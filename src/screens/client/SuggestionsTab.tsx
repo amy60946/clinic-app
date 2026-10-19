@@ -1,98 +1,138 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, Alert, StyleSheet, ActivityIndicator } from 'react-native';
-import { colors } from '../../theme';
-import { Card, Label, Input, Cta, Empty, Segmented, SmallButton } from '../../components/ui';
-import { Suggestion, SuggestionInput, Difficulty, listSuggestions, addSuggestion, withdrawSuggestion } from '../../lib/clinic';
+import { View, Text, Pressable, Alert, StyleSheet, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, radius } from '../../theme';
+import { Label, Empty, Notice, DifficultyBadge } from '../../components/ui';
+import {
+  Suggestion, SuggestionInput, SuggestionSchemaMissing, listSuggestions, addSuggestions, updateSuggestion, withdrawSuggestion,
+} from '../../lib/clinic';
+import { formatTR } from '../../dates';
+import SuggestionEditor, { repeatSummary } from './SuggestionEditor';
 import type { ClientCtx } from './ClientScreen';
 
-const STATUS: Record<Suggestion['status'], { label: string; color: string }> = {
-  pending: { label: 'Ebeveyn kararı bekleniyor', color: colors.medium.fg },
-  accepted: { label: 'Ebeveyn görevlere ekledi', color: colors.ok },
-  declined: { label: 'Ebeveyn eklemedi', color: colors.muted },
+const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: string; icon: keyof typeof Ionicons.glyphMap }> = {
+  pending: { label: 'Ebeveyn kararı bekleniyor', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'time-outline' },
+  accepted: { label: 'Ebeveyn görevlere ekledi', fg: colors.easy.fg, bg: colors.easy.bg, icon: 'checkmark-circle' },
+  declined: { label: 'Ebeveyn eklemedi', fg: colors.muted, bg: '#ECEEF3', icon: 'close-circle-outline' },
 };
 
-const EMPTY: SuggestionInput = { title: '', emoji: '⭐', skill: '', difficulty: 'easy', recurring: true, note: '' };
-
 // Uzman yalnız önerir; görevi ekleyip eklememek ebeveynin kararıdır (ParentApp › Uzmanım).
+// Bekleyen öneri güncellenebilir ya da geri çekilebilir; karar verilmiş öneri değişmez.
 export default function SuggestionsTab({ client, me }: ClientCtx) {
   const [items, setItems] = useState<Suggestion[] | null>(null);
-  const [f, setF] = useState<SuggestionInput>(EMPTY);
-  const [busy, setBusy] = useState(false);
+  const [editor, setEditor] = useState<{ open: boolean; editing: Suggestion | null }>({ open: false, editing: null });
+  const [schemaMissing, setSchemaMissing] = useState(false);
 
   const load = useCallback(() => {
     listSuggestions(client.link_id).then(setItems).catch((e) => Alert.alert('Öneriler yüklenemedi', (e as Error).message));
   }, [client.link_id]);
   useEffect(load, [load]);
 
-  const send = async () => {
-    if (!f.title.trim()) return Alert.alert('Görevin adını yaz.');
-    setBusy(true);
+  const close = () => setEditor({ open: false, editing: null });
+
+  const submit = async (list: SuggestionInput[]) => {
     try {
-      await addSuggestion(client, me.id, f);
-      setF(EMPTY);
-      load();
+      if (editor.editing) await updateSuggestion(editor.editing.id, list[0]);
+      else await addSuggestions(client, me.id, list);
     } catch (e) {
-      Alert.alert('Öneri gönderilemedi', (e as Error).message);
-    } finally {
-      setBusy(false);
+      if (e instanceof SuggestionSchemaMissing) setSchemaMissing(true);
+      throw e;
     }
+    close();
+    load();
   };
 
-  const withdraw = (s: Suggestion) =>
-    withdrawSuggestion(s.id).then(load).catch((e) => Alert.alert('Geri çekilemedi', (e as Error).message));
+  const withdraw = (s: Suggestion) => Alert.alert('Öneri geri çekilsin mi?', 'Ebeveyn bu öneriyi artık görmez.', [
+    { text: 'Vazgeç', style: 'cancel' },
+    {
+      text: 'Geri çek', style: 'destructive',
+      onPress: () => withdrawSuggestion(s.id).then(() => { close(); load(); }).catch((e) => Alert.alert('Geri çekilemedi', (e as Error).message)),
+    },
+  ]);
 
   return (
     <View>
-      <Label>Aileye görev öner</Label>
-      <Card style={{ gap: 10 }}>
-        <View style={{ flexDirection: 'row', gap: 10 }}>
-          <View style={{ width: 72 }}>
-            <Input value={f.emoji} onChangeText={(emoji) => setF({ ...f, emoji })} placeholder="⭐" maxLength={4} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Input value={f.title} onChangeText={(title) => setF({ ...f, title })} placeholder="Görev (ör. Okul çantasını akşamdan hazırla)" maxLength={120} />
-          </View>
-        </View>
-        <Input value={f.skill} onChangeText={(skill) => setF({ ...f, skill })} placeholder="Beceri alanı (ör. Planlama, Öz bakım) — isteğe bağlı" maxLength={40} />
-        <Segmented<Difficulty>
-          options={[{ id: 'easy', label: 'Kolay' }, { id: 'medium', label: 'Orta' }, { id: 'hard', label: 'Zor' }]}
-          value={f.difficulty} onChange={(difficulty) => setF({ ...f, difficulty })}
-        />
-        <Segmented<'yes' | 'no'>
-          options={[{ id: 'yes', label: 'Her gün' }, { id: 'no', label: 'Bir kez' }]}
-          value={f.recurring ? 'yes' : 'no'} onChange={(v) => setF({ ...f, recurring: v === 'yes' })}
-        />
-        <Input value={f.note} onChangeText={(note) => setF({ ...f, note })} placeholder="Ebeveyne not (neden bu görev, nasıl desteklesin) — isteğe bağlı" multiline maxLength={300} />
-        <Cta label="Öneriyi gönder" onPress={send} busy={busy} />
-        <Text style={styles.small}>Ebeveyn öneriyi ParentApp'te görür; eklerse görev çocuğun listesine düşer. Coin ve ayrıntıları ebeveyn belirler.</Text>
-      </Card>
+      <Pressable style={styles.cta} onPress={() => setEditor({ open: true, editing: null })}>
+        <Ionicons name="add" size={22} color="#fff" />
+        <Text style={styles.ctaText}>Aileye görev öner</Text>
+      </Pressable>
+      <Text style={styles.sub}>
+        Ebeveyn öneriyi ParentApp'te görür; eklerse görev buradaki ayarlarla çocuğun listesine düşer. Bekleyen bir öneriye dokunarak güncelleyebilirsin.
+      </Text>
+      {schemaMissing && (
+        <Notice icon="construct-outline" text="Öneri ayrıntıları (tekrar günleri, hatırlatma, ödül…) için veritabanı güncellemesi bekleniyor. Güncelleme uygulanınca bu özellik açılır." />
+      )}
 
       <Label>{`Gönderilen öneriler (${items?.length ?? 0})`}</Label>
       {!items ? <ActivityIndicator color={colors.navy} /> : items.length === 0 ? <Empty text="Henüz öneri gönderilmedi." /> : (
-        <View style={{ gap: 8 }}>
-          {items.map((s) => (
-            <Card key={s.id} style={{ gap: 4 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ fontSize: 16 }}>{s.emoji}</Text>
-                <Text style={[styles.body, { flex: 1, fontWeight: '600' }]}>{s.title}</Text>
-                {s.status === 'pending' && <SmallButton label="Geri çek" onPress={() => withdraw(s)} />}
-              </View>
-              <Text style={[styles.small, { color: STATUS[s.status].color, fontWeight: '600' }]}>
-                {STATUS[s.status].label}{s.task_title ? ` · görev: ${s.task_title}` : ''}
-              </Text>
-              <Text style={styles.small}>
-                {new Date(s.created_at).toLocaleDateString('tr-TR')} · {s.recurring ? 'her gün' : 'bir kez'}{s.skill ? ` · ${s.skill}` : ''}
-              </Text>
-              {s.note ? <Text style={styles.small}>Not: {s.note}</Text> : null}
-            </Card>
-          ))}
+        <View style={{ gap: 10 }}>
+          {items.map((s) => {
+            const st = STATUS[s.status] ?? STATUS.pending;
+            const pending = s.status === 'pending';
+            return (
+              <Pressable key={s.id} disabled={!pending} onPress={() => setEditor({ open: true, editing: s })}
+                accessibilityHint={pending ? 'Öneriyi düzenle' : undefined} style={styles.card}>
+                <Text style={{ fontSize: 22 }}>{s.emoji}</Text>
+                <View style={{ flex: 1, gap: 5 }}>
+                  <Text style={styles.cardTitle}>{s.title}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <DifficultyBadge d={s.difficulty} coins={s.coins} />
+                    {!!s.skill && <Text style={styles.meta}>{s.skill}</Text>}
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                    <Meta icon={s.recurring ? 'repeat' : 'calendar-outline'}
+                      text={s.recurring ? repeatSummary(s.repeat_kind, s.repeat_days) : s.start_date ? formatTR(s.start_date) : 'Tek seferlik'} />
+                    {!!s.reminder && <Meta icon="alarm-outline" text={s.reminder} />}
+                    {!s.requires_review && <Meta icon="flash-outline" text="Otomatik onay" />}
+                  </View>
+                  {!!s.description && <Text style={styles.meta} numberOfLines={2}>{s.description}</Text>}
+                  {!!s.note && <Text style={styles.meta} numberOfLines={2}>Not: {s.note}</Text>}
+                  <View style={[styles.pill, { backgroundColor: st.bg }]}>
+                    <Ionicons name={st.icon} size={13} color={st.fg} />
+                    <Text style={{ fontSize: 12, fontWeight: '600', color: st.fg }}>
+                      {st.label}{s.task_title ? ` · görev: ${s.task_title}` : ''}
+                    </Text>
+                  </View>
+                  <Text style={styles.date}>
+                    {new Date(s.created_at).toLocaleDateString('tr-TR')}
+                    {s.updated_at ? ` · güncellendi ${new Date(s.updated_at).toLocaleDateString('tr-TR')}` : ''}
+                  </Text>
+                </View>
+                {pending && <Ionicons name="create-outline" size={20} color={colors.navy} />}
+              </Pressable>
+            );
+          })}
         </View>
       )}
+
+      <SuggestionEditor
+        visible={editor.open}
+        childName={client.child_name}
+        editing={editor.editing}
+        onClose={close}
+        onSubmit={submit}
+        onWithdraw={editor.editing ? () => withdraw(editor.editing!) : undefined}
+      />
+    </View>
+  );
+}
+
+function Meta({ icon, text }: { icon: keyof typeof Ionicons.glyphMap; text: string }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+      <Ionicons name={icon} size={13} color={colors.muted} />
+      <Text style={styles.meta}>{text}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { fontSize: 14, color: colors.text, lineHeight: 20 },
-  small: { fontSize: 12, color: colors.muted, lineHeight: 17 },
+  cta: { flexDirection: 'row', gap: 6, height: 52, borderRadius: radius.md, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
+  ctaText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  sub: { fontSize: 12, color: colors.muted, lineHeight: 17, marginTop: 8 },
+  card: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, backgroundColor: '#fff', borderRadius: radius.md, padding: 14 },
+  cardTitle: { fontSize: 15, fontWeight: '600', color: colors.navy },
+  meta: { fontSize: 12, color: colors.muted, lineHeight: 17 },
+  pill: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill, marginTop: 2 },
+  date: { fontSize: 11, color: colors.faint },
 });

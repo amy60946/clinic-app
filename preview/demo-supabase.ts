@@ -120,6 +120,8 @@ function seed(): Db {
   db.clinic_task_suggestions.push({
     id: uuid(), link_id: L, clinic_id: K, family_id: F, child_id: 'c-nazli', title: 'Kıyafetini akşamdan hazırla', emoji: '👕',
     skill: 'Planlama', difficulty: 'easy', recurring: true, note: 'Sabah rutinini kısaltmak için.', status: 'pending', created_by: D, created_at: ago(300), decided_at: null,
+    description: 'Yatmadan önce yarın giyeceklerini sandalyeye koy.', category: 'self', template_key: null, coins: 5, start_date: null,
+    repeat_kind: 'weekly', repeat_days: [1, 2, 3, 4, 5], end_date: null, reminder: '20:00', requires_review: true, updated_at: null,
   });
 
   // İki uygulama aynı anda ilk kez açılabilir: hangisi kurarsa kursun her ikisinin hazır oturumu olsun
@@ -210,6 +212,11 @@ function visible(table: string, r: Row): boolean {
   return false; // posta, coin defteri, aile tabloları uzmanla paylaşılmaz
 }
 
+// Sunucudaki sütun varsayılanları (yalnız uygulamanın eklerken boş bıraktıkları)
+const DEFAULTS: Record<string, Row> = {
+  clinic_task_suggestions: { status: 'pending', decided_at: null, task_id: null, updated_at: null },
+};
+
 class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
   private filters: ((r: Row) => boolean)[] = [];
   private op: 'select' | 'insert' | 'upsert' | 'update' | 'delete' = 'select';
@@ -259,7 +266,7 @@ class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
     }
     if (this.op === 'insert' || this.op === 'upsert') {
       const list: Row[] = (Array.isArray(this.payload) ? this.payload : [this.payload]).map((r: Row) => ({
-        ...(PK[this.table] ? {} : { id: uuid() }), created_at: now(), ...r,
+        ...(PK[this.table] ? {} : { id: uuid() }), created_at: now(), ...DEFAULTS[this.table], ...r,
       }));
       const key = this.conflict ?? PK[this.table] ?? ['id'];
       for (const r of list) {
@@ -519,6 +526,29 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
       return { link_id: l.id, child_id: l.child_id, clinic: db.clinics.find((x: Row) => x.id === l.clinic_id)?.name ?? '', clinician: m?.name ?? '', title: m?.title ?? '', consent_at: l.consent_at };
     });
     return { data: rows, error: null };
+  }
+  if (name === 'clinic_clients') {
+    const m = myClinician();
+    if (!m) return { data: [], error: null };
+    const rows = db.clinic_links.filter((l: Row) => l.clinic_id === m.clinic_id && l.status === 'active').map((l: Row) => {
+      const c = db.children.find((x: Row) => x.id === l.child_id);
+      const parents = db.profiles.filter((p: Row) => p.family_id === l.family_id)
+        .sort((a: Row, b: Row) => String(a.created_at).localeCompare(String(b.created_at)))
+        .map((p: Row) => String(p.name ?? '').trim() || p.nickname).join(', ');
+      return { link_id: l.id, clinic_id: l.clinic_id, family_id: l.family_id, child_id: l.child_id, child_name: c?.name ?? '',
+        avatar: c?.avatar ?? null, birthday: c?.birthday ?? null, label: l.label, consent_at: l.consent_at, parents };
+    }).sort((a: Row, b: Row) => String(b.consent_at).localeCompare(String(a.consent_at)));
+    return { data: rows, error: null };
+  }
+  if (name === 'clinic_update_suggestion') {
+    const m = myClinician();
+    const s = db.clinic_task_suggestions.find((x: Row) => x.id === args.p_id && m && x.clinic_id === m.clinic_id);
+    if (!s) return err('Öneri bulunamadı');
+    if (s.status !== 'pending') return err('Karar verilmiş öneri değiştirilemez');
+    if (!db.clinic_links.some((l: Row) => l.id === s.link_id && l.status === 'active')) return err('Paylaşım sona ermiş');
+    Object.assign(s, args.p ?? {}, { updated_at: now() });
+    save();
+    return { data: null, error: null };
   }
   if (name === 'family_premium') {
     const fid = args.p_family_id ?? me?.family_id;

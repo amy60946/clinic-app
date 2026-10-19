@@ -25,6 +25,7 @@ export type Client = {
   child_name: string;
   label: string;
   consent_at: string;
+  parents: string; // ailedeki ebeveynlerin adı (aynı adlı çocukları ayırt etmek için)
 };
 
 export type Invite = { code: string; expires_at: string };
@@ -49,6 +50,14 @@ export async function clinicianMe(): Promise<ClinicianMe | null> {
 }
 
 export async function listClients(): Promise<Client[]> {
+  const rpc = await supabase.rpc('clinic_clients');
+  if (!rpc.error) {
+    return ((rpc.data ?? []) as any[]).map((r) => ({
+      link_id: r.link_id, clinic_id: r.clinic_id, family_id: r.family_id, child_id: r.child_id,
+      child_name: r.child_name ?? '', label: r.label ?? '', consent_at: r.consent_at, parents: r.parents ?? '',
+    }));
+  }
+  // clinic_clients henüz uygulanmadıysa (ortak 20261019140000) ebeveyn adı olmadan
   const { data, error } = await supabase
     .from('clinic_links')
     .select('id, clinic_id, family_id, child_id, label, consent_at, children(name)')
@@ -66,6 +75,7 @@ export async function listClients(): Promise<Client[]> {
     child_name: r.children?.name ?? '',
     label: r.label,
     consent_at: r.consent_at,
+    parents: '',
   }));
 }
 
@@ -171,29 +181,82 @@ export async function rateGoal(c: Client, by: string, goalId: string, week: stri
 }
 
 /* ---------- Aileye görev önerisi (ekleme kararı ebeveynin) ---------- */
+// Alanlar ParentApp "Görev Oluştur" ile birebir aynı; ebeveyn kabul edince görev bu ayarlarla açılır
+// (ortak/sozlesme/akislar.md 5.4, proposed/20261019140000_clinic_suggestion_details.sql).
 
-export type Difficulty = 'easy' | 'medium' | 'hard';
-export type Suggestion = {
-  id: string; title: string; emoji: string; skill: string; difficulty: Difficulty; recurring: boolean; note: string;
-  status: 'pending' | 'accepted' | 'declined'; created_at: string; decided_at: string | null; task_title: string | null;
+export type { Difficulty } from '../theme';
+import type { Difficulty } from '../theme';
+export type RepeatKind = 'daily' | 'weekly' | 'monthly';
+export type Category = 'home' | 'mind' | 'learn' | 'self';
+
+export type SuggestionInput = {
+  title: string; emoji: string; skill: string; description: string;
+  category: Category | null; template_key: string | null;
+  difficulty: Difficulty; coins: number;
+  start_date: string; recurring: boolean; repeat_kind: RepeatKind; repeat_days: number[]; end_date: string | null;
+  reminder: string | null; requires_review: boolean; note: string;
 };
-export type SuggestionInput = Pick<Suggestion, 'title' | 'emoji' | 'skill' | 'difficulty' | 'recurring' | 'note'>;
+export type Suggestion = SuggestionInput & {
+  id: string; status: 'pending' | 'accepted' | 'declined'; created_at: string; updated_at: string | null;
+  decided_at: string | null; task_title: string | null;
+};
 
-export async function listSuggestions(linkId: string): Promise<Suggestion[]> {
-  const { data, error } = await supabase.from('clinic_task_suggestions')
-    .select('id, title, emoji, skill, difficulty, recurring, note, status, created_at, decided_at, tasks(title)')
-    .eq('link_id', linkId).order('created_at', { ascending: false });
-  const rows = check(data ?? [], error) as unknown as (Omit<Suggestion, 'task_title'> & { tasks: { title: string } | null })[];
-  return rows.map(({ tasks, ...s }) => ({ ...s, task_title: tasks?.title ?? null }));
+// Yeni sütunlar Supabase'e uygulanmadıysa (PGRST204 / 42703) açık bir mesaj
+export class SuggestionSchemaMissing extends Error {}
+const SCHEMA_MSG = 'Öneri ayrıntıları için veritabanı güncellemesi bekleniyor (ortak: 20261019140000_clinic_suggestion_details.sql).';
+function checkSuggestion<T>(data: T, error: { code?: string; message: string } | null): T {
+  if (error && (error.code === 'PGRST204' || error.code === '42703' || error.code === 'PGRST202')) throw new SuggestionSchemaMissing(SCHEMA_MSG);
+  return check(data, error);
 }
 
-export async function addSuggestion(c: Client, by: string, s: SuggestionInput): Promise<void> {
-  const { error } = await supabase.from('clinic_task_suggestions').insert({
-    link_id: c.link_id, clinic_id: c.clinic_id, family_id: c.family_id, child_id: c.child_id, created_by: by,
-    title: s.title.trim(), emoji: s.emoji.trim() || '⭐', skill: s.skill.trim(), difficulty: s.difficulty,
-    recurring: s.recurring, note: s.note.trim(),
-  });
-  check(null, error);
+const SUGGESTION_COLS = 'id, title, emoji, skill, description, category, template_key, difficulty, coins, start_date, recurring, '
+  + 'repeat_kind, repeat_days, end_date, reminder, requires_review, note, status, created_at, updated_at, decided_at, tasks(title)';
+const OLD_COLS = 'id, title, emoji, skill, difficulty, recurring, note, status, created_at, decided_at, tasks(title)';
+
+export async function listSuggestions(linkId: string): Promise<Suggestion[]> {
+  let res: { data: unknown[] | null; error: { code?: string; message: string } | null } = await supabase
+    .from('clinic_task_suggestions').select(SUGGESTION_COLS).eq('link_id', linkId).order('created_at', { ascending: false });
+  // Yeni sütunlar henüz yoksa eski alanlarla listele
+  if (res.error && (res.error.code === '42703' || res.error.code === 'PGRST204')) {
+    res = await supabase.from('clinic_task_suggestions').select(OLD_COLS).eq('link_id', linkId).order('created_at', { ascending: false });
+  }
+  const rows = check(res.data ?? [], res.error) as unknown as (Partial<Suggestion> & { tasks: { title: string } | null })[];
+  return rows.map(({ tasks, ...r }) => ({
+    id: r.id!, title: r.title ?? '', emoji: r.emoji ?? '⭐', skill: r.skill ?? '', description: r.description ?? '',
+    category: (r.category as Category) ?? null, template_key: r.template_key ?? null,
+    difficulty: (r.difficulty as Difficulty) ?? 'easy', coins: r.coins ?? difficultyCoins(r.difficulty as Difficulty),
+    start_date: r.start_date ?? '', recurring: r.recurring ?? true, repeat_kind: (r.repeat_kind as RepeatKind) ?? 'daily',
+    repeat_days: r.repeat_days ?? [], end_date: r.end_date ?? null, reminder: r.reminder ?? null,
+    requires_review: r.requires_review ?? true, note: r.note ?? '', status: r.status!, created_at: r.created_at!,
+    updated_at: r.updated_at ?? null, decided_at: r.decided_at ?? null, task_title: tasks?.title ?? null,
+  }));
+}
+
+const difficultyCoins = (d: Difficulty | undefined) => ({ easy: 5, medium: 10, hard: 20 }[d ?? 'easy']);
+
+function payload(s: SuggestionInput) {
+  const recurring = s.recurring;
+  return {
+    title: s.title.trim(), emoji: s.emoji || '⭐', skill: s.skill.trim(), description: s.description.trim(),
+    category: s.category, template_key: s.template_key, difficulty: s.difficulty,
+    coins: Math.max(0, Math.min(50, Math.round(s.coins))), start_date: s.start_date || null, recurring,
+    repeat_kind: recurring ? s.repeat_kind : 'daily',
+    repeat_days: recurring && s.repeat_kind !== 'daily' ? s.repeat_days : [],
+    end_date: recurring ? s.end_date : null, reminder: s.reminder, requires_review: s.requires_review, note: s.note.trim(),
+  };
+}
+
+export async function addSuggestions(c: Client, by: string, list: SuggestionInput[]): Promise<void> {
+  const { error } = await supabase.from('clinic_task_suggestions').insert(list.map((s) => ({
+    link_id: c.link_id, clinic_id: c.clinic_id, family_id: c.family_id, child_id: c.child_id, created_by: by, ...payload(s),
+  })));
+  checkSuggestion(null, error);
+}
+
+// Uzman bekleyen öneriyi günceller (karar verilmişse sunucu reddeder)
+export async function updateSuggestion(id: string, s: SuggestionInput): Promise<void> {
+  const { error } = await supabase.rpc('clinic_update_suggestion', { p_id: id, p: payload(s) });
+  checkSuggestion(null, error);
 }
 
 // Yalnız bekleyen öneri geri çekilebilir (RLS)
