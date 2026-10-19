@@ -8,7 +8,7 @@ ClinicApp tek kod tabanıdır: aynı Expo projesi hem **web** (tarayıcı) hem *
 | Bundle ID | `com.clinicapp.uzman` | `com.parentapp.ios` |
 | Cihaz | iPad + iPhone, dikey ve yatay | iPhone, dikey |
 | Bağlantı şeması | `clinicapp://` | `parentapp://` |
-| Derleme | `.github/workflows/ios-testflight.yml` → `tools/ci/ios-testflight.sh` (ParentApp'teki düzeneğin aynısı) | aynı |
+| Derleme | `.github/workflows/ios-testflight.yml` → `tools/ci/ios-testflight.sh` (geçici dağıtım sertifikasıyla elle imza; geliştirme sertifikası oluşturmaz) | otomatik geliştirme imzası + dağıtım imzası |
 
 ## Bir kez yapılacaklar
 

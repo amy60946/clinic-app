@@ -1,7 +1,7 @@
 name: iOS (TestFlight)
 
 # ClinicApp (uzman paneli, iPad + iPhone) → macOS'ta expo prebuild + xcodebuild → TestFlight.
-# ParentApp'teki iş akışının aynısı (imza: tools/ci/asc_device.py + asc_sign.py). Gerekli secret'lar: docs/TESTFLIGHT.md
+# İmza: tools/ci/asc_sign.py (geçici App Store dağıtım sertifikası + profil; geliştirme sertifikası oluşmaz). Gerekli secret'lar: docs/TESTFLIGHT.md
 # Elle: Actions → "iOS (TestFlight)" → Run workflow. Otomatik: main'e gelen commit mesajında [ios] geçerse.
 on:
   workflow_dispatch:
