@@ -88,6 +88,8 @@ export default function ClientScreen({ client, me, onBack, onRevoked }: {
     <SafeAreaView style={styles.safe}>
       <ScrollView
         contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.navy} />}
       >
         <View style={styles.column}>

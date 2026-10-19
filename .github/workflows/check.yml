@@ -1,0 +1,24 @@
+name: Denetim
+
+# Her push ve PR'da: tür denetimi, gösterge testleri, web ve iOS JavaScript paketleri derleniyor mu (Linux, ücretsiz dakika).
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+      - name: Web ve iOS paketleri
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://ornek.supabase.co
+          EXPO_PUBLIC_SUPABASE_KEY: sb_publishable_ornek
+        run: CI=1 npx expo export --platform web --platform ios --output-dir dist >/dev/null
