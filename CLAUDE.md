@@ -4,7 +4,7 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 
 | Ürün | Kim kullanır | Depo | Durum |
 |---|---|---|---|
-| **Pofi Adası** (GameApp) | Çocuk (6–12, oyun) | `amy60946/pofi-adasi` (Unity 6, C#) | TestFlight hattı hazır |
+| **Pofi Adası** (GameApp) | Çocuk (oyun; yaş bantları A 6–9 · B 10–12 · C 13–15, karar bekliyor) | `amy60946/pofi-adasi` (Unity 6, C#) | TestFlight hattı hazır |
 | **ParentApp** | Ebeveyn (aile aboneliği) | `amy60946/parent-app` (Expo / React Native) | TestFlight'a yüklendi (19 Ekim 2026) |
 | **ClinicApp** | Uzman (klinisyen başına ücret) | `amy60946/clinic-app` (bu depo) | Başlangıç |
 
