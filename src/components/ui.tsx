@@ -57,7 +57,41 @@ export function Notice({ icon, text }: { icon: keyof typeof Ionicons.glyphMap; t
   );
 }
 
+export function Segmented<T extends string>({
+  options, value, onChange,
+}: { options: { id: T; label: string }[]; value: T; onChange: (v: T) => void }) {
+  return (
+    <View style={styles.seg}>
+      {options.map((o) => (
+        <Pressable key={o.id} onPress={() => onChange(o.id)} style={[styles.segItem, value === o.id && styles.segActive]}>
+          <Text style={{ fontSize: 13, fontWeight: value === o.id ? '700' : '500', color: value === o.id ? colors.navy : colors.muted }}>
+            {o.label}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+// Küçük düğme (ikincil eylem)
+export function SmallButton({ label, onPress, danger, busy }: { label: string; onPress: () => void; danger?: boolean; busy?: boolean }) {
+  return (
+    <Pressable onPress={onPress} disabled={busy} hitSlop={6}
+      style={[styles.small, danger && { borderColor: colors.danger }, busy && { opacity: 0.6 }]}>
+      <Text style={{ fontSize: 13, fontWeight: '600', color: danger ? colors.danger : colors.navy }}>{label}</Text>
+    </Pressable>
+  );
+}
+
+export function Empty({ text }: { text: string }) {
+  return <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19, paddingVertical: 8 }}>{text}</Text>;
+}
+
 const styles = StyleSheet.create({
+  seg: { flexDirection: 'row', flexWrap: 'wrap', backgroundColor: '#ECEEF3', borderRadius: radius.sm, padding: 3 },
+  segItem: { flexGrow: 1, alignItems: 'center', paddingVertical: 8, paddingHorizontal: 10, borderRadius: 8 },
+  segActive: { backgroundColor: '#fff' },
+  small: { borderWidth: 1, borderColor: colors.line, backgroundColor: '#fff', borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 8 },
   card: { backgroundColor: colors.card, borderRadius: radius.md, padding: 16 },
   label: { fontSize: 11, fontWeight: '600', letterSpacing: 0.6, color: colors.muted, marginTop: 20, marginBottom: 8 },
   inputWrap: {

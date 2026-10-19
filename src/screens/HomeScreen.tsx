@@ -5,18 +5,19 @@ import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../theme';
-import { Card, Label, Input, Cta, Notice } from '../components/ui';
+import { Card, Label, Input, Cta, Notice, SmallButton } from '../components/ui';
 import { useAuth } from '../lib/auth';
 import {
-  clinicianMe, listClients, createFamilyInvite, ClinicNotInstalled, ClinicianMe, Client, Invite,
+  clinicianMe, listClients, listTeam, createFamilyInvite, createTeamInvite, ClinicNotInstalled, ClinicianMe, Client, Invite, Member,
 } from '../lib/clinic';
+import ClientScreen from './client/ClientScreen';
 
 type State =
   | { kind: 'loading' }
   | { kind: 'not_installed' }
   | { kind: 'not_clinician' }
   | { kind: 'error'; message: string }
-  | { kind: 'ready'; me: ClinicianMe; clients: Client[] };
+  | { kind: 'ready'; me: ClinicianMe; clients: Client[]; team: Member[] };
 
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -32,12 +33,14 @@ export default function HomeScreen() {
   const { signOut } = useAuth();
   const [state, setState] = useState<State>({ kind: 'loading' });
   const [refreshing, setRefreshing] = useState(false);
+  const [selected, setSelected] = useState<Client | null>(null);
 
   const load = useCallback(async () => {
     try {
       const me = await clinicianMe();
       if (!me) return setState({ kind: 'not_clinician' });
-      setState({ kind: 'ready', me, clients: await listClients() });
+      const [clients, team] = await Promise.all([listClients(), listTeam()]);
+      setState({ kind: 'ready', me, clients, team });
     } catch (e) {
       if (e instanceof ClinicNotInstalled) setState({ kind: 'not_installed' });
       else setState({ kind: 'error', message: (e as Error).message });
@@ -51,6 +54,16 @@ export default function HomeScreen() {
     await load();
     setRefreshing(false);
   };
+
+  if (selected && state.kind === 'ready') {
+    return (
+      <ClientScreen
+        client={selected} me={state.me}
+        onBack={() => { setSelected(null); load(); }}
+        onRevoked={() => { setSelected(null); load(); }}
+      />
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -93,7 +106,8 @@ export default function HomeScreen() {
               ) : (
                 <View style={{ gap: 8 }}>
                   {state.clients.map((c) => (
-                    <Card key={c.link_id} style={styles.client}>
+                    <Pressable key={c.link_id} onPress={() => setSelected(c)} accessibilityRole="button">
+                    <Card style={styles.client}>
                       <View style={styles.initial}>
                         <Text style={{ fontWeight: '700', color: colors.navy }}>{(c.child_name || '?').slice(0, 1).toUpperCase()}</Text>
                       </View>
@@ -101,10 +115,13 @@ export default function HomeScreen() {
                         <Text style={styles.clientName}>{c.child_name || 'Adsız'}{c.label ? ` · ${c.label}` : ''}</Text>
                         <Text style={styles.small}>Ebeveyn onayı: {dateText(c.consent_at)}</Text>
                       </View>
+                      <Ionicons name="chevron-forward" size={18} color={colors.faint} />
                     </Card>
+                    </Pressable>
                   ))}
                 </View>
               )}
+              <TeamCard me={state.me} team={state.team} />
               <Text style={styles.footnote}>
                 Bu panel gözlem toplar, tanı koymaz. Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
               </Text>
@@ -113,6 +130,51 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function TeamCard({ me, team }: { me: ClinicianMe; team: Member[] }) {
+  const [invite, setInvite] = useState<Invite | null>(null);
+  const [busy, setBusy] = useState(false);
+  const create = async () => {
+    setBusy(true);
+    try {
+      setInvite(await createTeamInvite());
+    } catch (e) {
+      Alert.alert('Kod üretilemedi', (e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <>
+      <Label>{`Ekip (${team.length} / ${me.seat_limit} uzman)`}</Label>
+      <Card style={{ gap: 10 }}>
+        {team.map((m) => (
+          <Text key={m.id} style={styles.body}>
+            {m.name || 'Adsız'}{m.title ? ` · ${m.title}` : ''}{m.role === 'owner' ? ' · sahip' : ''}{m.id === me.id ? ' (sen)' : ''}
+          </Text>
+        ))}
+        {me.role === 'owner' && (invite ? (
+          <View style={styles.codeRow}>
+            <Text style={styles.code}>{invite.code}</Text>
+            <Pressable
+              onPress={() => Clipboard.setStringAsync(invite.code).then(() => Alert.alert('Kopyalandı'))}
+              accessibilityLabel="Kodu kopyala" hitSlop={8} style={styles.iconBtn}
+            >
+              <Ionicons name="copy-outline" size={18} color={colors.navy} />
+            </Pressable>
+            <Text style={[styles.small, { flex: 1 }]}>Yeni uzman kayıtta "Ekibe katıl" seçip bu kodu yazar. 7 gün geçerli.</Text>
+          </View>
+        ) : team.length < me.seat_limit ? (
+          <View style={{ alignItems: 'flex-start' }}>
+            <SmallButton label="Ekibe uzman davet et" onPress={create} busy={busy} />
+          </View>
+        ) : (
+          <Text style={styles.small}>Koltuk sınırı dolu.</Text>
+        ))}
+      </Card>
+    </>
   );
 }
 
