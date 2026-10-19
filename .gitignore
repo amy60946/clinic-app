@@ -10,3 +10,6 @@ web-build/
 *.log
 .DS_Store
 
+
+# Web önizleme çıktısı (preview/build.sh üretir)
+preview/out/

@@ -84,3 +84,10 @@ test('pazartesi günü dönem geçen haftayla biter (boş hafta gösterilmez)', 
   const w = weekly([task()], [], '2026-10-19', 1);
   assert.equal(w[0].planned, 7);
 });
+
+test('pazartesi günü ustalık geçen haftayı da sayar', () => {
+  const today = '2026-10-19'; // pazartesi: son tamamlanmış hafta 12–18 Ekim
+  const comps = [];
+  for (let d = '2026-09-21'; d <= '2026-10-18'; d = addDays(d, 1)) comps.push(comp(d, 'approved'));
+  assert.equal(perTask([task()], comps, today, 4)[0].mastered, true);
+});
