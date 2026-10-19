@@ -5,10 +5,9 @@
     "owner": "amy60946",
     "scheme": "clinicapp",
     "version": "0.1.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "runtimeVersion": {
-      "policy": "sdkVersion"
-    },
     "ios": {
       "bundleIdentifier": "com.clinicapp.ios",
       "supportsTablet": true,
@@ -19,7 +18,18 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "single"
-    }
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "backgroundColor": "#0F1B3D"
+        }
+      ]
+    ]
   }
 }

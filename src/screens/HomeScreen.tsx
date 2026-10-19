@@ -70,6 +70,8 @@ export default function HomeScreen() {
       <StatusBar style="dark" />
       <ScrollView
         contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.navy} />}
       >
         <View style={styles.column}>

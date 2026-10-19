@@ -1,6 +1,6 @@
 # ClinicApp
 
-Uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) için web + iPad paneli. Expo (React Native + web), ParentApp ile aynı yapı ve tasarım dili.
+Uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) için web + iOS (iPad, iPhone) paneli; tek kod tabanı. Expo (React Native + web), ParentApp ile aynı yapı ve tasarım dili.
 
 Veritabanı sözleşmesi bu depoda değil: [`amy60946/ortak`](https://github.com/amy60946/ortak) (klinik bölümü: `sozlesme/veritabani.md` §4, `sozlesme/akislar.md` §5).
 
@@ -17,3 +17,7 @@ Veritabanı sözleşmesi bu depoda değil: [`amy60946/ortak`](https://github.com
 2. `npm install`
 3. `npm run web` (tarayıcı) ya da `npm start` (iPad'de Expo Go).
 4. Tür denetimi: `npm run typecheck` · gösterge testleri: `npm test`
+
+## iOS ve TestFlight
+
+Adım adım kurulum: [`docs/TESTFLIGHT.md`](docs/TESTFLIGHT.md).
