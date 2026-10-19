@@ -4,7 +4,7 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 
 | Ürün | Kim kullanır | Depo | Durum |
 |---|---|---|---|
-| **Pofi Adası** (GameApp) | Çocuk (oyun; yaş bantları A 6–9 · B 10–12 · C 13–15, karar bekliyor) | `amy60946/pofi-adasi` (Unity 6, C#) | TestFlight hattı hazır |
+| **Pofi Adası** (GameApp) | Çocuk (oyun; yaş bantları A 6–9 · B 10–12 · C 13–15, karar bekliyor) | `amy60946/game-app` (Unity 6, C#) | TestFlight hattı hazır |
 | **ParentApp** | Ebeveyn (aile aboneliği) | `amy60946/parent-app` (Expo / React Native) | TestFlight'a yüklendi (19 Ekim 2026) |
 | **ClinicApp** | Uzman (klinisyen başına ücret) | `amy60946/clinic-app` (bu depo) | Başlangıç |
 
@@ -37,9 +37,8 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 
 ## Mevcut durum (19 Ekim 2026)
 
-- Bu depo boş. Klinik sunucu önerisi şimdilik ParentApp deposundaki `claude/project-thread-vwahaf` dalında:
-  `supabase/proposed/20261019000000_clinic.sql` (klinikler, uzmanlar, davet kodları, rıza bağlantısı, not, GAS, ABC, görev önerisi, aile aboneliği; satır düzeyi güvenlik) ve `supabase/test/test_clinic.sql`. **Henüz Supabase'e uygulanmadı.** `ortak` deposu kurulunca oraya taşınacak.
-- ParentApp tarafında "Aile › Hesap › Uzmanım" (kodla paylaşım, paylaşımı durdurma, öneriyi görevlere ekleme, zor an kaydı) aynı dalda.
+- Bu depo henüz kod içermiyor. Klinik sunucu önerisi `ortak` deposunda: `supabase/proposed/20261019000000_clinic.sql` (klinikler, uzmanlar, davet kodları, rıza bağlantısı, not, GAS, ABC, görev önerisi, aile aboneliği; satır düzeyi güvenlik) ve testi `supabase/test/test_clinic.sql`. **Henüz Supabase'e uygulanmadı.**
+- ParentApp tarafında "Aile › Hesap › Uzmanım" (kodla paylaşım, paylaşımı durdurma, öneriyi görevlere ekleme, zor an kaydı) ParentApp'in ana dalına alınmayı bekliyor (sunucu tarafı uygulanana kadar gizli tutulması önerildi).
 - Önizleme (uzman paneli + ParentApp, ortak deneme veritabanı): https://claude.ai/artifact/JkevesshtLTaZuJFrSrxNt
   Deneme girişleri sayfanın altında yazılı. Aynı URL'ye yeniden yayınla.
 - Teknoloji kararı **bekliyor**. Öneri: Expo (React Native + web) — ParentApp ile bileşen, Supabase istemcisi ve tasarım paylaşımı; tek kod tabanıyla web ve iPad. Kullanıcı onaylamadan iskelet kurma.
@@ -55,7 +54,7 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 
 1. ClinicApp teknolojisi (öneri: Expo + web).
 2. Türkiye'deki ilk klinik müşterisi ve pilot ortağı (KVKK ve özellik önceliğini etkiler).
-3. Klinik SQL'inin Supabase'e uygulanma zamanı (önce `ortak`'a taşınıp gözden geçirilecek).
+3. Klinik SQL'inin (`ortak/supabase/proposed`) Supabase'e uygulanma zamanı.
 4. Uzman raporunun ilk sürümünde hangi göstergeler olacak (omurga analizi bölüm 6).
 
 ## Güvenlik
