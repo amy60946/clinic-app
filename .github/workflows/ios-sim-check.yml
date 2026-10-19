@@ -1,0 +1,49 @@
+name: iOS simülatör denemesi
+
+# Uygulamayı (Release, JS paketi gömülü) iPad simülatöründe açar; çökerse çöküş kaydını ve son sistem günlüğünü yazdırır.
+# İmza ve Apple hesabı gerekmez. Elle başlatılır.
+on:
+  workflow_dispatch:
+
+jobs:
+  sim:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Sunucu ayarı (.env, örnek adres; açılış denemesi için yeterli)
+        run: printf 'EXPO_PUBLIC_SUPABASE_URL=https://ornek.supabase.co\nEXPO_PUBLIC_SUPABASE_KEY=sb_publishable_ornek\n' > .env
+      - name: Derle (simülatör)
+        run: |
+          xc=$(ls -d /Applications/Xcode_*.app 2>/dev/null | grep -v -i beta | sort -V | tail -1 || true)
+          [ -n "$xc" ] && sudo xcode-select -s "$xc/Contents/Developer"
+          CI=1 npx expo prebuild --platform ios --clean
+          xcodebuild -workspace ios/ClinicApp.xcworkspace -scheme ClinicApp -configuration Release \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO -quiet build
+      - name: Simülatörde aç
+        run: |
+          app=$(ls -d build/Build/Products/Release-iphonesimulator/*.app | head -1)
+          dev=$(xcrun simctl list devices available -j | python3 -c 'import json,sys;d=json.load(sys.stdin)["devices"];print(next(x["udid"] for k,v in d.items() if "iOS" in k for x in v if "iPad" in x["name"]))')
+          echo "Cihaz: $dev"
+          xcrun simctl boot "$dev"; xcrun simctl bootstatus "$dev" -b
+          xcrun simctl install "$dev" "$app"
+          xcrun simctl launch --terminate-running-process "$dev" com.clinicapp.uzman || true
+          sleep 25
+          echo "--- çalışıyor mu?"; xcrun simctl spawn "$dev" launchctl list | grep -i clinicapp || echo "UYGULAMA ÇALIŞMIYOR (çökmüş olabilir)"
+          xcrun simctl io "$dev" screenshot "$RUNNER_TEMP/ekran.png" || true
+          echo "--- sistem günlüğü (ClinicApp)"
+          xcrun simctl spawn "$dev" log show --last 3m --style compact --predicate 'process == "ClinicApp"' | grep -iE "error|exception|fatal|terminat|crash|abort|unhandled|js" | tail -150 || true
+          echo "--- çöküş raporları"
+          for f in $(ls -t ~/Library/Logs/DiagnosticReports/*ClinicApp* 2>/dev/null | head -2); do echo "== $f"; head -c 20000 "$f"; echo; done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: simulator-ekran
+          path: ${{ runner.temp }}/ekran.png
+          if-no-files-found: ignore
