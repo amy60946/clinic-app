@@ -15,6 +15,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Yerel paket sürümleri tek mi
+        run: node tools/ci/check-native-dupes.js
       - run: npx tsc --noEmit
       - run: npm test
       - name: Web ve iOS paketleri
