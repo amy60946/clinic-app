@@ -37,12 +37,13 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 
 ## Mevcut durum (19 Ekim 2026)
 
-- Bu depo boş. Klinik sunucu önerisi şimdilik ParentApp deposundaki `claude/project-thread-vwahaf` dalında:
-  `supabase/proposed/20261019000000_clinic.sql` (klinikler, uzmanlar, davet kodları, rıza bağlantısı, not, GAS, ABC, görev önerisi, aile aboneliği; satır düzeyi güvenlik) ve `supabase/test/test_clinic.sql`. **Henüz Supabase'e uygulanmadı.** `ortak` deposu kurulunca oraya taşınacak.
-- ParentApp tarafında "Aile › Hesap › Uzmanım" (kodla paylaşım, paylaşımı durdurma, öneriyi görevlere ekleme, zor an kaydı) aynı dalda.
+- **Teknoloji: Expo (React Native + web)**, ParentApp ile aynı sürümler (Expo 57, RN 0.86, React 19.2). Kullanıcı onayladı. Gezinme kütüphanesi henüz yok (ekranlar `App.tsx`'te durumla seçiliyor); sekme/yan menü gerekince ParentApp gibi `@react-navigation` eklenir.
+- İskelet: `App.tsx`, `src/lib/{supabase,auth,clinic,webAlert}`, `src/screens/{AuthScreens,HomeScreen}`, `src/components/ui.tsx`, `src/theme.ts` (ParentApp renkleri). Uzman kaydı `raw_user_meta_data.account = 'clinician'` (+ `clinic_name` ya da `team_code`, `name`, `title`) gönderir.
+- Klinik sunucu önerisi `ortak/supabase/proposed/20261019000000_clinic.sql`. **Henüz Supabase'e uygulanmadı**; uygulanana kadar panel "Klinik veritabanı henüz kurulmadı" der.
+- ParentApp tarafında "Aile › Hesap › Uzmanım" (kodla paylaşım, paylaşımı durdurma, öneriyi görevlere ekleme, zor an kaydı) ParentApp'in `claude/project-thread-vwahaf` dalında.
 - Önizleme (uzman paneli + ParentApp, ortak deneme veritabanı): https://claude.ai/artifact/JkevesshtLTaZuJFrSrxNt
   Deneme girişleri sayfanın altında yazılı. Aynı URL'ye yeniden yayınla.
-- Teknoloji kararı **bekliyor**. Öneri: Expo (React Native + web) — ParentApp ile bileşen, Supabase istemcisi ve tasarım paylaşımı; tek kod tabanıyla web ve iPad. Kullanıcı onaylamadan iskelet kurma.
+- Sıradaki ekranlar (SQL uygulandıktan sonra): danışan ayrıntısı (görev/tamamlama, zor an kaydı), not, hedef (GAS), görev önerisi.
 
 ## Referans dokümanlar (Claude Docs, kullanıcının "GameApp" projesinde)
 
@@ -53,10 +54,9 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 
 ## Açık sorular (kullanıcıyla karara bağlanacak)
 
-1. ClinicApp teknolojisi (öneri: Expo + web).
-2. Türkiye'deki ilk klinik müşterisi ve pilot ortağı (KVKK ve özellik önceliğini etkiler).
-3. Klinik SQL'inin Supabase'e uygulanma zamanı (önce `ortak`'a taşınıp gözden geçirilecek).
-4. Uzman raporunun ilk sürümünde hangi göstergeler olacak (omurga analizi bölüm 6).
+1. Türkiye'deki ilk klinik müşterisi ve pilot ortağı (KVKK ve özellik önceliğini etkiler).
+2. Klinik SQL'inin Supabase'e uygulanması (`ortak`'ta gözden geçirildi, testler geçiyor; kullanıcı SQL Editor'de çalıştıracak).
+3. Uzman raporunun ilk sürümünde hangi göstergeler olacak (omurga analizi bölüm 6).
 
 ## Güvenlik
 
