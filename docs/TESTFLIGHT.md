@@ -5,7 +5,7 @@ ClinicApp tek kod tabanıdır: aynı Expo projesi hem **web** (tarayıcı) hem *
 | | ClinicApp | ParentApp |
 |---|---|---|
 | Kim kullanır | Uzman | Ebeveyn |
-| Bundle ID | `com.clinicapp.ios` | `com.parentapp.ios` |
+| Bundle ID | `com.clinicapp.uzman` | `com.parentapp.ios` |
 | Cihaz | iPad + iPhone, dikey ve yatay | iPhone, dikey |
 | Bağlantı şeması | `clinicapp://` | `parentapp://` |
 | Derleme | `.github/workflows/ios-testflight.yml` → `tools/ci/ios-testflight.sh` (ParentApp'teki düzeneğin aynısı) | aynı |
@@ -13,9 +13,10 @@ ClinicApp tek kod tabanıdır: aynı Expo projesi hem **web** (tarayıcı) hem *
 ## Bir kez yapılacaklar
 
 1. **Bundle ID:** developer.apple.com → Certificates, IDs & Profiles → **Identifiers** → **+** → App IDs → App →
-   Description `ClinicApp`, Bundle ID (Explicit) `com.clinicapp.ios` → Continue → Register.
+   Description `ClinicApp`, Bundle ID (Explicit) `com.clinicapp.uzman` → Continue → Register.
+   (`com.clinicapp.ios` Apple'da başkasına ait olduğu için kullanılamadı, 19 Ekim 2026.)
 2. **Uygulama kaydı:** appstoreconnect.apple.com → **Apps** → **+** → **New App**: Platform iOS, Name `ClinicApp`
-   (ad alınmışsa ör. `ClinicApp Uzman`), Primary Language Türkçe, Bundle ID `com.clinicapp.ios`, SKU `clinicapp`, User Access Full Access.
+   (ad alınmışsa ör. `ClinicApp Uzman`), Primary Language Türkçe, Bundle ID `com.clinicapp.uzman`, SKU `clinicapp`, User Access Full Access.
 3. **Secret'lar:** github.com/amy60946/clinic-app → Settings → Secrets and variables → Actions → **New repository secret**.
    ParentApp deposuna eklenenlerin **aynısı** (secret'lar depo başınadır):
 
