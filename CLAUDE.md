@@ -45,7 +45,8 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 - Kaynak: araştırma belgesi "GameApp oyun omurgası analizi" bölüm 6 (uzman çıktıları). Henüz yok: ebeveyn derecelendirme ölçeği trendi ve müdahale değişikliği işaretleri (yeni tablo ister → önce `ortak`, kullanıcı onayı), çok adımlı görevde adım tamamlama (veri yok), "zamanında yapma" (görevde bitiş saati yok).
 - Yerel deneme: `ortak` göçleri + deneme verisi yerel PostgreSQL'de, PostgREST ve küçük bir auth taklidiyle web derlemesi uçtan uca denendi (gerçek RLS). `expo export` ortam değişkenlerini önbellekler; adres değişince `--clear` kullan.
 - ParentApp tarafında "Aile › Hesap › Uzmanım" ParentApp penceresinin işi; kabulde öneriye `task_id` yazması gerekiyor.
-- Önizleme (eski, ParentApp önizleme düzeneğiyle): https://claude.ai/artifact/JkevesshtLTaZuJFrSrxNt
+- **Önizleme** (uzman paneli + ParentApp yan yana, ortak deneme veritabanı, gerçek veriye bağlanmaz): https://claude.ai/artifact/JkevesshtLTaZuJFrSrxNt
+  Üretim: `bash preview/build.sh` → `preview/out/clinic.html`; aynı URL'ye `preview/frame.html` sayfa, `clinic.html` dosya olarak yayınlanır (`app.html` ParentApp penceresinden, dokunulmaz). Deneme veritabanı `preview/demo-supabase.ts` ParentApp'inkinin kopyası + embed, sıralama ve uzman görünürlüğü; depo anahtarı iki önizlemede aynı kalmalı. Girişler: uzman@clinicapp.app / demo@parentapp.app, şifre 12345678.
 
 ## Referans dokümanlar (Claude Docs, kullanıcının "GameApp" projesinde)
 

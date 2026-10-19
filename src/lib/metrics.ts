@@ -173,19 +173,19 @@ export function perTask(tasks: Task[], comps: Completion[], today: string, weeks
     .map((task) => {
       const ws = starts.map((s) => {
         const inst = instances([task], comps, s, weekEnd(s, today));
-        return { planned: inst.length, approved: inst.filter(done).length };
+        return { planned: inst.length, approved: inst.filter(done).length, complete: addDays(s, 6) <= lastFullDay(today) };
       });
       const shown = ws.slice(-weeks);
       const planned = shown.reduce((a, w) => a + w.planned, 0);
       const approved = shown.reduce((a, w) => a + w.approved, 0);
-      const last = ws.slice(-MASTERY_WEEKS - 1, -1);
+      const last = ws.filter((w) => w.complete).slice(-MASTERY_WEEKS);
       return {
         task,
         planned,
         approved,
         rate: pct(approved, planned),
         weeklyRates: shown.map((w) => pct(w.approved, w.planned)),
-        // İçinde bulunulan hafta henüz tamamlanmadığından ustalık, tamamlanmış son 4 haftaya bakar
+        // Ustalık yalnız tamamlanmış haftalara bakar (içinde bulunulan hafta sayılmaz)
         mastered: last.length === MASTERY_WEEKS
           && last.every((w) => w.planned > 0 && (pct(w.approved, w.planned) ?? 0) >= MASTERY_RATE),
       };

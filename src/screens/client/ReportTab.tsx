@@ -14,18 +14,40 @@ function initials(name: string) {
   return name.split(/\s+/).filter(Boolean).map((w) => `${w[0].toLocaleUpperCase('tr-TR')}.`).join(' ');
 }
 
-// Web'de raporu yeni pencerede açıp yazdırma penceresini getirir ("PDF olarak kaydet" oradan); iPad'de sistem yazdırma/paylaşma.
+// Web'de rapor sayfanın üstünde bir pencerede açılır; "Yazdır / PDF" tarayıcının yazdırma penceresini getirir
+// ("PDF olarak kaydet" oradan). iPad'de sistem yazdırma/paylaşma (expo-print).
+function showWebReport(html: string) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(15,27,61,.45);display:flex;flex-direction:column;padding:16px;gap:10px';
+  const bar = document.createElement('div');
+  bar.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif';
+  const btn = (label: string, primary: boolean) => {
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.style.cssText = `border:0;border-radius:999px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer;${primary ? 'background:#0F1B3D;color:#fff' : 'background:#fff;color:#0F1B3D'}`;
+    bar.appendChild(b);
+    return b;
+  };
+  const print = btn('Yazdır / PDF', true);
+  const close = btn('Kapat', false);
+  const frame = document.createElement('iframe');
+  frame.style.cssText = 'flex:1;border:0;border-radius:12px;background:#fff;width:100%';
+  frame.srcdoc = html;
+  overlay.append(bar, frame);
+  document.body.appendChild(overlay);
+  close.onclick = () => overlay.remove();
+  print.onclick = () => {
+    try {
+      frame.contentWindow?.focus();
+      frame.contentWindow?.print();
+    } catch {
+      Alert.alert('Yazdırılamadı', 'Bu sayfada yazdırma kapalı. Raporu tarayıcıda ClinicApp\'in kendi adresinden aç.');
+    }
+  };
+}
+
 async function printHtml(html: string) {
-  if (Platform.OS === 'web') {
-    const w = window.open('', '_blank');
-    if (!w) throw new Error('Tarayıcı yeni pencereyi engelledi. Açılır pencerelere izin ver.');
-    w.document.open();
-    w.document.write(html);
-    w.document.close();
-    w.focus();
-    setTimeout(() => w.print(), 300);
-    return;
-  }
+  if (Platform.OS === 'web') return showWebReport(html);
   await Print.printAsync({ html });
 }
 
@@ -74,7 +96,7 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
           value={mode} onChange={setMode}
         />
         <Text style={styles.small}>Görünecek: {childLabel || '—'}</Text>
-        <Cta label={Platform.OS === 'web' ? 'Raporu aç / PDF olarak kaydet' : 'Raporu yazdır / paylaş'} onPress={open} busy={busy} />
+        <Cta label={Platform.OS === 'web' ? 'Raporu aç' : 'Raporu yazdır / paylaş'} onPress={open} busy={busy} />
         <Text style={styles.small}>
           Rapor kişisel sağlık verisi içerir. Yalnız tedavi amacıyla, güvenli kanaldan ve ebeveynin bilgisiyle paylaş.
         </Text>
