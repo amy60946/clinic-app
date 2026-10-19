@@ -6,7 +6,7 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 |---|---|---|---|
 | **GameApp** | Çocuk (oyun; yaş bantları A 6–8 · B 9–12 · C 13–15) | `amy60946/game-app` (Unity 6, C#) | TestFlight'a yüklendi |
 | **ParentApp** | Ebeveyn (aile aboneliği) | `amy60946/parent-app` (Expo / React Native) | TestFlight'a yüklendi (19 Ekim 2026) |
-| **ClinicApp** | Uzman (klinisyen başına ücret) | `amy60946/clinic-app` (bu depo) | Uzman paneli ilk sürüm (web + iOS), TestFlight hattı hazır |
+| **ClinicApp** | Uzman (klinisyen başına ücret) | `amy60946/clinic-app` (bu depo) | Uzman paneli ilk sürüm (web + iOS); TestFlight'a yüklendi (19 Ekim 2026) |
 
 Üçü **ayrı uygulama, tek Supabase projesi** (`https://uhelhxqgpcjemadhsifx.supabase.co`). Aralarındaki bütün etkileşim veritabanı üzerinden olur.
 
