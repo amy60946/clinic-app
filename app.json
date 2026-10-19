@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "ClinicApp",
+    "slug": "clinicapp",
+    "owner": "amy60946",
+    "scheme": "clinicapp",
+    "version": "0.1.0",
+    "userInterfaceStyle": "light",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "ios": {
+      "bundleIdentifier": "com.clinicapp.ios",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleDevelopmentRegion": "tr"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
+  }
+}
