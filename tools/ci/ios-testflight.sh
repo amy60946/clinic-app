@@ -4,7 +4,7 @@
 # arşivler ve TestFlight'a yükler. EAS hesabı/sertifika kurulumu gerekmez; Apple sertifika ve profili bulutta yönetir.
 # Gerekli: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (p8 metni), APPLE_TEAM_ID, BUILD_NUMBER. Gizli bilgiler loga yazılmaz.
 set -euo pipefail
-BUNDLE_ID="${BUNDLE_ID:-com.clinicapp.ios}"
+BUNDLE_ID="${BUNDLE_ID:-com.clinicapp.uzman}"
 here="$(cd "$(dirname "$0")" && pwd)"
 # App Store yüklemesi iOS 26 SDK (Xcode 26+) ister: kurulu en yeni kararlı Xcode seçilir
 ls -d /Applications/Xcode*.app
