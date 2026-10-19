@@ -31,3 +31,12 @@ for b in builds['data']:
     print('- %s (%s) · yüklendi %s · işleme: %s · süre dolmuş: %s · şifreleme beyanı: %s · iç test: %s · dış test: %s' % (
         ver, a.get('version'), a.get('uploadedDate'), a.get('processingState'), a.get('expired'),
         a.get('usesNonExemptEncryption'), beta.get('internalBuildState'), beta.get('externalBuildState')))
+
+# TestFlight çöküş geri bildirimleri (test eden kişi çöküş penceresinde "Paylaş" dediyse) ve çöküş kayıtları
+subs = get('/apps/%s/betaFeedbackCrashSubmissions?limit=5' % app['id']).get('data', [])
+print('\nTestFlight çöküş geri bildirimi: %d' % len(subs))
+for s in subs:
+    a = s['attributes']
+    print('- %s · cihaz %s · iOS %s · yorum: %s' % (a.get('createdDate'), a.get('deviceModel'), a.get('osVersion'), a.get('comment')))
+    log = get('/betaFeedbackCrashSubmissions/%s/crashLog' % s['id']).get('data', {}).get('attributes', {}).get('logText', '')
+    print('\n'.join(log.splitlines()[:120]))
