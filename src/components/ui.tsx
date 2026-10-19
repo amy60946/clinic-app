@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator, TextInputProps, ViewStyle } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, StyleSheet, ActivityIndicator, TextInputProps, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, radius } from '../theme';
+import { colors, radius, Difficulty, difficultyMeta } from '../theme';
 
 // ParentApp'in bileşenleriyle aynı görünüm (src/components/ui.tsx, src/screens/AuthScreens.tsx)
 
@@ -73,6 +73,62 @@ export function Segmented<T extends string>({
   );
 }
 
+// ParentApp ile aynı açma/kapama düğmesi
+export function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <Pressable
+      onPress={() => onChange(!value)}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: value }}
+      style={{ width: 46, height: 28, borderRadius: 14, backgroundColor: value ? colors.navy : '#D7DAE2', padding: 3, justifyContent: 'center' }}
+    >
+      <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#fff', alignSelf: value ? 'flex-end' : 'flex-start' }} />
+    </Pressable>
+  );
+}
+
+export function DifficultyBadge({ d, coins }: { d: Difficulty; coins: number }) {
+  const c = d === 'easy' ? colors.easy : d === 'medium' ? colors.medium : colors.hard;
+  return (
+    <View style={[styles.badge, { backgroundColor: c.bg }]}>
+      <Text style={{ fontSize: 11, fontWeight: '600', color: c.fg }}>{difficultyMeta[d].label} · {coins}</Text>
+      <View style={styles.coin} />
+    </View>
+  );
+}
+
+export function IconButton({ name, onPress, label, size = 20 }: {
+  name: keyof typeof Ionicons.glyphMap; onPress?: () => void; label: string; size?: number;
+}) {
+  return (
+    <Pressable onPress={onPress} accessibilityLabel={label} hitSlop={8} style={styles.iconBtn}>
+      <Ionicons name={name} size={size} color={colors.navy} />
+    </Pressable>
+  );
+}
+
+// Yatay kaydırılan seçim çubuğu (ParentApp "Görev Oluştur" kategori çipleriyle aynı görünüm). Telefonda alt satıra kaymaz.
+export function ChipBar<T extends string>({ options, value, onChange, inset = 0 }: {
+  options: { id: T; label: string; icon?: keyof typeof Ionicons.glyphMap }[]; value: T; onChange: (v: T) => void;
+  inset?: number; // kaydırma alanı ekran kenarına kadar uzanırken ilk/son çipin kenardan boşluğu
+}) {
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ gap: 8, paddingVertical: 4, paddingHorizontal: inset, alignItems: 'center' }}>
+      {options.map((o) => {
+        const on = o.id === value;
+        return (
+          <Pressable key={o.id} onPress={() => onChange(o.id)} accessibilityRole="tab" accessibilityState={{ selected: on }}
+            style={[styles.chip, on && { backgroundColor: colors.navy, borderColor: colors.navy }]}>
+            {o.icon && <Ionicons name={o.icon} size={16} color={on ? '#fff' : colors.navy} />}
+            <Text numberOfLines={1} style={{ fontSize: 14, fontWeight: '600', color: on ? '#fff' : colors.navy }}>{o.label}</Text>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
+  );
+}
+
 // Küçük düğme (ikincil eylem)
 export function SmallButton({ label, onPress, danger, busy }: { label: string; onPress: () => void; danger?: boolean; busy?: boolean }) {
   return (
@@ -88,6 +144,13 @@ export function Empty({ text }: { text: string }) {
 }
 
 const styles = StyleSheet.create({
+  badge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill },
+  coin: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.gold },
+  iconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  chip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 16,
+    borderRadius: radius.pill, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line,
+  },
   seg: { flexDirection: 'row', flexWrap: 'wrap', backgroundColor: '#ECEEF3', borderRadius: radius.sm, padding: 3 },
   segItem: { flexGrow: 1, alignItems: 'center', paddingVertical: 8, paddingHorizontal: 10, borderRadius: 8 },
   segActive: { backgroundColor: '#fff' },

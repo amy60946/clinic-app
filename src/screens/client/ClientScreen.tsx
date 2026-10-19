@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../theme';
-import { Notice, Segmented, SmallButton } from '../../components/ui';
+import { Notice, Segmented, SmallButton, ChipBar } from '../../components/ui';
 import { Client, ClientData, ClinicianMe, loadClientData, revokeLink } from '../../lib/clinic';
 import { isoDate, windowStarts } from '../../lib/metrics';
 import { SummaryTab, RoutineTab, AbcTab } from './ObservationTabs';
@@ -14,14 +14,15 @@ import ReportTab from './ReportTab';
 
 type Tab = 'summary' | 'routine' | 'abc' | 'goals' | 'notes' | 'suggestions' | 'report';
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'summary', label: 'Özet' },
-  { id: 'routine', label: 'Rutin' },
-  { id: 'abc', label: 'Zor anlar' },
-  { id: 'goals', label: 'Hedefler' },
-  { id: 'notes', label: 'Notlar' },
-  { id: 'suggestions', label: 'Öneriler' },
-  { id: 'report', label: 'Rapor' },
+// Sekmeler yana kaydırılan çip çubuğu: telefonda alt satıra kaymaz, iPad/web'de tek satırda sığar
+const TABS: { id: Tab; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { id: 'summary', label: 'Özet', icon: 'pie-chart-outline' },
+  { id: 'routine', label: 'Rutin', icon: 'list-outline' },
+  { id: 'abc', label: 'Zor anlar', icon: 'pulse-outline' },
+  { id: 'goals', label: 'Hedefler', icon: 'flag-outline' },
+  { id: 'notes', label: 'Notlar', icon: 'document-text-outline' },
+  { id: 'suggestions', label: 'Öneriler', icon: 'add-circle-outline' },
+  { id: 'report', label: 'Rapor', icon: 'print-outline' },
 ];
 
 export const MAX_WEEKS = 8;
@@ -115,11 +116,13 @@ export default function ClientScreen({ client, me, onBack, onRevoked }: {
 
           {ctx && (
             <>
-              <Segmented options={TABS} value={tab} onChange={setTab} />
+              <View style={styles.tabs}>
+                <ChipBar<Tab> options={TABS} value={tab} onChange={setTab} inset={20} />
+              </View>
               {['summary', 'routine', 'abc', 'report'].includes(tab) && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 14 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6 }}>
                   <Text style={styles.small}>Dönem</Text>
-                  <View style={{ width: 200 }}>
+                  <View style={{ flex: 1, maxWidth: 220 }}>
                     <Segmented options={[{ id: '4', label: '4 hafta' }, { id: '8', label: '8 hafta' }]} value={weeks} onChange={setWeeks} />
                   </View>
                 </View>
@@ -146,11 +149,12 @@ export default function ClientScreen({ client, me, onBack, onRevoked }: {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
-  scroll: { padding: 24, paddingTop: 16, flexGrow: 1 },
+  scroll: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 40, flexGrow: 1 },
+  tabs: { marginHorizontal: -20, marginBottom: 4 },
   column: { width: '100%', maxWidth: 960, alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
   iconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 22, fontWeight: '700', color: colors.navy },
+  title: { fontSize: 20, fontWeight: '700', color: colors.navy },
   subtitle: { fontSize: 13, color: colors.muted, marginTop: 2 },
   small: { fontSize: 12, color: colors.muted },
 });

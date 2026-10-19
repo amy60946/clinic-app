@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
@@ -101,28 +101,8 @@ export default function HomeScreen() {
 
           {state.kind === 'ready' && (
             <>
+              <ClientList clients={state.clients} onOpen={setSelected} />
               <InviteCard onCreated={refresh} />
-              <Label>{`Danışanlar (${state.clients.length})`}</Label>
-              {state.clients.length === 0 ? (
-                <Notice icon="people-outline" text="Henüz paylaşım yok. Aileye bir paylaşım kodu ver; ebeveyn ParentApp'te kodu girip onay verince çocuk burada görünür." />
-              ) : (
-                <View style={{ gap: 8 }}>
-                  {state.clients.map((c) => (
-                    <Pressable key={c.link_id} onPress={() => setSelected(c)} accessibilityRole="button">
-                    <Card style={styles.client}>
-                      <View style={styles.initial}>
-                        <Text style={{ fontWeight: '700', color: colors.navy }}>{(c.child_name || '?').slice(0, 1).toUpperCase()}</Text>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.clientName}>{c.child_name || 'Adsız'}{c.label ? ` · ${c.label}` : ''}</Text>
-                        <Text style={styles.small}>Ebeveyn onayı: {dateText(c.consent_at)}</Text>
-                      </View>
-                      <Ionicons name="chevron-forward" size={18} color={colors.faint} />
-                    </Card>
-                    </Pressable>
-                  ))}
-                </View>
-              )}
               <TeamCard me={state.me} team={state.team} />
               <Text style={styles.footnote}>
                 Bu panel gözlem toplar, tanı koymaz. Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
@@ -132,6 +112,58 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+// Danışan listesi: aynı adlı çocuklar ebeveyn adıyla ayırt edilir; çok danışanda ad / ebeveyn / etiketle arama
+function ClientList({ clients, onOpen }: { clients: Client[]; onOpen: (c: Client) => void }) {
+  const [q, setQ] = useState('');
+  const query = q.trim().toLocaleLowerCase('tr');
+  const shown = query
+    ? clients.filter((c) => `${c.child_name} ${c.parents} ${c.label}`.toLocaleLowerCase('tr').includes(query))
+    : clients;
+  return (
+    <>
+      <Label>{`Danışanlar (${clients.length})`}</Label>
+      {clients.length === 0 ? (
+        <Notice icon="people-outline" text="Henüz paylaşım yok. Aşağıdan aileye bir paylaşım kodu ver; ebeveyn ParentApp'te kodu girip onay verince çocuk burada görünür." />
+      ) : (
+        <>
+          {clients.length > 3 && (
+            <View style={styles.search}>
+              <Ionicons name="search" size={18} color={colors.muted} />
+              <TextInput value={q} onChangeText={setQ} placeholder="Çocuk ya da ebeveyn adı ara" placeholderTextColor={colors.muted}
+                style={{ flex: 1, fontSize: 15, color: colors.navy }} autoCorrect={false} />
+            </View>
+          )}
+          <View style={styles.list}>
+            {shown.length === 0 && <Text style={[styles.small, { padding: 16 }]}>Sonuç bulunamadı.</Text>}
+            {shown.map((c, i) => (
+              <Pressable key={c.link_id} onPress={() => onOpen(c)} accessibilityRole="button"
+                style={({ pressed }) => [styles.row, i > 0 && styles.rowLine, pressed && { backgroundColor: '#F7F8FA' }]}>
+                <View style={styles.initial}>
+                  <Text style={{ fontSize: 16, fontWeight: '700', color: colors.navy }}>{(c.child_name || '?').slice(0, 1).toLocaleUpperCase('tr-TR')}</Text>
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <Text style={styles.clientName}>{c.child_name || 'Adsız'}</Text>
+                    {!!c.label && <Text style={styles.tag} numberOfLines={1}>{c.label}</Text>}
+                  </View>
+                  {!!c.parents && (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                      <Ionicons name="person-outline" size={13} color={colors.muted} />
+                      <Text style={styles.parents} numberOfLines={1}>{c.parents}</Text>
+                    </View>
+                  )}
+                  <Text style={styles.small}>Ebeveyn onayı: {dateText(c.consent_at)}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.faint} />
+              </Pressable>
+            ))}
+          </View>
+        </>
+      )}
+    </>
   );
 }
 
@@ -245,7 +277,13 @@ const styles = StyleSheet.create({
   codeRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   code: { fontSize: 28, fontWeight: '800', letterSpacing: 4, color: colors.navy },
   client: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: radius.md },
-  initial: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.today, alignItems: 'center', justifyContent: 'center' },
+  initial: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.today, alignItems: 'center', justifyContent: 'center' },
+  list: { backgroundColor: '#fff', borderRadius: radius.md, overflow: 'hidden' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
+  rowLine: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },
+  parents: { fontSize: 13, color: colors.text, flexShrink: 1 },
+  tag: { fontSize: 11, fontWeight: '600', color: colors.navy, backgroundColor: colors.today, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden', maxWidth: 180 },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: radius.md, paddingHorizontal: 14, height: 44, marginBottom: 8 },
   clientName: { fontSize: 15, fontWeight: '600', color: colors.text },
   footnote: { fontSize: 11, color: colors.muted, marginTop: 24, lineHeight: 16 },
 });
