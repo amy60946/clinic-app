@@ -1,0 +1,14 @@
+# Ortam değişkenleri (gerçek Supabase anahtarları)
+.env
+.env.local
+.env*.local
+
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.DS_Store
+
+# Web önizleme çıktısı (preview/build.sh üretir)
+preview/out/

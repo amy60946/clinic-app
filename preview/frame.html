@@ -1,0 +1,120 @@
+<title>ClinicApp Önizleme</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Düzen: solda geniş uzman paneli (ClinicApp), sağda telefon boyutunda ParentApp; ikisi aynı deneme veritabanını paylaşır.
+     Dar ekranda üstteki iki düğmeyle uygulamalar arasında geçilir. */
+  :root {
+    --ground: #E9ECF3;
+    --ink: #0F1B3D;
+    --muted: #5F6884;
+    --bezel: #0F1B3D;
+    --line: #D5DAE6;
+    --surface: #F5F6F8;
+    --chip: #FFFFFF;
+    --danger: #B3263E;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --ground: #0B1226; --ink: #E6EAF5; --muted: #95A0BE; --bezel: #26324F; --line: #2A3657; --chip: #16203B; --danger: #F07A8C; color-scheme: dark; }
+  }
+  :root[data-theme="dark"] { --ground: #0B1226; --ink: #E6EAF5; --muted: #95A0BE; --bezel: #26324F; --line: #2A3657; --chip: #16203B; --danger: #F07A8C; color-scheme: dark; }
+
+  html, body { height: 100%; }
+  body { background: var(--ground); color: var(--ink); font-family: var(--font); }
+  .stage {
+    box-sizing: border-box; min-height: 100%;
+    padding-block: 18px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+  .top h1 { font-size: 15px; margin: 0; font-weight: 700; }
+  .tabs { display: none; gap: 6px; }
+  .panes { flex: 1; display: flex; gap: 20px; align-items: stretch; min-height: 0; }
+  .pane { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .pane .label { font-size: 11px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); }
+  .clinic { flex: 1; }
+  .window { flex: 1; min-height: 600px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); box-shadow: 0 18px 50px rgba(15, 27, 61, .14); }
+  .parent { width: 390px; flex: none; }
+  .phone { flex: 1; min-height: 600px; border: 10px solid var(--bezel); border-radius: 46px; overflow: hidden; background: var(--surface); box-shadow: 0 18px 50px rgba(15, 27, 61, .14); }
+  iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-size: 12px; color: var(--muted); }
+  .bar b { color: var(--ink); font-weight: 600; user-select: all; }
+  button {
+    font: inherit; font-size: 12px; color: var(--ink); background: var(--chip); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 12px; cursor: pointer;
+  }
+  button[aria-pressed="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+  button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  button.confirm { color: var(--danger); border-color: var(--danger); }
+  .noparent .parent { display: none; }
+
+  @media (max-width: 1080px) {
+    .tabs { display: flex; }
+    .noparent .tabs { display: none; }
+    .panes { display: block; }
+    .pane { height: calc(100vh - 150px); min-height: 560px; }
+    .parent { width: 100%; max-width: 390px; margin: 0 auto; }
+    .stage[data-show="clinic"] .parent, .stage[data-show="parent"] .clinic { display: none; }
+    .pane .label { display: none; }
+  }
+</style>
+
+<div class="stage" id="stage" data-show="clinic">
+  <div class="top">
+    <h1>ClinicApp + ParentApp · ortak deneme veritabanı</h1>
+    <div class="tabs" role="group" aria-label="Uygulama seç">
+      <button type="button" id="t-clinic" aria-pressed="true">Uzman (ClinicApp)</button>
+      <button type="button" id="t-parent" aria-pressed="false">Ebeveyn (ParentApp)</button>
+    </div>
+  </div>
+  <div class="panes">
+    <div class="pane clinic">
+      <span class="label">Uzman · ClinicApp (web ve iPad)</span>
+      <div class="window"><iframe id="clinic" src="clinic.html" title="ClinicApp uzman paneli"></iframe></div>
+    </div>
+    <div class="pane parent">
+      <span class="label">Ebeveyn · ParentApp</span>
+      <div class="phone"><iframe id="parent" title="ParentApp ebeveyn uygulaması"></iframe></div>
+    </div>
+  </div>
+  <div class="bar">
+    <span>Uzman: <b>uzman@clinicapp.app</b> · Ebeveyn: <b>demo@parentapp.app</b> · şifre <b>12345678</b></span>
+    <span>Dene: uzmanda "Aile davet et" ile kod üret, ebeveynde Aile › Hesap › Uzmanım'a yaz.</span>
+    <button id="reset" type="button">Baştan başlat</button>
+  </div>
+</div>
+
+<script>
+  const stage = document.getElementById('stage');
+  const parent = document.getElementById('parent');
+  // ParentApp paketi yoksa yalnız uzman paneli gösterilir
+  fetch('app.html', { method: 'HEAD' }).then((r) => {
+    if (r.ok) parent.src = 'app.html'; else stage.classList.add('noparent');
+  }).catch(() => { parent.src = 'app.html'; });
+
+  const tabs = { clinic: document.getElementById('t-clinic'), parent: document.getElementById('t-parent') };
+  Object.entries(tabs).forEach(([k, b]) => b.addEventListener('click', () => {
+    stage.dataset.show = k;
+    Object.entries(tabs).forEach(([k2, b2]) => b2.setAttribute('aria-pressed', String(k2 === k)));
+    // Öteki uygulamadaki değişikliği görmek için geçince yenile
+    const f = document.getElementById(k);
+    if (f.src) f.src = f.src.split('?')[0] + '?' + Date.now();
+  }));
+
+  const btn = document.getElementById('reset');
+  let armed = false, timer;
+  btn.addEventListener('click', () => {
+    if (!armed) {
+      armed = true;
+      btn.textContent = 'Tüm deneme verisi silinsin mi? Evet';
+      btn.classList.add('confirm');
+      timer = setTimeout(() => { armed = false; btn.textContent = 'Baştan başlat'; btn.classList.remove('confirm'); }, 4000);
+      return;
+    }
+    clearTimeout(timer);
+    try { localStorage.removeItem('pofi-onizleme-v4'); } catch (e) { /* depolama kapalı */ }
+    document.getElementById('clinic').src = 'clinic.html?' + Date.now();
+    if (parent.src) parent.src = 'app.html?' + Date.now();
+    armed = false; btn.textContent = 'Baştan başlat'; btn.classList.remove('confirm');
+  });
+</script>

@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "ClinicApp",
+    "slug": "clinicapp",
+    "owner": "amy60946",
+    "scheme": "clinicapp",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "runtimeVersion": { "policy": "sdkVersion" },
+    "ios": {
+      "bundleIdentifier": "com.clinicapp.ios",
+      "supportsTablet": true,
+      "infoPlist": { "ITSAppUsesNonExemptEncryption": false, "CFBundleDevelopmentRegion": "tr" }
+    },
+    "android": { "package": "com.clinicapp.ios", "adaptiveIcon": { "backgroundColor": "#0F1B3D" } },
+    "web": { "favicon": "./assets/favicon.png", "name": "ClinicApp", "shortName": "ClinicApp", "lang": "tr" },
+    "plugins": [
+      ["expo-splash-screen", { "image": "./assets/splash-icon.png", "imageWidth": 200, "backgroundColor": "#0F1B3D" }]
+    ]
+  }
+}
