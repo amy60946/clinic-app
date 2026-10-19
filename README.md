@@ -8,7 +8,6 @@ Veritabanı sözleşmesi bu depoda değil: [`amy60946/ortak`](https://github.com
 
 - Uzman girişi, kaydı (yeni klinik açar ya da ekip koduyla katılır), şifre yenileme.
 - Panel: klinik bilgisi, aileye paylaşım kodu üretme, ebeveynin rıza verdiği danışanların listesi.
-- Klinik SQL'i Supabase'e uygulanmadıysa panel "Klinik veritabanı henüz kurulmadı" der.
 
 ## Çalıştırma (geliştirici için)
 
