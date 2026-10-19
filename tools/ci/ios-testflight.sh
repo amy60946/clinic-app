@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# (ParentApp deposundaki tools/ci/ios-testflight.sh ile aynı; yalnız bundle ID ve arşiv adı farklı.)
-# CI (macOS): Expo projesinden yerel iOS projesi üretir (expo prebuild), otomatik imzayla (App Store Connect API anahtarı)
-# arşivler ve TestFlight'a yükler. EAS hesabı/sertifika kurulumu gerekmez; Apple sertifika ve profili bulutta yönetir.
+# (ParentApp'teki tools/ci/ios-testflight.sh'tan türedi; fark: arşiv de doğrudan dağıtım imzasıyla, geliştirme sertifikası oluşmaz.)
+# CI (macOS): Expo projesinden yerel iOS projesi üretir (expo prebuild), geçici App Store dağıtım imzasıyla
+# arşivler ve TestFlight'a yükler. EAS hesabı/sertifika kurulumu gerekmez; sertifika ve profil API anahtarıyla oluşturulup silinir.
 # Gerekli: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (p8 metni), APPLE_TEAM_ID, BUILD_NUMBER. Gizli bilgiler loga yazılmaz.
 set -euo pipefail
 BUNDLE_ID="${BUNDLE_ID:-com.clinicapp.uzman}"
@@ -27,27 +27,16 @@ body=$(printf '%s' "$ASC_KEY_P8" | sed 's/\\n/\n/g' | tr -d '\r' | sed -E 's/---
 { echo "-----BEGIN PRIVATE KEY-----"; printf '%s' "$body" | fold -w 64; echo; echo "-----END PRIVATE KEY-----"; } > "$key"
 chmod 600 "$key"
 openssl pkey -in "$key" -noout 2>/dev/null || echo "::warning::ASC_KEY_P8 geçerli bir özel anahtar gibi görünmüyor (.p8 dosyasının tüm metnini yapıştır)."
-auth=(-allowProvisioningUpdates -authenticationKeyPath "$key" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
 
-# Arşiv otomatik geliştirme imzasıyla alınır (en az bir kayıtlı cihaz gerekir → asc_device.py); dışa aktarma App Store
-# dağıtım imzasıyla elle yeniden imzalar (aşağıda).
+# İmza: baştan sona elle App Store dağıtım imzası (asc_sign.py → geçici "Apple Distribution" sertifikası + App Store
+# profili, geçici yerel anahtar zinciri; iş bitince sertifika/profil iptal edilir, anahtar zinciri silinir).
+# Neden: Xcode'un otomatik imzası her CI çalıştırmasında yeni bir geliştirme sertifikası oluşturuyordu; hesap sınırı
+# dolunca "maximum number of certificates" hatası verdi (19 Ekim 2026). Bu yolda hiç geliştirme sertifikası oluşmaz.
 # Apple ara sertifikaları (WWDR G3/G6): imza zincirinin tamamı gömülsün, yoksa App Store "Invalid Signature" der
 for c in AppleWWDRCAG3 AppleWWDRCAG6; do
-  curl -fsSL -o "$RUNNER_TEMP/$c.cer" "https://www.apple.com/certificateauthority/$c.cer" \
-    && security import "$RUNNER_TEMP/$c.cer" -k ~/Library/Keychains/login.keychain-db -A >/dev/null 2>&1 || true
+  curl -fsSL -o "$RUNNER_TEMP/$c.cer" "https://www.apple.com/certificateauthority/$c.cer" || true
 done
 python3 -m pip install -q --disable-pip-version-check "pyjwt[crypto]" 2>/dev/null || python3 -m pip install -q --break-system-packages "pyjwt[crypto]"
-python3 "$here/asc_device.py" "$key"
-archive="$RUNNER_TEMP/ClinicApp.xcarchive"
-xcodebuild -workspace "$ws" -scheme "$scheme" -configuration Release \
-  -destination 'generic/platform=iOS' -archivePath "$archive" \
-  DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Automatic \
-  "${auth[@]}" -quiet archive
-[ -d "$archive" ] || { echo "::error::Arşiv oluşmadı"; exit 1; }
-codesign -dvv "$(ls -d "$archive"/Products/Applications/*.app | head -1)" 2>&1 | grep -E "Authority|TeamIdentifier" || true
-
-# Dışa aktarma: elle App Store dağıtım imzası (asc_sign.py → geçici sertifika + profil, geçici yerel anahtar zinciri;
-# iş bitince sertifika/profil iptal edilir, anahtar zinciri silinir). Kullanıcı onayı: 19 Ekim 2026.
 sign="$RUNNER_TEMP/sign"; kc="$RUNNER_TEMP/ci.keychain-db"; kcpw=$(openssl rand -hex 16)
 trap 'python3 "$here/asc_sign.py" cleanup "$key" "$sign/info.json" || true; security delete-keychain "$kc" 2>/dev/null || true; rm -rf "$key" "$sign"' EXIT
 python3 "$here/asc_sign.py" create "$key" "$BUNDLE_ID" "$sign"
@@ -68,6 +57,22 @@ pname=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["profile_
 for d in "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
   mkdir -p "$d"; cp "$sign/profile.mobileprovision" "$d/$puuid.mobileprovision"
 done
+
+# Elle imza ayarı yalnız uygulama hedefine yazılır (Pods hedefleri imzasız kalır). Uygulama hedefinin yapı ayarları,
+# expo prebuild'in ürettiği projede CODE_SIGN_ENTITLEMENTS satırını içeren tek bloktur (Debug + Release).
+pbx="ios/$scheme.xcodeproj/project.pbxproj"
+n=$(grep -c 'CODE_SIGN_ENTITLEMENTS = ' "$pbx" || true)
+[ "$n" = 2 ] || { echo "::error::Uygulama hedefi ayarları beklenen yerde değil ($n blok)"; exit 1; }
+TEAM="$APPLE_TEAM_ID" PNAME="$pname" perl -pi -e '
+  s{^(\s*)CODE_SIGN_ENTITLEMENTS = (.*)$}{$1CODE_SIGN_ENTITLEMENTS = $2\n$1CODE_SIGN_STYLE = Manual;\n$1DEVELOPMENT_TEAM = $ENV{TEAM};\n$1CODE_SIGN_IDENTITY = "Apple Distribution";\n$1"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";\n$1PROVISIONING_PROFILE_SPECIFIER = "$ENV{PNAME}";}
+' "$pbx"
+grep -c 'PROVISIONING_PROFILE_SPECIFIER' "$pbx"
+
+archive="$RUNNER_TEMP/ClinicApp.xcarchive"
+xcodebuild -workspace "$ws" -scheme "$scheme" -configuration Release \
+  -destination 'generic/platform=iOS' -archivePath "$archive" -quiet archive
+[ -d "$archive" ] || { echo "::error::Arşiv oluşmadı"; exit 1; }
+codesign -dvv "$(ls -d "$archive"/Products/Applications/*.app | head -1)" 2>&1 | grep -E "Authority|TeamIdentifier" || true
 
 cat > "$RUNNER_TEMP/ExportOptions.plist" <<PL
 <?xml version="1.0" encoding="UTF-8"?>
