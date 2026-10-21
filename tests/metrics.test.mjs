@@ -75,6 +75,9 @@ test('beceri alanı ve zor an özeti', () => {
   assert.deepEqual(a.perWeek[1], { start: '2026-10-19', count: 2, avgIntensity: 3 });
   assert.equal(a.byDayPart.sabah, 1);
   assert.equal(a.byDayPart['akşam'], 1);
+  // ebeveynin seçtiği gün bölümü saatten önce gelir
+  const b = abcSummary([{ ...ev('2026-10-20', '13:00', 3), day_part: 'night' }], '2026-10-21', 1);
+  assert.equal(b.byDayPart.gece, 1);
 });
 
 test('pazartesi günü dönem geçen haftayla biter (boş hafta gösterilmez)', async () => {

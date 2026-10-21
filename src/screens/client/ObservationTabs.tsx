@@ -5,8 +5,9 @@ import { Card, Label, Empty } from '../../components/ui';
 import { WeeklyRateBars, RateBar, Stat } from '../../components/charts';
 import {
   weekly, perTask, observations, bySkill, abcSummary, windowStarts, lastFullDay, parseDate, isoDate, DECLINE_LABELS, LIMITS_TEXT,
-  MASTERY_RATE, MASTERY_WEEKS, DayPart,
+  MASTERY_RATE, MASTERY_WEEKS, DayPart, AbcEvent, dayPart,
 } from '../../lib/metrics';
+import AbcVoice from '../../components/AbcVoice';
 import type { ClientCtx } from './ClientScreen';
 
 const p = (v: number | null) => (v === null ? '–' : `%${v}`);
@@ -135,11 +136,21 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
 /* ---------- Zor anlar (ABC) ---------- */
 
 const PARTS: { id: DayPart; label: string }[] = [
-  { id: 'sabah', label: 'Sabah (06–12)' },
-  { id: 'öğle', label: 'Öğle (12–17)' },
-  { id: 'akşam', label: 'Akşam (17–22)' },
-  { id: 'gece', label: 'Gece (22–06)' },
+  { id: 'sabah', label: 'Sabah' },
+  { id: 'öğle', label: 'Öğle' },
+  { id: 'akşam', label: 'Akşam' },
+  { id: 'gece', label: 'Gece' },
 ];
+
+const PART_LABEL: Record<DayPart, string> = { sabah: 'Sabah', 'öğle': 'Öğle', 'akşam': 'Akşam', gece: 'Gece' };
+
+// Yeni kayıtlarda saat temsilîdir (ebeveyn gün bölümünü seçer): tarih + gün bölümü; eski kayıtlarda saat de
+function abcWhen(e: AbcEvent) {
+  const d = new Date(e.occurred_at);
+  const day = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'short' });
+  if (e.day_part) return `${day} · ${PART_LABEL[dayPart(e)]}`;
+  return `${day} · ${d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`;
+}
 
 export function AbcTab({ data, today, weeks }: ClientCtx) {
   const s = useMemo(() => abcSummary(data.abc, today, weeks), [data, today, weeks]);
@@ -165,11 +176,12 @@ export function AbcTab({ data, today, weeks }: ClientCtx) {
         {list.map((e) => (
           <Card key={e.id} style={{ gap: 4 }}>
             <Text style={styles.small}>
-              {new Date(e.occurred_at).toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })} · şiddet {e.intensity}/5
+              {abcWhen(e)} · şiddet {e.intensity}/5{e.group_id ? ' · birden çok çocukla ilgili' : ''}
             </Text>
             {e.antecedent ? <Text style={styles.body}><Text style={styles.abcKey}>Öncesi: </Text>{e.antecedent}</Text> : null}
             <Text style={styles.body}><Text style={styles.abcKey}>Davranış: </Text>{e.behavior}</Text>
             {e.consequence ? <Text style={styles.body}><Text style={styles.abcKey}>Sonucu: </Text>{e.consequence}</Text> : null}
+            {e.audio_path ? <AbcVoice path={e.audio_path} durationMs={e.duration_ms} /> : null}
           </Card>
         ))}
       </View>

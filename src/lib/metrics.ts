@@ -35,6 +35,11 @@ export type AbcEvent = {
   behavior: string;
   consequence: string;
   intensity: number;
+  // ParentApp zor an kaydı (ortak 20261019140000_parent_features): ebeveynin seçtiği gün bölümü, çok çocuklu olay, ses
+  day_part?: 'morning' | 'noon' | 'evening' | 'night' | null;
+  group_id?: string | null;
+  audio_path?: string | null;
+  duration_ms?: number | null;
 };
 
 /* ---------- Tarih yardımcıları (yerel takvim günü, YYYY-MM-DD) ---------- */
@@ -298,11 +303,15 @@ export function bySkill(tasks: Task[], comps: Completion[], from: string, to: st
 
 export type DayPart = 'sabah' | 'öğle' | 'akşam' | 'gece';
 
-export function dayPart(iso: string): DayPart {
-  const h = new Date(iso).getHours();
-  if (h >= 6 && h < 12) return 'sabah';
-  if (h >= 12 && h < 17) return 'öğle';
-  if (h >= 17 && h < 22) return 'akşam';
+const PART_OF: Record<string, DayPart> = { morning: 'sabah', noon: 'öğle', evening: 'akşam', night: 'gece' };
+
+// Ebeveynin seçtiği gün bölümü; eski kayıtlarda saatten (ortak sözleşme: sabah 05–11, öğle 11–16, akşam 16–21, gece 21–05)
+export function dayPart(e: Pick<AbcEvent, 'occurred_at' | 'day_part'>): DayPart {
+  if (e.day_part && PART_OF[e.day_part]) return PART_OF[e.day_part];
+  const h = new Date(e.occurred_at).getHours();
+  if (h >= 5 && h < 11) return 'sabah';
+  if (h >= 11 && h < 16) return 'öğle';
+  if (h >= 16 && h < 21) return 'akşam';
   return 'gece';
 }
 
@@ -321,7 +330,7 @@ export function abcSummary(events: AbcEvent[], today: string, weeks: number): Ab
     return d >= from && d <= today;
   });
   const byDayPart: Record<DayPart, number> = { sabah: 0, öğle: 0, akşam: 0, gece: 0 };
-  inWindow.forEach((e) => { byDayPart[dayPart(e.occurred_at)] += 1; });
+  inWindow.forEach((e) => { byDayPart[dayPart(e)] += 1; });
   return {
     total: inWindow.length,
     perWeek: starts.map((start) => {

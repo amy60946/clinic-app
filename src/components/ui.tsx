@@ -9,8 +9,9 @@ export function Card({ children, style }: { children: React.ReactNode; style?: V
   return <View style={[styles.card, style]}>{children}</View>;
 }
 
+// Büyük harfe çevirme ve harf aralığı yok: Türkçe "i/İ" bozuluyordu (ParentApp ile aynı düzeltme)
 export const Label = ({ children }: { children: string }) => (
-  <Text style={styles.label}>{children.toUpperCase()}</Text>
+  <Text style={styles.label}>{children}</Text>
 );
 
 export function Input({ secure, ...props }: TextInputProps & { secure?: boolean }) {
@@ -156,7 +157,7 @@ const styles = StyleSheet.create({
   segActive: { backgroundColor: '#fff' },
   small: { borderWidth: 1, borderColor: colors.line, backgroundColor: '#fff', borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 8 },
   card: { backgroundColor: colors.card, borderRadius: radius.md, padding: 16 },
-  label: { fontSize: 11, fontWeight: '600', letterSpacing: 0.6, color: colors.muted, marginTop: 20, marginBottom: 8 },
+  label: { fontSize: 13, fontWeight: '600', color: colors.muted, marginTop: 20, marginBottom: 8 },
   inputWrap: {
     flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: radius.sm,
     paddingHorizontal: 14,

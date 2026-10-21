@@ -10,7 +10,7 @@ import { useAuth, authErrorText } from '../lib/auth';
 const MIN_PASSWORD = 8;
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
 
-export type AuthRoute = 'login' | 'signup' | 'forgot';
+export type AuthRoute = 'login' | 'signup' | 'join' | 'forgot';
 type Go = (r: AuthRoute, email?: string) => void;
 
 /* ---------- Ortak yerleşim (web'de ortada dar sütun) ---------- */
@@ -87,15 +87,23 @@ export function LoginScreen({ go, initialEmail = '' }: { go: Go; initialEmail?: 
       </Pressable>
       <Cta label="Giriş yap" onPress={submit} busy={busy} />
       <LinkText onPress={() => go('signup')}>Hesabın yok mu? Kayıt ol</LinkText>
+      <Pressable onPress={() => go('join')} style={styles.teamBox} accessibilityRole="button">
+        <Ionicons name="people-outline" size={22} color={colors.navy} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.teamTitle}>Ekip kodum var</Text>
+          <Text style={styles.small}>Klinik sahibinin verdiği 6 karakterli kodla ekibe katıl.</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.faint} />
+      </Pressable>
     </Layout>
   );
 }
 
 /* ---------- Kayıt: yeni klinik açar ya da ekip koduyla mevcut kliniğe katılır ---------- */
 
-export function SignUpScreen({ go }: { go: Go }) {
+export function SignUpScreen({ go, initialJoin = false }: { go: Go; initialJoin?: boolean }) {
   const { signUp, resendConfirmation } = useAuth();
-  const [join, setJoin] = useState(false);
+  const [join, setJoin] = useState(initialJoin);
   const [name, setName] = useState('');
   const [title, setTitle] = useState('');
   const [clinicName, setClinicName] = useState('');
@@ -140,9 +148,15 @@ export function SignUpScreen({ go }: { go: Go }) {
   }
 
   return (
-    <Layout title="Uzman kaydı" subtitle="Aileler, çocuklarının verisini yalnız kendi verdikleri kodla ve istedikleri sürece seninle paylaşır." onBack={() => go('login')}>
+    <Layout
+      title={join ? 'Ekibe katıl' : 'Uzman kaydı'}
+      subtitle={join
+        ? 'Klinik sahibinin verdiği ekip koduyla hesabını aç; kliniğin adı ve ekibi profiline kendiliğinden gelir. Zaten hesabın varsa giriş yap, Ekip bölümünden kodu gir.'
+        : 'Aileler, çocuklarının verisini yalnız kendi verdikleri kodla ve istedikleri sürece seninle paylaşır.'}
+      onBack={() => go('login')}
+    >
       <View style={styles.seg}>
-        {[{ id: false, label: 'Yeni klinik' }, { id: true, label: 'Ekibe katıl' }].map((o) => (
+        {[{ id: false, label: 'Yeni klinik' }, { id: true, label: 'Ekip kodum var' }].map((o) => (
           <Pressable key={o.label} onPress={() => setJoin(o.id)} style={[styles.segItem, join === o.id && styles.segActive]}>
             <Text style={{ fontSize: 13, fontWeight: join === o.id ? '700' : '500', color: join === o.id ? colors.navy : colors.muted }}>
               {o.label}
@@ -150,14 +164,13 @@ export function SignUpScreen({ go }: { go: Go }) {
           </Pressable>
         ))}
       </View>
+      {join && (
+        <Input value={teamCode} onChangeText={(t) => setTeamCode(t.toUpperCase())} placeholder="Ekip kodu (klinik sahibinden, 6 karakter)"
+          autoCapitalize="characters" autoCorrect={false} maxLength={6} />
+      )}
       <Input value={name} onChangeText={setName} placeholder="Adın soyadın" autoComplete="name" textContentType="name" />
       <Input value={title} onChangeText={setTitle} placeholder="Unvanın (ör. Klinik Psikolog)" />
-      {join ? (
-        <Input value={teamCode} onChangeText={(t) => setTeamCode(t.toUpperCase())} placeholder="Ekip kodu (klinik sahibinden)"
-          autoCapitalize="characters" maxLength={6} />
-      ) : (
-        <Input value={clinicName} onChangeText={setClinicName} placeholder="Kliniğinin adı" />
-      )}
+      {!join && <Input value={clinicName} onChangeText={setClinicName} placeholder="Kliniğinin adı" />}
       <Input value={email} onChangeText={setEmail} placeholder="E-posta" keyboardType="email-address"
         autoCapitalize="none" autoComplete="email" textContentType="emailAddress" />
       <Input value={password} onChangeText={setPassword} placeholder={`Şifre (en az ${MIN_PASSWORD} karakter)`} secure
@@ -249,4 +262,6 @@ const styles = StyleSheet.create({
   seg: { flexDirection: 'row', backgroundColor: '#ECEEF3', borderRadius: 10, padding: 3 },
   segItem: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 8 },
   segActive: { backgroundColor: '#fff' },
+  teamBox: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#fff', borderRadius: 14, padding: 14, marginTop: 8 },
+  teamTitle: { fontSize: 14, fontWeight: '700', color: colors.navy },
 });

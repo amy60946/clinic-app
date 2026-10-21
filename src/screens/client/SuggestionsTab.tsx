@@ -9,6 +9,7 @@ import {
 import { formatTR } from '../../dates';
 import SuggestionEditor, { repeatSummary } from './SuggestionEditor';
 import type { ClientCtx } from './ClientScreen';
+import { track } from '../../lib/track';
 
 const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: string; icon: keyof typeof Ionicons.glyphMap }> = {
   pending: { label: 'Ebeveyn kararı bekleniyor', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'time-outline' },
@@ -32,8 +33,13 @@ export default function SuggestionsTab({ client, me }: ClientCtx) {
 
   const submit = async (list: SuggestionInput[]) => {
     try {
-      if (editor.editing) await updateSuggestion(editor.editing.id, list[0]);
-      else await addSuggestions(client, me.id, list);
+      if (editor.editing) {
+        await updateSuggestion(editor.editing.id, list[0]);
+        track('suggestion.update');
+      } else {
+        await addSuggestions(client, me.id, list);
+        track('suggestion.send', { n: list.length });
+      }
     } catch (e) {
       if (e instanceof SuggestionSchemaMissing) setSchemaMissing(true);
       throw e;
