@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator, RefreshControl, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
@@ -8,14 +8,17 @@ import { colors, radius } from '../theme';
 import { Card, Label, Input, Cta, Notice, SmallButton } from '../components/ui';
 import { useAuth } from '../lib/auth';
 import {
-  clinicianMe, listClients, listTeam, createFamilyInvite, createTeamInvite, joinTeam, ClinicNotInstalled, ClinicianMe, Client, Invite, Member,
+  clinicianMe, listClients, listTeam, createFamilyInvite, createTeamInvite, joinTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Invite, Member,
 } from '../lib/clinic';
+import MembershipScreen from './MembershipScreen';
+import { billingStatus, hasAccess, daysLeft, packageName } from '../lib/billing';
 import ClientScreen, { Tab } from './client/ClientScreen';
 import NotificationsSheet, { notificationTab } from './NotificationsSheet';
 import Bell from '../components/Bell';
 import { useNotifications } from '../lib/notificationsContext';
 import { AppNotification, notificationChildren, onNotificationTap, unregisterPush } from '../lib/notifications';
 import { track, flush } from '../lib/track';
+import { supabase } from '../lib/supabase';
 
 type State =
   | { kind: 'loading' }
@@ -27,11 +30,19 @@ type State =
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 function planText(me: ClinicianMe) {
-  if (me.plan === 'trial') {
-    return me.active ? `Deneme sürümü · ${dateText(me.trial_ends_at)} tarihine kadar` : 'Deneme süresi bitti';
-  }
-  if (me.plan === 'inactive') return 'Abonelik etkin değil';
-  return `Plan: ${me.plan} · ${me.seat_limit} uzman`;
+  const st = billingStatus(me);
+  if (st === 'trial') return `Ücretsiz deneme · ${daysLeft(me.trial_ends_at)} gün kaldı`;
+  if (st === 'expired') return me.plan === 'trial' ? 'Deneme süresi bitti' : 'Üyelik sona erdi';
+  return `${packageName(me)} paket${me.period_end ? ` · ${dateText(me.period_end)}` : ''}`;
+}
+
+// Web: iyzico ödemesinden dönüş (?billing=ok|fail)
+function billingReturn(): 'ok' | 'fail' | null {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
+  const v = new URLSearchParams(window.location.search).get('billing');
+  if (v !== 'ok' && v !== 'fail') return null;
+  window.history.replaceState(null, '', window.location.pathname);
+  return v;
 }
 
 export default function HomeScreen() {
@@ -41,6 +52,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selected, setSelected] = useState<{ client: Client; tab: Tab; key: number } | null>(null);
   const [bell, setBell] = useState(false);
+  const [plans, setPlans] = useState(false);
   const { unread, unreadByChild } = useNotifications();
   const pending = useRef<Pick<AppNotification, 'kind' | 'data' | 'childId'> | null>(null);
 
@@ -61,7 +73,20 @@ export default function HomeScreen() {
     return next;
   }, []);
 
-  useEffect(() => { load(); track('screen.home'); }, [load]);
+  useEffect(() => {
+    load();
+    track('screen.home');
+    const onReturn = () => {
+      const r = billingReturn();
+      if (r === 'ok') { Alert.alert('Ödeme alındı', 'Üyeliğin başladı. Teşekkürler!'); setPlans(false); load(); }
+      if (r === 'fail') Alert.alert('Ödeme tamamlanmadı', 'Kartından ücret alınmadı. Tekrar deneyebilirsin.');
+    };
+    onReturn();
+    // Sayfa yeniden yüklenmeden dönüş (ödeme penceresi adresi değiştirip haber verir)
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    window.addEventListener('clinicapp-billing', onReturn);
+    return () => window.removeEventListener('clinicapp-billing', onReturn);
+  }, [load]);
   useEffect(() => { stateRef.current = state; }, [state]);
 
   // Bildirime dokununca ilgili danışan ve sekme. Danışan listede yoksa (yeni paylaşım) liste yenilenip tekrar aranır.
@@ -106,6 +131,43 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
+  const logout = async () => {
+    // Çıkmadan önce bekleyen kullanım olayları gönderilir ve bu cihaza push kapatılır
+    await flush().catch(() => {});
+    await unregisterPush().catch(() => {});
+    signOut();
+  };
+  const removeAccount = () => Alert.alert('Hesabın silinsin mi?',
+    state.kind === 'ready' && state.team.length <= 1
+      ? 'Hesabın, kliniğin, danışan paylaşımların, notların ve hedeflerin kalıcı olarak silinir. Geri alınamaz. App Store üyeliğin varsa Apple Ayarlar\'dan ayrıca kapat.'
+      : 'Hesabın kalıcı olarak silinir; klinik ve danışanlar ekipte kalır (sahipsen sahiplik en eski üyeye geçer). Geri alınamaz.',
+    [{ text: 'Vazgeç', style: 'cancel' }, {
+      text: 'Kalıcı olarak sil', style: 'destructive', onPress: async () => {
+        try {
+          await flush().catch(() => {});
+          await unregisterPush().catch(() => {});
+          await deleteAccount();
+          await supabase.auth.signOut({ scope: 'local' });
+        } catch (e) {
+          Alert.alert('Hesap silinemedi', (e as Error).message);
+        }
+      },
+    }]);
+  const accountLinks = (
+    <View style={styles.accountLinks}>
+      <Pressable onPress={logout} hitSlop={8}><Text style={styles.link}>Çıkış yap</Text></Pressable>
+      <Pressable onPress={removeAccount} hitSlop={8}><Text style={[styles.link, { color: colors.danger }]}>Hesabı sil</Text></Pressable>
+    </View>
+  );
+
+  // Deneme/üyelik bitti (ya da Bireysel pakette ekip üyesi): panel yerine üyelik ekranı
+  if (state.kind === 'ready' && !hasAccess(state.me)) {
+    return <MembershipScreen me={state.me} blocking onChanged={load} footer={accountLinks} />;
+  }
+  if (plans && state.kind === 'ready') {
+    return <MembershipScreen me={state.me} onClose={() => { setPlans(false); load(); }} onChanged={load} footer={accountLinks} />;
+  }
+
   if (selected && state.kind === 'ready') {
     return (
       <ClientScreen
@@ -139,12 +201,7 @@ export default function HomeScreen() {
               )}
             </View>
             {state.kind === 'ready' && <Bell count={unread} onPress={() => setBell(true)} />}
-            <Pressable onPress={async () => {
-              // Çıkmadan önce bekleyen kullanım olayları gönderilir ve bu cihaza push kapatılır
-              await flush().catch(() => {});
-              await unregisterPush().catch(() => {});
-              signOut();
-            }} accessibilityLabel="Çıkış yap" hitSlop={8} style={styles.iconBtn}>
+            <Pressable onPress={logout} accessibilityLabel="Çıkış yap" hitSlop={8} style={styles.iconBtn}>
               <Ionicons name="log-out-outline" size={20} color={colors.navy} />
             </Pressable>
           </View>
@@ -160,12 +217,14 @@ export default function HomeScreen() {
 
           {state.kind === 'ready' && (
             <>
+              <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
               <ClientList clients={state.clients} unread={unreadByChild} onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
               <InviteCard onCreated={refresh} />
-              <TeamCard me={state.me} team={state.team} onJoined={refresh} />
+              <TeamCard me={state.me} team={state.team} onJoined={refresh} onUpgrade={() => setPlans(true)} />
               <Text style={styles.footnote}>
                 Bu panel gözlem toplar, tanı koymaz. Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
               </Text>
+              {accountLinks}
             </>
           )}
         </View>
@@ -229,7 +288,27 @@ function ClientList({ clients, unread, onOpen }: { clients: Client[]; unread: Re
   );
 }
 
-function TeamCard({ me, team, onJoined }: { me: ClinicianMe; team: Member[]; onJoined: () => void }) {
+// Üyelik özeti: denemede kalan gün, pakette yenileme tarihi; dokununca üyelik ekranı
+function MembershipRow({ me, onOpen }: { me: ClinicianMe; onOpen: () => void }) {
+  const st = billingStatus(me);
+  const left = daysLeft(me.trial_ends_at);
+  const urgent = st === 'trial' && left <= 2;
+  return (
+    <Pressable onPress={onOpen} accessibilityRole="button"
+      style={({ pressed }) => [styles.member, urgent && { backgroundColor: '#FFF3D6' }, pressed && { opacity: 0.8 }]}>
+      <Ionicons name={st === 'trial' ? 'time-outline' : 'ribbon-outline'} size={20} color={colors.navy} />
+      <View style={{ flex: 1 }}>
+        <Text style={styles.memberTitle}>{st === 'trial' ? `Ücretsiz deneme: ${left} gün kaldı` : `Üyelik: ${packageName(me)}`}</Text>
+        <Text style={styles.small}>{st === 'trial'
+          ? (me.role === 'owner' ? 'Paketleri ve fiyatları gör' : 'Üyeliği klinik sahibi seçer')
+          : planText(me)}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={colors.faint} />
+    </Pressable>
+  );
+}
+
+function TeamCard({ me, team, onJoined, onUpgrade }: { me: ClinicianMe; team: Member[]; onJoined: () => void; onUpgrade: () => void }) {
   const [invite, setInvite] = useState<Invite | null>(null);
   const [busy, setBusy] = useState(false);
   const [joining, setJoining] = useState(false);
@@ -246,7 +325,7 @@ function TeamCard({ me, team, onJoined }: { me: ClinicianMe; team: Member[]; onJ
     }
   };
   const join = async () => {
-    if (code.trim().length !== 6) return Alert.alert('Ekip kodu 6 karakterdir.');
+    if (![6, 8].includes(code.trim().length)) return Alert.alert('Ekip kodu 8 karakterdir.');
     setBusy(true);
     try {
       await joinTeam(code);
@@ -289,8 +368,12 @@ function TeamCard({ me, team, onJoined }: { me: ClinicianMe; team: Member[]; onJ
             >
               <Ionicons name="copy-outline" size={18} color={colors.navy} />
             </Pressable>
-            <Text style={[styles.small, { flex: 1 }]}>Yeni uzman ClinicApp girişinde "Ekip kodum var" seçip bu kodu yazar. 7 gün geçerli.</Text>
+            <Text style={[styles.small, { flex: 1 }]}>Yeni uzman ClinicApp girişinde "Ekip kodum var" seçip bu kodu yazar. 48 saat geçerli, tek kullanımlık.</Text>
           </View>
+        ) : me.seat_limit <= 1 ? (
+          <Pressable onPress={onUpgrade} hitSlop={8} style={{ alignSelf: 'flex-start' }}>
+            <Text style={styles.link}>Bireysel pakette ekip yok. Ekip için Klinik paketine geç (10 uzmana kadar)</Text>
+          </Pressable>
         ) : team.length < me.seat_limit ? (
           <View style={{ alignItems: 'flex-start' }}>
             <SmallButton label="Ekibe uzman davet et" onPress={create} busy={busy && !joining} />
@@ -300,8 +383,8 @@ function TeamCard({ me, team, onJoined }: { me: ClinicianMe; team: Member[]; onJ
         ))}
         {canJoin && (joining ? (
           <View style={{ gap: 8 }}>
-            <Text style={styles.small}>Başka bir kliniğin ekibine katıl: sahibinden aldığın 6 karakterli kodu yaz. Bu boş klinik kapanır.</Text>
-            <Input value={code} onChangeText={(t) => setCode(t.toUpperCase())} placeholder="Ekip kodu" autoCapitalize="characters" maxLength={6} />
+            <Text style={styles.small}>Başka bir kliniğin ekibine katıl: sahibinden aldığın 8 karakterli kodu yaz. Bu boş klinik kapanır.</Text>
+            <Input value={code} onChangeText={(t) => setCode(t.toUpperCase())} placeholder="Ekip kodu" autoCapitalize="characters" maxLength={8} />
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <SmallButton label="Katıl" onPress={join} busy={busy} />
               <SmallButton label="Vazgeç" onPress={() => setJoining(false)} />
@@ -392,4 +475,7 @@ const styles = StyleSheet.create({
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: radius.md, paddingHorizontal: 14, height: 44, marginBottom: 8 },
   clientName: { fontSize: 15, fontWeight: '600', color: colors.text },
   footnote: { fontSize: 11, color: colors.muted, marginTop: 24, lineHeight: 16 },
+  accountLinks: { flexDirection: 'row', gap: 24, marginTop: 20 },
+  member: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.today, borderRadius: radius.md, padding: 14, marginTop: 8 },
+  memberTitle: { fontSize: 14, fontWeight: '700', color: colors.navy },
 });

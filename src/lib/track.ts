@@ -32,6 +32,8 @@ export function track(event: string, props?: Ev['props']) {
 
 export async function flush() {
   if (off || !queue.length) return;
+  // Oturum yoksa (çıkış / hesap silme) gönderilmez; sunucu zaten reddeder
+  if (!(await supabase.auth.getSession()).data.session) { queue = []; return; }
   const batch = queue.splice(0, 50);
   const { error } = await supabase.rpc('track_events', { p_app: APP, p_events: batch, p_platform: platform, p_version: version });
   if (error && (error.code === 'PGRST202' || error.code === '42883')) off = true;

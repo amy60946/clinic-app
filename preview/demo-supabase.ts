@@ -20,7 +20,7 @@ const APP: string = (globalThis as any).__PREVIEW_APP__ ?? 'parent';
 const KEY = 'pofi-onizleme-v4';
 const TABLES = ['profiles', 'families', 'children', 'tasks', 'task_assignments', 'completions', 'messages', 'saved_templates', 'invite_codes',
   'clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'abc_events',
-  'clinic_task_suggestions', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events'];
+  'clinic_task_suggestions', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events', 'billing_plans'];
 
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -157,6 +157,27 @@ function upgrade(x: Db): Db {
     x.clinic_invites.push({ code: 'EKP4MA', clinic_id: 'demo-clinic', clinician_id: owner?.id ?? 'demo-clinician', kind: 'clinician', label: '',
       created_at: ago(4 * 1440 + 60), expires_at: ago(-3 * 1440), used_at: ago(4 * 1440), used_by: MEMBER });
   }
+  // Üyelik (ortak 20261022000000): paket kataloğu, 7 günlük deneme, süresi dolmuş örnek hesap
+  if (!x.billing_plans.length) {
+    x.billing_plans.push(
+      { id: 'solo_monthly', package: 'solo', period: 'monthly', seat_limit: 1, price_try: 749.99, apple_product_id: 'com.clinicapp.uzman.solo.monthly', iyzico_plan_ref: 'demo', sort: 1, active: true },
+      { id: 'solo_yearly', package: 'solo', period: 'yearly', seat_limit: 1, price_try: 7499.99, apple_product_id: 'com.clinicapp.uzman.solo.yearly', iyzico_plan_ref: 'demo', sort: 2, active: true },
+      { id: 'clinic_monthly', package: 'clinic', period: 'monthly', seat_limit: 10, price_try: 2999.99, apple_product_id: 'com.clinicapp.uzman.clinic.monthly', iyzico_plan_ref: 'demo', sort: 3, active: true },
+      { id: 'clinic_yearly', package: 'clinic', period: 'yearly', seat_limit: 10, price_try: 29999.99, apple_product_id: 'com.clinicapp.uzman.clinic.yearly', iyzico_plan_ref: 'demo', sort: 4, active: true },
+    );
+    x.clinics.forEach((c: Row) => {
+      if (c.plan === 'trial') {
+        c.seat_limit = 10;
+        if (c.trial_ends_at > new Date(Date.now() + 7 * 864e5).toISOString()) c.trial_ends_at = new Date(Date.now() + 5 * 864e5).toISOString();
+      }
+    });
+  }
+  if (!x.users.some((u: Row) => u.email === 'bitti@clinicapp.app')) {
+    x.users.push({ id: 'demo-expired', email: 'bitti@clinicapp.app', password: '12345678' });
+    x.clinics.push({ id: 'demo-clinic-expired', name: 'Deneme Süresi Biten Klinik', plan: 'trial', seat_limit: 10,
+      trial_ends_at: ago(1440), created_by: 'demo-expired', created_at: ago(8 * 1440) });
+    x.clinicians.push({ id: 'demo-expired', clinic_id: 'demo-clinic-expired', name: 'Dr. Can Demir', title: 'Ergoterapist', role: 'owner', created_at: ago(8 * 1440) });
+  }
   if (!x.clinicNotifSeeded) {
     // Örnek verinin geçmiş olayları okunmuş sayılır; yalnız en yeni zor an okunmamış (zil ve rozet görünsün)
     deriveClinicNotifications(x, () => true);
@@ -264,14 +285,27 @@ function embed(table: string, cols: string, r: Row): Row {
   return out;
 }
 
+function clinicActive(id: string) {
+  const c = db.clinics.find((x: Row) => x.id === id);
+  return !!c && (['small', 'business', 'custom'].includes(c.plan) || (c.plan === 'trial' && c.trial_ends_at > now())
+    || (['solo', 'clinic'].includes(c.plan) && (c.period_end ?? '') > now()));
+}
+function clinicianAccess(m: Row) {
+  const c = db.clinics.find((x: Row) => x.id === m.clinic_id);
+  return clinicActive(m.clinic_id) && (m.role === 'owner' || (c?.seat_limit ?? 1) > 1);
+}
+
 // Uzman oturumunda sunucudaki RLS'nin önizleme karşılığı: yalnız kendi kliniği ve etkin rızalı çocuk
 const CLINIC_OWN = ['clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'clinic_task_suggestions'];
 const CHILD_SHARED = ['children', 'task_assignments', 'completions', 'abc_events'];
 function visible(table: string, r: Row): boolean {
   if (['notifications', 'push_tokens'].includes(table)) return r.user_id === sess()?.user.id;
   if (['user_activity', 'app_events'].includes(table)) return false;
+  if (table === 'billing_plans') return r.active;
   const m = myClinician();
   if (!m) return true;
+  // Deneme/üyelik bitince çocuk verisi ve klinik çalışma alanı kapanır (sunucudaki clinician_access)
+  if (!clinicianAccess(m) && [...CHILD_SHARED, 'tasks', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'clinic_task_suggestions'].includes(table)) return false;
   if (CLINIC_OWN.includes(table)) return (table === 'clinics' ? r.id : r.clinic_id) === m.clinic_id;
   const sees = (childId: string) => db.clinic_links.some((l: Row) => l.clinic_id === m.clinic_id && l.child_id === childId && l.status === 'active');
   if (CHILD_SHARED.includes(table)) return sees(table === 'children' ? r.id : r.child_id);
@@ -405,7 +439,7 @@ const auth = {
         cid = inv.clinic_id; role = 'member';
       } else {
         cid = uuid();
-        db.clinics.push({ id: cid, name: String(meta.clinic_name || 'Kliniğim'), plan: 'trial', seat_limit: 3, trial_ends_at: new Date(Date.now() + 14 * 864e5).toISOString(), created_by: id, created_at: now() });
+        db.clinics.push({ id: cid, name: String(meta.clinic_name || 'Kliniğim'), plan: 'trial', seat_limit: 10, trial_ends_at: new Date(Date.now() + 7 * 864e5).toISOString(), created_by: id, created_at: now() });
       }
       db.clinicians.push({ id, clinic_id: cid, name: meta.name ?? '', title: meta.title ?? '', role, created_at: now() });
     } else {
@@ -442,7 +476,7 @@ const auth = {
 /* ---------- Sunucu fonksiyonları ---------- */
 
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-const makeCode = () => Array.from({ length: 6 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join('');
+const makeCode = (n = 6) => Array.from({ length: n }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join('');
 
 async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Err }> {
   await new Promise((r) => setTimeout(r, 120));
@@ -519,6 +553,20 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     return { data: inv.family_id, error: null };
   }
   if (name === 'delete_account') {
+    const cm = myClinician();
+    if (cm) {
+      const others = db.clinicians.filter((x: Row) => x.clinic_id === cm.clinic_id && x.id !== uid)
+        .sort((a: Row, b: Row) => String(a.created_at).localeCompare(String(b.created_at)));
+      if (!others.length) {
+        const k = cm.clinic_id;
+        db.clinics = db.clinics.filter((x: Row) => x.id !== k);
+        CLINIC_OWN.filter((t) => t !== 'clinics').forEach((t) => { db[t] = db[t].filter((r: Row) => r.clinic_id !== k); });
+      } else {
+        if (cm.role === 'owner') others[0].role = 'owner';
+        db.clinic_links.forEach((l: Row) => { if (l.clinician_id === uid) l.clinician_id = cm.role === 'owner' ? others[0].id : null; });
+        db.clinicians = db.clinicians.filter((x: Row) => x.id !== uid);
+      }
+    }
     const fid = me?.family_id;
     db.profiles = db.profiles.filter((p: Row) => p.id !== uid);
     if (fid && !db.profiles.some((p: Row) => p.family_id === fid)) {
@@ -532,10 +580,6 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
   }
   // Klinik (ClinicApp) fonksiyonları: sunucudaki 20261019000000_clinic.sql ile aynı kurallar
   const err = (message: string) => ({ data: null, error: { message } });
-  const clinicActive = (id: string) => {
-    const c = db.clinics.find((x: Row) => x.id === id);
-    return !!c && (['small', 'business', 'custom'].includes(c.plan) || (c.plan === 'trial' && c.trial_ends_at > now()));
-  };
   const openInvite = (code: string, kind: string) =>
     db.clinic_invites.find((i: Row) => i.code === String(code ?? '').trim().toUpperCase() && i.kind === kind && !i.used_at && i.expires_at > now());
   if (name === 'clinician_me') {
@@ -547,7 +591,11 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
       .sort((a: Row, b: Row) => String(b.used_at).localeCompare(String(a.used_at)))[0];
     const inviter = used ? db.clinicians.find((o: Row) => o.id === used.clinician_id) : null;
     return { data: { id: m.id, name: m.name, title: m.title, role: m.role, clinic_id: c.id, clinic: c.name, plan: c.plan, seat_limit: c.seat_limit,
-      trial_ends_at: c.trial_ends_at, active: clinicActive(c.id), joined_at: m.created_at, owner_name: owner?.name ?? null, invited_by_name: inviter?.name ?? null }, error: null };
+      trial_ends_at: c.trial_ends_at, active: clinicActive(c.id), joined_at: m.created_at, owner_name: owner?.name ?? null, invited_by_name: inviter?.name ?? null,
+      access: clinicianAccess(m),
+      status: c.plan === 'trial' && c.trial_ends_at > now() ? 'trial' : clinicActive(c.id) ? 'active' : 'expired',
+      billing_period: c.billing_period ?? null, period_end: c.period_end ?? null, billing_source: c.billing_source ?? null,
+      auto_renew: !!c.auto_renew, member_count: db.clinicians.filter((x: Row) => x.clinic_id === c.id).length }, error: null };
   }
   if (name === 'clinic_join_team') {
     const m = myClinician();
@@ -595,11 +643,14 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
   if (name === 'clinic_create_invite') {
     const m = myClinician();
     if (!m) return err('Yalnızca uzman hesabı');
+    if (!clinicianAccess(m)) return err('Üyelik etkin değil');
     if (args.p_kind === 'clinician' && m.role !== 'owner') return err('Ekibe yalnızca klinik sahibi davet eder');
-    let code = makeCode();
-    while (db.clinic_invites.some((i: Row) => i.code === code)) code = makeCode();
+    const team = args.p_kind === 'clinician';
+    if (team && db.clinics.find((x: Row) => x.id === m.clinic_id)?.seat_limit <= 1) return err('Bireysel pakette ekip yok; Klinik paketine geçin');
+    let code = makeCode(team ? 8 : 6);
+    while (db.clinic_invites.some((i: Row) => i.code === code)) code = makeCode(team ? 8 : 6);
     const row = { code, clinic_id: m.clinic_id, clinician_id: m.id, kind: args.p_kind ?? 'family', label: String(args.p_label ?? '').slice(0, 60),
-      created_at: now(), expires_at: new Date(Date.now() + 7 * 864e5).toISOString(), used_at: null, used_by: null };
+      created_at: now(), expires_at: new Date(Date.now() + (team ? 2 : 7) * 864e5).toISOString(), used_at: null, used_by: null };
     db.clinic_invites.push(row);
     save();
     return { data: { code, expires_at: row.expires_at }, error: null };
@@ -644,7 +695,7 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
   }
   if (name === 'clinic_clients') {
     const m = myClinician();
-    if (!m) return { data: [], error: null };
+    if (!m || !clinicianAccess(m)) return { data: [], error: null };
     const rows = db.clinic_links.filter((l: Row) => l.clinic_id === m.clinic_id && l.status === 'active').map((l: Row) => {
       const c = db.children.find((x: Row) => x.id === l.child_id);
       const parents = db.profiles.filter((p: Row) => p.family_id === l.family_id)
@@ -672,6 +723,40 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
   }
   return { data: null, error: null };
 }
+
+/* ---------- Edge Function: clinic-billing (önizlemede gerçek ödeme yok) ---------- */
+
+const functions = {
+  async invoke(name: string, opts?: { body?: Row }) {
+    await new Promise((r) => setTimeout(r, 300));
+    const uid = sess()?.user.id;
+    const m = db.clinicians.find((x: Row) => x.id === uid);
+    if (!m || m.role !== 'owner') return { data: null, error: { message: 'Üyeliği yalnız klinik sahibi alır' } };
+    const c = db.clinics.find((x: Row) => x.id === m.clinic_id);
+    if (name === 'clinic-billing/iyzico-start') {
+      const plan = db.billing_plans.find((p: Row) => p.id === opts?.body?.plan_id);
+      if (!plan) return { data: null, error: { message: 'Bilinmeyen paket' } };
+      // iyzico formu yerine: önizleme ödemesi onaylanınca klinik o pakete geçer
+      (globalThis as any).__onizlemeOdeme = () => {
+        const end = new Date();
+        if (plan.period === 'yearly') end.setFullYear(end.getFullYear() + 1); else end.setMonth(end.getMonth() + 1);
+        Object.assign(c, { plan: plan.package, seat_limit: plan.seat_limit, billing_period: plan.period, period_end: end.toISOString(),
+          billing_source: 'iyzico', auto_renew: true });
+        save();
+      };
+      // Önizleme sayfası yeniden yüklenmeden: ödeme anında "tamamlandı" sayılır, uygulama ?billing=ok dönüşünü görür
+      const script = `<script>window.__onizlemeOdeme(); history.replaceState(null, '', location.pathname + '?billing=ok'); `
+        + `window.dispatchEvent(new Event('clinicapp-billing'));</script>`;
+      return { data: { token: 'demo', checkoutFormContent: script }, error: null };
+    }
+    if (name === 'clinic-billing/iyzico-cancel') {
+      c.auto_renew = false;
+      save();
+      return { data: { ok: true, canceled: 1 }, error: null };
+    }
+    return { data: null, error: { message: 'Önizlemede bu ödeme yolu yok' } };
+  },
+};
 
 /* ---------- Dosyalar (Posta fotoğraf/ses) ---------- */
 
@@ -722,6 +807,7 @@ export const supabase = {
   from: (t: string) => new Query(t),
   rpc,
   storage,
+  functions,
   channel,
   removeChannel() {},
 } as unknown as SupabaseClient;

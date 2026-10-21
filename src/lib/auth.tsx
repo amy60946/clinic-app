@@ -82,25 +82,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const handleUrl = useCallback(async (url: string | null) => {
     if (!url) return;
     const p = urlParams(url);
-    const isAuthLink = p.access_token || p.code || p.token_hash || p.error || p.error_description;
+    const isAuthLink = p.code || p.token_hash || p.error || p.error_description;
     if (!isAuthLink) return;
 
+    // Bağlantıdaki metin gösterilmez (sahte uyarı yazdırılamasın)
     if (p.error || p.error_description) {
       Alert.alert('Bağlantı açılamadı', p.error_code === 'otp_expired'
         ? 'Bağlantının süresi dolmuş ya da daha önce kullanılmış. Yeniden iste.'
-        : p.error_description || 'Bağlantı geçersiz.');
+        : 'Bağlantı geçersiz. Yeniden iste.');
       return;
     }
     try {
-      if (p.access_token && p.refresh_token) {
-        const { error } = await supabase.auth.setSession({ access_token: p.access_token, refresh_token: p.refresh_token });
-        if (error) throw error;
+      if (p.code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(p.code);
+        if (error) {
+          // Bağlantı başka cihazda/tarayıcıda açıldı: e-posta yine doğrulanmıştır
+          Alert.alert('E-posta doğrulandı', 'Bağlantıyı başka bir cihazda açtın. Şimdi e-posta ve şifrenle giriş yapabilirsin.');
+          return;
+        }
       } else if (p.token_hash && p.type) {
         const { error } = await supabase.auth.verifyOtp({ token_hash: p.token_hash, type: p.type as EmailOtpType });
         if (error) throw error;
-      } else if (p.code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(p.code);
-        if (error) throw error;
+        if (p.type !== 'recovery') {
+          // Kayıt doğrulaması oturum açtırmaz: kişi kendi şifresiyle girer
+          await supabase.auth.signOut({ scope: 'local' });
+          Alert.alert('E-posta doğrulandı', 'Şimdi e-posta ve şifrenle giriş yapabilirsin.');
+          return;
+        }
       }
       if (p.type === 'recovery') setRecovery(true);
     } catch (e) {

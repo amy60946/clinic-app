@@ -33,6 +33,8 @@ function showWebReport(html: string) {
   const close = btn('Kapat', false);
   const frame = document.createElement('iframe');
   frame.style.cssText = 'flex:1;border:0;border-radius:12px;background:#fff;width:100%';
+  // Rapor içinde betik çalışmaz (kaçış hatası olsa bile oturum anahtarına erişemez); yazdırma çalışır
+  frame.setAttribute('sandbox', 'allow-same-origin allow-modals');
   frame.srcdoc = html;
   overlay.append(bar, frame);
   document.body.appendChild(overlay);
