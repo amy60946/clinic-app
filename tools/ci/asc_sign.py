@@ -61,6 +61,7 @@ def create(p8, bundle, out):
     bids = call(tok, 'GET', '/bundleIds?filter[identifier]=%s&limit=20' % bundle)['data']
     bids = [b for b in bids if b['attributes']['identifier'] == bundle]
     if not bids: raise RuntimeError('Bundle ID kayıtlı değil: ' + bundle)
+    ensure_push(tok, bids[0]['id'])
     name = 'CI %s %d' % (bundle, int(time.time()))
     prof = call(tok, 'POST', '/profiles', {'data': {'type': 'profiles', 'attributes': {'name': name, 'profileType': 'IOS_APP_STORE'},
         'relationships': {'bundleId': {'data': {'type': 'bundleIds', 'id': bids[0]['id']}},
@@ -69,6 +70,16 @@ def create(p8, bundle, out):
     info.update(profile_id=prof['data']['id'], profile_uuid=prof['data']['attributes']['uuid'], profile_name=name)
     open(os.path.join(out, 'info.json'), 'w').write(json.dumps(info))
     print('Dağıtım sertifikası ve App Store profili hazır:', name)
+
+def ensure_push(tok, bid):
+    # Push bildirimi (expo-notifications → aps-environment) için App ID'de yetenek açık olmalı; yoksa profil uyuşmaz
+    # (ParentApp düzeneğiyle aynı)
+    caps = call(tok, 'GET', '/bundleIds/%s/bundleIdCapabilities' % bid)['data']
+    if any(c['attributes'].get('capabilityType') == 'PUSH_NOTIFICATIONS' for c in caps): return
+    call(tok, 'POST', '/bundleIdCapabilities', {'data': {'type': 'bundleIdCapabilities',
+        'attributes': {'capabilityType': 'PUSH_NOTIFICATIONS'},
+        'relationships': {'bundleId': {'data': {'type': 'bundleIds', 'id': bid}}}}})
+    print('App ID için push bildirimi yeteneği açıldı.')
 
 def cleanup(p8, info_path):
     if not os.path.exists(info_path): return

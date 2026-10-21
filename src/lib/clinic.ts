@@ -15,6 +15,10 @@ export type ClinicianMe = {
   seat_limit: number;
   trial_ends_at: string;
   active: boolean;
+  // ortak 20261021100000: ekip üyesi profilinde klinik sahibi ve davet eden (yoksa boş gelir)
+  owner_name?: string | null;
+  invited_by_name?: string | null;
+  joined_at?: string | null;
 };
 
 export type Client = {
@@ -112,7 +116,7 @@ export async function loadClientData(childId: string, from: string): Promise<Cli
       .select('task_id, date, status, child_done_at, reviewed_at, decline_reason, parent_note')
       .eq('child_id', childId).gte('date', from),
     supabase.from('abc_events')
-      .select('id, occurred_at, antecedent, behavior, consequence, intensity')
+      .select('*')   // ses, gün bölümü ve grup alanları eski şemada yoksa da çalışsın
       .eq('child_id', childId).order('occurred_at', { ascending: false }).limit(500),
   ]);
   const rows = check(assigned.data ?? [], assigned.error) as unknown as { tasks: Task | null }[];
@@ -122,6 +126,13 @@ export async function loadClientData(childId: string, from: string): Promise<Cli
     completions: check((comps.data ?? []) as Completion[], comps.error),
     abc: check((abc.data ?? []) as AbcEvent[], abc.error),
   };
+}
+
+// Zor an sesi: Storage 'abc' kovası; uzman yalnız rızalı çocuğun kaydına bağlı sesi okuyabilir (RLS). 1 saatlik bağlantı.
+export async function abcAudioUrl(path: string): Promise<string> {
+  const { data, error } = await supabase.storage.from('abc').createSignedUrl(path, 3600);
+  if (error || !data?.signedUrl) throw new Error(error?.message ?? 'Ses kaydı açılamadı');
+  return data.signedUrl;
 }
 
 /* ---------- Uzman notları (aile görmez) ---------- */
@@ -272,6 +283,13 @@ export type Member = { id: string; name: string; title: string; role: 'owner' | 
 export async function listTeam(): Promise<Member[]> {
   const { data, error } = await supabase.from('clinicians').select('id, name, title, role').order('created_at');
   return check((data ?? []) as Member[], error);
+}
+
+// Giriş yapmış uzman ekip koduyla kliniğe katılır (eski kliniği boşsa silinir; doluysa sunucu reddeder)
+export async function joinTeam(code: string): Promise<void> {
+  const { error } = await supabase.rpc('clinic_join_team', { p_code: code.trim().toUpperCase() });
+  if (error?.code === 'PGRST202') throw new Error('Bu özellik için veritabanı güncellemesi bekleniyor.');
+  check(null, error);
 }
 
 // Yalnız klinik sahibi; koltuk sınırı kayıtta denetlenir

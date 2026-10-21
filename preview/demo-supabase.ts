@@ -20,7 +20,7 @@ const APP: string = (globalThis as any).__PREVIEW_APP__ ?? 'parent';
 const KEY = 'pofi-onizleme-v4';
 const TABLES = ['profiles', 'families', 'children', 'tasks', 'task_assignments', 'completions', 'messages', 'saved_templates', 'invite_codes',
   'clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'abc_events',
-  'clinic_task_suggestions', 'family_subscriptions'];
+  'clinic_task_suggestions', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events'];
 
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -139,16 +139,81 @@ function load(): Db {
       const x = JSON.parse(raw);
       TABLES.forEach((t) => { x[t] = x[t] ?? []; });
       x.sessions = x.sessions ?? {};
-      return x;
+      return upgrade(x);
     }
   } catch { /* depolama kapalıysa her açılışta örnek aile */ }
-  return seed();
+  return upgrade(seed());
+}
+
+/* ---------- ClinicApp eklemeleri: ekip üyesi deneme hesabı, uzman bildirimleri ---------- */
+
+const MEMBER = 'demo-clinician-2';
+
+// Eski önizleme verisine de uygulanır (iki uygulama aynı depoyu paylaşır)
+function upgrade(x: Db): Db {
+  if (!x.users.some((u: Row) => u.email === 'ekip@clinicapp.app') && x.clinicians.some((m: Row) => m.id === MEMBER)) {
+    x.users.push({ id: MEMBER, email: 'ekip@clinicapp.app', password: '12345678' });
+    const owner = x.clinicians.find((m: Row) => m.clinic_id === 'demo-clinic' && m.role === 'owner');
+    x.clinic_invites.push({ code: 'EKP4MA', clinic_id: 'demo-clinic', clinician_id: owner?.id ?? 'demo-clinician', kind: 'clinician', label: '',
+      created_at: ago(4 * 1440 + 60), expires_at: ago(-3 * 1440), used_at: ago(4 * 1440), used_by: MEMBER });
+  }
+  if (!x.clinicNotifSeeded) {
+    // Örnek verinin geçmiş olayları okunmuş sayılır; yalnız en yeni zor an okunmamış (zil ve rozet görünsün)
+    deriveClinicNotifications(x, () => true);
+    const latest = [...x.abc_events].sort((a: Row, b: Row) => String(b.occurred_at).localeCompare(String(a.occurred_at)))[0];
+    x.notifications.forEach((n: Row) => { if (n.app === 'clinic' && latest && n.data?.abc_id === latest.id) n.read_at = null; });
+    x.clinicNotifSeeded = true;
+  }
+  return x;
+}
+
+// Sunucudaki bildirim tetikleyicilerinin (ortak 20261019130000_notifications.sql) önizleme karşılığı. ParentApp önizlemesi
+// tetikleyici çalıştırmaz; bu yüzden ClinicApp her eşitlemede uzmana gidecek bildirimleri satırlardan türetir.
+function deriveClinicNotifications(x: Db, isOld?: (createdAt: string) => boolean): boolean {
+  const seeding = !!isOld;
+  const before = x.notifications.length;
+  let nextId = x.notifications.reduce((a: number, n: Row) => Math.max(a, Number(n.id) || 0), 0) + 1;
+  const has = (kind: string, test: (d: Row) => boolean) => x.notifications.some((n: Row) => n.app === 'clinic' && n.kind === kind && test(n.data ?? {}));
+  const name = (childId: string) => x.children.find((c: Row) => c.id === childId)?.name ?? 'Çocuk';
+  const push = (user: string, kind: string, title: string, body: string, data: Row, childId: string | null, createdAt: string) => {
+    x.notifications.push({ id: nextId++, user_id: user, app: 'clinic', kind, title, body, data, family_id: null, child_id: childId,
+      created_at: createdAt, read_at: isOld?.(createdAt) ? createdAt : null });
+  };
+  const recipients = (l: Row) => (l.clinician_id ? [l.clinician_id] : x.clinicians.filter((m: Row) => m.clinic_id === l.clinic_id).map((m: Row) => m.id));
+  x.clinic_links.forEach((l: Row) => {
+    if (!has('clinic_shared', (d) => (d.links ?? []).some((k: Row) => k.link_id === l.id))) {
+      recipients(l).forEach((u: string) => push(u, 'clinic_shared', `Yeni paylaşım: ${name(l.child_id)}`,
+        `Aile rıza verdi: ${name(l.child_id)}. Görev ve kayıtları artık görebilirsin.`,
+        { links: [{ link_id: l.id, child_id: l.child_id }], family_id: l.family_id }, l.child_id, l.consent_at ?? l.created_at));
+    }
+    const byParent = x.profiles.some((p: Row) => p.id === l.revoked_by && p.family_id === l.family_id);
+    if (l.status === 'revoked' && byParent && !has('clinic_revoked', (d) => d.link_id === l.id)) {
+      recipients(l).forEach((u: string) => push(u, 'clinic_revoked', `Paylaşım durduruldu: ${name(l.child_id)}`,
+        'Aile bu çocuğun paylaşımını sonlandırdı.', { link_id: l.id, child_id: l.child_id }, l.child_id, l.revoked_at ?? now()));
+    }
+  });
+  x.abc_events.forEach((e: Row) => {
+    if (has('abc_event', (d) => d.abc_id === e.id || (d.items ?? []).some((k: Row) => k.abc_id === e.id))) return;
+    x.clinic_links.filter((l: Row) => l.child_id === e.child_id && l.status === 'active').forEach((l: Row) => {
+      recipients(l).forEach((u: string) => push(u, 'abc_event', `Yeni zor an kaydı: ${name(e.child_id)}`,
+        `Şiddet ${e.intensity}/5${e.audio_path ? ' · 🎤 sesli kayıt' : ''}`, { abc_id: e.id, child_id: e.child_id }, e.child_id,
+        // örnek verinin kayıtları hep "şimdi" eklenmiş: geçmiş olay zamanı kullanılır
+        seeding && e.occurred_at < (e.created_at ?? now()) ? e.occurred_at : e.created_at ?? now()));
+    });
+  });
+  x.clinic_task_suggestions.forEach((s: Row) => {
+    if (!['accepted', 'declined'].includes(s.status) || has('suggestion_decided', (d) => d.suggestion_id === s.id)) return;
+    push(s.created_by, 'suggestion_decided', `${s.status === 'accepted' ? 'Öneri kabul edildi: ' : 'Öneri şimdilik eklenmedi: '}${s.title}`,
+      name(s.child_id), { suggestion_id: s.id, child_id: s.child_id }, s.child_id, s.decided_at ?? now());
+  });
+  return x.notifications.length !== before;
 }
 
 let db = load();
 // Aynı sayfadaki öteki uygulama yazmış olabilir: her işlemden önce depodan tazele
 const sync = () => {
   try { if (localStorage.getItem(KEY)) db = load(); } catch { /* yok say */ }
+  if (APP === 'clinic' && deriveClinicNotifications(db)) save();
 };
 const sess = () => db.sessions[APP] ?? null;
 const setSess = (s: Row | null) => { db.sessions[APP] = s; };
@@ -203,6 +268,8 @@ function embed(table: string, cols: string, r: Row): Row {
 const CLINIC_OWN = ['clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'clinic_task_suggestions'];
 const CHILD_SHARED = ['children', 'task_assignments', 'completions', 'abc_events'];
 function visible(table: string, r: Row): boolean {
+  if (['notifications', 'push_tokens'].includes(table)) return r.user_id === sess()?.user.id;
+  if (['user_activity', 'app_events'].includes(table)) return false;
   const m = myClinician();
   if (!m) return true;
   if (CLINIC_OWN.includes(table)) return (table === 'clinics' ? r.id : r.clinic_id) === m.clinic_id;
@@ -475,7 +542,55 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     const m = myClinician();
     if (!m) return { data: null, error: null };
     const c = db.clinics.find((x: Row) => x.id === m.clinic_id);
-    return { data: { id: m.id, name: m.name, title: m.title, role: m.role, clinic_id: c.id, clinic: c.name, plan: c.plan, seat_limit: c.seat_limit, trial_ends_at: c.trial_ends_at, active: clinicActive(c.id) }, error: null };
+    const owner = db.clinicians.find((o: Row) => o.clinic_id === c.id && o.role === 'owner');
+    const used = db.clinic_invites.filter((v: Row) => v.used_by === m.id && v.kind === 'clinician' && v.clinic_id === c.id)
+      .sort((a: Row, b: Row) => String(b.used_at).localeCompare(String(a.used_at)))[0];
+    const inviter = used ? db.clinicians.find((o: Row) => o.id === used.clinician_id) : null;
+    return { data: { id: m.id, name: m.name, title: m.title, role: m.role, clinic_id: c.id, clinic: c.name, plan: c.plan, seat_limit: c.seat_limit,
+      trial_ends_at: c.trial_ends_at, active: clinicActive(c.id), joined_at: m.created_at, owner_name: owner?.name ?? null, invited_by_name: inviter?.name ?? null }, error: null };
+  }
+  if (name === 'clinic_join_team') {
+    const m = myClinician();
+    if (!m) return err('Yalnızca uzman hesabı ekibe katılabilir');
+    const inv = openInvite(args.p_code, 'clinician');
+    if (!inv) return err('Ekip kodu geçersiz ya da süresi dolmuş');
+    if (inv.clinic_id === m.clinic_id) return err('Zaten bu kliniğin ekibindesin');
+    const target = db.clinics.find((x: Row) => x.id === inv.clinic_id);
+    if (db.clinicians.filter((x: Row) => x.clinic_id === inv.clinic_id).length >= target.seat_limit) return err('Kliniğin uzman koltuğu dolu');
+    const old = m.clinic_id;
+    if (db.clinicians.some((x: Row) => x.clinic_id === old && x.id !== m.id) || db.clinic_links.some((l: Row) => l.clinic_id === old)
+      || db.clinic_notes.some((n: Row) => n.clinic_id === old) || db.clinic_goals.some((g: Row) => g.clinic_id === old)) {
+      return err('Mevcut kliniğinde danışan, not ya da başka uzman var; katılırsan kaybolur. Başka bir e-postayla kayıt olup ekip koduyla katıl.');
+    }
+    Object.assign(m, { clinic_id: inv.clinic_id, role: 'member' });
+    inv.used_at = now(); inv.used_by = uid;
+    db.clinic_invites = db.clinic_invites.filter((v: Row) => v.clinic_id !== old);
+    db.clinics = db.clinics.filter((x: Row) => x.id !== old);
+    save();
+    return { data: { clinic_id: inv.clinic_id }, error: null };
+  }
+  if (name === 'mark_notifications_read') {
+    let n = 0;
+    db.notifications.forEach((r: Row) => {
+      if (r.user_id === uid && !r.read_at && (!args.p_ids || args.p_ids.includes(r.id))) { r.read_at = now(); n += 1; }
+    });
+    save();
+    return { data: n, error: null };
+  }
+  if (name === 'register_push_token' || name === 'unregister_push_token') return { data: null, error: null };
+  if (name === 'track_session') {
+    const row = db.user_activity.find((a: Row) => a.user_id === uid && a.app === args.p_app);
+    if (row) Object.assign(row, { last_seen_at: now(), sessions: row.sessions + 1 });
+    else db.user_activity.push({ user_id: uid, app: args.p_app, first_seen_at: now(), last_seen_at: now(), sessions: 1, active_days: 1, platform: args.p_platform, app_version: args.p_version });
+    save();
+    return { data: null, error: null };
+  }
+  if (name === 'track_events') {
+    // Önizlemede yalnız son 200 olay tutulur (tarayıcı deposu sınırlı)
+    (args.p_events ?? []).forEach((e: Row) => db.app_events.push({ user_id: uid, app: args.p_app, event: e.event, props: e.props ?? {}, created_at: now() }));
+    db.app_events = db.app_events.slice(-200);
+    save();
+    return { data: (args.p_events ?? []).length, error: null };
   }
   if (name === 'clinic_create_invite') {
     const m = myClinician();
@@ -573,6 +688,10 @@ const storage = {
       db.blobs[path] = toDataUrl(body, opts?.contentType ?? 'application/octet-stream');
       save();
       return { data: { path }, error: null };
+    },
+    async createSignedUrl(path: string) {
+      const url = db.blobs[path];
+      return url ? { data: { signedUrl: url }, error: null } : { data: null, error: { message: 'Dosya bulunamadı' } };
     },
     async createSignedUrls(paths: string[]) {
       return { data: paths.map((path) => ({ path, signedUrl: db.blobs[path] ?? '' })), error: null };

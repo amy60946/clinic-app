@@ -7,6 +7,7 @@ import { Goal, listGoals } from '../../lib/clinic';
 import { buildReportHtml } from '../../lib/report';
 import { Limits } from './ObservationTabs';
 import { ageText, type ClientCtx } from './ClientScreen';
+import { track } from '../../lib/track';
 
 type NameMode = 'name' | 'initials' | 'label';
 
@@ -47,6 +48,7 @@ function showWebReport(html: string) {
 }
 
 async function printHtml(html: string) {
+  track('report.print');
   if (Platform.OS === 'web') return showWebReport(html);
   await Print.printAsync({ html });
 }
