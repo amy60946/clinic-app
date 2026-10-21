@@ -20,6 +20,9 @@ export const supabase = createClient(url ?? 'https://ayarlanmadi.supabase.co', k
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
+    // E-posta bağlantıları ?code= ile gelir; kod yalnız bağlantıyı isteyen cihazda oturuma çevrilebilir
+    // (başkasının bağlantısıyla sessizce onun hesabına girilemez).
+    flowType: 'pkce',
   },
 });
 

@@ -20,7 +20,7 @@ export type ReportInput = {
 };
 
 const esc = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const p = (v: number | null) => (v === null ? '–' : `%${v}`);
 const d = (iso: string) => parseDate(iso).toLocaleDateString('tr-TR');
 

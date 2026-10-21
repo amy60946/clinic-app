@@ -91,7 +91,7 @@ export function LoginScreen({ go, initialEmail = '' }: { go: Go; initialEmail?: 
         <Ionicons name="people-outline" size={22} color={colors.navy} />
         <View style={{ flex: 1 }}>
           <Text style={styles.teamTitle}>Ekip kodum var</Text>
-          <Text style={styles.small}>Klinik sahibinin verdiği 6 karakterli kodla ekibe katıl.</Text>
+          <Text style={styles.small}>Klinik sahibinin verdiği 8 karakterli kodla ekibe katıl.</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={colors.faint} />
       </Pressable>
@@ -115,7 +115,7 @@ export function SignUpScreen({ go, initialJoin = false }: { go: Go; initialJoin?
 
   const submit = async () => {
     if (!name.trim()) return Alert.alert('Adını yaz.');
-    if (join && teamCode.trim().length !== 6) return Alert.alert('Ekip kodu 6 karakterdir.');
+    if (join && ![6, 8].includes(teamCode.trim().length)) return Alert.alert('Ekip kodu 8 karakterdir.');
     if (!join && !clinicName.trim()) return Alert.alert('Kliniğinin adını yaz.');
     if (!isEmail(email)) return Alert.alert('Geçerli bir e-posta adresi yaz.');
     if (password.length < MIN_PASSWORD) return Alert.alert(`Şifre en az ${MIN_PASSWORD} karakter olmalı.`);
@@ -165,8 +165,8 @@ export function SignUpScreen({ go, initialJoin = false }: { go: Go; initialJoin?
         ))}
       </View>
       {join && (
-        <Input value={teamCode} onChangeText={(t) => setTeamCode(t.toUpperCase())} placeholder="Ekip kodu (klinik sahibinden, 6 karakter)"
-          autoCapitalize="characters" autoCorrect={false} maxLength={6} />
+        <Input value={teamCode} onChangeText={(t) => setTeamCode(t.toUpperCase())} placeholder="Ekip kodu (klinik sahibinden, 8 karakter)"
+          autoCapitalize="characters" autoCorrect={false} maxLength={8} />
       )}
       <Input value={name} onChangeText={setName} placeholder="Adın soyadın" autoComplete="name" textContentType="name" />
       <Input value={title} onChangeText={setTitle} placeholder="Unvanın (ör. Klinik Psikolog)" />
@@ -220,7 +220,7 @@ export function ForgotPasswordScreen({ go, initialEmail = '' }: { go: Go; initia
 /* ---------- Yeni şifre (e-postadaki bağlantıdan gelinir) ---------- */
 
 export function NewPasswordScreen() {
-  const { updatePassword, signOut } = useAuth();
+  const { updatePassword, signOut, session } = useAuth();
   const [password, setPassword] = useState('');
   const [again, setAgain] = useState('');
   const [busy, setBusy] = useState(false);
@@ -240,7 +240,8 @@ export function NewPasswordScreen() {
   };
 
   return (
-    <Layout title="Yeni şifre belirle" subtitle="Hesabın için yeni bir şifre seç." onBack={signOut}>
+    <Layout title="Yeni şifre belirle"
+      subtitle={`${session?.user.email ?? 'Hesabın'} için yeni bir şifre seç. Bu e-posta senin değilse geri dön.`} onBack={signOut}>
       <Input value={password} onChangeText={setPassword} placeholder={`Yeni şifre (en az ${MIN_PASSWORD} karakter)`} secure
         autoComplete="new-password" textContentType="newPassword" />
       <Input value={again} onChangeText={setAgain} placeholder="Yeni şifre (tekrar)" secure

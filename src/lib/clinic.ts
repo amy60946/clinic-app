@@ -11,10 +11,18 @@ export type ClinicianMe = {
   role: 'owner' | 'member';
   clinic_id: string;
   clinic: string;
-  plan: 'trial' | 'small' | 'business' | 'custom' | 'inactive';
+  plan: 'trial' | 'solo' | 'clinic' | 'small' | 'business' | 'custom' | 'inactive';
   seat_limit: number;
   trial_ends_at: string;
   active: boolean;
+  // ortak 20261022000000 (üyelik): yoksa eski sunucu
+  access?: boolean;                  // bu uzman paneli kullanabilir mi (Bireysel pakette yalnız sahip)
+  status?: 'trial' | 'active' | 'expired';
+  billing_period?: 'monthly' | 'yearly' | null;
+  period_end?: string | null;
+  billing_source?: 'app_store' | 'iyzico' | 'manual' | null;
+  auto_renew?: boolean;
+  member_count?: number;
   // ortak 20261021100000: ekip üyesi profilinde klinik sahibi ve davet eden (yoksa boş gelir)
   owner_name?: string | null;
   invited_by_name?: string | null;
@@ -296,4 +304,11 @@ export async function joinTeam(code: string): Promise<void> {
 export async function createTeamInvite(): Promise<Invite> {
   const { data, error } = await supabase.rpc('clinic_create_invite', { p_kind: 'clinician', p_label: '' });
   return check(data as Invite, error);
+}
+
+// Hesabı kalıcı sil (App Store kuralı + KVKK). Tek kişilik klinikte danışan paylaşımları, notlar ve hedefler de silinir;
+// ekip varsa klinik kalır, sahiplik en eski üyeye geçer.
+export async function deleteAccount(): Promise<void> {
+  const { error } = await supabase.rpc('delete_account');
+  check(null, error);
 }
