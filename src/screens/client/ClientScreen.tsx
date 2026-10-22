@@ -9,7 +9,8 @@ import NotificationsSheet, { notificationTab } from '../NotificationsSheet';
 import { useNotifications } from '../../lib/notificationsContext';
 import { AppNotification, notificationChildren } from '../../lib/notifications';
 import { track } from '../../lib/track';
-import { Client, ClientData, ClinicianMe, loadClientData, revokeLink } from '../../lib/clinic';
+import { Client, ClientData, ClinicianMe, Member, loadClientData, revokeLink } from '../../lib/clinic';
+import TeamAccessSheet from './TeamAccessSheet';
 import { isoDate, windowStarts } from '../../lib/metrics';
 import { SummaryTab, RoutineTab, AbcTab } from './ObservationTabs';
 import GoalsTab from './GoalsTab';
@@ -50,12 +51,21 @@ export type ClientCtx = {
   weeks: number;
 };
 
-export default function ClientScreen({ client, me, initialTab = 'summary', onBack, onRevoked, onOpenNotification }: {
-  client: Client; me: ClinicianMe; initialTab?: Tab; onBack: () => void; onRevoked: () => void;
+export default function ClientScreen({ client, me, team = [], initialTab = 'summary', onBack, onRevoked, onOpenNotification, onTeamChanged }: {
+  client: Client; me: ClinicianMe; team?: Member[]; initialTab?: Tab; onBack: () => void; onRevoked: () => void;
   onOpenNotification: (n: AppNotification) => void;
+  onTeamChanged?: () => void;
 }) {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [bell, setBell] = useState(false);
+  const [access, setAccess] = useState(false);
+  const owner = me.role === 'owner';
+  const nameOf = (id: string) => team.find((m) => m.id === id)?.name || 'Adsız';
+  const others = (client.assigned ?? []).filter((id) => id !== client.clinician_id).map(nameOf);
+  const teamLine = team.length > 1 && client.clinician_id !== undefined
+    ? [client.clinician_id ? `Sorumlu: ${client.clinician_id === me.id ? 'sen' : client.clinician_name || nameOf(client.clinician_id)}` : '',
+       owner && others.length ? `Erişen: ${others.join(', ')}` : ''].filter(Boolean).join(' · ')
+    : '';
   const { items, unreadByChild, markRead } = useNotifications();
   // Açılan sekmenin bu çocuğa ait okunmamış bildirimleri okunmuş sayılır (ör. Zor anlar açılınca zor an bildirimleri)
   useEffect(() => {
@@ -125,7 +135,13 @@ export default function ClientScreen({ client, me, initialTab = 'summary', onBac
                 {[ageText(data?.child?.birthday ?? null), `Ebeveyn onayı ${new Date(client.consent_at).toLocaleDateString('tr-TR')}`]
                   .filter(Boolean).join(' · ')}
               </Text>
+              {!!teamLine && <Text style={styles.subtitle}>{teamLine}</Text>}
             </View>
+            {owner && team.length > 1 && (
+              <Pressable onPress={() => setAccess(true)} accessibilityLabel="Ekip erişimi" hitSlop={8} style={styles.iconBtn}>
+                <Ionicons name="people-outline" size={18} color={colors.navy} />
+              </Pressable>
+            )}
             <Pressable onPress={refresh} accessibilityLabel="Yenile" hitSlop={8} style={styles.iconBtn}>
               <Ionicons name="refresh" size={18} color={colors.navy} />
             </Pressable>
@@ -163,6 +179,10 @@ export default function ClientScreen({ client, me, initialTab = 'summary', onBac
           )}
         </View>
       </ScrollView>
+      {owner && (
+        <TeamAccessSheet visible={access} onClose={() => setAccess(false)} client={client} me={me} team={team}
+          onChanged={() => onTeamChanged?.()} />
+      )}
       <NotificationsSheet
         visible={bell} onClose={() => setBell(false)} childId={client.child_id} childName={client.child_name}
         onOpen={(n) => {

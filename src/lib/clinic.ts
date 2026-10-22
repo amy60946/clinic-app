@@ -38,6 +38,10 @@ export type Client = {
   label: string;
   consent_at: string;
   parents: string; // ailedeki ebeveynlerin adı (aynı adlı çocukları ayırt etmek için)
+  // ortak 20261022100000 (klinik içi atama): sorumlu uzman ve sahibin atadığı ekip üyeleri
+  clinician_id?: string | null;
+  clinician_name?: string;
+  assigned?: string[];
 };
 
 export type Invite = { code: string; expires_at: string };
@@ -67,6 +71,7 @@ export async function listClients(): Promise<Client[]> {
     return ((rpc.data ?? []) as any[]).map((r) => ({
       link_id: r.link_id, clinic_id: r.clinic_id, family_id: r.family_id, child_id: r.child_id,
       child_name: r.child_name ?? '', label: r.label ?? '', consent_at: r.consent_at, parents: r.parents ?? '',
+      clinician_id: r.clinician_id ?? null, clinician_name: r.clinician_name ?? '', assigned: r.assigned ?? [],
     }));
   }
   // clinic_clients henüz uygulanmadıysa (ortak 20261019140000) ebeveyn adı olmadan
@@ -310,5 +315,18 @@ export async function createTeamInvite(): Promise<Invite> {
 // ekip varsa klinik kalır, sahiplik en eski üyeye geçer.
 export async function deleteAccount(): Promise<void> {
   const { error } = await supabase.rpc('delete_account');
+  check(null, error);
+}
+
+// Klinik sahibi: danışanı bir ekip üyesine açar / kapatır; sorumlu uzmanı değiştirir (ortak 20261022100000)
+export async function assignClient(linkId: string, clinicianId: string, assigned: boolean): Promise<void> {
+  const { error } = await supabase.rpc('clinic_assign', { p_link_id: linkId, p_clinician_id: clinicianId, p_assigned: assigned });
+  if (error?.code === 'PGRST202') throw new Error('Bu özellik için veritabanı güncellemesi bekleniyor.');
+  check(null, error);
+}
+
+export async function setResponsible(linkId: string, clinicianId: string): Promise<void> {
+  const { error } = await supabase.rpc('clinic_set_responsible', { p_link_id: linkId, p_clinician_id: clinicianId });
+  if (error?.code === 'PGRST202') throw new Error('Bu özellik için veritabanı güncellemesi bekleniyor.');
   check(null, error);
 }

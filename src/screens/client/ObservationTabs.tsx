@@ -176,7 +176,7 @@ export function AbcTab({ data, today, weeks }: ClientCtx) {
         {list.map((e) => (
           <Card key={e.id} style={{ gap: 4 }}>
             <Text style={styles.small}>
-              {abcWhen(e)} · şiddet {e.intensity}/5{e.group_id ? ' · birden çok çocukla ilgili' : ''}
+              {abcWhen(e)} · şiddet {e.intensity}/5
             </Text>
             {e.antecedent ? <Text style={styles.body}><Text style={styles.abcKey}>Öncesi: </Text>{e.antecedent}</Text> : null}
             <Text style={styles.body}><Text style={styles.abcKey}>Davranış: </Text>{e.behavior}</Text>
