@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Alert } from 'react-native';
 import * as Linking from 'expo-linking';
 import type { Session, EmailOtpType } from '@supabase/supabase-js';
@@ -29,6 +29,10 @@ type Auth = {
   sendPasswordReset: (email: string) => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  // Uzman hesabı olmayan oturum (ör. ParentApp hesabı): kapatılır, kayıt ekranı açılır
+  noAccount: boolean;
+  rejectAccount: () => Promise<void>;
+  clearNoAccount: () => void;
 };
 
 const Ctx = createContext<Auth | null>(null);
@@ -40,7 +44,7 @@ export function authErrorText(e: unknown): string {
     case 'invalid_credentials': return 'E-posta ya da şifre hatalı.';
     case 'email_not_confirmed': return 'E-posta adresin henüz doğrulanmadı. Gelen kutunu kontrol et.';
     case 'user_already_exists':
-    case 'email_exists': return 'Bu e-postayla zaten bir hesap var.';
+    case 'email_exists': return 'Bu e-posta kullanımda. Başka bir e-posta yaz ya da giriş yap.';
     case 'weak_password': return 'Şifre çok zayıf. En az 8 karakter, harf ve rakam kullan.';
     case 'same_password': return 'Yeni şifre eskisinden farklı olmalı.';
     case 'email_address_invalid':
@@ -77,6 +81,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [recovery, setRecovery] = useState(false);
+  const [noAccount, setNoAccount] = useState(false);
+  // Girişte hesap türü denetlenirken oturum ekrana yansımaz (panel bir an açılıp kapanmasın)
+  const verifying = useRef(false);
 
   // E-posta bağlantısından gelen oturumu kur
   const handleUrl = useCallback(async (url: string | null) => {
@@ -122,6 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
     const { data } = supabase.auth.onAuthStateChange((event, s) => {
+      if (verifying.current) return;
       setSession(s);
       if (event === 'PASSWORD_RECOVERY') setRecovery(true);
       if (event === 'SIGNED_OUT') setRecovery(false);
@@ -135,8 +143,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [handleUrl]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    if (error) throw error;
+    verifying.current = true;
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (error) throw error;
+      // Aynı Supabase'teki ebeveyn hesabı uzman hesabı sayılmaz: "hesap yok" gibi davranılır
+      const me = await supabase.rpc('clinician_me');
+      if (!me.error && me.data == null) {
+        await supabase.auth.signOut({ scope: 'local' });
+        throw Object.assign(new Error('Uzman hesabı yok'), { code: 'no_clinician_account' });
+      }
+      setSession(data.session);
+    } finally {
+      verifying.current = false;
+    }
   }, []);
 
   const signUp = useCallback(async (p: ClinicianSignUp) => {
@@ -155,6 +175,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
     });
     if (error) throw error;
+    // E-posta başka bir hesapta (ör. ParentApp) kayıtlıysa Supabase hata vermez, kimliksiz kullanıcı döner
+    if (data.user && data.user.identities?.length === 0) {
+      throw Object.assign(new Error('E-posta kullanımda'), { code: 'email_exists' });
+    }
     return { needsConfirmation: !data.session };
   }, []);
 
@@ -183,8 +207,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) await supabase.auth.signOut({ scope: 'local' });
   }, []);
 
+  const rejectAccount = useCallback(async () => {
+    setNoAccount(true);
+    await supabase.auth.signOut({ scope: 'local' });
+  }, []);
+  const clearNoAccount = useCallback(() => setNoAccount(false), []);
+
   return (
-    <Ctx.Provider value={{ session, loading, recovery, signIn, signUp, resendConfirmation, sendPasswordReset, updatePassword, signOut }}>
+    <Ctx.Provider value={{
+      session, loading, recovery, signIn, signUp, resendConfirmation, sendPasswordReset, updatePassword, signOut,
+      noAccount, rejectAccount, clearNoAccount,
+    }}>
       {children}
     </Ctx.Provider>
   );
