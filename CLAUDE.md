@@ -76,3 +76,5 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 
 - Uygulamaya ve depoya yalnız Supabase **publishable** anahtarı girer (`SUPABASE_PUBLISHABLE_KEY` secret). `sb_secret_` / `service_role` asla.
 - Satır düzeyi güvenlik (RLS) her yeni tabloda zorunlu; testi `ortak` deposundaki SQL test düzeneğinde yazılır.
+
+- **XP sistemi takibi (22 Ekim 2026):** https://claude.ai/artifact/GBchgErLHs7MniTLGEsanE — pet XP senaryoları madde madde (iletişim, beyin fırtınası, son durum, tasarım, çocuğa metin, etkilenen uygulama). Veri sayfanın veritabanında (`items`, `log`); XP/görev/seviye işinden önce oku, kararları oraya işle (ArtifactData).
