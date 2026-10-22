@@ -13,3 +13,4 @@ web-build/
 
 # Web önizleme çıktısı (preview/build.sh üretir)
 preview/out/
+dist-site/

@@ -172,7 +172,13 @@ export default function HomeScreen() {
     return (
       <ClientScreen
         key={selected.key}
-        client={selected.client} me={state.me} initialTab={selected.tab}
+        client={selected.client} me={state.me} team={state.team} initialTab={selected.tab}
+        onTeamChanged={async () => {
+          const st = await load();
+          const c = st.kind === 'ready' ? st.clients.find((x) => x.link_id === selected.client.link_id) : undefined;
+          if (c) setSelected((s) => (s ? { ...s, client: c } : s));
+          else setSelected(null);
+        }}
         onBack={() => { setSelected(null); load(); }}
         onRevoked={() => { setSelected(null); load(); }}
         onOpenNotification={openTarget}
@@ -218,7 +224,7 @@ export default function HomeScreen() {
           {state.kind === 'ready' && (
             <>
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
-              <ClientList clients={state.clients} unread={unreadByChild} onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
+              <ClientList clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
               <InviteCard onCreated={refresh} />
               <TeamCard me={state.me} team={state.team} onJoined={refresh} onUpgrade={() => setPlans(true)} />
               <Text style={styles.footnote}>
@@ -236,7 +242,9 @@ export default function HomeScreen() {
 
 // Danışan listesi: aynı adlı çocuklar ebeveyn adıyla ayırt edilir; çok danışanda ad / ebeveyn / etiketle arama
 // Sağda: okunmamış bildirim zili (sayılı) + ok. Çok danışanda içine girmeden hangisinde bildirim olduğu görünür.
-function ClientList({ clients, unread, onOpen }: { clients: Client[]; unread: Record<string, number>; onOpen: (c: Client) => void }) {
+function ClientList({ clients, unread, me, team, onOpen }: {
+  clients: Client[]; unread: Record<string, number>; me: ClinicianMe; team: Member[]; onOpen: (c: Client) => void;
+}) {
   const [q, setQ] = useState('');
   const query = q.trim().toLocaleLowerCase('tr');
   const shown = query
@@ -246,7 +254,9 @@ function ClientList({ clients, unread, onOpen }: { clients: Client[]; unread: Re
     <>
       <Label>{`Danışanlar (${clients.length})`}</Label>
       {clients.length === 0 ? (
-        <Notice icon="people-outline" text="Henüz paylaşım yok. Aşağıdan aileye bir paylaşım kodu ver; ebeveyn ParentApp'te kodu girip onay verince çocuk burada görünür." />
+        <Notice icon="people-outline" text={me.role === 'member'
+          ? "Henüz danışanın yok. Aşağıdan aileye bir paylaşım kodu ver ya da klinik sahibinin sana danışan atamasını bekle."
+          : "Henüz paylaşım yok. Aşağıdan aileye bir paylaşım kodu ver; ebeveyn ParentApp'te kodu girip onay verince çocuk burada görünür."} />
       ) : (
         <>
           {clients.length > 3 && (
@@ -275,7 +285,11 @@ function ClientList({ clients, unread, onOpen }: { clients: Client[]; unread: Re
                       <Text style={styles.parents} numberOfLines={1}>{c.parents}</Text>
                     </View>
                   )}
-                  <Text style={styles.small}>Ebeveyn onayı: {dateText(c.consent_at)}</Text>
+                  <Text style={styles.small}>
+                    Ebeveyn onayı: {dateText(c.consent_at)}
+                    {me.role === 'owner' && team.length > 1 && c.clinician_id && c.clinician_id !== me.id ? ` · Sorumlu: ${c.clinician_name || 'ekip üyesi'}` : ''}
+                    {me.role === 'member' && c.clinician_id !== me.id && (c.assigned ?? []).includes(me.id) ? ' · Sana atandı' : ''}
+                  </Text>
                 </View>
                 <Bell count={unread[c.child_id] ?? 0} small />
                 <Ionicons name="chevron-forward" size={18} color={colors.faint} />
@@ -300,7 +314,7 @@ function MembershipRow({ me, onOpen }: { me: ClinicianMe; onOpen: () => void }) 
       <View style={{ flex: 1 }}>
         <Text style={styles.memberTitle}>{st === 'trial' ? `Ücretsiz deneme: ${left} gün kaldı` : `Üyelik: ${packageName(me)}`}</Text>
         <Text style={styles.small}>{st === 'trial'
-          ? (me.role === 'owner' ? 'Paketleri ve fiyatları gör' : 'Üyeliği klinik sahibi seçer')
+          ? (me.role === 'owner' ? 'Paketleri ve fiyatları gör' : 'Üyeliği klinik sahibi yönetir')
           : planText(me)}</Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.faint} />
@@ -351,7 +365,7 @@ function TeamCard({ me, team, onJoined, onUpgrade }: { me: ClinicianMe; team: Me
             {!!me.owner_name && <Text style={styles.body}><Text style={{ fontWeight: '600' }}>Klinik sahibi: </Text>{me.owner_name}</Text>}
             {!!me.invited_by_name && <Text style={styles.body}><Text style={{ fontWeight: '600' }}>Seni davet eden: </Text>{me.invited_by_name}</Text>}
             {!!me.joined_at && <Text style={styles.small}>Ekibe katılma: {dateText(me.joined_at)}</Text>}
-            <Text style={styles.small}>Kliniğin bütün danışanlarını görürsün; bildirimler danışanın sorumlu uzmanına gider.</Text>
+            <Text style={styles.small}>Kendi davet ettiğin aileleri ve klinik sahibinin sana atadığı danışanları görürsün. Bildirimler danışanın sorumlu uzmanına ve atanan uzmanlara gider.</Text>
           </View>
         )}
         {team.map((m) => (
@@ -360,15 +374,17 @@ function TeamCard({ me, team, onJoined, onUpgrade }: { me: ClinicianMe; team: Me
           </Text>
         ))}
         {me.role === 'owner' && (invite ? (
-          <View style={styles.codeRow}>
-            <Text style={styles.code}>{invite.code}</Text>
-            <Pressable
-              onPress={() => Clipboard.setStringAsync(invite.code).then(() => Alert.alert('Kopyalandı'))}
-              accessibilityLabel="Kodu kopyala" hitSlop={8} style={styles.iconBtn}
-            >
-              <Ionicons name="copy-outline" size={18} color={colors.navy} />
-            </Pressable>
-            <Text style={[styles.small, { flex: 1 }]}>Yeni uzman ClinicApp girişinde "Ekip kodum var" seçip bu kodu yazar. 48 saat geçerli, tek kullanımlık.</Text>
+          <View style={{ gap: 6 }}>
+            <View style={styles.codeRow}>
+              <Text style={styles.code}>{invite.code}</Text>
+              <Pressable
+                onPress={() => Clipboard.setStringAsync(invite.code).then(() => Alert.alert('Kopyalandı'))}
+                accessibilityLabel="Kodu kopyala" hitSlop={8} style={styles.iconBtn}
+              >
+                <Ionicons name="copy-outline" size={18} color={colors.navy} />
+              </Pressable>
+            </View>
+            <Text style={styles.small}>Yeni uzman ClinicApp'te kayıt olurken "Kodum var"ı seçip bu kodu yazar. 48 saat geçerli, tek kullanımlık.</Text>
           </View>
         ) : me.seat_limit <= 1 ? (
           <Pressable onPress={onUpgrade} hitSlop={8} style={{ alignSelf: 'flex-start' }}>

@@ -3,15 +3,23 @@ import { View, Text, FlatList, Pressable, StyleSheet, Switch, Alert, Platform, M
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../theme';
-import { IconButton, Segmented } from '../components/ui';
+import { IconButton } from '../components/ui';
 import { useNotifications } from '../lib/notificationsContext';
 import { AppNotification, notificationChildren, pushEnabled, setPushEnabled } from '../lib/notifications';
 import { track } from '../lib/track';
 
 const ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   abc_event: 'pulse-outline', clinic_shared: 'person-add-outline', clinic_revoked: 'lock-closed-outline',
-  suggestion_decided: 'checkmark-done-outline', team_joined: 'people-outline',
+  suggestion_decided: 'checkmark-done-outline', team_joined: 'people-outline', client_assigned: 'person-outline',
 };
+
+// Danışan ekranında birden çok çocuklu bildirim (kardeşler) yalnız bu çocuğun adıyla gösterilir
+function titleFor(n: AppNotification, childId?: string, childName?: string) {
+  if (!childId || notificationChildren(n).length < 2) return n.title;
+  if (n.kind === 'abc_event') return `Yeni zor an kaydı: ${childName || 'bu danışan'}`;
+  if (n.kind === 'clinic_shared') return `Yeni paylaşım: ${childName || 'bu danışan'}`;
+  return n.title;
+}
 
 // Bildirim nereye götürür (danışan sekmesi): ClientScreen'deki sekme kimlikleriyle aynı
 export function notificationTab(kind: string): 'abc' | 'suggestions' | 'summary' {
@@ -29,7 +37,8 @@ export const ago = (iso: string) => {
   return d < 7 ? `${d} g` : new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// Bildirim kutusu (ParentApp'in Bildirimler ekranıyla aynı düzen). Danışan ekranından açılınca önce o danışanınkiler.
+// Bildirim kutusu (ParentApp'in Bildirimler ekranıyla aynı düzen). Ana ekrandan açılınca bütün danışanlar;
+// danışan ekranından açılınca yalnız o çocuğun bildirimleri (aynı ailenin diğer çocukları dahil edilmez).
 export default function NotificationsSheet({ visible, onClose, onOpen, childId, childName }: {
   visible: boolean;
   onClose: () => void;
@@ -37,13 +46,12 @@ export default function NotificationsSheet({ visible, onClose, onOpen, childId, 
   childId?: string;
   childName?: string;
 }) {
-  const { items, unread, markRead, remove } = useNotifications();
-  const [scope, setScope] = useState<'child' | 'all'>(childId ? 'child' : 'all');
+  const { items, markRead, remove } = useNotifications();
   const [push, setPush] = useState(true);
-  useEffect(() => { if (visible) { setScope(childId ? 'child' : 'all'); track('screen.notifications'); } }, [visible, childId]);
+  useEffect(() => { if (visible) track('screen.notifications', { scope: childId ? 'child' : 'all' }); }, [visible, childId]);
   useEffect(() => { pushEnabled().then(setPush); }, []);
 
-  const list = scope === 'child' && childId ? items.filter((n) => notificationChildren(n).includes(childId)) : items;
+  const list = childId ? items.filter((n) => notificationChildren(n).includes(childId)) : items;
   const listUnread = list.filter((n) => !n.readAt).map((n) => n.id);
 
   const togglePush = async (on: boolean) => {
@@ -67,20 +75,14 @@ export default function NotificationsSheet({ visible, onClose, onOpen, childId, 
         <View style={styles.column}>
           <View style={styles.header}>
             <IconButton name="close" onPress={onClose} label="Kapat" />
-            <Text style={styles.title}>Bildirimler</Text>
-            <Pressable onPress={() => markRead(scope === 'all' ? undefined : listUnread)} disabled={!listUnread.length} hitSlop={8}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.title}>Bildirimler</Text>
+              {!!childId && <Text style={styles.cap}>{childName || 'Bu danışan'}</Text>}
+            </View>
+            <Pressable onPress={() => markRead(childId ? listUnread : undefined)} disabled={!listUnread.length} hitSlop={8}>
               <Text style={[styles.link, !listUnread.length && { color: colors.faint }]}>Tümü okundu</Text>
             </Pressable>
           </View>
-
-          {childId && (
-            <View style={{ paddingHorizontal: 16, paddingBottom: 8 }}>
-              <Segmented
-                options={[{ id: 'child', label: childName || 'Bu danışan' }, { id: 'all', label: `Tümü${unread ? ` (${unread})` : ''}` }]}
-                value={scope} onChange={setScope}
-              />
-            </View>
-          )}
 
           {Platform.OS !== 'web' && (
             <View style={styles.setting}>
@@ -99,7 +101,7 @@ export default function NotificationsSheet({ visible, onClose, onOpen, childId, 
             contentContainerStyle={{ padding: 16, gap: 8, flexGrow: 1 }}
             ListEmptyComponent={
               <Text style={styles.empty}>
-                Henüz bildirim yok. Aile yeni bir çocuk paylaştığında, zor an kaydettiğinde ya da önerine karar verdiğinde burada görünür.
+                {childId ? `${childName || 'Bu danışan'} için henüz bildirim yok.` : 'Henüz bildirim yok. Aile yeni bir çocuk paylaştığında, zor an kaydettiğinde ya da önerine karar verdiğinde burada görünür.'}
               </Text>
             }
             renderItem={({ item: n }) => (
@@ -107,7 +109,7 @@ export default function NotificationsSheet({ visible, onClose, onOpen, childId, 
                 accessibilityHint="Dokununca ilgili sayfa açılır, uzun basınca silinir">
                 <Ionicons name={ICON[n.kind] ?? 'notifications-outline'} size={20} color={colors.navy} />
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.h, !n.readAt && { fontWeight: '700' }]}>{n.title}</Text>
+                  <Text style={[styles.h, !n.readAt && { fontWeight: '700' }]}>{titleFor(n, childId, childName)}</Text>
                   {!!n.body && <Text style={styles.cap}>{n.body}</Text>}
                 </View>
                 <Text style={styles.cap}>{ago(n.createdAt)}</Text>
@@ -126,7 +128,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   column: { flex: 1, width: '100%', maxWidth: 760, alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 10 },
-  title: { flex: 1, fontSize: 17, fontWeight: '700', color: colors.navy },
+  title: { fontSize: 17, fontWeight: '700', color: colors.navy },
   link: { fontSize: 13, fontWeight: '600', color: colors.navy },
   setting: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 16, padding: 14, borderRadius: radius.md, backgroundColor: '#fff' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: radius.md, backgroundColor: '#fff' },

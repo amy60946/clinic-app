@@ -20,7 +20,7 @@ const APP: string = (globalThis as any).__PREVIEW_APP__ ?? 'parent';
 const KEY = 'pofi-onizleme-v4';
 const TABLES = ['profiles', 'families', 'children', 'tasks', 'task_assignments', 'completions', 'messages', 'saved_templates', 'invite_codes',
   'clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'abc_events',
-  'clinic_task_suggestions', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events', 'billing_plans'];
+  'clinic_task_suggestions', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events', 'billing_plans', 'clinic_link_access'];
 
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -200,7 +200,12 @@ function deriveClinicNotifications(x: Db, isOld?: (createdAt: string) => boolean
     x.notifications.push({ id: nextId++, user_id: user, app: 'clinic', kind, title, body, data, family_id: null, child_id: childId,
       created_at: createdAt, read_at: isOld?.(createdAt) ? createdAt : null });
   };
-  const recipients = (l: Row) => (l.clinician_id ? [l.clinician_id] : x.clinicians.filter((m: Row) => m.clinic_id === l.clinic_id).map((m: Row) => m.id));
+  // sunucudaki clinic_link_recipients: sorumlu + atananlar; kimse yoksa klinik sahibi
+  const recipients = (l: Row) => {
+    const r = [...new Set([l.clinician_id, ...(x.clinic_link_access ?? []).filter((a: Row) => a.link_id === l.id).map((a: Row) => a.clinician_id)]
+      .filter((id) => id && x.clinicians.some((m: Row) => m.id === id && m.clinic_id === l.clinic_id)))];
+    return r.length ? r : x.clinicians.filter((m: Row) => m.clinic_id === l.clinic_id && m.role === 'owner').map((m: Row) => m.id);
+  };
   x.clinic_links.forEach((l: Row) => {
     if (!has('clinic_shared', (d) => (d.links ?? []).some((k: Row) => k.link_id === l.id))) {
       recipients(l).forEach((u: string) => push(u, 'clinic_shared', `Yeni paylaşım: ${name(l.child_id)}`,
@@ -295,6 +300,12 @@ function clinicianAccess(m: Row) {
   return clinicActive(m.clinic_id) && (m.role === 'owner' || (c?.seat_limit ?? 1) > 1);
 }
 
+// Klinik içi atama (ortak 20261022100000): sahip hepsini; üye sorumlusu olduğu ve kendisine atanan paylaşımları görür
+function linkVisible(m: Row, l: Row) {
+  return !!l && l.clinic_id === m.clinic_id && (m.role === 'owner' || l.clinician_id === m.id
+    || db.clinic_link_access.some((a: Row) => a.link_id === l.id && a.clinician_id === m.id));
+}
+
 // Uzman oturumunda sunucudaki RLS'nin önizleme karşılığı: yalnız kendi kliniği ve etkin rızalı çocuk
 const CLINIC_OWN = ['clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'clinic_task_suggestions'];
 const CHILD_SHARED = ['children', 'task_assignments', 'completions', 'abc_events'];
@@ -306,8 +317,13 @@ function visible(table: string, r: Row): boolean {
   if (!m) return true;
   // Deneme/üyelik bitince çocuk verisi ve klinik çalışma alanı kapanır (sunucudaki clinician_access)
   if (!clinicianAccess(m) && [...CHILD_SHARED, 'tasks', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'clinic_task_suggestions'].includes(table)) return false;
+  if (table === 'clinic_link_access') return r.clinic_id === m.clinic_id && (m.role === 'owner' || r.clinician_id === m.id);
+  const byLink = (id: string) => linkVisible(m, db.clinic_links.find((l: Row) => l.id === id));
+  if (table === 'clinic_links') return linkVisible(m, r);
+  if (['clinic_notes', 'clinic_goals', 'clinic_task_suggestions'].includes(table)) return r.clinic_id === m.clinic_id && byLink(r.link_id);
+  if (table === 'goal_ratings') return r.clinic_id === m.clinic_id && byLink(db.clinic_goals.find((g: Row) => g.id === r.goal_id)?.link_id);
   if (CLINIC_OWN.includes(table)) return (table === 'clinics' ? r.id : r.clinic_id) === m.clinic_id;
-  const sees = (childId: string) => db.clinic_links.some((l: Row) => l.clinic_id === m.clinic_id && l.child_id === childId && l.status === 'active');
+  const sees = (childId: string) => db.clinic_links.some((l: Row) => l.child_id === childId && l.status === 'active' && linkVisible(m, l));
   if (CHILD_SHARED.includes(table)) return sees(table === 'children' ? r.id : r.child_id);
   if (table === 'tasks') return db.task_assignments.some((a: Row) => a.task_id === r.id && sees(a.child_id));
   return false; // posta, coin defteri, aile tabloları uzmanla paylaşılmaz
@@ -680,7 +696,7 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
   if (name === 'revoke_clinic_link') {
     const m = myClinician();
     const l = db.clinic_links.find((x: Row) => x.id === args.p_link_id && x.status === 'active'
-      && ((me?.family_id && x.family_id === me.family_id) || (m && x.clinic_id === m.clinic_id)));
+      && ((me?.family_id && x.family_id === me.family_id) || (m && linkVisible(m, x))));
     if (!l) return err('Paylaşım bulunamadı');
     Object.assign(l, { status: 'revoked', revoked_at: now(), revoked_by: uid });
     save();
@@ -696,15 +712,35 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
   if (name === 'clinic_clients') {
     const m = myClinician();
     if (!m || !clinicianAccess(m)) return { data: [], error: null };
-    const rows = db.clinic_links.filter((l: Row) => l.clinic_id === m.clinic_id && l.status === 'active').map((l: Row) => {
+    const rows = db.clinic_links.filter((l: Row) => l.status === 'active' && linkVisible(m, l)).map((l: Row) => {
       const c = db.children.find((x: Row) => x.id === l.child_id);
       const parents = db.profiles.filter((p: Row) => p.family_id === l.family_id)
         .sort((a: Row, b: Row) => String(a.created_at).localeCompare(String(b.created_at)))
         .map((p: Row) => String(p.name ?? '').trim() || p.nickname).join(', ');
       return { link_id: l.id, clinic_id: l.clinic_id, family_id: l.family_id, child_id: l.child_id, child_name: c?.name ?? '',
-        avatar: c?.avatar ?? null, birthday: c?.birthday ?? null, label: l.label, consent_at: l.consent_at, parents };
+        avatar: c?.avatar ?? null, birthday: c?.birthday ?? null, label: l.label, consent_at: l.consent_at, parents,
+        clinician_id: l.clinician_id ?? null, clinician_name: db.clinicians.find((x: Row) => x.id === l.clinician_id)?.name ?? '',
+        assigned: db.clinic_link_access.filter((a: Row) => a.link_id === l.id).map((a: Row) => a.clinician_id) };
     }).sort((a: Row, b: Row) => String(b.consent_at).localeCompare(String(a.consent_at)));
     return { data: rows, error: null };
+  }
+  if (name === 'clinic_assign' || name === 'clinic_set_responsible') {
+    const m = myClinician();
+    if (!m || m.role !== 'owner') return err('Danışanı yalnız klinik sahibi atar');
+    const l = db.clinic_links.find((x: Row) => x.id === args.p_link_id && x.clinic_id === m.clinic_id && x.status === 'active');
+    if (!l) return err('Paylaşım bulunamadı');
+    if (!db.clinicians.some((x: Row) => x.id === args.p_clinician_id && x.clinic_id === m.clinic_id)) return err('Uzman bu kliniğin ekibinde değil');
+    db.clinic_link_access = db.clinic_link_access.filter((a: Row) => !(a.link_id === l.id && a.clinician_id === args.p_clinician_id));
+    if (name === 'clinic_set_responsible') l.clinician_id = args.p_clinician_id;
+    else if (args.p_assigned) {
+      db.clinic_link_access.push({ link_id: l.id, clinician_id: args.p_clinician_id, clinic_id: l.clinic_id, granted_by: m.id, created_at: now() });
+      const nid = db.notifications.reduce((a: number, n: Row) => Math.max(a, Number(n.id) || 0), 0) + 1;
+      const child = db.children.find((c: Row) => c.id === l.child_id)?.name ?? 'Çocuk';
+      db.notifications.push({ id: nid, user_id: args.p_clinician_id, app: 'clinic', kind: 'client_assigned', title: `Yeni danışan atandı: ${child}`,
+        body: 'Klinik sahibi bu danışanı sana atadı.', data: { link_id: l.id, child_id: l.child_id }, family_id: null, child_id: l.child_id, created_at: now(), read_at: null });
+    }
+    save();
+    return { data: null, error: null };
   }
   if (name === 'clinic_update_suggestion') {
     const m = myClinician();
