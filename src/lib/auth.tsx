@@ -57,7 +57,7 @@ export function authErrorText(e: unknown): string {
   if (err?.message?.toLowerCase().includes('network')) return 'İnternet bağlantını kontrol et.';
   // Kayıt tetikleyicisinin Türkçe hataları (ekip kodu, koltuk) Supabase'ten genel bir mesajla döner
   if (err?.message?.toLowerCase().includes('database error saving new user')) {
-    return 'Kayıt tamamlanamadı. Ekip kodu yazdıysan geçerli olduğundan ve kliniğin uzman koltuğunun dolu olmadığından emin ol.';
+    return 'Kayıt tamamlanamadı. Ekip kodu yazdıysan doğru yazdığından, 15 dakikalık süresinin dolmadığından ve kliniğin uzman koltuğunun dolu olmadığından emin ol; gerekirse klinik sahibinden yeni kod iste.';
   }
   return err?.message || 'Bir şeyler ters gitti. Tekrar dene.';
 }

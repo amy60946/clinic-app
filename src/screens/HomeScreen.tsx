@@ -321,6 +321,48 @@ function MembershipRow({ me, onOpen }: { me: ClinicianMe; onOpen: () => void }) 
   );
 }
 
+// Kodlar 15 dakika geçerli, tek kullanımlık (ortak 20261022100000_codes_15min): geri sayım, süre dolunca "Yeni kod al"
+function useSecondsLeft(expiresAt: string | undefined) {
+  const calc = () => (expiresAt ? Math.max(0, Math.round((new Date(expiresAt).getTime() - Date.now()) / 1000)) : 0);
+  const [left, setLeft] = useState(calc);
+  useEffect(() => {
+    setLeft(calc());
+    if (!expiresAt) return;
+    const t = setInterval(() => setLeft(calc()), 1000);
+    return () => clearInterval(t);
+  }, [expiresAt]); // eslint-disable-line react-hooks/exhaustive-deps
+  return left;
+}
+
+function CodeBox({ invite, onRenew, busy, children }: { invite: Invite; onRenew: () => void; busy?: boolean; children?: React.ReactNode }) {
+  const left = useSecondsLeft(invite.expires_at);
+  const expired = left <= 0;
+  const mm = Math.floor(left / 60);
+  const ss = String(left % 60).padStart(2, '0');
+  return (
+    <View style={{ gap: 6 }}>
+      <View style={styles.codeRow}>
+        <Text style={[styles.code, expired && { color: colors.faint, textDecorationLine: 'line-through' }]}>{invite.code}</Text>
+        {!expired && (
+          <Pressable
+            onPress={() => Clipboard.setStringAsync(invite.code).then(() => Alert.alert('Kopyalandı'))}
+            accessibilityLabel="Kodu kopyala" hitSlop={8} style={styles.iconBtn}
+          >
+            <Ionicons name="copy-outline" size={18} color={colors.navy} />
+          </Pressable>
+        )}
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <Text style={[styles.small, { marginTop: 0, fontWeight: '600' }, expired && { color: colors.danger }]}>
+          {expired ? 'Kodun süresi doldu' : `${mm}:${ss} geçerli`}
+        </Text>
+        <SmallButton label="Yeni kod al" onPress={onRenew} busy={busy} />
+      </View>
+      {children}
+    </View>
+  );
+}
+
 function TeamCard({ me, team, onJoined, onUpgrade }: { me: ClinicianMe; team: Member[]; onJoined: () => void; onUpgrade: () => void }) {
   const [invite, setInvite] = useState<Invite | null>(null);
   const [busy, setBusy] = useState(false);
@@ -373,18 +415,9 @@ function TeamCard({ me, team, onJoined, onUpgrade }: { me: ClinicianMe; team: Me
           </Text>
         ))}
         {me.role === 'owner' && (invite ? (
-          <View style={{ gap: 6 }}>
-            <View style={styles.codeRow}>
-              <Text style={styles.code}>{invite.code}</Text>
-              <Pressable
-                onPress={() => Clipboard.setStringAsync(invite.code).then(() => Alert.alert('Kopyalandı'))}
-                accessibilityLabel="Kodu kopyala" hitSlop={8} style={styles.iconBtn}
-              >
-                <Ionicons name="copy-outline" size={18} color={colors.navy} />
-              </Pressable>
-            </View>
-            <Text style={styles.small}>Yeni uzman ClinicApp'te kayıt olurken "Kodum var"ı seçip bu kodu yazar. 48 saat geçerli, tek kullanımlık.</Text>
-          </View>
+          <CodeBox invite={invite} onRenew={create} busy={busy && !joining}>
+            <Text style={styles.small}>Yeni uzman ClinicApp'te kayıt olurken "Kodum var"ı seçip bu kodu yazar. Kod 15 dakika geçerli, tek kullanımlık.</Text>
+          </CodeBox>
         ) : me.seat_limit <= 1 ? (
           <Pressable onPress={onUpgrade} hitSlop={8} style={{ alignSelf: 'flex-start' }}>
             <Text style={styles.link}>Bireysel pakette ekip yok. Ekip için Klinik paketine geç (10 uzmana kadar)</Text>
@@ -419,11 +452,13 @@ function InviteCard({ onCreated }: { onCreated: () => void }) {
   const [label, setLabel] = useState('');
   const [busy, setBusy] = useState(false);
   const [invite, setInvite] = useState<Invite | null>(null);
+  const [lastLabel, setLastLabel] = useState('');
 
-  const create = async () => {
+  const create = async (l = label) => {
     setBusy(true);
     try {
-      setInvite(await createFamilyInvite(label));
+      setInvite(await createFamilyInvite(l));
+      setLastLabel(l);
       track('invite.family');
       setLabel('');
       onCreated();
@@ -439,26 +474,19 @@ function InviteCard({ onCreated }: { onCreated: () => void }) {
       <Label>Aileyi davet et</Label>
       <Card style={{ gap: 12 }}>
         <Text style={styles.body}>
-          Ebeveyn bu kodu ParentApp › Aile › Hesap › Uzmanım bölümüne yazar ve hangi çocuğunu paylaşacağını seçer. Kod 7 gün geçerli, tek kullanımlık.
+          Ebeveyn bu kodu ParentApp › Aile › Hesap › Uzmanım bölümüne yazar ve hangi çocuğunu paylaşacağını seçer. Kod 15 dakika geçerli, tek kullanımlık; ebeveynle birlikteyken ya da görüşme sırasında üret.
         </Text>
         {invite ? (
-          <View style={styles.codeRow}>
-            <Text style={styles.code}>{invite.code}</Text>
-            <Pressable
-              onPress={() => Clipboard.setStringAsync(invite.code).then(() => Alert.alert('Kopyalandı'))}
-              accessibilityLabel="Kodu kopyala" hitSlop={8} style={styles.iconBtn}
-            >
-              <Ionicons name="copy-outline" size={18} color={colors.navy} />
+          <>
+            <CodeBox invite={invite} onRenew={() => create(lastLabel)} busy={busy} />
+            <Pressable onPress={() => setInvite(null)} hitSlop={8} style={{ alignSelf: 'flex-start' }}>
+              <Text style={styles.link}>Başka bir aile için not yazarak kod al</Text>
             </Pressable>
-            <View style={{ flex: 1 }} />
-            <Pressable onPress={() => setInvite(null)} hitSlop={8}>
-              <Text style={styles.link}>Yeni kod</Text>
-            </Pressable>
-          </View>
+          </>
         ) : (
           <>
             <Input value={label} onChangeText={setLabel} placeholder="Kendi notun (ör. danışanın takma adı) — isteğe bağlı" maxLength={60} />
-            <Cta label="Paylaşım kodu üret" onPress={create} busy={busy} />
+            <Cta label="Paylaşım kodu üret" onPress={() => create()} busy={busy} />
           </>
         )}
       </Card>
