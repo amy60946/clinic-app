@@ -46,7 +46,7 @@ function billingReturn(): 'ok' | 'fail' | null {
 }
 
 export default function HomeScreen() {
-  const { signOut } = useAuth();
+  const { signOut, rejectAccount } = useAuth();
   const [state, setState] = useState<State>({ kind: 'loading' });
   const stateRef = useRef(state);
   const [refreshing, setRefreshing] = useState(false);
@@ -88,6 +88,8 @@ export default function HomeScreen() {
     return () => window.removeEventListener('clinicapp-billing', onReturn);
   }, [load]);
   useEffect(() => { stateRef.current = state; }, [state]);
+  // Açık kalmış uzman olmayan oturum (ör. ParentApp hesabı): kapatılır, kayıt ekranı açılır
+  useEffect(() => { if (state.kind === 'not_clinician') rejectAccount(); }, [state.kind, rejectAccount]);
 
   // Bildirime dokununca ilgili danışan ve sekme. Danışan listede yoksa (yeni paylaşım) liste yenilenip tekrar aranır.
   const openTarget = useCallback(async (n: Pick<AppNotification, 'kind' | 'data' | 'childId'>) => {
@@ -212,12 +214,9 @@ export default function HomeScreen() {
             </Pressable>
           </View>
 
-          {state.kind === 'loading' && <ActivityIndicator color={colors.navy} style={{ marginTop: 40 }} />}
+          {(state.kind === 'loading' || state.kind === 'not_clinician') && <ActivityIndicator color={colors.navy} style={{ marginTop: 40 }} />}
           {state.kind === 'not_installed' && (
             <Notice icon="construct-outline" text="Klinik veritabanı henüz kurulmadı. Klinik SQL'i Supabase'e uygulanınca bu panel açılır." />
-          )}
-          {state.kind === 'not_clinician' && (
-            <Notice icon="person-outline" text="Bu hesap uzman hesabı değil. ParentApp hesabıyla ClinicApp'e girilemez; uzman olarak ayrı bir e-postayla kayıt ol." />
           )}
           {state.kind === 'error' && <Notice icon="alert-circle-outline" text={`Yüklenemedi: ${state.message}`} />}
 

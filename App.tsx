@@ -20,9 +20,13 @@ function Loading() {
 }
 
 function AuthFlow() {
-  const [route, setRoute] = useState<{ name: AuthRoute; email?: string }>({ name: 'login' });
+  const { noAccount, clearNoAccount } = useAuth();
+  const [route, setRoute] = useState<{ name: AuthRoute; email?: string }>({ name: noAccount ? 'noaccount' : 'login' });
+  useEffect(() => clearNoAccount(), [clearNoAccount]);
   const go = (name: AuthRoute, email?: string) => setRoute({ name, email });
-  if (route.name === 'signup' || route.name === 'join') return <SignUpScreen key={route.name} go={go} initialJoin={route.name === 'join'} />;
+  if (route.name === 'signup' || route.name === 'join' || route.name === 'noaccount') {
+    return <SignUpScreen key={route.name} go={go} initialJoin={route.name === 'join'} noAccount={route.name === 'noaccount'} />;
+  }
   if (route.name === 'forgot') return <ForgotPasswordScreen go={go} initialEmail={route.email} />;
   return <LoginScreen key={route.email ?? ''} go={go} initialEmail={route.email} />;
 }

@@ -10,7 +10,8 @@ import { useAuth, authErrorText } from '../lib/auth';
 const MIN_PASSWORD = 8;
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
 
-export type AuthRoute = 'login' | 'signup' | 'join' | 'forgot';
+// noaccount: girilen hesap uzman hesabı değil (ör. ParentApp hesabı); hesap yokmuş gibi kayda yönlendirilir
+export type AuthRoute = 'login' | 'signup' | 'join' | 'forgot' | 'noaccount';
 type Go = (r: AuthRoute, email?: string) => void;
 
 /* ---------- Ortak yerleşim (web'de ortada dar sütun) ---------- */
@@ -58,7 +59,9 @@ export function LoginScreen({ go, initialEmail = '' }: { go: Go; initialEmail?: 
       await signIn(email, password);
     } catch (e) {
       const code = (e as { code?: string }).code;
-      if (code === 'email_not_confirmed') {
+      if (code === 'no_clinician_account') {
+        go('noaccount');
+      } else if (code === 'email_not_confirmed') {
         Alert.alert('E-posta doğrulanmadı', authErrorText(e), [
           { text: 'Vazgeç', style: 'cancel' },
           {
@@ -103,7 +106,7 @@ export function LoginScreen({ go, initialEmail = '' }: { go: Go; initialEmail?: 
 
 type Practice = 'solo' | 'clinic';
 
-export function SignUpScreen({ go, initialJoin = false }: { go: Go; initialJoin?: boolean }) {
+export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { go: Go; initialJoin?: boolean; noAccount?: boolean }) {
   const { signUp, resendConfirmation } = useAuth();
   const [join, setJoin] = useState(initialJoin);
   const [name, setName] = useState('');
@@ -160,6 +163,7 @@ export function SignUpScreen({ go, initialJoin = false }: { go: Go; initialJoin?
         : 'Tek başına çalışan uzman da klinik de hesap açabilir. Aileler, çocuklarının verisini yalnız kendi verdikleri kodla ve istedikleri sürece seninle paylaşır.'}
       onBack={() => go('login')}
     >
+      {noAccount && <Notice icon="person-add-outline" text="Bu e-postayla bir uzman hesabı bulunamadı. Aşağıdan yeni hesabını aç." />}
       <View style={styles.seg}>
         {[{ id: false, label: 'Yeni hesap' }, { id: true, label: 'Kodum var' }].map((o) => (
           <Pressable key={o.label} onPress={() => setJoin(o.id)} style={[styles.segItem, join === o.id && styles.segActive]}>
