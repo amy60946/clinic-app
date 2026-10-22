@@ -666,7 +666,7 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     let code = makeCode(team ? 8 : 6);
     while (db.clinic_invites.some((i: Row) => i.code === code)) code = makeCode(team ? 8 : 6);
     const row = { code, clinic_id: m.clinic_id, clinician_id: m.id, kind: args.p_kind ?? 'family', label: String(args.p_label ?? '').slice(0, 60),
-      created_at: now(), expires_at: new Date(Date.now() + (team ? 2 : 7) * 864e5).toISOString(), used_at: null, used_by: null };
+      created_at: now(), expires_at: new Date(Date.now() + 15 * 60e3).toISOString(), used_at: null, used_by: null };
     db.clinic_invites.push(row);
     save();
     return { data: { code, expires_at: row.expires_at }, error: null };
