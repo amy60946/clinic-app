@@ -17,6 +17,7 @@ import GoalsTab from './GoalsTab';
 import NotesTab from './NotesTab';
 import SuggestionsTab from './SuggestionsTab';
 import ReportTab from './ReportTab';
+import { fromISO } from '../../dates';
 
 export type Tab = 'summary' | 'routine' | 'abc' | 'goals' | 'notes' | 'suggestions' | 'report';
 
@@ -36,7 +37,8 @@ export const MAX_WEEKS = 8;
 
 export function ageText(birthday: string | null): string {
   if (!birthday) return '';
-  const b = new Date(birthday);
+  // YYYY-MM-DD yerel gün olarak çözülür (new Date('YYYY-MM-DD') UTC sayar, batı saat dilimlerinde bir gün kayar)
+  const b = fromISO(birthday.slice(0, 10));
   const n = new Date();
   let y = n.getFullYear() - b.getFullYear();
   if (n.getMonth() < b.getMonth() || (n.getMonth() === b.getMonth() && n.getDate() < b.getDate())) y -= 1;
