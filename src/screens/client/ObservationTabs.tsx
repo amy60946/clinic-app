@@ -9,6 +9,7 @@ import {
 } from '../../lib/metrics';
 import AbcVoice from '../../components/AbcVoice';
 import type { ClientCtx } from './ClientScreen';
+import { skillName } from '../../skills';
 
 const p = (v: number | null) => (v === null ? '–' : `%${v}`);
 
@@ -89,7 +90,7 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
             </View>
             <Text style={styles.small}>
               Haftalar: {s.weeklyRates.map((r) => (r === null ? '–' : r)).join(' · ')}
-              {s.task.reminder ? ` · hatırlatma ${s.task.reminder}` : ''}{s.task.skill ? ` · ${s.task.skill}` : ''}
+              {s.task.reminder ? ` · hatırlatma ${s.task.reminder}` : ''}{skillName(s.task.skill) ? ` · ${skillName(s.task.skill)}` : ''}
             </Text>
           </View>
         ))}

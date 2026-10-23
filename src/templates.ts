@@ -1,40 +1,34 @@
-// ParentApp'in görev şablonları (parent-app/src/data/templates.ts) — uzman önerisi aynı şablonlardan seçilir.
-// ParentApp'teki liste değişirse burası da aynı tutulmalı (template_key ile eşleşir).
+// Görev şablonları: ortak katalog (ortak/veri/gorev_sablonlari.json, sozlesme/gorev_sablonlari.md) — ParentApp ile aynı liste.
+// Güncellemek için: node tools/sync-templates.mjs <ortak>/veri/gorev_sablonlari.json  (template_key = katalog key)
 import { Difficulty } from './theme';
+import { Category, SkillKey } from './skills';
+import catalog from './data/taskTemplates.json';
 
-export type Category = 'home' | 'mind' | 'learn' | 'self';
+export { categories } from './skills';
+export type { Category } from './skills';
 
-export const categories: { id: Category; label: string; emoji: string }[] = [
-  { id: 'home', label: 'Ev İşleri', emoji: '🏠' },
-  { id: 'mind', label: 'Ruh Sağlığı', emoji: '🌈' },
-  { id: 'learn', label: 'Öğrenme', emoji: '📚' },
-  { id: 'self', label: 'Kişisel Bakım', emoji: '🪥' },
+// Önerilen yaş grupları (K ≤5, A 6–8, B 9–12, C 13+)
+export type AgeGroup = 'K' | 'A' | 'B' | 'C';
+export const ageGroups: { id: AgeGroup; label: string }[] = [
+  { id: 'K', label: '5 ve altı' },
+  { id: 'A', label: '6–8' },
+  { id: 'B', label: '9–12' },
+  { id: 'C', label: '13 ve üstü' },
 ];
 
 export type Template = {
   id: string;
   title: string;
   emoji: string;
-  category: Category;
+  category: Category; // ana kategori: becerisini belirler
+  categories: Category[]; // süzgeç etiketleri
+  ages: AgeGroup[];
   difficulty: Difficulty;
-  skill: string; // hangi beceriye hitap ediyor
-  usedBy: number; // kaç ebeveyn kullandı
-  custom?: boolean;
+  coins: number;
+  skill: SkillKey;
 };
 
-export const templates: Template[] = [
-  { id: 't1', title: 'Yatağını topla', emoji: '🛏️', category: 'home', difficulty: 'easy', skill: 'Takım Çalışması', usedBy: 843 },
-  { id: 't2', title: 'Oyuncaklarını topla', emoji: '🧸', category: 'home', difficulty: 'easy', skill: 'Takım Çalışması', usedBy: 659 },
-  { id: 't3', title: 'Sofrayı kurmaya yardım et', emoji: '🍽️', category: 'home', difficulty: 'medium', skill: 'Takım Çalışması', usedBy: 477 },
-  { id: 't4', title: 'Kirli çamaşırları sepete at', emoji: '🧺', category: 'home', difficulty: 'easy', skill: 'Takım Çalışması', usedBy: 296 },
-  { id: 't5', title: 'Odanı süpür', emoji: '🧹', category: 'home', difficulty: 'medium', skill: 'Takım Çalışması', usedBy: 1015 },
-  { id: 't6', title: 'Bulaşık makinesini boşalt', emoji: '🫧', category: 'home', difficulty: 'hard', skill: 'Takım Çalışması', usedBy: 834 },
-  { id: 't7', title: 'Çiçekleri sula', emoji: '🪴', category: 'home', difficulty: 'easy', skill: 'Sorumluluk', usedBy: 653 },
-  { id: 't8', title: 'Yarın için kıyafetini seç', emoji: '👕', category: 'self', difficulty: 'easy', skill: 'Bağımsızlık', usedBy: 412 },
-  { id: 't9', title: 'Dişlerini fırçala', emoji: '🪥', category: 'self', difficulty: 'easy', skill: 'Öz Bakım', usedBy: 1320 },
-  { id: 't10', title: '10 dakika kitap oku', emoji: '📖', category: 'learn', difficulty: 'medium', skill: 'Odaklanma', usedBy: 902 },
-  { id: 't11', title: 'Ödevini bitir', emoji: '✏️', category: 'learn', difficulty: 'hard', skill: 'Sorumluluk', usedBy: 768 },
-  { id: 't12', title: 'Derin nefes egzersizi yap', emoji: '🌬️', category: 'mind', difficulty: 'easy', skill: 'Sakinleşme', usedBy: 231 },
-  { id: 't13', title: 'Bugün güzel olan 3 şeyi anlat', emoji: '🌈', category: 'mind', difficulty: 'medium', skill: 'Minnettarlık', usedBy: 188 },
-  { id: 't14', title: 'Birine nazik bir söz söyle', emoji: '💬', category: 'mind', difficulty: 'easy', skill: 'Empati', usedBy: 154 },
-];
+export const templates: Template[] = (catalog.templates as any[]).map((t) => ({
+  id: t.key, title: t.title, emoji: t.emoji, category: t.category, categories: t.categories,
+  ages: t.ages, difficulty: t.difficulty, coins: t.coins, skill: t.skill,
+}));

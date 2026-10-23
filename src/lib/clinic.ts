@@ -211,7 +211,8 @@ export async function rateGoal(c: Client, by: string, goalId: string, week: stri
 export type { Difficulty } from '../theme';
 import type { Difficulty } from '../theme';
 export type RepeatKind = 'daily' | 'weekly' | 'monthly';
-export type Category = 'home' | 'mind' | 'learn' | 'self';
+import { Category, normalizeCategory } from '../skills';
+export type { Category } from '../skills';
 
 export type SuggestionInput = {
   title: string; emoji: string; skill: string; description: string;
@@ -247,7 +248,7 @@ export async function listSuggestions(linkId: string): Promise<Suggestion[]> {
   const rows = check(res.data ?? [], res.error) as unknown as (Partial<Suggestion> & { tasks: { title: string } | null })[];
   return rows.map(({ tasks, ...r }) => ({
     id: r.id!, title: r.title ?? '', emoji: r.emoji ?? '⭐', skill: r.skill ?? '', description: r.description ?? '',
-    category: (r.category as Category) ?? null, template_key: r.template_key ?? null,
+    category: normalizeCategory(r.category), template_key: r.template_key ?? null,
     difficulty: (r.difficulty as Difficulty) ?? 'easy', coins: r.coins ?? difficultyCoins(r.difficulty as Difficulty),
     start_date: r.start_date ?? '', recurring: r.recurring ?? true, repeat_kind: (r.repeat_kind as RepeatKind) ?? 'daily',
     repeat_days: r.repeat_days ?? [], end_date: r.end_date ?? null, reminder: r.reminder ?? null,
@@ -270,16 +271,26 @@ function payload(s: SuggestionInput) {
   };
 }
 
+// Sunucu henüz altı kategoriye açılmadıysa (ortak proposed/20261023020000_skill_keys.sql) eski kısıta takılır:
+// o zaman eski kategoriyle yeniden dene (Sağlık → self; Odak/İlişki → boş). Beceri anahtarı her durumda doğru yazılır.
+const isCategoryCheck = (e: { code?: string; message: string } | null) => e?.code === '23514' && e.message.includes('cts_category_check');
+const legacy = (s: SuggestionInput): SuggestionInput => ({
+  ...s, category: s.category === 'health' ? ('self' as Category) : ['home', 'mind', 'learn'].includes(s.category ?? '') ? s.category : null,
+});
+
 export async function addSuggestions(c: Client, by: string, list: SuggestionInput[]): Promise<void> {
-  const { error } = await supabase.from('clinic_task_suggestions').insert(list.map((s) => ({
+  const insert = (items: SuggestionInput[]) => supabase.from('clinic_task_suggestions').insert(items.map((s) => ({
     link_id: c.link_id, clinic_id: c.clinic_id, family_id: c.family_id, child_id: c.child_id, created_by: by, ...payload(s),
   })));
+  let { error } = await insert(list);
+  if (isCategoryCheck(error)) ({ error } = await insert(list.map(legacy)));
   checkSuggestion(null, error);
 }
 
 // Uzman bekleyen öneriyi günceller (karar verilmişse sunucu reddeder)
 export async function updateSuggestion(id: string, s: SuggestionInput): Promise<void> {
-  const { error } = await supabase.rpc('clinic_update_suggestion', { p_id: id, p: payload(s) });
+  let { error } = await supabase.rpc('clinic_update_suggestion', { p_id: id, p: payload(s) });
+  if (isCategoryCheck(error)) ({ error } = await supabase.rpc('clinic_update_suggestion', { p_id: id, p: payload(legacy(s)) }));
   checkSuggestion(null, error);
 }
 

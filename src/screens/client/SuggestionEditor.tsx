@@ -5,7 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, Difficulty, difficultyMeta, MAX_TASK_COINS } from '../../theme';
 import { DifficultyBadge, IconButton, Segmented, Toggle, Label, ChipBar } from '../../components/ui';
 import DateField from '../../components/DateField';
-import { categories, templates, Template } from '../../templates';
+import { categories, templates, Template, ageGroups, AgeGroup } from '../../templates';
+import { SKILL_LABEL, skillOf, normalizeCategory } from '../../skills';
 import { DAY_SHORT, fromISO, todayISO } from '../../dates';
 import type { Suggestion, SuggestionInput, RepeatKind, Category } from '../../lib/clinic';
 
@@ -62,12 +63,17 @@ function TemplatePicker({ onClose, onNext, onCustom }: {
 }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
+  const [age, setAge] = useState<'all' | AgeGroup>('all');
   const [picked, setPicked] = useState<string[]>([]);
 
   const list = useMemo(() => {
     const q = query.trim().toLocaleLowerCase('tr');
-    return templates.filter((t) => (filter === 'all' || t.category === filter) && (!q || t.title.toLocaleLowerCase('tr').includes(q)));
-  }, [filter, query]);
+    return templates.filter((t) => (filter === 'all' || t.categories.includes(filter))
+      && (age === 'all' || t.ages.includes(age))
+      && (!q || t.title.toLocaleLowerCase('tr').includes(q)))
+      // seçili kategori ana kategorisi olan şablonlar önce (öbürleri yalnız süzgeç etiketiyle gelir)
+      .sort((a, b) => (filter === 'all' ? 0 : Number(b.category === filter) - Number(a.category === filter)));
+  }, [filter, age, query]);
 
   const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
 
@@ -91,6 +97,12 @@ function TemplatePicker({ onClose, onNext, onCustom }: {
           value={filter} onChange={setFilter} inset={20}
         />
       </View>
+      <View style={{ height: 52, justifyContent: 'center' }}>
+        <ChipBar<'all' | AgeGroup>
+          options={[{ id: 'all', label: 'Tüm yaşlar' }, ...ageGroups.map((a) => ({ id: a.id as 'all' | AgeGroup, label: a.label }))]}
+          value={age} onChange={setAge} inset={20}
+        />
+      </View>
 
       <Text style={styles.hint}>Birden fazla görev seçip tek seferde önerebilirsiniz.</Text>
 
@@ -107,12 +119,8 @@ function TemplatePicker({ onClose, onNext, onCustom }: {
               <View style={{ flex: 1 }}>
                 <Text style={styles.cardTitle}>{t.title}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                  <DifficultyBadge d={t.difficulty} coins={difficultyMeta[t.difficulty].coins} />
-                  <Text style={{ fontSize: 12, color: colors.muted }}>{t.skill}</Text>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 6 }}>
-                  <Ionicons name="people-outline" size={14} color={colors.navy} />
-                  <Text style={styles.used}>{`${t.usedBy.toLocaleString('tr-TR')} ebeveyn tarafından kullanıldı`}</Text>
+                  <DifficultyBadge d={t.difficulty} coins={t.coins} />
+                  <Text style={{ fontSize: 12, color: colors.muted }}>{SKILL_LABEL[t.skill]}</Text>
                 </View>
               </View>
             </Pressable>
@@ -147,7 +155,9 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
   const [title, setTitle] = useState(editing?.title ?? '');
   const [description, setDescription] = useState(editing?.description ?? '');
   const [difficulty, setDifficulty] = useState<Difficulty>(initialDifficulty);
-  const [coins, setCoins] = useState(String(editing?.coins ?? difficultyMeta[initialDifficulty].coins));
+  const [coins, setCoins] = useState(String(editing?.coins ?? picked[0]?.coins ?? difficultyMeta[initialDifficulty].coins));
+  // Kendi yazdığı görevde kategori seçilir; beceri kategoriden gelir (ortak ekonomi.md 5B)
+  const [category, setCategory] = useState(normalizeCategory(editing?.category));
   const [startDate, setStartDate] = useState<string>(editing?.start_date || todayISO());
   const [recurring, setRecurring] = useState(editing?.recurring ?? false);
   const [repeatKind, setRepeatKind] = useState<RepeatKind>(editing?.repeat_kind ?? 'daily');
@@ -174,6 +184,7 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
 
   const submit = async () => {
     if (canTitle && !title.trim()) return Alert.alert('Görev adı gerekli');
+    if (canTitle && !category) return Alert.alert('Kategori seç', 'Görevin becerisi kategoriden gelir.');
     if (recurring && endDate && endDate < startDate) return Alert.alert('Son tarih başlangıçtan önce olamaz');
     if (recurring && repeatKind !== 'daily' && repeatDays.length === 0) {
       return Alert.alert(repeatKind === 'weekly' ? 'Haftanın en az bir gününü seç' : 'Ayın en az bir gününü seç');
@@ -192,9 +203,9 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
       note: note.trim(),
     };
     const list: SuggestionInput[] = editing
-      ? [{ ...common, title: title.trim(), emoji: editing.emoji, skill: editing.skill, category: editing.category, template_key: editing.template_key }]
+      ? [{ ...common, title: title.trim(), emoji: editing.emoji, skill: skillOf(category!), category, template_key: editing.template_key }]
       : custom
-        ? [{ ...common, title: title.trim(), emoji: '⭐', skill: 'Özel', category: null, template_key: null }]
+        ? [{ ...common, title: title.trim(), emoji: '⭐', skill: skillOf(category!), category, template_key: null }]
         : picked.map((t) => ({ ...common, title: t.title, emoji: t.emoji, skill: t.skill, category: t.category, template_key: t.id }));
     setBusy(true);
     try {
@@ -228,6 +239,21 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
             <Label>Görev adı</Label>
             <TextInput value={title} onChangeText={setTitle} placeholder="Örn. Çantanı hazırla" placeholderTextColor={colors.muted}
               style={styles.input} maxLength={120} />
+            <Label>Kategori</Label>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {categories.map((c) => {
+                const on = category === c.id;
+                return (
+                  <Pressable key={c.id} onPress={() => setCategory(c.id)} accessibilityRole="radio" accessibilityState={{ selected: on }}
+                    style={[styles.catChip, on && { borderColor: colors.navy, backgroundColor: '#fff' }]}>
+                    <Text style={{ fontSize: 13, color: colors.navy, fontWeight: on ? '700' : '500' }}>{c.emoji}  {c.label}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Text style={styles.skillHint}>
+              {category ? `Bu görev çocuğun oyundaki ${SKILL_LABEL[skillOf(category)]} becerisine yıldız kazandırır.` : 'Kategoriyi seç; görevin becerisi kategoriden gelir.'}
+            </Text>
           </>
         ) : (
           <>
@@ -381,7 +407,8 @@ const styles = StyleSheet.create({
   card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#fff', borderRadius: radius.md, padding: 14, borderWidth: 1.5, borderColor: 'transparent' },
   radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.faint, alignItems: 'center', justifyContent: 'center' },
   cardTitle: { fontSize: 15, fontWeight: '600', color: colors.navy },
-  used: { fontSize: 13, fontWeight: '600', color: colors.navy },
+  catChip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: colors.line, backgroundColor: colors.bg },
+  skillHint: { fontSize: 12, color: colors.muted, marginTop: 8 },
   bottomPick: { position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#fff', paddingHorizontal: 20, paddingTop: 14, paddingBottom: 28 },
   banner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.medium.bg, marginHorizontal: 20, marginTop: 12, padding: 12, borderRadius: radius.sm },
   input: { backgroundColor: '#fff', borderRadius: radius.md, padding: 14, fontSize: 15, color: colors.navy },
