@@ -25,8 +25,7 @@ const DEFAULT_PLANS: BillingPlan[] = [
   { id: 'clinic_yearly', package: 'clinic', period: 'yearly', seat_limit: 10, price_try: 29999.99, apple_product_id: 'com.clinicapp.uzman.clinic.yearly', iyzico_plan_ref: null },
 ];
 
-// Paket içerikleri (üyelik ekranında sade liste). Joon Health'in uzman paketlerindeki başlıklardan esinlenildi;
-// yalnız ClinicApp'te gerçekten olanlar yazılır.
+// Paket içerikleri (üyelik ekranında sade liste); yalnız ClinicApp'te gerçekten olanlar yazılır.
 export const PACKAGES: Record<PackageId, { title: string; who: string; features: string[] }> = {
   solo: {
     title: 'Bireysel',

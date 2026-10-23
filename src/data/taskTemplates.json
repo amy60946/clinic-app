@@ -1,8 +1,8 @@
 {
- "version": 1,
+ "version": 2,
  "templates": [
   {
-   "key": "jt_clean_up_from_dinner",
+   "key": "gs_home_001",
    "title": "Akşam yemeğinden sonra toplamaya yardım et",
    "emoji": "🍽️",
    "category": "home",
@@ -20,7 +20,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_mom_dad_prepare_dinner",
+   "key": "gs_home_002",
    "title": "Akşam yemeğini hazırlamaya yardım et",
    "emoji": "🍲",
    "category": "home",
@@ -38,7 +38,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_ask_mom_or_dad_what_you_can_help_with",
+   "key": "gs_home_003",
    "title": "Anne ya da babana bugün neye yardım edebileceğini sor",
    "emoji": "🙋",
    "category": "home",
@@ -56,7 +56,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_mom_or_dad_when_asked",
+   "key": "gs_home_004",
    "title": "Annen ya da baban isteyince yardım et",
    "emoji": "🙋",
    "category": "home",
@@ -74,7 +74,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_mom_or_dad_rake_the_leaves_in_the",
+   "key": "gs_home_005",
    "title": "Annen ya da babanla bahçedeki yaprakları topla",
    "emoji": "🍁",
    "category": "home",
@@ -90,7 +90,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_wash_car",
+   "key": "gs_home_006",
    "title": "Araba yıkamaya yardım et",
    "emoji": "🚗",
    "category": "home",
@@ -107,7 +107,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_wash_car",
+   "key": "gs_home_007",
    "title": "Arabayı yıka",
    "emoji": "🚗",
    "category": "home",
@@ -123,7 +123,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_put_shoes_away",
+   "key": "gs_home_008",
    "title": "Ayakkabılarını yerine koy",
    "emoji": "👟",
    "category": "home",
@@ -141,7 +141,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_do_some_yard_work",
+   "key": "gs_home_009",
    "title": "Bahçe işlerine yardım et",
    "emoji": "🌳",
    "category": "home",
@@ -157,7 +157,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_in_the_garden",
+   "key": "gs_home_010",
    "title": "Bahçede yardım et",
    "emoji": "🌱",
    "category": "home",
@@ -174,7 +174,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_rake_the_leaves_in_the_yard",
+   "key": "gs_home_011",
    "title": "Bahçedeki yaprakları tırmıkla",
    "emoji": "🍂",
    "category": "home",
@@ -190,7 +190,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_empty_bathroom_trash_bin",
+   "key": "gs_home_012",
    "title": "Banyo çöp kutusunu boşalt",
    "emoji": "🗑️",
    "category": "home",
@@ -207,7 +207,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_hang_up_towels_in_bathroom",
+   "key": "gs_home_013",
    "title": "Banyodaki havluları as",
    "emoji": "🧻",
    "category": "home",
@@ -225,7 +225,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_clean_bathroom",
+   "key": "gs_home_014",
    "title": "Banyoyu temizle",
    "emoji": "🛁",
    "category": "home",
@@ -242,7 +242,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_prepare_a_simple_meal",
+   "key": "gs_home_015",
    "title": "Basit bir yemeği hazırlamaya yardım et",
    "emoji": "🥘",
    "category": "home",
@@ -261,7 +261,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_wait_until_others_are_done_talking_bef",
+   "key": "gs_home_016",
    "title": "Başkası konuşurken sözünü kesmeden bekle",
    "emoji": "✋",
    "category": "home",
@@ -279,7 +279,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_empty_the_dishwasher",
+   "key": "gs_home_017",
    "title": "Bulaşık makinesini boşalt",
    "emoji": "🍽️",
    "category": "home",
@@ -296,7 +296,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_load_the_dishwasher",
+   "key": "gs_home_018",
    "title": "Bulaşık makinesini doldur",
    "emoji": "🍽️",
    "category": "home",
@@ -313,7 +313,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_wash_dirty_dishes",
+   "key": "gs_home_019",
    "title": "Bulaşıkları yıka",
    "emoji": "🧽",
    "category": "home",
@@ -329,7 +329,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_follow_instructions_from_parents_witho",
+   "key": "gs_home_020",
    "title": "Büyüklerinin söylediğini tartışmadan yap",
    "emoji": "👂",
    "category": "home",
@@ -347,7 +347,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_wash_windows",
+   "key": "gs_home_021",
    "title": "Camları sil",
    "emoji": "🪟",
    "category": "home",
@@ -364,7 +364,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_vacuum",
+   "key": "gs_home_022",
    "title": "Elektrik süpürgesi çekmeye yardım et",
    "emoji": "🧹",
    "category": "home",
@@ -381,7 +381,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_offer_to_help_with_household_chores",
+   "key": "gs_home_023",
    "title": "Ev işlerine yardım etmeyi teklif et",
    "emoji": "🙌",
    "category": "home",
@@ -400,7 +400,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_give_pet_food_and_water",
+   "key": "gs_home_024",
    "title": "Evcil hayvanına mama ve su ver",
    "emoji": "🐾",
    "category": "home",
@@ -418,7 +418,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_with_home_repairs",
+   "key": "gs_home_025",
    "title": "Evdeki küçük tamirlere yardım et",
    "emoji": "🔨",
    "category": "home",
@@ -435,7 +435,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_unload_the_car_when_home",
+   "key": "gs_home_026",
    "title": "Eve gelince arabadan eşyaları taşı",
    "emoji": "🚙",
    "category": "home",
@@ -452,7 +452,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_with_general_tidiness_of_house",
+   "key": "gs_home_027",
    "title": "Evin genel düzenine yardım et",
    "emoji": "🏠",
    "category": "home",
@@ -470,7 +470,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_clean_garage",
+   "key": "gs_home_028",
    "title": "Garajı ya da depoyu temizlemeye yardım et",
    "emoji": "🧰",
    "category": "home",
@@ -487,7 +487,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_take_out_recycling",
+   "key": "gs_home_029",
    "title": "Geri dönüşüm kutusunu çıkar",
    "emoji": "♻️",
    "category": "home",
@@ -504,7 +504,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_sort_recycling_and_trash",
+   "key": "gs_home_030",
    "title": "Geri dönüşüm ve çöpü ayır",
    "emoji": "♻️",
    "category": "home",
@@ -522,7 +522,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_bring_in_light_groceries",
+   "key": "gs_home_031",
    "title": "Hafif market poşetlerini taşımaya yardım et",
    "emoji": "🛍️",
    "category": "home",
@@ -540,7 +540,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_with_weekly_house_clean_up",
+   "key": "gs_home_032",
    "title": "Haftalık ev temizliğine yardım et",
    "emoji": "🧽",
    "category": "home",
@@ -558,7 +558,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_put_your_plate_bowl_in_the_sink_after",
+   "key": "gs_home_033",
    "title": "Her yemekten sonra tabağını lavaboya bırak",
    "emoji": "🥣",
    "category": "home",
@@ -576,7 +576,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_prepare_the_coffee_maker",
+   "key": "gs_home_034",
    "title": "Kahvaltı için çay hazırlığına yardım et",
    "emoji": "🫖",
    "category": "home",
@@ -592,7 +592,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_clean_up_from_breakfast",
+   "key": "gs_home_035",
    "title": "Kahvaltıdan sonra toplamaya yardım et",
    "emoji": "🍳",
    "category": "home",
@@ -610,7 +610,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_your_sibling_with_homework",
+   "key": "gs_home_036",
    "title": "Kardeşine ödevinde yardım et",
    "emoji": "📖",
    "category": "home",
@@ -627,7 +627,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_take_a_silly_photo_of_yourself",
+   "key": "gs_home_037",
    "title": "Kendinin komik bir fotoğrafını çek",
    "emoji": "🤳",
    "category": "home",
@@ -644,7 +644,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_mind_own_business_i_e_no_tattling_with",
+   "key": "gs_home_038",
    "title": "Kimseyi şikâyet etmeden kendi işine odaklan",
    "emoji": "🤫",
    "category": "home",
@@ -661,7 +661,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_put_clothes_in_the_hamper",
+   "key": "gs_home_039",
    "title": "Kirli kıyafetlerini sepete at",
    "emoji": "🧺",
    "category": "home",
@@ -679,7 +679,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_with_grocery_shopping",
+   "key": "gs_home_040",
    "title": "Market alışverişine yardım et",
    "emoji": "🛒",
    "category": "home",
@@ -697,7 +697,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_put_groceries_away",
+   "key": "gs_home_041",
    "title": "Market alışverişini yerleştirmeye yardım et",
    "emoji": "🧃",
    "category": "home",
@@ -715,7 +715,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_dust_the_furniture",
+   "key": "gs_home_042",
    "title": "Mobilyaların tozunu almaya yardım et",
    "emoji": "🪶",
    "category": "home",
@@ -733,7 +733,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_set_the_kitchen_table",
+   "key": "gs_home_043",
    "title": "Mutfak masasını kur",
    "emoji": "🍴",
    "category": "home",
@@ -751,7 +751,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_wipe_down_kitchen_table",
+   "key": "gs_home_044",
    "title": "Mutfak masasını sil",
    "emoji": "🧽",
    "category": "home",
@@ -769,7 +769,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_clean_up_bedroom_toys_clothes_bed",
+   "key": "gs_home_045",
    "title": "Odanı topla (oyuncak, kıyafet, yatak)",
    "emoji": "🧹",
    "category": "home",
@@ -786,7 +786,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_organize_your_toys",
+   "key": "gs_home_046",
    "title": "Oyuncaklarını düzenle",
    "emoji": "🧸",
    "category": "home",
@@ -803,7 +803,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_clean_up_after_playing",
+   "key": "gs_home_047",
    "title": "Oyundan sonra ortalığı topla",
    "emoji": "🧸",
    "category": "home",
@@ -821,7 +821,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_wash_plastic_dishes_with_supervision",
+   "key": "gs_home_048",
    "title": "Plastik bulaşıkları yıka (bir büyüğünle)",
    "emoji": "🧽",
    "category": "home",
@@ -837,7 +837,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_bring_the_mail_in_from_the_mailbox",
+   "key": "gs_home_049",
    "title": "Posta kutusundaki mektupları getir",
    "emoji": "📬",
    "category": "home",
@@ -854,7 +854,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_set_the_table",
+   "key": "gs_home_050",
    "title": "Sofrayı kurmaya yardım et",
    "emoji": "🍴",
    "category": "home",
@@ -872,7 +872,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_clear_the_table",
+   "key": "gs_home_051",
    "title": "Sofrayı toplamaya yardım et",
    "emoji": "🍽️",
    "category": "home",
@@ -890,7 +890,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_mom_dad_when_asked_without_remind",
+   "key": "gs_home_052",
    "title": "Söylenmeden annene ya da babana yardım et",
    "emoji": "⭐",
    "category": "home",
@@ -907,7 +907,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_clean_up_toys_without_being_asked",
+   "key": "gs_home_053",
    "title": "Söylenmeden oyuncaklarını topla",
    "emoji": "🧸",
    "category": "home",
@@ -925,7 +925,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_put_away_clean_dishes_no_sharp_objects",
+   "key": "gs_home_054",
    "title": "Temiz tabakları yerleştir (kesici aletler hariç!)",
    "emoji": "🍽️",
    "category": "home",
@@ -943,7 +943,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_put_away_clean_laundry",
+   "key": "gs_home_055",
    "title": "Temiz çamaşırları yerleştir",
    "emoji": "👕",
    "category": "home",
@@ -960,7 +960,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_replace_toilet_paper_in_bathroom",
+   "key": "gs_home_056",
    "title": "Tuvalet kâğıdını değiştir",
    "emoji": "🧻",
    "category": "home",
@@ -978,7 +978,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_change_bed_sheets",
+   "key": "gs_home_057",
    "title": "Yatak çarşafını değiştir",
    "emoji": "🛏️",
    "category": "home",
@@ -994,7 +994,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_pick_up_toys_before_bed",
+   "key": "gs_home_058",
    "title": "Yatmadan önce oyuncaklarını topla",
    "emoji": "🧸",
    "category": "home",
@@ -1011,7 +1011,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_invent_a_new_handshake",
+   "key": "gs_home_059",
    "title": "Yeni bir selamlaşma uydur",
    "emoji": "✋",
    "category": "home",
@@ -1029,7 +1029,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_sweep_the_floors",
+   "key": "gs_home_060",
    "title": "Yerleri süpür",
    "emoji": "🧹",
    "category": "home",
@@ -1046,7 +1046,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_with_starting_laundry",
+   "key": "gs_home_061",
    "title": "Çamaşır makinesini çalıştırmaya yardım et",
    "emoji": "🧺",
    "category": "home",
@@ -1063,7 +1063,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_with_laundry_sort_clothing",
+   "key": "gs_home_062",
    "title": "Çamaşırları ayırmaya yardım et",
    "emoji": "👕",
    "category": "home",
@@ -1081,7 +1081,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_water_plants",
+   "key": "gs_home_063",
    "title": "Çiçekleri sula",
    "emoji": "🪴",
    "category": "home",
@@ -1099,7 +1099,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_take_out_the_trash",
+   "key": "gs_home_064",
    "title": "Çöpü çıkar",
    "emoji": "🗑️",
    "category": "home",
@@ -1115,7 +1115,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_help_take_out_trash",
+   "key": "gs_home_065",
    "title": "Çöpü çıkarmaya yardım et",
    "emoji": "🗑️",
    "category": "home",
@@ -1131,7 +1131,7 @@
    "skill": "teamwork"
   },
   {
-   "key": "jt_practice_deep_breathing_exercise_for_1",
+   "key": "gs_mind_001",
    "title": "1 dakika derin nefes egzersizi yap",
    "emoji": "🌬️",
    "category": "mind",
@@ -1149,7 +1149,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_meditate_for_10_minutes",
+   "key": "gs_mind_002",
    "title": "10 dakika meditasyon yap",
    "emoji": "🧘",
    "category": "mind",
@@ -1167,7 +1167,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_meditate_for_15_minutes",
+   "key": "gs_mind_003",
    "title": "15 dakika meditasyon yap",
    "emoji": "🧘",
    "category": "mind",
@@ -1184,7 +1184,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_dance_for_2_minutes",
+   "key": "gs_mind_004",
    "title": "2 dakika dans et",
    "emoji": "🕺",
    "category": "mind",
@@ -1202,7 +1202,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_take_5_deep_breaths",
+   "key": "gs_mind_005",
    "title": "5 kez derin nefes al",
    "emoji": "🌬️",
    "category": "mind",
@@ -1220,7 +1220,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_write_a_note_to_your_parents",
+   "key": "gs_mind_006",
    "title": "Ailene bir not yaz",
    "emoji": "📝",
    "category": "mind",
@@ -1238,7 +1238,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_write_a_note_to_your_parents_about_how",
+   "key": "gs_mind_007",
    "title": "Ailene nasıl hissettiğini anlatan bir not yaz",
    "emoji": "💌",
    "category": "mind",
@@ -1254,7 +1254,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_go_on_a_nature_walk_with_parent_and_co",
+   "key": "gs_mind_008",
    "title": "Bir büyüğünle doğa yürüyüşünde yaprak ya da taş topla",
    "emoji": "🍂",
    "category": "mind",
@@ -1270,7 +1270,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_create_a_mood_tracker_and_fill_it_out",
+   "key": "gs_mind_009",
    "title": "Bir duygu çizelgesi yap ve bugün doldur",
    "emoji": "🌈",
    "category": "mind",
@@ -1287,7 +1287,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_draw_a_picture_and_show_it_to_mom_dad",
+   "key": "gs_mind_010",
    "title": "Bir resim çiz ve annene ya da babana göster",
    "emoji": "🖍️",
    "category": "mind",
@@ -1304,7 +1304,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_write_down_what_you_are_grateful_for_t",
+   "key": "gs_mind_011",
    "title": "Bu hafta minnet duyduğun şeyleri yaz",
    "emoji": "🙏",
    "category": "mind",
@@ -1320,7 +1320,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_have_a_positive_attitude_today",
+   "key": "gs_mind_012",
    "title": "Bugün olumlu ol",
    "emoji": "😊",
    "category": "mind",
@@ -1338,7 +1338,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_list_three_good_things_today",
+   "key": "gs_mind_013",
    "title": "Bugünün 3 güzel şeyini yaz",
    "emoji": "✨",
    "category": "mind",
@@ -1357,7 +1357,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_take_a_5_10_minute_break_to_calm_down",
+   "key": "gs_mind_014",
    "title": "Cevap vermeden önce sakinleşmek için 5–10 dakika ara ver",
    "emoji": "⏸️",
    "category": "mind",
@@ -1374,7 +1374,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_talk_about_your_feelings_with_mom_dad",
+   "key": "gs_mind_015",
    "title": "Duygularını annen ya da babanla konuş",
    "emoji": "💭",
    "category": "mind",
@@ -1392,7 +1392,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_write_down_what_you_are_most_scared_of",
+   "key": "gs_mind_016",
    "title": "En çok neden korktuğunu yaz",
    "emoji": "🫂",
    "category": "mind",
@@ -1409,7 +1409,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_draw_a_map_of_your_house_then_show_mom",
+   "key": "gs_mind_017",
    "title": "Evinin haritasını çiz ve ailene göster",
    "emoji": "🗺️",
    "category": "mind",
@@ -1425,7 +1425,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_start_a_diary",
+   "key": "gs_mind_018",
    "title": "Günlük tutmaya başla",
    "emoji": "📓",
    "category": "mind",
@@ -1442,7 +1442,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_journal_about_your_day",
+   "key": "gs_mind_019",
    "title": "Gününü günlüğüne yaz",
    "emoji": "📓",
    "category": "mind",
@@ -1458,7 +1458,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_paint_something_cool",
+   "key": "gs_mind_020",
    "title": "Havalı bir şey boya!",
    "emoji": "🎨",
    "category": "mind",
@@ -1476,7 +1476,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_find_something_to_do_and_do_it",
+   "key": "gs_mind_021",
    "title": "Kendine yapacak bir iş bul ve bitir",
    "emoji": "💡",
    "category": "mind",
@@ -1496,7 +1496,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_start_a_gratitude_journal",
+   "key": "gs_mind_022",
    "title": "Minnet defteri tutmaya başla",
    "emoji": "📔",
    "category": "mind",
@@ -1513,7 +1513,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_add_a_new_entry_to_your_gratitude_jour",
+   "key": "gs_mind_023",
    "title": "Minnet defterine yeni bir şey yaz",
    "emoji": "📔",
    "category": "mind",
@@ -1530,7 +1530,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_have_a_dance_party_in_your_room",
+   "key": "gs_mind_024",
    "title": "Odanda dans partisi yap",
    "emoji": "🎶",
    "category": "mind",
@@ -1547,7 +1547,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_stretch_for_5_10_minutes_in_the_mornin",
+   "key": "gs_mind_025",
    "title": "Sabah 5–10 dakika esne",
    "emoji": "🌅",
    "category": "mind",
@@ -1565,7 +1565,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_write_down_what_makes_you_happy",
+   "key": "gs_mind_026",
    "title": "Seni mutlu eden şeyleri yaz",
    "emoji": "😊",
    "category": "mind",
@@ -1582,7 +1582,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_grab_some_chalk_and_decorate_the_sidew",
+   "key": "gs_mind_027",
    "title": "Tebeşirle kaldırımı süsle",
    "emoji": "🖍️",
    "category": "mind",
@@ -1598,7 +1598,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_create_a_new_dance_move",
+   "key": "gs_mind_028",
    "title": "Yeni bir dans hareketi uydur",
    "emoji": "💃",
    "category": "mind",
@@ -1616,7 +1616,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_take_five_deep_breaths_when_upset",
+   "key": "gs_mind_029",
    "title": "Üzüldüğünde 5 kez derin nefes al",
    "emoji": "🌬️",
    "category": "mind",
@@ -1634,7 +1634,7 @@
    "skill": "stamina"
   },
   {
-   "key": "jt_find_5_things_starting_with_b",
+   "key": "gs_learn_001",
    "title": "'B' harfiyle başlayan 5 şey bul",
    "emoji": "🔤",
    "category": "learn",
@@ -1650,7 +1650,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_read_a_book_for_10_minutes",
+   "key": "gs_learn_002",
    "title": "10 dakika kitap oku",
    "emoji": "📖",
    "category": "learn",
@@ -1668,7 +1668,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_do_a_100_piece_puzzle",
+   "key": "gs_learn_003",
    "title": "100 parçalı yapboz yap",
    "emoji": "🧩",
    "category": "learn",
@@ -1684,7 +1684,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_practice_an_instrument_for_15_minutes",
+   "key": "gs_learn_004",
    "title": "15 dakika enstrüman çal",
    "emoji": "🎹",
    "category": "learn",
@@ -1702,7 +1702,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_read_on_your_own_for_15_minutes",
+   "key": "gs_learn_005",
    "title": "15 dakika kendi başına kitap oku",
    "emoji": "📖",
    "category": "learn",
@@ -1719,7 +1719,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_read_for_20_minutes",
+   "key": "gs_learn_006",
    "title": "20 dakika kitap oku",
    "emoji": "📖",
    "category": "learn",
@@ -1736,7 +1736,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_tell_your_parent_a_story_about_today",
+   "key": "gs_learn_007",
    "title": "Ailene bugünle ilgili bir hikâye anlat",
    "emoji": "📖",
    "category": "learn",
@@ -1754,7 +1754,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_write_a_joke_for_dinner",
+   "key": "gs_learn_008",
    "title": "Akşam yemeği için bir fıkra yaz",
    "emoji": "😂",
    "category": "learn",
@@ -1771,7 +1771,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_practice_saying_the_alphabet",
+   "key": "gs_learn_009",
    "title": "Alfabeyi söylemeyi çalış",
    "emoji": "🔠",
    "category": "learn",
@@ -1787,7 +1787,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_practice_writing_the_alphabet",
+   "key": "gs_learn_010",
    "title": "Alfabeyi yazmayı çalış",
    "emoji": "✍️",
    "category": "learn",
@@ -1803,7 +1803,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_read_a_whole_book",
+   "key": "gs_learn_011",
    "title": "Bir kitabı baştan sona oku",
    "emoji": "📚",
    "category": "learn",
@@ -1820,7 +1820,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_do_a_math_problem_set",
+   "key": "gs_learn_012",
    "title": "Bir matematik çalışma sayfası çöz",
    "emoji": "➗",
    "category": "learn",
@@ -1837,7 +1837,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_do_a_homework_assignment",
+   "key": "gs_learn_013",
    "title": "Bir ödevini yap",
    "emoji": "✏️",
    "category": "learn",
@@ -1854,7 +1854,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_teach_someone_something_new",
+   "key": "gs_learn_014",
    "title": "Birine yeni bir şey öğret",
    "emoji": "🧑‍🏫",
    "category": "learn",
@@ -1871,7 +1871,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_learn_how_to_ride_a_bicycle_with_helme",
+   "key": "gs_learn_015",
    "title": "Bisiklet sürmeyi öğren (kask ve destek tekerleriyle)",
    "emoji": "🚲",
    "category": "learn",
@@ -1887,7 +1887,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_learn_how_to_identify_plants",
+   "key": "gs_learn_016",
    "title": "Bitkileri tanımayı öğren",
    "emoji": "🌿",
    "category": "learn",
@@ -1903,7 +1903,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_complete_all_your_homework_assignments",
+   "key": "gs_learn_017",
    "title": "Bütün ödevlerini bitir",
    "emoji": "📚",
    "category": "learn",
@@ -1920,7 +1920,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_learn_how_to_use_a_digital_map_for_nav",
+   "key": "gs_learn_018",
    "title": "Dijital haritayla yol bulmayı öğren",
    "emoji": "📱",
    "category": "learn",
@@ -1936,7 +1936,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_memorize_your_home_address",
+   "key": "gs_learn_019",
    "title": "Ev adresini ezberle",
    "emoji": "🏡",
    "category": "learn",
@@ -1953,7 +1953,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_learn_how_to_tie_different_knots",
+   "key": "gs_learn_020",
    "title": "Farklı düğümler atmayı öğren",
    "emoji": "🪢",
    "category": "learn",
@@ -1970,7 +1970,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_start_next_week_s_homework",
+   "key": "gs_learn_021",
    "title": "Gelecek haftanın ödevine başla",
    "emoji": "📚",
    "category": "learn",
@@ -1986,7 +1986,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_draw_or_write_about_your_day",
+   "key": "gs_learn_022",
    "title": "Gününü çiz ya da yaz",
    "emoji": "📝",
    "category": "learn",
@@ -2004,7 +2004,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_learn_how_to_treat_a_cut_or_wound",
+   "key": "gs_learn_023",
    "title": "Kesik ya da yarayı temizlemeyi öğren",
    "emoji": "🩹",
    "category": "learn",
@@ -2021,7 +2021,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_learn_how_to_tie_a_tie",
+   "key": "gs_learn_024",
    "title": "Kravat bağlamayı öğren",
    "emoji": "👔",
    "category": "learn",
@@ -2037,7 +2037,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_create_a_tiny_art_gallery",
+   "key": "gs_learn_025",
    "title": "Küçük bir resim sergisi hazırla",
    "emoji": "🖼️",
    "category": "learn",
@@ -2055,7 +2055,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_go_to_school",
+   "key": "gs_learn_026",
    "title": "Okula git",
    "emoji": "🏫",
    "category": "learn",
@@ -2073,7 +2073,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_learn_to_play_chess",
+   "key": "gs_learn_027",
    "title": "Satranç öğren",
    "emoji": "♟️",
    "category": "learn",
@@ -2090,7 +2090,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_practice_writing_down_numbers",
+   "key": "gs_learn_028",
    "title": "Sayıları yazmayı çalış",
    "emoji": "🔢",
    "category": "learn",
@@ -2106,7 +2106,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_learn_how_to_do_basic_first_aid",
+   "key": "gs_learn_029",
    "title": "Temel ilk yardımı öğren",
    "emoji": "⛑️",
    "category": "learn",
@@ -2123,7 +2123,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_prepare_for_an_upcoming_quiz_or_test",
+   "key": "gs_learn_030",
    "title": "Yaklaşan bir sınava ya da yazılıya hazırlan",
    "emoji": "📖",
    "category": "learn",
@@ -2140,7 +2140,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_write_down_what_schoolwork_you_need_to",
+   "key": "gs_learn_031",
    "title": "Yapman gereken ödevleri bir listeye yaz",
    "emoji": "📋",
    "category": "learn",
@@ -2157,7 +2157,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_tell_mom_or_dad_3_interesting_facts_be",
+   "key": "gs_learn_032",
    "title": "Yatmadan önce ailene 3 ilginç bilgi anlat",
    "emoji": "🦉",
    "category": "learn",
@@ -2175,7 +2175,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_read_before_bed",
+   "key": "gs_learn_033",
    "title": "Yatmadan önce kitap oku",
    "emoji": "📖",
    "category": "learn",
@@ -2193,7 +2193,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_help_measure_ingredients_for_cooking",
+   "key": "gs_learn_034",
    "title": "Yemek yaparken malzemeleri ölçmeye yardım et",
    "emoji": "🥄",
    "category": "learn",
@@ -2210,7 +2210,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_start_learning_a_new_language",
+   "key": "gs_learn_035",
    "title": "Yeni bir dil öğrenmeye başla",
    "emoji": "🌍",
    "category": "learn",
@@ -2227,7 +2227,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_start_learning_a_new_instrument",
+   "key": "gs_learn_036",
    "title": "Yeni bir enstrümana başla",
    "emoji": "🎸",
    "category": "learn",
@@ -2244,7 +2244,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_learn_a_new_game",
+   "key": "gs_learn_037",
    "title": "Yeni bir oyun öğren",
    "emoji": "🎲",
    "category": "learn",
@@ -2262,7 +2262,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_design_a_new_sandwich",
+   "key": "gs_learn_038",
    "title": "Yeni bir sandviç tarifi uydur",
    "emoji": "🥪",
    "category": "learn",
@@ -2279,7 +2279,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_learn_how_to_identify_poisonous_plants",
+   "key": "gs_learn_039",
    "title": "Zehirli bitki ve hayvanları tanımayı öğren",
    "emoji": "⚠️",
    "category": "learn",
@@ -2296,7 +2296,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_recite_multiplication_tables",
+   "key": "gs_learn_040",
    "title": "Çarpım tablosunu tekrar et",
    "emoji": "✖️",
    "category": "learn",
@@ -2312,7 +2312,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_complete_your_homework_before_5_00pm",
+   "key": "gs_learn_041",
    "title": "Ödevini saat 17.00'den önce bitir",
    "emoji": "⏰",
    "category": "learn",
@@ -2329,7 +2329,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_share_something_you_learned",
+   "key": "gs_learn_042",
    "title": "Öğrendiğin bir şeyi paylaş",
    "emoji": "💡",
    "category": "learn",
@@ -2347,7 +2347,7 @@
    "skill": "knowledge"
   },
   {
-   "key": "jt_do_a_1_minute_stretch",
+   "key": "gs_health_001",
    "title": "1 dakika esneme yap",
    "emoji": "🙆",
    "category": "health",
@@ -2363,7 +2363,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_run_on_the_spot_for_1_minute",
+   "key": "gs_health_002",
    "title": "1 dakika yerinde koş",
    "emoji": "🏃",
    "category": "health",
@@ -2381,7 +2381,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_do_10_burpees",
+   "key": "gs_health_003",
    "title": "10 burpee yap",
    "emoji": "🏋️",
    "category": "health",
@@ -2397,7 +2397,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_stretch_for_10_minutes",
+   "key": "gs_health_004",
    "title": "10 dakika esneme yap",
    "emoji": "🧘",
    "category": "health",
@@ -2414,7 +2414,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_do_10_jumping_jacks",
+   "key": "gs_health_005",
    "title": "10 zıplama hareketi (jumping jack) yap",
    "emoji": "🤸",
    "category": "health",
@@ -2432,7 +2432,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_do_20_sit_ups",
+   "key": "gs_health_006",
    "title": "20 mekik çek",
    "emoji": "🏃",
    "category": "health",
@@ -2448,7 +2448,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_do_20_push_ups",
+   "key": "gs_health_007",
    "title": "20 şınav çek",
    "emoji": "💪",
    "category": "health",
@@ -2464,7 +2464,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_run_2_miles_and_time_yourself",
+   "key": "gs_health_008",
    "title": "3 km koş (süreni tut!)",
    "emoji": "🏃",
    "category": "health",
@@ -2480,7 +2480,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_do_3_push_ups",
+   "key": "gs_health_009",
    "title": "3 şınav çek",
    "emoji": "💪",
    "category": "health",
@@ -2496,7 +2496,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_exercise_for_30_minutes",
+   "key": "gs_health_010",
    "title": "30 dakika spor yap",
    "emoji": "🏅",
    "category": "health",
@@ -2512,7 +2512,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_practice_a_sport_for_30_minutes",
+   "key": "gs_health_011",
    "title": "30 dakika spor çalış",
    "emoji": "🏀",
    "category": "health",
@@ -2528,7 +2528,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_eat_5_different_fruits_and_veggies",
+   "key": "gs_health_012",
    "title": "5 farklı meyve ve sebze ye",
    "emoji": "🥕",
    "category": "health",
@@ -2546,7 +2546,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_do_5_sit_ups",
+   "key": "gs_health_013",
    "title": "5 mekik çek",
    "emoji": "🏃",
    "category": "health",
@@ -2564,7 +2564,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_do_5_push_ups",
+   "key": "gs_health_014",
    "title": "5 şınav çek",
    "emoji": "💪",
    "category": "health",
@@ -2581,7 +2581,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_go_on_a_hike_with_mom_or_dad",
+   "key": "gs_health_015",
    "title": "Annen ya da babanla doğa yürüyüşüne çık",
    "emoji": "🥾",
    "category": "health",
@@ -2598,7 +2598,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_go_on_a_run_with_mom_dad",
+   "key": "gs_health_016",
    "title": "Annen ya da babanla koşuya çık",
    "emoji": "🏃",
    "category": "health",
@@ -2615,7 +2615,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_take_dog_for_walk_with_mom_dad",
+   "key": "gs_health_017",
    "title": "Annen ya da babanla köpeği yürüyüşe çıkar",
    "emoji": "🐕",
    "category": "health",
@@ -2631,7 +2631,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_play_catch_with_mom_or_dad",
+   "key": "gs_health_018",
    "title": "Annen ya da babanla top yakalama oyna",
    "emoji": "⚾",
    "category": "health",
@@ -2649,7 +2649,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_have_a_bath_with_help_from_mom_or_dad",
+   "key": "gs_health_019",
    "title": "Annen ya da babanın yardımıyla banyo yap",
    "emoji": "🛁",
    "category": "health",
@@ -2665,7 +2665,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_put_shoes_on",
+   "key": "gs_health_020",
    "title": "Ayakkabılarını kendin giy",
    "emoji": "👟",
    "category": "health",
@@ -2682,7 +2682,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_eat_a_low_sugar_meal",
+   "key": "gs_health_021",
    "title": "Az şekerli bir öğün ye",
    "emoji": "🍎",
    "category": "health",
@@ -2700,7 +2700,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_go_on_a_bike_ride",
+   "key": "gs_health_022",
    "title": "Bisiklet sür",
    "emoji": "🚲",
    "category": "health",
@@ -2718,7 +2718,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_drink_plenty_of_water",
+   "key": "gs_health_023",
    "title": "Bol su iç",
    "emoji": "💧",
    "category": "health",
@@ -2736,7 +2736,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_put_on_deodorant",
+   "key": "gs_health_024",
    "title": "Deodorant kullan",
    "emoji": "🧴",
    "category": "health",
@@ -2753,7 +2753,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_floss_your_teeth",
+   "key": "gs_health_025",
    "title": "Diş ipi kullan",
    "emoji": "🦷",
    "category": "health",
@@ -2770,7 +2770,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_play_outside",
+   "key": "gs_health_026",
    "title": "Dışarıda oyna!",
    "emoji": "🌞",
    "category": "health",
@@ -2788,7 +2788,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_be_brave_even_when_worried_about_what",
+   "key": "gs_health_027",
    "title": "Endişelendiğinde bile cesur ol",
    "emoji": "🦁",
    "category": "health",
@@ -2806,7 +2806,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_drink_8_cups_of_water_a_day",
+   "key": "gs_health_028",
    "title": "Gün boyunca 8 bardak su iç",
    "emoji": "💧",
    "category": "health",
@@ -2823,7 +2823,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_eat_3_meals_a_day",
+   "key": "gs_health_029",
    "title": "Günde 3 öğün ye",
    "emoji": "🍽️",
    "category": "health",
@@ -2841,7 +2841,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_swim_1_lap",
+   "key": "gs_health_030",
    "title": "Havuzda 1 tur yüz",
    "emoji": "🏊",
    "category": "health",
@@ -2858,7 +2858,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_eat_breakfast",
+   "key": "gs_health_031",
    "title": "Kahvaltını yap",
    "emoji": "🥣",
    "category": "health",
@@ -2876,7 +2876,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_take_dog_for_walk",
+   "key": "gs_health_032",
    "title": "Köpeği yürüyüşe çıkar",
    "emoji": "🐕",
    "category": "health",
@@ -2892,7 +2892,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_brush_your_teeth_in_the_morning",
+   "key": "gs_health_033",
    "title": "Sabah dişlerini fırçala",
    "emoji": "🪥",
    "category": "health",
@@ -2911,7 +2911,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_brush_teeth_in_the_morning_and_at_nigh",
+   "key": "gs_health_034",
    "title": "Sabah ve akşam dişlerini fırçala",
    "emoji": "🪥",
    "category": "health",
@@ -2929,7 +2929,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_brush_your_hair",
+   "key": "gs_health_035",
    "title": "Saçını tara",
    "emoji": "💇",
    "category": "health",
@@ -2948,7 +2948,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_eat_a_healthy_dinner",
+   "key": "gs_health_036",
    "title": "Sağlıklı bir akşam yemeği ye",
    "emoji": "🥗",
    "category": "health",
@@ -2966,7 +2966,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_eat_a_healthy_lunch",
+   "key": "gs_health_037",
    "title": "Sağlıklı bir öğle yemeği ye",
    "emoji": "🥪",
    "category": "health",
@@ -2984,7 +2984,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_eat_your_vegetables",
+   "key": "gs_health_038",
    "title": "Sebzelerini ye",
    "emoji": "🥦",
    "category": "health",
@@ -3002,7 +3002,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_take_vitamins_or_medicine",
+   "key": "gs_health_039",
    "title": "Vitaminini ya da ilacını al (bir büyüğünle)",
    "emoji": "💊",
    "category": "health",
@@ -3020,7 +3020,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_brush_your_teeth_before_bed",
+   "key": "gs_health_040",
    "title": "Yatmadan önce dişlerini fırçala",
    "emoji": "🪥",
    "category": "health",
@@ -3039,7 +3039,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_wash_hands_before_eating",
+   "key": "gs_health_041",
    "title": "Yemekten önce ellerini yıka",
    "emoji": "🧼",
    "category": "health",
@@ -3057,7 +3057,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_eat_meal_without_complaining",
+   "key": "gs_health_042",
    "title": "Yemeğini söylenmeden ye",
    "emoji": "😋",
    "category": "health",
@@ -3075,7 +3075,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_learn_a_new_sport",
+   "key": "gs_health_043",
    "title": "Yeni bir spor öğren",
    "emoji": "⚽",
    "category": "health",
@@ -3092,7 +3092,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_practice_swim_strokes",
+   "key": "gs_health_044",
    "title": "Yüzme kulaçlarını çalış",
    "emoji": "🏊",
    "category": "health",
@@ -3109,7 +3109,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_learn_how_to_swim",
+   "key": "gs_health_045",
    "title": "Yüzmeyi öğren",
    "emoji": "🏊",
    "category": "health",
@@ -3127,7 +3127,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_wash_your_face",
+   "key": "gs_health_046",
    "title": "Yüzünü yıka",
    "emoji": "🫧",
    "category": "health",
@@ -3146,7 +3146,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_practice_jumping_rope_with_supervision",
+   "key": "gs_health_047",
    "title": "İp atlamayı çalış (bir büyüğünle)",
    "emoji": "🪢",
    "category": "health",
@@ -3163,7 +3163,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_try_a_fun_activity_that_you_don_t_want",
+   "key": "gs_health_048",
    "title": "İstemediğin eğlenceli bir etkinliği dene",
    "emoji": "🎢",
    "category": "health",
@@ -3181,7 +3181,7 @@
    "skill": "strength"
   },
   {
-   "key": "jt_accept_no_without_arguing",
+   "key": "gs_focus_001",
    "title": "'Hayır' cevabını tartışmadan kabul et",
    "emoji": "🙂",
    "category": "focus",
@@ -3200,7 +3200,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_get_dressed_for_the_day_in_under_5_min",
+   "key": "gs_focus_002",
    "title": "5 dakikadan kısa sürede giyin",
    "emoji": "⏱️",
    "category": "focus",
@@ -3217,7 +3217,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_write_a_story_using_6_words",
+   "key": "gs_focus_003",
    "title": "6 kelimelik bir hikâye yaz",
    "emoji": "📜",
    "category": "focus",
@@ -3234,7 +3234,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_write_your_name_fancy",
+   "key": "gs_focus_004",
    "title": "Adını süslü harflerle yaz",
    "emoji": "✒️",
    "category": "focus",
@@ -3250,7 +3250,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_prepare_a_meal_for_the_family",
+   "key": "gs_focus_005",
    "title": "Aile için bir yemek hazırla (bir büyüğünle)",
    "emoji": "👩‍🍳",
    "category": "focus",
@@ -3266,7 +3266,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_do_your_bedtime_routine",
+   "key": "gs_focus_006",
    "title": "Akşam uyku hazırlığını kendin yap",
    "emoji": "🌙",
    "category": "focus",
@@ -3284,7 +3284,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_wake_up_with_alarm_clock",
+   "key": "gs_focus_007",
    "title": "Alarmla kendin uyan",
    "emoji": "⏰",
    "category": "focus",
@@ -3301,7 +3301,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_practice_tying_your_shoes",
+   "key": "gs_focus_008",
    "title": "Ayakkabı bağlamayı çalış",
    "emoji": "👟",
    "category": "focus",
@@ -3317,7 +3317,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_draw_a_family_member_and_give_it_to_th",
+   "key": "gs_focus_009",
    "title": "Bir aile üyeni çiz ve resmi ona hediye et",
    "emoji": "🎨",
    "category": "focus",
@@ -3334,7 +3334,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_write_out_a_business_plan_for_an_idea",
+   "key": "gs_focus_010",
    "title": "Bir fikrin için küçük bir iş planı yaz",
    "emoji": "💼",
    "category": "focus",
@@ -3350,7 +3350,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_complete_a_task_without_needing_parent",
+   "key": "gs_focus_011",
    "title": "Bir işi büyüklerinden yardım almadan bitir",
    "emoji": "💪",
    "category": "focus",
@@ -3368,7 +3368,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_complete_a_puzzle_without_giving_up",
+   "key": "gs_focus_012",
    "title": "Bir yapbozu vazgeçmeden bitir",
    "emoji": "🧩",
    "category": "focus",
@@ -3387,7 +3387,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_pick_an_item_you_want_to_start_saving",
+   "key": "gs_focus_013",
    "title": "Biriktirmek istediğin bir şey seç",
    "emoji": "🎯",
    "category": "focus",
@@ -3404,7 +3404,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_write_out_5_goals_for_the_month_and_sh",
+   "key": "gs_focus_014",
    "title": "Bu ay için 5 hedef yaz ve ailene göster",
    "emoji": "🎯",
    "category": "focus",
@@ -3421,7 +3421,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_tell_mom_dad_what_you_want_to_do_today",
+   "key": "gs_focus_015",
    "title": "Bugün ne yapmak istediğini ailene anlat",
    "emoji": "🗣️",
    "category": "focus",
@@ -3439,7 +3439,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_stay_in_bed_all_night",
+   "key": "gs_focus_016",
    "title": "Bütün gece kendi yatağında uyu",
    "emoji": "🛏️",
    "category": "focus",
@@ -3455,7 +3455,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_wait_quietly_while_parents_are_on_call",
+   "key": "gs_focus_017",
    "title": "Büyüklerin telefondayken sessizce bekle",
    "emoji": "🤫",
    "category": "focus",
@@ -3474,7 +3474,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_write_about_what_you_want_to_be_when_y",
+   "key": "gs_focus_018",
    "title": "Büyüyünce ne olmak istediğini yaz",
    "emoji": "🌟",
    "category": "focus",
@@ -3491,7 +3491,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_draw_what_you_want_to_be_when_you_grow",
+   "key": "gs_focus_019",
    "title": "Büyüyünce ne olmak istediğini çiz",
    "emoji": "🌟",
    "category": "focus",
@@ -3507,7 +3507,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_fix_something_broken_around_the_house",
+   "key": "gs_focus_020",
    "title": "Evde bozuk bir şeyi onar (bir büyüğünle)",
    "emoji": "🔧",
    "category": "focus",
@@ -3523,7 +3523,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_pick_up_your_belongings",
+   "key": "gs_focus_021",
    "title": "Eşyalarını topla",
    "emoji": "🎒",
    "category": "focus",
@@ -3541,7 +3541,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_finish_all_quests_for_the_day",
+   "key": "gs_focus_022",
    "title": "Günün bütün Ev Görevlerini bitir",
    "emoji": "🎯",
    "category": "focus",
@@ -3559,7 +3559,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_plan_out_your_day",
+   "key": "gs_focus_023",
    "title": "Gününü planla",
    "emoji": "📅",
    "category": "focus",
@@ -3576,7 +3576,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_list_3_weekend_wishes",
+   "key": "gs_focus_024",
    "title": "Hafta sonu için 3 dilek yaz",
    "emoji": "🌈",
    "category": "focus",
@@ -3594,7 +3594,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_create_a_weekly_study_schedule",
+   "key": "gs_focus_025",
    "title": "Haftalık ders çalışma planı yap",
    "emoji": "🗓️",
    "category": "focus",
@@ -3610,7 +3610,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_set_your_goals_for_the_week",
+   "key": "gs_focus_026",
    "title": "Haftalık hedeflerini belirle!",
    "emoji": "🎯",
    "category": "focus",
@@ -3627,7 +3627,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_make_a_plan_for_your_week",
+   "key": "gs_focus_027",
    "title": "Haftanın planını yap",
    "emoji": "🗓️",
    "category": "focus",
@@ -3644,7 +3644,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_create_a_little_spending_budget_for_al",
+   "key": "gs_focus_028",
    "title": "Harçlığın için küçük bir bütçe yap",
    "emoji": "💰",
    "category": "focus",
@@ -3660,7 +3660,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_tidy_your_room_when_you_wake_up",
+   "key": "gs_focus_029",
    "title": "Kalkınca odanı topla",
    "emoji": "🛏️",
    "category": "focus",
@@ -3678,7 +3678,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_try_to_dress_yourself",
+   "key": "gs_focus_030",
    "title": "Kendi kendine giyinmeyi dene!",
    "emoji": "👕",
    "category": "focus",
@@ -3694,7 +3694,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_do_your_own_laundry",
+   "key": "gs_focus_031",
    "title": "Kendi çamaşırını yıka",
    "emoji": "🧺",
    "category": "focus",
@@ -3710,7 +3710,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_prepare_a_snack",
+   "key": "gs_focus_032",
    "title": "Kendine bir atıştırmalık hazırla",
    "emoji": "🍎",
    "category": "focus",
@@ -3727,7 +3727,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_start_a_piggy_bank",
+   "key": "gs_focus_033",
    "title": "Kumbara edin",
    "emoji": "🐷",
    "category": "focus",
@@ -3744,7 +3744,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_add_a_little_bit_of_money_to_your_pigg",
+   "key": "gs_focus_034",
    "title": "Kumbarana biraz para at",
    "emoji": "🐷",
    "category": "focus",
@@ -3761,7 +3761,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_create_a_paper_airplane",
+   "key": "gs_focus_035",
    "title": "Kâğıttan uçak yap",
    "emoji": "✈️",
    "category": "focus",
@@ -3779,7 +3779,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_make_a_grocery_list",
+   "key": "gs_focus_036",
    "title": "Market listesi yap",
    "emoji": "📝",
    "category": "focus",
@@ -3796,7 +3796,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_go_to_sleep_without_a_fuss",
+   "key": "gs_focus_037",
    "title": "Mızıkçılık yapmadan uyu",
    "emoji": "😴",
    "category": "focus",
@@ -3812,7 +3812,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_clean_your_room_extra_well",
+   "key": "gs_focus_038",
    "title": "Odanı bugün çok iyi temizle",
    "emoji": "✨",
    "category": "focus",
@@ -3829,7 +3829,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_open_your_bedroom_blinds",
+   "key": "gs_focus_039",
    "title": "Odanın perdesini aç",
    "emoji": "🪟",
    "category": "focus",
@@ -3847,7 +3847,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_help_prepare_school_lunch",
+   "key": "gs_focus_040",
    "title": "Okul yemeğini hazırlamaya yardım et",
    "emoji": "🥪",
    "category": "focus",
@@ -3864,7 +3864,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_make_your_own_school_lunch",
+   "key": "gs_focus_041",
    "title": "Okul yemeğini kendin hazırla",
    "emoji": "🍱",
    "category": "focus",
@@ -3880,7 +3880,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_organize_your_backpack",
+   "key": "gs_focus_042",
    "title": "Okul çantanı düzenle",
    "emoji": "🎒",
    "category": "focus",
@@ -3897,7 +3897,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_pack_your_school_bag",
+   "key": "gs_focus_043",
    "title": "Okul çantanı hazırla",
    "emoji": "🎒",
    "category": "focus",
@@ -3916,7 +3916,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_get_dressed_for_school",
+   "key": "gs_focus_044",
    "title": "Okula giyinerek hazırlan",
    "emoji": "🎒",
    "category": "focus",
@@ -3934,7 +3934,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_complete_all_your_quests_first_before",
+   "key": "gs_focus_045",
    "title": "Oyuna girmeden önce bugünkü Ev Görevlerini bitir",
    "emoji": "✅",
    "category": "focus",
@@ -3953,7 +3953,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_put_pajamas_on_for_bed_by_yourself",
+   "key": "gs_focus_046",
    "title": "Pijamanı kendin giy",
    "emoji": "🩳",
    "category": "focus",
@@ -3969,7 +3969,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_go_to_bed_before_9pm",
+   "key": "gs_focus_047",
    "title": "Saat 21.00'den önce yat",
    "emoji": "🌙",
    "category": "focus",
@@ -3986,7 +3986,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_ready_out_of_the_house_by_8am",
+   "key": "gs_focus_048",
    "title": "Saat 8.00'de hazır ol",
    "emoji": "🚪",
    "category": "focus",
@@ -4003,7 +4003,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_get_out_of_bed_at_6_45am_by_yourself",
+   "key": "gs_focus_049",
    "title": "Sabah 6.45'te kendi kendine kalk",
    "emoji": "⏰",
    "category": "focus",
@@ -4020,7 +4020,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_do_your_morning_routine",
+   "key": "gs_focus_050",
    "title": "Sabah hazırlığını kendin yap",
    "emoji": "☀️",
    "category": "focus",
@@ -4038,7 +4038,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_morning_routine_checklist",
+   "key": "gs_focus_051",
    "title": "Sabah kontrol listeni tamamla",
    "emoji": "☑️",
    "category": "focus",
@@ -4056,7 +4056,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_start_homework_without_being_reminded",
+   "key": "gs_focus_052",
    "title": "Söylenmeden ödevine başla",
    "emoji": "📝",
    "category": "focus",
@@ -4073,7 +4073,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_turn_off_video_game_console_when_time",
+   "key": "gs_focus_053",
    "title": "Süre bitince oyun konsolunu kapat",
    "emoji": "🎮",
    "category": "focus",
@@ -4091,7 +4091,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_set_alarm_for_tomorrow_morning",
+   "key": "gs_focus_054",
    "title": "Yarın sabah için alarm kur",
    "emoji": "⏰",
    "category": "focus",
@@ -4108,7 +4108,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_plan_out_tomorrow",
+   "key": "gs_focus_055",
    "title": "Yarını planla",
    "emoji": "📅",
    "category": "focus",
@@ -4125,7 +4125,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_pick_out_tomorrow_s_clothes",
+   "key": "gs_focus_056",
    "title": "Yarının kıyafetlerini seç",
    "emoji": "👚",
    "category": "focus",
@@ -4143,7 +4143,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_make_your_bed",
+   "key": "gs_focus_057",
    "title": "Yatağını topla",
    "emoji": "🛏️",
    "category": "focus",
@@ -4161,7 +4161,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_put_away_electronic_devices_20_minutes",
+   "key": "gs_focus_058",
    "title": "Yatmadan 20 dakika önce ekranları kapat",
    "emoji": "📵",
    "category": "focus",
@@ -4179,7 +4179,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_get_ready_for_bed",
+   "key": "gs_focus_059",
    "title": "Yatmaya hazırlan",
    "emoji": "🛌",
    "category": "focus",
@@ -4197,7 +4197,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_organize_your_workspace",
+   "key": "gs_focus_060",
    "title": "Çalışma masanı düzenle",
    "emoji": "🗂️",
    "category": "focus",
@@ -4214,7 +4214,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_prepare_all_homework_supplies_before_s",
+   "key": "gs_focus_061",
    "title": "Ödeve başlamadan bütün malzemeni hazırla",
    "emoji": "✏️",
    "category": "focus",
@@ -4231,7 +4231,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_use_indoor_voice_when_indoors",
+   "key": "gs_focus_062",
    "title": "İçeride alçak sesle konuş",
    "emoji": "🔉",
    "category": "focus",
@@ -4249,7 +4249,7 @@
    "skill": "focus"
   },
   {
-   "key": "jt_give_3_compliments",
+   "key": "gs_relation_001",
    "title": "3 kişiye iltifat et",
    "emoji": "🌼",
    "category": "relation",
@@ -4266,7 +4266,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_have_a_family_movie_night",
+   "key": "gs_relation_002",
    "title": "Ailece film gecesi yap",
    "emoji": "🎬",
    "category": "relation",
@@ -4284,7 +4284,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_plan_a_fun_weekend_activity_for_your_f",
+   "key": "gs_relation_003",
    "title": "Ailen için eğlenceli bir hafta sonu etkinliği planla",
    "emoji": "🎡",
    "category": "relation",
@@ -4301,7 +4301,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_write_3_things_you_love_about_your_fam",
+   "key": "gs_relation_004",
    "title": "Ailende sevdiğin 3 şeyi yaz!",
    "emoji": "💖",
    "category": "relation",
@@ -4318,7 +4318,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_schedule_a_hangout_with_a_friend_that",
+   "key": "gs_relation_005",
    "title": "Ailenin onayladığı bir arkadaşınla buluşma planla",
    "emoji": "📆",
    "category": "relation",
@@ -4334,7 +4334,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_watch_a_movie_with_family",
+   "key": "gs_relation_006",
    "title": "Ailenle film izle",
    "emoji": "🍿",
    "category": "relation",
@@ -4352,7 +4352,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_go_on_a_day_trip_with_your_family",
+   "key": "gs_relation_007",
    "title": "Ailenle günübirlik bir geziye çık",
    "emoji": "🚗",
    "category": "relation",
@@ -4370,7 +4370,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_play_a_card_game_with_your_family",
+   "key": "gs_relation_008",
    "title": "Ailenle kart oyunu oyna",
    "emoji": "🃏",
    "category": "relation",
@@ -4388,7 +4388,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_play_a_board_game_with_family",
+   "key": "gs_relation_009",
    "title": "Ailenle kutu oyunu oyna",
    "emoji": "🎲",
    "category": "relation",
@@ -4406,7 +4406,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_go_on_a_walk_with_family",
+   "key": "gs_relation_010",
    "title": "Ailenle yürüyüşe çık",
    "emoji": "🚶",
    "category": "relation",
@@ -4424,7 +4424,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_read_a_short_book_with_mom_or_dad",
+   "key": "gs_relation_011",
    "title": "Annen ya da babanla kısa bir kitap oku",
    "emoji": "📚",
    "category": "relation",
@@ -4440,7 +4440,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_practice_good_manners_with_mom_or_dad",
+   "key": "gs_relation_012",
    "title": "Annen ya da babanla nazik davranmayı çalış",
    "emoji": "🎩",
    "category": "relation",
@@ -4458,7 +4458,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_go_to_the_park_with_mom_or_dad",
+   "key": "gs_relation_013",
    "title": "Annen ya da babanla parka git",
    "emoji": "🌳",
    "category": "relation",
@@ -4475,7 +4475,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_snuggle_with_mom_or_dad",
+   "key": "gs_relation_014",
    "title": "Annen ya da babanla sarılarak dinlen",
    "emoji": "🧸",
    "category": "relation",
@@ -4492,7 +4492,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_ask_about_parent_s_day",
+   "key": "gs_relation_015",
    "title": "Annene ya da babana gününün nasıl geçtiğini sor",
    "emoji": "💬",
    "category": "relation",
@@ -4510,7 +4510,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_give_mom_or_dad_a_hug",
+   "key": "gs_relation_016",
    "title": "Annene ya da babana sarıl",
    "emoji": "🤗",
    "category": "relation",
@@ -4528,7 +4528,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_treat_peers_respectfully_no_bossing_th",
+   "key": "gs_relation_017",
    "title": "Arkadaşlarına saygılı davran (patronluk taslamadan)",
    "emoji": "🤝",
    "category": "relation",
@@ -4546,7 +4546,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_daily_check_in_with_parent_s_about_fri",
+   "key": "gs_relation_018",
    "title": "Arkadaşlarını annen ya da babanla konuş",
    "emoji": "👫",
    "category": "relation",
@@ -4564,7 +4564,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_tell_others_how_you_re_feeling_without",
+   "key": "gs_relation_019",
    "title": "Bağırmadan nasıl hissettiğini anlat",
    "emoji": "💬",
    "category": "relation",
@@ -4581,7 +4581,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_call_facetime_a_family_member_to_check",
+   "key": "gs_relation_020",
    "title": "Bir aile büyüğünü arayıp hâlini sor",
    "emoji": "📞",
    "category": "relation",
@@ -4599,7 +4599,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_play_a_game_of_chess_with_family_membe",
+   "key": "gs_relation_021",
    "title": "Bir aile üyenle satranç oyna",
    "emoji": "♟️",
    "category": "relation",
@@ -4616,7 +4616,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_write_a_letter_to_a_friend",
+   "key": "gs_relation_022",
    "title": "Bir arkadaşına mektup yaz",
    "emoji": "✉️",
    "category": "relation",
@@ -4633,7 +4633,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_hang_out_with_a_friend",
+   "key": "gs_relation_023",
    "title": "Bir arkadaşınla vakit geçir",
    "emoji": "👫",
    "category": "relation",
@@ -4651,7 +4651,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_write_a_thank_you_note",
+   "key": "gs_relation_024",
    "title": "Bir teşekkür notu yaz",
    "emoji": "💐",
    "category": "relation",
@@ -4669,7 +4669,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_do_something_kind_for_someone",
+   "key": "gs_relation_025",
    "title": "Biri için güzel bir şey yap",
    "emoji": "💝",
    "category": "relation",
@@ -4687,7 +4687,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_tell_someone_good_morning",
+   "key": "gs_relation_026",
    "title": "Birine günaydın de!",
    "emoji": "🌞",
    "category": "relation",
@@ -4705,7 +4705,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_give_a_compliment_to_someone",
+   "key": "gs_relation_027",
    "title": "Birine iltifat et",
    "emoji": "🌸",
    "category": "relation",
@@ -4723,7 +4723,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_make_a_card_for_someone_telling_them_w",
+   "key": "gs_relation_028",
    "title": "Birine neden onu sevdiğini anlatan bir kart yap",
    "emoji": "💌",
    "category": "relation",
@@ -4741,7 +4741,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_practice_greeting_someone_politely",
+   "key": "gs_relation_029",
    "title": "Birini kibarca selamlamayı çalış",
    "emoji": "👋",
    "category": "relation",
@@ -4759,7 +4759,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_leave_a_happy_surprise_note_for_someon",
+   "key": "gs_relation_030",
    "title": "Birini mutlu edecek bir sürpriz not bırak",
    "emoji": "💌",
    "category": "relation",
@@ -4777,7 +4777,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_make_someone_smile_today",
+   "key": "gs_relation_031",
    "title": "Bugün birini gülümset",
    "emoji": "😄",
    "category": "relation",
@@ -4795,7 +4795,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_absolutely_no_physical_violence_to_sib",
+   "key": "gs_relation_032",
    "title": "Bugün kardeşine hiç vurma, itme",
    "emoji": "🤝",
    "category": "relation",
@@ -4812,7 +4812,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_share_your_favorite_book",
+   "key": "gs_relation_033",
    "title": "En sevdiğin kitabı paylaş",
    "emoji": "📕",
    "category": "relation",
@@ -4830,7 +4830,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_share_a_fun_memory",
+   "key": "gs_relation_034",
    "title": "Eğlenceli bir anını paylaş",
    "emoji": "📸",
    "category": "relation",
@@ -4848,7 +4848,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_find_3_things_you_re_proud_of",
+   "key": "gs_relation_035",
    "title": "Gurur duyduğun 3 şeyi bul",
    "emoji": "🏆",
    "category": "relation",
@@ -4865,7 +4865,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_share_with_siblings_or_friends",
+   "key": "gs_relation_036",
    "title": "Kardeşin ya da arkadaşlarınla paylaş",
    "emoji": "🤲",
    "category": "relation",
@@ -4883,7 +4883,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_be_nice_to_your_sibling",
+   "key": "gs_relation_037",
    "title": "Kardeşine iyi davran",
    "emoji": "💛",
    "category": "relation",
@@ -4901,7 +4901,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_have_a_outdoor_picnic_with_your_siblin",
+   "key": "gs_relation_038",
    "title": "Kardeşinle açık havada piknik yap",
    "emoji": "🧺",
    "category": "relation",
@@ -4919,7 +4919,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_do_a_fun_activity_with_your_sibling",
+   "key": "gs_relation_039",
    "title": "Kardeşinle eğlenceli bir şey yap",
    "emoji": "🎈",
    "category": "relation",
@@ -4937,7 +4937,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_dont_fight_with_your_sibling",
+   "key": "gs_relation_040",
    "title": "Kardeşinle kavga etme",
    "emoji": "🕊️",
    "category": "relation",
@@ -4955,7 +4955,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_play_a_game_with_your_sibling",
+   "key": "gs_relation_041",
    "title": "Kardeşinle oyun oyna",
    "emoji": "🎮",
    "category": "relation",
@@ -4973,7 +4973,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_make_a_silly_monster_face",
+   "key": "gs_relation_042",
    "title": "Komik bir canavar yüzü yap",
    "emoji": "👾",
    "category": "relation",
@@ -4990,7 +4990,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_make_eye_contact_in_a_conversation_wit",
+   "key": "gs_relation_043",
    "title": "Konuşurken söylenmeden göz teması kur",
    "emoji": "👀",
    "category": "relation",
@@ -5008,7 +5008,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_babysit_younger_sibling",
+   "key": "gs_relation_044",
    "title": "Küçük kardeşine göz kulak ol (bir büyüğün yanındayken)",
    "emoji": "👶",
    "category": "relation",
@@ -5024,7 +5024,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_say_please_and_thank_you",
+   "key": "gs_relation_045",
    "title": "Lütfen ve teşekkür ederim de",
    "emoji": "🙏",
    "category": "relation",
@@ -5042,7 +5042,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_behave_at_school_all_day",
+   "key": "gs_relation_046",
    "title": "Okulda bütün gün güzel davran",
    "emoji": "🏫",
    "category": "relation",
@@ -5060,7 +5060,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_wait_your_turn_in_games",
+   "key": "gs_relation_047",
    "title": "Oyunlarda sıranı bekle",
    "emoji": "⏳",
    "category": "relation",
@@ -5079,7 +5079,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_do_a_random_act_of_kindness",
+   "key": "gs_relation_048",
    "title": "Rastgele bir iyilik yap",
    "emoji": "🎁",
    "category": "relation",
@@ -5097,7 +5097,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_draw_something_you_re_thankful_for",
+   "key": "gs_relation_049",
    "title": "Teşekkür ettiğin bir şeyi çiz",
    "emoji": "🙏",
    "category": "relation",
@@ -5114,7 +5114,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_play_with_a_new_friend",
+   "key": "gs_relation_050",
    "title": "Yeni bir arkadaşla oyna",
    "emoji": "🧒",
    "category": "relation",
@@ -5132,7 +5132,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_say_something_nice_to_2_different_peop",
+   "key": "gs_relation_051",
    "title": "İki farklı kişiye güzel bir söz söyleyip onları gülümset",
    "emoji": "😊",
    "category": "relation",
@@ -5150,7 +5150,7 @@
    "skill": "kindness"
   },
   {
-   "key": "jt_discuss_what_makes_a_good_friend_with",
+   "key": "gs_relation_052",
    "title": "İyi arkadaş nasıl olur, ailenle konuş",
    "emoji": "🤗",
    "category": "relation",
