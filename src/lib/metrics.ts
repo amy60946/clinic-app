@@ -1,6 +1,7 @@
 // Ev rutin kartı göstergeleri (araştırma belgesi "oyun omurgası analizi" bölüm 6).
 // Hepsi yalnız çocuğun kendi geçmişiyle karşılaştırılır; norm yok, tanı/zekâ/dikkat puanı değildir.
 // Saf fonksiyonlar: sunucudan gelen satırlarla çalışır, testleri tests/metrics.test.mjs.
+import { skillKey, SKILL_LABEL } from '../skills.ts';
 
 export type Task = {
   id: string;
@@ -281,14 +282,15 @@ export function observations(tasks: Task[], comps: Completion[], from: string, t
   };
 }
 
-/* ---------- Beceri alanına göre ---------- */
+/* ---------- Beceri alanına göre: altı beceri (ortak ekonomi.md 5B); eski etiketler eşlenir, eşleşmeyen "Diğer" ---------- */
 
 export type SkillStat = { skill: string; planned: number; approved: number; rate: number | null };
 
 export function bySkill(tasks: Task[], comps: Completion[], from: string, to: string): SkillStat[] {
   const map = new Map<string, { planned: number; approved: number }>();
   instances(tasks, comps, from, to).forEach((i) => {
-    const k = i.task.skill.trim() || 'Diğer';
+    const sk = skillKey(i.task.skill);
+    const k = sk ? SKILL_LABEL[sk] : 'Diğer';
     const v = map.get(k) ?? { planned: 0, approved: 0 };
     v.planned += 1;
     if (done(i)) v.approved += 1;
@@ -296,7 +298,7 @@ export function bySkill(tasks: Task[], comps: Completion[], from: string, to: st
   });
   return [...map.entries()]
     .map(([skill, v]) => ({ skill, ...v, rate: pct(v.approved, v.planned) }))
-    .sort((a, b) => b.planned - a.planned);
+    .sort((a, b) => (a.skill === 'Diğer' ? 1 : 0) - (b.skill === 'Diğer' ? 1 : 0) || b.planned - a.planned);
 }
 
 /* ---------- Zor an (ABC) özeti ---------- */

@@ -5,6 +5,7 @@ import {
   DECLINE_LABELS, LIMITS_TEXT, MASTERY_RATE, MASTERY_WEEKS,
 } from './metrics';
 import type { Goal } from './clinic';
+import { skillName } from '../skills';
 
 export type ReportInput = {
   clinic: string;
@@ -44,7 +45,7 @@ export function buildReportHtml(r: ReportInput): string {
   const weekRows = w.map((x) => `<tr><td>${d(x.start)} – ${d(addDays(x.start, 6))}</td><td class="n">${x.approved}/${x.planned}</td>
     <td>${bar(x.rate)} ${p(x.rate)}</td><td class="n">${x.fullDays}/${x.plannedDays}</td><td class="n">${x.declined}</td><td class="n">${x.rejected}</td></tr>`).join('');
   const taskRows = tasks.map((s) => `<tr><td>${esc(s.task.emoji)} ${esc(s.task.title)}${s.mastered ? ' <b class="ok">ustalık</b>' : ''}</td>
-    <td>${esc(s.task.skill || '–')}</td><td class="n">${s.approved}/${s.planned}</td><td>${bar(s.rate)} ${p(s.rate)}</td>
+    <td>${esc(skillName(s.task.skill) || '–')}</td><td class="n">${s.approved}/${s.planned}</td><td>${bar(s.rate)} ${p(s.rate)}</td>
     <td class="n">${s.weeklyRates.map((x) => (x === null ? '–' : x)).join(' · ')}</td></tr>`).join('');
   const skillRows = skills.map((s) => `<tr><td>${esc(s.skill)}</td><td class="n">${s.approved}/${s.planned}</td><td>${bar(s.rate)} ${p(s.rate)}</td></tr>`).join('');
   // GAS bu haftayı da içerir (uzman içinde bulunulan haftayı puanlayabilir)

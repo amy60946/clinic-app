@@ -10,6 +10,7 @@ import { formatTR } from '../../dates';
 import SuggestionEditor, { repeatSummary } from './SuggestionEditor';
 import type { ClientCtx } from './ClientScreen';
 import { track } from '../../lib/track';
+import { skillName } from '../../skills';
 
 const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: string; icon: keyof typeof Ionicons.glyphMap }> = {
   pending: { label: 'Ebeveyn kararı bekleniyor', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'time-outline' },
@@ -83,7 +84,7 @@ export default function SuggestionsTab({ client, me }: ClientCtx) {
                   <Text style={styles.cardTitle}>{s.title}</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <DifficultyBadge d={s.difficulty} coins={s.coins} />
-                    {!!s.skill && <Text style={styles.meta}>{s.skill}</Text>}
+                    {!!skillName(s.skill) && <Text style={styles.meta}>{skillName(s.skill)}</Text>}
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                     <Meta icon={s.recurring ? 'repeat' : 'calendar-outline'}
