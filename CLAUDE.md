@@ -4,7 +4,7 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 
 | Ürün | Kim kullanır | Depo | Durum |
 |---|---|---|---|
-| **GameApp** | Çocuk (oyun; yaş bantları A 6–8 · B 9–12, canlıda doğrulandı 21 Ekim 2026) | `amy60946/game-app` (Unity 6, C#) | TestFlight'a yüklendi |
+| **GameApp** | Çocuk (oyun; yaş grupları K ≤5 · A 6–8 · B 9–12 · C 13+, tek kaynak `age_band(doğum günü, gün)`; analizler olay günündeki gerçek yaşı `age_years` ile kullanır — ortak `durumlar.md` §4) | `amy60946/game-app` (Unity 6, C#) | TestFlight'a yüklendi |
 | **ParentApp** | Ebeveyn (aile aboneliği) | `amy60946/parent-app` (Expo / React Native) | TestFlight'a yüklendi (19 Ekim 2026) |
 | **ClinicApp** | Uzman (klinisyen başına ücret) | `amy60946/clinic-app` (bu depo) | Uzman paneli ilk sürüm (web + iOS); TestFlight'a yüklendi (19 Ekim 2026) |
 
