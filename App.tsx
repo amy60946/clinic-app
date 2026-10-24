@@ -10,6 +10,8 @@ import {
 import HomeScreen from './src/screens/HomeScreen';
 import { NotificationsProvider } from './src/lib/notificationsContext';
 import { startTracking } from './src/lib/track';
+import { ClientConfigProvider } from './src/lib/clientConfig';
+import ConfigGate from './src/screens/ConfigGate';
 
 function Loading() {
   return (
@@ -32,15 +34,19 @@ function AuthFlow() {
 }
 
 function Root() {
-  const { session, loading, recovery } = useAuth();
+  const { session, loading, recovery, signOut } = useAuth();
   if (loading) return <Loading />;
   if (recovery && session) return <NewPasswordScreen />;
   if (!session) return <AuthFlow />;
   return (
-    <NotificationsProvider key={session.user.id} userId={session.user.id}>
-      <Tracking />
-      <HomeScreen />
-    </NotificationsProvider>
+    <ClientConfigProvider key={session.user.id}>
+      <ConfigGate onSignOut={signOut}>
+        <NotificationsProvider key={session.user.id} userId={session.user.id}>
+          <Tracking />
+          <HomeScreen />
+        </NotificationsProvider>
+      </ConfigGate>
+    </ClientConfigProvider>
   );
 }
 

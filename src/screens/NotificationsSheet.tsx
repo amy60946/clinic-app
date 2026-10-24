@@ -10,7 +10,7 @@ import { track } from '../lib/track';
 
 const ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   abc_event: 'pulse-outline', clinic_shared: 'person-add-outline', clinic_revoked: 'lock-closed-outline',
-  suggestion_decided: 'checkmark-done-outline', team_joined: 'people-outline', client_assigned: 'person-outline',
+  suggestion_decided: 'checkmark-done-outline', team_joined: 'people-outline', client_assigned: 'person-outline', admin_message: 'megaphone-outline',
 };
 
 // Danışan ekranında birden çok çocuklu bildirim (kardeşler) yalnız bu çocuğun adıyla gösterilir
