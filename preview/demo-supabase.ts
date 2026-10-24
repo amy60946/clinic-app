@@ -642,6 +642,12 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     return { data: n, error: null };
   }
   if (name === 'register_push_token' || name === 'unregister_push_token') return { data: null, error: null };
+  // Uzaktan uygulama ayarı: önizlemede boş (denemek için tarayıcı deposuna 'demo.client_config' JSON yazılabilir)
+  if (name === 'client_config') {
+    let v: Row = { app: {}, flags: {} };
+    try { v = JSON.parse(localStorage.getItem('demo.client_config') || 'null') ?? v; } catch {}
+    return { data: v, error: null };
+  }
   if (name === 'track_session') {
     const row = db.user_activity.find((a: Row) => a.user_id === uid && a.app === args.p_app);
     if (row) Object.assign(row, { last_seen_at: now(), sessions: row.sessions + 1 });

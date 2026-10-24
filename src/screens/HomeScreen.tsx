@@ -11,6 +11,7 @@ import {
   clinicianMe, listClients, listTeam, createFamilyInvite, createTeamInvite, joinTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Invite, Member,
 } from '../lib/clinic';
 import MembershipScreen from './MembershipScreen';
+import { ConfigBanner } from './ConfigGate';
 import { billingStatus, hasAccess, daysLeft, packageName } from '../lib/billing';
 import ClientScreen, { Tab } from './client/ClientScreen';
 import NotificationsSheet, { notificationTab } from './NotificationsSheet';
@@ -220,6 +221,7 @@ export default function HomeScreen() {
           )}
           {state.kind === 'error' && <Notice icon="alert-circle-outline" text={`Yüklenemedi: ${state.message}`} />}
 
+          <ConfigBanner />
           {state.kind === 'ready' && (
             <>
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
