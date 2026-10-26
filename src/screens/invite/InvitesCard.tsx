@@ -3,7 +3,7 @@ import { View, Text, Pressable, Alert, StyleSheet } from 'react-native';
 import { colors, radius } from '../../theme';
 import { Card, Label, Cta, SmallButton } from '../../components/ui';
 import { ClinicianMe, Member } from '../../lib/clinic';
-import { FamilyInvite, InviteStats, STATUS_TEXT, listInvites, inviteStats, revokeInvite, sweepInvites, leftText } from '../../lib/invites';
+import { FamilyInvite, InviteStats, STATUS_TEXT, listInvites, inviteStats, revokeInvite, sweepInvites, leftText, ageGroupLabel } from '../../lib/invites';
 import InviteSheet, { SheetInvite } from './InviteSheet';
 
 // Ana ekran: "Aileyi davet et" + davetlerim (durum, yeniden gönder, iptal) + sahip için ekip istatistiği (ortak akislar.md 10).
@@ -60,7 +60,8 @@ export default function InvitesCard({ me, team, reloadKey, onChanged }: {
             {shown.map((i) => {
               const open = ['sent', 'opened', 'claimed'].includes(i.status);
               const tone = TONE[i.status] ?? TONE.sent;
-              const who = [i.parent_name, i.label].filter(Boolean).join(' · ') || 'İsimsiz davet';
+              const child = [i.child_name, ageGroupLabel(i.child_age_group)].filter(Boolean).join(', ');
+              const who = [i.parent_name, child, i.label].filter(Boolean).join(' · ') || 'İsimsiz davet';
               return (
                 <Card key={i.code} style={{ gap: 6 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -77,10 +78,10 @@ export default function InvitesCard({ me, team, reloadKey, onChanged }: {
                   {open && (
                     <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
                       {i.status !== 'claimed' && (
-                        <SmallButton label="Yeniden gönder / plan" onPress={() => setSheet({ open: true, existing: { code: i.code, token: i.token, expires_at: i.expires_at, parent_name: i.parent_name, parent_email: i.parent_email, label: i.label } })} />
+                        <SmallButton label="Yeniden gönder / plan" onPress={() => setSheet({ open: true, existing: { code: i.code, token: i.token, expires_at: i.expires_at, parent_name: i.parent_name, parent_email: i.parent_email, label: i.label, child_name: i.child_name, child_age_group: i.child_age_group } })} />
                       )}
                       {i.status === 'claimed' && (
-                        <SmallButton label="Plan" onPress={() => setSheet({ open: true, existing: { code: i.code, token: i.token, expires_at: i.expires_at, parent_name: i.parent_name, parent_email: i.parent_email, label: i.label } })} />
+                        <SmallButton label="Plan" onPress={() => setSheet({ open: true, existing: { code: i.code, token: i.token, expires_at: i.expires_at, parent_name: i.parent_name, parent_email: i.parent_email, label: i.label, child_name: i.child_name, child_age_group: i.child_age_group } })} />
                       )}
                       <SmallButton label="İptal" danger onPress={() => revoke(i)} />
                     </View>

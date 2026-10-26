@@ -697,7 +697,9 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     const row = { code, clinic_id: m.clinic_id, clinician_id: m.id, kind: args.p_kind ?? 'family', label: String(args.p_label ?? '').slice(0, 60),
       created_at: now(), expires_at: new Date(Date.now() + (team ? 15 * 60e3 : 48 * 3600e3)).toISOString(), used_at: null, used_by: null,
       token, parent_name: String(args.p_parent_name ?? '').trim().slice(0, 60), parent_email: (String(args.p_parent_email ?? '').trim().toLowerCase() || null),
-      channel: null, opened_at: null, claimed_at: null, claimed_family: null, expired_notified_at: null, revoked_at: null };
+      channel: null, opened_at: null, claimed_at: null, claimed_family: null, expired_notified_at: null, revoked_at: null,
+      child_name: team ? null : (String(args.p_child_name ?? '').trim().slice(0, 40) || null),
+      child_age_group: team ? null : (['K', 'A', 'B', 'C'].includes(String(args.p_child_age_group)) ? args.p_child_age_group : null) };
     db.clinic_invites.push(row);
     save();
     return { data: { code, token, expires_at: row.expires_at }, error: null };
@@ -713,6 +715,8 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     if (args.p_revoke) {
       if (inv.used_at) return err('Kullanılmış davet iptal edilemez');
       inv.revoked_at = inv.revoked_at ?? now();
+      inv.child_name = null;
+      inv.child_age_group = null;
       db.clinic_goals = db.clinic_goals.filter((g: Row) => g.invite_code !== inv.code);
       db.care_modules = db.care_modules.filter((x: Row) => x.invite_code !== inv.code);
     } else if (args.p_channel) inv.channel = args.p_channel;
@@ -727,7 +731,8 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
       code: i.code, token: !i.used_at && !i.revoked_at ? i.token ?? null : null, clinician_id: i.clinician_id,
       clinician: db.clinicians.find((x: Row) => x.id === i.clinician_id)?.name ?? '', label: i.label ?? '', parent_name: i.parent_name ?? '',
       parent_email: i.parent_email ?? null, channel: i.channel ?? null, status: inviteStatus(i), created_at: i.created_at, expires_at: i.expires_at,
-      opened_at: i.opened_at ?? null, claimed_at: i.claimed_at ?? null, used_at: i.used_at, has_plan: hasPlan(i.code) })), error: null };
+      opened_at: i.opened_at ?? null, claimed_at: i.claimed_at ?? null, used_at: i.used_at, has_plan: hasPlan(i.code),
+      child_name: i.child_name ?? null, child_age_group: i.child_age_group ?? null })), error: null };
   }
   if (name === 'clinic_invite_stats') {
     const m = myClinician();

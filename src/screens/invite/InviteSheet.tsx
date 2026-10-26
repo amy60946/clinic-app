@@ -4,16 +4,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
-import { Card, Label, Input, Cta, IconButton } from '../../components/ui';
+import { Card, Label, Input, Cta, IconButton, Segmented } from '../../components/ui';
 import PlanEditor from '../plan/PlanEditor';
 import { track } from '../../lib/track';
 import {
-  NewInvite, Channel, createInvite, markInvite, inviteLink, inviteMessage, shareInvite, leftText,
+  NewInvite, Channel, ChildAgeGroup, CHILD_AGE_GROUPS, ageGroupLabel, createInvite, markInvite, inviteLink, inviteMessage, shareInvite, leftText,
 } from '../../lib/invites';
 
 // Aileyi davet et (ortak akislar.md 10): 1) isteğe bağlı ebeveyn adı / e-posta / not → 2) bağlantı + kod, WhatsApp / e-posta / diğer
 // → 3) isteğe bağlı taslak takip planı (aile çocuğunu paylaşınca o çocuğa taşınır). Davet 48 saat geçerli.
-export type SheetInvite = NewInvite & { parent_name?: string; parent_email?: string | null; label?: string };
+export type SheetInvite = NewInvite & {
+  parent_name?: string; parent_email?: string | null; label?: string; child_name?: string | null; child_age_group?: string | null;
+};
 
 export default function InviteSheet({ visible, onClose, clinicId, clinicianName, existing }: {
   visible: boolean; onClose: () => void; clinicId: string; clinicianName: string; existing?: SheetInvite | null;
@@ -32,6 +34,8 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
   const [parentName, setParentName] = useState('');
   const [email, setEmail] = useState('');
   const [label, setLabel] = useState('');
+  const [childName, setChildName] = useState('');
+  const [childAge, setChildAge] = useState<ChildAgeGroup | 'none'>('none');
   const [busy, setBusy] = useState(false);
   const [plan, setPlan] = useState(false);
   const [, tick] = useState(0);
@@ -41,9 +45,11 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
     if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return Alert.alert('E-posta adresi geçersiz.');
     setBusy(true);
     try {
-      const r = await createInvite(label, parentName, email);
-      setInv({ ...r, parent_name: parentName.trim(), parent_email: email.trim() || null, label: label.trim() });
-      track('invite.family', { email: !!email.trim(), link: !!r.token });
+      const age = childAge === 'none' ? null : childAge;
+      const r = await createInvite({ label, parentName, parentEmail: email, childName, childAgeGroup: age });
+      setInv({ ...r, parent_name: parentName.trim(), parent_email: email.trim() || null, label: label.trim(),
+        child_name: r.childSaved ? childName.trim() || null : null, child_age_group: r.childSaved ? age : null });
+      track('invite.family', { email: !!email.trim(), link: !!r.token, child: !!childName.trim() || !!age });
     } catch (e) {
       Alert.alert('Davet oluşturulamadı', (e as Error).message);
     } finally {
@@ -88,8 +94,15 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
               <Label>Ebeveynin e-postası (isteğe bağlı)</Label>
               <Input value={email} onChangeText={setEmail} placeholder="ornek@eposta.com" keyboardType="email-address" autoCapitalize="none" maxLength={160} />
               <Text style={styles.small}>Ebeveyn bu e-postayla kayıt olursa davet bağlantıya dokunmasa da kendiliğinden eşleşir.</Text>
+              <Label>Çocuğun adı ya da takma adı (isteğe bağlı)</Label>
+              <Input value={childName} onChangeText={setChildName} placeholder="Ör. Efe" maxLength={40} />
+              <Label>Yaş grubu (isteğe bağlı)</Label>
+              <Segmented options={[{ id: 'none' as const, label: 'Belirtme' }, ...CHILD_AGE_GROUPS]} value={childAge} onChange={setChildAge} />
+              <Text style={styles.small}>
+                Ebeveyn kayıt olunca "{childName.trim() || 'Çocuğunu'} ekle ve paylaş" diye hazır gelir; düzenleyip kendisi ekler. Mesajda ve bağlantı sayfasında görünmez; davet bitince silinir.
+              </Text>
               <Label>Kendi notun (isteğe bağlı, aile görmez)</Label>
-              <Input value={label} onChangeText={setLabel} placeholder="Ör. danışanın takma adı" maxLength={60} />
+              <Input value={label} onChangeText={setLabel} placeholder="Ör. dosya no, görüşme günü" maxLength={60} />
               <View style={{ marginTop: 16 }}><Cta label="Daveti oluştur" onPress={create} busy={busy} /></View>
             </>
           ) : (
@@ -104,6 +117,9 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
                   </Pressable>
                 </View>
                 <Text style={[styles.small, { fontWeight: '600' }]}>{leftText(inv.expires_at)}{inv.label ? ` · ${inv.label}` : ''}</Text>
+                {(!!inv.child_name || !!inv.child_age_group) && (
+                  <Text style={styles.small}>Çocuk: {[inv.child_name, ageGroupLabel(inv.child_age_group) && `${ageGroupLabel(inv.child_age_group)} yaş`].filter(Boolean).join(' · ')} (yalnız daveti kabul eden ebeveyn görür)</Text>
+                )}
                 {link ? <Text style={styles.small} selectable>{link}</Text> : (
                   <Text style={styles.small}>Bağlantı adresi henüz tanımlı değil (alan adı bekleniyor); mesajda yükleme yolu ve kod gider.</Text>
                 )}

@@ -13,8 +13,15 @@ export type FamilyInvite = {
   code: string; token: string | null; clinician_id: string; clinician: string; label: string;
   parent_name: string; parent_email: string | null; channel: string | null; status: InviteStatus;
   created_at: string; expires_at: string; opened_at: string | null; claimed_at: string | null; used_at: string | null;
-  has_plan: boolean;
+  has_plan: boolean; child_name?: string | null; child_age_group?: ChildAgeGroup | null;
 };
+// Çocuk önerisi (ortak akislar.md 10): ad/takma ad + yaş grubu; yalnız daveti kabul eden ebeveyn görür, mesajda gitmez
+export type ChildAgeGroup = 'K' | 'A' | 'B' | 'C';
+export const CHILD_AGE_GROUPS: { id: ChildAgeGroup; label: string }[] = [
+  { id: 'K', label: '5 ve altı' }, { id: 'A', label: '6–8' }, { id: 'B', label: '9–12' }, { id: 'C', label: '13+' },
+];
+export const ageGroupLabel = (g?: string | null) => CHILD_AGE_GROUPS.find((x) => x.id === g)?.label ?? '';
+export type InviteInput = { label: string; parentName: string; parentEmail: string; childName: string; childAgeGroup: ChildAgeGroup | null };
 export type NewInvite = { code: string; token: string | null; expires_at: string };
 export type InviteStats = {
   clinician_id: string; clinician: string; sent: number; opened: number; claimed: number; shared: number; expired: number; open_now: number;
@@ -32,18 +39,23 @@ export const STATUS_TEXT: Record<InviteStatus, string> = {
 
 const missing = (e: { code?: string } | null) => e?.code === 'PGRST202' || e?.code === '42883';
 
-export async function createInvite(label: string, parentName: string, parentEmail: string): Promise<NewInvite> {
-  const r = await supabase.rpc('clinic_create_invite', {
-    p_kind: 'family', p_label: label.trim(), p_parent_name: parentName.trim(), p_parent_email: parentEmail.trim() || null,
-  });
-  if (missing(r.error)) {
-    // eski sunucu: yalnız kod (15 dk)
-    const old = await supabase.rpc('clinic_create_invite', { p_kind: 'family', p_label: label.trim() });
-    if (old.error) throw new Error(old.error.message);
-    return { ...(old.data as NewInvite), token: null };
+export async function createInvite(i: InviteInput): Promise<NewInvite & { childSaved: boolean }> {
+  const base = { p_kind: 'family', p_label: i.label.trim(), p_parent_name: i.parentName.trim(), p_parent_email: i.parentEmail.trim() || null };
+  const r = await supabase.rpc('clinic_create_invite', { ...base, p_child_name: i.childName.trim(), p_child_age_group: i.childAgeGroup });
+  if (!missing(r.error)) {
+    if (r.error) throw new Error(r.error.message);
+    return { ...(r.data as NewInvite), childSaved: true };
   }
-  if (r.error) throw new Error(r.error.message);
-  return r.data as NewInvite;
+  // çocuk önerisi olmayan sunucu
+  const mid = await supabase.rpc('clinic_create_invite', base);
+  if (!missing(mid.error)) {
+    if (mid.error) throw new Error(mid.error.message);
+    return { ...(mid.data as NewInvite), childSaved: false };
+  }
+  // eski sunucu: yalnız kod (15 dk)
+  const old = await supabase.rpc('clinic_create_invite', { p_kind: 'family', p_label: i.label.trim() });
+  if (old.error) throw new Error(old.error.message);
+  return { ...(old.data as NewInvite), token: null, childSaved: false };
 }
 
 export async function markInvite(code: string, channel: Channel): Promise<void> {
