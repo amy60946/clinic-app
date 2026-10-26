@@ -128,9 +128,9 @@ export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { g
     setBusy(true);
     try {
       const { needsConfirmation } = await signUp({
-        email, password, name, title, teamCode: join ? teamCode : '',
-        // Bireysel uzmanın çalışma alanı kendi adıyla açılır (sonra değiştirilebilir)
-        clinicName: join ? '' : (clinicName.trim() || name.trim()),
+        email, password, name, title, teamCode: join ? teamCode : '', practice,
+        // Bireysel uzmanın çalışma alanı kendi adıyla açılır; ailelere ve raporda uzmanın adı görünür
+        clinicName: join ? '' : practice === 'solo' ? name.trim() : clinicName.trim(),
       });
       if (needsConfirmation) setSentTo(email.trim());
     } catch (e) {
@@ -195,9 +195,6 @@ export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { g
       <Input value={name} onChangeText={setName} placeholder="Adın soyadın" autoComplete="name" textContentType="name" />
       <Input value={title} onChangeText={setTitle} placeholder="Unvanın (ör. Klinik Psikolog)" />
       {!join && practice === 'clinic' && <Input value={clinicName} onChangeText={setClinicName} placeholder="Kliniğinin adı" />}
-      {!join && practice === 'solo' && (
-        <Input value={clinicName} onChangeText={setClinicName} placeholder="Çalışma adın (isteğe bağlı)" />
-      )}
       <Input value={email} onChangeText={setEmail} placeholder="E-posta" keyboardType="email-address"
         autoCapitalize="none" autoComplete="email" textContentType="emailAddress" />
       <Input value={password} onChangeText={setPassword} placeholder={`Şifre (en az ${MIN_PASSWORD} karakter)`} secure

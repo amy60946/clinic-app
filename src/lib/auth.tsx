@@ -17,6 +17,7 @@ export type ClinicianSignUp = {
   title: string;
   clinicName: string;
   teamCode: string;
+  practice?: 'solo' | 'clinic';   // yalnız arayüz için (bireyselde ekip bölümü yok); sunucu ikisinde de klinik açar
 };
 
 type Auth = {
@@ -169,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           account: 'clinician',
           name: p.name.trim(),
           title: p.title.trim(),
-          ...(teamCode ? { team_code: teamCode } : { clinic_name: p.clinicName.trim() }),
+          ...(teamCode ? { team_code: teamCode } : { clinic_name: p.clinicName.trim(), practice: p.practice ?? 'clinic' }),
         },
         emailRedirectTo: authRedirectUrl(),
       },

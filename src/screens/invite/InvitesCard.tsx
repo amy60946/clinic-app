@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, Alert, StyleSheet } from 'react-native';
 import { colors, radius } from '../../theme';
-import { Card, Label, Cta, SmallButton } from '../../components/ui';
+import { Card, Label, Cta, SmallButton, InfoText } from '../../components/ui';
 import { ClinicianMe, Member } from '../../lib/clinic';
-import { FamilyInvite, InviteStats, STATUS_TEXT, HAS_BASE, listInvites, inviteStats, revokeInvite, sweepInvites, leftText, ageGroupLabel } from '../../lib/invites';
+import { FamilyInvite, InviteStats, STATUS_TEXT, INVITE_HELP, listInvites, inviteStats, revokeInvite, sweepInvites, leftText, ageGroupLabel } from '../../lib/invites';
 import { useNotifications } from '../../lib/notificationsContext';
 import InviteSheet, { SheetInvite } from './InviteSheet';
 
@@ -57,11 +57,7 @@ export default function InvitesCard({ me, team, reloadKey, onChanged }: {
     <>
       <Label>Aileyi davet et</Label>
       <Card style={{ gap: 12 }}>
-        <Text style={styles.body}>
-          {HAS_BASE
-            ? 'Aileye WhatsApp ya da e-postayla bağlantı gönder. Ebeveyn bağlantıdan ParentApp\'i yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin, çocuğunu paylaşma kararı ebeveynin. İstersen önce takip planını hazırla. Davet 48 saat geçerli.'
-            : 'Aileye WhatsApp, e-posta ya da SMS ile davet gönder. Ebeveyn ParentApp\'e kayıt olurken mesajdaki kodu yazar; sen kendiliğinden tanımlı gelirsin, çocuğunu paylaşma kararı ebeveynin. İstersen önce takip planını hazırla. Davet 48 saat geçerli.'}
-        </Text>
+        <InfoText text="Aileye davet gönder; ebeveyn onaylayınca çocuk danışan listene eklenir." detail={INVITE_HELP} />
         <Cta label="Aileyi davet et" onPress={() => setSheet({ open: true, existing: null })} />
         {mine && mine.sent > 0 && (
           <Text style={styles.small}>Son 30 gün: {mine.sent} davet · {mine.claimed} kayıt · {mine.shared} paylaşım{mine.expired ? ` · ${mine.expired} kullanılmadı` : ''}</Text>

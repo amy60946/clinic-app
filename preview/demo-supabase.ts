@@ -455,7 +455,7 @@ const auth = {
     sync();
     const u = db.users.find((x) => x.email.toLowerCase() === email.toLowerCase() && x.password === password);
     if (!u) return fail('Invalid login credentials', 'invalid_credentials');
-    setSess({ user: { id: u.id, email: u.email }, access_token: 'demo' });
+    setSess({ user: { id: u.id, email: u.email, user_metadata: u.meta ?? {} }, access_token: 'demo' });
     save(); emit('SIGNED_IN');
     return { data: { session: sess() }, error: null };
   },
@@ -483,8 +483,8 @@ const auth = {
     } else {
       newFamilyFor(id, meta.name ?? '');
     }
-    db.users.push({ id, email, password });
-    setSess({ user: { id, email }, access_token: 'demo' });
+    db.users.push({ id, email, password, meta });
+    setSess({ user: { id, email, user_metadata: meta }, access_token: 'demo' });
     save(); emit('SIGNED_IN');
     return { data: { session: sess(), user: sess()!.user }, error: null };
   },

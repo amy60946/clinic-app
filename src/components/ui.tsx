@@ -140,6 +140,32 @@ export function SmallButton({ label, onPress, danger, busy }: { label: string; o
   );
 }
 
+// Kısa metin + "i": dokununca ayrıntı yerinde açılır (Alert web'de görünmediği için açılır kutu)
+export function InfoText({ text, detail }: { text: string; detail: string[] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View style={{ gap: 8 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+        <Text style={styles.infoText}>{text}</Text>
+        <Pressable onPress={() => setOpen((v) => !v)} hitSlop={10} accessibilityRole="button"
+          accessibilityLabel={open ? 'Açıklamayı kapat' : 'Nasıl çalışır?'} accessibilityState={{ expanded: open }}>
+          <Ionicons name={open ? 'information-circle' : 'information-circle-outline'} size={22} color={colors.navy} />
+        </Pressable>
+      </View>
+      {open && (
+        <View style={styles.infoBox}>
+          {detail.map((d) => (
+            <View key={d} style={{ flexDirection: 'row', gap: 8 }}>
+              <Text style={styles.infoDetail}>•</Text>
+              <Text style={[styles.infoDetail, { flex: 1 }]}>{d}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
 export function Empty({ text }: { text: string }) {
   return <Text style={{ fontSize: 13, color: colors.muted, lineHeight: 19, paddingVertical: 8 }}>{text}</Text>;
 }
@@ -167,4 +193,7 @@ const styles = StyleSheet.create({
   ctaText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   link: { fontSize: 13, fontWeight: '600', color: colors.navy },
   notice: { flexDirection: 'row', gap: 12, backgroundColor: '#fff', borderRadius: radius.md, padding: 16, alignItems: 'center' },
+  infoText: { flex: 1, fontSize: 14, color: colors.text, lineHeight: 20 },
+  infoBox: { backgroundColor: colors.bg, borderRadius: radius.sm, padding: 12, gap: 6 },
+  infoDetail: { fontSize: 13, color: colors.text, lineHeight: 19 },
 });
