@@ -8,10 +8,11 @@ import { colors, radius } from '../theme';
 import { Card, Label, Input, Cta, Notice, SmallButton } from '../components/ui';
 import { useAuth } from '../lib/auth';
 import {
-  clinicianMe, listClients, listTeam, createFamilyInvite, createTeamInvite, joinTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Invite, Member,
+  clinicianMe, listClients, listTeam, createTeamInvite, joinTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Invite, Member,
 } from '../lib/clinic';
 import MembershipScreen from './MembershipScreen';
 import { ConfigBanner } from './ConfigGate';
+import InvitesCard from './invite/InvitesCard';
 import Onboarding, { onboardingSeen, markOnboardingSeen } from './Onboarding';
 import { billingStatus, hasAccess, daysLeft, packageName } from '../lib/billing';
 import ClientScreen, { Tab } from './client/ClientScreen';
@@ -56,6 +57,7 @@ export default function HomeScreen() {
   const [bell, setBell] = useState(false);
   const [plans, setPlans] = useState(false);
   const [guide, setGuide] = useState(false);
+  const [invitesKey, setInvitesKey] = useState(0);
   const { unread, unreadByChild } = useNotifications();
   const pending = useRef<Pick<AppNotification, 'kind' | 'data' | 'childId'> | null>(null);
 
@@ -109,6 +111,8 @@ export default function HomeScreen() {
   const openTarget = useCallback(async (n: Pick<AppNotification, 'kind' | 'data' | 'childId'>) => {
     setBell(false);
     if (n.kind === 'team_joined') { setSelected(null); load(); return; }
+    // davet bildirimleri: ana ekrandaki davet listesi yenilenir
+    if (n.kind === 'invite_claimed' || n.kind === 'invite_expired') { setSelected(null); setInvitesKey((k) => k + 1); return; }
     const ids = notificationChildren(n);
     if (!ids.length) return;
     let st = stateRef.current;
@@ -239,7 +243,7 @@ export default function HomeScreen() {
             <>
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
               <ClientList clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
-              <InviteCard onCreated={refresh} />
+              <InvitesCard me={state.me} team={state.team} reloadKey={invitesKey} onChanged={refresh} />
               <TeamCard me={state.me} team={state.team} onJoined={refresh} onUpgrade={() => setPlans(true)} />
               <Text style={styles.footnote}>
                 Bu panel gözlem toplar, tanı koymaz. Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
@@ -462,52 +466,6 @@ function TeamCard({ me, team, onJoined, onUpgrade }: { me: ClinicianMe; team: Me
             <Text style={styles.link}>Ekip kodun mu var? Başka bir kliniğin ekibine katıl</Text>
           </Pressable>
         ))}
-      </Card>
-    </>
-  );
-}
-
-function InviteCard({ onCreated }: { onCreated: () => void }) {
-  const [label, setLabel] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [invite, setInvite] = useState<Invite | null>(null);
-  const [lastLabel, setLastLabel] = useState('');
-
-  const create = async (l = label) => {
-    setBusy(true);
-    try {
-      setInvite(await createFamilyInvite(l));
-      setLastLabel(l);
-      track('invite.family');
-      setLabel('');
-      onCreated();
-    } catch (e) {
-      Alert.alert('Kod üretilemedi', (e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <>
-      <Label>Aileyi davet et</Label>
-      <Card style={{ gap: 12 }}>
-        <Text style={styles.body}>
-          Ebeveyn bu kodu ParentApp › Aile › Hesap › Uzmanım bölümüne yazar ve hangi çocuğunu paylaşacağını seçer. Kod 15 dakika geçerli, tek kullanımlık; ebeveynle birlikteyken ya da görüşme sırasında üret.
-        </Text>
-        {invite ? (
-          <>
-            <CodeBox invite={invite} onRenew={() => create(lastLabel)} busy={busy} />
-            <Pressable onPress={() => setInvite(null)} hitSlop={8} style={{ alignSelf: 'flex-start' }}>
-              <Text style={styles.link}>Başka bir aile için not yazarak kod al</Text>
-            </Pressable>
-          </>
-        ) : (
-          <>
-            <Input value={label} onChangeText={setLabel} placeholder="Kendi notun (ör. danışanın takma adı) — isteğe bağlı" maxLength={60} />
-            <Cta label="Paylaşım kodu üret" onPress={() => create()} busy={busy} />
-          </>
-        )}
       </Card>
     </>
   );
