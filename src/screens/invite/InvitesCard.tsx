@@ -14,6 +14,7 @@ const TONE: Record<string, { bg: string; fg: string }> = {
   shared: { bg: '#E6F4EA', fg: colors.ok },
   expired: { bg: '#F3F4F6', fg: '#6B7286' },
   revoked: { bg: '#F3F4F6', fg: '#6B7286' },
+  declined: { bg: '#FDECEC', fg: '#A23B3B' },
 };
 
 export default function InvitesCard({ me, team, reloadKey, onChanged }: {

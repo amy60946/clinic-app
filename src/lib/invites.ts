@@ -8,7 +8,7 @@ const BASE = (process.env.EXPO_PUBLIC_INVITE_BASE_URL ?? '').replace(/\/?$/, '/'
 const HAS_BASE = !!process.env.EXPO_PUBLIC_INVITE_BASE_URL;
 const PARENTAPP_STORE_URL = process.env.EXPO_PUBLIC_PARENTAPP_STORE_URL ?? '';
 
-export type InviteStatus = 'sent' | 'opened' | 'claimed' | 'shared' | 'expired' | 'revoked';
+export type InviteStatus = 'sent' | 'opened' | 'claimed' | 'shared' | 'expired' | 'revoked' | 'declined';
 export type FamilyInvite = {
   code: string; token: string | null; clinician_id: string; clinician: string; label: string;
   parent_name: string; parent_email: string | null; channel: string | null; status: InviteStatus;
@@ -35,6 +35,7 @@ export const STATUS_TEXT: Record<InviteStatus, string> = {
   shared: 'Çocuk paylaşıldı',
   expired: 'Süresi doldu',
   revoked: 'İptal edildi',
+  declined: 'Aile reddetti',
 };
 
 const missing = (e: { code?: string } | null) => e?.code === 'PGRST202' || e?.code === '42883';

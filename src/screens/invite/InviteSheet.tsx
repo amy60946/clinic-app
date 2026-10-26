@@ -99,7 +99,7 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
               <Label>Yaş grubu (isteğe bağlı)</Label>
               <Segmented options={[{ id: 'none' as const, label: 'Belirtme' }, ...CHILD_AGE_GROUPS]} value={childAge} onChange={setChildAge} />
               <Text style={styles.small}>
-                Ebeveyn kayıt olunca "{childName.trim() || 'Çocuğunu'} ekle ve paylaş" diye hazır gelir; düzenleyip kendisi ekler. Mesajda ve bağlantı sayfasında görünmez; davet bitince silinir.
+                Ebeveyn kayıt olunca bilgiler hazır gelir; kontrol edip onaylar, gerekirse düzeltir (düzeltirse sana bildirim gelir). Mesajda ve bağlantı sayfasında görünmez; davet bitince silinir. Yalnız ad ve yaş grubu gir, sağlık bilgisi yazma.
               </Text>
               <Label>Kendi notun (isteğe bağlı, aile görmez)</Label>
               <Input value={label} onChangeText={setLabel} placeholder="Ör. dosya no, görüşme günü" maxLength={60} />

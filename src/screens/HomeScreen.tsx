@@ -112,7 +112,8 @@ export default function HomeScreen() {
     setBell(false);
     if (n.kind === 'team_joined') { setSelected(null); load(); return; }
     // davet bildirimleri: ana ekrandaki davet listesi yenilenir
-    if (n.kind === 'invite_claimed' || n.kind === 'invite_expired') { setSelected(null); setInvitesKey((k) => k + 1); return; }
+    if (n.kind === 'invite_claimed' || n.kind === 'invite_expired' || n.kind === 'invite_declined') { setSelected(null); setInvitesKey((k) => k + 1); return; }
+    // invite_child_updated: ebeveynin düzelttiği çocuk, danışan olarak açılır (aşağıda)
     const ids = notificationChildren(n);
     if (!ids.length) return;
     let st = stateRef.current;
