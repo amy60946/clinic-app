@@ -42,7 +42,7 @@ export default function NotesTab({ client, me }: ClientCtx) {
       <Card style={{ gap: 10 }}>
         <Input value={body} onChangeText={setBody} placeholder="Seans notu, gözlem, müdahale değişikliği (ör. ödül değişti)…" multiline maxLength={4000} />
         <Cta label="Notu kaydet" onPress={save} busy={busy} />
-        <Text style={styles.small}>Notlar aileye görünmez; yalnız kliniğindeki uzmanlar okur.</Text>
+        <Text style={styles.small}>Notlar aileye görünmez; yalnız kliniğindeki uzmanlar okur. Ebeveyn izin verirse notların, adın gizlenerek çocuğun sonraki uzmanına okunur olarak açılabilir; nota kimlik bilgisi yazma.</Text>
       </Card>
       <Label>{`Notlar (${notes?.length ?? 0})`}</Label>
       {!notes ? <ActivityIndicator color={colors.navy} /> : notes.length === 0 ? <Empty text="Henüz not yok." /> : (
