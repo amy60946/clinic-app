@@ -7,7 +7,7 @@ import { FamilyInvite, InviteStats, STATUS_TEXT, INVITE_HELP, listInvites, invit
 import { useNotifications } from '../../lib/notificationsContext';
 import InviteSheet, { SheetInvite } from './InviteSheet';
 
-// Ana ekran: "Aileyi davet et" + davetlerim (durum, yeniden gönder, iptal) + sahip için ekip istatistiği (ortak akislar.md 10).
+// Ana ekran: "Aileyi davet et" (e-postayla) + davetlerim (durum, e-posta durumu, yeniden gönder, iptal) + sahip için ekip istatistiği (ortak akislar.md 10).
 const TONE: Record<string, { bg: string; fg: string }> = {
   sent: { bg: '#EEF0F5', fg: colors.navy },
   opened: { bg: '#E6EAF5', fg: '#2C4A9A' },
@@ -57,7 +57,7 @@ export default function InvitesCard({ me, team, reloadKey, onChanged }: {
     <>
       <Label>Aileyi davet et</Label>
       <Card style={{ gap: 12 }}>
-        <InfoText text="Aileye davet gönder; ebeveyn onaylayınca çocuk danışan listene eklenir." detail={INVITE_HELP} />
+        <InfoText text="Aileye e-postayla davet gönder; ebeveyn onaylayınca çocuk danışan listene eklenir." detail={INVITE_HELP} />
         <Cta label="Aileyi davet et" onPress={() => setSheet({ open: true, existing: null })} />
         {mine && mine.sent > 0 && (
           <Text style={styles.small}>Son 30 gün: {mine.sent} davet · {mine.claimed} kayıt · {mine.shared} paylaşım{mine.expired ? ` · ${mine.expired} kullanılmadı` : ''}</Text>
@@ -72,7 +72,9 @@ export default function InvitesCard({ me, team, reloadKey, onChanged }: {
               const open = ['sent', 'opened', 'claimed'].includes(i.status);
               const tone = TONE[i.status] ?? TONE.sent;
               const child = [i.child_name, ageGroupLabel(i.child_age_group)].filter(Boolean).join(', ');
-              const who = [i.parent_name, child, i.label].filter(Boolean).join(' · ') || 'İsimsiz davet';
+              const who = [i.parent_name || i.parent_email, child, i.label].filter(Boolean).join(' · ') || 'İsimsiz davet';
+              const sheet = { code: i.code, token: i.token, expires_at: i.expires_at, parent_name: i.parent_name, parent_email: i.parent_email,
+                label: i.label, child_name: i.child_name, child_age_group: i.child_age_group, email_status: i.email_status };
               return (
                 <Card key={i.code} style={{ gap: 6 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -83,16 +85,16 @@ export default function InvitesCard({ me, team, reloadKey, onChanged }: {
                     {i.code}
                     {i.status === 'sent' || i.status === 'opened' ? ` · ${leftText(i.expires_at)}` : ''}
                     {owner && i.clinician_id !== me.id ? ` · ${i.clinician}` : ''}
-                    {i.channel ? ` · ${CH[i.channel] ?? i.channel}` : ''}
+                    {i.email_status === 'sent' ? ' · e-posta gönderildi' : i.email_status === 'failed' ? ' · e-posta gönderilemedi' : i.channel ? ` · ${CH[i.channel] ?? i.channel}` : ''}
                     {i.has_plan ? ' · plan hazır' : ''}
                   </Text>
                   {open && (
                     <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
                       {i.status !== 'claimed' && (
-                        <SmallButton label="Yeniden gönder / plan" onPress={() => setSheet({ open: true, existing: { code: i.code, token: i.token, expires_at: i.expires_at, parent_name: i.parent_name, parent_email: i.parent_email, label: i.label, child_name: i.child_name, child_age_group: i.child_age_group } })} />
+                        <SmallButton label="Yeniden gönder / plan" onPress={() => setSheet({ open: true, existing: sheet })} />
                       )}
                       {i.status === 'claimed' && (
-                        <SmallButton label="Plan" onPress={() => setSheet({ open: true, existing: { code: i.code, token: i.token, expires_at: i.expires_at, parent_name: i.parent_name, parent_email: i.parent_email, label: i.label, child_name: i.child_name, child_age_group: i.child_age_group } })} />
+                        <SmallButton label="Plan" onPress={() => setSheet({ open: true, existing: sheet })} />
                       )}
                       <SmallButton label="İptal" danger onPress={() => revoke(i)} />
                     </View>

@@ -695,7 +695,7 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     while (db.clinic_invites.some((i: Row) => i.code === code)) code = makeCode(team ? 8 : 6);
     const token = team ? null : uuid().replace(/-/g, '');
     const row = { code, clinic_id: m.clinic_id, clinician_id: m.id, kind: args.p_kind ?? 'family', label: String(args.p_label ?? '').slice(0, 60),
-      created_at: now(), expires_at: new Date(Date.now() + (team ? 15 * 60e3 : 48 * 3600e3)).toISOString(), used_at: null, used_by: null,
+      created_at: now(), expires_at: new Date(Date.now() + (team ? 15 * 60e3 : 72 * 3600e3)).toISOString(), used_at: null, used_by: null,
       token, parent_name: String(args.p_parent_name ?? '').trim().slice(0, 60), parent_email: (String(args.p_parent_email ?? '').trim().toLowerCase() || null),
       channel: null, opened_at: null, claimed_at: null, claimed_family: null, expired_notified_at: null, revoked_at: null,
       child_name: team ? null : (String(args.p_child_name ?? '').trim().slice(0, 40) || null),
@@ -732,7 +732,8 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
       clinician: db.clinicians.find((x: Row) => x.id === i.clinician_id)?.name ?? '', label: i.label ?? '', parent_name: i.parent_name ?? '',
       parent_email: i.parent_email ?? null, channel: i.channel ?? null, status: inviteStatus(i), created_at: i.created_at, expires_at: i.expires_at,
       opened_at: i.opened_at ?? null, claimed_at: i.claimed_at ?? null, used_at: i.used_at, has_plan: hasPlan(i.code),
-      child_name: i.child_name ?? null, child_age_group: i.child_age_group ?? null })), error: null };
+      child_name: i.child_name ?? null, child_age_group: i.child_age_group ?? null,
+      email_status: i.email_status ?? null, email_count: i.email_count ?? 0, email_sent_at: i.email_sent_at ?? null })), error: null };
   }
   if (name === 'clinic_invite_stats') {
     const m = myClinician();
@@ -909,6 +910,21 @@ function saveVerification(v: Row) { try { localStorage.setItem(VKEY, JSON.string
 const functions = {
   async invoke(name: string, opts?: { body?: Row }) {
     await new Promise((r) => setTimeout(r, 300));
+    // Davet e-postası (ortak invite-email): önizlemede e-posta gitmez, gönderilmiş sayılır
+    if (name === 'invite-email') {
+      const m = db.clinicians.find((x: Row) => x.id === sess()?.user.id);
+      const inv = m && db.clinic_invites.find((i: Row) => i.code === opts?.body?.code && i.kind === 'family' && i.clinic_id === m.clinic_id
+        && (i.clinician_id === m.id || m.role === 'owner'));
+      if (!inv) return { data: { sent: false, reason: 'not_found' }, error: null };
+      if (!inv.parent_email) return { data: { sent: false, reason: 'no_email' }, error: null };
+      if (inv.used_at || inv.revoked_at || inv.claimed_at) return { data: { sent: false, reason: 'closed' }, error: null };
+      if (inv.expires_at <= now()) return { data: { sent: false, reason: 'expired' }, error: null };
+      if ((inv.email_count ?? 0) >= 3) return { data: { sent: false, reason: 'limit_invite' }, error: null };
+      if (inv.email_sent_at && Date.now() - new Date(inv.email_sent_at).getTime() < 60e3) return { data: { sent: false, reason: 'too_soon' }, error: null };
+      Object.assign(inv, { email_count: (inv.email_count ?? 0) + 1, email_sent_at: now(), email_status: 'sent', channel: 'email' });
+      save();
+      return { data: { sent: true }, error: null };
+    }
     if (name === 'clinician-verify') {
       const v = demoVerification();
       if (v.last) { v.last.checked = true; saveVerification(v); }

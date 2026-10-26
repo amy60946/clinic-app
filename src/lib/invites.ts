@@ -1,8 +1,8 @@
 import { Platform, Share, Linking } from 'react-native';
 import { supabase } from './supabase';
 
-// Aile davet bağlantısı (ortak/sozlesme/akislar.md 10, proposed/20261026100000_family_invite_links.sql):
-// 48 saat geçerli; bağlantı (token) + yazılabilir 6 karakter kod aynı davettir. Uzman WhatsApp / e-posta / SMS ile gönderir.
+// Aile daveti (ortak/sozlesme/akislar.md 10): 3 gün geçerli; bağlantı (token) + yazılabilir 6 karakter kod aynı davettir.
+// Ana yol sistem e-postası (Edge Function invite-email, ortak proposed/20261027000000_invite_email.sql); yedek: uzman kodu kopyalar.
 // Bağlantı adresi alan adı alınınca EXPO_PUBLIC_INVITE_BASE_URL ile verilir (ör. https://alanadi.com/d/); yoksa mesajda yalnız kod.
 const BASE = (process.env.EXPO_PUBLIC_INVITE_BASE_URL ?? '').replace(/\/?$/, '/');
 export const HAS_BASE = !!process.env.EXPO_PUBLIC_INVITE_BASE_URL;
@@ -14,7 +14,10 @@ export type FamilyInvite = {
   parent_name: string; parent_email: string | null; channel: string | null; status: InviteStatus;
   created_at: string; expires_at: string; opened_at: string | null; claimed_at: string | null; used_at: string | null;
   has_plan: boolean; child_name?: string | null; child_age_group?: ChildAgeGroup | null;
+  // sistem e-postası (ortak 20261027000000); eski sunucuda yok
+  email_status?: EmailStatus | null; email_count?: number; email_sent_at?: string | null;
 };
+export type EmailStatus = 'sending' | 'sent' | 'failed';
 // Çocuk önerisi (ortak akislar.md 10): ad/takma ad + yaş grubu; yalnız daveti kabul eden ebeveyn görür, mesajda gitmez
 export type ChildAgeGroup = 'K' | 'A' | 'B' | 'C';
 export const CHILD_AGE_GROUPS: { id: ChildAgeGroup; label: string }[] = [
@@ -30,12 +33,13 @@ export type Channel = 'whatsapp' | 'email' | 'sms' | 'copy' | 'other';
 
 // "i" açıklaması (ana ekran kartı ve davet penceresi)
 export const INVITE_HELP = [
+  'Davet e-postası senin adınla ebeveynin e-postasına gider; yanıtlarsa yanıtı sana gelir.',
   HAS_BASE
-    ? 'Ebeveyn bağlantıdan ParentApp\'i yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin.'
-    : 'Ebeveyn ParentApp\'e kayıt olurken mesajdaki 6 karakterlik kodu yazar; sen kendiliğinden tanımlı gelirsin.',
+    ? 'Ebeveyn e-postadaki bağlantıdan ParentApp\'i yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin.'
+    : 'Ebeveyn ParentApp\'e kayıt olurken e-postadaki 6 karakterlik kodu yazar; sen kendiliğinden tanımlı gelirsin.',
   'Hangi çocuğu paylaşacağına ebeveyn karar verir; paylaşımı istediği an durdurabilir.',
-  'Çocuğun adını ve yaş grubunu yazarsan yalnız daveti kabul eden ebeveyn görür; kontrol edip onaylar, düzeltirse sana bildirim gelir. Mesajda görünmez, davet bitince silinir.',
-  'Davet 48 saat geçerli. Davetlerim\'den yeniden gönderebilir ya da iptal edebilirsin.',
+  'Çocuğun adını ve yaş grubunu yazarsan yalnız daveti kabul eden ebeveyn görür; kontrol edip onaylar, düzeltirse sana bildirim gelir. E-postada görünmez, davet bitince silinir.',
+  'Davet 3 gün geçerli. Davetlerim\'den e-postayı yeniden gönderebilir ya da daveti iptal edebilirsin. E-posta ulaşmazsa kodu kopyalayıp kendin ilet.',
   'İstersen takip planını davetle birlikte hazırla; aile çocuğu paylaşınca plan hazır gelir.',
 ];
 
@@ -111,13 +115,41 @@ export function inviteMessage(inv: { code: string; token: string | null; expires
     `${clinician || 'Uzmanınız'} sizi ParentApp'te çocuğunuzun takibine davet ediyor. Hangi çocuğunuzu paylaşacağınıza siz karar verirsiniz; istediğiniz an durdurabilirsiniz.`,
     '',
     link ? `Daveti açın: ${link}` : `1) ParentApp'i yükleyin${PARENTAPP_STORE_URL ? `: ${PARENTAPP_STORE_URL}` : ' (App Store)'}`,
-    link ? `Uygulama kod sorarsa: ${inv.code}` : `2) Kayıt olurken ya da Aile › Hesap › Uzmanım bölümünde bu kodu yazın: ${inv.code}`,
+    link ? `Uygulama kod sorarsa: ${inv.code}` : `2) Kayıt olurken "Davet kodum var"a dokunup bu kodu yazın (hesabınız varsa Aile › Hesap › Uzmanım): ${inv.code}`,
     `Davet ${until} tarihine kadar geçerli.`,
   ];
   return lines.join('\n');
 }
 
 const SUBJECT = 'ParentApp daveti';
+
+// Sistem e-postası (Edge Function invite-email). İşlev yayında değilse ya da e-posta ayarı yoksa gönderilmez; uzman kodu kopyalar.
+export type EmailResult = { sent: boolean; reason?: string; detail?: string };
+export async function sendInviteEmail(code: string): Promise<EmailResult> {
+  const { data, error } = await supabase.functions.invoke('invite-email', { body: { code } });
+  if (error) {
+    const status = (error as { context?: { status?: number } }).context?.status;
+    return { sent: false, reason: status === 404 || !status ? 'not_deployed' : 'error' };
+  }
+  return (data ?? { sent: false, reason: 'error' }) as EmailResult;
+}
+
+export function emailReasonText(r: EmailResult): string {
+  switch (r.reason) {
+    case 'not_deployed': case 'not_configured': return 'Otomatik e-posta henüz açık değil. Kodu kopyalayıp aileye kendin iletebilirsin.';
+    case 'too_soon': return 'Aynı davete bir dakika içinde yeniden e-posta gönderilemez.';
+    case 'limit_invite': return 'Bu davete en çok 3 e-posta gönderilebilir. Kodu kopyalayıp kendin ilet.';
+    case 'limit_day': return 'Bugün çok fazla davet e-postası gönderdin; yarın tekrar dene ya da kodu kendin ilet.';
+    case 'expired': return 'Davetin süresi doldu; yeni davet oluştur.';
+    case 'closed': return 'Aile daveti zaten aldı ya da davet kapandı; e-posta gerekmez.';
+    case 'no_email': return 'Bu davette e-posta adresi yok. Kodu kopyalayıp kendin ilet.';
+    case 'no_access': return 'Üyelik etkin değil.';
+    case 'send_failed': return r.detail === 'EAUTH'
+      ? 'E-posta gönderilemedi: gönderim hesabının ayarı hatalı (uygulama şifresi). Kodu kopyalayıp kendin iletebilirsin.'
+      : 'E-posta gönderilemedi. Adresi kontrol et ya da kodu kopyalayıp kendin ilet.';
+    default: return 'E-posta gönderilemedi. Kodu kopyalayıp kendin iletebilirsin.';
+  }
+}
 
 // 'shared': gönderim uygulaması açıldı · 'dismissed': kullanıcı paylaşım menüsünü kapattı · 'unsupported': cihazda menü yok
 export type ShareResult = 'shared' | 'dismissed' | 'unsupported';
