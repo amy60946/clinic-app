@@ -28,6 +28,17 @@ export type InviteStats = {
 };
 export type Channel = 'whatsapp' | 'email' | 'sms' | 'copy' | 'other';
 
+// "i" açıklaması (ana ekran kartı ve davet penceresi)
+export const INVITE_HELP = [
+  HAS_BASE
+    ? 'Ebeveyn bağlantıdan ParentApp\'i yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin.'
+    : 'Ebeveyn ParentApp\'e kayıt olurken mesajdaki 6 karakterlik kodu yazar; sen kendiliğinden tanımlı gelirsin.',
+  'Hangi çocuğu paylaşacağına ebeveyn karar verir; paylaşımı istediği an durdurabilir.',
+  'Çocuğun adını ve yaş grubunu yazarsan yalnız daveti kabul eden ebeveyn görür; kontrol edip onaylar, düzeltirse sana bildirim gelir. Mesajda görünmez, davet bitince silinir.',
+  'Davet 48 saat geçerli. Davetlerim\'den yeniden gönderebilir ya da iptal edebilirsin.',
+  'İstersen takip planını davetle birlikte hazırla; aile çocuğu paylaşınca plan hazır gelir.',
+];
+
 export const STATUS_TEXT: Record<InviteStatus, string> = {
   sent: 'Gönderildi',
   opened: 'Bağlantı açıldı',

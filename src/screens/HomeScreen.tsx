@@ -41,6 +41,14 @@ function planText(me: ClinicianMe) {
   return `${packageName(me)} paket${me.period_end ? ` · ${dateText(me.period_end)}` : ''}`;
 }
 
+// Bireysel uzman (kayıtta "Bireysel uzman" seçildi, auth meta `practice`): ana ekranda ekip bölümü yok.
+// Klinik paketine geçince ya da ekipte başka uzman varsa görünür. Seçimi kaydı olmayan eski hesapta kliniğin adı uzmanın adıysa bireysel sayılır.
+function isSolo(me: ClinicianMe, team: Member[], practice: unknown) {
+  if (me.role !== 'owner' || team.length > 1 || me.plan === 'clinic') return false;
+  if (practice === 'solo' || practice === 'clinic') return practice === 'solo';
+  return me.clinic.trim() === me.name.trim();
+}
+
 // Web: iyzico ödemesinden dönüş (?billing=ok|fail)
 function billingReturn(): 'ok' | 'fail' | null {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
@@ -51,7 +59,7 @@ function billingReturn(): 'ok' | 'fail' | null {
 }
 
 export default function HomeScreen() {
-  const { signOut, rejectAccount } = useAuth();
+  const { signOut, rejectAccount, session } = useAuth();
   const [state, setState] = useState<State>({ kind: 'loading' });
   const stateRef = useRef(state);
   const [refreshing, setRefreshing] = useState(false);
@@ -220,6 +228,7 @@ export default function HomeScreen() {
     );
   }
 
+  const solo = state.kind === 'ready' && isSolo(state.me, state.team, session?.user.user_metadata?.practice);
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
@@ -236,7 +245,8 @@ export default function HomeScreen() {
               <Text style={styles.title}>{state.kind === 'ready' ? state.me.clinic : 'Uzman paneli'}</Text>
               {state.kind === 'ready' && (
                 <Text style={styles.subtitle}>
-                  {[state.me.name, state.me.title].filter(Boolean).join(' · ')}{'\n'}{planText(state.me)}
+                  {[[state.me.name !== state.me.clinic && state.me.name, state.me.title].filter(Boolean).join(' · '), planText(state.me)]
+                    .filter(Boolean).join('\n')}
                 </Text>
               )}
             </View>
@@ -259,7 +269,7 @@ export default function HomeScreen() {
               {!!verification?.enabled && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
               <ClientList clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
               <InvitesCard me={state.me} team={state.team} reloadKey={invitesKey} onChanged={refresh} />
-              <TeamCard me={state.me} team={state.team} onJoined={refresh} onUpgrade={() => setPlans(true)} />
+              {!solo && <TeamCard me={state.me} team={state.team} onJoined={refresh} onUpgrade={() => setPlans(true)} />}
               <Text style={styles.footnote}>
                 Bu panel gözlem toplar, tanı koymaz. Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
               </Text>
@@ -293,8 +303,8 @@ function ClientList({ clients, unread, me, team, onOpen }: {
       <Label>{`Danışanlar (${clients.length})`}</Label>
       {clients.length === 0 ? (
         <Notice icon="people-outline" text={me.role === 'member'
-          ? "Henüz danışanın yok. Aşağıdan aileye bir paylaşım kodu ver ya da klinik sahibinin sana danışan atamasını bekle."
-          : "Henüz paylaşım yok. Aşağıdan aileye bir paylaşım kodu ver; ebeveyn ParentApp'te kodu girip onay verince çocuk burada görünür."} />
+          ? 'Henüz danışanın yok. Aileyi davet et ya da klinik sahibinin atamasını bekle.'
+          : 'Henüz danışanın yok. Aileyi davet et; ebeveyn onaylayınca çocuk burada görünür.'} />
       ) : (
         <>
           {clients.length > 3 && (

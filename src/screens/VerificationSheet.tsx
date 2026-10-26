@@ -82,7 +82,7 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
           <IconButton name="close" onPress={() => onClose(!!result)} label="Kapat" />
           <Text style={styles.title}>Belge incelemesi</Text>
         </View>
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60, gap: 4 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60, gap: 4 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" automaticallyAdjustKeyboardInsets>
           {state === undefined && <ActivityIndicator color={colors.navy} style={{ marginTop: 24 }} />}
           {state === null && <Notice icon="construct-outline" text="Belge incelemesi için veritabanı güncellemesi bekleniyor." />}
           {!!state && state.enabled === false && <Notice icon="time-outline" text="Belge incelemesi şu an kapalı." />}

@@ -298,7 +298,7 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
             <IconButton name="close" label="Kapat" onPress={onClose} />
             <Text style={styles.sheetTitle}>{title}</Text>
           </View>
-          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">{children}</ScrollView>
+          <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" automaticallyAdjustKeyboardInsets>{children}</ScrollView>
         </View>
       </SafeAreaView>
     </Modal>

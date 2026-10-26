@@ -4,12 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
-import { Card, Label, Input, Cta, IconButton, Segmented } from '../../components/ui';
+import { Card, Label, Input, Cta, IconButton, Segmented, InfoText } from '../../components/ui';
 import PlanEditor from '../plan/PlanEditor';
 import { track } from '../../lib/track';
 import {
   NewInvite, Channel, ChildAgeGroup, CHILD_AGE_GROUPS, ageGroupLabel, createInvite, markInvite, inviteLink, inviteMessage, shareInvite, leftText,
-  HAS_BASE,
+  INVITE_HELP,
 } from '../../lib/invites';
 
 // Aileyi davet et (ortak akislar.md 10): 1) isteğe bağlı ebeveyn adı / e-posta / not → 2) bağlantı + kod, WhatsApp / e-posta / diğer
@@ -88,26 +88,20 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
           <IconButton name="close" onPress={onClose} label="Kapat" />
           <Text style={styles.title}>Aileyi davet et</Text>
         </View>
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60, gap: 4 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60, gap: 4 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" automaticallyAdjustKeyboardInsets>
           {!inv ? (
             <>
-              <Text style={styles.body}>
-                {HAS_BASE
-                  ? 'Aileye bir davet bağlantısı gönder. Ebeveyn bağlantıdan ParentApp\'i yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin. Çocuğunu paylaşma kararı ebeveynin. Davet 48 saat geçerli.'
-                  : 'Aileye WhatsApp, e-posta ya da SMS ile davet gönder. Ebeveyn ParentApp\'e kayıt olurken mesajdaki 6 karakterlik kodu yazar; sen kendiliğinden tanımlı gelirsin. Çocuğunu paylaşma kararı ebeveynin. Davet 48 saat geçerli.'}
-              </Text>
+              <InfoText text="Bilgileri gir, daveti oluştur ve aileye gönder. Davet 48 saat geçerli." detail={INVITE_HELP} />
               <Label>Ebeveynin adı (isteğe bağlı)</Label>
               <Input value={parentName} onChangeText={setParentName} placeholder="Mesajda selam için" maxLength={60} />
               <Label>Ebeveynin e-postası (isteğe bağlı)</Label>
               <Input value={email} onChangeText={setEmail} placeholder="ornek@eposta.com" keyboardType="email-address" autoCapitalize="none" maxLength={160} />
-              <Text style={styles.small}>Ebeveyn bu e-postayla kayıt olursa davet bağlantıya dokunmasa da kendiliğinden eşleşir.</Text>
-              <Label>Çocuğun adı ya da takma adı (isteğe bağlı)</Label>
+              <Text style={styles.small}>Ebeveyn bu e-postayla kayıt olursa davet kendiliğinden eşleşir.</Text>
+              <Label>Çocuğun adı (isteğe bağlı)</Label>
               <Input value={childName} onChangeText={setChildName} placeholder="Ör. Efe" maxLength={40} />
               <Label>Yaş grubu (isteğe bağlı)</Label>
               <Segmented options={[{ id: 'none' as const, label: 'Belirtme' }, ...CHILD_AGE_GROUPS]} value={childAge} onChange={setChildAge} />
-              <Text style={styles.small}>
-                Ebeveyn kayıt olunca bilgiler hazır gelir; kontrol edip onaylar, gerekirse düzeltir (düzeltirse sana bildirim gelir). Mesajda ve bağlantı sayfasında görünmez; davet bitince silinir. Yalnız ad ve yaş grubu gir, sağlık bilgisi yazma.
-              </Text>
+              <Text style={styles.small}>Yalnız daveti kabul eden ebeveyn görür. Sağlık bilgisi yazma.</Text>
               <Label>Kendi notun (isteğe bağlı, aile görmez)</Label>
               <Input value={label} onChangeText={setLabel} placeholder="Ör. dosya no, görüşme günü" maxLength={60} />
               <View style={{ marginTop: 16 }}><Cta label="Daveti oluştur" onPress={create} busy={busy} /></View>
@@ -176,7 +170,6 @@ const styles = StyleSheet.create({
   column: { flex: 1, width: '100%', maxWidth: 680, alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 10 },
   title: { fontSize: 17, fontWeight: '700', color: colors.navy },
-  body: { fontSize: 14, color: colors.text, lineHeight: 20 },
   small: { fontSize: 12, color: colors.muted, lineHeight: 17 },
   code: { fontSize: 30, fontWeight: '800', letterSpacing: 5, color: colors.navy },
   round: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
