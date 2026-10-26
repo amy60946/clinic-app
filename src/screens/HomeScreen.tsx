@@ -118,7 +118,7 @@ export default function HomeScreen() {
   const openTarget = useCallback(async (n: Pick<AppNotification, 'kind' | 'data' | 'childId'>) => {
     setBell(false);
     if (n.kind === 'team_joined') { setSelected(null); load(); return; }
-    if (n.kind.startsWith('verification_')) { setSelected(null); setVerify(true); loadVerify(); return; }
+    if (n.kind.startsWith('verification_')) { setSelected(null); setVerify(true); loadVerify(); return; }   // bayrak kapalıyken bu bildirimler gelmez
     // davet bildirimleri: ana ekrandaki davet listesi yenilenir
     if (n.kind === 'invite_claimed' || n.kind === 'invite_expired' || n.kind === 'invite_declined') { setSelected(null); setInvitesKey((k) => k + 1); return; }
     // invite_child_updated: ebeveynin düzelttiği çocuk, danışan olarak açılır (aşağıda)
@@ -251,7 +251,7 @@ export default function HomeScreen() {
           {state.kind === 'ready' && (
             <>
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
-              {!!verification && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
+              {!!verification?.enabled && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
               <ClientList clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
               <InvitesCard me={state.me} team={state.team} reloadKey={invitesKey} onChanged={refresh} />
               <TeamCard me={state.me} team={state.team} onJoined={refresh} onUpgrade={() => setPlans(true)} />

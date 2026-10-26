@@ -888,9 +888,12 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
 /* ---------- Belge incelemesi (önizleme: tarayıcı deposu, gerçek belge okunmaz) ---------- */
 
 const VKEY = 'demo.verification';
+// Görünürlük bayrağı önizlemede de kapalı; açmak için demo.client_config içinde flags.clinician_verification = true
 function demoVerification(): Row {
-  try { return JSON.parse(localStorage.getItem(VKEY) || 'null') ?? { verified_profession: null, verified_label: null, verified_at: null, last: null }; }
-  catch { return { verified_profession: null, verified_label: null, verified_at: null, last: null }; }
+  let enabled = false;
+  try { enabled = JSON.parse(localStorage.getItem('demo.client_config') || '{}')?.flags?.clinician_verification === true; } catch { /* yok say */ }
+  try { return { ...(JSON.parse(localStorage.getItem(VKEY) || 'null') ?? { verified_profession: null, verified_label: null, verified_at: null, last: null }), enabled }; }
+  catch { return { enabled, verified_profession: null, verified_label: null, verified_at: null, last: null }; }
 }
 function saveVerification(v: Row) { try { localStorage.setItem(VKEY, JSON.stringify(v)); } catch { /* yok say */ } }
 (globalThis as any).onizlemeBelgeOnayla = () => {

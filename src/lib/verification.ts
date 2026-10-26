@@ -11,6 +11,7 @@ export const professionLabel = (k?: string | null) => PROFESSIONS.find((p) => p.
 
 export type VerificationStatus = 'pending' | 'auto_rejected' | 'approved' | 'rejected' | 'withdrawn' | 'suspended';
 export type VerificationState = {
+  enabled?: boolean;   // bayrak clinician_verification (ilk sürümde kapalı) — kapalıyken satır ve sayfa görünmez
   verified_profession: string | null; verified_label: string | null; verified_at: string | null;
   last: null | {
     id: string; profession: string; status: VerificationStatus; reason: string | null; note: string | null;
