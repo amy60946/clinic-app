@@ -33,7 +33,7 @@ const SOFT = dim('#A0A6B6');
 
 type Step = { title: string; line: string; screen: 'invite' | 'client' | 'plan' | 'report' };
 const STEPS: Step[] = [
-  { title: 'Aileyi davet et', line: 'Bağlantıyı WhatsApp ya da e-postayla gönder', screen: 'invite' },
+  { title: 'Aileyi davet et', line: 'Davet senin adınla e-postayla gider', screen: 'invite' },
   { title: 'Danışanını aç', line: 'Aile paylaşınca burada belirir', screen: 'client' },
   { title: 'Takip planını kur', line: 'Hazır paketle başla, sonra düzenle', screen: 'plan' },
   { title: 'Raporunu al', line: 'PDF kaydet ya da yazdır', screen: 'report' },
