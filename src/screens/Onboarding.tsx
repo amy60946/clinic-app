@@ -7,7 +7,7 @@ import { colors } from '../theme';
 import { track } from '../lib/track';
 
 // İlk kullanım rehberi (kullanıcı kararı 26 Ekim 2026: ParentApp ile aynı "G1" biçimi, tasarım
-// https://claude.ai/artifact/NfSc3FCuCntqgqRWruwnbX v2): uygulamanın kendi ekranı tam boy ve %60 lacivertle
+// https://claude.ai/artifact/NfSc3FCuCntqgqRWruwnbX v2; 26 Ekim: davet bağlantısı ve Plan sekmesine göre güncellendi): uygulamanın kendi ekranı tam boy ve %60 lacivertle
 // karartılmış, dokunulacak yer altın halka + ① ② numarası, iki dokunuş arasında altın kesikli çizgi;
 // yazı yalnız başlık + tek kısa satır. Yeni hesapta bir kez açılır, ana ekrandaki "Nasıl kullanılır" ile yeniden.
 
@@ -31,11 +31,11 @@ const FAINT = dim('#E9ECF1');
 const INK = colors.navy;
 const SOFT = dim('#A0A6B6');
 
-type Step = { title: string; line: string; screen: 'invite' | 'client' | 'suggest' | 'report' };
+type Step = { title: string; line: string; screen: 'invite' | 'client' | 'plan' | 'report' };
 const STEPS: Step[] = [
-  { title: 'Aileyi davet et', line: 'Kodu üret, ebeveyne ver', screen: 'invite' },
+  { title: 'Aileyi davet et', line: 'Bağlantıyı WhatsApp ya da e-postayla gönder', screen: 'invite' },
   { title: 'Danışanını aç', line: 'Aile paylaşınca burada belirir', screen: 'client' },
-  { title: 'Görev öner', line: 'Karar ebeveynin, sonuç bildirimde', screen: 'suggest' },
+  { title: 'Takip planını kur', line: 'Hazır paketle başla, sonra düzenle', screen: 'plan' },
   { title: 'Raporunu al', line: 'PDF kaydet ya da yazdır', screen: 'report' },
 ];
 
@@ -72,7 +72,7 @@ export default function Onboarding({ visible, onClose }: { visible: boolean; onC
               <View style={[styles.column, wide && { maxWidth: 960, paddingHorizontal: 32 }]}>
                 {s.screen === 'invite' && <InviteMock />}
                 {s.screen === 'client' && <ClientListMock />}
-                {s.screen === 'suggest' && <ClientMock tab="Öneriler" wide={wide} />}
+                {s.screen === 'plan' && <ClientMock tab="Plan" wide={wide} />}
                 {s.screen === 'report' && <ClientMock tab="Rapor" wide={wide} />}
               </View>
             </SafeAreaView>
@@ -154,7 +154,7 @@ function InviteMock() {
         <View style={{ height: 34, borderRadius: 8, backgroundColor: FAINT }} />
         <View style={{ height: 40, borderRadius: 12, backgroundColor: BG }} />
         <View style={styles.target}>
-          <Text style={styles.ctaText}>Paylaşım kodu üret</Text>
+          <Text style={styles.ctaText}>Aileyi davet et</Text>
           <Badge n={1} />
         </View>
       </View>
@@ -183,9 +183,9 @@ function ClientListMock() {
   );
 }
 
-const TABS = ['Özet', 'Rutin', 'Zor anlar', 'Hedefler', 'Notlar', 'Öneriler', 'Rapor'];
+const TABS = ['Özet', 'Rutin', 'Zor anlar', 'Plan', 'Notlar', 'Öneriler', 'Rapor'];
 
-function ClientMock({ tab, wide }: { tab: 'Öneriler' | 'Rapor'; wide: boolean }) {
+function ClientMock({ tab, wide }: { tab: 'Plan' | 'Rapor'; wide: boolean }) {
   const cols = wide ? 7 : 4;
   const at = TABS.indexOf(tab);
   const col = at % cols;
@@ -213,11 +213,11 @@ function ClientMock({ tab, wide }: { tab: 'Öneriler' | 'Rapor'; wide: boolean }
         {/* ① → ② kesikli yol */}
         <View style={[styles.path, { left: `${((col + 0.5) / cols) * 100}%` }]} />
       </View>
-      {tab === 'Öneriler' ? (
+      {tab === 'Plan' ? (
         <>
           <View style={[styles.target, { marginTop: 18 }]}>
-            <Ionicons name="add" size={20} color="#fff" />
-            <Text style={styles.ctaText}>Aileye görev öner</Text>
+            <Ionicons name="albums-outline" size={20} color="#fff" />
+            <Text style={styles.ctaText}>Hazır paketle başla</Text>
             <Badge n={2} side="right" />
           </View>
           <Block h={92} />

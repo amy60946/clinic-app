@@ -1,0 +1,838 @@
+{
+ "version": 1,
+ "measures": [
+  {
+   "key": "yesno",
+   "label": "Evet / hayır (gün bazında)",
+   "hint": "Gün içinde oldu mu?"
+  },
+  {
+   "key": "percent",
+   "label": "Yüzde (fırsatların kaçında)",
+   "hint": "10 fırsatın kaçında?"
+  },
+  {
+   "key": "frequency",
+   "label": "Sıklık (kaç kez)",
+   "hint": "Günde / haftada kaç kez?"
+  },
+  {
+   "key": "duration",
+   "label": "Süre (dakika)",
+   "hint": "Ne kadar sürdü?"
+  },
+  {
+   "key": "level",
+   "label": "Düzey (uzman değerlendirir)",
+   "hint": "Haftalık GAS (−2 … +2)"
+  }
+ ],
+ "targets": [
+  "7 günün 5'i",
+  "7 günün 6'sı",
+  "%80",
+  "%90",
+  "Günde en çok 1 kez",
+  "Haftada en çok 2 kez",
+  "4 ardışık hafta"
+ ],
+ "domains": [
+  {
+   "key": "routine",
+   "label": "Günlük rutin ve öz bakım",
+   "task_category": "home"
+  },
+  {
+   "key": "attention",
+   "label": "Dikkat ve görev tamamlama",
+   "task_category": "focus"
+  },
+  {
+   "key": "rules",
+   "label": "Uyum ve kurallar",
+   "task_category": "focus"
+  },
+  {
+   "key": "emotion",
+   "label": "Duygu düzenleme",
+   "task_category": "mind"
+  },
+  {
+   "key": "social",
+   "label": "Sosyal iletişim",
+   "task_category": "relation"
+  },
+  {
+   "key": "sleep",
+   "label": "Uyku",
+   "task_category": "health"
+  },
+  {
+   "key": "school",
+   "label": "Okul ve ödev",
+   "task_category": "learn"
+  }
+ ],
+ "goals": [
+  {
+   "key": "g_morning_routine",
+   "domain": "routine",
+   "title": "Sabah rutinini görsel çizelgeyle en çok 1 hatırlatmayla bitirir",
+   "measure": "yesno",
+   "target": "7 günün 5'i",
+   "weeks": 6,
+   "home_support": "Resimli sabah çizelgesi; bitince kısa övgü.",
+   "modules": [
+    "m_routine",
+    "m_praise"
+   ]
+  },
+  {
+   "key": "g_hand_wash",
+   "domain": "routine",
+   "title": "Yemekten önce elini kendiliğinden yıkar",
+   "measure": "percent",
+   "target": "%80",
+   "weeks": 4,
+   "home_support": "Lavabo yanında resimli hatırlatma.",
+   "modules": [
+    "m_routine"
+   ]
+  },
+  {
+   "key": "g_bag_ready",
+   "domain": "routine",
+   "title": "Okul çantasını akşamdan kendisi hazırlar",
+   "measure": "yesno",
+   "target": "7 günün 5'i",
+   "weeks": 6,
+   "home_support": "Çanta kontrol listesi kapıda.",
+   "modules": [
+    "m_routine",
+    "m_rewards"
+   ]
+  },
+  {
+   "key": "g_teeth",
+   "domain": "routine",
+   "title": "Dişini zamanlayıcıyla 2 dakika fırçalar",
+   "measure": "yesno",
+   "target": "7 günün 6'sı",
+   "weeks": 4,
+   "home_support": "Kum saati ya da şarkı.",
+   "modules": [
+    "m_routine"
+   ]
+  },
+  {
+   "key": "g_dressing",
+   "domain": "routine",
+   "title": "Giyinmeyi yardım almadan tamamlar",
+   "measure": "yesno",
+   "target": "7 günün 5'i",
+   "weeks": 8,
+   "home_support": "Kıyafetler sırayla dizili; adım adım resim.",
+   "modules": [
+    "m_routine"
+   ]
+  },
+  {
+   "key": "g_start_task",
+   "domain": "attention",
+   "title": "İstenen tek adımlı işe 10 saniye içinde başlar",
+   "measure": "percent",
+   "target": "%80",
+   "weeks": 6,
+   "home_support": "Yakından, göz teması kurup tek cümleyle söyle.",
+   "modules": [
+    "m_commands",
+    "m_praise"
+   ]
+  },
+  {
+   "key": "g_table_time",
+   "domain": "attention",
+   "title": "Masa başı etkinlikte kalır",
+   "measure": "duration",
+   "target": "10 dakika",
+   "weeks": 6,
+   "home_support": "Zamanlayıcı; süre adım adım uzatılır.",
+   "modules": [
+    "m_praise",
+    "m_rewards"
+   ]
+  },
+  {
+   "key": "g_tidy_toys",
+   "domain": "attention",
+   "title": "Oyuncak toplamayı tek hatırlatmayla bitirir",
+   "measure": "yesno",
+   "target": "7 günün 5'i",
+   "weeks": 4,
+   "home_support": "Toplama şarkısı; kutularda resim.",
+   "modules": [
+    "m_commands",
+    "m_rewards"
+   ]
+  },
+  {
+   "key": "g_first_ask",
+   "domain": "rules",
+   "title": "Ebeveynin isteğine ilk söyleyişte uyar",
+   "measure": "percent",
+   "target": "%80",
+   "weeks": 8,
+   "home_support": "Kısa, net, tek adımlı istek; uyunca hemen övgü.",
+   "modules": [
+    "m_commands",
+    "m_praise",
+    "m_consequences"
+   ]
+  },
+  {
+   "key": "g_hitting",
+   "domain": "rules",
+   "title": "Vurma ya da eşya fırlatma azalır",
+   "measure": "frequency",
+   "target": "Haftada en çok 2 kez",
+   "weeks": 10,
+   "home_support": "Zor anı ParentApp'e kaydet; sakin ve tutarlı sonuç.",
+   "modules": [
+    "m_attention",
+    "m_consequences",
+    "m_abc"
+   ]
+  },
+  {
+   "key": "g_screen_off",
+   "domain": "rules",
+   "title": "Zamanlayıcı çalınca ekranı itirazsız kapatır",
+   "measure": "percent",
+   "target": "%80",
+   "weeks": 6,
+   "home_support": "5 dakika önce uyarı; 'önce–sonra' dili.",
+   "modules": [
+    "m_transitions",
+    "m_rewards"
+   ]
+  },
+  {
+   "key": "g_accept_no",
+   "domain": "rules",
+   "title": "\"Hayır\" yanıtını bağırmadan kabul eder",
+   "measure": "percent",
+   "target": "%80",
+   "weeks": 8,
+   "home_support": "Kabul edince adıyla öv.",
+   "modules": [
+    "m_praise",
+    "m_emotion"
+   ]
+  },
+  {
+   "key": "g_tantrum",
+   "domain": "emotion",
+   "title": "Öfke nöbetleri azalır ve kısalır",
+   "measure": "frequency",
+   "target": "Günde en çok 1 kez",
+   "weeks": 8,
+   "home_support": "Zor anı kaydet (ne oldu, ne yaptın).",
+   "modules": [
+    "m_emotion",
+    "m_attention",
+    "m_abc"
+   ]
+  },
+  {
+   "key": "g_calm_tool",
+   "domain": "emotion",
+   "title": "Zorlandığında sakinleşme yolunu (nefes, sakin köşe) kullanır",
+   "measure": "percent",
+   "target": "%60",
+   "weeks": 8,
+   "home_support": "Sakin anlarda birlikte çalış; zor anda hatırlat.",
+   "modules": [
+    "m_emotion"
+   ]
+  },
+  {
+   "key": "g_name_feeling",
+   "domain": "emotion",
+   "title": "Duygusunu sözle ya da kartla adlandırır",
+   "measure": "frequency",
+   "target": "Günde 2 kez",
+   "weeks": 6,
+   "home_support": "Duygu kartları; sen de kendi duygunu adlandır.",
+   "modules": [
+    "m_emotion"
+   ]
+  },
+  {
+   "key": "g_losing",
+   "domain": "emotion",
+   "title": "Oyunda kaybettikten sonra 2 dakika içinde oyuna döner",
+   "measure": "duration",
+   "target": "2 dakika",
+   "weeks": 6,
+   "home_support": "Kaybetmeyi oyunla prova et.",
+   "modules": [
+    "m_emotion",
+    "m_praise"
+   ]
+  },
+  {
+   "key": "g_request",
+   "domain": "social",
+   "title": "İsteğini söz, işaret ya da resimle belirtir",
+   "measure": "percent",
+   "target": "%60",
+   "weeks": 12,
+   "home_support": "Sevdiği nesneyi görünür ama ulaşamayacağı yere koy; isteği bekle.",
+   "modules": [
+    "m_interaction"
+   ]
+  },
+  {
+   "key": "g_turns",
+   "domain": "social",
+   "title": "Yetişkinle oyunda en az 5 kez sıra alır",
+   "measure": "frequency",
+   "target": "Oyun başına 5",
+   "weeks": 12,
+   "home_support": "Kısa, sevdiği oyun; sırayı sözle ve el işaretiyle belirt.",
+   "modules": [
+    "m_interaction",
+    "m_special_time"
+   ]
+  },
+  {
+   "key": "g_greeting",
+   "domain": "social",
+   "title": "Selama karşılık verir",
+   "measure": "percent",
+   "target": "%70",
+   "weeks": 8,
+   "home_support": "Model ol; karşılık verince öv.",
+   "modules": [
+    "m_interaction",
+    "m_praise"
+   ]
+  },
+  {
+   "key": "g_sibling_wait",
+   "domain": "social",
+   "title": "Kardeşiyle oyunda sırasını bekler",
+   "measure": "percent",
+   "target": "%70",
+   "weeks": 8,
+   "home_support": "Kum saatiyle sıra.",
+   "modules": [
+    "m_praise",
+    "m_rewards"
+   ]
+  },
+  {
+   "key": "g_bedtime_routine",
+   "domain": "sleep",
+   "title": "Yatma rutinini 30 dakika içinde bitirir",
+   "measure": "yesno",
+   "target": "7 günün 5'i",
+   "weeks": 4,
+   "home_support": "Her gece aynı sıra; resimli yatma çizelgesi.",
+   "modules": [
+    "m_sleep",
+    "m_routine"
+   ]
+  },
+  {
+   "key": "g_falls_asleep_alone",
+   "domain": "sleep",
+   "title": "Ebeveyn yanında olmadan kendi yatağında uykuya dalar",
+   "measure": "yesno",
+   "target": "7 günün 5'i",
+   "weeks": 6,
+   "home_support": "Yöntemi uzmanınla seç; tutarlı uygula.",
+   "modules": [
+    "m_sleep"
+   ]
+  },
+  {
+   "key": "g_night_visits",
+   "domain": "sleep",
+   "title": "Gece ebeveyn yatağına gelme azalır",
+   "measure": "frequency",
+   "target": "Haftada en çok 1 kez",
+   "weeks": 6,
+   "home_support": "Sabah küçük bir ödül.",
+   "modules": [
+    "m_sleep",
+    "m_rewards"
+   ]
+  },
+  {
+   "key": "g_homework_start",
+   "domain": "school",
+   "title": "Ödeve kararlaştırılan saatte başlar",
+   "measure": "yesno",
+   "target": "7 günün 5'i",
+   "weeks": 6,
+   "home_support": "Sabit saat ve sessiz köşe.",
+   "modules": [
+    "m_routine",
+    "m_rewards"
+   ]
+  },
+  {
+   "key": "g_homework_time",
+   "domain": "school",
+   "title": "Ödevde ara vermeden 15 dakika çalışır",
+   "measure": "duration",
+   "target": "15 dakika",
+   "weeks": 6,
+   "home_support": "Zamanlayıcı; kısa mola sonra devam.",
+   "modules": [
+    "m_praise",
+    "m_rewards"
+   ]
+  },
+  {
+   "key": "g_daily_card_home",
+   "domain": "school",
+   "title": "Öğretmenin günlük kartını eve getirir",
+   "measure": "yesno",
+   "target": "7 günün 5'i",
+   "weeks": 8,
+   "home_support": "Kart gelince kısa övgü.",
+   "modules": [
+    "m_school"
+   ]
+  },
+  {
+   "key": "g_daily_card_score",
+   "domain": "school",
+   "title": "Günlük karttaki hedeflerde \"evet\" alır",
+   "measure": "percent",
+   "target": "%75",
+   "weeks": 8,
+   "home_support": "Karta bağlı küçük ev ödülü.",
+   "modules": [
+    "m_school",
+    "m_rewards"
+   ]
+  }
+ ],
+ "modules": [
+  {
+   "key": "m_abc",
+   "title": "Gözlem ve zor an kaydı",
+   "aim": "Zor anların ne zaman, neyle başladığını ve neyle bittiğini birlikte görmek.",
+   "skills": [
+    "Zor anı olunca ya da aynı gün kaydetmek",
+    "Öncesini, davranışı ve sonrasını kısa yazmak"
+   ],
+   "practice": "Bu hafta her zor anı ParentApp › Zor anlar ile kaydet.",
+   "checklist": [
+    "Zor anı aynı gün kaydettim",
+    "Öncesinde ne olduğunu yazdım",
+    "Benim tepkimi yazdım"
+   ],
+   "weeks": 1,
+   "note": "",
+   "sources": [
+    "https://www.joonhealth.co/for-providers"
+   ]
+  },
+  {
+   "key": "m_special_time",
+   "title": "Olumlu ilgi ve özel zaman",
+   "aim": "Her gün kısa ve düzenli bir süre çocuğun yönettiği oyunla ilişkiyi güçlendirmek.",
+   "skills": [
+    "Oyunu çocuk seçer, sen eşlik edersin",
+    "Yaptığını sözle betimlersin",
+    "Soru ve yönlendirmeyi azaltırsın"
+   ],
+   "practice": "Her gün 5–10 dakika; telefon uzakta.",
+   "checklist": [
+    "Telefonu uzağa koydum",
+    "Oyunu çocuğum seçti",
+    "Yaptığını betimledim",
+    "Yönlendirmedim"
+   ],
+   "weeks": 2,
+   "note": "",
+   "sources": [
+    "https://pubmed.ncbi.nlm.nih.gov/18205039/"
+   ]
+  },
+  {
+   "key": "m_praise",
+   "title": "Övgü ve olumlu pekiştirme",
+   "aim": "İstenen davranışı fark edip hemen ve adıyla övmek.",
+   "skills": [
+    "Davranışı adıyla övmek (\"Çantanı kendin hazırladın\")",
+    "Hemen övmek",
+    "Küçük adımları da görmek"
+   ],
+   "practice": "Her gün hedef davranışı en az 5 kez fark et ve öv.",
+   "checklist": [
+    "Davranışı adıyla övdüm",
+    "Hemen övdüm",
+    "Küçük bir adımı da fark ettim"
+   ],
+   "weeks": 1,
+   "note": "",
+   "sources": [
+    "https://research.bangor.ac.uk/en/publications/meta-analyses-key-parenting-program-components-for-disruptive-chi/"
+   ]
+  },
+  {
+   "key": "m_commands",
+   "title": "Etkili istek",
+   "aim": "Çocuğun isteğe uyma olasılığını artıran istek biçimini kullanmak.",
+   "skills": [
+    "Yakına gel ve dikkatini al",
+    "Kısa, tek adımlı, düz cümle",
+    "Soru gibi sorma; bekle",
+    "Uyunca öv"
+   ],
+   "practice": "Günde birkaç istekte bu adımları uygula.",
+   "checklist": [
+    "Yakına gittim, dikkatini aldım",
+    "Tek adımlı söyledim",
+    "Bekledim",
+    "Uyunca övdüm"
+   ],
+   "weeks": 1,
+   "note": "",
+   "sources": [
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC2884347"
+   ]
+  },
+  {
+   "key": "m_rewards",
+   "title": "Ödül sistemi",
+   "aim": "Birkaç hedef davranışı küçük ve sık ödüllerle desteklemek.",
+   "skills": [
+    "En çok 2–3 davranış seçmek",
+    "Küçük ve sık ödül",
+    "Zamanla azaltmak"
+   ],
+   "practice": "ParentApp'te hedef davranışları görev olarak ekle; coin ve ödülleri birlikte belirleyin.",
+   "checklist": [
+    "Hedef davranışları seçtik",
+    "Ödülleri birlikte belirledik",
+    "Söz verdiğim ödülü verdim"
+   ],
+   "weeks": 2,
+   "note": "Oyundaki coin ve taş sistemiyle birlikte çalışır.",
+   "sources": [
+    "https://www.aafp.org/pubs/afp/issues/2020/0701/p58.html"
+   ]
+  },
+  {
+   "key": "m_attention",
+   "title": "Planlı görmezden gelme",
+   "aim": "Zararsız, ilgi arayan davranışta ilgiyi çekip uygun davranış başlayınca ilgiyi geri vermek.",
+   "skills": [
+    "Hangi davranışın zararsız olduğunu belirlemek",
+    "Sakin kalıp ilgiyi çekmek",
+    "Uygun davranış başlayınca hemen ilgi ve övgü"
+   ],
+   "practice": "Uzmanınla seçtiğiniz tek bir davranışta uygula.",
+   "checklist": [
+    "Yalnız seçtiğimiz davranışta uyguladım",
+    "Uygun davranışı hemen övdüm"
+   ],
+   "weeks": 1,
+   "note": "Tehlikeli ya da zarar veren davranışta uygulanmaz; övgüyle birlikte kullanılır.",
+   "sources": [
+    "https://journals.sagepub.com/doi/ref/10.1177/01454455840084005"
+   ]
+  },
+  {
+   "key": "m_consequences",
+   "title": "Sakin sonuçlar ve mola",
+   "aim": "Önceden açıklanan, kısa, sakin ve tutarlı sonuçlar kullanmak.",
+   "skills": [
+    "Kuralı ve sonucu önceden açıklamak",
+    "Sakin ve kısa uygulamak",
+    "Sonra yeniden başlamak"
+   ],
+   "practice": "Uzmanının belirlediği kural ve sonucu bu hafta tutarlı uygula.",
+   "checklist": [
+    "Kuralı önceden açıkladım",
+    "Sesimi yükseltmedim",
+    "Sonra ilişkiyi onardım"
+   ],
+   "weeks": 2,
+   "note": "Uzman uygun görürse eklenir.",
+   "sources": [
+    "https://research.bangor.ac.uk/en/publications/meta-analyses-key-parenting-program-components-for-disruptive-chi/"
+   ]
+  },
+  {
+   "key": "m_routine",
+   "title": "Rutin ve görsel çizelge",
+   "aim": "Sabah ve akşam rutinlerini adımlara bölüp görünür kılmak.",
+   "skills": [
+    "Rutini 4–6 adıma bölmek",
+    "Resimli çizelge",
+    "Her gün aynı sıra"
+   ],
+   "practice": "Bir rutini seçip çizelgesini birlikte hazırla; ParentApp'te görev olarak ekle.",
+   "checklist": [
+    "Çizelgeyi asılı tuttum",
+    "Aynı sırayı izledik",
+    "Bitince övdüm"
+   ],
+   "weeks": 2,
+   "note": "",
+   "sources": [
+    "https://cbmt.franciscan.edu/wp-content/uploads/sites/32/2021/07/Knight-et-al.-2015_Visual-Schedules.pdf"
+   ]
+  },
+  {
+   "key": "m_transitions",
+   "title": "Geçişlere hazırlık",
+   "aim": "Etkinlik değişimlerini önceden haber verip kolaylaştırmak.",
+   "skills": [
+    "5 ve 1 dakika önce uyarı",
+    "Zamanlayıcı",
+    "\"Önce … sonra …\" dili",
+    "Sorunsuz geçişi övmek"
+   ],
+   "practice": "Günün en zor geçişinde uygula (ör. ekran kapatma).",
+   "checklist": [
+    "Önceden uyardım",
+    "Zamanlayıcı kullandım",
+    "Geçişi övdüm"
+   ],
+   "weeks": 1,
+   "note": "",
+   "sources": [
+    "https://link.springer.com/article/10.1007/s40617-017-0187-7"
+   ]
+  },
+  {
+   "key": "m_school",
+   "title": "Okul iş birliği ve günlük kart",
+   "aim": "Öğretmenle 2–3 ortak hedef belirleyip günlük kartla evle bağ kurmak.",
+   "skills": [
+    "Öğretmenle hedef belirlemek",
+    "Kart her gün eve gelir",
+    "Karta bağlı küçük ev ödülü"
+   ],
+   "practice": "Öğretmenle görüş; kartı her akşam birlikte gözden geçir.",
+   "checklist": [
+    "Kart bugün geldi",
+    "Birlikte baktık",
+    "Evet'leri övdüm"
+   ],
+   "weeks": 2,
+   "note": "",
+   "sources": [
+    "https://pubmed.ncbi.nlm.nih.gov/29135352/"
+   ]
+  },
+  {
+   "key": "m_emotion",
+   "title": "Duygu koçluğu",
+   "aim": "Çocuğun duygusunu fark edip adlandırmak ve sınırı koruyarak birlikte çözüm aramak.",
+   "skills": [
+    "Duyguyu fark etmek ve adlandırmak",
+    "Kabul etmek, davranışa sınır koymak",
+    "Sakinleşince birlikte çözüm aramak"
+   ],
+   "practice": "Günde bir duygu anında bu adımları uygula.",
+   "checklist": [
+    "Duyguyu adlandırdım",
+    "Sınırı korudum",
+    "Sonra birlikte konuştuk"
+   ],
+   "weeks": 2,
+   "note": "",
+   "sources": [
+    "https://pubmed.ncbi.nlm.nih.gov/18205039/"
+   ]
+  },
+  {
+   "key": "m_interaction",
+   "title": "Etkileşim ve iletişim fırsatları",
+   "aim": "Günlük oyun ve rutinlerde iletişim fırsatlarını artırmak.",
+   "skills": [
+    "Çocuğun ilgisini izlemek",
+    "Yüz yüze konumlanmak",
+    "İstek fırsatı yaratmak",
+    "Model olmak ve doğal ödül"
+   ],
+   "practice": "Günde 2 kez 10 dakikalık oyunda uygula.",
+   "checklist": [
+    "Yüz yüze oynadık",
+    "İstek fırsatı yarattım",
+    "Söylediğini genişlettim"
+   ],
+   "weeks": 2,
+   "note": "Otizmde ebeveyn aracılı müdahalelerin ortak öğelerinden.",
+   "sources": [
+    "https://pubmed.ncbi.nlm.nih.gov/29490483/"
+   ]
+  },
+  {
+   "key": "m_sleep",
+   "title": "Uyku rutini",
+   "aim": "Sabit saat ve kısa, sakin, her gece aynı yatma rutini kurmak.",
+   "skills": [
+    "Sabit yatma ve kalkma saati",
+    "Kısa ve sakin rutin",
+    "Görsel yatma çizelgesi",
+    "Kendi başına uykuya dalma"
+   ],
+   "practice": "Her gece aynı rutini uygula; uykuya dalma yöntemini uzmanınla seç.",
+   "checklist": [
+    "Saat sabitti",
+    "Rutin aynıydı",
+    "Ekran rutinden önce kapandı"
+   ],
+   "weeks": 2,
+   "note": "",
+   "sources": [
+    "https://pubmed.ncbi.nlm.nih.gov/17068979/",
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC3818449"
+   ]
+  }
+ ],
+ "packages": [
+  {
+   "key": "p_adhd_preschool",
+   "title": "Davranış: okul öncesi (3–6)",
+   "goals": [
+    "g_first_ask",
+    "g_tantrum",
+    "g_morning_routine"
+   ],
+   "modules": [
+    "m_special_time",
+    "m_praise",
+    "m_commands",
+    "m_rewards",
+    "m_attention",
+    "m_consequences",
+    "m_routine"
+   ],
+   "weeks": 10
+  },
+  {
+   "key": "p_adhd_school",
+   "title": "Ev ve okul: okul çağı (6–12)",
+   "goals": [
+    "g_homework_start",
+    "g_homework_time",
+    "g_daily_card_score"
+   ],
+   "modules": [
+    "m_praise",
+    "m_commands",
+    "m_rewards",
+    "m_school",
+    "m_routine"
+   ],
+   "weeks": 8
+  },
+  {
+   "key": "p_rules",
+   "title": "Uyum ve kurallar",
+   "goals": [
+    "g_first_ask",
+    "g_hitting",
+    "g_accept_no"
+   ],
+   "modules": [
+    "m_special_time",
+    "m_praise",
+    "m_commands",
+    "m_rewards",
+    "m_attention",
+    "m_consequences"
+   ],
+   "weeks": 10
+  },
+  {
+   "key": "p_communication",
+   "title": "İletişim ve rutin",
+   "goals": [
+    "g_request",
+    "g_turns",
+    "g_morning_routine"
+   ],
+   "modules": [
+    "m_interaction",
+    "m_routine",
+    "m_transitions",
+    "m_praise"
+   ],
+   "weeks": 12
+  },
+  {
+   "key": "p_challenging",
+   "title": "Zorlayıcı davranış",
+   "goals": [
+    "g_tantrum",
+    "g_calm_tool",
+    "g_screen_off"
+   ],
+   "modules": [
+    "m_abc",
+    "m_routine",
+    "m_transitions",
+    "m_praise",
+    "m_rewards",
+    "m_attention"
+   ],
+   "weeks": 12
+  },
+  {
+   "key": "p_emotion",
+   "title": "Duygu düzenleme",
+   "goals": [
+    "g_tantrum",
+    "g_calm_tool",
+    "g_name_feeling"
+   ],
+   "modules": [
+    "m_special_time",
+    "m_emotion",
+    "m_praise",
+    "m_consequences"
+   ],
+   "weeks": 8
+  },
+  {
+   "key": "p_sleep",
+   "title": "Uyku",
+   "goals": [
+    "g_bedtime_routine",
+    "g_falls_asleep_alone",
+    "g_night_visits"
+   ],
+   "modules": [
+    "m_sleep",
+    "m_routine",
+    "m_rewards"
+   ],
+   "weeks": 6
+  },
+  {
+   "key": "p_selfcare",
+   "title": "Öz bakım ev programı",
+   "goals": [
+    "g_teeth",
+    "g_dressing",
+    "g_morning_routine"
+   ],
+   "modules": [
+    "m_routine"
+   ],
+   "weeks": 8
+  }
+ ]
+}

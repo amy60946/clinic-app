@@ -13,7 +13,7 @@ import { Client, ClientData, ClinicianMe, Member, loadClientData, revokeLink } f
 import TeamAccessSheet from './TeamAccessSheet';
 import { isoDate, windowStarts } from '../../lib/metrics';
 import { SummaryTab, RoutineTab, AbcTab } from './ObservationTabs';
-import GoalsTab from './GoalsTab';
+import PlanTab from './PlanTab';
 import NotesTab from './NotesTab';
 import SuggestionsTab from './SuggestionsTab';
 import ReportTab from './ReportTab';
@@ -27,7 +27,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'summary', label: 'Özet' },
   { id: 'routine', label: 'Rutin' },
   { id: 'abc', label: 'Zor anlar' },
-  { id: 'goals', label: 'Hedefler' },
+  { id: 'goals', label: 'Plan' },
   { id: 'notes', label: 'Notlar' },
   { id: 'suggestions', label: 'Öneriler' },
   { id: 'report', label: 'Rapor' },
@@ -169,7 +169,7 @@ export default function ClientScreen({ client, me, team = [], initialTab = 'summ
                 {tab === 'summary' && <SummaryTab {...ctx} />}
                 {tab === 'routine' && <RoutineTab {...ctx} />}
                 {tab === 'abc' && <AbcTab {...ctx} />}
-                {tab === 'goals' && <GoalsTab {...ctx} />}
+                {tab === 'goals' && <PlanTab {...ctx} />}
                 {tab === 'notes' && <NotesTab {...ctx} />}
                 {tab === 'suggestions' && <SuggestionsTab {...ctx} />}
                 {tab === 'report' && <ReportTab {...ctx} />}

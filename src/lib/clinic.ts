@@ -97,10 +97,6 @@ export async function listClients(): Promise<Client[]> {
 }
 
 // Aileye verilecek paylaşım kodu (ebeveyn ParentApp › Aile › Hesap › Uzmanım'da girer). 7 gün, tek kullanım.
-export async function createFamilyInvite(label: string): Promise<Invite> {
-  const { data, error } = await supabase.rpc('clinic_create_invite', { p_kind: 'family', p_label: label.trim() });
-  return check(data as Invite, error);
-}
 
 // Uzman paylaşımı sonlandırabilir (ebeveyn de). Erişim hemen biter; notlar ve hedefler klinikte kalır.
 export async function revokeLink(linkId: string): Promise<void> {
@@ -171,7 +167,7 @@ export async function deleteNote(id: string): Promise<void> {
   check(null, error);
 }
 
-/* ---------- Hedefe ulaşma ölçeği (GAS, -2 … +2, haftalık) ---------- */
+/* ---------- Hedefler ve haftalık GAS puanı (rapor için; düzenleme lib/plan.ts) ---------- */
 
 export type GoalRating = { week: string; rating: number; note: string };
 export type Goal = { id: string; title: string; description: string; archived: boolean; created_at: string; ratings: GoalRating[] };
@@ -182,26 +178,6 @@ export async function listGoals(linkId: string): Promise<Goal[]> {
     .eq('link_id', linkId).order('created_at');
   const rows = check(data ?? [], error) as unknown as (Omit<Goal, 'ratings'> & { goal_ratings: GoalRating[] })[];
   return rows.map(({ goal_ratings, ...g }) => ({ ...g, ratings: goal_ratings ?? [] }));
-}
-
-export async function addGoal(c: Client, by: string, title: string, description: string): Promise<void> {
-  const { error } = await supabase.from('clinic_goals').insert({
-    link_id: c.link_id, clinic_id: c.clinic_id, title: title.trim(), description: description.trim(), created_by: by,
-  });
-  check(null, error);
-}
-
-export async function setGoalArchived(id: string, archived: boolean): Promise<void> {
-  const { error } = await supabase.from('clinic_goals').update({ archived }).eq('id', id);
-  check(null, error);
-}
-
-export async function rateGoal(c: Client, by: string, goalId: string, week: string, rating: number, note = ''): Promise<void> {
-  const { error } = await supabase.from('goal_ratings').upsert(
-    { goal_id: goalId, clinic_id: c.clinic_id, week, rating, note: note.trim(), rated_by: by },
-    { onConflict: 'goal_id,week' },
-  );
-  check(null, error);
 }
 
 /* ---------- Aileye görev önerisi (ekleme kararı ebeveynin) ---------- */

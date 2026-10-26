@@ -4,6 +4,7 @@ import { colors } from '../../theme';
 import { Card, Label, Input, Cta, Empty, SmallButton } from '../../components/ui';
 import { Note, listNotes, addNote, deleteNote } from '../../lib/clinic';
 import type { ClientCtx } from './ClientScreen';
+import { InheritedNotes } from './History';
 
 // Uzman notları: yalnız klinik ekibi görür; aile görmez. Paylaşım biterse de klinikte kalır.
 export default function NotesTab({ client, me }: ClientCtx) {
@@ -60,6 +61,7 @@ export default function NotesTab({ client, me }: ClientCtx) {
           ))}
         </View>
       )}
+      <InheritedNotes linkId={client.link_id} />
     </View>
   );
 }

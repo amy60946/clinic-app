@@ -11,6 +11,7 @@ import SuggestionEditor, { repeatSummary } from './SuggestionEditor';
 import type { ClientCtx } from './ClientScreen';
 import { track } from '../../lib/track';
 import { skillName } from '../../skills';
+import { InheritedSuggestions } from './History';
 
 const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: string; icon: keyof typeof Ionicons.glyphMap }> = {
   pending: { label: 'Ebeveyn kararı bekleniyor', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'time-outline' },
@@ -111,6 +112,7 @@ export default function SuggestionsTab({ client, me }: ClientCtx) {
           })}
         </View>
       )}
+      <InheritedSuggestions linkId={client.link_id} />
 
       <SuggestionEditor
         visible={editor.open}
