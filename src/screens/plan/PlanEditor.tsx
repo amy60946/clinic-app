@@ -11,7 +11,7 @@ import {
   PlanTarget, PlanGoal, PlanModule, ModuleLog, GoalInput, ModuleInput, Measure, GoalStatus, ModuleStatus, PackageT,
   DOMAINS, GOAL_TEMPLATES, MODULE_TEMPLATES, PACKAGES, MEASURES, TARGET_HINTS, BARRIERS,
   loadPlan, loadLogs, addGoals, updateGoal, deleteGoal, addModules, updateModule, deleteModule, rateGoal, applyPackage,
-  goalFromTemplate, moduleFromTemplate, domainLabel, logSummary, PlanSchemaMissing,
+  goalFromTemplate, moduleFromTemplate, domainLabel, logSummary, lastLogDay, PlanSchemaMissing,
 } from '../../lib/plan';
 
 // Takip planı düzenleyicisi (ortak/sozlesme/akislar.md 12): hedefler + aile programı. Bir paylaşımda (danışan › Plan)
@@ -245,7 +245,10 @@ function ModuleCard({ m, isLink, readOnly, logs, onEdit, onStatus, onDelete }: {
   m: PlanModule; isLink: boolean; readOnly: boolean; logs: ModuleLog[];
   onEdit: () => void; onStatus: (s: ModuleStatus) => void; onDelete: () => void;
 }) {
-  const s = isLink ? logSummary(logs, m.id) : null;
+  // devralınan plan (salt okunur): pencere önceki dönemin son kaydında biter, bugünden sayılmaz
+  const end = readOnly ? lastLogDay(logs, m.id) : undefined;
+  const s = isLink && (!readOnly || end) ? logSummary(logs, m.id, 14, end) : null;
+  const ease = s ? [s.ease.easy && `kolay ${s.ease.easy}`, s.ease.medium && `orta ${s.ease.medium}`, s.ease.hard && `zorlandı ${s.ease.hard}`].filter(Boolean).join(' · ') : '';
   const barriers = s ? Object.entries(s.barriers).map(([k, n]) => `${BARRIERS[k] ?? k} (${n})`).join(', ') : '';
   return (
     <Card style={{ gap: 8 }}>
@@ -272,8 +275,8 @@ function ModuleCard({ m, isLink, readOnly, logs, onEdit, onStatus, onDelete }: {
       {s && m.status !== 'planned' && (
         <View style={styles.logBox}>
           <Text style={styles.body}>
-            <Text style={{ fontWeight: '700' }}>Son {s.days} gün: </Text>
-            {s.practiced} gün uyguladı{s.avgDifficulty != null ? ` · zorlanma (aile) ort. ${s.avgDifficulty}/5` : ''}
+            <Text style={{ fontWeight: '700' }}>{end ? `Dönemin son ${s.days} günü` : `Son ${s.days} gün`}: </Text>
+            {s.practiced} gün uyguladı{ease ? ` · ailenin bildirdiği zorluk: ${ease}` : ''}
           </Text>
           {!!barriers && <Text style={styles.small}>Uygulayamadığı günler: {barriers}</Text>}
           <Text style={styles.tiny}>Ailenin kendi bildirimi; bir puan ya da değerlendirme değildir.</Text>
@@ -365,11 +368,11 @@ function GoalSheet({ editing, legacy, onClose, onSave }: {
         <Chips options={MEASURES.map((m) => ({ id: m.key, label: m.label }))} value={f.measure} onChange={(v) => set({ measure: v as Measure })} />
         <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
           <View style={{ flex: 1, minWidth: 140 }}>
-            <Label>Başlangıç düzeyi</Label>
+            <Label>Başlangıç düzeyi (aile görür)</Label>
             <Input value={f.baseline} onChangeText={(v) => set({ baseline: v })} placeholder="Ör. %30 (boşsa ilk hafta)" maxLength={60} />
           </View>
           <View style={{ flex: 1, minWidth: 140 }}>
-            <Label>Hedef düzey</Label>
+            <Label>Hedef düzey (aile görür)</Label>
             <Input value={f.target} onChangeText={(v) => set({ target: v })} placeholder="Ör. 7 günün 5'i" maxLength={60} />
           </View>
         </View>

@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, Alert, StyleSheet } from 'react-native';
 import { colors, radius } from '../../theme';
 import { Card, Label, Cta, SmallButton } from '../../components/ui';
 import { ClinicianMe, Member } from '../../lib/clinic';
-import { FamilyInvite, InviteStats, STATUS_TEXT, listInvites, inviteStats, revokeInvite, sweepInvites, leftText, ageGroupLabel } from '../../lib/invites';
+import { FamilyInvite, InviteStats, STATUS_TEXT, HAS_BASE, listInvites, inviteStats, revokeInvite, sweepInvites, leftText, ageGroupLabel } from '../../lib/invites';
+import { useNotifications } from '../../lib/notificationsContext';
 import InviteSheet, { SheetInvite } from './InviteSheet';
 
 // Ana ekran: "Aileyi davet et" + davetlerim (durum, yeniden gönder, iptal) + sahip için ekip istatistiği (ortak akislar.md 10).
@@ -33,6 +34,17 @@ export default function InvitesCard({ me, team, reloadKey, onChanged }: {
     if (list) setStats(await inviteStats(30));
   }, []);
   useEffect(() => { load(); }, [load, reloadKey]);
+  // davet bildirimi gelince (aile kabul etti / reddetti / süre doldu) liste yenilenir; kalan süre dakikada bir güncellenir
+  const { items: notes } = useNotifications();
+  const lastInviteNote = notes.find((n) => n.kind.startsWith('invite_'))?.id;
+  const seenNote = useRef(lastInviteNote);
+  useEffect(() => {
+    if (lastInviteNote === seenNote.current) return;   // açılışta değil, yeni bildirimde
+    seenNote.current = lastInviteNote;
+    load();
+  }, [lastInviteNote, load]);
+  const [, tick] = useState(0);
+  useEffect(() => { const t = setInterval(() => tick((n) => n + 1), 60_000); return () => clearInterval(t); }, []);
 
   const revoke = (i: FamilyInvite) => Alert.alert('Davet iptal edilsin mi?', 'Bağlantı ve kod çalışmaz; davete eklediğin taslak plan silinir.', [
     { text: 'Vazgeç', style: 'cancel' },
@@ -46,7 +58,9 @@ export default function InvitesCard({ me, team, reloadKey, onChanged }: {
       <Label>Aileyi davet et</Label>
       <Card style={{ gap: 12 }}>
         <Text style={styles.body}>
-          Aileye WhatsApp ya da e-postayla bağlantı gönder. Ebeveyn bağlantıdan ParentApp'i yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin, çocuğunu paylaşma kararı ebeveynin. İstersen önce takip planını hazırla. Davet 48 saat geçerli.
+          {HAS_BASE
+            ? 'Aileye WhatsApp ya da e-postayla bağlantı gönder. Ebeveyn bağlantıdan ParentApp\'i yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin, çocuğunu paylaşma kararı ebeveynin. İstersen önce takip planını hazırla. Davet 48 saat geçerli.'
+            : 'Aileye WhatsApp, e-posta ya da SMS ile davet gönder. Ebeveyn ParentApp\'e kayıt olurken mesajdaki kodu yazar; sen kendiliğinden tanımlı gelirsin, çocuğunu paylaşma kararı ebeveynin. İstersen önce takip planını hazırla. Davet 48 saat geçerli.'}
         </Text>
         <Cta label="Aileyi davet et" onPress={() => setSheet({ open: true, existing: null })} />
         {mine && mine.sent > 0 && (

@@ -118,7 +118,12 @@ export default function HomeScreen() {
   const openTarget = useCallback(async (n: Pick<AppNotification, 'kind' | 'data' | 'childId'>) => {
     setBell(false);
     if (n.kind === 'team_joined') { setSelected(null); load(); return; }
-    if (n.kind.startsWith('verification_')) { setSelected(null); setVerify(true); loadVerify(); return; }   // bayrak kapalıyken bu bildirimler gelmez
+    // bayrak sonradan kapatıldıysa eski bildirim sayfayı açmaz (kapalıyken hiçbir şey görünmez)
+    if (n.kind.startsWith('verification_')) {
+      setSelected(null);
+      loadVerification().then((v) => { setVerification(v); if (v?.enabled) setVerify(true); }).catch(() => setVerification(null));
+      return;
+    }
     // davet bildirimleri: ana ekrandaki davet listesi yenilenir
     if (n.kind === 'invite_claimed' || n.kind === 'invite_expired' || n.kind === 'invite_declined') { setSelected(null); setInvitesKey((k) => k + 1); return; }
     // invite_child_updated: ebeveynin düzelttiği çocuk, danışan olarak açılır (aşağıda)
@@ -138,7 +143,7 @@ export default function HomeScreen() {
       return;
     }
     setSelected({ client: c, tab: notificationTab(n.kind), key: Date.now() });
-  }, [load, loadVerify]);
+  }, [load]);
 
   // Telefon bildirimine dokunma (uygulama kapalıyken de)
   useEffect(() => onNotificationTap((data) => {

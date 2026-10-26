@@ -6,6 +6,7 @@ export function pickPdf(): Promise<PickedPdf | null> {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'application/pdf,.pdf';
+    input.addEventListener('cancel', () => resolve(null));   // pencere kapatılınca beklemede kalmasın
     input.onchange = async () => {
       const f = input.files?.[0];
       if (!f) return resolve(null);

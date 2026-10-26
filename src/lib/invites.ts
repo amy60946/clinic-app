@@ -5,7 +5,7 @@ import { supabase } from './supabase';
 // 48 saat geçerli; bağlantı (token) + yazılabilir 6 karakter kod aynı davettir. Uzman WhatsApp / e-posta / SMS ile gönderir.
 // Bağlantı adresi alan adı alınınca EXPO_PUBLIC_INVITE_BASE_URL ile verilir (ör. https://alanadi.com/d/); yoksa mesajda yalnız kod.
 const BASE = (process.env.EXPO_PUBLIC_INVITE_BASE_URL ?? '').replace(/\/?$/, '/');
-const HAS_BASE = !!process.env.EXPO_PUBLIC_INVITE_BASE_URL;
+export const HAS_BASE = !!process.env.EXPO_PUBLIC_INVITE_BASE_URL;
 const PARENTAPP_STORE_URL = process.env.EXPO_PUBLIC_PARENTAPP_STORE_URL ?? '';
 
 export type InviteStatus = 'sent' | 'opened' | 'claimed' | 'shared' | 'expired' | 'revoked' | 'declined';
@@ -108,36 +108,37 @@ export function inviteMessage(inv: { code: string; token: string | null; expires
 
 const SUBJECT = 'ParentApp daveti';
 
-export async function shareInvite(channel: Channel, message: string, email?: string | null): Promise<boolean> {
+// 'shared': gönderim uygulaması açıldı · 'dismissed': kullanıcı paylaşım menüsünü kapattı · 'unsupported': cihazda menü yok
+export type ShareResult = 'shared' | 'dismissed' | 'unsupported';
+export async function shareInvite(channel: Channel, message: string, email?: string | null): Promise<ShareResult> {
   const text = encodeURIComponent(message);
   if (channel === 'whatsapp') {
     const url = `https://wa.me/?text=${text}`;
     if (Platform.OS === 'web') window.open(url, '_blank', 'noopener');
     else await Linking.openURL(url);
-    return true;
+    return 'shared';
   }
   if (channel === 'email') {
     const url = `mailto:${email ?? ''}?subject=${encodeURIComponent(SUBJECT)}&body=${text}`;
     if (Platform.OS === 'web') window.location.href = url;
     else await Linking.openURL(url);
-    return true;
+    return 'shared';
   }
   if (channel === 'sms') {
     const url = Platform.OS === 'ios' ? `sms:&body=${text}` : `sms:?body=${text}`;
     await Linking.openURL(url);
-    return true;
+    return 'shared';
   }
   if (channel === 'other') {
     if (Platform.OS === 'web') {
       const nav = navigator as Navigator & { share?: (d: { title?: string; text?: string }) => Promise<void> };
-      if (!nav.share) return false;
-      await nav.share({ title: SUBJECT, text: message }).catch(() => {});
-      return true;
+      if (!nav.share) return 'unsupported';
+      return nav.share({ title: SUBJECT, text: message }).then(() => 'shared' as const, () => 'dismissed' as const);
     }
     const r = await Share.share({ message, title: SUBJECT });
-    return r.action === Share.sharedAction;
+    return r.action === Share.sharedAction ? 'shared' : 'dismissed';
   }
-  return false;
+  return 'unsupported';
 }
 
 // Kalan süre metni
