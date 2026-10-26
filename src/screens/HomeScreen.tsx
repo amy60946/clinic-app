@@ -12,6 +12,7 @@ import {
 } from '../lib/clinic';
 import MembershipScreen from './MembershipScreen';
 import { ConfigBanner } from './ConfigGate';
+import Onboarding, { onboardingSeen, markOnboardingSeen } from './Onboarding';
 import { billingStatus, hasAccess, daysLeft, packageName } from '../lib/billing';
 import ClientScreen, { Tab } from './client/ClientScreen';
 import NotificationsSheet, { notificationTab } from './NotificationsSheet';
@@ -54,6 +55,7 @@ export default function HomeScreen() {
   const [selected, setSelected] = useState<{ client: Client; tab: Tab; key: number } | null>(null);
   const [bell, setBell] = useState(false);
   const [plans, setPlans] = useState(false);
+  const [guide, setGuide] = useState(false);
   const { unread, unreadByChild } = useNotifications();
   const pending = useRef<Pick<AppNotification, 'kind' | 'data' | 'childId'> | null>(null);
 
@@ -89,6 +91,17 @@ export default function HomeScreen() {
     return () => window.removeEventListener('clinicapp-billing', onReturn);
   }, [load]);
   useEffect(() => { stateRef.current = state; }, [state]);
+  // İlk kullanım rehberi: henüz danışanı olmayan hesapta bir kez (görüldü bilgisi cihazda)
+  const meId = state.kind === 'ready' ? state.me.id : null;
+  const noClients = state.kind === 'ready' && state.clients.length === 0;
+  useEffect(() => {
+    if (!meId) return;
+    onboardingSeen(meId).then((seen) => {
+      if (seen) return;
+      if (noClients) setGuide(true);
+      else markOnboardingSeen(meId);
+    });
+  }, [meId]); // eslint-disable-line react-hooks/exhaustive-deps
   // Açık kalmış uzman olmayan oturum (ör. ParentApp hesabı): kapatılır, kayıt ekranı açılır
   useEffect(() => { if (state.kind === 'not_clinician') rejectAccount(); }, [state.kind, rejectAccount]);
 
@@ -231,12 +244,16 @@ export default function HomeScreen() {
               <Text style={styles.footnote}>
                 Bu panel gözlem toplar, tanı koymaz. Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
               </Text>
+              <Pressable onPress={() => setGuide(true)} hitSlop={8} style={{ alignSelf: 'flex-start' }} accessibilityRole="button">
+                <Text style={styles.link}>Nasıl kullanılır?</Text>
+              </Pressable>
               {accountLinks}
             </>
           )}
         </View>
       </ScrollView>
       <NotificationsSheet visible={bell} onClose={() => setBell(false)} onOpen={openTarget} />
+      <Onboarding visible={guide} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
     </SafeAreaView>
   );
 }
