@@ -755,7 +755,12 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     save();
     return { data: n, error: null };
   }
-  if (name === 'clinic_link_history_of') return { data: [], error: null };
+  // Önceki uzmandan devralınan kayıtlar: önizlemede boş (denemek için tarayıcı deposuna 'demo.inherited' JSON yazılabilir)
+  if (name === 'clinic_inherited_records') {
+    let v: unknown = [];
+    try { v = JSON.parse(localStorage.getItem('demo.inherited') || 'null') ?? v; } catch {}
+    return { data: v, error: null };
+  }
   if (name === 'care_plan_publish') {
     const l = db.clinic_links.find((x: Row) => x.id === args.p_link_id);
     if (!l) return err('Paylaşım bulunamadı');

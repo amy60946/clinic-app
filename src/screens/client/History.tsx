@@ -2,48 +2,45 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { colors, radius } from '../../theme';
 import { Card, Label } from '../../components/ui';
-import { HistoryLink, loadHistory } from '../../lib/plan';
-import { listNotes, listSuggestions, Note, Suggestion } from '../../lib/clinic';
+import { InheritedRecord, loadInherited } from '../../lib/plan';
 import { skillName } from '../../skills';
 
-// Önceki uzman(lar)dan devralınan kayıtlar (ortak akislar.md 11): ebeveyn rızasıyla, salt okunur, kimden geldiği yazılı.
+// Önceki uzman(lar)dan devralınan kayıtlar (ortak akislar.md 11): ebeveyn rızasıyla, salt okunur.
+// Önceki uzman adsızdır: "Önceki uzman 1" + dönem; sunucu ad, unvan, klinik ve kimlik döndürmez.
 export function useHistory(linkId: string) {
-  const [links, setLinks] = useState<HistoryLink[]>([]);
-  useEffect(() => { loadHistory(linkId).then(setLinks); }, [linkId]);
-  return links;
+  const [records, setRecords] = useState<InheritedRecord[]>([]);
+  useEffect(() => { loadInherited(linkId).then(setRecords); }, [linkId]);
+  return records;
 }
 
-const period = (h: HistoryLink) => {
-  const f = (d: string | null) => (d ? new Date(d).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }) : 'devam ediyor');
-  return `${f(h.consent_at)} – ${f(h.revoked_at)}`;
+const month = (ym: string | null) => {
+  if (!ym) return 'devam ediyor';
+  const [y, m] = ym.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
 };
 
-export function HistoryHeader({ h }: { h: HistoryLink }) {
+export function HistoryHeader({ h }: { h: InheritedRecord }) {
   return (
     <View style={styles.head}>
-      <Text style={styles.headTitle}>Önceki uzman: {[h.clinician, h.title].filter(Boolean).join(' · ') || 'Adsız'} — {h.clinic}</Text>
-      <Text style={styles.small}>{period(h)} · ebeveynin izniyle, yalnız okuma</Text>
+      <Text style={styles.headTitle}>{h.label}</Text>
+      <Text style={styles.small}>{month(h.from)} – {month(h.to)} · ebeveynin izniyle, yalnız okuma</Text>
     </View>
   );
 }
 
 export function InheritedNotes({ linkId }: { linkId: string }) {
-  const links = useHistory(linkId);
-  const [notes, setNotes] = useState<Record<string, Note[]>>({});
-  useEffect(() => {
-    links.forEach((h) => listNotes(h.from_link_id).then((n) => setNotes((s) => ({ ...s, [h.from_link_id]: n }))).catch(() => {}));
-  }, [links]);
-  if (!links.length) return null;
+  const records = useHistory(linkId);
+  if (!records.length) return null;
   return (
     <View>
       <Label>Önceki uzmanın notları</Label>
-      {links.map((h) => (
-        <View key={h.from_link_id} style={{ gap: 8, marginBottom: 10 }}>
+      {records.map((h) => (
+        <View key={h.key} style={{ gap: 8, marginBottom: 10 }}>
           <HistoryHeader h={h} />
-          {(notes[h.from_link_id] ?? []).length === 0 && <Text style={styles.small}>Not yok.</Text>}
-          {(notes[h.from_link_id] ?? []).map((n) => (
-            <Card key={n.id} style={{ gap: 4, backgroundColor: '#FAFAFB' }}>
-              <Text style={styles.small}>{new Date(n.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}{n.author ? ` · ${n.author}` : ''}</Text>
+          {h.notes.length === 0 && <Text style={styles.small}>Not yok.</Text>}
+          {h.notes.map((n, i) => (
+            <Card key={i} style={{ gap: 4, backgroundColor: '#FAFAFB' }}>
+              <Text style={styles.small}>{new Date(n.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</Text>
               <Text style={styles.body}>{n.body}</Text>
             </Card>
           ))}
@@ -56,21 +53,17 @@ export function InheritedNotes({ linkId }: { linkId: string }) {
 const STATUS: Record<string, string> = { pending: 'Bekliyor', accepted: 'Eklendi', declined: 'Eklenmedi' };
 
 export function InheritedSuggestions({ linkId }: { linkId: string }) {
-  const links = useHistory(linkId);
-  const [items, setItems] = useState<Record<string, Suggestion[]>>({});
-  useEffect(() => {
-    links.forEach((h) => listSuggestions(h.from_link_id).then((n) => setItems((s) => ({ ...s, [h.from_link_id]: n }))).catch(() => {}));
-  }, [links]);
-  if (!links.length) return null;
+  const records = useHistory(linkId);
+  if (!records.length) return null;
   return (
     <View>
       <Label>Önceki uzmanın önerileri</Label>
-      {links.map((h) => (
-        <View key={h.from_link_id} style={{ gap: 6, marginBottom: 10 }}>
+      {records.map((h) => (
+        <View key={h.key} style={{ gap: 6, marginBottom: 10 }}>
           <HistoryHeader h={h} />
-          {(items[h.from_link_id] ?? []).length === 0 && <Text style={styles.small}>Öneri yok.</Text>}
-          {(items[h.from_link_id] ?? []).map((s) => (
-            <Card key={s.id} style={{ flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: '#FAFAFB' }}>
+          {h.suggestions.length === 0 && <Text style={styles.small}>Öneri yok.</Text>}
+          {h.suggestions.map((s, i) => (
+            <Card key={i} style={{ flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: '#FAFAFB' }}>
               <Text style={{ fontSize: 18 }}>{s.emoji}</Text>
               <View style={{ flex: 1 }}>
                 <Text style={styles.body}>{s.title}</Text>

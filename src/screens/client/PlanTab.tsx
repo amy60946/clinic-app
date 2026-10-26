@@ -39,11 +39,12 @@ export default function PlanTab({ client, today }: ClientCtx) {
         <Cta label={dirty ? 'Değişiklikleri aileye gönder' : 'Planı aileye gönder'} onPress={publish} busy={busy} />
         <Text style={styles.small}>Her düzenlemede bildirim gitmez; hazır olunca buradan bir kez gönder.</Text>
       </View>
-      {history.map((h) => (
-        <View key={h.from_link_id}>
+      {history.filter((h) => h.goals.length || h.modules.length).map((h) => (
+        <View key={h.key}>
           <Label>Önceki uzmanın planı</Label>
           <HistoryHeader h={h} />
-          <PlanEditor target={{ kind: 'link', linkId: h.from_link_id, clinicId: '' }} today={today} readOnly />
+          <PlanEditor target={{ kind: 'link', linkId: h.key, clinicId: '' }} readOnly preset={h}
+            today={h.goals.flatMap((g) => g.ratings.map((r) => r.week)).sort().pop() ?? today} />
         </View>
       ))}
     </View>

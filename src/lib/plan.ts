@@ -164,12 +164,37 @@ export async function applyPackage(t: PlanTarget, p: PackageT, existing: { goals
   await addModules(t, ms.map((m, i) => moduleFromTemplate(m, existing.modules.length + i, !anyActive && i === 0 ? 'active' : 'planned')));
 }
 
-/* ---------- Önceki uzmandan devralınan kayıtlar (ebeveyn rızasıyla, salt okunur) ---------- */
-export type HistoryLink = { from_link_id: string; clinic: string; clinician: string; title: string; consent_at: string; revoked_at: string | null };
-export async function loadHistory(linkId: string): Promise<HistoryLink[]> {
-  const { data, error } = await supabase.rpc('clinic_link_history_of', { p_link_id: linkId });
-  if (error) return [];
-  return (data ?? []) as HistoryLink[];
+/* ---------- Önceki uzmandan devralınan kayıtlar (ebeveyn rızasıyla, salt okunur, önceki uzman adsız) ---------- */
+// ortak akislar.md 11: sunucu adı, unvanı, kliniği ve kimlikleri döndürmez; metinde geçen adlar "[önceki uzman]".
+export type InheritedNote = { body: string; created_at: string };
+export type InheritedSuggestion = {
+  title: string; emoji: string; skill: string; category: string | null; description: string; note: string;
+  recurring: boolean; status: string; created_at: string; decided_at: string | null;
+};
+export type InheritedRecord = {
+  key: string; label: string; from: string; to: string | null;
+  notes: InheritedNote[]; suggestions: InheritedSuggestion[]; goals: PlanGoal[]; modules: PlanModule[]; logs: ModuleLog[];
+};
+type RawGoal = Omit<PlanGoal, 'id' | 'shared' | 'position' | 'template_key' | 'ratings'> & { ratings: { week: string; rating: number }[] };
+type RawModule = Omit<PlanModule, 'id' | 'position' | 'template_key'> & { logs: Omit<ModuleLog, 'module_id' | 'note'>[] };
+type RawRecord = { n: number; label: string; from: string; to: string | null; notes: InheritedNote[]; suggestions: InheritedSuggestion[]; goals: RawGoal[]; modules: RawModule[] };
+
+export async function loadInherited(linkId: string): Promise<InheritedRecord[]> {
+  const { data, error } = await supabase.rpc('clinic_inherited_records', { p_link_id: linkId });
+  if (error || !Array.isArray(data)) return [];
+  return (data as RawRecord[]).map((r) => {
+    const key = `h${r.n}`;
+    const modules = (r.modules ?? []).map(({ logs, ...m }, i) => ({ ...m, id: `${key}-m${i}`, position: i, template_key: null, logs }));
+    return {
+      key, label: r.label, from: r.from, to: r.to, notes: r.notes ?? [], suggestions: r.suggestions ?? [],
+      goals: (r.goals ?? []).map((g, i) => ({
+        ...g, id: `${key}-g${i}`, shared: false, position: i, template_key: null,
+        ratings: (g.ratings ?? []).map((x) => ({ ...x, note: '' })),
+      })),
+      modules: modules.map(({ logs, ...m }) => m),
+      logs: modules.flatMap((m) => (m.logs ?? []).map((l) => ({ ...l, module_id: m.id, note: '' }))),
+    };
+  });
 }
 
 /* ---------- Ebeveyn kaydı özeti (uzmana) ---------- */

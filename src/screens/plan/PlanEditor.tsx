@@ -28,8 +28,10 @@ const MODULE_STATUS: { id: ModuleStatus; label: string }[] = [
   { id: 'planned', label: 'Planlandı' }, { id: 'active', label: 'Etkin' }, { id: 'done', label: 'Tamamlandı' },
 ];
 
-export default function PlanEditor({ target, today, onChanged, readOnly = false }: {
+// preset: hazır veriyle salt okunur gösterim (önceki uzmandan devralınan plan; sunucudan ayrıca yüklenmez)
+export default function PlanEditor({ target, today, onChanged, readOnly = false, preset }: {
   target: PlanTarget; today?: string; onChanged?: () => void; readOnly?: boolean;
+  preset?: { goals: PlanGoal[]; modules: PlanModule[]; logs: ModuleLog[] };
 }) {
   const [plan, setPlan] = useState<{ goals: PlanGoal[]; modules: PlanModule[]; legacy: boolean } | null>(null);
   const [logs, setLogs] = useState<ModuleLog[]>([]);
@@ -43,6 +45,11 @@ export default function PlanEditor({ target, today, onChanged, readOnly = false 
   const key = target.kind === 'link' ? target.linkId : target.code;
 
   const load = useCallback(async () => {
+    if (preset) {
+      setPlan({ goals: preset.goals, modules: preset.modules, legacy: false });
+      setLogs(preset.logs);
+      return;
+    }
     try {
       const p = await loadPlan(target);
       setPlan(p);
@@ -82,7 +89,7 @@ export default function PlanEditor({ target, today, onChanged, readOnly = false 
       )}
 
       <Label>{`Çocuğun hedefleri (${goals.length})`}</Label>
-      {isLink && goals.some((g) => g.ratings) && weeks.length > 1 && (
+      {isLink && !readOnly && goals.some((g) => g.ratings) && weeks.length > 1 && (
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
           {(['this', 'last'] as const).map((w) => (
             <Pressable key={w} onPress={() => setWhich(w)} style={[styles.chip, which === w && styles.chipOn]}>
@@ -194,11 +201,13 @@ function GoalCard({ g, isLink, readOnly, week, weeks, legacy, onEdit, onToggleSh
       </View>
       {!legacy && (
         <View style={styles.rowWrap}>
-          <View style={styles.inline}>
-            <Switch value={g.shared} disabled={readOnly} onValueChange={onToggleShared} trackColor={{ true: colors.navy }}
-              accessibilityLabel="Aile bu hedefi görür" />
-            <Text style={styles.small}>{g.shared ? 'Aile görür' : 'Yalnız klinik'}</Text>
-          </View>
+          {!readOnly && (
+            <View style={styles.inline}>
+              <Switch value={g.shared} onValueChange={onToggleShared} trackColor={{ true: colors.navy }}
+                accessibilityLabel="Aile bu hedefi görür" />
+              <Text style={styles.small}>{g.shared ? 'Aile görür' : 'Yalnız klinik'}</Text>
+            </View>
+          )}
           <View style={styles.seg}>
             {GOAL_STATUS.map((s) => (
               <Pressable key={s.id} disabled={readOnly} onPress={() => onStatus(s.id)} style={[styles.segItem, g.status === s.id && styles.segOn]}>
