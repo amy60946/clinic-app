@@ -93,8 +93,15 @@ const owner = (t: PlanTarget) => (t.kind === 'link'
 export type GoalInput = Pick<PlanGoal, 'title' | 'description' | 'domain' | 'measure' | 'baseline' | 'target' | 'weeks' | 'home_support' | 'shared' | 'status'> & { template_key?: string | null; position?: number };
 export type ModuleInput = Pick<PlanModule, 'title' | 'aim' | 'practice' | 'checklist' | 'status'> & { template_key?: string | null; position?: number };
 
-const cleanGoal = (g: Partial<GoalInput>) => ({
-  ...g,
+// Yalnız tablo sütunları gider: düzenlenen hedef tam PlanGoal'dır (id, ratings, created_at…); PostgREST bilinmeyen sütunu reddeder
+const GOAL_FIELDS = ['title', 'description', 'domain', 'measure', 'baseline', 'target', 'weeks', 'home_support', 'shared', 'status',
+  'position', 'template_key', 'archived'] as const;
+const MODULE_FIELDS = ['title', 'aim', 'practice', 'checklist', 'status', 'position', 'template_key'] as const;
+const pick = (o: Record<string, unknown>, keys: readonly string[]) =>
+  Object.fromEntries(keys.filter((k) => o[k] !== undefined).map((k) => [k, o[k]]));
+
+const cleanGoal = (g: Partial<GoalInput> & { archived?: boolean }) => ({
+  ...pick(g, GOAL_FIELDS),
   ...(g.title !== undefined && { title: g.title.trim().slice(0, 120) }),
   ...(g.description !== undefined && { description: g.description.trim().slice(0, 600) }),
   ...(g.baseline !== undefined && { baseline: g.baseline.trim().slice(0, 60) }),
@@ -102,7 +109,7 @@ const cleanGoal = (g: Partial<GoalInput>) => ({
   ...(g.home_support !== undefined && { home_support: g.home_support.trim().slice(0, 400) }),
 });
 const cleanModule = (m: Partial<ModuleInput>) => ({
-  ...m,
+  ...pick(m, MODULE_FIELDS),
   ...(m.title !== undefined && { title: m.title.trim().slice(0, 120) }),
   ...(m.aim !== undefined && { aim: m.aim.trim().slice(0, 400) }),
   ...(m.practice !== undefined && { practice: m.practice.trim().slice(0, 600) }),
@@ -198,12 +205,22 @@ export async function loadInherited(linkId: string): Promise<InheritedRecord[]> 
 }
 
 /* ---------- Ebeveyn kaydı özeti (uzmana) ---------- */
-export function logSummary(logs: ModuleLog[], moduleId: string, days = 14) {
-  const since = new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
-  const mine = logs.filter((l) => l.module_id === moduleId && l.day >= since);
+// Pencere bugüne kadar son `days` gün; devralınan (biten) dönemde modülün son kayıt gününe kadar.
+// Zorlanma ebeveynin kendi bildirimi (1 çok kolay … 5 çok zor); ortalama/ölçek olarak gösterilmez, kaç kez olduğu sayılır.
+export function logSummary(logs: ModuleLog[], moduleId: string, days = 14, endDay?: string) {
+  const end = endDay ? new Date(`${endDay}T12:00:00Z`).getTime() : Date.now();
+  const since = new Date(end - days * 864e5).toISOString().slice(0, 10);
+  const mine = logs.filter((l) => l.module_id === moduleId && l.day >= since && (!endDay || l.day <= endDay));
   const practiced = new Set(mine.filter((l) => l.practiced).map((l) => l.day)).size;
-  const diffs = mine.map((l) => l.difficulty).filter((d): d is number => d != null);
+  const ease = { easy: 0, medium: 0, hard: 0 };
+  mine.forEach((l) => {
+    if (l.difficulty == null) return;
+    if (l.difficulty <= 2) ease.easy += 1; else if (l.difficulty === 3) ease.medium += 1; else ease.hard += 1;
+  });
   const barriers: Record<string, number> = {};
   mine.filter((l) => l.barrier).forEach((l) => { barriers[l.barrier!] = (barriers[l.barrier!] ?? 0) + 1; });
-  return { practiced, days, avgDifficulty: diffs.length ? Math.round((diffs.reduce((a, b) => a + b, 0) / diffs.length) * 10) / 10 : null, barriers };
+  return { practiced, days, ease, barriers };
 }
+
+export const lastLogDay = (logs: ModuleLog[], moduleId: string) =>
+  logs.filter((l) => l.module_id === moduleId).reduce<string | undefined>((a, l) => (!a || l.day > a ? l.day : a), undefined);

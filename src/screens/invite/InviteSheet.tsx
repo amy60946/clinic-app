@@ -9,6 +9,7 @@ import PlanEditor from '../plan/PlanEditor';
 import { track } from '../../lib/track';
 import {
   NewInvite, Channel, ChildAgeGroup, CHILD_AGE_GROUPS, ageGroupLabel, createInvite, markInvite, inviteLink, inviteMessage, shareInvite, leftText,
+  HAS_BASE,
 } from '../../lib/invites';
 
 // Aileyi davet et (ortak akislar.md 10): 1) isteğe bağlı ebeveyn adı / e-posta / not → 2) bağlantı + kod, WhatsApp / e-posta / diğer
@@ -50,6 +51,9 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
       setInv({ ...r, parent_name: parentName.trim(), parent_email: email.trim() || null, label: label.trim(),
         child_name: r.childSaved ? childName.trim() || null : null, child_age_group: r.childSaved ? age : null });
       track('invite.family', { email: !!email.trim(), link: !!r.token, child: !!childName.trim() || !!age });
+      if (!r.childSaved && (childName.trim() || age)) {
+        Alert.alert('Çocuk bilgisi kaydedilmedi', 'Sunucu güncellemesi beklendiği için davete çocuğun adı ve yaş grubu eklenemedi. Davet yine geçerli; ebeveyn çocuğu kendisi ekler.');
+      }
     } catch (e) {
       Alert.alert('Davet oluşturulamadı', (e as Error).message);
     } finally {
@@ -65,8 +69,9 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
         await Clipboard.setStringAsync(msg);
         Alert.alert('Kopyalandı', 'Mesajı istediğin uygulamaya yapıştırabilirsin.');
       } else {
-        const ok = await shareInvite(ch, msg, inv.parent_email);
-        if (!ok && ch === 'other') { await Clipboard.setStringAsync(msg); Alert.alert('Kopyalandı', 'Bu cihazda paylaşım menüsü yok; mesaj panoya kopyalandı.'); }
+        const r = await shareInvite(ch, msg, inv.parent_email);
+        if (r === 'dismissed') return;   // menü kapatıldı: gönderilmiş sayılmaz
+        if (r === 'unsupported') { await Clipboard.setStringAsync(msg); Alert.alert('Kopyalandı', 'Bu cihazda paylaşım menüsü yok; mesaj panoya kopyalandı.'); }
       }
       markInvite(inv.code, ch).catch(() => {});
       track('invite.share', { channel: ch });
@@ -87,7 +92,9 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
           {!inv ? (
             <>
               <Text style={styles.body}>
-                Aileye bir davet bağlantısı gönder. Ebeveyn bağlantıdan ParentApp'i yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin. Çocuğunu paylaşma kararı ebeveynin. Davet 48 saat geçerli.
+                {HAS_BASE
+                  ? 'Aileye bir davet bağlantısı gönder. Ebeveyn bağlantıdan ParentApp\'i yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin. Çocuğunu paylaşma kararı ebeveynin. Davet 48 saat geçerli.'
+                  : 'Aileye WhatsApp, e-posta ya da SMS ile davet gönder. Ebeveyn ParentApp\'e kayıt olurken mesajdaki 6 karakterlik kodu yazar; sen kendiliğinden tanımlı gelirsin. Çocuğunu paylaşma kararı ebeveynin. Davet 48 saat geçerli.'}
               </Text>
               <Label>Ebeveynin adı (isteğe bağlı)</Label>
               <Input value={parentName} onChangeText={setParentName} placeholder="Mesajda selam için" maxLength={60} />
@@ -139,7 +146,7 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
                   <Ionicons name="clipboard-outline" size={20} color={colors.navy} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.planTitle}>Hedefleri ve aile programını şimdi hazırla</Text>
-                    <Text style={styles.small}>Aile çocuğunu paylaşınca plan o çocuğa taşınır ve ParentApp'te hazır bulunur.</Text>
+                    <Text style={styles.small}>Aile çocuğunu paylaşınca plan o çocuğa (önerdiğin çocuk varsa yalnız ona) taşınır ve ParentApp'te hazır bulunur.</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={colors.faint} />
                 </Pressable>

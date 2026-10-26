@@ -32,7 +32,7 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
   useEffect(() => {
     loadVerification().then((s) => {
       setState(s);
-      if (s && !s.verified_at && (!s.last || ['rejected', 'auto_rejected', 'suspended'].includes(s.last.status))) setForm(true);
+      if (s && s.enabled !== false && !s.verified_at && (!s.last || ['rejected', 'auto_rejected', 'suspended'].includes(s.last.status))) setForm(true);
     }).catch((e) => { setState(null); Alert.alert('Yüklenemedi', (e as Error).message); });
   }, []);
 
@@ -44,6 +44,11 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
       const f = await pickPdf();
       if (!f) return;
       if (f.size > MAX_PDF) return Alert.alert('Dosya çok büyük', 'En çok 10 MB. e-Devlet belgesi genellikle çok daha küçüktür.');
+      // yalnız gerçek PDF (dosya başı "%PDF"): başka dosya ön kontrolde reddedilip günlük hakkı harcar
+      const head = new Uint8Array(f.body.slice(0, 4));
+      if (!(head[0] === 0x25 && head[1] === 0x50 && head[2] === 0x44 && head[3] === 0x46)) {
+        return Alert.alert('PDF değil', 'e-Devlet\'ten indirdiğin PDF dosyasını değiştirmeden seç.');
+      }
       setPdf(f);
     } catch (e) {
       Alert.alert('Dosya seçilemedi', (e as Error).message);
@@ -54,7 +59,7 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
     if (!p) return;
     setBusy(true);
     try {
-      const r = await submitDocument(p.key, bacb, pdf);
+      const r = await submitDocument(p.key, p.bacb ? bacb : '', pdf);   // başka meslekte kalan sicil no gönderilmez
       setResult(r ?? 'sent');
       setForm(false);
       track('verification.submit', { profession: p.key, check: r?.status ?? 'none' });
@@ -80,10 +85,11 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60, gap: 4 }} keyboardShouldPersistTaps="handled">
           {state === undefined && <ActivityIndicator color={colors.navy} style={{ marginTop: 24 }} />}
           {state === null && <Notice icon="construct-outline" text="Belge incelemesi için veritabanı güncellemesi bekleniyor." />}
-          {!!state && (
+          {!!state && state.enabled === false && <Notice icon="time-outline" text="Belge incelemesi şu an kapalı." />}
+          {!!state && state.enabled !== false && (
             <>
               <Text style={styles.body}>
-                Mezuniyet belgeni yükle; ekibimiz inceleyince ailelerin davet ekranında "Belgesi incelendi" rozeti görünür. Bu, ailelerin seni tanıdığından emin olmasına yardım eder.
+                Mezuniyet belgeni yükle; ekibimiz inceleyince ailelerin davet ekranında "Belgesi incelendi" rozeti görünür. Rozet, belgenin incelendiğini gösterir; aileler seni gerçek hayatta tanıdıklarını yine kendileri onaylar.
               </Text>
 
               {!!state.verified_at && (

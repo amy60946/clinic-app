@@ -32,12 +32,12 @@ export default function PlanTab({ client, today }: ClientCtx) {
   return (
     <View>
       <Text style={styles.intro}>
-        Takip planı: çocuğun hedefleri ve ailenin evde uygulayacağı program. Aile "aile görür" işaretli hedefleri ve etkin modülleri ParentApp'te görür; haftalık değerlendirmen yalnız klinikte kalır. Gözlem toplar, tanı koymaz.
+        Takip planı: çocuğun hedefleri ve ailenin evde uygulayacağı program. Aile "aile görür" işaretli hedefleri ve etkin modülleri, sen "Planı aileye gönder" dediğinde ParentApp'te görür; haftalık değerlendirmen yalnız klinikte kalır. Gözlem toplar, tanı koymaz.
       </Text>
       <PlanEditor target={{ kind: 'link', linkId: client.link_id, clinicId: client.clinic_id }} today={today} onChanged={() => setDirty(true)} />
       <View style={{ marginTop: 16 }}>
         <Cta label={dirty ? 'Değişiklikleri aileye gönder' : 'Planı aileye gönder'} onPress={publish} busy={busy} />
-        <Text style={styles.small}>Her düzenlemede bildirim gitmez; hazır olunca buradan bir kez gönder.</Text>
+        <Text style={styles.small}>Aile değişiklikleri sen gönderene kadar görmez; hazır olunca buradan bir kez gönder.</Text>
       </View>
       {history.filter((h) => h.goals.length || h.modules.length).map((h) => (
         <View key={h.key}>
