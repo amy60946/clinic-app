@@ -13,6 +13,8 @@ import {
 import MembershipScreen from './MembershipScreen';
 import { ConfigBanner } from './ConfigGate';
 import InvitesCard from './invite/InvitesCard';
+import VerificationSheet from './VerificationSheet';
+import { VerificationState, loadVerification } from '../lib/verification';
 import Onboarding, { onboardingSeen, markOnboardingSeen } from './Onboarding';
 import { billingStatus, hasAccess, daysLeft, packageName } from '../lib/billing';
 import ClientScreen, { Tab } from './client/ClientScreen';
@@ -58,6 +60,8 @@ export default function HomeScreen() {
   const [plans, setPlans] = useState(false);
   const [guide, setGuide] = useState(false);
   const [invitesKey, setInvitesKey] = useState(0);
+  const [verify, setVerify] = useState(false);
+  const [verification, setVerification] = useState<VerificationState | null>(null);
   const { unread, unreadByChild } = useNotifications();
   const pending = useRef<Pick<AppNotification, 'kind' | 'data' | 'childId'> | null>(null);
 
@@ -96,6 +100,9 @@ export default function HomeScreen() {
   // İlk kullanım rehberi: henüz danışanı olmayan hesapta bir kez (görüldü bilgisi cihazda)
   const meId = state.kind === 'ready' ? state.me.id : null;
   const noClients = state.kind === 'ready' && state.clients.length === 0;
+  // Belge incelemesi durumu (sunucu kurulmadıysa null → satır görünmez)
+  const loadVerify = useCallback(() => { loadVerification().then(setVerification).catch(() => setVerification(null)); }, []);
+  useEffect(() => { if (meId) loadVerify(); }, [meId, loadVerify]);
   useEffect(() => {
     if (!meId) return;
     onboardingSeen(meId).then((seen) => {
@@ -111,6 +118,7 @@ export default function HomeScreen() {
   const openTarget = useCallback(async (n: Pick<AppNotification, 'kind' | 'data' | 'childId'>) => {
     setBell(false);
     if (n.kind === 'team_joined') { setSelected(null); load(); return; }
+    if (n.kind.startsWith('verification_')) { setSelected(null); setVerify(true); loadVerify(); return; }   // bayrak kapalıyken bu bildirimler gelmez
     // davet bildirimleri: ana ekrandaki davet listesi yenilenir
     if (n.kind === 'invite_claimed' || n.kind === 'invite_expired' || n.kind === 'invite_declined') { setSelected(null); setInvitesKey((k) => k + 1); return; }
     // invite_child_updated: ebeveynin düzelttiği çocuk, danışan olarak açılır (aşağıda)
@@ -130,7 +138,7 @@ export default function HomeScreen() {
       return;
     }
     setSelected({ client: c, tab: notificationTab(n.kind), key: Date.now() });
-  }, [load]);
+  }, [load, loadVerify]);
 
   // Telefon bildirimine dokunma (uygulama kapalıyken de)
   useEffect(() => onNotificationTap((data) => {
@@ -243,6 +251,7 @@ export default function HomeScreen() {
           {state.kind === 'ready' && (
             <>
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
+              {!!verification?.enabled && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
               <ClientList clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
               <InvitesCard me={state.me} team={state.team} reloadKey={invitesKey} onChanged={refresh} />
               <TeamCard me={state.me} team={state.team} onJoined={refresh} onUpgrade={() => setPlans(true)} />
@@ -258,6 +267,7 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
       <NotificationsSheet visible={bell} onClose={() => setBell(false)} onOpen={openTarget} />
+      <VerificationSheet visible={verify} onClose={() => { setVerify(false); loadVerify(); }} />
       <Onboarding visible={guide} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
     </SafeAreaView>
   );
@@ -339,6 +349,29 @@ function MembershipRow({ me, onOpen }: { me: ClinicianMe; onOpen: () => void }) 
         <Text style={styles.small}>{st === 'trial'
           ? (me.role === 'owner' ? 'Paketleri ve fiyatları gör' : 'Üyeliği klinik sahibi yönetir')
           : planText(me)}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={colors.faint} />
+    </Pressable>
+  );
+}
+
+// Belge incelemesi (ortak akislar.md 14): rozet varsa kısa satır, yoksa ailelere görünen rozete çağrı
+function VerificationRow({ v, onOpen }: { v: VerificationState; onOpen: () => void }) {
+  const st = v.last?.status;
+  const icon = v.verified_at ? 'shield-checkmark' : st === 'pending' && v.last?.submitted ? 'hourglass-outline' : 'shield-outline';
+  const title = v.verified_at ? `Belgesi incelendi: ${v.verified_label}`
+    : st === 'pending' && v.last?.submitted ? 'Belgen incelemede'
+    : st && ['rejected', 'auto_rejected', 'suspended'].includes(st) ? 'Belgeni yeniden yükle' : 'Belgeni yükle';
+  const sub = v.verified_at ? 'Ailelerin davet ekranında görünür'
+    : st === 'pending' && v.last?.submitted ? 'Ekibimiz inceleyince bildirim gelir'
+    : 'Ailelere "Belgesi incelendi" rozeti görünsün';
+  return (
+    <Pressable onPress={onOpen} accessibilityRole="button"
+      style={({ pressed }) => [styles.member, v.verified_at && { backgroundColor: '#E6F4EA' }, pressed && { opacity: 0.8 }]}>
+      <Ionicons name={icon} size={20} color={v.verified_at ? colors.ok : colors.navy} />
+      <View style={{ flex: 1 }}>
+        <Text style={styles.memberTitle}>{title}</Text>
+        <Text style={styles.small}>{sub}</Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.faint} />
     </Pressable>

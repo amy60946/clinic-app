@@ -1,0 +1,106 @@
+{
+ "version": 1,
+ "professions": [
+  {
+   "key": "psikolog",
+   "label": "Psikolog",
+   "programs": [
+    "psikoloji"
+   ],
+   "degree": "lisans"
+  },
+  {
+   "key": "klinik_psikolog",
+   "label": "Klinik psikolog",
+   "programs": [
+    "klinik psikoloji"
+   ],
+   "degree": "yuksek_lisans",
+   "also": [
+    "psikoloji"
+   ]
+  },
+  {
+   "key": "pdr",
+   "label": "Psikolojik danışman (PDR)",
+   "programs": [
+    "rehberlik ve psikolojik danışmanlık",
+    "psikolojik danışmanlık ve rehberlik",
+    "psikolojik danışma ve rehberlik",
+    "rehberlik ve psikolojik danışma"
+   ],
+   "degree": "lisans"
+  },
+  {
+   "key": "ergoterapist",
+   "label": "Ergoterapist",
+   "programs": [
+    "ergoterapi"
+   ],
+   "degree": "lisans"
+  },
+  {
+   "key": "dil_konusma",
+   "label": "Dil ve konuşma terapisti",
+   "programs": [
+    "dil ve konuşma terapisi"
+   ],
+   "degree": "lisans"
+  },
+  {
+   "key": "ozel_egitim",
+   "label": "Özel eğitim öğretmeni",
+   "programs": [
+    "özel eğitim öğretmenliği",
+    "zihin engelliler öğretmenliği",
+    "işitme engelliler öğretmenliği",
+    "görme engelliler öğretmenliği",
+    "özel eğitim"
+   ],
+   "degree": "lisans"
+  },
+  {
+   "key": "cocuk_gelisimi",
+   "label": "Çocuk gelişimci",
+   "programs": [
+    "çocuk gelişimi"
+   ],
+   "degree": "lisans"
+  },
+  {
+   "key": "bcba",
+   "label": "Davranış analisti (BCBA)",
+   "programs": [],
+   "degree": null,
+   "bacb": true
+  },
+  {
+   "key": "hekim",
+   "label": "Çocuk ve ergen psikiyatristi",
+   "programs": [
+    "tıp"
+   ],
+   "degree": "lisans",
+   "manual": "Uzmanlık belgesi elle incelenir"
+  },
+  {
+   "key": "diger",
+   "label": "Diğer",
+   "programs": [],
+   "degree": null,
+   "manual": "Belge elle incelenir"
+  }
+ ],
+ "reasons": {
+  "name_mismatch": "Belgedeki ad hesabındaki adla eşleşmiyor. Adını belgeyle aynı yaz ya da kendi belgeni yükle.",
+  "barcode_invalid": "Belgenin barkodu e-Devlet'te doğrulanamadı. e-Devlet'ten yeni bir belge indirip yükle.",
+  "program_mismatch": "Belgedeki bölüm seçtiğin meslekle uyuşmuyor. Doğru mesleği seç ya da ilgili belgeyi yükle.",
+  "degree_mismatch": "Seçtiğin meslek için gereken derece belgede görünmüyor (ör. klinik psikolog için yüksek lisans).",
+  "unreadable": "Belge okunamadı. e-Devlet'ten indirdiğin PDF'i değiştirmeden yükle; fotoğraf ya da tarama kabul edilmiyor.",
+  "student_doc": "Bu bir öğrenci belgesi. Mezuniyet belgesi gerekiyor.",
+  "duplicate": "Bu belge başka bir hesapta kullanılmış.",
+  "bacb_inactive": "BACB kaydında sertifika etkin görünmüyor ya da ad eşleşmiyor.",
+  "name_changed": "Adını değiştirdiğin için belge incelemesi yenilenmeli.",
+  "other": "Ayrıntı için açıklamaya bak."
+ }
+}
