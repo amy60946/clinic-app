@@ -2,7 +2,7 @@ import { Platform, Share, Linking } from 'react-native';
 import { supabase } from './supabase';
 
 // Aile daveti (ortak/sozlesme/akislar.md 10): 3 gün geçerli; bağlantı (token) + yazılabilir 6 karakter kod aynı davettir.
-// Ana yol sistem e-postası (Edge Function invite-email, ortak proposed/20261027000000_invite_email.sql); yedek: uzman kodu kopyalar.
+// Ana yol sistem e-postası (Edge Function invite-email, ortak migrations/20261027000000_invite_email.sql); yedek: uzman kodu kopyalar.
 // Bağlantı adresi alan adı alınınca EXPO_PUBLIC_INVITE_BASE_URL ile verilir (ör. https://alanadi.com/d/); yoksa mesajda yalnız kod.
 const BASE = (process.env.EXPO_PUBLIC_INVITE_BASE_URL ?? '').replace(/\/?$/, '/');
 export const HAS_BASE = !!process.env.EXPO_PUBLIC_INVITE_BASE_URL;
