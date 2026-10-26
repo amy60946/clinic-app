@@ -760,6 +760,25 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     save();
     return { data: n, error: null };
   }
+  // Belge incelemesi (ortak 20261026050000): önizlemede tarayıcı deposunda; onay için konsolda onizlemeBelgeOnayla()
+  if (name === 'clinician_verification_me') return { data: demoVerification(), error: null };
+  if (name === 'clinician_verification_start') {
+    const v = demoVerification();
+    if (!args.p_profession) return err('Meslek seç');
+    if (args.p_profession === 'bcba' && !args.p_bacb_number) return err('BACB sicil numarasını yaz');
+    const id = uuid();
+    v.last = { id, profession: args.p_profession, status: 'pending', reason: null, note: null, submitted: false, checked: false,
+      created_at: now(), decided_at: null };
+    saveVerification(v);
+    return { data: { id, upload_path: `${sess()?.user.id}/${id}.pdf` }, error: null };
+  }
+  if (name === 'clinician_verification_submit') {
+    const v = demoVerification();
+    if (!v.last || v.last.id !== args.p_id) return err('Başvuru bulunamadı');
+    v.last.submitted = true;
+    saveVerification(v);
+    return { data: null, error: null };
+  }
   // Önceki uzmandan devralınan kayıtlar: önizlemede boş (denemek için tarayıcı deposuna 'demo.inherited' JSON yazılabilir)
   if (name === 'clinic_inherited_records') {
     let v: unknown = [];
@@ -866,11 +885,32 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
   return { data: null, error: null };
 }
 
+/* ---------- Belge incelemesi (önizleme: tarayıcı deposu, gerçek belge okunmaz) ---------- */
+
+const VKEY = 'demo.verification';
+function demoVerification(): Row {
+  try { return JSON.parse(localStorage.getItem(VKEY) || 'null') ?? { verified_profession: null, verified_label: null, verified_at: null, last: null }; }
+  catch { return { verified_profession: null, verified_label: null, verified_at: null, last: null }; }
+}
+function saveVerification(v: Row) { try { localStorage.setItem(VKEY, JSON.stringify(v)); } catch { /* yok say */ } }
+(globalThis as any).onizlemeBelgeOnayla = () => {
+  const v = demoVerification();
+  const labels: Record<string, string> = { psikolog: 'Psikolog', klinik_psikolog: 'Klinik psikolog', ergoterapist: 'Ergoterapist' };
+  Object.assign(v, { verified_profession: v.last?.profession ?? 'psikolog', verified_label: labels[v.last?.profession] ?? 'Psikolog', verified_at: now() });
+  if (v.last) v.last.status = 'approved';
+  saveVerification(v);
+};
+
 /* ---------- Edge Function: clinic-billing (önizlemede gerçek ödeme yok) ---------- */
 
 const functions = {
   async invoke(name: string, opts?: { body?: Row }) {
     await new Promise((r) => setTimeout(r, 300));
+    if (name === 'clinician-verify') {
+      const v = demoVerification();
+      if (v.last) { v.last.checked = true; saveVerification(v); }
+      return { data: { status: 'pending', checks: { text: 'ok', edevlet: 'ok', graduate: 'ok', barcode: 'ok', name: 'ok', program: 'ok', degree: 'ok' } }, error: null };
+    }
     const uid = sess()?.user.id;
     const m = db.clinicians.find((x: Row) => x.id === uid);
     if (!m || m.role !== 'owner') return { data: null, error: { message: 'Üyeliği yalnız klinik sahibi alır' } };
