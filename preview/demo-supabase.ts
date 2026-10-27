@@ -198,6 +198,14 @@ function upgrade(x: Db): Db {
     x.notifications.forEach((n: Row) => { if (n.app === 'clinic' && latest && n.data?.abc_id === latest.id) n.read_at = null; });
     x.clinicNotifSeeded = true;
   }
+  // Motive etmek (ortak 20261027130000): örnek ailenin onaylı görevlerine ebeveyn gözlemi (eskiler zor, yeniler kolay; bazıları yanıtsız)
+  if (!x.motivationSeeded) {
+    x.completions.filter((c: Row) => c.child_id === 'c-nazli' && c.status === 'approved' && c.motivation == null).forEach((c: Row, i: number) => {
+      const age = (Date.now() - Date.parse(c.date)) / 864e5;
+      if (i % 4 !== 3) c.motivation = age > 14 ? 3 + (i % 3) : 1 + (i % 2) + (c.task_id === 'k-kitap' ? 2 : 0);
+    });
+    x.motivationSeeded = true;
+  }
   // Karşılama anketi (ortak 20261027100000): hazır örnek uzmanlara sorulmaz; önizlemede yeni kayıt olan uzman görür
   x.clinician_surveys = x.clinician_surveys ?? [];
   x.clinicians.filter((m: Row) => !String(m.id).match(/^[0-9a-f]{8}-/) && !x.clinician_surveys.some((s: Row) => s.clinician_id === m.id))
@@ -560,7 +568,9 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     const key = { task_id: args.p_task_id, child_id: args.p_child_id, date: args.p_date };
     let row = db.completions.find((r: Row) => r.task_id === key.task_id && r.child_id === key.child_id && r.date === key.date);
     if (!row) { row = { id: uuid(), family_id: me.family_id, ...key, created_at: now() }; db.completions.push(row); }
-    Object.assign(row, { status: args.p_status, parent_note: args.p_note ?? null, reviewed_at: now(), reviewed_by: uid });
+    Object.assign(row, { status: args.p_status, parent_note: args.p_note ?? null, reviewed_at: now(), reviewed_by: uid,
+      // ParentApp İnceleme ayrıntısı (ortak 20261027130000): motive etmek 1–5, Güneş Taşı
+      motivation: args.p_motivation ?? null, stones: args.p_stones ?? null });
     save();
     return { data: null, error: null };
   }
