@@ -1,3 +1,5 @@
+// Bugün kullanılmıyor: ClinicApp web'de satış yok (kullanıcı kararı 22 Ekim 2026; üyelik iPhone/iPad'den App Store ile).
+// İleride kendi ödeme sistemine geçilirse diye duruyor (sunucudaki clinic-billing iyzico yolu gibi, yayınlanmaz).
 // iyzico'nun ödeme formu: iyzico'nun döndürdüğü betik sayfaya eklenir, form iyzico'nun kendi penceresinde açılır.
 // Kart bilgisi ClinicApp'e hiç gelmez. Ödeme bitince iyzico sunucumuza döner, oradan ?billing=ok ile uygulamaya.
 export function showIyzicoForm(content: string): void {
