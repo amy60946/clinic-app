@@ -94,3 +94,26 @@ test('pazartesi günü ustalık geçen haftayı da sayar', () => {
   for (let d = '2026-09-21'; d <= '2026-10-18'; d = addDays(d, 1)) comps.push(comp(d, 'approved'));
   assert.equal(perTask([task()], comps, today, 4)[0].mastered, true);
 });
+
+test('"Tekrar dene" (retry) tamamlandı sayılmaz, planlıda kalır', () => {
+  const t = task({ start_date: '2026-10-19' });
+  const w = weekly([t], [comp('2026-10-19', 'retry'), comp('2026-10-20', 'approved')], '2026-10-22', 1);
+  assert.equal(w[0].planned, 3);
+  assert.equal(w[0].approved, 1);
+  assert.equal(w[0].rejected, 0);
+});
+
+test('motive etmek: kolay/orta/zor sayıları ve eğilim (ebeveyn gözlemi)', async () => {
+  const { motivationStats, motivationText } = await import('../src/lib/metrics.ts');
+  const m = (date, v, id = 't1') => comp(date, 'approved', { motivation: v, task_id: id });
+  // önceki 14 gün zor (5,4,5), son 14 gün kolay (1,2,2) → kolaylaşıyor
+  const comps = [m('2026-10-01', 5), m('2026-10-03', 4), m('2026-10-05', 5), m('2026-10-16', 1), m('2026-10-18', 2), m('2026-10-20', 2),
+    m('2026-10-19', 3, 't2'), comp('2026-10-21', 'approved')];
+  const all = motivationStats(comps, '2026-09-25', '2026-10-21');
+  assert.deepEqual([all.answered, all.easy, all.medium, all.hard], [7, 3, 1, 3]);
+  const t1 = motivationStats(comps, '2026-09-25', '2026-10-21', 't1');
+  assert.equal(t1.trend, 'easier');
+  assert.equal(motivationText(t1), 'kolay 3 · orta 0 · zor 3 · son 2 haftada kolaylaşıyor');
+  assert.equal(motivationStats(comps, '2026-09-25', '2026-10-21', 't2').trend, null); // az yanıt: eğilim yok
+  assert.equal(motivationStats([comp('2026-10-20', 'approved')], '2026-10-01', '2026-10-21').answered, 0); // eski sunucu: alan yok
+});

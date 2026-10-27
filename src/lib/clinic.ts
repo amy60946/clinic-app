@@ -117,13 +117,20 @@ export type ClientData = { child: Child | null; tasks: Task[]; completions: Comp
 
 const TASK_COLS = 'id, title, emoji, skill, start_date, end_date, recurring, repeat_kind, repeat_days, reminder, requires_review';
 
+const COMP_COLS = 'task_id, date, status, child_done_at, reviewed_at, decline_reason, parent_note';
+
+// motivation (ebeveynin "motive etmek ne kadar zordu" gözlemi, ortak 20261027130000) sunucuda yoksa onsuz okunur
+async function loadCompletions(childId: string, from: string) {
+  const q = (cols: string) => supabase.from('completions').select(cols).eq('child_id', childId).gte('date', from);
+  const r = await q(`${COMP_COLS}, motivation`);
+  return r.error?.code === '42703' || r.error?.code === 'PGRST204' ? q(COMP_COLS) : r;
+}
+
 export async function loadClientData(childId: string, from: string): Promise<ClientData> {
   const [child, assigned, comps, abc] = await Promise.all([
     supabase.from('children').select('id, name, gender, birthday, age_band').eq('id', childId).maybeSingle(),
     supabase.from('task_assignments').select(`tasks(${TASK_COLS})`).eq('child_id', childId),
-    supabase.from('completions')
-      .select('task_id, date, status, child_done_at, reviewed_at, decline_reason, parent_note')
-      .eq('child_id', childId).gte('date', from),
+    loadCompletions(childId, from),
     supabase.from('abc_events')
       .select('*')   // ses, gün bölümü ve grup alanları eski şemada yoksa da çalışsın
       .eq('child_id', childId).order('occurred_at', { ascending: false }).limit(500),
@@ -132,7 +139,7 @@ export async function loadClientData(childId: string, from: string): Promise<Cli
   return {
     child: check(child.data as Child | null, child.error),
     tasks: rows.map((r) => r.tasks).filter((t): t is Task => !!t),
-    completions: check((comps.data ?? []) as Completion[], comps.error),
+    completions: check((comps.data ?? []) as unknown as Completion[], comps.error),
     abc: check((abc.data ?? []) as AbcEvent[], abc.error),
   };
 }

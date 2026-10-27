@@ -20,11 +20,14 @@ export type Task = {
 export type Completion = {
   task_id: string;
   date: string;
-  status: 'pending' | 'approved' | 'declined' | 'rejected';
+  // retry: ebeveyn "Tekrar dene" dedi, görev çocuğa geri döndü (tamamlandı sayılmaz; ortak 20261027130000)
+  status: 'pending' | 'approved' | 'declined' | 'rejected' | 'retry';
   child_done_at: string | null;
   reviewed_at: string | null;
   decline_reason: DeclineReason | null;
   parent_note: string | null;
+  // ebeveynin incelemedeki gözlemi: "Motive etmek ne kadar zordu?" 1 çok kolay … 5 çok zor (ortak 20261027130000; eski sunucuda yok)
+  motivation?: number | null;
 };
 
 export type DeclineReason = 'hard' | 'no_time' | 'did_not_want' | 'other';
@@ -349,6 +352,40 @@ export function abcSummary(events: AbcEvent[], today: string, weeks: number): Ab
 }
 
 /* ---------- Metinler ---------- */
+
+/* ---------- Motive etmek (ebeveyn gözlemi; puan ya da tanı değildir) ---------- */
+
+// ParentApp İnceleme'de ebeveynin isteğe bağlı yanıtı: 1–2 kolay · 3 orta · 4–5 zor. Eğilim: son 14 gün ile önceki 14 gün
+// (her birinde en az 3 yanıt) ortalaması en az 0,75 farklıysa "kolaylaşıyor" / "zorlaşıyor", değilse "benzer".
+export type Motivation = { answered: number; easy: number; medium: number; hard: number; trend: 'easier' | 'harder' | 'same' | null };
+export const MOTIVATION_TREND_DAYS = 14;
+
+export function motivationStats(comps: Completion[], from: string, to: string, taskId?: string): Motivation {
+  const rows = comps.filter((c) => typeof c.motivation === 'number' && c.date >= from && c.date <= to && (!taskId || c.task_id === taskId));
+  const v = (c: Completion) => c.motivation as number;
+  const avg = (l: Completion[]) => l.reduce((a, c) => a + v(c), 0) / l.length;
+  const mid = addDays(to, -(MOTIVATION_TREND_DAYS - 1));
+  const recent = rows.filter((c) => c.date >= mid);
+  const prev = rows.filter((c) => c.date < mid && c.date >= addDays(mid, -MOTIVATION_TREND_DAYS));
+  let trend: Motivation['trend'] = null;
+  if (recent.length >= 3 && prev.length >= 3) {
+    const d = avg(recent) - avg(prev);
+    trend = d >= 0.75 ? 'harder' : d <= -0.75 ? 'easier' : 'same';
+  }
+  return {
+    answered: rows.length,
+    easy: rows.filter((c) => v(c) <= 2).length,
+    medium: rows.filter((c) => v(c) === 3).length,
+    hard: rows.filter((c) => v(c) >= 4).length,
+    trend,
+  };
+}
+
+export const MOTIVATION_TREND_TEXT: Record<'easier' | 'harder' | 'same', string> = {
+  easier: 'son 2 haftada kolaylaşıyor', harder: 'son 2 haftada zorlaşıyor', same: 'son 2 haftada benzer',
+};
+export const motivationText = (m: Motivation) =>
+  `kolay ${m.easy} · orta ${m.medium} · zor ${m.hard}${m.trend ? ` · ${MOTIVATION_TREND_TEXT[m.trend]}` : ''}`;
 
 export const DECLINE_LABELS: Record<DeclineReason | 'unknown', string> = {
   hard: 'Zor geldi',

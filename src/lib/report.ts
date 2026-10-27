@@ -2,6 +2,7 @@
 // Araştırma belgesi bölüm 6 "Uzman için çıktılar". Tanı koymaz, gözlem toplar; sınırlar her raporda yazılı.
 import {
   Task, Completion, AbcEvent, weekly, perTask, observations, bySkill, abcSummary, windowStarts, weekStarts, addDays, parseDate, lastFullDay,
+  motivationStats, motivationText,
   DECLINE_LABELS, LIMITS_TEXT, MASTERY_RATE, MASTERY_WEEKS,
 } from './metrics';
 import type { Goal } from './clinic';
@@ -38,6 +39,7 @@ export function buildReportHtml(r: ReportInput): string {
   const skills = bySkill(r.tasks, r.completions, from, lastFullDay(r.today));
   const abc = abcSummary(r.abc, r.today, r.weeks);
   const goals = r.goals.filter((g) => !g.archived);
+  const motivation = motivationStats(r.completions, from, lastFullDay(r.today));
   const reasons = (Object.keys(o.declineReasons) as (keyof typeof o.declineReasons)[])
     .filter((k) => o.declineReasons[k] > 0)
     .map((k) => `${DECLINE_LABELS[k]}: ${o.declineReasons[k]}`).join(' · ') || 'yok';
@@ -91,6 +93,7 @@ export function buildReportHtml(r: ReportInput): string {
 <tr><td>Tutarlılık</td><td>${p(o.fullDayRate)} — planlanan her görevin yapıldığı gün oranı</td></tr>
 <tr><td>Görevden kaçınma / uygunluk</td><td>"Yapamam" ${p(o.declineRate)} (${esc(reasons)}); ebeveyn reddi ${p(o.rejectRate)}</td></tr>
 <tr><td>Ebeveyn döngüsü</td><td>"Yaptım" → ebeveyn kararı ortanca ${o.reviewDelayHours === null ? '–' : `${o.reviewDelayHours} saat`}</td></tr>
+${motivation.answered ? `<tr><td>Motive etmek (ebeveyn gözlemi)</td><td>${esc(motivationText(motivation))} — ${motivation.answered} incelemede ebeveynin yanıtı; puan değildir</td></tr>` : ''}
 </table>
 
 <h2>Görev başına</h2>

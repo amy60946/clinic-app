@@ -5,6 +5,7 @@ import { Card, Label, Empty } from '../../components/ui';
 import { WeeklyRateBars, RateBar, Stat } from '../../components/charts';
 import {
   weekly, perTask, observations, bySkill, abcSummary, windowStarts, lastFullDay, parseDate, isoDate, DECLINE_LABELS, LIMITS_TEXT,
+  motivationStats, motivationText, MOTIVATION_TREND_TEXT, Completion,
   MASTERY_RATE, MASTERY_WEEKS, DayPart, AbcEvent, dayPart,
 } from '../../lib/metrics';
 import AbcVoice from '../../components/AbcVoice';
@@ -70,6 +71,7 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 10);
   const titles = new Map(data.tasks.map((t) => [t.id, t.title]));
+  const motivation = useMemo(() => motivationStats(data.completions, from, lastFullDay(today)), [data, from, today]);
 
   if (!tasks.length) return <Empty text="Bu dönemde planlanmış görev yok." />;
   return (
@@ -92,6 +94,7 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
               Haftalar: {s.weeklyRates.map((r) => (r === null ? '–' : r)).join(' · ')}
               {s.task.reminder ? ` · hatırlatma ${s.task.reminder}` : ''}{skillName(s.task.skill) ? ` · ${skillName(s.task.skill)}` : ''}
             </Text>
+            <TaskMotivation comps={data.completions} from={from} to={lastFullDay(today)} taskId={s.task.id} />
           </View>
         ))}
       </Card>
@@ -109,6 +112,19 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
           </View>
         ))}
       </Card>
+
+      {motivation.answered > 0 && (
+        <>
+          <Label>Motive etmek (ebeveyn gözlemi)</Label>
+          <Card style={{ gap: 6 }}>
+            <Row k="Kolay" v={String(motivation.easy)} />
+            <Row k="Orta" v={String(motivation.medium)} />
+            <Row k="Zor" v={String(motivation.hard)} />
+            {motivation.trend && <Text style={styles.small}>Ebeveynin yanıtlarına göre {MOTIVATION_TREND_TEXT[motivation.trend]}.</Text>}
+          </Card>
+          <Text style={styles.note}>Ebeveynin incelemede verdiği isteğe bağlı yanıt ("Motive etmek ne kadar zordu?"). Puan ya da tanı değildir; görevin çocuğa uygunluğunu konuşmak için bir ipucudur.</Text>
+        </>
+      )}
 
       <Label>"Yapamam" nedenleri</Label>
       <Card style={{ gap: 6 }}>
@@ -132,6 +148,13 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
       <Limits />
     </View>
   );
+}
+
+// Görev satırında ebeveynin motivasyon gözlemi (yanıt varsa)
+function TaskMotivation({ comps, from, to, taskId }: { comps: Completion[]; from: string; to: string; taskId: string }) {
+  const m = motivationStats(comps, from, to, taskId);
+  if (!m.answered) return null;
+  return <Text style={styles.small}>Motive etmek (ebeveyn): {motivationText(m)}</Text>;
 }
 
 /* ---------- Zor anlar (ABC) ---------- */
