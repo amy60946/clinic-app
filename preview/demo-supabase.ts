@@ -21,7 +21,7 @@ const KEY = 'pofi-onizleme-v4';
 const TABLES = ['profiles', 'families', 'children', 'tasks', 'task_assignments', 'completions', 'messages', 'saved_templates', 'invite_codes',
   'clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'abc_events',
   'clinic_task_suggestions', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events', 'billing_plans', 'clinic_link_access',
-  'care_modules', 'care_module_logs', 'clinic_link_history'];
+  'care_modules', 'care_module_logs', 'clinic_link_history', 'clinician_surveys'];
 
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -198,6 +198,10 @@ function upgrade(x: Db): Db {
     x.notifications.forEach((n: Row) => { if (n.app === 'clinic' && latest && n.data?.abc_id === latest.id) n.read_at = null; });
     x.clinicNotifSeeded = true;
   }
+  // Karşılama anketi (ortak 20261027100000): hazır örnek uzmanlara sorulmaz; önizlemede yeni kayıt olan uzman görür
+  x.clinician_surveys = x.clinician_surveys ?? [];
+  x.clinicians.filter((m: Row) => !String(m.id).match(/^[0-9a-f]{8}-/) && !x.clinician_surveys.some((s: Row) => s.clinician_id === m.id))
+    .forEach((m: Row) => x.clinician_surveys.push({ clinician_id: m.id, profession: null, challenges: [], features: [], intent: null, skipped: true, updated_at: now() }));
   return x;
 }
 
@@ -763,6 +767,20 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
   }
   // Belge incelemesi (ortak 20261026050000): önizlemede tarayıcı deposunda; onay için konsolda onizlemeBelgeOnayla()
   if (name === 'clinician_verification_me') return { data: demoVerification(), error: null };
+  // Karşılama anketi (ortak 20261027100000)
+  if (name === 'clinician_survey_me') {
+    const s = db.clinician_surveys.find((r: Row) => r.clinician_id === sess()?.user.id);
+    return { data: s ? { profession: s.profession, challenges: s.challenges, features: s.features, intent: s.intent, skipped: s.skipped } : null, error: null };
+  }
+  if (name === 'clinician_survey_save') {
+    const uid = sess()?.user.id;
+    if (!db.clinicians.some((m: Row) => m.id === uid)) return err('Yalnızca uzman hesabı');
+    db.clinician_surveys = db.clinician_surveys.filter((r: Row) => r.clinician_id !== uid);
+    db.clinician_surveys.push({ clinician_id: uid, profession: args.p_profession ?? null, challenges: args.p_challenges ?? [], features: args.p_features ?? [],
+      intent: args.p_intent ?? null, skipped: !!args.p_skipped, updated_at: now() });
+    save();
+    return { data: null, error: null };
+  }
   if (name === 'clinician_verification_start') {
     const v = demoVerification();
     if (!args.p_profession) return err('Meslek seç');

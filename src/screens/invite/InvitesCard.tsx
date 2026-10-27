@@ -18,14 +18,16 @@ const TONE: Record<string, { bg: string; fg: string }> = {
   declined: { bg: '#FDECEC', fg: '#A23B3B' },
 };
 
-export default function InvitesCard({ me, team, reloadKey, onChanged }: {
-  me: ClinicianMe; team: Member[]; reloadKey?: number; onChanged: () => void;
+export default function InvitesCard({ me, team, reloadKey, openKey, onChanged }: {
+  me: ClinicianMe; team: Member[]; reloadKey?: number; openKey?: number; onChanged: () => void;
 }) {
   const [items, setItems] = useState<FamilyInvite[] | null | undefined>(undefined);
   const [stats, setStats] = useState<InviteStats[]>([]);
   const [sheet, setSheet] = useState<{ open: boolean; existing?: SheetInvite | null }>({ open: false });
   const [all, setAll] = useState(false);
   const owner = me.role === 'owner';
+  // dışarıdan aç (karşılama anketinin "İlk aileni davet et" düğmesi)
+  useEffect(() => { if (openKey) setSheet({ open: true, existing: null }); }, [openKey]);
 
   const load = useCallback(async () => {
     await sweepInvites().catch(() => {});

@@ -1,0 +1,172 @@
+{
+ "version": 1,
+ "profession": {
+  "title": "Mesleğin ne?",
+  "hint": "Sana uygun şablonları ve örnekleri öne çıkaralım.",
+  "options": [
+   {
+    "key": "psikolog",
+    "label": "Psikolog"
+   },
+   {
+    "key": "klinik_psikolog",
+    "label": "Klinik psikolog"
+   },
+   {
+    "key": "pdr",
+    "label": "Psikolojik danışman (PDR)"
+   },
+   {
+    "key": "ergoterapist",
+    "label": "Ergoterapist"
+   },
+   {
+    "key": "dil_konusma",
+    "label": "Dil ve konuşma terapisti"
+   },
+   {
+    "key": "ozel_egitim",
+    "label": "Özel eğitim öğretmeni"
+   },
+   {
+    "key": "cocuk_gelisimi",
+    "label": "Çocuk gelişimci"
+   },
+   {
+    "key": "bcba",
+    "label": "Davranış analisti (BCBA)"
+   },
+   {
+    "key": "hekim",
+    "label": "Çocuk ve ergen psikiyatristi"
+   },
+   {
+    "key": "oyun_terapisti",
+    "label": "Oyun terapisti",
+    "survey_only": true
+   },
+   {
+    "key": "sanat_terapisti",
+    "label": "Sanat, müzik ya da drama terapisti",
+    "survey_only": true
+   },
+   {
+    "key": "aile_danismani",
+    "label": "Aile danışmanı",
+    "survey_only": true
+   },
+   {
+    "key": "okul_rehber",
+    "label": "Okul rehber öğretmeni",
+    "survey_only": true
+   },
+   {
+    "key": "ogrenci",
+    "label": "Öğrenci ya da stajyer",
+    "survey_only": true
+   },
+   {
+    "key": "diger",
+    "label": "Diğer"
+   }
+  ]
+ },
+ "challenges": {
+  "title": "Ailelerle çalışırken en çok neyde zorlanıyorsun?",
+  "hint": "Birden çok seçebilirsin.",
+  "options": [
+   {
+    "key": "home_followthrough",
+    "label": "Ailenin evde düzenli uygulaması",
+    "icon": "home-outline"
+   },
+   {
+    "key": "home_data",
+    "label": "Evden güvenilir gözlem bilgisi almak",
+    "icon": "clipboard-outline"
+   },
+   {
+    "key": "unpaid_time",
+    "label": "Seans dışında aileye ayırdığım ücretsiz zaman",
+    "icon": "time-outline"
+   },
+   {
+    "key": "no_system",
+    "label": "Aile çalışması için düzenli bir sistemim olmaması",
+    "icon": "folder-open-outline"
+   },
+   {
+    "key": "between_sessions",
+    "label": "Seanslar arasında aileyle iletişim",
+    "icon": "chatbubbles-outline"
+   },
+   {
+    "key": "progress_report",
+    "label": "İlerlemeyi ölçmek ve aileye göstermek",
+    "icon": "trending-up-outline"
+   }
+  ]
+ },
+ "features": {
+  "title": "Hangileri işine en çok yarar?",
+  "hint": "Birden çok seçebilirsin.",
+  "options": [
+   {
+    "key": "plan_templates",
+    "label": "Hazır hedef ve aile programı şablonları",
+    "icon": "albums-outline"
+   },
+   {
+    "key": "parent_logging",
+    "label": "Ebeveynin telefondan kısa gözlem kaydı",
+    "icon": "phone-portrait-outline"
+   },
+   {
+    "key": "reward_routines",
+    "label": "Çocuğa ödüllü rutin ve görev sistemi",
+    "icon": "star-outline"
+   },
+   {
+    "key": "progress_report",
+    "label": "Hedeflere göre ilerleme raporu",
+    "icon": "bar-chart-outline"
+   },
+   {
+    "key": "report_export",
+    "label": "Raporu PDF olarak almak",
+    "icon": "document-text-outline"
+   },
+   {
+    "key": "parent_materials",
+    "label": "Aileye okuma, video ve çalışma kâğıdı göndermek",
+    "icon": "library-outline"
+   }
+  ]
+ },
+ "intent": {
+  "title": "Seni ClinicApp'e ne getirdi?",
+  "hint": "Birini seç.",
+  "options": [
+   {
+    "key": "trial",
+    "label": "Birkaç ailede ücretsiz denemek",
+    "icon": "flask-outline"
+   },
+   {
+    "key": "family",
+    "label": "Çalıştığım bir aileyi bağlamak",
+    "icon": "link-outline"
+   },
+   {
+    "key": "team",
+    "label": "Kliniğimin ekibine katılmak",
+    "icon": "people-outline"
+   },
+   {
+    "key": "org",
+    "label": "Kliniğimde aile çalışmasını tek düzene almak",
+    "icon": "business-outline"
+   }
+  ]
+ }
+}

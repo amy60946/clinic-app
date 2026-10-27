@@ -16,6 +16,8 @@ import InvitesCard from './invite/InvitesCard';
 import VerificationSheet from './VerificationSheet';
 import { VerificationState, loadVerification } from '../lib/verification';
 import Onboarding, { onboardingSeen, markOnboardingSeen } from './Onboarding';
+import WelcomeSurvey, { SurveyAction } from './WelcomeSurvey';
+import { surveyAnswered } from '../lib/survey';
 import { billingStatus, hasAccess, daysLeft, packageName } from '../lib/billing';
 import ClientScreen, { Tab } from './client/ClientScreen';
 import NotificationsSheet, { notificationTab } from './NotificationsSheet';
@@ -70,6 +72,10 @@ export default function HomeScreen() {
   const [invitesKey, setInvitesKey] = useState(0);
   const [verify, setVerify] = useState(false);
   const [verification, setVerification] = useState<VerificationState | null>(null);
+  // Karşılama anketi (ortak akislar.md 15): cevap yoksa ilk girişte bir kez; bitince seçilen ilk adım
+  const [survey, setSurvey] = useState<'unknown' | 'show' | 'hidden'>('unknown');
+  const [inviteOpenKey, setInviteOpenKey] = useState(0);
+  const skipGuide = useRef(false);
   const { unread, unreadByChild } = useNotifications();
   const pending = useRef<Pick<AppNotification, 'kind' | 'data' | 'childId'> | null>(null);
 
@@ -113,12 +119,24 @@ export default function HomeScreen() {
   useEffect(() => { if (meId) loadVerify(); }, [meId, loadVerify]);
   useEffect(() => {
     if (!meId) return;
+    surveyAnswered().then((a) => setSurvey(a === false ? 'show' : 'hidden'));
+  }, [meId]);
+  useEffect(() => {
+    if (!meId || survey !== 'hidden' || skipGuide.current) return;
     onboardingSeen(meId).then((seen) => {
       if (seen) return;
       if (noClients) setGuide(true);
       else markOnboardingSeen(meId);
     });
-  }, [meId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [meId, survey]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Anket bitti: davet ya da paket seçildiyse rehber bu açılışta gösterilmez (danışan yoksa sonraki açılışta gelir)
+  const finishSurvey = (action: SurveyAction) => {
+    if (action === 'invite' || action === 'plans') skipGuide.current = true;
+    setSurvey('hidden');
+    if (action === 'invite') setInviteOpenKey(Date.now());
+    if (action === 'plans') setPlans(true);
+    if (action === 'joined') load();
+  };
   // Açık kalmış uzman olmayan oturum (ör. ParentApp hesabı): kapatılır, kayıt ekranı açılır
   useEffect(() => { if (state.kind === 'not_clinician') rejectAccount(); }, [state.kind, rejectAccount]);
 
@@ -206,6 +224,9 @@ export default function HomeScreen() {
   if (state.kind === 'ready' && !hasAccess(state.me)) {
     return <MembershipScreen me={state.me} blocking onChanged={load} footer={accountLinks} />;
   }
+  if (state.kind === 'ready' && survey === 'show') {
+    return <WelcomeSurvey me={state.me} onFinish={finishSurvey} />;
+  }
   if (plans && state.kind === 'ready') {
     return <MembershipScreen me={state.me} onClose={() => { setPlans(false); load(); }} onChanged={load} footer={accountLinks} />;
   }
@@ -256,19 +277,19 @@ export default function HomeScreen() {
             </Pressable>
           </View>
 
-          {(state.kind === 'loading' || state.kind === 'not_clinician') && <ActivityIndicator color={colors.navy} style={{ marginTop: 40 }} />}
+          {(state.kind === 'loading' || state.kind === 'not_clinician' || (state.kind === 'ready' && survey === 'unknown')) && <ActivityIndicator color={colors.navy} style={{ marginTop: 40 }} />}
           {state.kind === 'not_installed' && (
             <Notice icon="construct-outline" text="Klinik veritabanı henüz kurulmadı. Klinik SQL'i Supabase'e uygulanınca bu panel açılır." />
           )}
           {state.kind === 'error' && <Notice icon="alert-circle-outline" text={`Yüklenemedi: ${state.message}`} />}
 
           <ConfigBanner />
-          {state.kind === 'ready' && (
+          {state.kind === 'ready' && survey !== 'unknown' && (
             <>
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
               {!!verification?.enabled && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
               <ClientList clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
-              <InvitesCard me={state.me} team={state.team} reloadKey={invitesKey} onChanged={refresh} />
+              <InvitesCard me={state.me} team={state.team} reloadKey={invitesKey} openKey={inviteOpenKey} onChanged={refresh} />
               {!solo && <TeamCard me={state.me} team={state.team} onJoined={refresh} onUpgrade={() => setPlans(true)} />}
               <Text style={styles.footnote}>
                 Bu panel gözlem toplar, tanı koymaz. Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
