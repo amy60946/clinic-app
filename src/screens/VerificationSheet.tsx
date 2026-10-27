@@ -3,7 +3,8 @@ import { View, Text, Pressable, ScrollView, Modal, Alert, StyleSheet, ActivityIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../theme';
-import { Card, Label, Input, Cta, IconButton, Notice } from '../components/ui';
+import { Card, Label, Input, Cta, IconButton, Notice, InlineLink } from '../components/ui';
+import { useLegalOn, openLegal } from '../lib/legal';
 import { pickPdf, PickedPdf } from '../lib/pickPdf';
 import { track } from '../lib/track';
 import {
@@ -28,6 +29,7 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
   const [pdf, setPdf] = useState<PickedPdf | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<CheckResult | 'sent' | null>(null);
+  const legalOn = useLegalOn();
 
   useEffect(() => {
     loadVerification().then((s) => {
@@ -90,6 +92,11 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
             <>
               <Text style={styles.body}>
                 Mezuniyet belgeni yükle; ekibimiz inceleyince ailelerin davet ekranında "Belgesi incelendi" rozeti görünür. Rozet, belgenin incelendiğini gösterir; aileler seni gerçek hayatta tanıdıklarını yine kendileri onaylar.
+              </Text>
+              {/* ortak hukuk/50-uygulama-ici-metinler.md 12 */}
+              <Text style={styles.small}>
+                Belgen yalnız inceleme için okunur, karar verilince silinir; kimlik numaran saklanmaz. Ailelere yalnız "Belgesi incelendi" ve meslek adın görünür; bu bir yetki onayı değildir.
+                {legalOn && <>{' '}<InlineLink onPress={() => openLegal('aydinlatma-uzman')}>Uzman Aydınlatma Metni</InlineLink></>}
               </Text>
 
               {!!state.verified_at && (

@@ -12,6 +12,7 @@ import {
 import * as store from '../lib/store';
 import { showIyzicoForm } from '../lib/iyzicoForm';
 import { track } from '../lib/track';
+import { useLegalOn, openLegal } from '../lib/legal';
 
 const APPLE_EULA = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL;
@@ -31,6 +32,7 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
   const [period, setPeriod] = useState<Period>(me.billing_period ?? 'yearly');
   const [busy, setBusy] = useState<string | null>(null);
   const [buyerFor, setBuyerFor] = useState<BillingPlan | null>(null);
+  const legalOn = useLegalOn();
   const status = billingStatus(me);
   const owner = me.role === 'owner';
   const ios = store.storeKind === 'app_store';
@@ -171,7 +173,9 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
           </Text>
           <View style={styles.links}>
             {ios && <Pressable onPress={() => Linking.openURL(APPLE_EULA)} hitSlop={8}><Text style={styles.smallLink}>Kullanım Koşulları (EULA)</Text></Pressable>}
-            {!!PRIVACY_URL && <Pressable onPress={() => Linking.openURL(PRIVACY_URL)} hitSlop={8}><Text style={styles.smallLink}>Gizlilik Politikası</Text></Pressable>}
+            {legalOn && <Pressable onPress={() => openLegal('sozlesme-uzman')} hitSlop={8}><Text style={styles.smallLink}>Uzman Hizmet Sözleşmesi</Text></Pressable>}
+            {legalOn ? <Pressable onPress={() => openLegal('gizlilik')} hitSlop={8}><Text style={styles.smallLink}>Gizlilik Politikası</Text></Pressable>
+              : !!PRIVACY_URL && <Pressable onPress={() => Linking.openURL(PRIVACY_URL)} hitSlop={8}><Text style={styles.smallLink}>Gizlilik Politikası</Text></Pressable>}
           </View>
           {footer}
         </View>

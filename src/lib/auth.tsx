@@ -18,6 +18,9 @@ export type ClinicianSignUp = {
   clinicName: string;
   teamCode: string;
   practice?: 'solo' | 'clinic';   // yalnız arayüz için (bireyselde ekip bölümü yok); sunucu ikisinde de klinik açar
+  // Kayıtta onaylanan yasal metin sürümleri ({anahtar: sürüm}); oturum e-posta doğrulamasından sonra açıldığı için
+  // ilk girişte legal_accept ile kaydedilir (lib/legal.ts legalPending; ortak akislar.md 17)
+  legal?: Record<string, string>;
 };
 
 type Auth = {
@@ -171,6 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: p.name.trim(),
           title: p.title.trim(),
           ...(teamCode ? { team_code: teamCode } : { clinic_name: p.clinicName.trim(), practice: p.practice ?? 'clinic' }),
+          ...(p.legal ? { legal: p.legal } : {}),
         },
         emailRedirectTo: authRedirectUrl(),
       },

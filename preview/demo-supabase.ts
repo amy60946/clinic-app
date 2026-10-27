@@ -21,7 +21,7 @@ const KEY = 'pofi-onizleme-v4';
 const TABLES = ['profiles', 'families', 'children', 'tasks', 'task_assignments', 'completions', 'messages', 'saved_templates', 'invite_codes',
   'clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'abc_events',
   'clinic_task_suggestions', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events', 'billing_plans', 'clinic_link_access',
-  'care_modules', 'care_module_logs', 'clinic_link_history', 'clinician_surveys'];
+  'care_modules', 'care_module_logs', 'clinic_link_history', 'clinician_surveys', 'legal_acceptances', 'kvkk_requests'];
 
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -210,8 +210,44 @@ function upgrade(x: Db): Db {
   x.clinician_surveys = x.clinician_surveys ?? [];
   x.clinicians.filter((m: Row) => !String(m.id).match(/^[0-9a-f]{8}-/) && !x.clinician_surveys.some((s: Row) => s.clinician_id === m.id))
     .forEach((m: Row) => x.clinician_surveys.push({ clinician_id: m.id, profession: null, challenges: [], features: [], intent: null, skipped: true, updated_at: now() }));
+  // Yasal metinler (ortak 20261027200000): hazır örnek uzmanlar ilk sürümü onaylamış sayılır; yeni kayıt kayıt ekranında onaylar.
+  // Yeniden onay ekranını görmek için konsolda onizlemeSozlesmeGuncelle()
+  x.legal_acceptances = x.legal_acceptances ?? [];
+  x.kvkk_requests = x.kvkk_requests ?? [];
+  if (!x.legalSeeded) {
+    x.clinicians.forEach((m: Row) => ['sozlesme-uzman', 'veri-isleme-eki', 'aydinlatma-uzman'].forEach((k) =>
+      x.legal_acceptances.push({ user_id: m.id, doc_key: k, version: 'v1', app: 'clinic', accepted_at: ago(3 * 1440) })));
+    x.legalSeeded = true;
+  }
   return x;
 }
+
+/* ---------- Yasal metinler (ortak hukuk/, 20261027200000_legal.sql): önizlemede taslak sürümler ---------- */
+
+const LEGAL_DOCS: Row[] = [
+  { key: 'sozlesme-uzman', title: 'ClinicApp Uzman Hizmet Sözleşmesi', apps: ['clinic'], requires_acceptance: true },
+  { key: 'veri-isleme-eki', title: 'Veri İşleme Eki (ClinicApp Uzman Hizmet Sözleşmesi, Ek-1)', apps: ['clinic'], requires_acceptance: true },
+  { key: 'aydinlatma-uzman', title: 'ClinicApp Uzman Aydınlatma Metni', apps: ['clinic'], requires_acceptance: true },
+  { key: 'gizlilik', title: 'Gizlilik Politikası', apps: ['parent', 'child', 'clinic', 'web'], requires_acceptance: false },
+  { key: 'alt-isleyenler', title: 'Hizmet Sağlayıcılar (Alt İşleyenler) Listesi', apps: ['parent', 'child', 'clinic', 'web'], requires_acceptance: false },
+  { key: 'kvkk-basvuru', title: 'KVKK Başvuru Usulü', apps: ['parent', 'child', 'clinic', 'web'], requires_acceptance: false },
+  { key: 'cerez-clinicapp-web', title: 'ClinicApp Web Çerez Politikası', apps: ['clinic', 'web'], requires_acceptance: false },
+];
+const LEGAL_V2 = 'demo.legal_v2';   // tarayıcı deposunda '1' → sözleşme v2 (yeniden onay ekranı)
+function legalDocs(): Row[] {
+  let v2 = false;
+  try { v2 = localStorage.getItem(LEGAL_V2) === '1'; } catch { /* yok say */ }
+  return LEGAL_DOCS.map((d) => (v2 && d.key === 'sozlesme-uzman'
+    ? { ...d, version: 'v2', status: 'draft', summary: 'Örnek: Fesih ve dışa aktarma süresi netleşti (madde 14).' }
+    : { ...d, version: 'v1', status: 'draft', summary: null }));
+}
+function legalFor(uid: string | undefined, app: string): Row[] {
+  return legalDocs().filter((d) => d.apps.includes(app)).map((d) => ({
+    key: d.key, version: d.version, title: d.title, status: d.status, summary: d.summary, requires_acceptance: d.requires_acceptance,
+    published_at: null, accepted_at: db.legal_acceptances.find((a: Row) => a.user_id === uid && a.doc_key === d.key && a.version === d.version)?.accepted_at ?? null,
+  }));
+}
+(globalThis as any).onizlemeSozlesmeGuncelle = () => { try { localStorage.setItem(LEGAL_V2, '1'); } catch { /* yok say */ } location.reload(); };
 
 // Sunucudaki bildirim tetikleyicilerinin (ortak 20261019130000_notifications.sql) önizleme karşılığı. ParentApp önizlemesi
 // tetikleyici çalıştırmaz; bu yüzden ClinicApp her eşitlemede uzmana gidecek bildirimleri satırlardan türetir.
@@ -782,6 +818,40 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     const s = db.clinician_surveys.find((r: Row) => r.clinician_id === sess()?.user.id);
     return { data: s ? { profession: s.profession, challenges: s.challenges, features: s.features, intent: s.intent, skipped: s.skipped } : null, error: null };
   }
+  // Yasal metinler ve KVKK başvurusu (ortak 20261027200000)
+  if (name === 'legal_documents_for') return { data: legalFor(sess()?.user.id, args.p_app), error: null };
+  if (name === 'legal_pending') {
+    return { data: legalFor(sess()?.user.id, args.p_app).filter((d) => d.requires_acceptance && !d.accepted_at), error: null };
+  }
+  if (name === 'legal_accept') {
+    const uid = sess()?.user.id;
+    const cur = legalFor(uid, args.p_app);
+    for (const x of args.p_docs ?? []) {
+      if (!cur.some((d) => d.key === x.key && d.version === x.version && d.requires_acceptance)) return err(`Metin güncel değil: ${x.key} ${x.version}`);
+      if (!db.legal_acceptances.some((a: Row) => a.user_id === uid && a.doc_key === x.key && a.version === x.version)) {
+        db.legal_acceptances.push({ user_id: uid, doc_key: x.key, version: x.version, app: args.p_app, accepted_at: now() });
+      }
+    }
+    save();
+    return { data: legalFor(uid, args.p_app).filter((d) => d.requires_acceptance && !d.accepted_at), error: null };
+  }
+  if (name === 'kvkk_request_create') {
+    const uid = sess()?.user.id;
+    if (['correct', 'object', 'damages', 'other'].includes(args.p_kind) && String(args.p_detail ?? '').trim().length < 5) return err('Talebini kısaca yaz');
+    if (db.kvkk_requests.filter((r: Row) => r.user_id === uid && ['received', 'in_progress'].includes(r.status)).length >= 5) {
+      return err('Açık başvurun var; yanıtlanınca yenisini gönderebilirsin');
+    }
+    const r = { id: uuid(), user_id: uid, app: args.p_app, kind: args.p_kind, detail: args.p_detail ?? '', status: 'received', received_at: now(),
+      due_at: new Date(Date.now() + 30 * 864e5).toISOString(), answered_at: null };
+    db.kvkk_requests.push(r);
+    save();
+    return { data: { id: r.id, status: r.status, received_at: r.received_at, due_at: r.due_at }, error: null };
+  }
+  if (name === 'my_kvkk_requests') {
+    return { data: db.kvkk_requests.filter((r: Row) => r.user_id === sess()?.user.id)
+      .sort((a: Row, b: Row) => (a.received_at < b.received_at ? 1 : -1))
+      .map(({ id, app, kind, status, received_at, due_at, answered_at }: Row) => ({ id, app, kind, child_id: null, status, received_at, due_at, answered_at })), error: null };
+  }
   if (name === 'clinician_survey_save') {
     const uid = sess()?.user.id;
     if (!db.clinicians.some((m: Row) => m.id === uid)) return err('Yalnızca uzman hesabı');
@@ -938,6 +1008,10 @@ function saveVerification(v: Row) { try { localStorage.setItem(VKEY, JSON.string
 const functions = {
   async invoke(name: string, opts?: { body?: Row }) {
     await new Promise((r) => setTimeout(r, 300));
+    // Yasal metin listesi (Edge Function legal, oturumsuz)
+    if (name === 'legal?format=json') {
+      return { data: legalDocs().map(({ key, version, title, status, apps }) => ({ key, version, title, status, apps })), error: null };
+    }
     // Davet e-postası (ortak invite-email): önizlemede e-posta gitmez, gönderilmiş sayılır
     if (name === 'invite-email') {
       const m = db.clinicians.find((x: Row) => x.id === sess()?.user.id);

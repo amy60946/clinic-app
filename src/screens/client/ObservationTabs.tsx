@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '../../theme';
+import { Ionicons } from '@expo/vector-icons';
+import { colors, radius } from '../../theme';
 import { Card, Label, Empty } from '../../components/ui';
 import { WeeklyRateBars, RateBar, Stat } from '../../components/charts';
 import {
@@ -16,6 +17,18 @@ const p = (v: number | null) => (v === null ? '–' : `%${v}`);
 
 export function Limits() {
   return <Text style={styles.limits}>{LIMITS_TEXT}</Text>;
+}
+
+// Zor anlar sekmesinin üstü (ortak hukuk/50-uygulama-ici-metinler.md 9)
+function Emergency() {
+  return (
+    <View style={styles.emergency}>
+      <Ionicons name="call-outline" size={16} color={colors.medium.fg} />
+      <Text style={styles.emergencyText}>
+        ClinicApp acil yardım ya da kriz izleme hizmeti değildir. Ailelerin kayıtları sana gecikmeyle ulaşabilir. Acil bir durum fark edersen 112'yi ara ya da aileyi hemen 112'ye yönlendir.
+      </Text>
+    </View>
+  );
 }
 
 /* ---------- Özet ---------- */
@@ -181,9 +194,10 @@ export function AbcTab({ data, today, weeks }: ClientCtx) {
   const from = s.perWeek[0].start;
   const list = data.abc.filter((e) => isoDate(new Date(e.occurred_at)) >= from);
 
-  if (!s.total) return <Empty text="Bu dönemde ebeveyn zor an kaydı girmedi. Kayıtlar ParentApp › Aile › Uzmanım bölümünden eklenir." />;
+  if (!s.total) return <View><Emergency /><Empty text="Bu dönemde ebeveyn zor an kaydı girmedi. Kayıtlar ParentApp › Aile › Uzmanım bölümünden eklenir." /></View>;
   return (
     <View>
+      <Emergency />
       <Label>Haftalık sayı ve ortalama şiddet (1–5)</Label>
       <Card style={{ gap: 6 }}>
         {s.perWeek.map((w) => (
@@ -220,6 +234,8 @@ const styles = StyleSheet.create({
   small: { fontSize: 12, color: colors.muted },
   note: { fontSize: 11, color: colors.muted, marginTop: 6, lineHeight: 16 },
   limits: { fontSize: 11, color: colors.muted, marginTop: 24, lineHeight: 16 },
+  emergency: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: colors.medium.bg, borderRadius: radius.sm, padding: 12, marginTop: 8 },
+  emergencyText: { flex: 1, fontSize: 12, color: colors.text, lineHeight: 17 },
   badge: {
     fontSize: 11, fontWeight: '700', color: colors.ok, backgroundColor: colors.easy.bg,
     paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden',
