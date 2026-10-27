@@ -396,5 +396,5 @@ export const DECLINE_LABELS: Record<DeclineReason | 'unknown', string> = {
 };
 
 export const LIMITS_TEXT =
-  'Bu göstergeler gözlemdir; tanı, zekâ ya da dikkat puanı değildir. Veri ebeveynin onayına ve cihaz kullanımına bağlıdır. ' +
+  'Bu oranlar ev rutinine ilişkin gözlem özetidir; tanı, zekâ ya da dikkat puanı değildir. Veri ebeveynin onayına ve cihaz kullanımına bağlıdır. ' +
   'Çocuk yalnız kendi geçmişiyle karşılaştırılır (norm yok). Klinik geçerlik bir pilot çalışmayla gösterilene kadar sonuç çıkarmak için tek başına kullanılmamalıdır.';

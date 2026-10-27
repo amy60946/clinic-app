@@ -119,11 +119,13 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
               <Label>Ebeveynin e-postası</Label>
               <Input value={email} onChangeText={setEmail} placeholder="ornek@eposta.com" keyboardType="email-address" autoCapitalize="none"
                 autoCorrect={false} maxLength={160} />
+              <Text style={styles.small}>Bu adrese senin adına davet e-postası gider; çocuğun adı ve notun e-postada yer almaz. Aile yanıtlarsa yanıt senin e-posta adresine gelir. Daveti yalnız tanıdığın ve hizmet verdiğin aileye gönder.</Text>
               <Label>Çocuğun adı (isteğe bağlı)</Label>
               <Input value={childName} onChangeText={setChildName} placeholder="Ör. Efe" maxLength={40} />
               <Label>Yaş grubu (isteğe bağlı)</Label>
               <Segmented options={[{ id: 'none' as const, label: 'Belirtme' }, ...CHILD_AGE_GROUPS]} value={childAge} onChange={setChildAge} />
-              <Text style={styles.small}>Yalnız daveti kabul eden ebeveyn görür; e-postada yer almaz. Sağlık bilgisi yazma.</Text>
+              <InfoText small text="Yalnız daveti kabul eden ebeveyn görür. Sağlık bilgisi yazma."
+                detail={['Çocuğun adını ve yaş grubunu yazarsan yalnız daveti kabul eden ebeveyn görür; kontrol edip onaylar, düzeltirse sana bildirim gelir. Mesajda görünmez, davet bitince silinir.']} />
               <Label>Kendi notun (isteğe bağlı, aile görmez)</Label>
               <Input value={label} onChangeText={setLabel} placeholder="Ör. dosya no, görüşme günü" maxLength={60} />
               <View style={{ marginTop: 16 }}><Cta label="E-posta gönder" onPress={create} busy={busy} /></View>

@@ -8,6 +8,9 @@ import {
 import type { Goal } from './clinic';
 import { skillName } from '../skills';
 
+// Yazdırma/PDF alt bilgisi (ortak hukuk/50-uygulama-ici-metinler.md 13)
+const REPORT_NOTE = 'Bu çıktı ailenin uygulama kayıtlarından ve uzmanın gözlemlerinden oluşur. Tanı değildir; tek başına klinik karar için kullanılmaz.';
+
 export type ReportInput = {
   clinic: string;
   clinician: string;
@@ -111,5 +114,6 @@ ${goals.length ? `<table><tr><th>Hedef</th>${gasWeeks.map((s) => `<th class="n">
 <div class="m">Günün bölümü: sabah ${abc.byDayPart.sabah} · öğle ${abc.byDayPart['öğle']} · akşam ${abc.byDayPart['akşam']} · gece ${abc.byDayPart.gece}</div>
 
 <div class="limits"><b>Sınırlar.</b> ${esc(LIMITS_TEXT)}</div>
+<div class="limits">${esc(REPORT_NOTE)}</div>
 </body></html>`;
 }

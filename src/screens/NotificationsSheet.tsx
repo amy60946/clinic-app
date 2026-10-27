@@ -13,6 +13,7 @@ const ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   suggestion_decided: 'checkmark-done-outline', team_joined: 'people-outline', client_assigned: 'person-outline', admin_message: 'megaphone-outline',
   invite_claimed: 'person-add-outline', invite_expired: 'time-outline', invite_declined: 'close-circle-outline', invite_child_updated: 'create-outline',
   verification_approved: 'shield-checkmark-outline', verification_rejected: 'alert-circle-outline', verification_suspended: 'shield-outline',
+  kvkk_answered: 'document-text-outline',
 };
 
 // Danışan ekranında birden çok çocuklu bildirim (kardeşler) yalnız bu çocuğun adıyla gösterilir

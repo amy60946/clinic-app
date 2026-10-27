@@ -17,7 +17,9 @@ echo "› Tip kontrolü"
 (cd "$WORK" && npx tsc --noEmit)
 
 echo "› Web paketi"
-(cd "$WORK" && CI=1 npx expo export --clear --platform web --output-dir dist >/dev/null)
+# Yasal metin bağlantıları gerçek `legal` işlevini açar (herkese açık taslak metinler; deneme verisi değil)
+(cd "$WORK" && CI=1 EXPO_PUBLIC_LEGAL_URL=https://uhelhxqgpcjemadhsifx.supabase.co/functions/v1/legal \
+  npx expo export --clear --platform web --output-dir dist >/dev/null)
 
 echo "› Paketleniyor"
 node "$ROOT/preview/pack.js" "$WORK/dist" "$ROOT/preview/out"

@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme';
-import { Input, Cta, LinkText, Notice } from '../components/ui';
+import { Input, Cta, LinkText, Notice, CheckRow, InlineLink } from '../components/ui';
 import { useAuth, authErrorText } from '../lib/auth';
+import { signupVersions, openLegal } from '../lib/legal';
 
 const MIN_PASSWORD = 8;
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
@@ -118,8 +119,17 @@ export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { g
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [sentTo, setSentTo] = useState<string | undefined>();
+  // Yasal metinler yayındaysa sözleşme kutusu (hukuk/50 bölüm 1.2); değilse eski kayıt (kutusuz)
+  const [legal, setLegal] = useState<Record<string, string> | null | undefined>(undefined);
+  const [agree, setAgree] = useState(false);
+  useEffect(() => { signupVersions().then(setLegal); }, []);
 
   const submit = async () => {
+    const versions = legal === undefined ? await signupVersions() : legal;
+    if (versions && !agree) {
+      setLegal(versions);
+      return Alert.alert('Sözleşmeyi onayla', 'Hesap açmak için Uzman Hizmet Sözleşmesi\'ni ve Veri İşleme Eki\'ni okuyup kutuyu işaretle.');
+    }
     if (!name.trim()) return Alert.alert('Adını yaz.');
     if (join && ![6, 8].includes(teamCode.trim().length)) return Alert.alert('Ekip kodu 8 karakterdir.');
     if (!join && practice === 'clinic' && !clinicName.trim()) return Alert.alert('Kliniğinin adını yaz.');
@@ -128,7 +138,7 @@ export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { g
     setBusy(true);
     try {
       const { needsConfirmation } = await signUp({
-        email, password, name, title, teamCode: join ? teamCode : '', practice,
+        email, password, name, title, teamCode: join ? teamCode : '', practice, legal: versions ?? undefined,
         // Bireysel uzmanın çalışma alanı kendi adıyla açılır; ailelere ve raporda uzmanın adı görünür
         clinicName: join ? '' : practice === 'solo' ? name.trim() : clinicName.trim(),
       });
@@ -199,7 +209,25 @@ export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { g
         autoCapitalize="none" autoComplete="email" textContentType="emailAddress" />
       <Input value={password} onChangeText={setPassword} placeholder={`Şifre (en az ${MIN_PASSWORD} karakter)`} secure
         autoComplete="new-password" textContentType="newPassword" onSubmitEditing={submit} />
-      <Cta label="Kayıt ol" onPress={submit} busy={busy} />
+      {!!legal && (
+        <View style={{ gap: 8, marginTop: 4 }}>
+          <CheckRow checked={agree} onToggle={() => setAgree((a) => !a)}>
+            <InlineLink onPress={() => openLegal('sozlesme-uzman', legal['sozlesme-uzman'])}>Uzman Hizmet Sözleşmesi</InlineLink>
+            {'\'ni ve '}
+            <InlineLink onPress={() => openLegal('veri-isleme-eki', legal['veri-isleme-eki'])}>Veri İşleme Eki</InlineLink>
+            {'\'ni okudum, kabul ediyorum.'}
+          </CheckRow>
+          {!!legal['aydinlatma-uzman'] && (
+            <Text style={styles.legalLine}>
+              {'Kişisel verilerinin nasıl işlendiğini '}
+              <InlineLink onPress={() => openLegal('aydinlatma-uzman', legal['aydinlatma-uzman'])}>Uzman Aydınlatma Metni</InlineLink>
+              {'\'nde anlatıyoruz.'}
+            </Text>
+          )}
+          <Text style={styles.legalLine}><InlineLink onPress={() => openLegal('gizlilik')}>Gizlilik Politikası</InlineLink></Text>
+        </View>
+      )}
+      <Cta label="Kayıt ol" onPress={submit} busy={busy} disabled={!!legal && !agree} />
       <LinkText onPress={() => go('login')}>Zaten hesabın var mı? Giriş yap</LinkText>
     </Layout>
   );
@@ -292,4 +320,5 @@ const styles = StyleSheet.create({
   practiceRow: { flexDirection: 'row', gap: 10 },
   practice: { flex: 1, gap: 4, padding: 14, borderRadius: 14, backgroundColor: '#fff', borderWidth: 1.5, borderColor: 'transparent' },
   practiceOn: { borderColor: colors.navy },
+  legalLine: { fontSize: 12, color: colors.muted, lineHeight: 18, paddingLeft: 32 },
 });

@@ -33,9 +33,12 @@ export function Input({ secure, ...props }: TextInputProps & { secure?: boolean 
   );
 }
 
-export function Cta({ label, onPress, busy, style }: { label: string; onPress: () => void; busy?: boolean; style?: ViewStyle }) {
+export function Cta({ label, onPress, busy, disabled, style }: {
+  label: string; onPress: () => void; busy?: boolean; disabled?: boolean; style?: ViewStyle;
+}) {
   return (
-    <Pressable style={[styles.cta, busy && { opacity: 0.7 }, style]} onPress={onPress} disabled={busy}>
+    <Pressable style={[styles.cta, busy && { opacity: 0.7 }, disabled && { opacity: 0.4 }, style]} onPress={onPress}
+      disabled={busy || disabled} accessibilityRole="button" accessibilityState={{ disabled: !!(busy || disabled) }}>
       {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.ctaText}>{label}</Text>}
     </Pressable>
   );
@@ -141,15 +144,15 @@ export function SmallButton({ label, onPress, danger, busy }: { label: string; o
 }
 
 // Kısa metin + "i": dokununca ayrıntı yerinde açılır (Alert web'de görünmediği için açılır kutu)
-export function InfoText({ text, detail }: { text: string; detail: string[] }) {
+export function InfoText({ text, detail, small }: { text: string; detail: string[]; small?: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <View style={{ gap: 8 }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
-        <Text style={styles.infoText}>{text}</Text>
+        <Text style={[styles.infoText, small && styles.infoSmall]}>{text}</Text>
         <Pressable onPress={() => setOpen((v) => !v)} hitSlop={10} accessibilityRole="button"
           accessibilityLabel={open ? 'Açıklamayı kapat' : 'Nasıl çalışır?'} accessibilityState={{ expanded: open }}>
-          <Ionicons name={open ? 'information-circle' : 'information-circle-outline'} size={22} color={colors.navy} />
+          <Ionicons name={open ? 'information-circle' : 'information-circle-outline'} size={small ? 18 : 22} color={colors.navy} />
         </Pressable>
       </View>
       {open && (
@@ -163,6 +166,24 @@ export function InfoText({ text, detail }: { text: string; detail: string[] }) {
         </View>
       )}
     </View>
+  );
+}
+
+// Onay kutusu satırı: önceden işaretli gelmez; metindeki bağlantılar (InlineLink) kutuyu değiştirmez
+export function CheckRow({ checked, onToggle, children }: { checked: boolean; onToggle: () => void; children: React.ReactNode }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+      <Pressable onPress={onToggle} hitSlop={8} accessibilityRole="checkbox" accessibilityState={{ checked }}>
+        <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={22} color={checked ? colors.navy : colors.muted} />
+      </Pressable>
+      <Text style={styles.checkText} onPress={onToggle}>{children}</Text>
+    </View>
+  );
+}
+
+export function InlineLink({ children, onPress }: { children: string; onPress: () => void }) {
+  return (
+    <Text style={styles.inlineLink} accessibilityRole="link" onPress={(e) => { e?.stopPropagation?.(); onPress(); }}>{children}</Text>
   );
 }
 
@@ -194,6 +215,9 @@ const styles = StyleSheet.create({
   link: { fontSize: 13, fontWeight: '600', color: colors.navy },
   notice: { flexDirection: 'row', gap: 12, backgroundColor: '#fff', borderRadius: radius.md, padding: 16, alignItems: 'center' },
   infoText: { flex: 1, fontSize: 14, color: colors.text, lineHeight: 20 },
+  infoSmall: { fontSize: 12, color: colors.muted, lineHeight: 17 },
   infoBox: { backgroundColor: colors.bg, borderRadius: radius.sm, padding: 12, gap: 6 },
   infoDetail: { fontSize: 13, color: colors.text, lineHeight: 19 },
+  checkText: { flex: 1, fontSize: 13, color: colors.text, lineHeight: 20 },
+  inlineLink: { fontWeight: '700', color: colors.navy, textDecorationLine: 'underline' },
 });

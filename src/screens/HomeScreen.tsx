@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator, RefreshControl, Platform } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator, RefreshControl, Platform, AppState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as Clipboard from 'expo-clipboard';
@@ -18,6 +18,10 @@ import { VerificationState, loadVerification } from '../lib/verification';
 import Onboarding, { onboardingSeen, markOnboardingSeen } from './Onboarding';
 import WelcomeSurvey, { SurveyAction } from './WelcomeSurvey';
 import { surveyAnswered } from '../lib/survey';
+import { LegalDoc, legalPending } from '../lib/legal';
+import LegalSheet from './legal/LegalSheet';
+import KvkkSheet from './legal/KvkkSheet';
+import LegalUpdateScreen from './legal/LegalUpdateScreen';
 import { billingStatus, hasAccess, daysLeft, packageName } from '../lib/billing';
 import ClientScreen, { Tab } from './client/ClientScreen';
 import NotificationsSheet, { notificationTab } from './NotificationsSheet';
@@ -76,6 +80,11 @@ export default function HomeScreen() {
   const [survey, setSurvey] = useState<'unknown' | 'show' | 'hidden'>('unknown');
   const [inviteOpenKey, setInviteOpenKey] = useState(0);
   const skipGuide = useRef(false);
+  // Yasal metinler (ortak akislar.md 17): onay bekleyen varsa panel yerine yeniden onay ekranı. null: sunucuda yok
+  const [legal, setLegal] = useState<'unknown' | LegalDoc[] | null>('unknown');
+  const [legalOpen, setLegalOpen] = useState(false);
+  const [kvkkOpen, setKvkkOpen] = useState(false);
+  const legalAt = useRef(0);
   const { unread, unreadByChild } = useNotifications();
   const pending = useRef<Pick<AppNotification, 'kind' | 'data' | 'childId'> | null>(null);
 
@@ -121,6 +130,18 @@ export default function HomeScreen() {
     if (!meId) return;
     surveyAnswered().then((a) => setSurvey(a === false ? 'show' : 'hidden'));
   }, [meId]);
+  // Açılışta ve ön plana gelince (en çok 10 dakikada bir) onay bekleyen yasal metin; kayıtta onaylananlar sessizce kaydedilir
+  const signedLegal = session?.user.user_metadata?.legal;
+  useEffect(() => {
+    if (!meId) return;
+    const check = () => {
+      legalAt.current = Date.now();
+      legalPending(signedLegal).catch(() => null).then((p) => setLegal((cur) => (p === null && cur !== 'unknown' ? cur : p)));
+    };
+    check();
+    const sub = AppState.addEventListener('change', (st) => { if (st === 'active' && Date.now() - legalAt.current > 10 * 60e3) check(); });
+    return () => sub.remove();
+  }, [meId]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!meId || survey !== 'hidden' || skipGuide.current) return;
     onboardingSeen(meId).then((seen) => {
@@ -144,6 +165,7 @@ export default function HomeScreen() {
   const openTarget = useCallback(async (n: Pick<AppNotification, 'kind' | 'data' | 'childId'>) => {
     setBell(false);
     if (n.kind === 'team_joined') { setSelected(null); load(); return; }
+    if (n.kind === 'kvkk_answered') { setSelected(null); setKvkkOpen(true); return; }
     // bayrak sonradan kapatıldıysa eski bildirim sayfayı açmaz (kapalıyken hiçbir şey görünmez)
     if (n.kind.startsWith('verification_')) {
       setSelected(null);
@@ -197,10 +219,13 @@ export default function HomeScreen() {
     await unregisterPush().catch(() => {});
     signOut();
   };
+  // Metinler hukuk/50-uygulama-ici-metinler.md 5.2 (tek kişilik klinik · ekipte sahip · ekip üyesi)
   const removeAccount = () => Alert.alert('Hesabın silinsin mi?',
     state.kind === 'ready' && state.team.length <= 1
-      ? 'Hesabın, kliniğin, danışan paylaşımların, notların ve hedeflerin kalıcı olarak silinir. Geri alınamaz. App Store üyeliğin varsa Apple Ayarlar\'dan ayrıca kapat.'
-      : 'Hesabın kalıcı olarak silinir; klinik ve danışanlar ekipte kalır (sahipsen sahiplik en eski üyeye geçer). Geri alınamaz.',
+      ? 'Kliniğin ve içindeki her şey silinir: danışan paylaşımları, notlar, hedefler, haftalık değerlendirmeler, görev önerileri, takip planları, davetler ve üyelik kaydı. Ailelerin ParentApp\'teki kendi verileri silinmez; yalnız seninle paylaşımları biter. Saklaman gereken kayıtları önce yazdır. App Store üyeliğin varsa Apple Ayarlar\'dan ayrıca kapat. Bu işlem geri alınamaz.'
+      : state.kind === 'ready' && state.me.role === 'owner'
+        ? 'Klinik kalır; sahiplik ekibin en eski üyesine geçer. Kliniğe ait kayıtlar klinikte kalır. Yalnız senin hesabın silinir. Bu işlem geri alınamaz.'
+        : 'Yalnız senin hesabın silinir. Kliniğe ait kayıtlar klinikte kalır. Bu işlem geri alınamaz.',
     [{ text: 'Vazgeç', style: 'cancel' }, {
       text: 'Kalıcı olarak sil', style: 'destructive', onPress: async () => {
         try {
@@ -213,22 +238,36 @@ export default function HomeScreen() {
         }
       },
     }]);
+  const legalOn = Array.isArray(legal);
   const accountLinks = (
     <View style={styles.accountLinks}>
+      {legalOn && <Pressable onPress={() => setLegalOpen(true)} hitSlop={8}><Text style={styles.link}>Yasal metinler</Text></Pressable>}
+      {legalOn && <Pressable onPress={() => setKvkkOpen(true)} hitSlop={8}><Text style={styles.link}>KVKK başvurusu</Text></Pressable>}
       <Pressable onPress={logout} hitSlop={8}><Text style={styles.link}>Çıkış yap</Text></Pressable>
       <Pressable onPress={removeAccount} hitSlop={8}><Text style={[styles.link, { color: colors.danger }]}>Hesabı sil</Text></Pressable>
     </View>
   );
+  // Yeniden onay ve üyelik ekranlarından da açılır (hukuk/50 bölüm 2: onay beklerken yasal metinler ve KVKK başvurusu açık)
+  const legalSheets = (
+    <>
+      <LegalSheet visible={legalOpen} onClose={() => setLegalOpen(false)} />
+      <KvkkSheet visible={kvkkOpen} email={session?.user.email ?? ''} onClose={() => setKvkkOpen(false)} />
+    </>
+  );
+
+  if (state.kind === 'ready' && Array.isArray(legal) && legal.length > 0) {
+    return <><LegalUpdateScreen docs={legal} onDone={setLegal} footer={accountLinks} />{legalSheets}</>;
+  }
 
   // Deneme/üyelik bitti (ya da Bireysel pakette ekip üyesi): panel yerine üyelik ekranı
   if (state.kind === 'ready' && !hasAccess(state.me)) {
-    return <MembershipScreen me={state.me} blocking onChanged={load} footer={accountLinks} />;
+    return <><MembershipScreen me={state.me} blocking onChanged={load} footer={accountLinks} />{legalSheets}</>;
   }
-  if (state.kind === 'ready' && survey === 'show') {
+  if (state.kind === 'ready' && survey === 'show' && legal !== 'unknown') {
     return <WelcomeSurvey me={state.me} onFinish={finishSurvey} />;
   }
   if (plans && state.kind === 'ready') {
-    return <MembershipScreen me={state.me} onClose={() => { setPlans(false); load(); }} onChanged={load} footer={accountLinks} />;
+    return <><MembershipScreen me={state.me} onClose={() => { setPlans(false); load(); }} onChanged={load} footer={accountLinks} />{legalSheets}</>;
   }
 
   if (selected && state.kind === 'ready') {
@@ -277,14 +316,14 @@ export default function HomeScreen() {
             </Pressable>
           </View>
 
-          {(state.kind === 'loading' || state.kind === 'not_clinician' || (state.kind === 'ready' && survey === 'unknown')) && <ActivityIndicator color={colors.navy} style={{ marginTop: 40 }} />}
+          {(state.kind === 'loading' || state.kind === 'not_clinician' || (state.kind === 'ready' && (survey === 'unknown' || legal === 'unknown'))) && <ActivityIndicator color={colors.navy} style={{ marginTop: 40 }} />}
           {state.kind === 'not_installed' && (
             <Notice icon="construct-outline" text="Klinik veritabanı henüz kurulmadı. Klinik SQL'i Supabase'e uygulanınca bu panel açılır." />
           )}
           {state.kind === 'error' && <Notice icon="alert-circle-outline" text={`Yüklenemedi: ${state.message}`} />}
 
           <ConfigBanner />
-          {state.kind === 'ready' && survey !== 'unknown' && (
+          {state.kind === 'ready' && survey !== 'unknown' && legal !== 'unknown' && (
             <>
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
               {!!verification?.enabled && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
@@ -293,6 +332,7 @@ export default function HomeScreen() {
               {!solo && <TeamCard me={state.me} team={state.team} onJoined={refresh} onUpgrade={() => setPlans(true)} />}
               <Text style={styles.footnote}>
                 Bu panel gözlem toplar, tanı koymaz. Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
+                {' '}ClinicApp acil yardım hizmeti değildir; acil durumda 112'yi ara.
               </Text>
               <Pressable onPress={() => setGuide(true)} hitSlop={8} style={{ alignSelf: 'flex-start' }} accessibilityRole="button">
                 <Text style={styles.link}>Nasıl kullanılır?</Text>
@@ -305,6 +345,7 @@ export default function HomeScreen() {
       <NotificationsSheet visible={bell} onClose={() => setBell(false)} onOpen={openTarget} />
       <VerificationSheet visible={verify} onClose={() => { setVerify(false); loadVerify(); }} />
       <Onboarding visible={guide} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
+      {legalSheets}
     </SafeAreaView>
   );
 }
@@ -565,7 +606,7 @@ const styles = StyleSheet.create({
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: radius.md, paddingHorizontal: 14, height: 44, marginBottom: 8 },
   clientName: { fontSize: 15, fontWeight: '600', color: colors.text },
   footnote: { fontSize: 11, color: colors.muted, marginTop: 24, lineHeight: 16 },
-  accountLinks: { flexDirection: 'row', gap: 24, marginTop: 20 },
+  accountLinks: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 24, rowGap: 12, marginTop: 20 },
   member: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.today, borderRadius: radius.md, padding: 14, marginTop: 8 },
   memberTitle: { fontSize: 14, fontWeight: '700', color: colors.navy },
 });
