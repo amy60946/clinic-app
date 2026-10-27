@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, Pressable, Alert, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, Alert, StyleSheet, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
 import { Label, Empty, Notice, DifficultyBadge } from '../../components/ui';
@@ -12,6 +12,8 @@ import type { ClientCtx } from './ClientScreen';
 import { track } from '../../lib/track';
 import { skillName } from '../../skills';
 import { InheritedSuggestions } from './History';
+import RoutineSheet from './RoutineSheet';
+import { ROUTINES, Routine, routineTasks } from '../../lib/routines';
 
 const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: string; icon: keyof typeof Ionicons.glyphMap }> = {
   pending: { label: 'Ebeveyn kararı bekleniyor', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'time-outline' },
@@ -21,10 +23,27 @@ const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: stri
 
 // Uzman yalnız önerir; görevi ekleyip eklememek ebeveynin kararıdır (ParentApp › Uzmanım).
 // Bekleyen öneri güncellenebilir ya da geri çekilebilir; karar verilmiş öneri değişmez.
-export default function SuggestionsTab({ client, me }: ClientCtx) {
+export default function SuggestionsTab({ client, me, data }: ClientCtx) {
   const [items, setItems] = useState<Suggestion[] | null>(null);
   const [editor, setEditor] = useState<{ open: boolean; editing: Suggestion | null }>({ open: false, editing: null });
   const [schemaMissing, setSchemaMissing] = useState(false);
+  const [routine, setRoutine] = useState<Routine | null>(null);
+  const { width } = useWindowDimensions();
+  // çocukta zaten olan görevler ve bekleyen öneriler (rutinde baştan seçili gelmez)
+  const taken = [...data.tasks.map((t) => t.title), ...(items ?? []).filter((s) => s.status === 'pending').map((s) => s.title)];
+
+  const sendRoutine = async (list: SuggestionInput[]) => {
+    try {
+      await addSuggestions(client, me.id, list);
+    } catch (e) {
+      if (e instanceof SuggestionSchemaMissing) setSchemaMissing(true);
+      throw e;
+    }
+    track('suggestion.routine', { routine: routine?.id ?? '', n: list.length });
+    setRoutine(null);
+    load();
+    Alert.alert('Rutin önerildi', `${list.length} görev ebeveynin onayına gönderildi.`);
+  };
 
   const load = useCallback(() => {
     listSuggestions(client.link_id).then(setItems).catch((e) => Alert.alert('Öneriler yüklenemedi', (e as Error).message));
@@ -67,6 +86,18 @@ export default function SuggestionsTab({ client, me }: ClientCtx) {
       <Text style={styles.sub}>
         Ebeveyn öneriyi ParentApp'te görür; eklerse görev buradaki ayarlarla çocuğun listesine düşer. Bekleyen bir öneriye dokunarak güncelleyebilirsin.
       </Text>
+      <Label>Günlük rutin önerisi</Label>
+      <Text style={[styles.sub, { marginTop: 0, marginBottom: 10 }]}>Hazır bir rutini tek seferde öner; ebeveyn her görevi ayrı onaylar.</Text>
+      <View style={styles.routines}>
+        {ROUTINES.map((r) => (
+          <Pressable key={r.id} onPress={() => setRoutine(r)} accessibilityRole="button"
+            style={({ pressed }) => [styles.routine, { width: width >= 720 ? '32%' : '48.5%', backgroundColor: r.tint }, pressed && { opacity: 0.85 }]}>
+            <View style={styles.routineIcon}><Ionicons name={r.icon as keyof typeof Ionicons.glyphMap} size={20} color={colors.navy} /></View>
+            <Text style={styles.routineTitle}>{r.title}</Text>
+            <Text style={styles.meta}>{r.subtitle} · {routineTasks(r).length} görev</Text>
+          </Pressable>
+        ))}
+      </View>
       {schemaMissing && (
         <Notice icon="construct-outline" text="Öneri ayrıntıları (tekrar günleri, hatırlatma, ödül…) için veritabanı güncellemesi bekleniyor. Güncelleme uygulanınca bu özellik açılır." />
       )}
@@ -114,6 +145,7 @@ export default function SuggestionsTab({ client, me }: ClientCtx) {
       )}
       <InheritedSuggestions linkId={client.link_id} />
 
+      <RoutineSheet routine={routine} childName={client.child_name} taken={taken} onClose={() => setRoutine(null)} onSubmit={sendRoutine} />
       <SuggestionEditor
         visible={editor.open}
         childName={client.child_name}
@@ -144,4 +176,8 @@ const styles = StyleSheet.create({
   meta: { fontSize: 12, color: colors.muted, lineHeight: 17 },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill, marginTop: 2 },
   date: { fontSize: 11, color: colors.faint },
+  routines: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 10 },
+  routine: { borderRadius: radius.md, padding: 14, gap: 4, minHeight: 112 },
+  routineIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', marginBottom: 6 },
+  routineTitle: { fontSize: 14, fontWeight: '700', color: colors.navy },
 });
