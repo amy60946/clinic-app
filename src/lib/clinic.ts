@@ -20,7 +20,7 @@ export type ClinicianMe = {
   status?: 'trial' | 'active' | 'expired';
   billing_period?: 'monthly' | 'yearly' | null;
   period_end?: string | null;
-  billing_source?: 'app_store' | 'iyzico' | 'manual' | null;
+  billing_source?: 'revenuecat' | 'app_store' | 'iyzico' | 'manual' | null;   // ortak durumlar.md (iyzico ileride kendi sistem için; bugün kullanılmaz)
   auto_renew?: boolean;
   member_count?: number;
   // ortak 20261021100000: ekip üyesi profilinde klinik sahibi ve davet eden (yoksa boş gelir)

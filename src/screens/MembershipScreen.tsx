@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Platform, Linking, Modal, KeyboardAvoidingView } from 'react-native';
+import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../theme';
-import { Card, Label, Input, Cta, Segmented, SmallButton } from '../components/ui';
+import { Card, Label, Cta, Segmented } from '../components/ui';
 import type { ClinicianMe } from '../lib/clinic';
 import {
-  BillingPlan, Buyer, PackageId, Period, PACKAGES, COMMON_TERMS, listPlans, tl, billingStatus, hasAccess, daysLeft,
-  packageName, verifyApple, startWebCheckout, cancelWeb,
+  BillingPlan, PackageId, Period, PACKAGES, COMMON_TERMS, listPlans, tl, billingStatus, hasAccess, daysLeft,
+  packageName, verifyApple,
 } from '../lib/billing';
 import * as store from '../lib/store';
-import { showIyzicoForm } from '../lib/iyzicoForm';
 import { track } from '../lib/track';
 import { useLegalOn, openLegal } from '../lib/legal';
 
 const APPLE_EULA = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL;
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-const SOURCE: Record<string, string> = { app_store: 'App Store', iyzico: 'web (kartla)', manual: 'klinik anlaşması' };
+const SOURCE: Record<string, string> = { app_store: 'App Store', revenuecat: 'App Store', manual: 'klinik anlaşması' };
 
 // Üyelik ekranı. blocking: deneme/üyelik bitti, panel yerine bu ekran gösterilir (kapatılamaz).
 export default function MembershipScreen({ me, blocking, onClose, onChanged, footer }: {
@@ -31,7 +30,6 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
   const [prices, setPrices] = useState<Record<string, string>>({});
   const [period, setPeriod] = useState<Period>(me.billing_period ?? 'yearly');
   const [busy, setBusy] = useState<string | null>(null);
-  const [buyerFor, setBuyerFor] = useState<BillingPlan | null>(null);
   const legalOn = useLegalOn();
   const status = billingStatus(me);
   const owner = me.role === 'owner';
@@ -57,7 +55,7 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
       if (!ok) return;
     }
     track('membership.choose', { plan: p.id });
-    if (!ios) { setBuyerFor(p); return; }
+    if (!ios) return;   // web'de satış yok (kullanıcı kararı 22 Ekim 2026): üyelik iPhone/iPad'den alınır
     if (!p.apple_product_id) return Alert.alert('Bu paket şu an satın alınamıyor.');
     setBusy(p.id);
     try {
@@ -87,22 +85,6 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
     }
   };
 
-  const cancel = () => Alert.alert('Yenileme kapatılsın mı?',
-    me.period_end ? `Üyeliğin ${dateText(me.period_end)} tarihine kadar açık kalır, sonra yenilenmez.` : 'Üyeliğin dönem sonunda yenilenmez.',
-    [{ text: 'Vazgeç', style: 'cancel' }, {
-      text: 'Yenilemeyi kapat', style: 'destructive', onPress: async () => {
-        setBusy('cancel');
-        try {
-          await cancelWeb();
-          track('membership.cancel');
-          onChanged();
-        } catch (e) {
-          Alert.alert('İptal edilemedi', (e as Error).message);
-        } finally {
-          setBusy(null);
-        }
-      },
-    }]);
 
   const shown = plans.filter((p) => p.period === period);
 
@@ -137,7 +119,7 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
 
           <View style={styles.cards}>
             {shown.map((p) => (
-              <PlanCard key={p.id} plan={p} price={priceOf(p)} current={current(p)} canBuy={owner}
+              <PlanCard key={p.id} plan={p} price={priceOf(p)} current={current(p)} canBuy={owner && ios}
                 busy={busy === p.id} onChoose={() => choose(p)} highlight={p.package === 'clinic'} />
             ))}
           </View>
@@ -147,16 +129,8 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
             {COMMON_TERMS.map((t) => <Check key={t} text={t} />)}
           </Card>
 
-          {owner && status === 'active' && me.billing_source === 'iyzico' && me.auto_renew && !ios && (
-            <View style={{ marginTop: 16, alignItems: 'flex-start' }}>
-              <SmallButton label="Yenilemeyi kapat" onPress={cancel} danger busy={busy === 'cancel'} />
-            </View>
-          )}
-          {status === 'active' && me.billing_source === 'app_store' && !ios && (
+          {status === 'active' && (me.billing_source === 'app_store' || me.billing_source === 'revenuecat') && !ios && (
             <Text style={[styles.small, { marginTop: 12 }]}>Üyeliğin App Store üzerinden alındı; iPhone/iPad'de Ayarlar › Apple Hesabı › Abonelikler'den yönetilir.</Text>
-          )}
-          {status === 'active' && me.billing_source === 'iyzico' && ios && (
-            <Text style={[styles.small, { marginTop: 12 }]}>Üyeliğin web'den kartla alındı; yönetmek için ClinicApp'e web'den gir.</Text>
           )}
 
           {ios && owner && (
@@ -169,7 +143,7 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
           <Text style={styles.legal}>
             {ios
               ? 'Ödeme, onayladığında Apple hesabından alınır. Abonelik, dönem bitmeden en az 24 saat önce kapatılmazsa aynı süre ve ücretle otomatik yenilenir; yenileme ücreti dönem bitmeden önceki 24 saat içinde alınır. Ayarlar › Apple Hesabı › Abonelikler\'den yönetebilir ya da kapatabilirsin.'
-              : 'Ödeme iyzico güvenli ödeme sayfasında alınır; kart bilgin ClinicApp\'e gelmez. Abonelik her dönem sonunda otomatik yenilenir; buradan dilediğin an yenilemeyi kapatabilirsin. Fiyatlara KDV dahildir.'}
+              : owner ? 'Üyeliği iPhone ya da iPad\'deki ClinicApp\'ten alabilirsin. Üyelik hesabına bağlıdır; web\'de de açılır.' : ''}
           </Text>
           <View style={styles.links}>
             {ios && <Pressable onPress={() => Linking.openURL(APPLE_EULA)} hitSlop={8}><Text style={styles.smallLink}>Kullanım Koşulları (EULA)</Text></Pressable>}
@@ -180,9 +154,6 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
           {footer}
         </View>
       </ScrollView>
-      {buyerFor && (
-        <BuyerSheet plan={buyerFor} price={priceOf(buyerFor)} onClose={() => setBuyerFor(null)} />
-      )}
     </SafeAreaView>
   );
 }
@@ -252,56 +223,6 @@ const Check = ({ text }: { text: string }) => (
   </View>
 );
 
-// Web: fatura bilgisi (iyzico zorunlu tutar) → iyzico ödeme formu. Bilgiler ClinicApp'te saklanmaz.
-function BuyerSheet({ plan, price, onClose }: { plan: BillingPlan; price: string; onClose: () => void }) {
-  const [b, setB] = useState<Buyer>({ name: '', surname: '', identityNumber: '', gsmNumber: '', city: '', address: '' });
-  const [busy, setBusy] = useState(false);
-  const set = (k: keyof Buyer) => (v: string) => setB((x) => ({ ...x, [k]: v }));
-  const submit = async () => {
-    if (!b.name.trim() || !b.surname.trim() || !b.city.trim() || !b.address.trim()) return Alert.alert('Ad, soyad, şehir ve adresi yaz.');
-    if (!/^\d{11}$/.test(b.identityNumber.trim())) return Alert.alert('T.C. kimlik numarası 11 hane olmalı.');
-    if (!/^(\+90|0)?5\d{9}$/.test(b.gsmNumber.replace(/\s/g, ''))) return Alert.alert('Cep telefonunu 05xx xxx xx xx biçiminde yaz.');
-    setBusy(true);
-    try {
-      const r = await startWebCheckout(plan.id, { ...b, gsmNumber: b.gsmNumber.replace(/\s/g, '') });
-      track('membership.checkout', { plan: plan.id });
-      onClose();
-      showIyzicoForm(r.checkoutFormContent);
-    } catch (e) {
-      Alert.alert('Ödeme başlatılamadı', (e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <Modal visible animationType="slide" transparent onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.sheetWrap}>
-        <View style={styles.sheet}>
-          <View style={styles.header}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.statusTitle}>{PACKAGES[plan.package].title} · {plan.period === 'yearly' ? 'Yıllık' : 'Aylık'} · {price}</Text>
-              <Text style={styles.small}>Fatura bilgisi (iyzico ister). Kart bilgisini bir sonraki adımda iyzico'nun güvenli sayfasına yazarsın.</Text>
-            </View>
-            <Pressable onPress={onClose} accessibilityLabel="Kapat" hitSlop={8} style={styles.iconBtn}>
-              <Ionicons name="close" size={20} color={colors.navy} />
-            </Pressable>
-          </View>
-          <ScrollView contentContainerStyle={{ gap: 10 }} keyboardShouldPersistTaps="handled">
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <View style={{ flex: 1 }}><Input value={b.name} onChangeText={set('name')} placeholder="Ad" autoComplete="given-name" maxLength={60} /></View>
-              <View style={{ flex: 1 }}><Input value={b.surname} onChangeText={set('surname')} placeholder="Soyad" autoComplete="family-name" maxLength={60} /></View>
-            </View>
-            <Input value={b.identityNumber} onChangeText={(t) => set('identityNumber')(t.replace(/\D/g, ''))} placeholder="T.C. kimlik no" keyboardType="number-pad" maxLength={11} />
-            <Input value={b.gsmNumber} onChangeText={set('gsmNumber')} placeholder="Cep telefonu (05xx…)" keyboardType="phone-pad" autoComplete="tel" maxLength={16} />
-            <Input value={b.city} onChangeText={set('city')} placeholder="Şehir" maxLength={40} />
-            <Input value={b.address} onChangeText={set('address')} placeholder="Fatura adresi" maxLength={200} multiline />
-            <Cta label="Ödemeye geç" onPress={submit} busy={busy} />
-          </ScrollView>
-        </View>
-      </KeyboardAvoidingView>
-    </Modal>
-  );
-}
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
@@ -327,6 +248,4 @@ const styles = StyleSheet.create({
   link: { fontSize: 13, fontWeight: '600', color: colors.navy },
   smallLink: { fontSize: 12, color: colors.muted, textDecorationLine: 'underline' },
   legal: { fontSize: 11, color: colors.muted, lineHeight: 16, marginTop: 20 },
-  sheetWrap: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(15,27,61,0.35)' },
-  sheet: { backgroundColor: colors.bg, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: '90%', width: '100%', maxWidth: 560, alignSelf: 'center' },
 });

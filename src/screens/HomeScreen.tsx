@@ -55,7 +55,7 @@ function isSolo(me: ClinicianMe, team: Member[], practice: unknown) {
   return me.clinic.trim() === me.name.trim();
 }
 
-// Web: iyzico ödemesinden dönüş (?billing=ok|fail)
+// Web: ödeme dönüşü (?billing=ok|fail); bugün web'de satış yok, eski iyzico yolu için duruyor
 function billingReturn(): 'ok' | 'fail' | null {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
   const v = new URLSearchParams(window.location.search).get('billing');

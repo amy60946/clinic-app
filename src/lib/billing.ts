@@ -104,6 +104,7 @@ async function call<T>(route: string, body: unknown): Promise<T> {
 
 export const verifyApple = (transactionId: string) => call<{ active: boolean }>('apple-verify', { transactionId });
 
+// Web ödemesi (iyzico): bugün kullanılmıyor — web'de satış yok (kullanıcı kararı 22 Ekim 2026)
 export type Buyer = { name: string; surname: string; identityNumber: string; gsmNumber: string; city: string; address: string };
 export const startWebCheckout = (planId: string, buyer: Buyer) =>
   call<{ token: string; checkoutFormContent: string }>('iyzico-start', { plan_id: planId, buyer });
