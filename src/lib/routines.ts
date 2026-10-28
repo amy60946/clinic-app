@@ -1,47 +1,51 @@
 import data from '../data/routines.json';
-import { templates, Template } from '../templates';
-import type { SuggestionInput, RepeatKind } from './clinic';
+import { templates, Template, AgeGroup } from '../templates';
+import type { Category } from '../skills';
+import { Routine, RoutineTask, RoutineRepeat, OwnRoutine, fitsAge } from './routineCore';
+export * from './routineCore';
 
-// Hazır günlük rutinler (ortak veri/hazir_rutinler.json, sozlesme/akislar.md 5.4; ParentApp'in hazır rutinleriyle aynı).
-// Uzman bir rutini tek seferde önerir; veritabanında "rutin" kaydı yok, her görev ayrı öneri olur (not alanında rutin adı).
-export type RoutineRepeat = 'weekdays' | 'daily' | 'weekly';
-export type Routine = {
-  id: string; title: string; subtitle: string; icon: string; tint: string; repeat: RoutineRepeat;
+// Günlük rutinler v2 (ortak veri/hazir_rutinler.json sürüm 2, sozlesme/akislar.md 5.4 "Günlük rutin v2"; kullanıcı kararı 28 Ekim 2026):
+// - Katalog yaş grubuna göre: her rutin bir yaş aralığı için ('ages'), aynı konunun ('theme') K / A–B / C sürümleri olabilir.
+//   Çocuğun yaş grubuna uyan sürüm gösterilir; rutindeki her görev o yaşa uygundur (ortak tools/check_routines.py).
+// - Uzmanın kendi rutinleri (clinic_routines) aynı biçime çevrilir.
+// - Uzman saatleri ve günleri düzenler; seçili görevler tek paket (routine_group) olarak ayrı öneri satırları olur.
+//   Ebeveyn paketi tek kartta görür; kabul edilen her görev ayrı görev kalır (onay ve oyun görev görev).
+type CatalogRoutine = {
+  id: string; theme: string; ages: AgeGroup[]; title: string; subtitle: string; icon: string; tint: string; repeat: RoutineRepeat;
   items: { key: string; time: string; days?: number[] }[];
 };
-export type RoutineTask = Template & { time: string; days?: number[] };
 
-export const ROUTINES = (data as { routines: Routine[] }).routines;
-export const WEEKDAYS = [1, 2, 3, 4, 5];
+const fromTemplate = (t: Template, time: string, days?: number[]): RoutineTask => ({
+  id: t.id, title: t.title, emoji: t.emoji, skill: t.skill, category: t.category, template_key: t.id,
+  difficulty: t.difficulty, coins: t.coins, time, days,
+});
 
 // Katalogda olmayan anahtar (katalog değişirse) sessizce atlanır
-export function routineTasks(r: Routine): RoutineTask[] {
-  return r.items.flatMap((i) => {
+export const ROUTINES: Routine[] = (data as { routines: CatalogRoutine[] }).routines.map((r) => ({
+  id: r.id, key: r.id, source: 'catalog', title: r.title, subtitle: r.subtitle, icon: r.icon, tint: r.tint, repeat: r.repeat,
+  ages: r.ages, theme: r.theme,
+  tasks: r.items.flatMap((i) => {
     const t = templates.find((x) => x.id === i.key);
-    return t ? [{ ...t, time: i.time, days: i.days }] : [];
-  });
+    return t ? [fromTemplate(t, i.time, i.days)] : [];
+  }),
+}));
+
+// Çocuğa uyan rutinler: yaş biliniyorsa yalnız o grubun sürümleri; bilinmiyorsa hepsi (yaş etiketiyle)
+export const routinesFor = (band: AgeGroup | null, list: Routine[] = ROUTINES) => list.filter((r) => fitsAge(r, band));
+
+const OWN_TINT = '#EEF1F8';
+export function ownToRoutine(o: OwnRoutine): Routine {
+  return {
+    id: o.id, key: `own:${o.id}`, source: 'own', title: o.title, subtitle: 'Senin rutinin', icon: o.icon, tint: OWN_TINT,
+    repeat: o.repeat, ages: o.ages,
+    tasks: o.items.map((x, i) => {
+      const t = x.key ? templates.find((y) => y.id === x.key) : undefined;
+      return {
+        id: `${o.id}-${i}`, title: x.title, emoji: x.emoji || t?.emoji || '⭐', skill: x.skill ?? t?.skill ?? '',
+        category: ((x.category ?? t?.category) as Category) ?? null, template_key: x.key ?? null,
+        difficulty: x.difficulty ?? t?.difficulty ?? 'easy', coins: x.coins ?? t?.coins ?? ({ easy: 5, medium: 10, hard: 20 }[x.difficulty ?? 'easy']),
+        time: x.time ?? '', days: x.days,
+      };
+    }),
+  };
 }
-
-export const REPEAT_TEXT: Record<RoutineRepeat, string> = {
-  weekdays: 'Hafta içi her gün', daily: 'Her gün', weekly: 'Her görev haftanın kendi gününde',
-};
-
-function schedule(r: Routine, t: RoutineTask): { recurring: boolean; repeat_kind: RepeatKind; repeat_days: number[] } {
-  if (r.repeat === 'daily') return { recurring: true, repeat_kind: 'daily', repeat_days: [] };
-  if (r.repeat === 'weekdays') return { recurring: true, repeat_kind: 'weekly', repeat_days: WEEKDAYS };
-  return { recurring: true, repeat_kind: 'weekly', repeat_days: t.days?.length ? t.days : WEEKDAYS };
-}
-
-// Seçilen görevlerden öneri satırları: ödül ve zorluk katalogdan, hatırlatma rutinin saati, onay ebeveynde
-export function routineSuggestions(r: Routine, tasks: RoutineTask[], startDate: string, note: string): SuggestionInput[] {
-  const n = [`${r.title} rutini`, note.trim()].filter(Boolean).join(' · ');
-  return tasks.map((t) => ({
-    title: t.title, emoji: t.emoji, skill: t.skill, description: '', category: t.category, template_key: t.id,
-    difficulty: t.difficulty, coins: t.coins, start_date: startDate, ...schedule(r, t), end_date: null,
-    reminder: t.time, requires_review: true, note: n,
-  }));
-}
-
-const norm = (s: string) => s.trim().toLocaleLowerCase('tr-TR');
-// Çocukta aynı adlı görev ya da bekleyen öneri varsa baştan seçili gelmez
-export const isTaken = (title: string, taken: string[]) => taken.some((x) => norm(x) === norm(title));

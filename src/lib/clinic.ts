@@ -205,16 +205,19 @@ export type RepeatKind = 'daily' | 'weekly' | 'monthly';
 import { Category, normalizeCategory } from '../skills';
 export type { Category } from '../skills';
 
+// Rutin paketi (ortak proposed/20261028200000_routines_v2.sql): aynı `group` = aynı paket; ebeveyn tek kartta görür
+export type RoutineRef = { group: string; title: string; icon: string; position: number; key: string };
 export type SuggestionInput = {
   title: string; emoji: string; skill: string; description: string;
   category: Category | null; template_key: string | null;
   difficulty: Difficulty; coins: number;
   start_date: string; recurring: boolean; repeat_kind: RepeatKind; repeat_days: number[]; end_date: string | null;
   reminder: string | null; requires_review: boolean; note: string;
+  routine?: RoutineRef | null; goal_id?: string | null;
 };
 export type Suggestion = SuggestionInput & {
   id: string; status: 'pending' | 'accepted' | 'declined'; created_at: string; updated_at: string | null;
-  decided_at: string | null; task_title: string | null;
+  decided_at: string | null; task_title: string | null; task_id: string | null;
 };
 
 // Yeni sütunlar Supabase'e uygulanmadıysa (PGRST204 / 42703) açık bir mesaj
@@ -226,25 +229,32 @@ function checkSuggestion<T>(data: T, error: { code?: string; message: string } |
 }
 
 const SUGGESTION_COLS = 'id, title, emoji, skill, description, category, template_key, difficulty, coins, start_date, recurring, '
-  + 'repeat_kind, repeat_days, end_date, reminder, requires_review, note, status, created_at, updated_at, decided_at, tasks(title)';
-const OLD_COLS = 'id, title, emoji, skill, difficulty, recurring, note, status, created_at, decided_at, tasks(title)';
+  + 'repeat_kind, repeat_days, end_date, reminder, requires_review, note, status, created_at, updated_at, decided_at, task_id, tasks(title)';
+const ROUTINE_COLS = ', routine_group, routine_title, routine_icon, routine_position, routine_key, goal_id';
+const OLD_COLS = 'id, title, emoji, skill, difficulty, recurring, note, status, created_at, decided_at, task_id, tasks(title)';
+const missingCol = (e: { code?: string } | null) => e?.code === '42703' || e?.code === 'PGRST204';
+
+type SuggestionRow = Partial<Suggestion> & { tasks: { title: string } | null; routine_group?: string | null; routine_title?: string | null;
+  routine_icon?: string | null; routine_position?: number | null; routine_key?: string | null };
 
 export async function listSuggestions(linkId: string): Promise<Suggestion[]> {
-  let res: { data: unknown[] | null; error: { code?: string; message: string } | null } = await supabase
-    .from('clinic_task_suggestions').select(SUGGESTION_COLS).eq('link_id', linkId).order('created_at', { ascending: false });
-  // Yeni sütunlar henüz yoksa eski alanlarla listele
-  if (res.error && (res.error.code === '42703' || res.error.code === 'PGRST204')) {
-    res = await supabase.from('clinic_task_suggestions').select(OLD_COLS).eq('link_id', linkId).order('created_at', { ascending: false });
-  }
-  const rows = check(res.data ?? [], res.error) as unknown as (Partial<Suggestion> & { tasks: { title: string } | null })[];
-  return rows.map(({ tasks, ...r }) => ({
+  const q = (cols: string) => supabase.from('clinic_task_suggestions').select(cols).eq('link_id', linkId).order('created_at', { ascending: false });
+  let res: { data: unknown[] | null; error: { code?: string; message: string } | null } = await q(SUGGESTION_COLS + ROUTINE_COLS);
+  // Rutin v2 ya da ayrıntı sütunları henüz yoksa daha eski alanlarla listele
+  if (missingCol(res.error)) res = await q(SUGGESTION_COLS);
+  if (missingCol(res.error)) res = await q(OLD_COLS);
+  const rows = check(res.data ?? [], res.error) as unknown as SuggestionRow[];
+  return rows.map(({ tasks, routine_group, routine_title, routine_icon, routine_position, routine_key, ...r }) => ({
     id: r.id!, title: r.title ?? '', emoji: r.emoji ?? '⭐', skill: r.skill ?? '', description: r.description ?? '',
     category: normalizeCategory(r.category), template_key: r.template_key ?? null,
     difficulty: (r.difficulty as Difficulty) ?? 'easy', coins: r.coins ?? difficultyCoins(r.difficulty as Difficulty),
     start_date: r.start_date ?? '', recurring: r.recurring ?? true, repeat_kind: (r.repeat_kind as RepeatKind) ?? 'daily',
     repeat_days: r.repeat_days ?? [], end_date: r.end_date ?? null, reminder: r.reminder ?? null,
     requires_review: r.requires_review ?? true, note: r.note ?? '', status: r.status!, created_at: r.created_at!,
-    updated_at: r.updated_at ?? null, decided_at: r.decided_at ?? null, task_title: tasks?.title ?? null,
+    updated_at: r.updated_at ?? null, decided_at: r.decided_at ?? null, task_title: tasks?.title ?? null, task_id: r.task_id ?? null,
+    routine: routine_group ? { group: routine_group, title: routine_title ?? '', icon: routine_icon ?? 'repeat-outline',
+      position: routine_position ?? 0, key: routine_key ?? '' } : null,
+    goal_id: r.goal_id ?? null,
   }));
 }
 
@@ -259,6 +269,10 @@ function payload(s: SuggestionInput) {
     repeat_kind: recurring ? s.repeat_kind : 'daily',
     repeat_days: recurring && s.repeat_kind !== 'daily' ? s.repeat_days : [],
     end_date: recurring ? s.end_date : null, reminder: s.reminder, requires_review: s.requires_review, note: s.note.trim(),
+    // rutin paketi ve hedef yalnız varsa gönderilir (eski sunucuda sıradan öneri yine çalışır)
+    ...(s.routine ? { routine_group: s.routine.group, routine_title: s.routine.title.slice(0, 60), routine_icon: s.routine.icon,
+      routine_position: s.routine.position, routine_key: s.routine.key.slice(0, 60) } : {}),
+    ...(s.goal_id ? { goal_id: s.goal_id } : {}),
   };
 }
 
@@ -269,13 +283,22 @@ const legacy = (s: SuggestionInput): SuggestionInput => ({
   ...s, category: s.category === 'health' ? ('self' as Category) : ['home', 'mind', 'learn'].includes(s.category ?? '') ? s.category : null,
 });
 
-export async function addSuggestions(c: Client, by: string, list: SuggestionInput[]): Promise<void> {
+// Dönüş: paket olarak gitti mi (rutin v2 sütunları sunucuda yoksa görevler ayrı öneri olarak gider)
+export async function addSuggestions(c: Client, by: string, list: SuggestionInput[]): Promise<{ grouped: boolean }> {
   const insert = (items: SuggestionInput[]) => supabase.from('clinic_task_suggestions').insert(items.map((s) => ({
     link_id: c.link_id, clinic_id: c.clinic_id, family_id: c.family_id, child_id: c.child_id, created_by: by, ...payload(s),
   })));
-  let { error } = await insert(list);
-  if (isCategoryCheck(error)) ({ error } = await insert(list.map(legacy)));
+  let items = list;
+  let { error } = await insert(items);
+  const grouped = list.some((s) => s.routine || s.goal_id);
+  if (grouped && missingCol(error)) {
+    items = list.map((s) => ({ ...s, routine: null, goal_id: null }));
+    ({ error } = await insert(items));
+    if (!error) return { grouped: false };
+  }
+  if (isCategoryCheck(error)) ({ error } = await insert(items.map(legacy)));
   checkSuggestion(null, error);
+  return { grouped };
 }
 
 // Uzman bekleyen öneriyi günceller (karar verilmişse sunucu reddeder)
@@ -288,6 +311,31 @@ export async function updateSuggestion(id: string, s: SuggestionInput): Promise<
 // Yalnız bekleyen öneri geri çekilebilir (RLS)
 export async function withdrawSuggestion(id: string): Promise<void> {
   const { error } = await supabase.from('clinic_task_suggestions').delete().eq('id', id);
+  check(null, error);
+}
+
+/* ---------- Uzmanın kendi rutinleri (clinic_routines; ortak proposed/20261028200000_routines_v2.sql) ---------- */
+import type { OwnRoutine, OwnItem } from './routines';
+const ROUTINE_TABLE_MISSING = (e: { code?: string } | null) => e?.code === 'PGRST205' || e?.code === '42P01';
+
+// Sunucuda tablo yoksa null (Rutinlerim görünmez)
+export async function listOwnRoutines(): Promise<OwnRoutine[] | null> {
+  const { data, error } = await supabase.from('clinic_routines')
+    .select('id, title, icon, repeat, ages, items, shared, archived, created_by, updated_at').eq('archived', false).order('updated_at', { ascending: false });
+  if (ROUTINE_TABLE_MISSING(error)) return null;
+  return check((data ?? []) as OwnRoutine[], error);
+}
+export type OwnRoutineInput = Pick<OwnRoutine, 'title' | 'icon' | 'repeat' | 'ages' | 'shared'> & { items: OwnItem[] };
+export async function saveOwnRoutine(me: ClinicianMe, r: OwnRoutineInput, id?: string): Promise<void> {
+  const row = { title: r.title.trim().slice(0, 60), icon: r.icon, repeat: r.repeat, ages: r.ages, shared: r.shared, items: r.items,
+    archived: false, updated_at: new Date().toISOString() };
+  // klinik ve oluşturan sunucuda tetikleyiciyle yazılır; önizleme için yine gönderilir
+  const { error } = id ? await supabase.from('clinic_routines').update(row).eq('id', id)
+    : await supabase.from('clinic_routines').insert({ ...row, clinic_id: me.clinic_id, created_by: me.id });
+  check(null, error);
+}
+export async function deleteOwnRoutine(id: string): Promise<void> {
+  const { error } = await supabase.from('clinic_routines').delete().eq('id', id);
   check(null, error);
 }
 

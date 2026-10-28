@@ -203,6 +203,17 @@ export function perTask(tasks: Task[], comps: Completion[], today: string, weeks
     .sort((a, b) => (a.rate ?? 0) - (b.rate ?? 0));
 }
 
+/* ---------- Hedefe bağlı rutin (ortak akislar.md 5.4 "Günlük rutin v2" adım 3) ---------- */
+
+// Son `days` tam günde (dünkü güne kadar) verilen görevlerin planlı / onaylı sayısı; ebeveyn kaydı, puan değil
+export function taskSetRate(tasks: Task[], comps: Completion[], taskIds: string[], today: string, days = 7) {
+  const set = tasks.filter((t) => taskIds.includes(t.id));
+  const to = lastFullDay(today);
+  const inst = instances(set, comps, addDays(to, -(days - 1)), to);
+  const approved = inst.filter(done).length;
+  return { planned: inst.length, approved, rate: pct(approved, inst.length) };
+}
+
 /* ---------- Ev rutinleri: haftalık tablo ve zaman içinde (uzman ekranı) ---------- */
 
 // Gün hücresi: onaylandı · çocuk "Yaptım" dedi, ebeveyn incelemedi · "Yapamam" · ebeveyn reddetti · "Tekrar dene"

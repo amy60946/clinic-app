@@ -149,3 +149,15 @@ test('zaman içinde: haftalık yapılan ve planlanan, ortalama', () => {
   assert.equal(series[0].avg, 1.5);
   assert.equal(weeklyCounts([task({ start_date: '2026-11-01' })], [], today, 2).series.length, 0);
 });
+
+test('hedefe bağlı rutin: son 7 tam günde yalnız verilen görevler', async () => {
+  const { taskSetRate } = await import('../src/lib/metrics.ts');
+  const t1 = task({ id: 't1', start_date: '2026-10-01' });
+  const t2 = task({ id: 't2', start_date: '2026-10-01' });
+  const comps = [comp('2026-10-27', 'approved'), comp('2026-10-26', 'approved'), comp('2026-10-25', 'declined'), { ...comp('2026-10-27', 'approved'), task_id: 't2' }];
+  const r = taskSetRate([t1, t2], comps, ['t1'], '2026-10-28');
+  assert.equal(r.planned, 7);
+  assert.equal(r.approved, 2);
+  assert.equal(r.rate, 29);
+  assert.equal(taskSetRate([t1], comps, [], '2026-10-28').rate, null);
+});

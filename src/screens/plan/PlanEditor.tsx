@@ -29,9 +29,10 @@ const MODULE_STATUS: { id: ModuleStatus; label: string }[] = [
 ];
 
 // preset: hazır veriyle salt okunur gösterim (önceki uzmandan devralınan plan; sunucudan ayrıca yüklenmez)
-export default function PlanEditor({ target, today, onChanged, readOnly = false, preset }: {
+export default function PlanEditor({ target, today, onChanged, readOnly = false, preset, goalExtra }: {
   target: PlanTarget; today?: string; onChanged?: () => void; readOnly?: boolean;
   preset?: { goals: PlanGoal[]; modules: PlanModule[]; logs: ModuleLog[] };
+  goalExtra?: (goalId: string) => React.ReactNode;   // hedef kartında ek bilgi (ör. bağlı rutinin oranı)
 }) {
   const [plan, setPlan] = useState<{ goals: PlanGoal[]; modules: PlanModule[]; legacy: boolean } | null>(null);
   const [logs, setLogs] = useState<ModuleLog[]>([]);
@@ -102,7 +103,7 @@ export default function PlanEditor({ target, today, onChanged, readOnly = false,
       {goals.length === 0 && <Empty text="Henüz hedef yok." />}
       <View style={{ gap: 10 }}>
         {goals.map((g) => (
-          <GoalCard key={g.id} g={g} isLink={isLink} readOnly={readOnly} week={week} weeks={weeks} legacy={plan.legacy}
+          <GoalCard key={g.id} g={g} isLink={isLink} readOnly={readOnly} week={week} weeks={weeks} legacy={plan.legacy} extra={goalExtra?.(g.id)}
             onEdit={() => setGoalSheet({ open: true, editing: g })}
             onToggleShared={(v) => act(updateGoal(g.id, { shared: v }))}
             onStatus={(s) => act(updateGoal(g.id, { status: s }))}
@@ -179,8 +180,8 @@ export default function PlanEditor({ target, today, onChanged, readOnly = false,
 
 /* ---------- Kartlar ---------- */
 
-function GoalCard({ g, isLink, readOnly, week, weeks, legacy, onEdit, onToggleShared, onStatus, onArchive, onDelete, onRate }: {
-  g: PlanGoal; isLink: boolean; readOnly: boolean; week: string; weeks: string[]; legacy: boolean;
+function GoalCard({ g, isLink, readOnly, week, weeks, legacy, extra, onEdit, onToggleShared, onStatus, onArchive, onDelete, onRate }: {
+  g: PlanGoal; isLink: boolean; readOnly: boolean; week: string; weeks: string[]; legacy: boolean; extra?: React.ReactNode;
   onEdit: () => void; onToggleShared: (v: boolean) => void; onStatus: (s: GoalStatus) => void; onArchive: () => void; onDelete: () => void;
   onRate: (r: number) => void;
 }) {
@@ -199,6 +200,7 @@ function GoalCard({ g, isLink, readOnly, week, weeks, legacy, onEdit, onToggleSh
         </View>
         {!readOnly && <IconButton name="create-outline" label="Hedefi düzenle" onPress={onEdit} />}
       </View>
+      {extra}
       {!legacy && (
         <View style={styles.rowWrap}>
           {!readOnly && (
