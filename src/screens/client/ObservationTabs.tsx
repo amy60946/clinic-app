@@ -198,7 +198,7 @@ export function AbcTab({ client, data, today, weeks }: ClientCtx) {
   const from = s.perWeek[0].start;
   const list = data.abc.filter((e) => isoDate(new Date(e.occurred_at)) >= from);
 
-  if (!s.total) return <View><Emergency /><Empty text="Bu dönemde ebeveyn zor an kaydı girmedi. Kayıtlar ParentApp › Aile › Uzmanım bölümünden eklenir." /></View>;
+  if (!s.total) return <View><Emergency /><Empty text="Bu dönemde ebeveyn zor an kaydı girmedi. Ebeveyn kaydı ParentApp › Uzmanım › (senin adın) › Gözlem notu ekle'den girer." /></View>;
   return (
     <View>
       <Emergency />

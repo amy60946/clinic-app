@@ -21,7 +21,7 @@ const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: stri
   declined: { label: 'Ebeveyn eklemedi', fg: colors.muted, bg: '#ECEEF3', icon: 'close-circle-outline' },
 };
 
-// Uzman yalnız önerir; görevi ekleyip eklememek ebeveynin kararıdır (ParentApp › Uzmanım).
+// Uzman yalnız önerir; görevi ekleyip eklememek ebeveynin kararıdır (ParentApp › Uzmanım › <uzman> › Görev önerileri).
 // Bekleyen öneri güncellenebilir ya da geri çekilebilir; karar verilmiş öneri değişmez.
 export default function SuggestionsTab({ client, me, data }: ClientCtx) {
   const [items, setItems] = useState<Suggestion[] | null>(null);

@@ -33,7 +33,7 @@ function LivePlan({ client, today }: Pick<ClientCtx, 'client' | 'today'>) {
       await publishPlan(client.link_id);
       track('plan.publish');
       setDirty(false);
-      Alert.alert('Aileye gönderildi', 'Ebeveyn bildirim alır; plan ParentApp › Uzmanım bölümünde.');
+      Alert.alert('Aileye gönderildi', 'Ebeveyn bildirim alır; plan ParentApp › Uzmanım › (senin adın) › Program bölümünde.');
     } catch (e) {
       Alert.alert('Gönderilemedi', (e as Error).message);
     } finally {

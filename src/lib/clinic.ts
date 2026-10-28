@@ -97,7 +97,7 @@ export async function listClients(): Promise<Client[]> {
   }));
 }
 
-// Aileye verilecek paylaşım kodu (ebeveyn ParentApp › Aile › Hesap › Uzmanım'da girer). 7 gün, tek kullanım.
+// Aileye verilecek paylaşım kodu (ebeveyn ParentApp › Uzmanım › Uzman bağla ya da Aile › Hesap › Kod gir). 7 gün, tek kullanım.
 
 // Uzman paylaşımı sonlandırabilir (ebeveyn de). Erişim hemen biter; notlar ve hedefler klinikte kalır.
 export async function revokeLink(linkId: string): Promise<void> {
