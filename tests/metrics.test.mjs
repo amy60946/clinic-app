@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  occursOn, weekly, perTask, observations, bySkill, abcSummary, mondayOf, addDays,
+  occursOn, weekly, perTask, observations, bySkill, abcSummary, mondayOf, addDays, dayCell, weekGrid, timeOfDay, weeklyCounts,
 } from '../src/lib/metrics.ts';
 
 const task = (o) => ({
@@ -116,4 +116,36 @@ test('motive etmek: kolay/orta/zor sayıları ve eğilim (ebeveyn gözlemi)', as
   assert.equal(motivationText(t1), 'kolay 3 · orta 0 · zor 3 · son 2 haftada kolaylaşıyor');
   assert.equal(motivationStats(comps, '2026-09-25', '2026-10-21', 't2').trend, null); // az yanıt: eğilim yok
   assert.equal(motivationStats([comp('2026-10-20', 'approved')], '2026-10-01', '2026-10-21').answered, 0); // eski sunucu: alan yok
+});
+
+test('haftalık tablo: gün hücreleri, planlı ve yapılan', () => {
+  const today = '2026-10-21'; // çarşamba
+  const t = task({ repeat_kind: 'weekly', repeat_days: [1, 2, 3, 4, 5] }); // hafta içi
+  const comps = [comp('2026-10-19', 'approved'), comp('2026-10-20', 'pending'), comp('2026-10-16', 'declined')];
+  const { dates, rows } = weekGrid([t], comps, today);
+  assert.deepEqual(dates, ['2026-10-15', '2026-10-16', '2026-10-17', '2026-10-18', '2026-10-19', '2026-10-20', '2026-10-21']);
+  assert.deepEqual(rows[0].cells.map((c) => c.state), ['missed', 'declined', 'off', 'off', 'approved', 'waiting', 'today']);
+  assert.deepEqual([rows[0].planned, rows[0].done], [5, 1]);
+  assert.equal(dayCell(t, comp('2026-10-18', 'retry'), '2026-10-18', today), 'retry'); // planlı olmasa da kayıt gösterilir
+  // dönemde hiç planı olmayan görev tabloda yok
+  assert.equal(weekGrid([task({ start_date: '2026-11-01' })], [], today).rows.length, 0);
+});
+
+test('günün bölümü hatırlatma saatinden', () => {
+  assert.equal(timeOfDay({ reminder: null }), 'any');
+  assert.equal(timeOfDay({ reminder: '07:30' }), 'morning');
+  assert.equal(timeOfDay({ reminder: '12:00' }), 'noon');
+  assert.equal(timeOfDay({ reminder: '19:45' }), 'evening');
+  assert.equal(timeOfDay({ reminder: '21:00' }), 'night');
+});
+
+test('zaman içinde: haftalık yapılan ve planlanan, ortalama', () => {
+  const today = '2026-10-21';
+  const comps = [comp('2026-10-19', 'approved'), comp('2026-10-20', 'approved'), comp('2026-10-13', 'approved'), comp('2026-10-14', 'rejected')];
+  const { starts, series } = weeklyCounts([task()], comps, today, 2);
+  assert.deepEqual(starts, ['2026-10-12', '2026-10-19']);
+  assert.deepEqual(series[0].done, [1, 2]);
+  assert.deepEqual(series[0].planned, [7, 2]); // bu hafta dünkü güne kadar
+  assert.equal(series[0].avg, 1.5);
+  assert.equal(weeklyCounts([task({ start_date: '2026-11-01' })], [], today, 2).series.length, 0);
 });

@@ -18,21 +18,30 @@ const TONE: Record<string, { bg: string; fg: string }> = {
   declined: { bg: '#FDECEC', fg: '#A23B3B' },
 };
 
-export default function InvitesCard({ me, team, reloadKey, openKey, onChanged }: {
+let lastOpenKey = 0;
+
+export default function InvitesCard({ me, team, reloadKey, openKey, onChanged, onCount }: {
   me: ClinicianMe; team: Member[]; reloadKey?: number; openKey?: number; onChanged: () => void;
+  onCount?: (n: number) => void;   // ana ekrandaki "Başlarken": ilk davet gönderildi mi
 }) {
   const [items, setItems] = useState<FamilyInvite[] | null | undefined>(undefined);
   const [stats, setStats] = useState<InviteStats[]>([]);
   const [sheet, setSheet] = useState<{ open: boolean; existing?: SheetInvite | null }>({ open: false });
   const [all, setAll] = useState(false);
   const owner = me.role === 'owner';
-  // dışarıdan aç (karşılama anketinin "İlk aileni davet et" düğmesi)
-  useEffect(() => { if (openKey) setSheet({ open: true, existing: null }); }, [openKey]);
+  // dışarıdan aç (karşılama anketi, "Başlarken", örnek aile turu). Her istek bir kez: kart yeniden yüklenince
+  // (danışandan ana ekrana dönüş) aynı anahtarla pencere tekrar açılmaz
+  useEffect(() => {
+    if (!openKey || openKey <= lastOpenKey) return;
+    lastOpenKey = openKey;
+    setSheet({ open: true, existing: null });
+  }, [openKey]);
 
   const load = useCallback(async () => {
     await sweepInvites().catch(() => {});
     const list = await listInvites(90).catch(() => null);
     setItems(list);
+    if (list) onCount?.(list.length);
     if (list) setStats(await inviteStats(30));
   }, []);
   useEffect(() => { load(); }, [load, reloadKey]);

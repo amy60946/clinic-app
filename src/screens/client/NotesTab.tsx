@@ -7,7 +7,26 @@ import type { ClientCtx } from './ClientScreen';
 import { InheritedNotes } from './History';
 
 // Uzman notları: yalnız klinik ekibi görür; aile görmez. Paylaşım biterse de klinikte kalır.
-export default function NotesTab({ client, me }: ClientCtx) {
+export default function NotesTab({ client, me, data }: ClientCtx) {
+  if (data.sample) {
+    return (
+      <View>
+        <Text style={[styles.small, { marginTop: 8 }]}>Notlarını aile görmez. Örnek ailede not eklenmez.</Text>
+        <View style={{ gap: 8, marginTop: 12 }}>
+          {(data.sampleNotes ?? []).map((n) => (
+            <Card key={n.id} style={{ gap: 6 }}>
+              <Text style={styles.small}>{new Date(n.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })} · {n.author}</Text>
+              <Text style={styles.body}>{n.body}</Text>
+            </Card>
+          ))}
+        </View>
+      </View>
+    );
+  }
+  return <LiveNotes client={client} me={me} />;
+}
+
+function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
   const [notes, setNotes] = useState<Note[] | null>(null);
   const [body, setBody] = useState('');
   const [busy, setBusy] = useState(false);

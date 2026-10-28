@@ -423,8 +423,9 @@ class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
   gte(k: string, v: any) { this.filters.push((r) => String(r[k] ?? '') >= String(v)); return this; }
   lte(k: string, v: any) { this.filters.push((r) => String(r[k] ?? '') <= String(v)); return this; }
   limit() { return this; }
-  not(k: string, _op: string, list: string) {
-    const vals = list.replace(/[()]/g, '').split(',');
+  not(k: string, op: string, list: any) {
+    if (op === 'is') { this.filters.push((r) => (r[k] ?? null) !== list); return this; }
+    const vals = String(list).replace(/[()]/g, '').split(',');
     this.filters.push((r) => !vals.includes(String(r[k])));
     return this;
   }

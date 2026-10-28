@@ -203,6 +203,75 @@ export function perTask(tasks: Task[], comps: Completion[], today: string, weeks
     .sort((a, b) => (a.rate ?? 0) - (b.rate ?? 0));
 }
 
+/* ---------- Ev rutinleri: haftalık tablo ve zaman içinde (uzman ekranı) ---------- */
+
+// Gün hücresi: onaylandı · çocuk "Yaptım" dedi, ebeveyn incelemedi · "Yapamam" · ebeveyn reddetti · "Tekrar dene"
+// · planlı ama kayıt yok (geçmiş gün) · bugün henüz kayıt yok · o gün planlı değil
+export type CellState = 'approved' | 'waiting' | 'declined' | 'rejected' | 'retry' | 'missed' | 'today' | 'off';
+
+export function dayCell(t: Task, c: Completion | undefined, d: string, today: string): CellState {
+  if (c) {
+    if (c.status === 'approved') return 'approved';
+    if (c.status === 'pending') return 'waiting';
+    return c.status;
+  }
+  if (!occursOn(t, d)) return 'off';
+  return d >= today ? 'today' : 'missed';
+}
+
+export type GridRow = { task: Task; cells: { date: string; state: CellState }[]; planned: number; done: number };
+
+// Son `days` gün (bugün dahil). Planlı = o günlerde planlanan; yapılan = onaylanan. Dönemde hiç planı ya da kaydı olmayan görev yok.
+export function weekGrid(tasks: Task[], comps: Completion[], today: string, days = 7): { dates: string[]; rows: GridRow[] } {
+  const dates = Array.from({ length: days }, (_, i) => addDays(today, i - (days - 1)));
+  const byKey = new Map(comps.map((c) => [key(c.task_id, c.date), c]));
+  const rows = tasks.map((task) => {
+    const cells = dates.map((date) => ({ date, state: dayCell(task, byKey.get(key(task.id, date)), date, today) }));
+    return {
+      task,
+      cells,
+      planned: dates.filter((d) => occursOn(task, d)).length,
+      done: cells.filter((c) => c.state === 'approved').length,
+    };
+  }).filter((r) => r.planned > 0 || r.cells.some((c) => c.state !== 'off'));
+  return { dates, rows };
+}
+
+// Günün bölümü görevin hatırlatma saatinden (ParentApp'teki gün bölümleriyle aynı sınırlar); saat yoksa "her zaman"
+export type TimeOfDay = 'morning' | 'noon' | 'evening' | 'night' | 'any';
+export const TIME_OF_DAY_LABEL: Record<TimeOfDay, string> = {
+  morning: 'Sabah', noon: 'Öğle', evening: 'Akşam', night: 'Gece', any: 'Her zaman',
+};
+export function timeOfDay(t: Pick<Task, 'reminder'>): TimeOfDay {
+  if (!t.reminder) return 'any';
+  const h = Number(t.reminder.slice(0, 2));
+  if (h < 12) return 'morning';
+  if (h < 17) return 'noon';
+  if (h < 21) return 'evening';
+  return 'night';
+}
+
+export type TaskSeries = { task: Task; done: number[]; planned: number[]; avg: number | null };
+
+// Haftalık yapılan (onaylanan) ve planlanan sayılar; dönem göstergelerle aynı (dünkü güne kadar). avg: planlı haftaların ortalaması
+export function weeklyCounts(tasks: Task[], comps: Completion[], today: string, weeks: number): { starts: string[]; series: TaskSeries[] } {
+  const starts = windowStarts(today, weeks);
+  const series = tasks.map((task) => {
+    const ws = starts.map((s) => {
+      const inst = instances([task], comps, s, weekEnd(s, today));
+      return { planned: inst.length, done: inst.filter(done).length };
+    });
+    const active = ws.filter((w) => w.planned > 0);
+    return {
+      task,
+      done: ws.map((w) => w.done),
+      planned: ws.map((w) => w.planned),
+      avg: active.length ? Math.round((active.reduce((a, w) => a + w.done, 0) / active.length) * 100) / 100 : null,
+    };
+  }).filter((x) => x.planned.some((n) => n > 0));
+  return { starts, series };
+}
+
 /* ---------- Yürütücü işlev gözlem özeti (gözlem, ölçüm değil) ---------- */
 
 export type Observations = {

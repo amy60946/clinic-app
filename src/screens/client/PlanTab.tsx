@@ -10,7 +10,19 @@ import type { ClientCtx } from './ClientScreen';
 
 // Danışan › Plan: takip planı (hedefler + aile programı) + haftalık değerlendirme (GAS, aile görmez)
 // + önceki uzmandan devralınan plan (salt okunur). ortak akislar.md 11–12.
-export default function PlanTab({ client, today }: ClientCtx) {
+export default function PlanTab({ client, today, data }: ClientCtx) {
+  if (data.sample && data.samplePlan) {
+    return (
+      <View>
+        <Text style={styles.intro}>Takip planı: çocuğun hedefleri, haftalık değerlendirmen (aile görmez) ve ailenin evde uyguladığı program. Örnek ailede salt okunur.</Text>
+        <PlanEditor target={{ kind: 'link', linkId: client.link_id, clinicId: '' }} readOnly preset={data.samplePlan} today={today} />
+      </View>
+    );
+  }
+  return <LivePlan client={client} today={today} />;
+}
+
+function LivePlan({ client, today }: Pick<ClientCtx, 'client' | 'today'>) {
   const [busy, setBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
   const history = useHistory(client.link_id);

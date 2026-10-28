@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, Alert, Platform, StyleSheet } from 'react-native';
 import * as Print from 'expo-print';
-import { colors } from '../../theme';
-import { Card, Label, Cta, Segmented } from '../../components/ui';
+import * as Clipboard from 'expo-clipboard';
+import { colors, radius } from '../../theme';
+import { Card, Label, Cta, Segmented, SmallButton } from '../../components/ui';
+import { progressNote } from '../../lib/progressNote';
 import { Goal, listGoals } from '../../lib/clinic';
 import { buildReportHtml } from '../../lib/report';
 import { Limits } from './ObservationTabs';
@@ -60,10 +62,24 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
   const [goals, setGoals] = useState<Goal[]>([]);
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { listGoals(client.link_id).then(setGoals).catch(() => setGoals([])); }, [client.link_id]);
+  useEffect(() => {
+    // örnek ailede hedefler hazır veriden (sunucuya gidilmez)
+    if (data.sample) { setGoals((data.samplePlan?.goals ?? []).map(({ id, title, description, archived, created_at, ratings }) => ({ id, title, description, archived, created_at, ratings }))); return; }
+    listGoals(client.link_id).then(setGoals).catch(() => setGoals([]));
+  }, [client.link_id, data]);
 
   const name = data.child?.name ?? client.child_name;
   const childLabel = mode === 'name' ? name : mode === 'initials' ? initials(name) : client.label || initials(name);
+  const note = useMemo(() => progressNote({
+    childLabel, tasks: data.tasks, completions: data.completions, abc: data.abc, goals, today, weeks,
+  }), [childLabel, data, goals, today, weeks]);
+  const [copied, setCopied] = useState(false);
+  const copyNote = async () => {
+    await Clipboard.setStringAsync(note);
+    track('report.note_copy');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const open = async () => {
     setBusy(true);
@@ -105,6 +121,19 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
           Rapor kişisel sağlık verisi içerir. Yalnız tedavi amacıyla, güvenli kanaldan ve ebeveynin bilgisiyle paylaş.
         </Text>
       </Card>
+
+      <Label>{`İlerleme notu (${weeks} hafta)`}</Label>
+      <Card style={{ gap: 10 }}>
+        <Text style={styles.small}>
+          Dönemin kayıtlarından kuralla derlenir (yapay zekâ yok, veri cihazdan çıkmaz). Kopyala, kendi kayıt sistemine yapıştır, "Uzman yorumu"nu sen yaz. Çocuk yukarıda seçtiğin biçimde görünür.
+        </Text>
+        <View style={styles.note}>
+          <Text selectable style={styles.noteText}>{note}</Text>
+        </View>
+        <View style={{ alignItems: 'flex-start' }}>
+          <SmallButton label={copied ? 'Kopyalandı' : 'Notu kopyala'} onPress={copyNote} />
+        </View>
+      </Card>
       <Limits />
     </View>
   );
@@ -113,4 +142,6 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
 const styles = StyleSheet.create({
   body: { fontSize: 14, color: colors.text, lineHeight: 20 },
   small: { fontSize: 12, color: colors.muted, lineHeight: 17 },
+  note: { backgroundColor: '#F7F8FA', borderRadius: radius.sm, padding: 14, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line },
+  noteText: { fontSize: 13, color: colors.text, lineHeight: 20 },
 });
