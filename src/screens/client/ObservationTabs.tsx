@@ -1,9 +1,11 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
-import { Card, Label, Empty } from '../../components/ui';
-import { WeeklyRateBars, RateBar, Stat } from '../../components/charts';
+import { Card, Label, Empty, Segmented } from '../../components/ui';
+import { WeeklyRateBars, RateBar, Stat, CountBars } from '../../components/charts';
+import ExportButton from '../../components/ExportButton';
+import { abcRows, csvName, ABC_HEADER } from '../../lib/csv';
 import {
   weekly, perTask, observations, bySkill, abcSummary, windowStarts, lastFullDay, parseDate, isoDate, DECLINE_LABELS, LIMITS_TEXT,
   motivationStats, motivationText, MOTIVATION_TREND_TEXT, Completion,
@@ -189,8 +191,10 @@ function abcWhen(e: AbcEvent) {
   return `${day} · ${d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-export function AbcTab({ data, today, weeks }: ClientCtx) {
+export function AbcTab({ client, data, today, weeks }: ClientCtx) {
   const s = useMemo(() => abcSummary(data.abc, today, weeks), [data, today, weeks]);
+  const [view, setView] = useState<'cards' | 'table'>('cards');
+  const { width } = useWindowDimensions();
   const from = s.perWeek[0].start;
   const list = data.abc.filter((e) => isoDate(new Date(e.occurred_at)) >= from);
 
@@ -198,7 +202,12 @@ export function AbcTab({ data, today, weeks }: ClientCtx) {
   return (
     <View>
       <Emergency />
-      <Label>Haftalık sayı ve ortalama şiddet (1–5)</Label>
+      <Label>Haftalık zor an sayısı</Label>
+      <Card style={{ gap: 6 }}>
+        <CountBars data={s.perWeek.map((w) => ({ start: w.start, value: w.count }))} />
+        <Text style={styles.note}>Sütun: ebeveynin o hafta kaydettiği zor an sayısı. Az kayıt, az zor an demek olmayabilir; ebeveynin kayıt alışkanlığına bağlıdır.</Text>
+      </Card>
+      <Label>Haftalık sayı ve ortalama şiddet (1–5, ebeveyn)</Label>
       <Card style={{ gap: 6 }}>
         {s.perWeek.map((w) => (
           <Row key={w.start} k={`${parseDate(w.start).toLocaleDateString('tr-TR')} haftası`}
@@ -209,24 +218,63 @@ export function AbcTab({ data, today, weeks }: ClientCtx) {
       <Card style={{ gap: 6 }}>
         {PARTS.map((x) => <Row key={x.id} k={x.label} v={String(s.byDayPart[x.id])} />)}
       </Card>
-      <Label>{`Kayıtlar (${list.length})`}</Label>
-      <View style={{ gap: 8 }}>
-        {list.map((e) => (
-          <Card key={e.id} style={{ gap: 4 }}>
-            <Text style={styles.small}>
-              {abcWhen(e)} · şiddet {e.intensity}/5
-            </Text>
-            {e.antecedent ? <Text style={styles.body}><Text style={styles.abcKey}>Öncesi: </Text>{e.antecedent}</Text> : null}
-            <Text style={styles.body}><Text style={styles.abcKey}>Davranış: </Text>{e.behavior}</Text>
-            {e.consequence ? <Text style={styles.body}><Text style={styles.abcKey}>Sonucu: </Text>{e.consequence}</Text> : null}
-            {e.audio_path ? <AbcVoice path={e.audio_path} durationMs={e.duration_ms} /> : null}
-          </Card>
-        ))}
+      <View style={styles.listHead}>
+        <Text style={[styles.listTitle, { flex: 1 }]}>{`Kayıtlar (${list.length})`}</Text>
+        <View style={{ width: 180 }}>
+          <Segmented options={[{ id: 'cards', label: 'Kartlar' }, { id: 'table', label: 'Tablo' }]} value={view} onChange={setView} />
+        </View>
+        <ExportButton name={csvName('zor-anlar', client.child_name, from, today)} header={ABC_HEADER} event="export.abc"
+          rows={() => abcRows(data.abc, from, today)} />
       </View>
+      {view === 'table' ? (
+        <ScrollView horizontal={width < 900} contentContainerStyle={{ minWidth: '100%' }}>
+          <Card style={{ padding: 0, overflow: 'hidden', minWidth: 820, flex: 1 }}>
+            <View style={[styles.tr, styles.thRow]}>
+              {ABC_COLS.map((c) => <Text key={c.k} style={[styles.th, { flex: c.flex, width: c.w }]}>{c.label}</Text>)}
+            </View>
+            {list.map((e, i) => (
+              <View key={e.id} style={[styles.tr, i % 2 === 1 && { backgroundColor: '#FAFBFC' }]}>
+                <Text style={[styles.td, { width: 150 }]}>{abcWhen(e)}</Text>
+                <Text style={[styles.td, { flex: 1 }]}>{e.antecedent || '–'}</Text>
+                <Text style={[styles.td, { flex: 1 }]}>{e.behavior}</Text>
+                <Text style={[styles.td, { flex: 1 }]}>{e.consequence || '–'}</Text>
+                <Text style={[styles.td, { width: 60, textAlign: 'center' }]}>{`${e.intensity}/5`}</Text>
+                <View style={{ width: 44, alignItems: 'center' }}>
+                  {e.audio_path ? <Ionicons name="mic-outline" size={16} color={colors.navy} accessibilityLabel="Sesli kayıt var" /> : null}
+                </View>
+              </View>
+            ))}
+          </Card>
+        </ScrollView>
+      ) : (
+        <View style={{ gap: 8 }}>
+          {list.map((e) => (
+            <Card key={e.id} style={{ gap: 4 }}>
+              <Text style={styles.small}>
+                {abcWhen(e)} · şiddet {e.intensity}/5
+              </Text>
+              {e.antecedent ? <Text style={styles.body}><Text style={styles.abcKey}>Öncesi: </Text>{e.antecedent}</Text> : null}
+              <Text style={styles.body}><Text style={styles.abcKey}>Davranış: </Text>{e.behavior}</Text>
+              {e.consequence ? <Text style={styles.body}><Text style={styles.abcKey}>Sonucu: </Text>{e.consequence}</Text> : null}
+              {e.audio_path ? <AbcVoice path={e.audio_path} durationMs={e.duration_ms} /> : null}
+            </Card>
+          ))}
+        </View>
+      )}
+      {view === 'table' && list.some((e) => e.audio_path) && <Text style={styles.note}>Sesli kayıtları dinlemek için "Kartlar" görünümüne geç.</Text>}
       <Limits />
     </View>
   );
 }
+
+const ABC_COLS: { k: string; label: string; flex?: number; w?: number }[] = [
+  { k: 'when', label: 'Ne zaman', w: 150 },
+  { k: 'a', label: 'Öncesi', flex: 1 },
+  { k: 'b', label: 'Davranış', flex: 1 },
+  { k: 'c', label: 'Sonucu', flex: 1 },
+  { k: 'i', label: 'Şiddet', w: 60 },
+  { k: 'v', label: 'Ses', w: 44 },
+];
 
 const styles = StyleSheet.create({
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
@@ -241,4 +289,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden',
   },
   abcKey: { fontWeight: '600' },
+  listHead: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginTop: 20, marginBottom: 8 },
+  listTitle: { fontSize: 13, fontWeight: '600', color: colors.muted },
+  tr: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingHorizontal: 14, paddingVertical: 10 },
+  thRow: { backgroundColor: '#F2F4F8', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
+  th: { fontSize: 12, fontWeight: '700', color: colors.muted },
+  td: { fontSize: 13, color: colors.text, lineHeight: 18 },
 });

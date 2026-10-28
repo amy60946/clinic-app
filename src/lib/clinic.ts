@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import type { Task, Completion, AbcEvent } from './metrics';
+import type { SamplePlan, SampleNote } from './sample';
 
 // Sunucu sözleşmesi: ortak/sozlesme/veritabani.md bölüm 4 (klinik önerisi).
 // Uzman yalnız ebeveynin rıza verdiği (clinic_links.status = 'active') çocuğu görür ve yalnız okur.
@@ -113,7 +114,11 @@ export async function updateLinkLabel(linkId: string, label: string): Promise<vo
 
 export type Child = { id: string; name: string; gender: string | null; birthday: string | null; age_band: string | null };
 
-export type ClientData = { child: Child | null; tasks: Task[]; completions: Completion[]; abc: AbcEvent[] };
+// fromClinic: uzman önerisinden eklenmiş görevler (kabul edilen önerinin task_id'si; "Ekleyen" süzgeci). sample: örnek aile (salt okunur)
+export type ClientData = {
+  child: Child | null; tasks: Task[]; completions: Completion[]; abc: AbcEvent[]; fromClinic: string[];
+  sample?: boolean; samplePlan?: SamplePlan; sampleNotes?: SampleNote[];
+};
 
 const TASK_COLS = 'id, title, emoji, skill, start_date, end_date, recurring, repeat_kind, repeat_days, reminder, requires_review';
 
@@ -127,13 +132,14 @@ async function loadCompletions(childId: string, from: string) {
 }
 
 export async function loadClientData(childId: string, from: string): Promise<ClientData> {
-  const [child, assigned, comps, abc] = await Promise.all([
+  const [child, assigned, comps, abc, sugg] = await Promise.all([
     supabase.from('children').select('id, name, gender, birthday, age_band').eq('id', childId).maybeSingle(),
     supabase.from('task_assignments').select(`tasks(${TASK_COLS})`).eq('child_id', childId),
     loadCompletions(childId, from),
     supabase.from('abc_events')
       .select('*')   // ses, gün bölümü ve grup alanları eski şemada yoksa da çalışsın
       .eq('child_id', childId).order('occurred_at', { ascending: false }).limit(500),
+    supabase.from('clinic_task_suggestions').select('task_id').eq('child_id', childId).not('task_id', 'is', null),
   ]);
   const rows = check(assigned.data ?? [], assigned.error) as unknown as { tasks: Task | null }[];
   return {
@@ -141,6 +147,8 @@ export async function loadClientData(childId: string, from: string): Promise<Cli
     tasks: rows.map((r) => r.tasks).filter((t): t is Task => !!t),
     completions: check((comps.data ?? []) as unknown as Completion[], comps.error),
     abc: check((abc.data ?? []) as AbcEvent[], abc.error),
+    // öneri tablosu okunamazsa süzgeç yalnız "Ebeveyn" der; ekranı durdurmaz
+    fromClinic: sugg.error ? [] : ((sugg.data ?? []) as { task_id: string }[]).map((r) => r.task_id),
   };
 }
 
@@ -303,6 +311,17 @@ export async function joinTeam(code: string): Promise<void> {
 export async function createTeamInvite(): Promise<Invite> {
   const { data, error } = await supabase.rpc('clinic_create_invite', { p_kind: 'clinician', p_label: '' });
   return check(data as Invite, error);
+}
+
+// Ayarlar: uzman kendi adını ve unvanını, klinik sahibi kliniğin adını değiştirir (RLS: ortak veritabani.md 4.1)
+export async function updateProfile(id: string, name: string, title: string): Promise<void> {
+  const { error } = await supabase.from('clinicians').update({ name: name.trim().slice(0, 80), title: title.trim().slice(0, 80) }).eq('id', id);
+  check(null, error);
+}
+
+export async function updateClinicName(clinicId: string, name: string): Promise<void> {
+  const { error } = await supabase.from('clinics').update({ name: name.trim().slice(0, 120) }).eq('id', clinicId);
+  check(null, error);
 }
 
 // Hesabı kalıcı sil (App Store kuralı + KVKK). Tek kişilik klinikte danışan paylaşımları, notlar ve hedefler de silinir;

@@ -1,15 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator, RefreshControl, Platform, AppState } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator, RefreshControl, Platform, AppState, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../theme';
-import { Card, Label, Input, Cta, Notice, SmallButton } from '../components/ui';
+import { Label, Notice } from '../components/ui';
 import { useAuth } from '../lib/auth';
 import {
-  clinicianMe, listClients, listTeam, createTeamInvite, joinTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Invite, Member,
+  clinicianMe, listClients, listTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Member,
 } from '../lib/clinic';
+import SettingsScreen from './SettingsScreen';
+import { StartCard, SampleRow, TourBar, TOUR, startFlags, markSampleSeen, hideStart } from './SampleTour';
+import { sampleClient } from '../lib/sample';
+import { isoDate } from '../lib/metrics';
 import MembershipScreen from './MembershipScreen';
 import { ConfigBanner } from './ConfigGate';
 import InvitesCard from './invite/InvitesCard';
@@ -38,6 +41,7 @@ type State =
   | { kind: 'error'; message: string }
   | { kind: 'ready'; me: ClinicianMe; clients: Client[]; team: Member[] };
 
+const initials = (name: string) => name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toLocaleUpperCase('tr-TR') || '?';
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 function planText(me: ClinicianMe) {
@@ -80,6 +84,13 @@ export default function HomeScreen() {
   const [survey, setSurvey] = useState<'unknown' | 'show' | 'hidden'>('unknown');
   const [inviteOpenKey, setInviteOpenKey] = useState(0);
   const skipGuide = useRef(false);
+  // Ayarlar (sağ üstteki ad), örnek aile + tur, "Başlarken" kartı
+  const [settings, setSettings] = useState(false);
+  const [sampleOpen, setSampleOpen] = useState(false);
+  const [tourStep, setTourStep] = useState<number | null>(null);
+  const [start, setStart] = useState<{ sampleSeen: boolean; hidden: boolean } | null>(null);
+  const [inviteCount, setInviteCount] = useState(0);
+  const { width } = useWindowDimensions();
   // Yasal metinler (ortak akislar.md 17): onay bekleyen varsa panel yerine yeniden onay ekranı. null: sunucuda yok
   const [legal, setLegal] = useState<'unknown' | LegalDoc[] | null>('unknown');
   const [legalOpen, setLegalOpen] = useState(false);
@@ -129,7 +140,23 @@ export default function HomeScreen() {
   useEffect(() => {
     if (!meId) return;
     surveyAnswered().then((a) => setSurvey(a === false ? 'show' : 'hidden'));
+    startFlags(meId).then(setStart);
   }, [meId]);
+  const sample = useMemo(() => (sampleOpen ? sampleClient(isoDate(new Date())) : null), [sampleOpen]);
+  const openSample = () => {
+    setSettings(false);
+    setSampleOpen(true);
+    setTourStep(0);
+    track('sample.open');
+    if (meId) markSampleSeen(meId);
+    setStart((s) => (s ? { ...s, sampleSeen: true } : s));
+  };
+  const inviteFirst = () => {
+    setSampleOpen(false);
+    setTourStep(null);
+    setSettings(false);
+    setInviteOpenKey(Date.now());
+  };
   // Açılışta ve ön plana gelince (en çok 10 dakikada bir) onay bekleyen yasal metin; kayıtta onaylananlar sessizce kaydedilir
   const signedLegal = session?.user.user_metadata?.legal;
   useEffect(() => {
@@ -164,6 +191,9 @@ export default function HomeScreen() {
   // Bildirime dokununca ilgili danışan ve sekme. Danışan listede yoksa (yeni paylaşım) liste yenilenip tekrar aranır.
   const openTarget = useCallback(async (n: Pick<AppNotification, 'kind' | 'data' | 'childId'>) => {
     setBell(false);
+    setSettings(false);
+    setSampleOpen(false);
+    setTourStep(null);
     if (n.kind === 'team_joined') { setSelected(null); load(); return; }
     if (n.kind === 'kvkk_answered') { setSelected(null); setKvkkOpen(true); return; }
     // bayrak sonradan kapatıldıysa eski bildirim sayfayı açmaz (kapalıyken hiçbir şey görünmez)
@@ -270,11 +300,48 @@ export default function HomeScreen() {
     return <><MembershipScreen me={state.me} onClose={() => { setPlans(false); load(); }} onChanged={load} footer={accountLinks} />{legalSheets}</>;
   }
 
+  if (sample && state.kind === 'ready') {
+    return (
+      <ClientScreen
+        client={sample.client} me={state.me} sample={sample.data}
+        focusTab={tourStep !== null ? TOUR[tourStep].tab : undefined}
+        onBack={() => { setSampleOpen(false); setTourStep(null); }}
+        onRevoked={() => setSampleOpen(false)}
+        onOpenNotification={openTarget}
+        footer={tourStep !== null ? (
+          <TourBar step={tourStep} onStep={setTourStep} onInvite={inviteFirst}
+            onClose={() => { setTourStep(null); track('sample.tour', { step: tourStep }); }} />
+        ) : undefined}
+      />
+    );
+  }
+
+  if (settings && state.kind === 'ready') {
+    return (
+      <>
+        <SettingsScreen
+          me={state.me} team={state.team} clients={state.clients} email={session?.user.email ?? ''}
+          solo={isSolo(state.me, state.team, session?.user.user_metadata?.practice)}
+          verified={!!verification?.verified_at} legalOn={Array.isArray(legal)}
+          onBack={() => setSettings(false)} onChanged={load} onPlans={() => setPlans(true)}
+          onOpenClient={(c) => { setSettings(false); setSelected({ client: c, tab: 'summary', key: Date.now() }); }}
+          onSample={openSample}
+          onLegal={() => setLegalOpen(true)} onKvkk={() => setKvkkOpen(true)}
+          onGuide={() => { setSettings(false); setGuide(true); }}
+          onLogout={logout} onDelete={removeAccount}
+        />
+        {legalSheets}
+      </>
+    );
+  }
+
   if (selected && state.kind === 'ready') {
     return (
       <ClientScreen
         key={selected.key}
         client={selected.client} me={state.me} team={state.team} initialTab={selected.tab}
+        clients={state.clients}
+        onSwitch={(c, tab) => setSelected({ client: c, tab, key: Date.now() })}
         onTeamChanged={async () => {
           const st = await load();
           const c = st.kind === 'ready' ? st.clients.find((x) => x.link_id === selected.client.link_id) : undefined;
@@ -311,9 +378,20 @@ export default function HomeScreen() {
               )}
             </View>
             {state.kind === 'ready' && <Bell count={unread} onPress={() => setBell(true)} />}
-            <Pressable onPress={logout} accessibilityLabel="Çıkış yap" hitSlop={8} style={styles.iconBtn}>
-              <Ionicons name="log-out-outline" size={20} color={colors.navy} />
-            </Pressable>
+            {state.kind === 'ready' ? (
+              <Pressable onPress={() => setSettings(true)} accessibilityRole="button" accessibilityLabel="Ayarlar" hitSlop={6}
+                style={({ pressed }) => [styles.profile, pressed && { opacity: 0.8 }]}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>{initials(state.me.name)}</Text>
+                </View>
+                {width >= 720 && <Text style={styles.profileName} numberOfLines={1}>{state.me.name}</Text>}
+                <Ionicons name="settings-outline" size={16} color={colors.muted} />
+              </Pressable>
+            ) : (
+              <Pressable onPress={logout} accessibilityLabel="Çıkış yap" hitSlop={8} style={styles.iconBtn}>
+                <Ionicons name="log-out-outline" size={20} color={colors.navy} />
+              </Pressable>
+            )}
           </View>
 
           {(state.kind === 'loading' || state.kind === 'not_clinician' || (state.kind === 'ready' && (survey === 'unknown' || legal === 'unknown'))) && <ActivityIndicator color={colors.navy} style={{ marginTop: 40 }} />}
@@ -327,17 +405,35 @@ export default function HomeScreen() {
             <>
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
               {!!verification?.enabled && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
-              <ClientList clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
-              <InvitesCard me={state.me} team={state.team} reloadKey={invitesKey} openKey={inviteOpenKey} onChanged={refresh} />
-              {!solo && <TeamCard me={state.me} team={state.team} onJoined={refresh} onUpgrade={() => setPlans(true)} />}
+              {start && !start.hidden && !(start.sampleSeen && (inviteCount > 0 || state.clients.length > 0)) && (
+                <StartCard sampleSeen={start.sampleSeen} invited={inviteCount > 0 || state.clients.length > 0}
+                  onSample={openSample} onInvite={inviteFirst}
+                  onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide'); }} />
+              )}
+              <ClientList clients={state.clients} unread={unreadByChild} me={state.me} team={state.team}
+                onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} onSample={openSample} />
+              <InvitesCard me={state.me} team={state.team} reloadKey={invitesKey} openKey={inviteOpenKey} onChanged={refresh} onCount={setInviteCount} />
+              {!solo && (
+                <Pressable onPress={() => setSettings(true)} accessibilityRole="button"
+                  style={({ pressed }) => [styles.member, { marginTop: 16 }, pressed && { opacity: 0.8 }]}>
+                  <Ionicons name="people-outline" size={20} color={colors.navy} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.memberTitle}>{`Ekip · ${state.team.length} uzman`}</Text>
+                    <Text style={styles.small}>{state.me.role === 'owner' ? 'Ekip kodu, koltuklar ve üyeler Ayarlar\'da' : 'Ekip üyeleri Ayarlar\'da'}</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.faint} />
+                </Pressable>
+              )}
               <Text style={styles.footnote}>
                 Bu panel gözlem toplar, tanı koymaz. Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
                 {' '}ClinicApp acil yardım hizmeti değildir; acil durumda 112'yi ara.
               </Text>
-              <Pressable onPress={() => setGuide(true)} hitSlop={8} style={{ alignSelf: 'flex-start' }} accessibilityRole="button">
-                <Text style={styles.link}>Nasıl kullanılır?</Text>
-              </Pressable>
-              {accountLinks}
+              <View style={styles.accountLinks}>
+                <Pressable onPress={() => setGuide(true)} hitSlop={8} accessibilityRole="button"><Text style={styles.link}>Nasıl kullanılır?</Text></Pressable>
+                {legalOn && <Pressable onPress={() => setLegalOpen(true)} hitSlop={8}><Text style={styles.link}>Yasal metinler</Text></Pressable>}
+                {legalOn && <Pressable onPress={() => setKvkkOpen(true)} hitSlop={8}><Text style={styles.link}>KVKK başvurusu</Text></Pressable>}
+                <Pressable onPress={() => setSettings(true)} hitSlop={8}><Text style={styles.link}>Ayarlar</Text></Pressable>
+              </View>
             </>
           )}
         </View>
@@ -352,8 +448,8 @@ export default function HomeScreen() {
 
 // Danışan listesi: aynı adlı çocuklar ebeveyn adıyla ayırt edilir; çok danışanda ad / ebeveyn / etiketle arama
 // Sağda: okunmamış bildirim zili (sayılı) + ok. Çok danışanda içine girmeden hangisinde bildirim olduğu görünür.
-function ClientList({ clients, unread, me, team, onOpen }: {
-  clients: Client[]; unread: Record<string, number>; me: ClinicianMe; team: Member[]; onOpen: (c: Client) => void;
+function ClientList({ clients, unread, me, team, onOpen, onSample }: {
+  clients: Client[]; unread: Record<string, number>; me: ClinicianMe; team: Member[]; onOpen: (c: Client) => void; onSample: () => void;
 }) {
   const [q, setQ] = useState('');
   const query = q.trim().toLocaleLowerCase('tr');
@@ -364,9 +460,12 @@ function ClientList({ clients, unread, me, team, onOpen }: {
     <>
       <Label>{`Danışanlar (${clients.length})`}</Label>
       {clients.length === 0 ? (
-        <Notice icon="people-outline" text={me.role === 'member'
-          ? 'Henüz danışanın yok. Aileyi davet et ya da klinik sahibinin atamasını bekle.'
-          : 'Henüz danışanın yok. Aileyi davet et; ebeveyn onaylayınca çocuk burada görünür.'} />
+        <>
+          <Notice icon="people-outline" text={me.role === 'member'
+            ? 'Henüz danışanın yok. Aileyi davet et ya da klinik sahibinin atamasını bekle.'
+            : 'Henüz danışanın yok. Aileyi davet et; ebeveyn onaylayınca çocuk burada görünür.'} />
+          <SampleRow onOpen={onSample} />
+        </>
       ) : (
         <>
           {clients.length > 3 && (
@@ -455,133 +554,6 @@ function VerificationRow({ v, onOpen }: { v: VerificationState; onOpen: () => vo
   );
 }
 
-// Kodlar 15 dakika geçerli, tek kullanımlık (ortak 20261022100000_codes_15min): geri sayım, süre dolunca "Yeni kod al"
-function useSecondsLeft(expiresAt: string | undefined) {
-  const calc = () => (expiresAt ? Math.max(0, Math.round((new Date(expiresAt).getTime() - Date.now()) / 1000)) : 0);
-  const [left, setLeft] = useState(calc);
-  useEffect(() => {
-    setLeft(calc());
-    if (!expiresAt) return;
-    const t = setInterval(() => setLeft(calc()), 1000);
-    return () => clearInterval(t);
-  }, [expiresAt]); // eslint-disable-line react-hooks/exhaustive-deps
-  return left;
-}
-
-function CodeBox({ invite, onRenew, busy, children }: { invite: Invite; onRenew: () => void; busy?: boolean; children?: React.ReactNode }) {
-  const left = useSecondsLeft(invite.expires_at);
-  const expired = left <= 0;
-  const mm = Math.floor(left / 60);
-  const ss = String(left % 60).padStart(2, '0');
-  return (
-    <View style={{ gap: 6 }}>
-      <View style={styles.codeRow}>
-        <Text style={[styles.code, expired && { color: colors.faint, textDecorationLine: 'line-through' }]}>{invite.code}</Text>
-        {!expired && (
-          <Pressable
-            onPress={() => Clipboard.setStringAsync(invite.code).then(() => Alert.alert('Kopyalandı'))}
-            accessibilityLabel="Kodu kopyala" hitSlop={8} style={styles.iconBtn}
-          >
-            <Ionicons name="copy-outline" size={18} color={colors.navy} />
-          </Pressable>
-        )}
-      </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <Text style={[styles.small, { marginTop: 0, fontWeight: '600' }, expired && { color: colors.danger }]}>
-          {expired ? 'Kodun süresi doldu' : `${mm}:${ss} geçerli`}
-        </Text>
-        <SmallButton label="Yeni kod al" onPress={onRenew} busy={busy} />
-      </View>
-      {children}
-    </View>
-  );
-}
-
-function TeamCard({ me, team, onJoined, onUpgrade }: { me: ClinicianMe; team: Member[]; onJoined: () => void; onUpgrade: () => void }) {
-  const [invite, setInvite] = useState<Invite | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [joining, setJoining] = useState(false);
-  const [code, setCode] = useState('');
-  const create = async () => {
-    setBusy(true);
-    try {
-      setInvite(await createTeamInvite());
-      track('invite.team');
-    } catch (e) {
-      Alert.alert('Kod üretilemedi', (e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
-  const join = async () => {
-    if (![6, 8].includes(code.trim().length)) return Alert.alert('Ekip kodu 8 karakterdir.');
-    setBusy(true);
-    try {
-      await joinTeam(code);
-      track('team.join');
-      setJoining(false);
-      setCode('');
-      onJoined();
-    } catch (e) {
-      Alert.alert('Ekibe katılınamadı', (e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
-  // Tek başına sahip (henüz ekibi yok): başka bir kliniğin ekip koduyla katılabilir
-  const canJoin = me.role === 'owner' && team.length <= 1;
-  return (
-    <>
-      <Label>{`Ekip (${team.length} / ${me.seat_limit} uzman)`}</Label>
-      <Card style={{ gap: 10 }}>
-        {me.role === 'member' && (
-          <View style={styles.memberInfo}>
-            <Text style={styles.body}><Text style={{ fontWeight: '600' }}>Klinik: </Text>{me.clinic}</Text>
-            {!!me.owner_name && <Text style={styles.body}><Text style={{ fontWeight: '600' }}>Klinik sahibi: </Text>{me.owner_name}</Text>}
-            {!!me.invited_by_name && <Text style={styles.body}><Text style={{ fontWeight: '600' }}>Seni davet eden: </Text>{me.invited_by_name}</Text>}
-            {!!me.joined_at && <Text style={styles.small}>Ekibe katılma: {dateText(me.joined_at)}</Text>}
-            <Text style={styles.small}>Kendi davet ettiğin aileleri ve klinik sahibinin sana atadığı danışanları görürsün. Bildirimler danışanın sorumlu uzmanına ve atanan uzmanlara gider.</Text>
-          </View>
-        )}
-        {team.map((m) => (
-          <Text key={m.id} style={styles.body}>
-            {m.name || 'Adsız'}{m.title ? ` · ${m.title}` : ''}{m.role === 'owner' ? ' · sahip' : ''}{m.id === me.id ? ' (sen)' : ''}
-          </Text>
-        ))}
-        {me.role === 'owner' && (invite ? (
-          <CodeBox invite={invite} onRenew={create} busy={busy && !joining}>
-            <Text style={styles.small}>Yeni uzman ClinicApp'te kayıt olurken "Kodum var"ı seçip bu kodu yazar. Kod 15 dakika geçerli, tek kullanımlık.</Text>
-          </CodeBox>
-        ) : me.seat_limit <= 1 ? (
-          <Pressable onPress={onUpgrade} hitSlop={8} style={{ alignSelf: 'flex-start' }}>
-            <Text style={styles.link}>Bireysel pakette ekip yok. Ekip için Klinik paketine geç (10 uzmana kadar)</Text>
-          </Pressable>
-        ) : team.length < me.seat_limit ? (
-          <View style={{ alignItems: 'flex-start' }}>
-            <SmallButton label="Ekibe uzman davet et" onPress={create} busy={busy && !joining} />
-          </View>
-        ) : (
-          <Text style={styles.small}>Koltuk sınırı dolu.</Text>
-        ))}
-        {canJoin && (joining ? (
-          <View style={{ gap: 8 }}>
-            <Text style={styles.small}>Başka bir kliniğin ekibine katıl: sahibinden aldığın 8 karakterli kodu yaz. Bu boş klinik kapanır.</Text>
-            <Input value={code} onChangeText={(t) => setCode(t.toUpperCase())} placeholder="Ekip kodu" autoCapitalize="characters" maxLength={8} />
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              <SmallButton label="Katıl" onPress={join} busy={busy} />
-              <SmallButton label="Vazgeç" onPress={() => setJoining(false)} />
-            </View>
-          </View>
-        ) : (
-          <Pressable onPress={() => setJoining(true)} hitSlop={8} style={{ alignSelf: 'flex-start' }}>
-            <Text style={styles.link}>Ekip kodun mu var? Başka bir kliniğin ekibine katıl</Text>
-          </Pressable>
-        ))}
-      </Card>
-    </>
-  );
-}
-
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: 24, paddingTop: 16, flexGrow: 1 },
@@ -591,12 +563,12 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontWeight: '700', color: colors.navy, marginTop: 6 },
   subtitle: { fontSize: 13, color: colors.muted, marginTop: 6, lineHeight: 19 },
   iconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
-  body: { fontSize: 14, color: colors.text, lineHeight: 20 },
+  profile: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: radius.pill, paddingLeft: 3, paddingRight: 10, height: 36, maxWidth: 240 },
+  avatar: { width: 30, height: 30, borderRadius: 15, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { fontSize: 12, fontWeight: '700', color: '#fff' },
+  profileName: { fontSize: 13, fontWeight: '600', color: colors.navy, flexShrink: 1 },
   small: { fontSize: 12, color: colors.muted, marginTop: 2 },
   link: { fontSize: 13, fontWeight: '600', color: colors.navy },
-  codeRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  code: { fontSize: 28, fontWeight: '800', letterSpacing: 4, color: colors.navy },
-  memberInfo: { gap: 4, paddingBottom: 10, marginBottom: 2, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
   initial: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.today, alignItems: 'center', justifyContent: 'center' },
   list: { backgroundColor: '#fff', borderRadius: radius.md, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
