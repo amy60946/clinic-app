@@ -10,7 +10,7 @@ import {
   clinicianMe, listClients, listTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Member,
 } from '../lib/clinic';
 import SettingsScreen from './SettingsScreen';
-import { StartCard, SampleRow, TourBar, TOUR, startFlags, markSampleSeen, hideStart } from './SampleTour';
+import { StartCard, SampleRow, TourBar, TOUR, StartFlags, startFlags, markSampleSeen, hideStart, hideSample } from './SampleTour';
 import { sampleClient } from '../lib/sample';
 import { isoDate } from '../lib/metrics';
 import MembershipScreen from './MembershipScreen';
@@ -23,7 +23,6 @@ import WelcomeSurvey, { SurveyAction } from './WelcomeSurvey';
 import { surveyAnswered } from '../lib/survey';
 import { LegalDoc, legalPending } from '../lib/legal';
 import LegalSheet from './legal/LegalSheet';
-import KvkkSheet from './legal/KvkkSheet';
 import LegalUpdateScreen from './legal/LegalUpdateScreen';
 import { billingStatus, hasAccess, daysLeft, packageName } from '../lib/billing';
 import ClientScreen, { Tab } from './client/ClientScreen';
@@ -88,13 +87,13 @@ export default function HomeScreen() {
   const [settings, setSettings] = useState(false);
   const [sampleOpen, setSampleOpen] = useState(false);
   const [tourStep, setTourStep] = useState<number | null>(null);
-  const [start, setStart] = useState<{ sampleSeen: boolean; hidden: boolean } | null>(null);
+  const [start, setStart] = useState<StartFlags | null>(null);
   const [inviteCount, setInviteCount] = useState(0);
   const { width } = useWindowDimensions();
   // Yasal metinler (ortak akislar.md 17): onay bekleyen varsa panel yerine yeniden onay ekranı. null: sunucuda yok
   const [legal, setLegal] = useState<'unknown' | LegalDoc[] | null>('unknown');
-  const [legalOpen, setLegalOpen] = useState(false);
-  const [kvkkOpen, setKvkkOpen] = useState(false);
+  // Yasal ve gizlilik (tek sayfa; KVKK başvurusu içinde): false ya da açılacak görünüm
+  const [legalOpen, setLegalOpen] = useState<false | 'docs' | 'kvkk'>(false);
   const legalAt = useRef(0);
   const { unread, unreadByChild } = useNotifications();
   const pending = useRef<Pick<AppNotification, 'kind' | 'data' | 'childId'> | null>(null);
@@ -195,7 +194,7 @@ export default function HomeScreen() {
     setSampleOpen(false);
     setTourStep(null);
     if (n.kind === 'team_joined') { setSelected(null); load(); return; }
-    if (n.kind === 'kvkk_answered') { setSelected(null); setKvkkOpen(true); return; }
+    if (n.kind === 'kvkk_answered') { setSelected(null); setLegalOpen('kvkk'); return; }
     // bayrak sonradan kapatıldıysa eski bildirim sayfayı açmaz (kapalıyken hiçbir şey görünmez)
     if (n.kind.startsWith('verification_')) {
       setSelected(null);
@@ -271,8 +270,7 @@ export default function HomeScreen() {
   const legalOn = Array.isArray(legal);
   const accountLinks = (
     <View style={styles.accountLinks}>
-      {legalOn && <Pressable onPress={() => setLegalOpen(true)} hitSlop={8}><Text style={styles.link}>Yasal metinler</Text></Pressable>}
-      {legalOn && <Pressable onPress={() => setKvkkOpen(true)} hitSlop={8}><Text style={styles.link}>KVKK başvurusu</Text></Pressable>}
+      {legalOn && <Pressable onPress={() => setLegalOpen('docs')} hitSlop={8}><Text style={styles.link}>Yasal ve gizlilik</Text></Pressable>}
       <Pressable onPress={logout} hitSlop={8}><Text style={styles.link}>Çıkış yap</Text></Pressable>
       <Pressable onPress={removeAccount} hitSlop={8}><Text style={[styles.link, { color: colors.danger }]}>Hesabı sil</Text></Pressable>
     </View>
@@ -280,8 +278,7 @@ export default function HomeScreen() {
   // Yeniden onay ve üyelik ekranlarından da açılır (hukuk/50 bölüm 2: onay beklerken yasal metinler ve KVKK başvurusu açık)
   const legalSheets = (
     <>
-      <LegalSheet visible={legalOpen} onClose={() => setLegalOpen(false)} />
-      <KvkkSheet visible={kvkkOpen} email={session?.user.email ?? ''} onClose={() => setKvkkOpen(false)} />
+      <LegalSheet visible={!!legalOpen} initial={legalOpen || 'docs'} email={session?.user.email ?? ''} onClose={() => setLegalOpen(false)} />
     </>
   );
 
@@ -326,7 +323,7 @@ export default function HomeScreen() {
           onBack={() => setSettings(false)} onChanged={load} onPlans={() => setPlans(true)}
           onOpenClient={(c) => { setSettings(false); setSelected({ client: c, tab: 'summary', key: Date.now() }); }}
           onSample={openSample}
-          onLegal={() => setLegalOpen(true)} onKvkk={() => setKvkkOpen(true)}
+          onLegal={() => setLegalOpen('docs')}
           onGuide={() => { setSettings(false); setGuide(true); }}
           onLogout={logout} onDelete={removeAccount}
         />
@@ -411,7 +408,15 @@ export default function HomeScreen() {
                   onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide'); }} />
               )}
               <ClientList clients={state.clients} unread={unreadByChild} me={state.me} team={state.team}
-                onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} onSample={openSample} />
+                onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
+              {/* örnek aile listenin altında kendi satırında: ilk açılıştan sonra 30 gün ya da × ile kaldırılana dek */}
+              {(state.clients.length === 0 || !!start?.sampleRow) && (
+                <SampleRow onOpen={openSample} onHide={state.clients.length === 0 ? undefined : () => {
+                  if (meId) hideSample(meId);
+                  setStart((s) => (s ? { ...s, sampleRow: false } : s));
+                  track('sample.hide');
+                }} />
+              )}
               <InvitesCard me={state.me} team={state.team} reloadKey={invitesKey} openKey={inviteOpenKey} onChanged={refresh} onCount={setInviteCount} />
               {!solo && (
                 <Pressable onPress={() => setSettings(true)} accessibilityRole="button"
@@ -430,8 +435,6 @@ export default function HomeScreen() {
               </Text>
               <View style={styles.accountLinks}>
                 <Pressable onPress={() => setGuide(true)} hitSlop={8} accessibilityRole="button"><Text style={styles.link}>Nasıl kullanılır?</Text></Pressable>
-                {legalOn && <Pressable onPress={() => setLegalOpen(true)} hitSlop={8}><Text style={styles.link}>Yasal metinler</Text></Pressable>}
-                {legalOn && <Pressable onPress={() => setKvkkOpen(true)} hitSlop={8}><Text style={styles.link}>KVKK başvurusu</Text></Pressable>}
                 <Pressable onPress={() => setSettings(true)} hitSlop={8}><Text style={styles.link}>Ayarlar</Text></Pressable>
               </View>
             </>
@@ -448,8 +451,8 @@ export default function HomeScreen() {
 
 // Danışan listesi: aynı adlı çocuklar ebeveyn adıyla ayırt edilir; çok danışanda ad / ebeveyn / etiketle arama
 // Sağda: okunmamış bildirim zili (sayılı) + ok. Çok danışanda içine girmeden hangisinde bildirim olduğu görünür.
-function ClientList({ clients, unread, me, team, onOpen, onSample }: {
-  clients: Client[]; unread: Record<string, number>; me: ClinicianMe; team: Member[]; onOpen: (c: Client) => void; onSample: () => void;
+function ClientList({ clients, unread, me, team, onOpen }: {
+  clients: Client[]; unread: Record<string, number>; me: ClinicianMe; team: Member[]; onOpen: (c: Client) => void;
 }) {
   const [q, setQ] = useState('');
   const query = q.trim().toLocaleLowerCase('tr');
@@ -460,12 +463,9 @@ function ClientList({ clients, unread, me, team, onOpen, onSample }: {
     <>
       <Label>{`Danışanlar (${clients.length})`}</Label>
       {clients.length === 0 ? (
-        <>
-          <Notice icon="people-outline" text={me.role === 'member'
-            ? 'Henüz danışanın yok. Aileyi davet et ya da klinik sahibinin atamasını bekle.'
-            : 'Henüz danışanın yok. Aileyi davet et; ebeveyn onaylayınca çocuk burada görünür.'} />
-          <SampleRow onOpen={onSample} />
-        </>
+        <Notice icon="people-outline" text={me.role === 'member'
+          ? 'Henüz danışanın yok. Aileyi davet et ya da klinik sahibinin atamasını bekle.'
+          : 'Henüz danışanın yok. Aileyi davet et; ebeveyn onaylayınca çocuk burada görünür.'} />
       ) : (
         <>
           {clients.length > 3 && (

@@ -19,6 +19,7 @@ import NotesTab from './NotesTab';
 import ReportTab from './ReportTab';
 import DetailsTab from './DetailsTab';
 import { fromISO } from '../../dates';
+import { SectionHint } from '../SampleTour';
 
 // 'suggestions' eski bağlantılar ve bildirimler için: Ev rutinleri › Öneriler açılır
 export type Tab = 'summary' | 'routine' | 'abc' | 'goals' | 'notes' | 'suggestions' | 'report' | 'details';
@@ -190,6 +191,7 @@ export default function ClientScreen({
             </View>
           )}
           <View style={{ marginTop: 8 }}>
+            {!sample && <SectionHint userId={me.id} section={tab} />}
             {tab === 'summary' && <SummaryTab {...ctx} />}
             {tab === 'routine' && <HomeRoutines {...ctx} view={routineView} onView={setRoutineView} />}
             {tab === 'abc' && <AbcTab {...ctx} />}

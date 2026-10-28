@@ -95,7 +95,7 @@ export const KVKK_KINDS: { kind: KvkkKind; label: string; hint?: string }[] = [
   { kind: 'info', label: 'Hakkımda hangi verileri, neden işlediğinizi öğrenmek' },
   { kind: 'access', label: 'Verilerimin bir kopyasını almak' },
   { kind: 'correct', label: 'Yanlış ya da eksik bir bilginin düzeltilmesi' },
-  { kind: 'delete', label: 'Verilerimin silinmesi', hint: 'Hesabının tamamını silmek için ana ekranın altındaki "Hesabı sil" daha hızlıdır.' },
+  { kind: 'delete', label: 'Verilerimin silinmesi', hint: 'Hesabının tamamını silmek için Ayarlar\'daki "Hesabı sil" daha hızlıdır.' },
   { kind: 'third_parties', label: 'Verilerimin kimlere aktarıldığını öğrenmek' },
   { kind: 'object', label: 'Bir işlemeye itiraz etmek' },
   { kind: 'damages', label: 'Uğradığım bir zararın giderilmesi' },

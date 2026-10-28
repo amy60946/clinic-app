@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, Pressable, ScrollView, Modal, Alert, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
@@ -11,17 +11,10 @@ import {
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 const kindLabel = (k: string) => KVKK_KINDS.find((x) => x.kind === k)?.label ?? 'Başvuru';
 
-// Ayarlar › KVKK başvurusu (hukuk/50-uygulama-ici-metinler.md 4): kvkk_request_create('clinic', tür, açıklama),
-// "Başvurularım" my_kvkk_requests(). Başvuru hesaba bağlıdır; yanıt e-postayla gider (bildirim kvkk_answered).
-export default function KvkkSheet({ visible, email, onClose }: { visible: boolean; email: string; onClose: () => void }) {
-  return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      {visible && <Body email={email} onClose={onClose} />}
-    </Modal>
-  );
-}
-
-function Body({ email, onClose }: { email: string; onClose: () => void }) {
+// Ayarlar › Yasal ve gizlilik › KVKK başvurusu (hukuk/50-uygulama-ici-metinler.md 4; LegalSheet içinde açılır):
+// kvkk_request_create('clinic', tür, açıklama), "Başvurularım" my_kvkk_requests(). Başvuru hesaba bağlıdır; yanıt e-postayla
+// gider (bildirim kvkk_answered).
+export function KvkkBody({ email, onBack }: { email: string; onBack: () => void }) {
   const [list, setList] = useState<KvkkRequest[] | null | undefined>(undefined);
   const [kind, setKind] = useState<KvkkKind | null>(null);
   const [detail, setDetail] = useState('');
@@ -52,7 +45,7 @@ function Body({ email, onClose }: { email: string; onClose: () => void }) {
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.column}>
         <View style={styles.header}>
-          <IconButton name="close" onPress={onClose} label="Kapat" />
+          <IconButton name="chevron-back" onPress={onBack} label="Geri" />
           <Text style={styles.title}>KVKK başvurusu</Text>
         </View>
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60, gap: 4 }} keyboardShouldPersistTaps="handled"

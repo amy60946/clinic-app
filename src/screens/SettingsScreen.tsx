@@ -14,11 +14,11 @@ const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { da
 
 // Ayarlar (ana ekranda sağ üstteki ad): kişisel bilgiler, klinik adı, ekip, üyelik, danışanlar, yasal ve hesap.
 export default function SettingsScreen({
-  me, team, clients, email, solo, verified, onBack, onChanged, onPlans, onOpenClient, onSample, onLegal, onKvkk, onGuide, onLogout, onDelete, legalOn,
+  me, team, clients, email, solo, verified, onBack, onChanged, onPlans, onOpenClient, onSample, onLegal, onGuide, onLogout, onDelete, legalOn,
 }: {
   me: ClinicianMe; team: Member[]; clients: Client[]; email: string; solo: boolean; verified: boolean; legalOn: boolean;
   onBack: () => void; onChanged: () => void; onPlans: () => void; onOpenClient: (c: Client) => void; onSample: () => void;
-  onLegal: () => void; onKvkk: () => void; onGuide: () => void; onLogout: () => void; onDelete: () => void;
+  onLegal: () => void; onGuide: () => void; onLogout: () => void; onDelete: () => void;
 }) {
   const owner = me.role === 'owner';
   const [name, setName] = useState(me.name);
@@ -139,7 +139,7 @@ export default function SettingsScreen({
           <Text style={styles.section}>Hesap</Text>
           <Card style={{ padding: 0, overflow: 'hidden' }}>
             {[
-              ...(legalOn ? [{ label: 'Yasal metinler', icon: 'document-text-outline' as const, on: onLegal }, { label: 'KVKK başvurusu', icon: 'shield-outline' as const, on: onKvkk }] : []),
+              ...(legalOn ? [{ label: 'Yasal ve gizlilik', icon: 'shield-checkmark-outline' as const, on: onLegal }] : []),
               { label: 'Nasıl kullanılır?', icon: 'help-circle-outline' as const, on: onGuide },
               { label: 'Örnek aileyi aç', icon: 'sparkles-outline' as const, on: onSample },
               { label: 'Çıkış yap', icon: 'log-out-outline' as const, on: onLogout },

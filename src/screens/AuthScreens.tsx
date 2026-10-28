@@ -209,22 +209,20 @@ export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { g
         autoCapitalize="none" autoComplete="email" textContentType="emailAddress" />
       <Input value={password} onChangeText={setPassword} placeholder={`Şifre (en az ${MIN_PASSWORD} karakter)`} secure
         autoComplete="new-password" textContentType="newPassword" onSubmitEditing={submit} />
+      {/* Tek kısa satır (kullanıcı kararı 28 Ekim 2026): kutu yalnız sözleşmeler için; aydınlatma ve gizlilik bilgilendirmedir */}
       {!!legal && (
-        <View style={{ gap: 8, marginTop: 4 }}>
-          <CheckRow checked={agree} onToggle={() => setAgree((a) => !a)}>
-            <InlineLink onPress={() => openLegal('sozlesme-uzman', legal['sozlesme-uzman'])}>Uzman Hizmet Sözleşmesi</InlineLink>
-            {'\'ni ve '}
+        <View style={{ marginTop: 2 }}>
+          <CheckRow small checked={agree} onToggle={() => setAgree((a) => !a)}>
+            <InlineLink onPress={() => openLegal('sozlesme-uzman', legal['sozlesme-uzman'])}>Hizmet Sözleşmesi</InlineLink>
+            {' ve '}
             <InlineLink onPress={() => openLegal('veri-isleme-eki', legal['veri-isleme-eki'])}>Veri İşleme Eki</InlineLink>
-            {'\'ni okudum, kabul ediyorum.'}
+            {'\'ni kabul ediyorum. '}
+            {!!legal['aydinlatma-uzman'] && (
+              <InlineLink onPress={() => openLegal('aydinlatma-uzman', legal['aydinlatma-uzman'])}>Aydınlatma</InlineLink>
+            )}
+            {!!legal['aydinlatma-uzman'] && ' · '}
+            <InlineLink onPress={() => openLegal('gizlilik')}>Gizlilik</InlineLink>
           </CheckRow>
-          {!!legal['aydinlatma-uzman'] && (
-            <Text style={styles.legalLine}>
-              {'Kişisel verilerinin nasıl işlendiğini '}
-              <InlineLink onPress={() => openLegal('aydinlatma-uzman', legal['aydinlatma-uzman'])}>Uzman Aydınlatma Metni</InlineLink>
-              {'\'nde anlatıyoruz.'}
-            </Text>
-          )}
-          <Text style={styles.legalLine}><InlineLink onPress={() => openLegal('gizlilik')}>Gizlilik Politikası</InlineLink></Text>
         </View>
       )}
       <Cta label="Kayıt ol" onPress={submit} busy={busy} disabled={!!legal && !agree} />
@@ -320,5 +318,4 @@ const styles = StyleSheet.create({
   practiceRow: { flexDirection: 'row', gap: 10 },
   practice: { flex: 1, gap: 4, padding: 14, borderRadius: 14, backgroundColor: '#fff', borderWidth: 1.5, borderColor: 'transparent' },
   practiceOn: { borderColor: colors.navy },
-  legalLine: { fontSize: 12, color: colors.muted, lineHeight: 18, paddingLeft: 32 },
 });

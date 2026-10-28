@@ -170,13 +170,13 @@ export function InfoText({ text, detail, small }: { text: string; detail: string
 }
 
 // Onay kutusu satırı: önceden işaretli gelmez; metindeki bağlantılar (InlineLink) kutuyu değiştirmez
-export function CheckRow({ checked, onToggle, children }: { checked: boolean; onToggle: () => void; children: React.ReactNode }) {
+export function CheckRow({ checked, onToggle, children, small }: { checked: boolean; onToggle: () => void; children: React.ReactNode; small?: boolean }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: small ? 8 : 10 }}>
       <Pressable onPress={onToggle} hitSlop={8} accessibilityRole="checkbox" accessibilityState={{ checked }}>
-        <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={22} color={checked ? colors.navy : colors.muted} />
+        <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={small ? 18 : 22} color={checked ? colors.navy : colors.muted} />
       </Pressable>
-      <Text style={styles.checkText} onPress={onToggle}>{children}</Text>
+      <Text style={[styles.checkText, small && styles.checkSmall]} onPress={onToggle}>{children}</Text>
     </View>
   );
 }
@@ -219,5 +219,6 @@ const styles = StyleSheet.create({
   infoBox: { backgroundColor: colors.bg, borderRadius: radius.sm, padding: 12, gap: 6 },
   infoDetail: { fontSize: 13, color: colors.text, lineHeight: 19 },
   checkText: { flex: 1, fontSize: 13, color: colors.text, lineHeight: 20 },
+  checkSmall: { fontSize: 12, lineHeight: 17, color: colors.muted },
   inlineLink: { fontWeight: '700', color: colors.navy, textDecorationLine: 'underline' },
 });

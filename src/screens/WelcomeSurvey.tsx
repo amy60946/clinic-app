@@ -11,6 +11,7 @@ import { track } from '../lib/track';
 
 // Uzman karşılama anketi (kullanıcı isteği 27 Ekim 2026; ortak sozlesme/akislar.md 15): kayıttan sonraki ilk girişte bir kez
 // meslek → zorluklar (çoklu) → işine yarayacaklar (çoklu) → buraya getiren (tek; ekip üyesine sorulmaz) → "Hazırsın".
+// Atlanamaz (kullanıcı kararı 28 Ekim 2026): "Şimdilik geç" yok, her soru yanıtlanır. Meslek kurumsal liste (gruplu, radyo).
 // Son ekran seçilen nedene göre ilk adımı önerir: aile daveti, ekip koduyla katılma ya da paketler.
 export type SurveyAction = 'invite' | 'plans' | 'joined' | null;
 type Step = 'profession' | 'challenges' | 'features' | 'intent';
@@ -38,13 +39,6 @@ export default function WelcomeSurvey({ me, onFinish }: { me: ClinicianMe; onFin
   const toggle = (list: string[], set: (v: string[]) => void, key: string) =>
     set(list.includes(key) ? list.filter((k) => k !== key) : [...list, key]);
 
-  const skip = async () => {
-    setBusy(true);
-    await saveSurvey(null).catch(() => {});
-    track('survey.skip', { step: i + 1 });
-    setBusy(false);
-    onFinish(null);
-  };
   const next = async () => {
     if (!valid) return;
     if (i < steps.length - 1) { setI(i + 1); return; }
@@ -67,9 +61,6 @@ export default function WelcomeSurvey({ me, onFinish }: { me: ClinicianMe; onFin
       <View style={styles.column}>
         <View style={styles.top}>
           <Text style={styles.brand}>ClinicApp</Text>
-          <Pressable onPress={skip} hitSlop={8} accessibilityRole="button" disabled={busy}>
-            <Text style={styles.skip}>Şimdilik geç</Text>
-          </Pressable>
         </View>
         <ScrollView contentContainerStyle={styles.scroll}>
           {i === 0 && (
@@ -86,18 +77,7 @@ export default function WelcomeSurvey({ me, onFinish }: { me: ClinicianMe; onFin
           <Text style={styles.hint}>{q.hint}</Text>
 
           {step === 'profession' ? (
-            <View style={styles.pills}>
-              {q.options.map((o) => {
-                const on = profession === o.key;
-                return (
-                  <Pressable key={o.key} onPress={() => setProfession(o.key)} accessibilityRole="radio" accessibilityState={{ selected: on }}
-                    style={({ pressed }) => [styles.pill, on && styles.pillOn, pressed && { opacity: 0.8 }]}>
-                    {on && <Ionicons name="checkmark" size={16} color={colors.navy} />}
-                    <Text style={[styles.pillText, on && { fontWeight: '700' }]}>{o.label}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+            <ProfessionList q={q} value={profession} onChange={setProfession} wide={width >= 720} />
           ) : (
             <View style={styles.grid}>
               {q.options.map((o) => {
@@ -137,6 +117,43 @@ export default function WelcomeSurvey({ me, onFinish }: { me: ClinicianMe; onFin
         </View>
       </View>
     </SafeAreaView>
+  );
+}
+
+// Meslek: grup başlıkları altında tek seçimli liste (form görünümü; ilgi alanı etiketi gibi değil). Geniş ekranda iki sütun.
+function ProfessionList({ q, value, onChange, wide }: { q: SurveyQuestion; value: string | null; onChange: (k: string) => void; wide: boolean }) {
+  const groups = q.groups?.length ? q.groups : [{ key: '', label: '' }];
+  const blocks = groups
+    .map((g) => ({ ...g, items: q.options.filter((o) => (g.key ? o.group === g.key : true)) }))
+    .filter((g) => g.items.length);
+  const half = Math.ceil(blocks.reduce((a, b) => a + b.items.length + 1, 0) / 2);
+  const cols: (typeof blocks)[] = [[], []];
+  let n = 0;
+  blocks.forEach((b) => { (wide && n >= half ? cols[1] : cols[0]).push(b); n += b.items.length + 1; });
+  return (
+    <View style={[styles.profCols, wide && { flexDirection: 'row' }]} accessibilityRole="radiogroup">
+      {cols.filter((c) => c.length).map((c, ci) => (
+        <View key={ci} style={{ flex: 1, gap: 14 }}>
+          {c.map((g) => (
+            <View key={g.key}>
+              {!!g.label && <Text style={styles.groupLabel}>{g.label}</Text>}
+              <View style={styles.listCard}>
+                {g.items.map((o, oi) => {
+                  const on = value === o.key;
+                  return (
+                    <Pressable key={o.key} onPress={() => onChange(o.key)} accessibilityRole="radio" accessibilityState={{ selected: on }}
+                      style={({ pressed }) => [styles.listRow, oi > 0 && styles.listLine, on && { backgroundColor: colors.today }, pressed && !on && { backgroundColor: '#F7F8FA' }]}>
+                      <Text style={[styles.listText, on && { fontWeight: '700' }]}>{o.label}</Text>
+                      <Ionicons name={on ? 'radio-button-on' : 'radio-button-off'} size={20} color={on ? colors.navy : colors.faint} />
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          ))}
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -202,7 +219,6 @@ const styles = StyleSheet.create({
   column: { flex: 1, width: '100%', maxWidth: 760, alignSelf: 'center' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 12 },
   brand: { fontSize: 13, fontWeight: '700', color: colors.muted, letterSpacing: 1 },
-  skip: { fontSize: 13, fontWeight: '600', color: colors.muted },
   scroll: { padding: 24, paddingBottom: 32 },
   hello: { fontSize: 26, fontWeight: '800', color: colors.navy },
   lead: { fontSize: 15, color: colors.text, lineHeight: 22, marginTop: 8 },
@@ -212,11 +228,12 @@ const styles = StyleSheet.create({
   count: { fontSize: 12, fontWeight: '700', color: colors.muted, marginLeft: 6 },
   title: { fontSize: 20, fontWeight: '800', color: colors.navy, lineHeight: 27 },
   hint: { fontSize: 13, color: colors.muted, marginTop: 4, marginBottom: 16 },
-  pills: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  pill: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: radius.pill,
-    backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line },
-  pillOn: { borderColor: colors.navy, borderWidth: 2, backgroundColor: colors.today, paddingHorizontal: 13, paddingVertical: 9 },
-  pillText: { fontSize: 14, color: colors.navy },
+  profCols: { gap: 14 },
+  groupLabel: { fontSize: 12, fontWeight: '700', color: colors.muted, marginBottom: 6, marginLeft: 4 },
+  listCard: { backgroundColor: '#fff', borderRadius: radius.md, borderWidth: 1, borderColor: colors.line, overflow: 'hidden' },
+  listRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 13 },
+  listLine: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },
+  listText: { flex: 1, fontSize: 15, color: colors.navy },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 },
   card: { minHeight: 128, backgroundColor: '#fff', borderRadius: radius.md, padding: 14, borderWidth: 1, borderColor: colors.line, gap: 12 },
   cardOn: { borderColor: colors.navy, borderWidth: 2, backgroundColor: colors.today, padding: 13 },
