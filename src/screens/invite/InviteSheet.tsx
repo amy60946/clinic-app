@@ -4,17 +4,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
-import { Card, Label, Input, Cta, IconButton, Segmented, InfoText, SmallButton } from '../../components/ui';
+import { Card, Label, Input, Cta, IconButton, Segmented, InfoText } from '../../components/ui';
 import PlanEditor from '../plan/PlanEditor';
 import { track } from '../../lib/track';
 import {
-  NewInvite, ChildAgeGroup, EmailStatus, CHILD_AGE_GROUPS, ageGroupLabel, createInvite, markInvite, inviteLink, inviteMessage, shareInvite,
+  NewInvite, ChildAgeGroup, EmailStatus, CHILD_AGE_GROUPS, ageGroupLabel, createInvite, markInvite,
   leftText, sendInviteEmail, emailReasonText, INVITE_HELP,
 } from '../../lib/invites';
 
 // Aileyi davet et (ortak akislar.md 10): 1) ebeveynin e-postası (zorunlu), isteğe bağlı çocuğun adı + yaş grubu, kendi notun
-// → 2) "E-posta gönder": sistem senin adınla e-posta gönderir (Edge Function invite-email); yedek: kodu / davet metnini kopyala
-// → 3) isteğe bağlı taslak takip planı (aile çocuğunu paylaşınca o çocuğa taşınır). Davet 3 gün geçerli.
+// → 2) "E-posta gönder": sistem senin adınla e-posta gönderir (Edge Function invite-email). Kullanıcı kararı 28 Ekim 2026:
+// süreç sistem üzerinden; davet metnini kopyalama ve e-posta uygulamasında açma kalktı. Kod yalnız e-posta gönderilemezse
+// yedek olarak görünür (26 Ekim kararı "kodu kopyala yedeği kalsın"). Davet 3 gün geçerli.
+// Taslak takip planı bu pencerede GİZLİ (kullanıcı kararı 28 Ekim 2026; ortak DURUM HATIRLATMA): uzman planı aile bağlanınca
+// danışan › Takip planı'nda kurar. Geri açmak için PLAN_IN_INVITE = true (sunucu invite_code taslağını hâlâ destekler).
+const PLAN_IN_INVITE = false;
 export type SheetInvite = NewInvite & {
   parent_name?: string; parent_email?: string | null; label?: string; child_name?: string | null; child_age_group?: string | null;
   email_status?: EmailStatus | null;
@@ -45,7 +49,7 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
   const [busy, setBusy] = useState(false);
   const [mail, setMail] = useState<Mail | null>(
     existing?.email_status === 'sent' ? { sent: true, text: '' }
-      : existing?.email_status === 'failed' ? { sent: false, text: 'Son e-posta gönderilemedi. Yeniden gönderebilir ya da kodu kendin iletebilirsin.' }
+      : existing?.email_status === 'failed' ? { sent: false, text: 'Son e-posta gönderilemedi. Adresi kontrol edip yeniden gönder.' }
       : null);
   const [plan, setPlan] = useState(false);
   const [, tick] = useState(0);
@@ -86,25 +90,15 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
     setBusy(false);
   };
 
-  // Yedek: uzman kodu ya da davet metnini kendisi iletir
-  const copy = async (what: 'code' | 'text') => {
+  // Yedek (yalnız e-posta gönderilemediyse): uzman kodu kendisi iletir
+  const copyCode = async () => {
     if (!inv) return;
-    await Clipboard.setStringAsync(what === 'code' ? inv.code : inviteMessage(inv, clinicianName));
-    Alert.alert('Kopyalandı', what === 'code' ? 'Kodu aileye iletebilirsin.' : 'Davet metnini istediğin uygulamaya yapıştırabilirsin.');
-    if (!mail?.sent) markInvite(inv.code, 'copy').catch(() => {});
+    await Clipboard.setStringAsync(inv.code);
+    Alert.alert('Kopyalandı', 'Kodu aileye iletebilirsin.');
+    markInvite(inv.code, 'copy').catch(() => {});
     track('invite.share', { channel: 'copy' });
   };
-  const openMailApp = async () => {
-    if (!inv) return;
-    try {
-      const r = await shareInvite('email', inviteMessage(inv, clinicianName), inv.parent_email);
-      if (r === 'shared') markInvite(inv.code, 'email').catch(() => {});
-    } catch (e) {
-      Alert.alert('Açılamadı', (e as Error).message);
-    }
-  };
 
-  const link = inviteLink(inv?.token ?? null);
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.column}>
@@ -147,38 +141,32 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
                   <Text style={[styles.statusText, { flex: 1 }]}>{mail.text}</Text>
                 </View>
               )}
-              <Card style={{ gap: 8 }}>
-                <Text style={styles.small}>Davet kodu</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                  <Text style={styles.code}>{inv.code}</Text>
-                  <Pressable onPress={() => copy('code')} hitSlop={8} accessibilityLabel="Kodu kopyala" style={styles.round}>
-                    <Ionicons name="copy-outline" size={18} color={colors.navy} />
-                  </Pressable>
-                </View>
-                <Text style={[styles.small, { fontWeight: '600' }]}>
-                  {leftText(inv.expires_at)}{inv.parent_email && !mail?.sent ? ` · ${inv.parent_email}` : ''}{inv.label ? ` · ${inv.label}` : ''}
-                </Text>
+              <Card style={{ gap: 6 }}>
+                {!!inv.parent_email && <Text style={styles.to}>{inv.parent_email}</Text>}
+                <Text style={[styles.small, { fontWeight: '600' }]}>{leftText(inv.expires_at)}{inv.label ? ` · ${inv.label}` : ''}</Text>
                 {(!!inv.child_name || !!inv.child_age_group) && (
                   <Text style={styles.small}>Çocuk: {[inv.child_name, ageGroupLabel(inv.child_age_group) && `${ageGroupLabel(inv.child_age_group)} yaş`].filter(Boolean).join(' · ')} (yalnız daveti kabul eden ebeveyn görür)</Text>
                 )}
-                {!!link && <Text style={styles.small} selectable>{link}</Text>}
+                {!mail?.sent && (
+                  <View style={styles.codeRow}>
+                    <Text style={styles.small}>Yedek davet kodu</Text>
+                    <Text style={styles.code}>{inv.code}</Text>
+                    <Pressable onPress={copyCode} hitSlop={8} accessibilityLabel="Kodu kopyala" style={styles.round}>
+                      <Ionicons name="copy-outline" size={16} color={colors.navy} />
+                    </Pressable>
+                  </View>
+                )}
               </Card>
-              <View style={styles.actions}>
-                {!!inv.parent_email && (
-                  <SmallButton label={mail ? 'E-postayı yeniden gönder' : 'E-posta gönder'} onPress={resend} busy={busy} />
-                )}
-                <Pressable onPress={() => copy('text')} hitSlop={8} accessibilityRole="button">
-                  <Text style={styles.link}>Davet metnini kopyala</Text>
+              {!!inv.parent_email && (
+                <Pressable onPress={resend} disabled={busy} accessibilityRole="button"
+                  style={({ pressed }) => [styles.secondary, (busy || pressed) && { opacity: 0.6 }]}>
+                  <Ionicons name="send-outline" size={18} color={colors.navy} />
+                  <Text style={styles.secondaryText}>{busy ? 'Gönderiliyor…' : mail ? 'E-postayı yeniden gönder' : 'E-posta gönder'}</Text>
                 </Pressable>
-                {!!mail && !mail.sent && !!inv.parent_email && (
-                  <Pressable onPress={openMailApp} hitSlop={8} accessibilityRole="button">
-                    <Text style={styles.link}>E-posta uygulamasında aç</Text>
-                  </Pressable>
-                )}
-              </View>
+              )}
 
-              <Label>Takip planı (isteğe bağlı)</Label>
-              {!plan ? (
+              {PLAN_IN_INVITE && <Label>Takip planı (isteğe bağlı)</Label>}
+              {!PLAN_IN_INVITE ? null : !plan ? (
                 <Pressable style={styles.planBox} onPress={() => setPlan(true)} accessibilityRole="button">
                   <Ionicons name="clipboard-outline" size={20} color={colors.navy} />
                   <View style={{ flex: 1 }}>
@@ -206,12 +194,16 @@ const styles = StyleSheet.create({
   title: { fontSize: 17, fontWeight: '700', color: colors.navy },
   small: { fontSize: 12, color: colors.muted, lineHeight: 17 },
   link: { fontSize: 13, fontWeight: '600', color: colors.navy },
-  code: { fontSize: 30, fontWeight: '800', letterSpacing: 5, color: colors.navy },
-  round: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
+  to: { fontSize: 15, fontWeight: '700', color: colors.navy },
+  codeRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },
+  code: { fontSize: 18, fontWeight: '800', letterSpacing: 3, color: colors.navy },
+  round: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' },
+  secondary: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 50, borderRadius: radius.md,
+    borderWidth: 1.5, borderColor: colors.navy, backgroundColor: '#fff', marginTop: 12 },
+  secondaryText: { fontSize: 15, fontWeight: '700', color: colors.navy },
   status: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: radius.md, padding: 14, marginBottom: 8 },
   statusTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
   statusText: { fontSize: 13, color: colors.text, lineHeight: 18 },
-  actions: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginTop: 12 },
   planBox: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#fff', borderRadius: radius.md, padding: 14, borderWidth: 1, borderColor: colors.line },
   planTitle: { fontSize: 14, fontWeight: '700', color: colors.navy },
 });

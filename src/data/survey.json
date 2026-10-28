@@ -2,71 +2,108 @@
  "version": 1,
  "profession": {
   "title": "Mesleğin ne?",
-  "hint": "Sana uygun şablonları ve örnekleri öne çıkaralım.",
+  "hint": "Unvanına en yakın olanı seç. Sana uygun şablonları ve örnekleri öne çıkaralım.",
+  "groups": [
+   {
+    "key": "mental",
+    "label": "Ruh sağlığı"
+   },
+   {
+    "key": "rehab",
+    "label": "Gelişim ve rehabilitasyon"
+   },
+   {
+    "key": "edu",
+    "label": "Eğitim"
+   },
+   {
+    "key": "expressive",
+    "label": "Oyun ve dışavurumcu terapiler"
+   },
+   {
+    "key": "other",
+    "label": "Diğer"
+   }
+  ],
   "options": [
    {
     "key": "psikolog",
+    "group": "mental",
     "label": "Psikolog"
    },
    {
     "key": "klinik_psikolog",
+    "group": "mental",
     "label": "Klinik psikolog"
    },
    {
     "key": "pdr",
+    "group": "mental",
     "label": "Psikolojik danışman (PDR)"
    },
    {
     "key": "ergoterapist",
+    "group": "rehab",
     "label": "Ergoterapist"
    },
    {
     "key": "dil_konusma",
+    "group": "rehab",
     "label": "Dil ve konuşma terapisti"
    },
    {
     "key": "ozel_egitim",
+    "group": "edu",
     "label": "Özel eğitim öğretmeni"
    },
    {
     "key": "cocuk_gelisimi",
+    "group": "rehab",
     "label": "Çocuk gelişimci"
    },
    {
     "key": "bcba",
+    "group": "rehab",
     "label": "Davranış analisti (BCBA)"
    },
    {
     "key": "hekim",
+    "group": "mental",
     "label": "Çocuk ve ergen psikiyatristi"
    },
    {
     "key": "oyun_terapisti",
+    "group": "expressive",
     "label": "Oyun terapisti",
     "survey_only": true
    },
    {
     "key": "sanat_terapisti",
+    "group": "expressive",
     "label": "Sanat, müzik ya da drama terapisti",
     "survey_only": true
    },
    {
     "key": "aile_danismani",
+    "group": "mental",
     "label": "Aile danışmanı",
     "survey_only": true
    },
    {
     "key": "okul_rehber",
+    "group": "edu",
     "label": "Okul rehber öğretmeni",
     "survey_only": true
    },
    {
     "key": "ogrenci",
+    "group": "other",
     "label": "Öğrenci ya da stajyer",
     "survey_only": true
    },
    {
     "key": "diger",
+    "group": "other",
     "label": "Diğer"
    }
   ]
@@ -145,7 +182,7 @@
  },
  "intent": {
   "title": "Seni ClinicApp'e ne getirdi?",
-  "hint": "Birini seç.",
+  "hint": "En önemli nedenini seç; ilk adımı buna göre önereceğiz.",
   "options": [
    {
     "key": "trial",

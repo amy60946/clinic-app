@@ -4,8 +4,8 @@ import data from '../data/survey.json';
 // Uzman karşılama anketi (ortak/sozlesme/akislar.md 15, proposed/20261027100000_clinician_survey.sql).
 // Kayıttan sonraki ilk girişte bir kez; "Şimdilik geç" de kayıt sayılır. Seçenekler ortak veri/uzman_anketi.json'dan
 // (node tools/sync-survey.mjs <ortak>/veri/uzman_anketi.json). Cevaplar aileye görünmez.
-export type SurveyOption = { key: string; label: string; icon?: string };
-export type SurveyQuestion = { title: string; hint: string; options: SurveyOption[] };
+export type SurveyOption = { key: string; label: string; icon?: string; group?: string };
+export type SurveyQuestion = { title: string; hint: string; options: SurveyOption[]; groups?: { key: string; label: string }[] };
 export const SURVEY = data as {
   version: number; profession: SurveyQuestion; challenges: SurveyQuestion; features: SurveyQuestion; intent: SurveyQuestion;
 };

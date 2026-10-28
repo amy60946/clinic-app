@@ -39,8 +39,8 @@ export const INVITE_HELP = [
     : 'Ebeveyn ParentApp\'i açınca davet kodu sorulduğunda e-postadaki 6 karakterlik kodu yazar; sen kendiliğinden tanımlı gelirsin.',
   'Hangi çocuğu paylaşacağına ebeveyn karar verir; paylaşımı istediği an durdurabilir.',
   'Çocuğun adını ve yaş grubunu yazarsan yalnız daveti kabul eden ebeveyn görür; kontrol edip onaylar, düzeltirse sana bildirim gelir. E-postada görünmez, davet bitince silinir.',
-  'Davet 3 gün geçerli. Davetlerim\'den e-postayı yeniden gönderebilir ya da daveti iptal edebilirsin. E-posta ulaşmazsa kodu kopyalayıp kendin ilet.',
-  'İstersen takip planını davetle birlikte hazırla; aile çocuğu paylaşınca plan hazır gelir.',
+  'Davet 3 gün geçerli. Davetlerim\'den e-postayı yeniden gönderebilir ya da daveti iptal edebilirsin. E-posta gönderilemezse yedek kod görünür.',
+  'Hedefleri ve aile programını aile bağlanınca danışanın Takip planı bölümünde kurarsın.',
 ];
 
 export const STATUS_TEXT: Record<InviteStatus, string> = {
