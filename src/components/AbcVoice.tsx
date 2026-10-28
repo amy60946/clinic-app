@@ -11,7 +11,7 @@ const mmss = (ms: number) => {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 };
 
-// Ebeveynin zor an kaydına eklediği ses (ParentApp › Zor anlar). Bağlantı imzalı ve 1 saat geçerli.
+// Ebeveynin davranış kaydına eklediği ses (ParentApp › Davranış kaydı). Bağlantı imzalı ve 1 saat geçerli.
 export default function AbcVoice({ path, durationMs }: { path: string; durationMs?: number | null }) {
   const [uri, setUri] = useState<string | null>(null);
   const [error, setError] = useState(false);

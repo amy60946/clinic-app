@@ -28,7 +28,7 @@ const pc = (v: number | null) => (v === null ? '–' : `%${v}`);
 const gas = (v: number) => (v > 0 ? `+${v}` : String(v).replace('-', '−'));
 const PART: Record<DayPart, string> = { sabah: 'sabah', 'öğle': 'öğle', 'akşam': 'akşam', gece: 'gece' };
 
-export const NOTE_FOOTER = 'Bu metin ebeveynin ev rutini ve zor an kayıtlarından kuralla derlenmiş bir gözlem özetidir; tanı, zekâ ya da dikkat puanı değildir ve tek başına klinik karar için kullanılmaz.';
+export const NOTE_FOOTER = 'Bu metin ebeveynin ev rutini ve davranış kayıtlarından kuralla derlenmiş bir gözlem özetidir; tanı, zekâ ya da dikkat puanı değildir ve tek başına klinik karar için kullanılmaz.';
 
 export function progressNote(r: NoteInput): string {
   const from = windowStarts(r.today, r.weeks)[0];
@@ -70,12 +70,12 @@ export function progressNote(r: NoteInput): string {
     if (m.answered >= 3) lines.push(`• Motive etmek (ebeveyn gözlemi): ${motivationText(m)}.`);
   }
 
-  // Zor anlar
-  lines.push('', 'Zor anlar');
+  // Davranış kayıtları
+  lines.push('', 'Davranış kayıtları');
   const inRange = (a: string, b: string) => r.abc.filter((e) => { const d = isoDate(new Date(e.occurred_at)); return d >= a && d <= b; });
   const cur = inRange(from, to);
   const before = inRange(prevFrom, prevTo);
-  if (!cur.length) lines.push(`• Bu dönemde zor an kaydı yok${before.length ? ` (önceki ${r.weeks} haftada ${before.length})` : ''}.`);
+  if (!cur.length) lines.push(`• Bu dönemde davranış kaydı yok${before.length ? ` (önceki ${r.weeks} haftada ${before.length})` : ''}.`);
   else {
     const avg = Math.round((cur.reduce((a, e) => a + e.intensity, 0) / cur.length) * 10) / 10;
     lines.push(`• ${cur.length} kayıt${before.length || r.abc.length > cur.length ? `; önceki ${r.weeks} haftada ${before.length}` : ''}. Ortalama şiddet ${String(avg).replace('.', ',')}/5 (ebeveyn değerlendirmesi).`);

@@ -20,7 +20,7 @@ export const toNotification = (r: any): AppNotification => ({
   childId: r.child_id ?? undefined, createdAt: r.created_at, readAt: r.read_at ?? undefined,
 });
 
-// Bildirimin ilgilendirdiği çocuklar: tek çocukta child_id, toplu paylaşım / zor anda data.links / data.items
+// Bildirimin ilgilendirdiği çocuklar: tek çocukta child_id, toplu paylaşım / davranış kaydında data.links / data.items
 export function notificationChildren(n: Pick<AppNotification, 'childId' | 'data'>): string[] {
   const ids = new Set<string>();
   if (n.childId) ids.add(n.childId);

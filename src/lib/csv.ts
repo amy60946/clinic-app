@@ -1,4 +1,4 @@
-// Tablo dışa aktarma (CSV): zor anlar ve ev rutini geçmişi. Türkçe Excel noktalı virgül ayırıcı ve UTF-8 BOM bekler.
+// Tablo dışa aktarma (CSV): davranış kayıtları ve ev rutini geçmişi. Türkçe Excel noktalı virgül ayırıcı ve UTF-8 BOM bekler.
 // Dosyada çocuğun adı yok (dosya adında yalnız baş harf); saf fonksiyonlar, testleri tests/csv.test.mjs.
 import type { AbcEvent, Task, Completion } from './metrics.ts';
 import { instances, isoDate, dayPart, DECLINE_LABELS } from './metrics.ts';
@@ -26,7 +26,7 @@ const PART: Record<string, string> = { sabah: 'Sabah', 'öğle': 'Öğle', 'akş
 
 export const ABC_HEADER = ['Tarih', 'Saat', 'Gün bölümü', 'Öncesi', 'Davranış', 'Sonucu', 'Şiddet (1–5)', 'Sesli kayıt'];
 
-// Dönemdeki zor anlar, eskiden yeniye
+// Dönemdeki davranış kayıtları, eskiden yeniye
 export function abcRows(events: AbcEvent[], from: string, to: string): string[][] {
   return events
     .filter((e) => { const d = isoDate(new Date(e.occurred_at)); return d >= from && d <= to; })
@@ -70,7 +70,7 @@ export function routineRows(tasks: Task[], comps: Completion[], from: string, to
 }
 
 // Dosya adı: baş harf + dönem (ad dosya adına yazılmaz)
-export function csvName(kind: 'zor-anlar' | 'ev-rutini', childName: string, from: string, to: string) {
+export function csvName(kind: 'davranis-kayitlari' | 'ev-rutini', childName: string, from: string, to: string) {
   const ini = (childName.trim()[0] || 'x').toLocaleLowerCase('tr-TR');
   return `${kind}-${ini}-${from}_${to}.csv`;
 }

@@ -108,7 +108,7 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
       <Label>{`Ev rutini gözlem raporu (${weeks} hafta)`}</Label>
       <Card style={{ gap: 12 }}>
         <Text style={styles.body}>
-          Rapor şunları içerir: haftalık rutin kartı, yürütücü işlev gözlem özeti (başlatma, tutarlılık, "Yapamam"), görev ve beceri alanı tabloları, GAS hedef puanları ve zor an özeti. Uzman notları rapora girmez.
+          Rapor şunları içerir: haftalık rutin kartı, yürütücü işlev gözlem özeti (başlatma, tutarlılık, "Yapamam"), görev ve beceri alanı tabloları, GAS hedef puanları ve davranış kaydı özeti. Uzman notları rapora girmez.
         </Text>
         <Text style={styles.small}>Raporda çocuk nasıl görünsün?</Text>
         <Segmented<NameMode>

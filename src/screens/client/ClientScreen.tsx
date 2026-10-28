@@ -28,7 +28,7 @@ type Section = Exclude<Tab, 'suggestions'>;
 const SECTIONS: { id: Section; label: string; short: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { id: 'summary', label: 'Özet', short: 'Özet', icon: 'grid-outline' },
   { id: 'routine', label: 'Ev rutinleri', short: 'Rutinler', icon: 'repeat-outline' },
-  { id: 'abc', label: 'Zor anlar', short: 'Zor anlar', icon: 'pulse-outline' },
+  { id: 'abc', label: 'Davranış kayıtları', short: 'Davranış', icon: 'pulse-outline' },
   { id: 'goals', label: 'Takip planı', short: 'Plan', icon: 'flag-outline' },
   { id: 'notes', label: 'Notlar', short: 'Notlar', icon: 'create-outline' },
   { id: 'report', label: 'Rapor', short: 'Rapor', icon: 'print-outline' },
@@ -87,7 +87,7 @@ export default function ClientScreen({
   const current: Tab = tab === 'routine' && routineView === 'suggest' ? 'suggestions' : tab;
   const sectionOf = (t: Tab): Section => (t === 'suggestions' ? 'routine' : t);
   const { items, unreadByChild, markRead } = useNotifications();
-  // Açılan bölümün bu çocuğa ait okunmamış bildirimleri okunmuş sayılır (ör. Zor anlar açılınca zor an bildirimleri)
+  // Açılan bölümün bu çocuğa ait okunmamış bildirimleri okunmuş sayılır (ör. Davranış kayıtları açılınca davranış kaydı bildirimleri)
   useEffect(() => {
     if (sample) return;
     const ids = items.filter((n) => !n.readAt && notificationTab(n.kind) === current && notificationChildren(n).includes(client.child_id)).map((n) => n.id);

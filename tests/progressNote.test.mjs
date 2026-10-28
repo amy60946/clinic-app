@@ -11,7 +11,7 @@ test('ilerleme notu: örnek aileden bölümler, önceki dönem, GAS, sınır met
   assert.match(note, /^İlerleme notu: D\./);
   assert.match(note, /Dönem: 5 Ekim – 27 Ekim 2026 \(4 hafta\)/);
   assert.match(note, /Ebeveyn onaylı tamamlama: \d+\/\d+ planlı görev \(%\d+\); önceki 4 haftada %\d+\./);
-  assert.match(note, /Zor anlar\n• \d+ kayıt; önceki 4 haftada \d+\./);
+  assert.match(note, /Davranış kayıtları\n• \d+ kayıt; önceki 4 haftada \d+\./);
   assert.match(note, /Hedefler \(GAS, −2 … \+2\)\n• /);
   assert.match(note, /→/);
   assert.ok(note.endsWith(NOTE_FOOTER));
@@ -22,6 +22,6 @@ test('ilerleme notu: örnek aileden bölümler, önceki dönem, GAS, sınır met
 test('ilerleme notu: kayıt yoksa boş bölümler', () => {
   const note = progressNote({ childLabel: 'A.', tasks: [], completions: [], abc: [], goals: [], today: '2026-10-28', weeks: 4 });
   assert.match(note, /Bu dönemde planlı görev yok\./);
-  assert.match(note, /Bu dönemde zor an kaydı yok\./);
+  assert.match(note, /Bu dönemde davranış kaydı yok\./);
   assert.doesNotMatch(note, /Hedefler/);
 });

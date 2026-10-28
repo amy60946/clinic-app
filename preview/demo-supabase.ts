@@ -192,7 +192,7 @@ function upgrade(x: Db): Db {
     x.clinicians.push({ id: 'demo-expired', clinic_id: 'demo-clinic-expired', name: 'Dr. Can Demir', title: 'Ergoterapist', role: 'owner', created_at: ago(8 * 1440) });
   }
   if (!x.clinicNotifSeeded) {
-    // Örnek verinin geçmiş olayları okunmuş sayılır; yalnız en yeni zor an okunmamış (zil ve rozet görünsün)
+    // Örnek verinin geçmiş olayları okunmuş sayılır; yalnız en yeni davranış kaydı okunmamış (zil ve rozet görünsün)
     deriveClinicNotifications(x, () => true);
     const latest = [...x.abc_events].sort((a: Row, b: Row) => String(b.occurred_at).localeCompare(String(a.occurred_at)))[0];
     x.notifications.forEach((n: Row) => { if (n.app === 'clinic' && latest && n.data?.abc_id === latest.id) n.read_at = null; });
@@ -282,7 +282,7 @@ function deriveClinicNotifications(x: Db, isOld?: (createdAt: string) => boolean
   x.abc_events.forEach((e: Row) => {
     if (has('abc_event', (d) => d.abc_id === e.id || (d.items ?? []).some((k: Row) => k.abc_id === e.id))) return;
     x.clinic_links.filter((l: Row) => l.child_id === e.child_id && l.status === 'active').forEach((l: Row) => {
-      recipients(l).forEach((u: string) => push(u, 'abc_event', `Yeni zor an kaydı: ${name(e.child_id)}`,
+      recipients(l).forEach((u: string) => push(u, 'abc_event', `Yeni davranış kaydı: ${name(e.child_id)}`,
         `Şiddet ${e.intensity}/5${e.audio_path ? ' · 🎤 sesli kayıt' : ''}`, { abc_id: e.id, child_id: e.child_id }, e.child_id,
         // örnek verinin kayıtları hep "şimdi" eklenmiş: geçmiş olay zamanı kullanılır
         seeding && e.occurred_at < (e.created_at ?? now()) ? e.occurred_at : e.created_at ?? now()));

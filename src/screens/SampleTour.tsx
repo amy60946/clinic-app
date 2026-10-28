@@ -75,7 +75,7 @@ export const TOUR: Step[] = [
   { tab: 'summary', title: 'Örnek aileye hoş geldin', text: 'Deniz ve ailesi uydurma bir örnek. Gerçek bir aile bağlandığında göreceğin ekranlar bunlar; kısa bir tur atalım.' },
   { tab: 'summary', title: 'Özet', text: 'Seçtiğin dönemin ev rutini özeti: tamamlama, tam gün, hatırlatmadan önce başlama. Oranlar gözlemdir, puan değildir.' },
   { tab: 'routine', title: 'Ev rutinleri', text: 'Haftalık tabloda her görevin günleri. Bir göreve dokun, gün gün ayrıntısı açılır; "Zaman içinde" görevleri haftadan haftaya karşılaştırır.' },
-  { tab: 'abc', title: 'Zor anlar', text: 'Ebeveynin kaydettiği zor anlar: öncesi, ne oldu, sonrası. Tablo görünümünü dosya olarak indirebilirsin.' },
+  { tab: 'abc', title: 'Davranış kayıtları', text: 'Ebeveynin girdiği davranış kayıtları: öncesi, davranış, sonrası (ABC). Tablo görünümünü dosya olarak indirebilirsin.' },
   { tab: 'goals', title: 'Takip planı', text: 'Hedefler, ölçütler ve aile programı. "Planı aileye gönder" deyince aile ParentApp\'te görür.' },
   { tab: 'report', title: 'Rapor', text: 'Dönemin yazdırılabilir gözlem raporu ve kopyalanabilir ilerleme notu.' },
   { tab: 'details', title: 'Sıra gerçek ailede', text: 'Aileyi e-postayla davet et; ebeveyn onaylayınca çocuk danışanların arasında görünür.' },

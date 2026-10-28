@@ -1,4 +1,4 @@
-// Uzman raporu: "Ev rutin kartı raporu (4–8 hafta)" + yürütücü işlev gözlem özeti + GAS + zor an özeti.
+// Uzman raporu: "Ev rutin kartı raporu (4–8 hafta)" + yürütücü işlev gözlem özeti + GAS + davranış kaydı özeti.
 // Araştırma belgesi bölüm 6 "Uzman için çıktılar". Tanı koymaz, gözlem toplar; sınırlar her raporda yazılı.
 import {
   Task, Completion, AbcEvent, weekly, perTask, observations, bySkill, abcSummary, windowStarts, weekStarts, addDays, parseDate, lastFullDay,
@@ -109,7 +109,7 @@ ${motivation.answered ? `<tr><td>Motive etmek (ebeveyn gözlemi)</td><td>${esc(m
 <h2>Hedefe ulaşma ölçeği (GAS, −2 … +2)</h2>
 ${goals.length ? `<table><tr><th>Hedef</th>${gasWeeks.map((s) => `<th class="n">${d(s).slice(0, 5)}</th>`).join('')}</tr>${goalRows}</table>` : '<div class="m">Etkin hedef yok.</div>'}
 
-<h2>Zor anlar (ebeveyn ABC kaydı)</h2>
+<h2>Davranış kayıtları (ebeveyn ABC kaydı)</h2>
 <table><tr><th>Hafta</th>${abc.perWeek.map((x) => `<th class="n">${d(x.start).slice(0, 5)}</th>`).join('')}</tr><tr><td>Kayıt (ş = ort. şiddet 1–5)</td>${abcRows}</tr></table>
 <div class="m">Günün bölümü: sabah ${abc.byDayPart.sabah} · öğle ${abc.byDayPart['öğle']} · akşam ${abc.byDayPart['akşam']} · gece ${abc.byDayPart.gece}</div>
 
