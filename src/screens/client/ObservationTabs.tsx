@@ -21,7 +21,7 @@ export function Limits() {
   return <Text style={styles.limits}>{LIMITS_TEXT}</Text>;
 }
 
-// Zor anlar sekmesinin üstü (ortak hukuk/50-uygulama-ici-metinler.md 9)
+// Davranış kayıtları bölümünün üstü (ortak hukuk/50-uygulama-ici-metinler.md 9)
 function Emergency() {
   return (
     <View style={styles.emergency}>
@@ -172,7 +172,7 @@ function TaskMotivation({ comps, from, to, taskId }: { comps: Completion[]; from
   return <Text style={styles.small}>Motive etmek (ebeveyn): {motivationText(m)}</Text>;
 }
 
-/* ---------- Zor anlar (ABC) ---------- */
+/* ---------- Davranış kayıtları (ABC) ---------- */
 
 const PARTS: { id: DayPart; label: string }[] = [
   { id: 'sabah', label: 'Sabah' },
@@ -198,14 +198,14 @@ export function AbcTab({ client, data, today, weeks }: ClientCtx) {
   const from = s.perWeek[0].start;
   const list = data.abc.filter((e) => isoDate(new Date(e.occurred_at)) >= from);
 
-  if (!s.total) return <View><Emergency /><Empty text="Bu dönemde ebeveyn zor an kaydı girmedi. Kayıtlar ParentApp › Aile › Uzmanım bölümünden eklenir." /></View>;
+  if (!s.total) return <View><Emergency /><Empty text="Bu dönemde ebeveyn davranış kaydı girmedi. Ebeveyn kaydı ParentApp › Uzmanım › (senin adın) › Davranış kaydı ekle'den girer." /></View>;
   return (
     <View>
       <Emergency />
-      <Label>Haftalık zor an sayısı</Label>
+      <Label>Haftalık davranış kaydı sayısı</Label>
       <Card style={{ gap: 6 }}>
         <CountBars data={s.perWeek.map((w) => ({ start: w.start, value: w.count }))} />
-        <Text style={styles.note}>Sütun: ebeveynin o hafta kaydettiği zor an sayısı. Az kayıt, az zor an demek olmayabilir; ebeveynin kayıt alışkanlığına bağlıdır.</Text>
+        <Text style={styles.note}>Sütun: ebeveynin o hafta girdiği davranış kaydı sayısı. Az kayıt, davranışın az görüldüğü anlamına gelmeyebilir; ebeveynin kayıt alışkanlığına bağlıdır.</Text>
       </Card>
       <Label>Haftalık sayı ve ortalama şiddet (1–5, ebeveyn)</Label>
       <Card style={{ gap: 6 }}>
@@ -223,7 +223,7 @@ export function AbcTab({ client, data, today, weeks }: ClientCtx) {
         <View style={{ width: 180 }}>
           <Segmented options={[{ id: 'cards', label: 'Kartlar' }, { id: 'table', label: 'Tablo' }]} value={view} onChange={setView} />
         </View>
-        <ExportButton name={csvName('zor-anlar', client.child_name, from, today)} header={ABC_HEADER} event="export.abc"
+        <ExportButton name={csvName('davranis-kayitlari', client.child_name, from, today)} header={ABC_HEADER} event="export.abc"
           rows={() => abcRows(data.abc, from, today)} />
       </View>
       {view === 'table' ? (

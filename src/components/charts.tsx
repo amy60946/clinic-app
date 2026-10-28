@@ -43,7 +43,7 @@ export function WeeklyRateBars({ data, height = 150, width = 520 }: {
   );
 }
 
-// Haftalık sayı (ör. zor an): hafta başına sütun, ölçek en büyük değere göre; 0 hafta ince çizgi
+// Haftalık sayı (ör. davranış kaydı): hafta başına sütun, ölçek en büyük değere göre; 0 hafta ince çizgi
 export function CountBars({ data, height = 140, width = 520, color = colors.navy }: {
   data: { start: string; value: number }[]; height?: number; width?: number; color?: string;
 }) {

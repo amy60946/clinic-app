@@ -17,7 +17,7 @@ test('örnek aile: aynı gün aynı veri, sonlara doğru iyileşme, bugün kayı
   assert.ok(a.completions.every((c) => c.date <= today));
   const grid = weekGrid(a.tasks, a.completions, today);
   assert.ok(grid.rows.length >= 5);
-  // zor anlar başta daha sık
+  // davranış kayıtları başta daha sık
   const first = a.abc.filter((e) => e.occurred_at < new Date('2026-09-15').toISOString()).length;
   const last = a.abc.filter((e) => e.occurred_at >= new Date('2026-10-14').toISOString()).length;
   assert.ok(first > last);

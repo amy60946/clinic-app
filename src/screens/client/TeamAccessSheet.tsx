@@ -34,7 +34,7 @@ export default function TeamAccessSheet({ visible, onClose, client, me, team, on
   };
 
   const makeResponsible = (m: Member) => Alert.alert(`${m.name || 'Bu uzman'} sorumlu olsun mu?`,
-    'Aileden gelen bildirimler (zor an, paylaşım, öneri kararı) ona gider. Sen bu danışanı görmeye devam edersin.',
+    'Aileden gelen bildirimler (davranış kaydı, paylaşım, öneri kararı) ona gider. Sen bu danışanı görmeye devam edersin.',
     [{ text: 'Vazgeç', style: 'cancel' }, {
       text: 'Sorumlu yap', onPress: async () => {
         setBusy(m.id);

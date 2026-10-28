@@ -109,7 +109,7 @@ export function sampleBundle(today: string): SampleBundle {
   completions.push({ task_id: 's-teeth', date: today, status: 'approved', child_done_at: at(today, '07:40'), reviewed_at: at(today, '08:00'), decline_reason: null, parent_note: null });
   completions.push({ task_id: 's-bed', date: today, status: 'pending', child_done_at: at(today, '07:55'), reviewed_at: null, decline_reason: null, parent_note: null });
 
-  // Zor anlar: başta haftada 3, sonlara doğru haftada 1
+  // Davranış kayıtları: başta haftada 3, sonlara doğru haftada 1
   const abc: AbcEvent[] = [];
   for (let w = 0; w < WEEKS; w++) {
     const n = w < 3 ? 3 : w < 6 ? 2 : 1;
@@ -165,7 +165,7 @@ function sampleNotes(today: string): SampleNote[] {
   });
   return [
     n(3, 'Görüşme: sabah rutini belirgin şekilde düzeldi; aile çizelgeyi tutarlı kullanıyor. Akşam ekran geçişleri hâlâ zor; geçiş uyarısı (5 dk kala) önerildi.', 1),
-    n(17, 'Görüşme: övgü modülü başladı. Anne zor anları aynı gün kaydediyor; en sık tetikleyici tablet kapatma.', 2),
+    n(17, 'Görüşme: övgü modülü başladı. Anne davranış kayıtlarını aynı gün giriyor; en sık tetikleyici tablet kapatma.', 2),
   ];
 }
 

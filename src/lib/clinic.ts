@@ -97,7 +97,7 @@ export async function listClients(): Promise<Client[]> {
   }));
 }
 
-// Aileye verilecek paylaşım kodu (ebeveyn ParentApp › Aile › Hesap › Uzmanım'da girer). 7 gün, tek kullanım.
+// Aileye verilecek paylaşım kodu (ebeveyn ParentApp › Uzmanım › Uzman bağla ya da Aile › Hesap › Kod gir). 7 gün, tek kullanım.
 
 // Uzman paylaşımı sonlandırabilir (ebeveyn de). Erişim hemen biter; notlar ve hedefler klinikte kalır.
 export async function revokeLink(linkId: string): Promise<void> {
@@ -152,7 +152,7 @@ export async function loadClientData(childId: string, from: string): Promise<Cli
   };
 }
 
-// Zor an sesi: Storage 'abc' kovası; uzman yalnız rızalı çocuğun kaydına bağlı sesi okuyabilir (RLS). 1 saatlik bağlantı.
+// Davranış kaydı sesi: Storage 'abc' kovası; uzman yalnız rızalı çocuğun kaydına bağlı sesi okuyabilir (RLS). 1 saatlik bağlantı.
 export async function abcAudioUrl(path: string): Promise<string> {
   const { data, error } = await supabase.storage.from('abc').createSignedUrl(path, 3600);
   if (error || !data?.signedUrl) throw new Error(error?.message ?? 'Ses kaydı açılamadı');

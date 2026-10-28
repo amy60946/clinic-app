@@ -65,7 +65,7 @@ test('gözlem özeti: hatırlatmadan önce başlama, nedenler, ret, onay gecikme
   assert.equal(o.reviewDelayHours, 2); // 2, 1, 3 saat → ortanca 2
 });
 
-test('beceri alanı ve zor an özeti', () => {
+test('beceri alanı ve davranış kaydı özeti', () => {
   const tasks = [task({ skill: 'teamwork' }), task({ id: 't2', skill: '' }), task({ id: 't3', skill: 'Sorumluluk' }), task({ id: 't4', skill: 'Odaklanma' })];
   const s = bySkill(tasks, [comp('2026-10-19', 'approved')], '2026-10-19', '2026-10-20');
   assert.deepEqual(s.map((x) => [x.skill, x.planned, x.approved]), [['Takım Çalışması', 4, 1], ['Odak', 2, 0], ['Diğer', 2, 0]]);

@@ -39,7 +39,7 @@ export type AbcEvent = {
   behavior: string;
   consequence: string;
   intensity: number;
-  // ParentApp zor an kaydı (ortak 20261019140000_parent_features): ebeveynin seçtiği gün bölümü, çok çocuklu olay, ses
+  // ParentApp davranış kaydı (ortak 20261019140000_parent_features): ebeveynin seçtiği gün bölümü, çok çocuklu olay, ses
   day_part?: 'morning' | 'noon' | 'evening' | 'night' | null;
   group_id?: string | null;
   audio_path?: string | null;
@@ -373,7 +373,7 @@ export function bySkill(tasks: Task[], comps: Completion[], from: string, to: st
     .sort((a, b) => (a.skill === 'Diğer' ? 1 : 0) - (b.skill === 'Diğer' ? 1 : 0) || b.planned - a.planned);
 }
 
-/* ---------- Zor an (ABC) özeti ---------- */
+/* ---------- Davranış kaydı (ABC) özeti ---------- */
 
 export type DayPart = 'sabah' | 'öğle' | 'akşam' | 'gece';
 
@@ -396,7 +396,7 @@ export type AbcSummary = {
 };
 
 export function abcSummary(events: AbcEvent[], today: string, weeks: number): AbcSummary {
-  // Zor anlar gün içinde de kaydedilir; bu hafta (bugün dahil) gösterilir
+  // Davranış kayıtları gün içinde de girilir; bu hafta (bugün dahil) gösterilir
   const starts = weekStarts(today, weeks);
   const from = starts[0];
   const inWindow = events.filter((e) => {

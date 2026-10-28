@@ -33,12 +33,12 @@ export const PACKAGES: Record<PackageId, { title: string; who: string; features:
     features: [
       'Sınırsız danışan; aileler ParentApp ile ücretsiz bağlanır',
       'Evdeki rutin verisi: görev, tamamlama, "Yapamam" nedenleri',
-      'Zor an (ABC) kayıtları ve ebeveynin sesli notları',
+      'Davranış kayıtları (ABC) ve ebeveynin sesli notları',
       'Hedef takibi (GAS) ve haftalık grafikler',
       'Aileye görev önerisi; karar ebeveynde',
       'Yazdırılabilir gözlem raporu (PDF)',
       'Yalnız sana görünen klinik notları (aile görmez)',
-      'Yeni kayıt ve zor anlarda anlık bildirim',
+      'Yeni kayıt ve davranış kaydında anlık bildirim',
     ],
   },
   clinic: {

@@ -13,7 +13,7 @@ test('CSV: noktalı virgül, tırnak, BOM ve formül koruması', () => {
   assert.equal(l2, ';5');
 });
 
-test('zor anlar: dönem dışı ayıklanır, eskiden yeniye, gün bölümü seçiliyse saat boş', () => {
+test('davranış kayıtları: dönem dışı ayıklanır, eskiden yeniye, gün bölümü seçiliyse saat boş', () => {
   const ev = (id, date, hm, o = {}) => ({ id, occurred_at: at(date, hm), antecedent: 'Ekran kapandı', behavior: 'Bağırdı', consequence: 'Sakinleşti', intensity: 3, ...o });
   const rows = abcRows([
     ev('2', '2026-10-10', '19:30'),
@@ -38,5 +38,5 @@ test('ev rutini: kayıtsız planlı günler de yazılır', () => {
 });
 
 test('dosya adında yalnız baş harf', () => {
-  assert.equal(csvName('zor-anlar', 'İpek Yılmaz', '2026-10-01', '2026-10-28'), 'zor-anlar-i-2026-10-01_2026-10-28.csv');
+  assert.equal(csvName('davranis-kayitlari', 'İpek Yılmaz', '2026-10-01', '2026-10-28'), 'davranis-kayitlari-i-2026-10-01_2026-10-28.csv');
 });

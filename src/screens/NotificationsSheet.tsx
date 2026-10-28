@@ -19,7 +19,7 @@ const ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
 // Danışan ekranında birden çok çocuklu bildirim (kardeşler) yalnız bu çocuğun adıyla gösterilir
 function titleFor(n: AppNotification, childId?: string, childName?: string) {
   if (!childId || notificationChildren(n).length < 2) return n.title;
-  if (n.kind === 'abc_event') return `Yeni zor an kaydı: ${childName || 'bu danışan'}`;
+  if (n.kind === 'abc_event') return `Yeni davranış kaydı: ${childName || 'bu danışan'}`;
   if (n.kind === 'clinic_shared') return `Yeni paylaşım: ${childName || 'bu danışan'}`;
   return n.title;
 }
@@ -104,7 +104,7 @@ export default function NotificationsSheet({ visible, onClose, onOpen, childId, 
             contentContainerStyle={{ padding: 16, gap: 8, flexGrow: 1 }}
             ListEmptyComponent={
               <Text style={styles.empty}>
-                {childId ? `${childName || 'Bu danışan'} için henüz bildirim yok.` : 'Henüz bildirim yok. Aile yeni bir çocuk paylaştığında, zor an kaydettiğinde ya da önerine karar verdiğinde burada görünür.'}
+                {childId ? `${childName || 'Bu danışan'} için henüz bildirim yok.` : 'Henüz bildirim yok. Aile yeni bir çocuk paylaştığında, davranış kaydı girdiğinde ya da önerine karar verdiğinde burada görünür.'}
               </Text>
             }
             renderItem={({ item: n }) => (
