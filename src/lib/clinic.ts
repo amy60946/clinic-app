@@ -205,7 +205,7 @@ export type RepeatKind = 'daily' | 'weekly' | 'monthly';
 import { Category, normalizeCategory } from '../skills';
 export type { Category } from '../skills';
 
-// Rutin paketi (ortak proposed/20261028200000_routines_v2.sql): aynı `group` = aynı paket; ebeveyn tek kartta görür
+// Rutin paketi (ortak migrations/20261028200000_routines_v2.sql): aynı `group` = aynı paket; ebeveyn tek kartta görür
 export type RoutineRef = { group: string; title: string; icon: string; position: number; key: string };
 export type SuggestionInput = {
   title: string; emoji: string; skill: string; description: string;
@@ -314,7 +314,7 @@ export async function withdrawSuggestion(id: string): Promise<void> {
   check(null, error);
 }
 
-/* ---------- Uzmanın kendi rutinleri (clinic_routines; ortak proposed/20261028200000_routines_v2.sql) ---------- */
+/* ---------- Uzmanın kendi rutinleri (clinic_routines; ortak migrations/20261028200000_routines_v2.sql) ---------- */
 import type { OwnRoutine, OwnItem } from './routines';
 const ROUTINE_TABLE_MISSING = (e: { code?: string } | null) => e?.code === 'PGRST205' || e?.code === '42P01';
 
