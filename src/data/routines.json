@@ -1,8 +1,51 @@
 {
- "version": 1,
+ "version": 2,
  "routines": [
   {
+   "id": "morning-k",
+   "theme": "morning",
+   "ages": [
+    "K"
+   ],
+   "title": "Güne hazır sabah",
+   "subtitle": "Okul ve kreş sabahları",
+   "icon": "sunny-outline",
+   "tint": "#FFF1D6",
+   "repeat": "weekdays",
+   "items": [
+    {
+     "key": "gs_focus_039",
+     "time": "07:00"
+    },
+    {
+     "key": "gs_focus_057",
+     "time": "07:05"
+    },
+    {
+     "key": "gs_health_033",
+     "time": "07:15"
+    },
+    {
+     "key": "gs_focus_030",
+     "time": "07:20"
+    },
+    {
+     "key": "gs_health_031",
+     "time": "07:30"
+    },
+    {
+     "key": "gs_health_020",
+     "time": "07:40"
+    }
+   ]
+  },
+  {
    "id": "morning",
+   "theme": "morning",
+   "ages": [
+    "A",
+    "B"
+   ],
    "title": "Güne hazır sabah",
    "subtitle": "Okul sabahları",
    "icon": "sunny-outline",
@@ -36,7 +79,84 @@
    ]
   },
   {
+   "id": "morning-c",
+   "theme": "morning",
+   "ages": [
+    "C"
+   ],
+   "title": "Güne hazır sabah",
+   "subtitle": "Okul sabahları, kendi başına",
+   "icon": "sunny-outline",
+   "tint": "#FFF1D6",
+   "repeat": "weekdays",
+   "items": [
+    {
+     "key": "gs_focus_007",
+     "time": "06:45"
+    },
+    {
+     "key": "gs_focus_057",
+     "time": "06:55"
+    },
+    {
+     "key": "gs_health_033",
+     "time": "07:00"
+    },
+    {
+     "key": "gs_health_024",
+     "time": "07:05"
+    },
+    {
+     "key": "gs_health_031",
+     "time": "07:15"
+    },
+    {
+     "key": "gs_focus_041",
+     "time": "07:30"
+    }
+   ]
+  },
+  {
+   "id": "afterschool-k",
+   "theme": "afterschool",
+   "ages": [
+    "K"
+   ],
+   "title": "Okul dönüşü",
+   "subtitle": "Öğleden sonra",
+   "icon": "school-outline",
+   "tint": "#E3F0FF",
+   "repeat": "weekdays",
+   "items": [
+    {
+     "key": "gs_home_008",
+     "time": "15:30"
+    },
+    {
+     "key": "gs_health_041",
+     "time": "15:35"
+    },
+    {
+     "key": "gs_relation_011",
+     "time": "16:00"
+    },
+    {
+     "key": "gs_health_026",
+     "time": "16:30"
+    },
+    {
+     "key": "gs_home_047",
+     "time": "17:30"
+    }
+   ]
+  },
+  {
    "id": "afterschool",
+   "theme": "afterschool",
+   "ages": [
+    "A",
+    "B"
+   ],
    "title": "Okul dönüşü",
    "subtitle": "Öğleden sonra",
    "icon": "school-outline",
@@ -66,7 +186,84 @@
    ]
   },
   {
+   "id": "afterschool-c",
+   "theme": "afterschool",
+   "ages": [
+    "C"
+   ],
+   "title": "Okul dönüşü",
+   "subtitle": "Öğleden sonra, ödev planıyla",
+   "icon": "school-outline",
+   "tint": "#E3F0FF",
+   "repeat": "weekdays",
+   "items": [
+    {
+     "key": "gs_focus_032",
+     "time": "15:45"
+    },
+    {
+     "key": "gs_learn_031",
+     "time": "16:00"
+    },
+    {
+     "key": "gs_learn_017",
+     "time": "16:15"
+    },
+    {
+     "key": "gs_health_010",
+     "time": "18:00"
+    },
+    {
+     "key": "gs_focus_055",
+     "time": "19:30"
+    }
+   ]
+  },
+  {
+   "id": "evening-k",
+   "theme": "evening",
+   "ages": [
+    "K"
+   ],
+   "title": "Sakin akşam",
+   "subtitle": "Uyku öncesi",
+   "icon": "moon-outline",
+   "tint": "#ECE8FF",
+   "repeat": "daily",
+   "items": [
+    {
+     "key": "gs_home_050",
+     "time": "19:00"
+    },
+    {
+     "key": "gs_home_033",
+     "time": "19:40"
+    },
+    {
+     "key": "gs_home_058",
+     "time": "20:00"
+    },
+    {
+     "key": "gs_focus_046",
+     "time": "20:10"
+    },
+    {
+     "key": "gs_health_040",
+     "time": "20:20"
+    },
+    {
+     "key": "gs_relation_011",
+     "time": "20:30"
+    }
+   ]
+  },
+  {
    "id": "evening",
+   "theme": "evening",
+   "ages": [
+    "A",
+    "B"
+   ],
    "title": "Sakin akşam",
    "subtitle": "Uyku öncesi",
    "icon": "moon-outline",
@@ -100,7 +297,95 @@
    ]
   },
   {
+   "id": "evening-c",
+   "theme": "evening",
+   "ages": [
+    "C"
+   ],
+   "title": "Sakin akşam",
+   "subtitle": "Uyku öncesi, ekransız son yarım saat",
+   "icon": "moon-outline",
+   "tint": "#ECE8FF",
+   "repeat": "daily",
+   "items": [
+    {
+     "key": "gs_home_051",
+     "time": "19:40"
+    },
+    {
+     "key": "gs_focus_055",
+     "time": "21:00"
+    },
+    {
+     "key": "gs_focus_058",
+     "time": "21:30"
+    },
+    {
+     "key": "gs_health_040",
+     "time": "21:40"
+    },
+    {
+     "key": "gs_learn_033",
+     "time": "21:50"
+    }
+   ]
+  },
+  {
+   "id": "chores-k",
+   "theme": "chores",
+   "ages": [
+    "K"
+   ],
+   "title": "Haftalık ev işleri",
+   "subtitle": "Her gün küçük bir iş",
+   "icon": "home-outline",
+   "tint": "#E6F4EA",
+   "repeat": "weekly",
+   "items": [
+    {
+     "key": "gs_home_053",
+     "time": "18:00",
+     "days": [
+      1
+     ]
+    },
+    {
+     "key": "gs_home_062",
+     "time": "18:00",
+     "days": [
+      2
+     ]
+    },
+    {
+     "key": "gs_home_063",
+     "time": "18:00",
+     "days": [
+      3
+     ]
+    },
+    {
+     "key": "gs_home_054",
+     "time": "18:00",
+     "days": [
+      4
+     ]
+    },
+    {
+     "key": "gs_home_039",
+     "time": "18:00",
+     "days": [
+      5
+     ]
+    }
+   ]
+  },
+  {
    "id": "chores",
+   "theme": "chores",
+   "ages": [
+    "A",
+    "B"
+   ],
    "title": "Haftalık ev işleri",
    "subtitle": "Her gün bir iş",
    "icon": "home-outline",
@@ -145,7 +430,111 @@
    ]
   },
   {
+   "id": "chores-c",
+   "theme": "chores",
+   "ages": [
+    "C"
+   ],
+   "title": "Haftalık ev işleri",
+   "subtitle": "Her gün bir sorumluluk",
+   "icon": "home-outline",
+   "tint": "#E6F4EA",
+   "repeat": "weekly",
+   "items": [
+    {
+     "key": "gs_home_045",
+     "time": "18:00",
+     "days": [
+      1
+     ]
+    },
+    {
+     "key": "gs_focus_031",
+     "time": "18:00",
+     "days": [
+      2
+     ]
+    },
+    {
+     "key": "gs_home_019",
+     "time": "18:00",
+     "days": [
+      3
+     ]
+    },
+    {
+     "key": "gs_home_060",
+     "time": "18:00",
+     "days": [
+      4
+     ]
+    },
+    {
+     "key": "gs_home_064",
+     "time": "18:00",
+     "days": [
+      5
+     ]
+    }
+   ]
+  },
+  {
+   "id": "family-ka",
+   "theme": "family",
+   "ages": [
+    "K",
+    "A"
+   ],
+   "title": "Ailece bir hafta",
+   "subtitle": "Her akşam birlikte",
+   "icon": "people-outline",
+   "tint": "#FDE7EF",
+   "repeat": "weekly",
+   "items": [
+    {
+     "key": "gs_relation_009",
+     "time": "19:30",
+     "days": [
+      1
+     ]
+    },
+    {
+     "key": "gs_relation_010",
+     "time": "18:30",
+     "days": [
+      2
+     ]
+    },
+    {
+     "key": "gs_learn_034",
+     "time": "18:00",
+     "days": [
+      3
+     ]
+    },
+    {
+     "key": "gs_mind_015",
+     "time": "20:00",
+     "days": [
+      4
+     ]
+    },
+    {
+     "key": "gs_relation_002",
+     "time": "20:00",
+     "days": [
+      5
+     ]
+    }
+   ]
+  },
+  {
    "id": "family",
+   "theme": "family",
+   "ages": [
+    "B",
+    "C"
+   ],
    "title": "Ailece bir hafta",
    "subtitle": "Her akşam birlikte",
    "icon": "people-outline",
@@ -190,7 +579,59 @@
    ]
   },
   {
+   "id": "weekend-k",
+   "theme": "weekend",
+   "ages": [
+    "K"
+   ],
+   "title": "Hafta sonu keyfi",
+   "subtitle": "Cumartesi ve Pazar",
+   "icon": "bicycle-outline",
+   "tint": "#E0F5F3",
+   "repeat": "weekly",
+   "items": [
+    {
+     "key": "gs_focus_029",
+     "time": "09:30",
+     "days": [
+      6,
+      7
+     ]
+    },
+    {
+     "key": "gs_relation_013",
+     "time": "11:00",
+     "days": [
+      6,
+      7
+     ]
+    },
+    {
+     "key": "gs_relation_011",
+     "time": "15:00",
+     "days": [
+      6,
+      7
+     ]
+    },
+    {
+     "key": "gs_relation_008",
+     "time": "19:00",
+     "days": [
+      6,
+      7
+     ]
+    }
+   ]
+  },
+  {
    "id": "weekend",
+   "theme": "weekend",
+   "ages": [
+    "A",
+    "B",
+    "C"
+   ],
    "title": "Hafta sonu keyfi",
    "subtitle": "Cumartesi ve Pazar",
    "icon": "bicycle-outline",

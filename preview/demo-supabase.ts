@@ -20,7 +20,7 @@ const APP: string = (globalThis as any).__PREVIEW_APP__ ?? 'parent';
 const KEY = 'pofi-onizleme-v4';
 const TABLES = ['profiles', 'families', 'children', 'tasks', 'task_assignments', 'completions', 'messages', 'saved_templates', 'invite_codes',
   'clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'abc_events',
-  'clinic_task_suggestions', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events', 'billing_plans', 'clinic_link_access',
+  'clinic_task_suggestions', 'clinic_routines', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events', 'billing_plans', 'clinic_link_access',
   'care_modules', 'care_module_logs', 'clinic_link_history', 'clinician_surveys', 'legal_acceptances', 'kvkk_requests'];
 
 const uuid = () =>
@@ -369,7 +369,7 @@ function linkVisible(m: Row, l: Row) {
 }
 
 // Uzman oturumunda sunucudaki RLS'nin önizleme karşılığı: yalnız kendi kliniği ve etkin rızalı çocuk
-const CLINIC_OWN = ['clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'clinic_task_suggestions'];
+const CLINIC_OWN = ['clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'clinic_task_suggestions', 'clinic_routines'];
 const CHILD_SHARED = ['children', 'task_assignments', 'completions', 'abc_events'];
 function visible(table: string, r: Row): boolean {
   if (['notifications', 'push_tokens'].includes(table)) return r.user_id === sess()?.user.id;
