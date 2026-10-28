@@ -196,7 +196,7 @@
    "measure": "frequency",
    "target": "Haftada en çok 2 kez",
    "weeks": 10,
-   "home_support": "Zor anı ParentApp'e kaydet; sakin ve tutarlı sonuç.",
+   "home_support": "Olunca ParentApp'te davranış kaydı gir; sakin ve tutarlı sonuç.",
    "modules": [
     "m_attention",
     "m_consequences",
@@ -236,7 +236,7 @@
    "measure": "frequency",
    "target": "Günde en çok 1 kez",
    "weeks": 8,
-   "home_support": "Zor anı kaydet (ne oldu, ne yaptın).",
+   "home_support": "Davranış kaydı gir (ne oldu, ne yaptın).",
    "modules": [
     "m_emotion",
     "m_attention",
@@ -424,15 +424,15 @@
  "modules": [
   {
    "key": "m_abc",
-   "title": "Gözlem ve zor an kaydı",
-   "aim": "Zor anların ne zaman, neyle başladığını ve neyle bittiğini birlikte görmek.",
+   "title": "Gözlem ve davranış kaydı",
+   "aim": "Zorlayıcı davranışların ne zaman, neyle başladığını ve neyle bittiğini birlikte görmek.",
    "skills": [
-    "Zor anı olunca ya da aynı gün kaydetmek",
+    "Davranış olunca ya da aynı gün kaydetmek",
     "Öncesini, davranışı ve sonrasını kısa yazmak"
    ],
-   "practice": "Bu hafta her zor anı ParentApp › Zor anlar ile kaydet.",
+   "practice": "Bu hafta her zorlayıcı davranışı ParentApp › Uzmanım › Davranış kaydı ekle ile kaydet.",
    "checklist": [
-    "Zor anı aynı gün kaydettim",
+    "Davranış kaydını aynı gün girdim",
     "Öncesinde ne olduğunu yazdım",
     "Benim tepkimi yazdım"
    ],
