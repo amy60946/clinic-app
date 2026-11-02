@@ -216,7 +216,7 @@ export type SuggestionInput = {
   routine?: RoutineRef | null; goal_id?: string | null;
 };
 // draft: gönderilmemiş taslak (aile görmez; "Aileye gönder" ile gider). kind 'change': ailede ekli göreve değişiklik önerisi
-// (ortak proposed/20261102100000_plan_redesign.sql, akislar.md 12.1)
+// (ortak migrations/20261102100000_plan_redesign.sql, akislar.md 12.1)
 export type Suggestion = SuggestionInput & {
   id: string; status: 'draft' | 'pending' | 'accepted' | 'declined'; created_at: string; updated_at: string | null;
   decided_at: string | null; task_title: string | null; task_id: string | null;
@@ -345,7 +345,7 @@ export async function proposeChanges(c: Client, by: string, list: ChangeInput[],
   }
 }
 
-// Rutin ya da tek görev ↔ hedef bağı (ailede ekli olanlar dahil; ortak proposed/20261102100000_plan_redesign.sql 6).
+// Rutin ya da tek görev ↔ hedef bağı (ailede ekli olanlar dahil; ortak migrations/20261102100000_plan_redesign.sql 6).
 // goalId null: bağı kaldır. Sunucuda işlev yoksa SuggestionSchemaMissing.
 export async function setSuggestionGoal(ids: string[], goalId: string | null): Promise<void> {
   if (!ids.length) return;

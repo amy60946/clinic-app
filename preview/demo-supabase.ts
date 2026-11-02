@@ -199,7 +199,7 @@ function upgrade(x: Db): Db {
     x.notifications.forEach((n: Row) => { if (n.app === 'clinic' && latest && n.data?.abc_id === latest.id) n.read_at = null; });
     x.clinicNotifSeeded = true;
   }
-  // Takip planı yeniden tasarımı (ortak proposed/20261102100000): örnek programlar hedeflerine bağlı, plan bir kez gönderilmiş
+  // Takip planı yeniden tasarımı (ortak migrations/20261102100000): örnek programlar hedeflerine bağlı, plan bir kez gönderilmiş
   TABLES.forEach((t) => { x[t] = x[t] ?? []; });
   if (!x.planRedesignSeeded) {
     if (x.care_modules.some((m: Row) => m.id === 'm-ovgu') && x.clinic_goals.some((g: Row) => g.id === 'g-sabah')) {
@@ -938,7 +938,7 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     try { v = JSON.parse(localStorage.getItem('demo.inherited') || 'null') ?? v; } catch {}
     return { data: v, error: null };
   }
-  // Tek gönderim (ortak proposed/20261102100000): plan anlık görüntüsü + taslak öneriler bekleyen; aileye tek bildirim
+  // Tek gönderim (ortak migrations/20261102100000): plan anlık görüntüsü + taslak öneriler bekleyen; aileye tek bildirim
   if (name === 'care_plan_publish') {
     const l = db.clinic_links.find((x: Row) => x.id === args.p_link_id);
     if (!l) return err('Paylaşım bulunamadı');

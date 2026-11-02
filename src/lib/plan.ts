@@ -183,7 +183,7 @@ export async function applyPackage(t: PlanTarget, p: PackageT, existing: { goals
   return { goalIds: gids };
 }
 
-/* ---------- Program ↔ hedef (çoklu; ortak proposed/20261102100000_plan_redesign.sql) ---------- */
+/* ---------- Program ↔ hedef (çoklu; ortak migrations/20261102100000_plan_redesign.sql) ---------- */
 export type ModuleGoals = Record<string, string[]>;   // program kimliği → hedef kimlikleri
 // Sunucuda tablo yoksa null: hedefe bağlama kapalı, programlar "bağlı olmayanlar"da
 export async function loadModuleGoals(moduleIds: string[]): Promise<ModuleGoals | null> {
