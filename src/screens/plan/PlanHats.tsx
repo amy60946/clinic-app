@@ -389,8 +389,8 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
     try {
       const tg = t.content.goal;
       const [gid] = await addGoals(target, [{
-        title: tg.title, description: tg.description ?? '', domain: tg.domain ?? '', measure: tg.measure ?? 'yesno', baseline: '',
-        target: tg.target ?? '', weeks: tg.weeks ?? null, home_support: tg.home_support ?? '', shared: true, status: 'active',
+        title: tg.title, description: [tg.description, tg.home_support].filter(Boolean).join('\n').slice(0, 600), domain: tg.domain ?? '',
+        measure: tg.measure ?? 'level', baseline: '', target: tg.target ?? '', weeks: tg.weeks ?? null, home_support: '', shared: true, status: 'active',
         template_key: tg.template_key ?? null, position: plan.goals.length,
       }]);
       // programlar: aynı şablon anahtarlı program planda varsa o bağlanır, yoksa eklenir
@@ -567,7 +567,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
             <View key={k} style={styles.kvItem}><Text style={styles.kvKey}>{k}</Text><Text style={styles.kvVal}>{v}</Text></View>
           ))}
         </View>
-        {!!g.description && <Text style={styles.small}>{g.description}</Text>}
+        {!!g.description && <Text style={styles.small}><Text style={{ fontWeight: '700', color: colors.navy }}>{g.shared ? 'Aileye not: ' : 'Not: '}</Text>{g.description}</Text>}
         {!!g.home_support && <Text style={styles.small}><Text style={{ fontWeight: '700', color: colors.navy }}>Evde: </Text>{g.home_support}</Text>}
         <View style={styles.private}>
           <View style={styles.privateHead}>

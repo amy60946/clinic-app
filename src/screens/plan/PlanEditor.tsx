@@ -326,7 +326,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave }: {
   const [step, setStep] = useState<'pick' | 'form'>(editing || legacy ? 'form' : 'pick');
   const [domain, setDomain] = useState(editing?.domain ?? '');
   const [f, setF] = useState<GoalInput>(editing ?? {
-    title: '', description: '', domain: '', measure: 'yesno', baseline: '', target: '', weeks: 6, home_support: '', shared: true, status: 'active',
+    title: '', description: '', domain: '', measure: 'level', baseline: '', target: '', weeks: 6, home_support: '', shared: true, status: 'active',
   });
   const [busy, setBusy] = useState(false);
   const set = (p: Partial<GoalInput>) => setF((x) => ({ ...x, ...p }));
@@ -348,7 +348,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave }: {
             <Pressable key={g.key} style={styles.tpl} onPress={() => { setF({ ...goalFromTemplate(g) }); setStep('form'); }}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={styles.title}>{g.title}</Text>
-                <Text style={styles.small}>{domainLabel(g.domain)} · {MEASURES.find((m) => m.key === g.measure)?.label} · {g.target}</Text>
+                <Text style={styles.small}>{domainLabel(g.domain)} · hedef {g.target} · {g.weeks} hafta</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.faint} />
             </Pressable>
@@ -366,37 +366,71 @@ export function GoalSheet({ editing, legacy, onClose, onSave }: {
       <Label>Hedef davranış</Label>
       <Input value={f.title} onChangeText={(v) => set({ title: v })} placeholder="Ör. Sabah rutinini 1 hatırlatmayla bitirir" maxLength={120} multiline />
       {!legacy && (<>
-        <Label>Nasıl ölçülür</Label>
-        <Chips options={MEASURES.map((m) => ({ id: m.key, label: m.label }))} value={f.measure} onChange={(v) => set({ measure: v as Measure })} />
-        <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
-          <View style={{ flex: 1, minWidth: 140 }}>
-            <Label>Başlangıç düzeyi (aile görür)</Label>
-            <Input value={f.baseline} onChangeText={(v) => set({ baseline: v })} placeholder="Ör. %30 (boşsa ilk hafta)" maxLength={60} />
-          </View>
-          <View style={{ flex: 1, minWidth: 140 }}>
-            <Label>Hedef düzey (aile görür)</Label>
-            <Input value={f.target} onChangeText={(v) => set({ target: v })} placeholder="Ör. 7 günün 5'i" maxLength={60} />
-          </View>
-        </View>
+        {/* B1 (kullanıcı kararı 2 Kasım 2026): ölçüm türü, başlangıç ve "Evde nasıl desteklenir" formdan kalktı; ilerlemeyi uzman
+            "Değerlendir" ile işaretler, ev talimatı programın "Evde uygulama"sında. Eski kayıtlardaki değerler aşağıda, nota taşınabilir. */}
+        <LabelInfo text="Hedef düzey" info="Bu düzeye ulaşıldığına sen karar verirsin; rutin oranları ve davranış kayıtları yardımcı olur. Aile görür." />
+        <Input value={f.target} onChangeText={(v) => set({ target: v })} placeholder="Ör. 7 günün 5'i" maxLength={60} />
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
           {TARGET_HINTS.map((t) => <SmallButton key={t} label={t} onPress={() => set({ target: t })} />)}
         </View>
-        <Label>Süre</Label>
+        <LabelInfo text="Süre" info="Süre dolunca planda &quot;Değerlendirme zamanı&quot; çıkar; hedefi sürdürür, kapatır ya da ara verirsin. Aile görür." />
         <Chips options={[4, 6, 8, 12].map((w) => ({ id: String(w), label: `${w} hafta` }))} value={f.weeks ? String(f.weeks) : ''}
           onChange={(v) => set({ weeks: Number(v) })} />
-        <Label>Evde nasıl desteklenir (aile görür)</Label>
-        <Input value={f.home_support} onChangeText={(v) => set({ home_support: v })} placeholder="Ör. Resimli çizelge; bitince övgü" maxLength={400} multiline />
       </>)}
-      <Label>{legacy ? 'Açıklama' : 'Ek açıklama (aile görür)'}</Label>
-      <Input value={f.description} onChangeText={(v) => set({ description: v })} placeholder="İsteğe bağlı" maxLength={600} multiline />
+      {legacy ? <Label>Açıklama</Label> : (
+        <LabelInfo text="Aileye not (isteğe bağlı)" info="Ailenin hedefin altında göreceği kısa açıklama. Evde nasıl uygulanacağını programın &quot;Evde uygulama&quot; kısmında anlatırsın." />
+      )}
+      <Input value={f.description} onChangeText={(v) => set({ description: v })}
+        placeholder={legacy ? 'İsteğe bağlı' : 'Ör. Resimli çizelgeyi buzdolabına asın; bitince kısa bir övgü yeter.'} maxLength={600} multiline />
+      {!legacy && (!!f.baseline.trim() || !!f.home_support.trim()) && (
+        <View style={styles.oldBox}>
+          <Text style={styles.small}>Önceki kayıttan (formda artık yok; aile görüyordu):</Text>
+          {!!f.baseline.trim() && <Text style={styles.body}>Başlangıç: {f.baseline}</Text>}
+          {!!f.home_support.trim() && <Text style={styles.body}>Evde: {f.home_support}</Text>}
+          <View style={{ alignSelf: 'flex-start' }}>
+            <SmallButton label="Aileye nota taşı" onPress={() => set({
+              description: [f.description.trim(), f.baseline.trim() && `Başlangıç: ${f.baseline.trim()}`, f.home_support.trim() && `Evde: ${f.home_support.trim()}`]
+                .filter(Boolean).join('\n').slice(0, 600),
+              baseline: '', home_support: '',
+            })} />
+          </View>
+        </View>
+      )}
       {!legacy && (
         <View style={[styles.inline, { marginTop: 14 }]}>
           <Switch value={f.shared} onValueChange={(v) => set({ shared: v })} trackColor={{ true: colors.navy }} />
-          <Text style={styles.body}>Aile bu hedefi görsün</Text>
+          <Text style={styles.body}>Aile bu hedefi görür</Text>
+          <InfoDot info="Kapalıysa hedef aileye gitmez, planda &quot;Yalnız sende&quot; yazar; bağlı program ve rutinler yine gider. Takip Planı'nda ⋯ menüsünden de değiştirilir." />
         </View>
       )}
       <View style={{ marginTop: 18 }}><Cta label="Kaydet" onPress={save} busy={busy} /></View>
     </Sheet>
+  );
+}
+
+// Etiket + (i): açıklama yalnız dokununca (kullanıcı isteği 2 Kasım 2026, madde 14)
+function LabelInfo({ text, info }: { text: string; info: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View style={{ marginTop: 14, gap: 4 }}>
+      <Pressable onPress={() => setOpen((v) => !v)} hitSlop={8} accessibilityRole="button" accessibilityLabel={`${text}: açıklama`}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start' }}>
+        <Text style={styles.formLabel}>{text}</Text>
+        <Ionicons name={open ? 'information-circle' : 'information-circle-outline'} size={16} color={colors.muted} />
+      </Pressable>
+      {open && <Text style={styles.infoBox}>{info}</Text>}
+    </View>
+  );
+}
+function InfoDot({ info }: { info: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Pressable onPress={() => setOpen((v) => !v)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Açıklama">
+        <Ionicons name={open ? 'information-circle' : 'information-circle-outline'} size={16} color={colors.muted} />
+      </Pressable>
+      {open && <Text style={[styles.infoBox, { flexBasis: '100%' }]}>{info}</Text>}
+    </>
   );
 }
 
@@ -529,7 +563,10 @@ const styles = StyleSheet.create({
   chipOn: { backgroundColor: colors.navy, borderColor: colors.navy },
   chipText: { fontSize: 13, fontWeight: '600', color: colors.navy },
   rowWrap: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 10, justifyContent: 'space-between' },
-  inline: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  inline: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  formLabel: { fontSize: 13, fontWeight: '700', color: colors.navy },
+  infoBox: { fontSize: 12, color: colors.text, lineHeight: 17, backgroundColor: '#F3F5FA', borderRadius: radius.sm, padding: 10 },
+  oldBox: { marginTop: 12, gap: 4, backgroundColor: '#F7F8FA', borderRadius: radius.sm, borderWidth: 1, borderColor: colors.line, padding: 10 },
   seg: { flexDirection: 'row', backgroundColor: '#ECEEF3', borderRadius: radius.sm, padding: 3 },
   segItem: { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8 },
   segOn: { backgroundColor: '#fff' },

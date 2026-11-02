@@ -165,9 +165,10 @@ export async function publishPlanSelected(linkId: string, hold: string[]): Promi
 }
 
 /* ---------- Şablondan ---------- */
+// B1 (kullanıcı kararı 2 Kasım 2026): şablonun ev desteği "Aileye not"a (description) yazılır; home_support formda yok, boş kalır
 export const goalFromTemplate = (g: GoalT, position = 0): GoalInput => ({
-  title: g.title, description: '', domain: g.domain, measure: g.measure, baseline: '', target: g.target, weeks: g.weeks,
-  home_support: g.home_support, shared: true, status: 'active', template_key: g.key, position,
+  title: g.title, description: g.home_support ?? '', domain: g.domain, measure: g.measure, baseline: '', target: g.target, weeks: g.weeks,
+  home_support: '', shared: true, status: 'active', template_key: g.key, position,
 });
 export const moduleFromTemplate = (m: ModuleT, position = 0, status: ModuleStatus = 'planned'): ModuleInput => ({
   title: m.title, aim: m.aim, practice: m.practice, checklist: m.checklist, status, template_key: m.key, position,
