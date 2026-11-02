@@ -96,6 +96,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
   const [which, setWhich] = useState<'this' | 'last'>('this');
   const [libOpen, setLibOpen] = useState<boolean | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [help, setHelp] = useState(false);
   // pencereler
   const [goalSheet, setGoalSheet] = useState<{ editing?: PlanGoal } | null>(null);
   const [moduleSheet, setModuleSheet] = useState<{ editing?: PlanModule; goalId: string | null } | null>(null);
@@ -571,7 +572,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
         {!mods.length && linkOK && <Text style={styles.empty}>Bu hedefe bağlı program yok.</Text>}
         {linkOK && want.length > 0 && (
           <View style={styles.sugg}>
-            <Text style={styles.suggLead}>Bu hedef için önerilen:</Text>
+            <Text style={styles.suggLead}>Öneriler</Text>
             {want.map((k) => (
               <Pressable key={k} onPress={() => addTemplateModule(k, g.id)} style={styles.chip} accessibilityRole="button">
                 <Text style={styles.chipText}>+ {MODULE_TEMPLATES.find((m) => m.key === k)?.title ?? k}</Text>
@@ -581,7 +582,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
         )}
         {linkOK && loose.length > 0 && (
           <View style={styles.sugg}>
-            <Text style={styles.suggLead}>Planda, bağlı değil:</Text>
+            <Text style={styles.suggLead}>Bağlı değil</Text>
             {loose.map((m) => (
               <Pressable key={m.id} onPress={() => act(linkModuleGoals(client.clinic_id, [[m.id, g.id]]), 'Bağlanamadı')} style={styles.chip} accessibilityRole="button">
                 <Text style={styles.chipText}>↳ {short(m.title, 26)}</Text>
@@ -590,7 +591,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
           </View>
         )}
         <Pressable onPress={() => setModuleSheet({ goalId: g.id })} style={styles.add} accessibilityRole="button">
-          <Text style={styles.addText}>+ Program ekle{isWeb && desktop ? ' · ya da kitaplıktan sürükle' : ''}</Text>
+          <Text style={styles.addText}>+ Program ekle</Text>
         </Pressable>
       </View>
     );
@@ -608,7 +609,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
         {!rts.length && <Text style={styles.empty}>Bu hedefe bağlı rutin yok.</Text>}
         {offer.length > 0 && (
           <View style={styles.sugg}>
-            <Text style={styles.suggLead}>{band ? `${AGE_LABEL[band]} yaş için uygun:` : 'Uygun rutinler:'}</Text>
+            <Text style={styles.suggLead}>{band ? `Öneriler · ${AGE_LABEL[band]} yaş` : 'Öneriler'}</Text>
             {offer.map((r) => (
               <Pressable key={r.key} onPress={() => setRtSheet({ routine: r, goalId: g.id })} style={styles.chip} accessibilityRole="button">
                 <Text style={styles.chipText}>+ {r.title}</Text>
@@ -618,7 +619,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
         )}
         {loose.length > 0 && (
           <View style={styles.sugg}>
-            <Text style={styles.suggLead}>Bağlı değil:</Text>
+            <Text style={styles.suggLead}>Bağlı değil</Text>
             {loose.map((r) => (
               <Pressable key={r.key} onPress={() => setRoutineGoal(r, g.id).catch(fail('Bağlanamadı'))} style={styles.chip} accessibilityRole="button">
                 <Text style={styles.chipText}>↳ {short(r.title, 26)}</Text>
@@ -682,18 +683,27 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
         {open && (
           <View style={[styles.hatBody, cols3 && { flexDirection: 'row', alignItems: 'flex-start' }]}>
             <View style={[styles.col, cols3 && styles.col3]}>
-              <Text style={styles.colQ}>Neyi değiştiriyoruz, nasıl anlayacağız?</Text>
-              <Text style={styles.colSub}>Hedef · uzman yazar ve değerlendirir</Text>
+              <ColHead q="Neyi değiştiriyoruz, nasıl anlayacağız?" info={[
+                'Hedef: uzman yazar ve değerlendirir.',
+                '"Aile görür" açıksa hedefin adı, düzeyleri ve açıklaması aileye gider; GAS değerlendirmen aileye gitmez.',
+              ]} />
               {goalColumn(g)}
             </View>
             <View style={[styles.col, cols3 && styles.col3]}>
-              <Text style={styles.colQ}>Ebeveyn evde nasıl destekler?</Text>
-              <Text style={styles.colSub}>Aile programı · ebeveyn uygular, "Bugün uyguladım" der</Text>
+              <ColHead q="Ebeveyn evde nasıl destekler?" info={[
+                'Aile programı: ebeveyn evde uygular, "Bugün uyguladım" der.',
+                'Aile yalnız Etkin ve Tamamlandı programları görür; Planlandı aileye gitmez.',
+                'Bir program birden çok hedefe bağlanabilir.',
+                ...(isWeb && desktop ? ['Kitaplıktan bir programı bu hedefin üstüne sürükleyip bırakabilirsin.'] : []),
+              ]} />
               {programColumn(g)}
             </View>
             <View style={[styles.col, cols3 && styles.col3]}>
-              <Text style={styles.colQ}>Her gün, hangi anda, hangi adımlarla?</Text>
-              <Text style={styles.colSub}>Rutin ve görevler · çocuk yapar, ebeveyn onaylar</Text>
+              <ColHead q="Her gün, hangi anda, hangi adımlarla?" info={[
+                'Rutin ve görevler: çocuk yapar, ebeveyn onaylar.',
+                'Buradan eklenenler taslaktır; "Aileye gönder" deyince aileye gider.',
+                'Oranlar ebeveynin onay kaydıdır, puan değildir.',
+              ]} />
               {routineColumn(g)}
             </View>
           </View>
@@ -723,10 +733,8 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
 
   return (
     <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-      <Text style={styles.intro}>
-        Her hedef bir satır: hedef · ailenin evdeki programı · çocuğun rutini ve görevleri. Eklediklerin taslaktır; aile, sen "Aileye gönder" deyince tek bildirimle görür. Gözlem toplar, tanı koymaz.
-      </Text>
       <View style={styles.toolbar}>
+        <IconButton name={help ? 'information-circle' : 'information-circle-outline'} label="Takip Planı nasıl çalışır?" size={20} onPress={() => setHelp((v) => !v)} />
         <SmallButton label={desktop && width >= 980 ? (libOpen ? 'Kitaplığı gizle' : 'Kitaplık') : 'Kitaplık'} onPress={() => setLibOpen((v) => !v)} />
         {goals.length > 1 && (
           <SmallButton label={(openIds ?? []).length >= goals.length ? 'Hepsini kapat' : 'Hepsini aç'}
@@ -748,6 +756,15 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
           )}
         </Pressable>
       </View>
+      {help && (
+        <View style={styles.infoBox}>
+          {[
+            'Her hedef bir satır: hedef · ailenin evdeki programı · çocuğun rutini ve görevleri. Satıra dokununca açılır.',
+            'Eklediklerin taslaktır; aile, sen "Aileye gönder" deyince tek bildirimle görür.',
+            'Takip Planı gözlem toplar, tanı koymaz.',
+          ].map((t) => <Text key={t} style={styles.infoLine}>• {t}</Text>)}
+        </View>
+      )}
       {attention.length > 0 && (
         <View style={styles.attention}>
           {attention.slice(0, 4).map((a, i) => (
@@ -780,10 +797,9 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
 
           {(unlinkedMods.length > 0 || unlinkedRts.length > 0) && (
             <DropView accept={['module', 'routine']} onDrop={onDropUnlinked} style={styles.unlinked}>
-              <Text style={styles.small}>
-                <Text style={{ fontWeight: '700', color: colors.navy }}>Bir hedefe bağlı olmayanlar</Text>
-                {isWeb && desktop ? ' · bir hedefin üstüne sürükle; bağı kaldırmak için kartı buraya bırak' : ' · "Hedefe bağla" ile bir hedefin altına al'}
-              </Text>
+              <ColHead q="Bir hedefe bağlı olmayanlar" info={[isWeb && desktop
+                ? 'Kartı bir hedefin üstüne sürükle; bağı kaldırmak için kartı buraya bırak.'
+                : '"Hedefe bağla" ile bir hedefin altına al.']} />
               <View style={styles.looseGrid}>
                 {unlinkedMods.map((m) => (
                   <View key={m.id} style={styles.looseItem}>
@@ -880,6 +896,22 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
         onLoose={(r) => { const gid = pick; setPick(null); if (gid) setRoutineGoal(r, gid).catch(fail('Bağlanamadı')); }} />
       {tplSave && <TemplateSaveSheet goal={tplSave} modules={modsOf(tplSave.id).length} routines={rtsOf(tplSave.id).filter((r) => r.routine).length}
         onClose={() => setTplSave(null)} onSave={(title, shared) => saveTemplate(tplSave, title, shared)} />}
+    </View>
+  );
+}
+
+/* ---------- Sütun başlığı: kısa başlık + (i); açıklama yalnız (i)'ye dokununca ---------- */
+function ColHead({ q, info }: { q: string; info: string[] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View style={{ gap: 4 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <Text style={[styles.colQ, { flexShrink: 1 }]}>{q}</Text>
+        <Pressable onPress={() => setOpen((v) => !v)} hitSlop={10} accessibilityRole="button" accessibilityLabel="Açıklama" accessibilityState={{ expanded: open }}>
+          <Ionicons name={open ? 'information-circle' : 'information-circle-outline'} size={16} color={colors.muted} />
+        </Pressable>
+      </View>
+      {open && <View style={styles.infoBox}>{info.map((t) => <Text key={t} style={styles.infoLine}>• {t}</Text>)}</View>}
     </View>
   );
 }
@@ -1133,8 +1165,10 @@ const styles = StyleSheet.create({
   chip: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.line, backgroundColor: '#fff' },
   chipOn: { backgroundColor: colors.navy, borderColor: colors.navy },
   chipText: { fontSize: 12, fontWeight: '600', color: colors.navy },
-  add: { borderWidth: 1, borderStyle: 'dashed', borderColor: colors.faint, borderRadius: radius.sm, paddingVertical: 9, alignItems: 'center' },
+  add: { backgroundColor: '#EEF0F4', borderRadius: radius.sm, paddingVertical: 8, alignItems: 'center' },
   addText: { fontSize: 12, fontWeight: '600', color: colors.navy },
+  infoBox: { backgroundColor: '#F3F5FA', borderRadius: radius.sm, padding: 10, gap: 4, marginTop: 4 },
+  infoLine: { fontSize: 12, color: colors.text, lineHeight: 17 },
   empty: { fontSize: 12, color: colors.muted, fontStyle: 'italic' },
   small: { fontSize: 12, color: colors.muted, lineHeight: 17 },
   tiny: { fontSize: 11, color: colors.muted, lineHeight: 15 },
