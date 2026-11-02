@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet, Activi
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { LayoutToggle } from '../lib/layout';
 import { colors, radius } from '../theme';
 import { Label, Notice } from '../components/ui';
 import { useAuth } from '../lib/auth';
@@ -374,6 +375,7 @@ export default function HomeScreen() {
                 </Text>
               )}
             </View>
+            {state.kind === 'ready' && <LayoutToggle />}
             {state.kind === 'ready' && <Bell count={unread} onPress={() => setBell(true)} />}
             {state.kind === 'ready' ? (
               <Pressable onPress={() => setSettings(true)} accessibilityRole="button" accessibilityLabel="Ayarlar" hitSlop={6}

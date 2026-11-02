@@ -183,7 +183,7 @@ function ClientListMock() {
   );
 }
 
-const TABS = ['Özet', 'Rutin', 'Davranış', 'Plan', 'Notlar', 'Öneriler', 'Rapor'];
+const TABS = ['Plan', 'Özet', 'Rutinler', 'Davranış', 'Notlar', 'Rapor', 'Bilgiler'];
 
 function ClientMock({ tab, wide }: { tab: 'Plan' | 'Rapor'; wide: boolean }) {
   const cols = wide ? 7 : 4;

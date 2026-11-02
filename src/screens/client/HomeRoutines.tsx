@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal, TextInput, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +16,7 @@ import { RoutineTab, Limits } from './ObservationTabs';
 import SuggestionsTab from './SuggestionsTab';
 import ExportButton from '../../components/ExportButton';
 import { routineRows, csvName, ROUTINE_HEADER } from '../../lib/csv';
+import { listSuggestions } from '../../lib/clinic';
 
 // Ev rutinleri (uzman): haftalık tablo (gün gün), zaman içinde (haftalık sayı, çoklu görev), oranlar (görev başına, beceri,
 // "Yapamam", ret notları) ve öneriler. Görev eklemek uzmanın önerisidir; ebeveyn ParentApp'te onaylayınca çocuğa gider.
@@ -36,36 +37,66 @@ const CELL: Record<CellState, { icon: keyof typeof Ionicons.glyphMap | null; col
 
 export default function HomeRoutines(ctx: ClientCtx & { view: RoutineView; onView: (v: RoutineView) => void }) {
   const { view, onView, data } = ctx;
+  // Öneriler bir sekme değil, bir eylem (kullanıcı isteği 30 Ekim 2026): "+ Aileye öner" ve "Gönderilenler" aynı pencereyi açar.
+  // 'suggest' görünümü eski bildirim bağlantıları için pencereyi "Gönderilenler"de açar; arkada haftalık tablo kalır.
+  const [sheet, setSheet] = useState<'suggest' | 'sent' | null>(view === 'suggest' ? 'sent' : null);
+  const [sent, setSent] = useState<number | null>(null);
+  useEffect(() => { if (view === 'suggest') { setSheet('sent'); onView('week'); } }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
+  const shown: RoutineView = view === 'suggest' ? 'week' : view;
   const views: { id: RoutineView; label: string }[] = [
-    { id: 'week', label: 'Haftalık' },
-    { id: 'trend', label: 'Zaman içinde' },
-    { id: 'stats', label: 'Oranlar' },
-    ...(data.sample ? [] : [{ id: 'suggest' as const, label: 'Öneriler' }]),
+    { id: 'week', label: 'Haftalık' }, { id: 'trend', label: 'Zaman içinde' }, { id: 'stats', label: 'Oranlar' },
   ];
   return (
     <View>
       <View style={styles.head}>
         <View style={{ flex: 1, minWidth: 240 }}>
-          <Segmented options={views} value={view} onChange={onView} />
+          <Segmented options={views} value={shown} onChange={onView} />
         </View>
-        {view !== 'suggest' && (
-          <ExportButton name={csvName('ev-rutini', ctx.client.child_name, windowStarts(ctx.today, ctx.weeks)[0], ctx.today)}
-            header={ROUTINE_HEADER} event="export.routine"
-            rows={() => routineRows(data.tasks, data.completions, windowStarts(ctx.today, ctx.weeks)[0], ctx.today)} />
-        )}
-        {!data.sample && view !== 'suggest' && (
-          <Pressable onPress={() => onView('suggest')} style={styles.add} accessibilityRole="button">
-            <Ionicons name="add" size={18} color="#fff" />
-            <Text style={styles.addText}>Rutin öner</Text>
-          </Pressable>
+        <ExportButton name={csvName('ev-rutini', ctx.client.child_name, windowStarts(ctx.today, ctx.weeks)[0], ctx.today)}
+          header={ROUTINE_HEADER} event="export.routine"
+          rows={() => routineRows(data.tasks, data.completions, windowStarts(ctx.today, ctx.weeks)[0], ctx.today)} />
+        {!data.sample && (
+          <>
+            <Pressable onPress={() => setSheet('sent')} style={styles.ghost} accessibilityRole="button">
+              <Ionicons name="paper-plane-outline" size={16} color={colors.navy} />
+              <Text style={styles.ghostText}>Gönderilenler{sent ? ` (${sent})` : ''}</Text>
+            </Pressable>
+            <Pressable onPress={() => setSheet('suggest')} style={styles.add} accessibilityRole="button">
+              <Ionicons name="add" size={18} color="#fff" />
+              <Text style={styles.addText}>Aileye öner</Text>
+            </Pressable>
+          </>
         )}
       </View>
-      {view === 'week' && <WeekGrid {...ctx} />}
-      {view === 'trend' && <Trend {...ctx} />}
-      {view === 'stats' && <RoutineTab {...ctx} />}
-      {view === 'suggest' && <SuggestionsTab {...ctx} />}
+      {shown === 'week' && <WeekGrid {...ctx} />}
+      {shown === 'trend' && <Trend {...ctx} />}
+      {shown === 'stats' && <RoutineTab {...ctx} />}
+      {!data.sample && <SentCount ctx={ctx} onCount={setSent} />}
+      <Modal visible={!!sheet} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setSheet(null)}>
+        <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+          <View style={styles.column}>
+            <View style={styles.sheetHead}>
+              <IconButton name="close" label="Kapat" onPress={() => setSheet(null)} />
+              <Text style={styles.sheetTitle}>{ctx.client.child_name ? `${ctx.client.child_name} · ` : ''}Aileye öneriler</Text>
+            </View>
+            <View style={{ paddingHorizontal: 16 }}>
+              <Segmented options={[{ id: 'suggest' as const, label: 'Öner' }, { id: 'sent' as const, label: `Gönderilenler${sent ? ` (${sent})` : ''}` }]}
+                value={sheet ?? 'suggest'} onChange={setSheet} />
+            </View>
+            <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+              {sheet && <SuggestionsTab {...ctx} section={sheet} onCount={setSent} />}
+            </ScrollView>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </View>
   );
+}
+
+// "Gönderilenler (n)" sayısı pencere açılmadan da görünsün
+function SentCount({ ctx, onCount }: { ctx: ClientCtx; onCount: (n: number) => void }) {
+  useEffect(() => { listSuggestions(ctx.client.link_id).then((x) => onCount(x.length)).catch(() => {}); }, [ctx.client.link_id]); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
 }
 
 /* ---------- Haftalık: son 7 gün, gün gün ---------- */
@@ -316,6 +347,8 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginTop: 4 },
   add: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.navy, borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 9 },
   addText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  ghost: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8 },
+  ghostText: { color: colors.navy, fontSize: 13, fontWeight: '600' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 10 },
   headRow: { backgroundColor: '#F7F8FA', paddingVertical: 8 },
   rowLine: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },

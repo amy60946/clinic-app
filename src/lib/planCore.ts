@@ -1,0 +1,79 @@
+// Takip planı — saf yardımcılar (veritabanı/JSON içe aktarmaz; testleri tests/plan.test.mjs). Ortak akislar.md 12.1.
+import type { Suggestion, RoutineRef } from './clinic.ts';
+import type { Task } from './metrics.ts';
+import type { PlanGoal, PlanModule } from './plan.ts';
+
+/* ---------- Aileye gönderilmemiş değişiklikler ---------- */
+// Aile planı sunucudaki gönderilmiş sürümden (pub, care_plan_snapshot) okur. Uzmanın gördüğü hâl ile pub karşılaştırılır.
+export type Pub = Record<string, unknown> | null;
+const str = (v: unknown) => (v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
+const differs = (want: Record<string, unknown> | null, pub: Pub) => {
+  if (!want || !pub) return !want !== !pub;
+  return Object.keys(want).some((k) => str(want[k]) !== str(pub[k]));
+};
+export function goalUnsent(g: PlanGoal, pub: Pub): boolean {
+  const want = g.shared && !g.archived ? {
+    title: g.title, description: g.description, domain: g.domain, measure: g.measure, baseline: g.baseline, target: g.target,
+    weeks: g.weeks, home_support: g.home_support, status: g.status, position: g.position,
+  } : null;
+  return differs(want, pub);
+}
+// sharedGoals: programın bağlı olduğu, aileye açık ve arşivlenmemiş hedefler (sıra önemsiz); null: bağ bilinmiyor
+export function moduleUnsent(m: PlanModule, pub: Pub, sharedGoals: string[] | null): boolean {
+  const want = m.status !== 'planned' ? {
+    title: m.title, aim: m.aim, practice: m.practice, checklist: m.checklist, status: m.status, position: m.position,
+  } : null;
+  if (differs(want, pub)) return true;
+  if (!want || !pub || sharedGoals === null) return false;
+  const was = Array.isArray(pub.goal_ids) ? (pub.goal_ids as string[]) : [];
+  return was.length !== sharedGoals.length || sharedGoals.some((x) => !was.includes(x));
+}
+
+
+/* ---------- Rutin grupları (öneri satırlarından) ---------- */
+type RState = 'draft' | 'pending' | 'added' | 'declined';
+export type RGroup = {
+  key: string; title: string; icon: string; emoji: string; single: boolean; routine: RoutineRef | null; goalId: string | null;
+  items: Suggestion[]; state: RState; added: number; waiting: number; drafts: number;
+  tasks: Task[];               // ailede ekli ve sürmekte olan görevler
+  changes: Suggestion[];       // bu görevlere açık (taslak / bekleyen) değişiklik önerileri
+  decidedAt: string | null;
+};
+
+export function groupSuggestions(list: Suggestion[], tasks: Task[], today: string): RGroup[] {
+  const map = new Map<string, Suggestion[]>();
+  list.filter((s) => s.kind !== 'change').forEach((s) => {
+    const k = s.routine?.group ?? s.id;
+    const l = map.get(k);
+    if (l) l.push(s); else map.set(k, [s]);
+  });
+  const opens = list.filter((s) => s.kind === 'change' && (s.status === 'draft' || s.status === 'pending'));
+  return [...map.entries()].map(([key, items]) => {
+    items.sort((a, b) => (a.routine?.position ?? 0) - (b.routine?.position ?? 0));
+    const first = items[0];
+    const added = items.filter((s) => s.status === 'accepted').length;
+    const waiting = items.filter((s) => s.status === 'pending').length;
+    const drafts = items.filter((s) => s.status === 'draft').length;
+    const state: RState = added ? 'added' : drafts ? 'draft' : waiting ? 'pending' : 'declined';
+    const ids = items.map((s) => s.task_id).filter((x): x is string => !!x);
+    const ts = tasks.filter((t) => ids.includes(t.id) && (!t.end_date || t.end_date >= today));
+    return {
+      key, title: first.routine?.title || first.title, icon: first.routine?.icon ?? '', emoji: first.emoji, single: !first.routine,
+      routine: first.routine ?? null, goalId: items.find((s) => s.goal_id)?.goal_id ?? null, items, state, added, waiting, drafts,
+      tasks: ts, changes: opens.filter((c) => !!c.target_task_id && ts.some((t) => t.id === c.target_task_id)),
+      decidedAt: items.map((s) => s.decided_at).filter((x): x is string => !!x).sort().pop() ?? null,
+    };
+  });
+}
+// Planda görünenler: reddedilen (14 günden eski) ve ailede bitmiş rutinler gizlenir
+export const visibleGroup = (r: RGroup, today: string) => {
+  if (r.state === 'declined') return !!r.decidedAt && r.decidedAt.slice(0, 10) >= shiftDay(today, -14);
+  if (r.state === 'added') return r.tasks.length > 0 || r.waiting > 0 || r.drafts > 0;
+  return true;
+};
+export function shiftDay(d: string, n: number) {
+  const t = new Date(`${d}T12:00:00Z`);
+  t.setUTCDate(t.getUTCDate() + n);
+  return t.toISOString().slice(0, 10);
+}
+

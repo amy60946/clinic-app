@@ -16,7 +16,8 @@ import type { Suggestion, SuggestionInput, RepeatKind, Category } from '../../li
 
 type Filter = 'all' | Category;
 
-export default function SuggestionEditor({ visible, childName, editing, onClose, onSubmit, onWithdraw }: {
+export default function SuggestionEditor({ visible, childName, editing, onClose, onSubmit, onWithdraw, asDraft = false }: {
+  asDraft?: boolean;   // takip planından: öneri taslak eklenir, "Aileye gönder" ile gider
   visible: boolean;
   childName: string;
   editing?: Suggestion | null;
@@ -26,13 +27,13 @@ export default function SuggestionEditor({ visible, childName, editing, onClose,
 }) {
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      {visible && <Editor childName={childName} editing={editing ?? undefined} onClose={onClose} onSubmit={onSubmit} onWithdraw={onWithdraw} />}
+      {visible && <Editor childName={childName} editing={editing ?? undefined} onClose={onClose} onSubmit={onSubmit} onWithdraw={onWithdraw} asDraft={asDraft} />}
     </Modal>
   );
 }
 
-function Editor({ childName, editing, onClose, onSubmit, onWithdraw }: {
-  childName: string; editing?: Suggestion; onClose: () => void;
+function Editor({ childName, editing, onClose, onSubmit, onWithdraw, asDraft }: {
+  childName: string; editing?: Suggestion; onClose: () => void; asDraft: boolean;
   onSubmit: (list: SuggestionInput[]) => Promise<void>; onWithdraw?: () => void;
 }) {
   const [step, setStep] = useState<'pick' | 'details'>(editing ? 'details' : 'pick');
@@ -51,7 +52,7 @@ function Editor({ childName, editing, onClose, onSubmit, onWithdraw }: {
   return (
     <Details
       childName={childName} editing={editing} picked={picked} custom={custom}
-      onBack={editing ? onClose : () => setStep('pick')} onClose={onClose} onSubmit={onSubmit} onWithdraw={onWithdraw}
+      onBack={editing ? onClose : () => setStep('pick')} onClose={onClose} onSubmit={onSubmit} onWithdraw={onWithdraw} asDraft={asDraft}
     />
   );
 }
@@ -147,7 +148,8 @@ function TemplatePicker({ onClose, onNext, onCustom }: {
 
 /* ---------- 2. Görev ayrıntıları (ParentApp TaskDetailsScreen) ---------- */
 
-function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit, onWithdraw }: {
+function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit, onWithdraw, asDraft }: {
+  asDraft: boolean;
   childName: string; editing?: Suggestion; picked: Template[]; custom: boolean;
   onBack: () => void; onClose: () => void; onSubmit: (list: SuggestionInput[]) => Promise<void>; onWithdraw?: () => void;
 }) {
@@ -371,7 +373,7 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
       <View style={styles.bottom}>
         <Pressable style={[styles.cta, busy && { opacity: 0.7 }]} onPress={submit} disabled={busy}>
           {busy ? <ActivityIndicator color="#fff" /> : (
-            <Text style={styles.ctaText}>{editing ? 'Kaydet' : picked.length > 1 ? `Önerileri gönder · ${picked.length}` : 'Öneriyi gönder'}</Text>
+            <Text style={styles.ctaText}>{editing ? 'Kaydet' : asDraft ? (picked.length > 1 ? `Plana ekle · ${picked.length}` : 'Plana ekle') : picked.length > 1 ? `Önerileri gönder · ${picked.length}` : 'Öneriyi gönder'}</Text>
           )}
         </Pressable>
       </View>

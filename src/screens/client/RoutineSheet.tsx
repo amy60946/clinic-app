@@ -13,30 +13,29 @@ import type { AgeGroup } from '../../templates';
 import { repeatSummary } from './SuggestionEditor';
 
 const DAY_SHORT = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-export type RoutineGoal = { id: string; title: string };
+export type RoutineGoal = { id: string; title: string; meta?: string };   // meta: alan · bağlı program/rutin sayısı
 
 // Günlük rutin önerisi v2 (ortak akislar.md 5.4 "Günlük rutin v2"; kullanıcı kararı 28 Ekim 2026):
 // görev seç/çıkar, saatleri tek tek ya da hep birlikte kaydır, tekrar (hafta içi · her gün · seçili günler), isteğe bağlı hedef.
 // Seçili görevler TEK PAKET olarak gider (aynı routine_group); ebeveyn tek kartta görür, isterse görev çıkarır.
 // Kabul edilen her görev ayrı görevdir: onay ve oyun görev görev.
-export default function RoutineSheet({ routine, childName, band, taken, goals, onClose, onSubmit }: {
-  routine: Routine | null; childName: string; band: AgeGroup | null; taken: string[]; goals: RoutineGoal[];
-  onClose: () => void; onSubmit: (list: SuggestionInput[]) => Promise<void>;
-}) {
+// asDraft: öneri plana taslak eklenir (Takip planı › "Aileye gönder" ile gider); initialGoal: hedef satırından açıldıysa seçili gelir
+type SheetProps = {
+  childName: string; band: AgeGroup | null; taken: string[]; goals: RoutineGoal[];
+  onClose: () => void; onSubmit: (list: SuggestionInput[]) => Promise<void>; initialGoal?: string | null; asDraft?: boolean;
+};
+export default function RoutineSheet({ routine, ...p }: SheetProps & { routine: Routine | null }) {
   return (
-    <Modal visible={!!routine} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      {routine && <Body routine={routine} childName={childName} band={band} taken={taken} goals={goals} onClose={onClose} onSubmit={onSubmit} />}
+    <Modal visible={!!routine} animationType="slide" presentationStyle="pageSheet" onRequestClose={p.onClose}>
+      {routine && <Body routine={routine} {...p} />}
     </Modal>
   );
 }
 
-function Body({ routine, childName, band, taken, goals, onClose, onSubmit }: {
-  routine: Routine; childName: string; band: AgeGroup | null; taken: string[]; goals: RoutineGoal[];
-  onClose: () => void; onSubmit: (list: SuggestionInput[]) => Promise<void>;
-}) {
+function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initialGoal = null, asDraft = false }: SheetProps & { routine: Routine }) {
   const [draft, setDraft] = useState<RoutineDraft>(() => draftOf(routine, taken));
   const [note, setNote] = useState('');
-  const [goalId, setGoalId] = useState<string | null>(null);
+  const [goalId, setGoalId] = useState<string | null>(initialGoal);
   const [editing, setEditing] = useState<{ id: string; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const picked = draft.tasks.filter((t) => t.on).length;
@@ -161,7 +160,10 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit }: {
                     <Pressable key={g.id || 'none'} onPress={() => setGoalId(g.id || null)} accessibilityRole="radio" accessibilityState={{ selected: on }}
                       style={[styles.goal, on && styles.goalOn]}>
                       <Ionicons name={on ? 'radio-button-on' : 'radio-button-off'} size={18} color={on ? colors.navy : colors.faint} />
-                      <Text style={[styles.goalText, !g.id && { color: colors.muted }]}>{g.title}</Text>
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text style={[styles.goalText, !g.id && { color: colors.muted }]}>{g.title}</Text>
+                        {'meta' in g && !!g.meta && <Text style={styles.small}>{g.meta}</Text>}
+                      </View>
                     </Pressable>
                   );
                 })}
@@ -173,7 +175,7 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit }: {
           <Text style={styles.label}>Aileye notun (isteğe bağlı)</Text>
           <Input value={note} onChangeText={setNote} placeholder="Ör. İlk hafta yalnız sabah görevlerine odaklanın" maxLength={140} />
           <Pressable onPress={send} disabled={busy || !picked} style={[styles.cta, (busy || !picked) && { opacity: 0.5 }]} accessibilityRole="button">
-            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.ctaText}>{`Rutini öner (${picked} görev)`}</Text>}
+            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.ctaText}>{asDraft ? `Plana ekle (${picked} görev)` : `Rutini öner (${picked} görev)`}</Text>}
           </Pressable>
         </ScrollView>
       </View>

@@ -215,9 +215,12 @@ export type SuggestionInput = {
   reminder: string | null; requires_review: boolean; note: string;
   routine?: RoutineRef | null; goal_id?: string | null;
 };
+// draft: gönderilmemiş taslak (aile görmez; "Aileye gönder" ile gider). kind 'change': ailede ekli göreve değişiklik önerisi
+// (ortak proposed/20261102100000_plan_redesign.sql, akislar.md 12.1)
 export type Suggestion = SuggestionInput & {
-  id: string; status: 'pending' | 'accepted' | 'declined'; created_at: string; updated_at: string | null;
+  id: string; status: 'draft' | 'pending' | 'accepted' | 'declined'; created_at: string; updated_at: string | null;
   decided_at: string | null; task_title: string | null; task_id: string | null;
+  kind: 'new' | 'change'; target_task_id: string | null; change_remove: boolean;
 };
 
 // Yeni sütunlar Supabase'e uygulanmadıysa (PGRST204 / 42703) açık bir mesaj
@@ -231,6 +234,7 @@ function checkSuggestion<T>(data: T, error: { code?: string; message: string } |
 const SUGGESTION_COLS = 'id, title, emoji, skill, description, category, template_key, difficulty, coins, start_date, recurring, '
   + 'repeat_kind, repeat_days, end_date, reminder, requires_review, note, status, created_at, updated_at, decided_at, task_id, tasks(title)';
 const ROUTINE_COLS = ', routine_group, routine_title, routine_icon, routine_position, routine_key, goal_id';
+const CHANGE_COLS = ', kind, target_task_id, change_remove';
 const OLD_COLS = 'id, title, emoji, skill, difficulty, recurring, note, status, created_at, decided_at, task_id, tasks(title)';
 const missingCol = (e: { code?: string } | null) => e?.code === '42703' || e?.code === 'PGRST204';
 
@@ -239,8 +243,9 @@ type SuggestionRow = Partial<Suggestion> & { tasks: { title: string } | null; ro
 
 export async function listSuggestions(linkId: string): Promise<Suggestion[]> {
   const q = (cols: string) => supabase.from('clinic_task_suggestions').select(cols).eq('link_id', linkId).order('created_at', { ascending: false });
-  let res: { data: unknown[] | null; error: { code?: string; message: string } | null } = await q(SUGGESTION_COLS + ROUTINE_COLS);
-  // Rutin v2 ya da ayrıntı sütunları henüz yoksa daha eski alanlarla listele
+  let res: { data: unknown[] | null; error: { code?: string; message: string } | null } = await q(SUGGESTION_COLS + ROUTINE_COLS + CHANGE_COLS);
+  // Takip planı yeniden tasarımı, rutin v2 ya da ayrıntı sütunları henüz yoksa daha eski alanlarla listele
+  if (missingCol(res.error)) res = await q(SUGGESTION_COLS + ROUTINE_COLS);
   if (missingCol(res.error)) res = await q(SUGGESTION_COLS);
   if (missingCol(res.error)) res = await q(OLD_COLS);
   const rows = check(res.data ?? [], res.error) as unknown as SuggestionRow[];
@@ -255,6 +260,7 @@ export async function listSuggestions(linkId: string): Promise<Suggestion[]> {
     routine: routine_group ? { group: routine_group, title: routine_title ?? '', icon: routine_icon ?? 'repeat-outline',
       position: routine_position ?? 0, key: routine_key ?? '' } : null,
     goal_id: r.goal_id ?? null,
+    kind: r.kind === 'change' ? 'change' : 'new', target_task_id: r.target_task_id ?? null, change_remove: !!r.change_remove,
   }));
 }
 
@@ -283,22 +289,71 @@ const legacy = (s: SuggestionInput): SuggestionInput => ({
   ...s, category: s.category === 'health' ? ('self' as Category) : ['home', 'mind', 'learn'].includes(s.category ?? '') ? s.category : null,
 });
 
-// Dönüş: paket olarak gitti mi (rutin v2 sütunları sunucuda yoksa görevler ayrı öneri olarak gider)
-export async function addSuggestions(c: Client, by: string, list: SuggestionInput[]): Promise<{ grouped: boolean }> {
+// Dönüş: paket olarak gitti mi (rutin v2 sütunları sunucuda yoksa görevler ayrı öneri olarak gider) ve taslak mı.
+// draft: öneri taslak yazılır (aile görmez); "Aileye gönder" (care_plan_publish) gönderir. Sunucu taslağı bilmiyorsa
+// (eski sürüm: durum kısıtı ya da politika) öneri eskisi gibi hemen gider.
+const isDraftRejected = (e: { code?: string; message: string } | null) =>
+  (e?.code === '23514' && e.message.includes('status_check')) || e?.code === '42501';
+export async function addSuggestions(c: Client, by: string, list: SuggestionInput[], opts: { draft?: boolean } = {}): Promise<{ grouped: boolean; draft: boolean }> {
+  let draft = !!opts.draft;
   const insert = (items: SuggestionInput[]) => supabase.from('clinic_task_suggestions').insert(items.map((s) => ({
     link_id: c.link_id, clinic_id: c.clinic_id, family_id: c.family_id, child_id: c.child_id, created_by: by, ...payload(s),
+    ...(draft ? { status: 'draft' } : {}),
   })));
   let items = list;
   let { error } = await insert(items);
+  if (draft && isDraftRejected(error)) { draft = false; ({ error } = await insert(items)); }
   const grouped = list.some((s) => s.routine || s.goal_id);
   if (grouped && missingCol(error)) {
     items = list.map((s) => ({ ...s, routine: null, goal_id: null }));
     ({ error } = await insert(items));
-    if (!error) return { grouped: false };
+    if (!error) return { grouped: false, draft };
   }
   if (isCategoryCheck(error)) ({ error } = await insert(items.map(legacy)));
   checkSuggestion(null, error);
-  return { grouped };
+  return { grouped, draft };
+}
+
+// Ailede ekli göreve değişiklik önerisi (taslak; "Aileye gönder" ile gider). Görev başına tek açık öneri:
+// varsa onu günceller. Sunucu desteklemiyorsa SuggestionSchemaMissing.
+export type ChangeInput = {
+  task: Task; reminder: string | null; remove: boolean;
+  routine?: RoutineRef | null; goal_id?: string | null;
+};
+export async function proposeChanges(c: Client, by: string, list: ChangeInput[], open: Suggestion[]): Promise<void> {
+  for (const ch of list) {
+    const existing = open.find((s) => s.kind === 'change' && s.target_task_id === ch.task.id && (s.status === 'draft' || s.status === 'pending'));
+    if (existing) {
+      const { error } = await supabase.rpc('clinic_update_suggestion', { p_id: existing.id, p: { reminder: ch.reminder, change_remove: ch.remove } });
+      checkSuggestion(null, error);
+      continue;
+    }
+    const t = ch.task;
+    const { error } = await supabase.from('clinic_task_suggestions').insert({
+      link_id: c.link_id, clinic_id: c.clinic_id, family_id: c.family_id, child_id: c.child_id, created_by: by,
+      status: 'draft', kind: 'change', target_task_id: t.id, change_remove: ch.remove,
+      title: t.title, emoji: t.emoji || '⭐', skill: t.skill ?? '', recurring: t.recurring, repeat_kind: t.repeat_kind,
+      repeat_days: t.repeat_days ?? [], end_date: t.end_date, reminder: ch.reminder, requires_review: t.requires_review,
+      ...(ch.routine ? { routine_group: ch.routine.group, routine_title: ch.routine.title.slice(0, 60), routine_icon: ch.routine.icon,
+        routine_position: ch.routine.position, routine_key: ch.routine.key.slice(0, 60) } : {}),
+      ...(ch.goal_id ? { goal_id: ch.goal_id } : {}),
+    });
+    if (error && (missingCol(error) || isDraftRejected(error))) {
+      throw new SuggestionSchemaMissing('Değişiklik önerisi için veritabanı güncellemesi bekleniyor (ortak: 20261102100000_plan_redesign.sql).');
+    }
+    checkSuggestion(null, error);
+  }
+}
+
+// Rutin ya da tek görev ↔ hedef bağı (ailede ekli olanlar dahil; ortak proposed/20261102100000_plan_redesign.sql 6).
+// goalId null: bağı kaldır. Sunucuda işlev yoksa SuggestionSchemaMissing.
+export async function setSuggestionGoal(ids: string[], goalId: string | null): Promise<void> {
+  if (!ids.length) return;
+  const { error } = await supabase.rpc('clinic_set_suggestion_goal', { p_ids: ids, p_goal_id: goalId });
+  if (error && (error.code === 'PGRST202' || error.code === '42883')) {
+    throw new SuggestionSchemaMissing('Hedefe bağlamak için veritabanı güncellemesi bekleniyor (ortak: 20261102100000_plan_redesign.sql).');
+  }
+  check(null, error);
 }
 
 // Uzman bekleyen öneriyi günceller (karar verilmişse sunucu reddeder)
@@ -308,7 +363,13 @@ export async function updateSuggestion(id: string, s: SuggestionInput): Promise<
   checkSuggestion(null, error);
 }
 
-// Yalnız bekleyen öneri geri çekilebilir (RLS)
+// Taslak ya da bekleyen önerinin tek alanları (ör. rutin düzenlemede saat); karar verilmişse sunucu reddeder
+export async function updateSuggestionFields(id: string, p: { reminder?: string | null; goal_id?: string | null; change_remove?: boolean }): Promise<void> {
+  const { error } = await supabase.rpc('clinic_update_suggestion', { p_id: id, p });
+  checkSuggestion(null, error);
+}
+
+// Taslak ya da bekleyen öneri geri çekilebilir (RLS)
 export async function withdrawSuggestion(id: string): Promise<void> {
   const { error } = await supabase.from('clinic_task_suggestions').delete().eq('id', id);
   check(null, error);

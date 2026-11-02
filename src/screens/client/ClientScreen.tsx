@@ -20,22 +20,25 @@ import ReportTab from './ReportTab';
 import DetailsTab from './DetailsTab';
 import { fromISO } from '../../dates';
 import { SectionHint } from '../SampleTour';
+import { useLayout, LayoutToggle } from '../../lib/layout';
 
-// 'suggestions' eski bağlantılar ve bildirimler için: Ev rutinleri › Öneriler açılır
+// 'suggestions' eski bağlantılar ve bildirimler için: Ev rutinleri'nde öneri penceresi (Gönderilenler) açılır
 export type Tab = 'summary' | 'routine' | 'abc' | 'goals' | 'notes' | 'suggestions' | 'report' | 'details';
 type Section = Exclude<Tab, 'suggestions'>;
 
-// Bölümler: geniş ekranda (web, yatay iPad) sol menü, telefonda gri zeminli seçici (4 + 4)
-const SECTIONS: { id: Section; label: string; short: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { id: 'summary', label: 'Özet', short: 'Özet', icon: 'grid-outline' },
-  { id: 'routine', label: 'Ev rutinleri', short: 'Rutinler', icon: 'repeat-outline' },
-  { id: 'abc', label: 'Davranış kayıtları', short: 'Davranış', icon: 'pulse-outline' },
-  { id: 'goals', label: 'Takip planı', short: 'Plan', icon: 'flag-outline' },
-  { id: 'notes', label: 'Notlar', short: 'Notlar', icon: 'create-outline' },
-  { id: 'report', label: 'Rapor', short: 'Rapor', icon: 'print-outline' },
-  { id: 'details', label: 'Danışan bilgileri', short: 'Bilgiler', icon: 'person-circle-outline' },
+// Bölümler: geniş ekranda (web, iPad'de "Web görünümü") gruplu sol menü — Planla · İzle · Kayıt (kullanıcı kararı 30 Ekim 2026);
+// telefonda ve "iPad görünümü"nde gri zeminli seçici (4 + 3)
+type Group = 'plan' | 'watch' | 'record';
+const GROUPS: { id: Group; label: string }[] = [{ id: 'plan', label: 'Planla' }, { id: 'watch', label: 'İzle' }, { id: 'record', label: 'Kayıt' }];
+const SECTIONS: { id: Section; label: string; short: string; icon: keyof typeof Ionicons.glyphMap; group: Group }[] = [
+  { id: 'goals', label: 'Takip planı', short: 'Plan', icon: 'flag-outline', group: 'plan' },
+  { id: 'summary', label: 'Özet', short: 'Özet', icon: 'grid-outline', group: 'watch' },
+  { id: 'routine', label: 'Ev rutinleri', short: 'Rutinler', icon: 'repeat-outline', group: 'watch' },
+  { id: 'abc', label: 'Davranış kayıtları', short: 'Davranış', icon: 'pulse-outline', group: 'watch' },
+  { id: 'notes', label: 'Notlar', short: 'Notlar', icon: 'create-outline', group: 'record' },
+  { id: 'report', label: 'Rapor', short: 'Rapor', icon: 'print-outline', group: 'record' },
+  { id: 'details', label: 'Danışan bilgileri', short: 'Bilgiler', icon: 'person-circle-outline', group: 'record' },
 ];
-const SIDEBAR_MIN = 900;
 
 export const MAX_WEEKS = 8;
 
@@ -75,8 +78,7 @@ export default function ClientScreen({
   const [access, setAccess] = useState(false);
   const [switcher, setSwitcher] = useState(false);
   const [label, setLabel] = useState(client.label);
-  const { width } = useWindowDimensions();
-  const sidebar = width >= SIDEBAR_MIN;
+  const { desktop: sidebar } = useLayout();
   const owner = me.role === 'owner';
   const nameOf = (id: string) => team.find((m) => m.id === id)?.name || 'Adsız';
   const others = (client.assigned ?? []).filter((id) => id !== client.clinician_id).map(nameOf);
@@ -84,14 +86,16 @@ export default function ClientScreen({
     ? [client.clinician_id ? `Sorumlu: ${client.clinician_id === me.id ? 'sen' : client.clinician_name || nameOf(client.clinician_id)}` : '',
        owner && others.length ? `Erişen: ${others.join(', ')}` : ''].filter(Boolean).join(' · ')
     : '';
-  // Bildirim sekmesi: öneri kararları Ev rutinleri › Öneriler'de
+  // Bildirim sekmesi: öneri kararları Ev rutinleri'ndeki öneri penceresinde
   const current: Tab = tab === 'routine' && routineView === 'suggest' ? 'suggestions' : tab;
   const sectionOf = (t: Tab): Section => (t === 'suggestions' ? 'routine' : t);
   const { items, unreadByChild, markRead } = useNotifications();
-  // Açılan bölümün bu çocuğa ait okunmamış bildirimleri okunmuş sayılır (ör. Davranış kayıtları açılınca davranış kaydı bildirimleri)
+  // Açılan bölümün bu çocuğa ait okunmamış bildirimleri okunmuş sayılır (ör. Davranış kayıtları açılınca davranış kaydı bildirimleri).
+  // Öneri kararları Ev rutinleri'nde (öneri penceresi) ve Takip planı'nda görünür.
   useEffect(() => {
     if (sample) return;
-    const ids = items.filter((n) => !n.readAt && notificationTab(n.kind) === current && notificationChildren(n).includes(client.child_id)).map((n) => n.id);
+    const seen = (t: Tab) => t === current || (t === 'suggestions' && (current === 'routine' || current === 'goals'));
+    const ids = items.filter((n) => !n.readAt && seen(notificationTab(n.kind)) && notificationChildren(n).includes(client.child_id)).map((n) => n.id);
     if (ids.length) markRead(ids);
   }, [current, items, client.child_id, markRead, sample]);
   useEffect(() => { track('screen.client', { tab: current, ...(sample ? { sample: true } : {}) }); }, [current, sample]);
@@ -160,6 +164,7 @@ export default function ClientScreen({
         </Text>
         {!!teamLine && <Text style={styles.subtitle}>{teamLine}</Text>}
       </View>
+      <LayoutToggle />
       {!sample && (
         <>
           <Pressable onPress={refresh} accessibilityLabel="Yenile" hitSlop={8} style={styles.iconBtn}>
@@ -223,17 +228,22 @@ export default function ClientScreen({
               <Text style={styles.switchText} numberOfLines={1}>{client.child_name || 'Adsız'}</Text>
               {clients.length > 1 && !sample && <Ionicons name="chevron-down" size={16} color={colors.muted} />}
             </Pressable>
-            {SECTIONS.map((s) => {
-              const on = s.id === tab;
-              return (
-                <Pressable key={s.id} onPress={() => go(s.id)} accessibilityRole="tab" accessibilityState={{ selected: on }}
-                  style={({ pressed }) => [styles.nav, on && styles.navOn, pressed && !on && { backgroundColor: '#ECEEF3' }]}>
-                  <Ionicons name={s.icon} size={17} color={on ? colors.navy : colors.muted} />
-                  <Text style={[styles.navText, on && { color: colors.navy, fontWeight: '700' }]}>{s.label}</Text>
-                  {dots[s.id] && <View style={styles.tabDot} />}
-                </Pressable>
-              );
-            })}
+            {GROUPS.map((g) => (
+              <View key={g.id} style={{ gap: 2 }}>
+                <Text style={styles.group}>{g.label}</Text>
+                {SECTIONS.filter((s) => s.group === g.id).map((s) => {
+                  const on = s.id === tab;
+                  return (
+                    <Pressable key={s.id} onPress={() => go(s.id)} accessibilityRole="tab" accessibilityState={{ selected: on }}
+                      style={({ pressed }) => [styles.nav, on && styles.navOn, pressed && !on && { backgroundColor: '#ECEEF3' }]}>
+                      <Ionicons name={s.icon} size={17} color={on ? colors.navy : colors.muted} />
+                      <Text style={[styles.navText, on && { color: colors.navy, fontWeight: '700' }]}>{s.label}</Text>
+                      {dots[s.id] && <View style={styles.tabDot} />}
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ))}
           </View>
         )}
         <ScrollView
@@ -243,7 +253,7 @@ export default function ClientScreen({
           automaticallyAdjustKeyboardInsets
           refreshControl={sample ? undefined : <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.navy} />}
         >
-          <View style={[styles.column, !!footer && { paddingBottom: 170 }]}>{body}</View>
+          <View style={[styles.column, sidebar && tab === 'goals' && { maxWidth: 1320 }, !!footer && { paddingBottom: 170 }]}>{body}</View>
         </ScrollView>
       </View>
       {/* tanıtım turu içeriğin üstünde, altta durur; içerik altına boşluk bırakılır */}
@@ -349,6 +359,7 @@ const styles = StyleSheet.create({
   nav: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 10, paddingVertical: 10, borderRadius: radius.sm },
   navOn: { backgroundColor: colors.today },
   navText: { flex: 1, fontSize: 14, color: colors.text },
+  group: { fontSize: 11, fontWeight: '700', color: colors.muted, textTransform: 'uppercase', letterSpacing: 0.6, paddingHorizontal: 10, marginTop: 10, marginBottom: 2 },
   backdrop: { flex: 1, backgroundColor: 'rgba(15,27,61,0.25)', alignItems: 'flex-start', paddingTop: 110, paddingLeft: 16 },
   pop: { width: 300, backgroundColor: '#fff', borderRadius: radius.md, overflow: 'hidden' },
   popRow: { paddingHorizontal: 14, paddingVertical: 10, gap: 2, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },

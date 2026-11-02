@@ -90,9 +90,9 @@ export function SampleRow({ onOpen, onHide }: { onOpen: () => void; onHide?: () 
 // Gerçek danışanda bölüm ilk açıldığında bir kez: kısa ipucu (örnek aile turunun bölüm metinleri, gerçek veriye göre)
 export const SECTION_HINTS: Partial<Record<Tab, { title: string; text: string }>> = {
   summary: { title: 'Özet', text: 'Seçtiğin dönemin ev rutini özeti: tamamlama, tam gün, hatırlatmadan önce başlama. Oranlar dünkü güne kadar hesaplanır; puan değildir.' },
-  routine: { title: 'Ev rutinleri', text: 'Haftalık tabloda her görevin günleri; bir göreve dokun, gün gün ayrıntısı açılır. "Zaman içinde" görevleri haftadan haftaya karşılaştırır, "Rutin öner" aileye görev önerir.' },
+  routine: { title: 'Ev rutinleri', text: 'Haftalık tabloda her görevin günleri; bir göreve dokun, gün gün ayrıntısı açılır. "Zaman içinde" görevleri haftadan haftaya karşılaştırır; "Aileye öner" ile rutin ya da görev önerirsin.' },
   abc: { title: 'Davranış kayıtları', text: 'Ebeveynin girdiği kayıtlar: öncesi, davranış, sonrası (ABC). Tablo görünümünü dosya olarak indirebilirsin.' },
-  goals: { title: 'Takip planı', text: 'Hedefleri ve aile programını burada kurarsın. "Planı aileye gönder" deyince aile ParentApp\'te görür.' },
+  goals: { title: 'Takip planı', text: 'Her hedef bir satır: hedef, ailenin evdeki programı, çocuğun rutini. Eklediklerin taslaktır; "Aileye gönder" deyince aile tek bildirimle görür. Kitaplık\'tan paket, hazır hedef ya da kendi şablonunu ekleyebilirsin.' },
   notes: { title: 'Notlar', text: 'Klinik notların yalnız sende ve yetkili ekibinde; aile görmez.' },
   report: { title: 'Rapor', text: 'Dönemin yazdırılabilir gözlem raporu ve kopyalanabilir ilerleme notu.' },
   details: { title: 'Danışan bilgileri', text: 'Klinik etiketin, ebeveyn adları, onay tarihi ve ekip erişimi.' },
@@ -130,7 +130,7 @@ export const TOUR: Step[] = [
   { tab: 'summary', title: 'Özet', text: 'Seçtiğin dönemin ev rutini özeti: tamamlama, tam gün, hatırlatmadan önce başlama. Oranlar gözlemdir, puan değildir.' },
   { tab: 'routine', title: 'Ev rutinleri', text: 'Haftalık tabloda her görevin günleri. Bir göreve dokun, gün gün ayrıntısı açılır; "Zaman içinde" görevleri haftadan haftaya karşılaştırır.' },
   { tab: 'abc', title: 'Davranış kayıtları', text: 'Ebeveynin girdiği davranış kayıtları: öncesi, davranış, sonrası (ABC). Tablo görünümünü dosya olarak indirebilirsin.' },
-  { tab: 'goals', title: 'Takip planı', text: 'Hedefler, ölçütler ve aile programı. "Planı aileye gönder" deyince aile ParentApp\'te görür.' },
+  { tab: 'goals', title: 'Takip planı', text: 'Hedefler, ölçütler ve aile programı. Gerçek ailede her hedef bir satırdır (hedef · program · rutin); "Aileye gönder" deyince aile görür.' },
   { tab: 'report', title: 'Rapor', text: 'Dönemin yazdırılabilir gözlem raporu ve kopyalanabilir ilerleme notu.' },
   { tab: 'details', title: 'Sıra gerçek ailede', text: 'Aileyi e-postayla davet et; ebeveyn onaylayınca çocuk danışanların arasında görünür.' },
 ];
