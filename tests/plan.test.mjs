@@ -1,7 +1,7 @@
 // Takip planı yeniden tasarımı testleri (ortak akislar.md 12.1). Çalıştırma: npm test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { groupSuggestions, visibleGroup, goalUnsent, moduleUnsent } from '../src/lib/planCore.ts';
+import { groupSuggestions, visibleGroup, goalUnsent, moduleUnsent, goalWeek, reviewDue, publishItems } from '../src/lib/planCore.ts';
 
 const today = '2026-11-02';
 const sug = (p) => ({
@@ -56,6 +56,17 @@ test('görünürlük: 14 günden eski ret ve ailede bitmiş rutin gizlenir', () 
   assert.deepEqual(vis, ['live', 'new']);
 });
 
+test('görünürlük: aile az önce kabul ettiyse (görev listesi eski) ya da görev kimliği yoksa rutin gizlenmez', () => {
+  const groups = groupSuggestions([
+    sug({ id: 'a', group: 'G1', status: 'accepted', task_id: 't-yeni', goal: 'g1' }),
+    sug({ id: 'b', group: 'G1', status: 'accepted', task_id: 't9', goal: 'g1' }),
+    sug({ id: 'nid', status: 'accepted' }),
+  ], [task('t9', '2026-10-20')], today);
+  const vis = groups.filter((r) => visibleGroup(r, today)).map((r) => r.key).sort();
+  assert.deepEqual(vis, ['G1', 'nid']);
+  assert.equal(groups.find((r) => r.key === 'G1').ended, false);
+});
+
 const goal = (p = {}) => ({ id: 'g1', title: 'Sabah', description: '', archived: false, created_at: '', domain: 'routine', measure: 'yesno',
   baseline: '', target: "7 günün 5'i", weeks: 6, home_support: '', shared: true, status: 'active', position: 0, template_key: null, ratings: [], ...p });
 const pubOf = (g) => ({ title: g.title, description: g.description, domain: g.domain, measure: g.measure, baseline: g.baseline, target: g.target,
@@ -80,4 +91,45 @@ test('program: planlandı aileye gitmez; bağlı hedefler değişince gönderilm
   assert.equal(moduleUnsent({ ...m, checklist: ['x', 'y'] }, pub, ['g1']), true);
   assert.equal(moduleUnsent({ ...m, status: 'planned' }, null, []), false);
   assert.equal(moduleUnsent({ ...m, status: 'planned' }, pub, []), true);
+});
+
+test('hedef haftası ve değerlendirme zamanı: 4 haftada bir ya da süre dolunca; süren hedefte', () => {
+  assert.equal(goalWeek('2026-10-12T09:00:00Z', '2026-11-02'), 4);
+  assert.equal(goalWeek('2026-11-02T09:00:00Z', '2026-11-02'), 1);
+  const g = (p) => goal({ created_at: '2026-10-12T09:00:00Z', weeks: 6, ...p });
+  assert.equal(reviewDue(g({}), '2026-11-02'), false, '3. haftada, hiç değerlendirme yok: henüz değil');
+  assert.equal(reviewDue(g({}), '2026-11-09'), true, '4 hafta doldu');
+  assert.equal(reviewDue(g({ ratings: [{ week: '2026-11-02', rating: 0, note: '' }] }), '2026-11-16'), false, 'son değerlendirme 2 hafta önce');
+  assert.equal(reviewDue(g({ ratings: [{ week: '2026-11-02', rating: 0, note: '' }] }), '2026-11-23'), true, 'süre doldu (6 hafta), son haftada değerlendirilmedi');
+  assert.equal(reviewDue(g({ ratings: [{ week: '2026-11-16', rating: 1, note: '' }] }), '2026-11-23'), false, 'son haftasında değerlendirildi');
+  assert.equal(reviewDue(g({ status: 'achieved' }), '2026-12-30'), false, 'ulaşılan hedef sorulmaz');
+});
+
+test('gönderim özeti: değişen hedef/program, taslak rutin ve tek görev, değişiklik önerisi; gizli ve değişmeyen yok', () => {
+  const g1 = goal({ id: 'g1' });
+  const g2 = goal({ id: 'g2', title: 'Gizli', shared: false });
+  const g3 = goal({ id: 'g3', title: 'Yeni' });
+  const mod = (p) => ({ id: 'm1', title: 'Övgü', aim: '', practice: '', checklist: [], status: 'active', position: 0, template_key: null, created_at: '', ...p });
+  const m1 = mod({});
+  const pub = { goals: { g1: pubOf(g1) }, modules: { m1: { title: 'Övgü', aim: '', practice: '', checklist: [], status: 'active', position: 0, goal_ids: ['g1'] } } };
+  const groups = groupSuggestions([
+    sug({ id: 'a', group: 'G1', goal: 'g3' }), sug({ id: 'b', group: 'G1', pos: 1, goal: 'g3' }),
+    sug({ id: 't', title: 'Çanta' }),
+    sug({ id: 'p', group: 'G2', status: 'pending' }),
+  ], [], today);
+  const changes = [sug({ id: 'c1', group: 'G9', kind: 'change', target: 't1', remove: true, goal: 'g1' }), sug({ id: 'c0', kind: 'change', target: 't2', status: 'pending' })];
+  const items = publishItems({ goals: [g1, g2, g3], modules: [m1], groups, changes, pub, links: { m1: ['g1', 'g3'] } });
+  const by = Object.fromEntries(items.map((x) => [x.key, x]));
+  assert.ok(!by['g:g1'], 'değişmeyen hedef listede yok');
+  assert.ok(!by['g:g2'], 'hiç gönderilmemiş gizli hedef listede yok');
+  assert.equal(by['g:g3'].detail, 'yeni hedef');
+  assert.equal(by['m:m1'].detail, 'değişti', 'programın yeni hedef bağı değişiklik sayılır');
+  assert.deepEqual(by['r:G1'].hold.sort(), ['a', 'b']);
+  assert.equal(by['r:G1'].goalId, 'g3');
+  assert.equal(by['r:t'].kind, 'task');
+  assert.ok(!by['r:G2'], 'bekleyen (gönderilmiş) öneri listede yok');
+  assert.deepEqual(by['c:G9'].hold, ['c1']);
+  assert.ok(!items.some((x) => x.hold.includes('c0')), 'gönderilmiş değişiklik önerisi listede yok');
+  const hidden = publishItems({ goals: [goal({ id: 'g1', shared: false })], modules: [], groups: [], changes: [], pub, links: null });
+  assert.equal(hidden[0].detail, 'aileden gizlendi · aileden kalkar', 'önceden gönderilmiş hedef gizlenince listede');
 });

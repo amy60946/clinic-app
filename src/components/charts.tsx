@@ -113,7 +113,7 @@ export const SERIES_COLORS = ['#2C4A9A', '#D9822B', '#2F8F6B', '#C2417A', '#7A5B
 export function MultiLine({ starts, series, target, height = 200, width = 640 }: {
   starts: string[]; series: { id: string; values: number[]; color: string }[]; target?: number[] | null; height?: number; width?: number;
 }) {
-  const top = 12, bottom = 22, left = 26, right = 8;
+  const top = 12, bottom = 22, left = 26, right = 18; // son tarih etiketi (ortalanmış) çizim alanında kalsın
   const h = height - top - bottom;
   const all = [...series.flatMap((s) => s.values), ...(target ?? [])];
   const max = Math.max(7, ...all);

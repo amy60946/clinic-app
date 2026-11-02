@@ -44,7 +44,7 @@ export default function HomeRoutines(ctx: ClientCtx & { view: RoutineView; onVie
   useEffect(() => { if (view === 'suggest') { setSheet('sent'); onView('week'); } }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
   const shown: RoutineView = view === 'suggest' ? 'week' : view;
   const views: { id: RoutineView; label: string }[] = [
-    { id: 'week', label: 'Haftalık' }, { id: 'trend', label: 'Zaman içinde' }, { id: 'stats', label: 'Oranlar' },
+    { id: 'week', label: 'Haftalık' }, { id: 'trend', label: 'Zaman İçinde' }, { id: 'stats', label: 'Oranlar' },
   ];
   return (
     <View>
@@ -297,10 +297,13 @@ function Trend({ data, today, weeks }: ClientCtx) {
       <View style={{ gap: 8, marginTop: 12 }}>
         <Segmented options={[{ id: 'all', label: 'Hepsi' }, { id: 'parent', label: 'Ebeveyn ekledi' }, { id: 'clinic', label: 'Uzman önerdi' }]}
           value={creator} onChange={setCreator} />
-        <ChipBar value={part} onChange={setPart}
-          options={[{ id: 'all', label: 'Günün her bölümü' }, ...(['morning', 'noon', 'evening', 'night', 'any'] as TimeOfDay[]).map((t) => ({ id: t, label: TIME_OF_DAY_LABEL[t] }))]} />
-        <ChipBar value={cat} onChange={setCat}
-          options={[{ id: 'all', label: 'Bütün beceriler' }, ...categories.map((c) => ({ id: c.skill as string, label: `${c.emoji} ${skillName(c.skill)}` }))]} />
+        {/* çip satırları ekran kenarına kadar kayar (sayfa boşluğunda yarıda kesilmez) */}
+        <View style={{ marginHorizontal: -20, gap: 8 }}>
+          <ChipBar value={part} onChange={setPart} inset={20}
+            options={[{ id: 'all', label: 'Günün her bölümü' }, ...(['morning', 'noon', 'evening', 'night', 'any'] as TimeOfDay[]).map((t) => ({ id: t, label: TIME_OF_DAY_LABEL[t] }))]} />
+          <ChipBar value={cat} onChange={setCat} inset={20}
+            options={[{ id: 'all', label: 'Bütün beceriler' }, ...categories.map((c) => ({ id: c.skill as string, label: `${c.emoji} ${skillName(c.skill)}` }))]} />
+        </View>
         <View style={styles.search}>
           <Ionicons name="search" size={16} color={colors.muted} />
           <TextInput value={q} onChangeText={setQ} placeholder="Görev ara" placeholderTextColor={colors.muted} style={{ flex: 1, fontSize: 14, color: colors.navy }} />

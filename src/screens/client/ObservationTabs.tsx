@@ -9,7 +9,7 @@ import { abcRows, csvName, ABC_HEADER } from '../../lib/csv';
 import {
   weekly, perTask, observations, bySkill, abcSummary, windowStarts, lastFullDay, parseDate, isoDate, DECLINE_LABELS, LIMITS_TEXT,
   motivationStats, motivationText, MOTIVATION_TREND_TEXT, Completion,
-  MASTERY_RATE, MASTERY_WEEKS, DayPart, AbcEvent, dayPart,
+  MASTERY_RATE, MASTERY_WEEKS, DayPart, AbcEvent, dayPart, dec,
 } from '../../lib/metrics';
 import AbcVoice from '../../components/AbcVoice';
 import type { ClientCtx } from './ClientScreen';
@@ -58,7 +58,7 @@ export function SummaryTab({ data, today, weeks }: ClientCtx) {
       <Label>Ebeveyn döngüsü</Label>
       <Card style={{ gap: 6 }}>
         <Row k="Ebeveyn ret oranı" v={p(o.rejectRate)} />
-        <Row k={'"Yaptım" → ebeveyn kararı (ortanca)'} v={o.reviewDelayHours === null ? '–' : `${o.reviewDelayHours} saat`} />
+        <Row k={'"Yaptım" → ebeveyn kararı (ortanca)'} v={o.reviewDelayHours === null ? '–' : `${dec(o.reviewDelayHours)} saat`} />
       </Card>
       <Limits />
     </View>
@@ -211,7 +211,7 @@ export function AbcTab({ client, data, today, weeks }: ClientCtx) {
       <Card style={{ gap: 6 }}>
         {s.perWeek.map((w) => (
           <Row key={w.start} k={`${parseDate(w.start).toLocaleDateString('tr-TR')} haftası`}
-            v={w.count ? `${w.count} kayıt · şiddet ${w.avgIntensity}` : '–'} />
+            v={w.count ? `${w.count} kayıt · şiddet ${w.avgIntensity === null ? '–' : dec(w.avgIntensity)}` : '–'} />
         ))}
       </Card>
       <Label>Günün hangi bölümünde</Label>

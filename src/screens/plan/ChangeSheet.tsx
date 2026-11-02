@@ -35,7 +35,7 @@ type Row = { item: EditItem; time: string; remove: boolean };
 const TEXT: Record<EditMode, { head: string; sub: string; note: string; cta: string }> = {
   draft: {
     head: 'Rutini düzenle', sub: 'Taslak · aileye gitmedi',
-    note: 'Taslak: değişiklik hemen kaydedilir. Takip planındaki "Aileye gönder" ile aileye gider.', cta: 'Kaydet',
+    note: 'Taslak: değişiklik hemen kaydedilir. Takip Planındaki "Aileye gönder" ile aileye gider.', cta: 'Kaydet',
   },
   pending: {
     head: 'Rutini düzenle', sub: 'Gönderildi · ebeveyn kararı bekleniyor',
@@ -134,7 +134,7 @@ function Body({ target, onClose, onSubmit, onWithdraw }: {
             {busy ? <ActivityIndicator color="#fff" />
               : <Text style={styles.ctaText}>{t.cta}{target.mode === 'change' && changed.length ? ` (${changed.length} görev)` : ''}</Text>}
           </Pressable>
-          {target.mode === 'change' && <Text style={[styles.small, { textAlign: 'center' }]}>Takip planındaki "Aileye gönder" ile aileye gider.</Text>}
+          {target.mode === 'change' && <Text style={[styles.small, { textAlign: 'center' }]}>Takip Planındaki "Aileye gönder" ile aileye gider.</Text>}
           {target.mode !== 'change' && onWithdraw && (
             <Pressable onPress={onWithdraw} style={{ alignItems: 'center', padding: 12 }} accessibilityRole="button">
               <Text style={{ color: colors.danger, fontWeight: '600' }}>{target.mode === 'draft' ? 'Taslağı sil' : 'Öneriyi geri çek'}</Text>

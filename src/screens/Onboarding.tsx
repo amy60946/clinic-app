@@ -35,7 +35,7 @@ type Step = { title: string; line: string; screen: 'invite' | 'client' | 'plan' 
 const STEPS: Step[] = [
   { title: 'Aileyi davet et', line: 'Davet senin adınla e-postayla gider', screen: 'invite' },
   { title: 'Danışanını aç', line: 'Aile paylaşınca burada belirir', screen: 'client' },
-  { title: 'Takip planını kur', line: 'Hazır paketle başla, sonra düzenle', screen: 'plan' },
+  { title: 'Takip Planını kur', line: 'Hazır paketle başla, sonra düzenle', screen: 'plan' },
   { title: 'Raporunu al', line: 'PDF kaydet ya da yazdır', screen: 'report' },
 ];
 

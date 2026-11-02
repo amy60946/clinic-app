@@ -168,7 +168,7 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initi
                   );
                 })}
               </View>
-              <Text style={styles.small}>Bağlarsan Takip planı'nda hedefin altında rutinin evde ne kadar yapıldığı görünür (ebeveyn kaydı, puan değil).</Text>
+              <Text style={styles.small}>Bağlarsan Takip Planı'nda hedefin altında rutinin evde ne kadar yapıldığı görünür (ebeveyn kaydı, puan değil).</Text>
             </>
           )}
 

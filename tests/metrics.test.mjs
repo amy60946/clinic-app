@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  occursOn, weekly, perTask, observations, bySkill, abcSummary, mondayOf, addDays, dayCell, weekGrid, timeOfDay, weeklyCounts,
+  occursOn, weekly, perTask, observations, bySkill, abcSummary, mondayOf, addDays, dayCell, weekGrid, timeOfDay, weeklyCounts, dec,
 } from '../src/lib/metrics.ts';
 
 const task = (o) => ({
@@ -160,4 +160,10 @@ test('hedefe bağlı rutin: son 7 tam günde yalnız verilen görevler', async (
   assert.equal(r.approved, 2);
   assert.equal(r.rate, 29);
   assert.equal(taskSetRate([t1], comps, [], '2026-10-28').rate, null);
+});
+
+test('ondalık sayı Türkçe yazılır (2.1 → 2,1)', () => {
+  assert.equal(dec(2.1), '2,1');
+  assert.equal(dec(3), '3');
+  assert.equal(dec(0.5), '0,5');
 });

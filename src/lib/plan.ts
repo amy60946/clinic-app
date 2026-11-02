@@ -152,11 +152,23 @@ export async function publishPlan(linkId: string): Promise<void> {
   const { error } = await supabase.rpc('care_plan_publish', { p_link_id: linkId });
   if (error) throw new Error(error.message);
 }
+// "Aileye gönder" özetinden: hold = bu gönderimde bekletilen hedef / program / öneri kimlikleri (ortak care_plan_publish_selected).
+// Sunucuda işlev yoksa: bekletilen yoksa eski tek gönderim, varsa PlanSchemaMissing.
+export async function publishPlanSelected(linkId: string, hold: string[]): Promise<void> {
+  const { error } = await supabase.rpc('care_plan_publish_selected', { p_link_id: linkId, p_hold: hold });
+  if (!error) return;
+  if (error.code === 'PGRST202' || error.code === '42883') {
+    if (!hold.length) return publishPlan(linkId);
+    throw new PlanSchemaMissing('Bir kısmını bekletmek için veritabanı güncellemesi bekleniyor (ortak 20261102500000_plan_publish_selected.sql). Hepsini işaretleyip gönderebilirsin.');
+  }
+  throw new Error(error.message);
+}
 
 /* ---------- Şablondan ---------- */
+// B1 (kullanıcı kararı 2 Kasım 2026): şablonun ev desteği "Aileye not"a (description) yazılır; home_support formda yok, boş kalır
 export const goalFromTemplate = (g: GoalT, position = 0): GoalInput => ({
-  title: g.title, description: '', domain: g.domain, measure: g.measure, baseline: '', target: g.target, weeks: g.weeks,
-  home_support: g.home_support, shared: true, status: 'active', template_key: g.key, position,
+  title: g.title, description: g.home_support ?? '', domain: g.domain, measure: g.measure, baseline: '', target: g.target, weeks: g.weeks,
+  home_support: '', shared: true, status: 'active', template_key: g.key, position,
 });
 export const moduleFromTemplate = (m: ModuleT, position = 0, status: ModuleStatus = 'planned'): ModuleInput => ({
   title: m.title, aim: m.aim, practice: m.practice, checklist: m.checklist, status, template_key: m.key, position,

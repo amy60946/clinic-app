@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, Pressable, ScrollView, Modal, Switch, Alert, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, Pressable, ScrollView, Modal, Alert, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
 import { Input, Notice, SmallButton, IconButton, Segmented } from '../../components/ui';
-import { GasLine } from '../../components/charts';
 import { weekStarts, taskSetRate, Task } from '../../lib/metrics';
 import { track } from '../../lib/track';
 import { todayISO } from '../../dates';
@@ -12,7 +11,7 @@ import {
   PlanTarget, PlanGoal, PlanModule, ModuleLog, ModuleGoals, ModuleInput, PlanTemplate, GoalT, PackageT, Published, GoalStatus, ModuleStatus,
   DOMAINS, GOAL_TEMPLATES, MODULE_TEMPLATES, PACKAGES, domainLabel, measureLabel,
   loadPlan, loadLogs, loadModuleGoals, linkModuleGoals, unlinkModuleGoal, addGoals, updateGoal, addModules, updateModule, deleteModule,
-  rateGoal, applyPackage, goalFromTemplate, moduleFromTemplate, logSummary, publishPlan, listPlanTemplates, savePlanTemplate,
+  rateGoal, applyPackage, goalFromTemplate, moduleFromTemplate, logSummary, publishPlan, publishPlanSelected, listPlanTemplates, savePlanTemplate,
   updatePlanTemplate, deletePlanTemplate, loadPublished, PlanSchemaMissing,
 } from '../../lib/plan';
 import {
@@ -24,13 +23,16 @@ import {
 } from '../../lib/routines';
 import type { AgeGroup } from '../../templates';
 import { useDragSource, useDropZone } from '../../lib/dnd';
-import { RGroup, groupSuggestions, visibleGroup, goalUnsent, moduleUnsent } from '../../lib/planCore';
+import { RGroup, PubItem, groupSuggestions, visibleGroup, goalUnsent, moduleUnsent, goalWeek, lastRating, reviewDue, publishItems } from '../../lib/planCore';
 import { useLayout } from '../../lib/layout';
 import { useClientConfig } from '../../lib/clientConfig';
 import RoutineSheet, { RoutineGoal } from '../client/RoutineSheet';
 import SuggestionEditor from '../client/SuggestionEditor';
 import ChangeSheet, { EditTarget, EditResult } from './ChangeSheet';
-import PlanEditor, { GoalSheet, ModuleSheet, PackageSheet, GAS_LABELS } from './PlanEditor';
+import PlanEditor, { GoalSheet, ModuleSheet, PackageSheet } from './PlanEditor';
+import EvaluateSheet, { dayMonth } from './EvaluateSheet';
+import PublishSheet from './PublishSheet';
+import { PRIVATE, HEAD, STATUS_TONE } from './tones';
 import type { ClientCtx } from '../client/ClientScreen';
 
 // Takip planı — hedef hatları (kullanıcı kararları 30 Ekim ve 2 Kasım 2026, "C"; ortak akislar.md 12.1):
@@ -73,7 +75,7 @@ const splitPayload = (p: string) => { const i = p.indexOf(':'); return [p.slice(
 
 /* ====================================================================== */
 
-export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'client' | 'me' | 'data' | 'today'>) {
+export default function PlanHats({ client, me, data, today, reload }: Pick<ClientCtx, 'client' | 'me' | 'data' | 'today' | 'reload'>) {
   const target: PlanTarget = { kind: 'link', linkId: client.link_id, clinicId: client.clinic_id };
   const { desktop } = useLayout();
   // Ailede ekli rutine değişiklik önerisi, ParentApp "Uzmanın değişiklik önerisi" kartını yayınlayana kadar kapalı: eski ParentApp
@@ -93,9 +95,12 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
   const [width, setWidth] = useState(0);
   const [openIds, setOpenIds] = useState<string[] | null>(null);
   const [focus, setFocus] = useState<string | null>(null);          // kitaplıktaki "Ekle" bu hedefe ekler
-  const [which, setWhich] = useState<'this' | 'last'>('this');
   const [libOpen, setLibOpen] = useState<boolean | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [help, setHelp] = useState(false);
+  const [evalSheet, setEvalSheet] = useState<{ goal: PlanGoal; status?: GoalStatus } | null>(null);
+  const [pubItems, setPubItems] = useState<PubItem[] | null>(null);
+  const [tabOf, setTabOf] = useState<Record<string, 'goal' | 'mod' | 'rt'>>({});   // dar ekranda açık hedefin sekmesi (L2)
   // pencereler
   const [goalSheet, setGoalSheet] = useState<{ editing?: PlanGoal } | null>(null);
   const [moduleSheet, setModuleSheet] = useState<{ editing?: PlanModule; goalId: string | null } | null>(null);
@@ -122,7 +127,16 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
     listPlanTemplates().then(setTpls).catch(() => setTpls(null));
     listOwnRoutines().then(setOwn).catch(() => setOwn(null));
   }, []);
-  useEffect(() => { load(); loadLibrary(); }, [load, loadLibrary]);
+  useEffect(() => { loadLibrary(); }, [loadLibrary]);
+  // danışan verisi yenilenince (aşağı çekme, kabul bildirimi) plan da yeniden okunur
+  useEffect(() => { load(); }, [load, data]);
+  // Aile bir öneriyi az önce kabul ettiyse görev listesi eskidir: kabul edilen görev çocuğun listesinde yoksa veriyi bir kez yenile
+  const staleAsked = useRef(false);
+  useEffect(() => {
+    if (staleAsked.current || !reload) return;
+    const known = new Set(data.tasks.map((t) => t.id));
+    if (sugg.some((s) => s.status === 'accepted' && s.task_id && !known.has(s.task_id))) { staleAsked.current = true; reload(); }
+  }, [sugg, data, reload]);
 
   const goals = useMemo(() => (plan?.goals ?? []).filter((g) => !g.archived), [plan]);
   const archived = useMemo(() => (plan?.goals ?? []).filter((g) => g.archived), [plan]);
@@ -140,7 +154,6 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
 
   /* ---------- türetilenler ---------- */
   const weeks = weekStarts(today, 8);
-  const week = which === 'this' ? weeks[weeks.length - 1] : weeks[weeks.length - 2];
   const thisWeek = weeks[weeks.length - 1];
   const linkOK = links !== null;
   const modsOf = (gid: string) => plan.modules.filter((m) => links?.[m.id]?.includes(gid));
@@ -342,6 +355,9 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
 
   const hatMenu = (g: PlanGoal) => Alert.alert(short(g.title, 60), undefined, [
     { text: 'Hedefi düzenle', onPress: () => setGoalSheet({ editing: g }) },
+    { text: 'Değerlendir', onPress: () => setEvalSheet({ goal: g }) },
+    // D1: "Aile görür" anahtarı satırdan menüye taşındı; kapalıysa başlıkta "Yalnız sende"
+    { text: g.shared ? 'Aileden gizle' : 'Aileye göster', onPress: () => act(updateGoal(g.id, { shared: !g.shared })) },
     { text: 'Şablon olarak kaydet', onPress: () => (tpls === null
       ? Alert.alert('Veritabanı güncellemesi bekleniyor', 'Şablonlarım için ortak 20261102100000_plan_redesign.sql uygulanmalı.')
       : setTplSave(g)) },
@@ -373,8 +389,8 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
     try {
       const tg = t.content.goal;
       const [gid] = await addGoals(target, [{
-        title: tg.title, description: tg.description ?? '', domain: tg.domain ?? '', measure: tg.measure ?? 'yesno', baseline: '',
-        target: tg.target ?? '', weeks: tg.weeks ?? null, home_support: tg.home_support ?? '', shared: true, status: 'active',
+        title: tg.title, description: [tg.description, tg.home_support].filter(Boolean).join('\n').slice(0, 600), domain: tg.domain ?? '',
+        measure: tg.measure ?? 'level', baseline: '', target: tg.target ?? '', weeks: tg.weeks ?? null, home_support: '', shared: true, status: 'active',
         template_key: tg.template_key ?? null, position: plan.goals.length,
       }]);
       // programlar: aynı şablon anahtarlı program planda varsa o bağlanır, yoksa eklenir
@@ -405,26 +421,55 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
     } catch (e) { fail('Şablon uygulanamadı')(e); }
   };
 
-  const publish = async () => {
+  // G1: önce özet; eski sunucuda (gönderilmiş sürüm okunamıyor) hepsi birden gider
+  const sendItems = pub ? publishItems({ goals: plan.goals, modules: plan.modules, groups, changes: sugg, pub, links }) : null;
+  const openPublish = () => {
+    if (!sendItems) return void publish([]);
+    if (!sendItems.length) return Alert.alert('Gönderilecek yeni bir şey yok', 'Aile planın son gönderdiğin hâlini görüyor.');
+    setPubItems(sendItems);
+  };
+  const publish = async (hold: string[]) => {
     setBusy(true);
     try {
-      await publishPlan(client.link_id);
-      track('plan.publish', { drafts: draftUnits, plan: unsentPlan });
+      await (pub ? publishPlanSelected(client.link_id, hold) : publishPlan(client.link_id));
+      track('plan.publish', { drafts: draftUnits, plan: unsentPlan, held: hold.length });
       setLocalDirty(false);
+      setPubItems(null);
       await load();
-      Alert.alert('Aileye gönderildi', 'Ebeveyn tek bildirim alır; plan ve öneriler ParentApp › Uzmanım › (senin adın) bölümünde.');
+      Alert.alert(hold.length ? 'Seçilenler aileye gönderildi' : 'Aileye gönderildi',
+        `Ebeveyn tek bildirim alır; plan ve öneriler ParentApp › Uzmanım › (senin adın) bölümünde.${hold.length ? ' Beklettiklerin planda "gönderilmedi" olarak kalır.' : ''}`);
     } catch (e) {
       Alert.alert('Gönderilemedi', (e as Error).message);
     } finally {
       setBusy(false);
     }
   };
+  // A1 + S1: değerlendirme ve durum
+  const saveEval = async (g: PlanGoal, rating: number | null, status: GoalStatus) => {
+    if (rating !== null) await rateGoal(client.clinic_id, g.id, thisWeek, rating);
+    if (status !== g.status) await updateGoal(g.id, { status });
+    track('plan.evaluate', { rated: rating !== null, status });
+    setEvalSheet(null);
+    await after(status !== g.status);
+  };
+  const statusMenu = (g: PlanGoal) => Alert.alert(short(g.title, 60), 'Hedefin durumu', [
+    ...(g.status !== 'active' ? [{ text: 'Sürüyor', onPress: () => act(updateGoal(g.id, { status: 'active' })) }] : []),
+    ...(g.status !== 'achieved' ? [{ text: 'Ulaşıldı · değerlendir', onPress: () => setEvalSheet({ goal: g, status: 'achieved' }) }] : []),
+    ...(g.status !== 'paused' ? [{ text: 'Ara ver', onPress: () => act(updateGoal(g.id, { status: 'paused' })) }] : []),
+    { text: 'Vazgeç', style: 'cancel' as const },
+  ]);
+  const moduleStatusMenu = (m: PlanModule) => Alert.alert(short(m.title, 60), 'Programın durumu', [
+    ...MODULE_STATUS.filter((x) => x.id !== m.status).map((x) => ({
+      text: x.id === 'planned' ? 'Planlandı (aile görmez)' : x.label, onPress: () => act(updateModule(m.id, { status: x.id })),
+    })),
+    { text: 'Vazgeç', style: 'cancel' as const },
+  ]);
 
   /* ---------- dikkat ---------- */
   const attention: { icon: keyof typeof Ionicons.glyphMap; text: string; onPress?: () => void; tone?: 'warn' }[] = [];
-  if (unsent) attention.push({ icon: 'paper-plane-outline', text: `${unsent} değişiklik aileye gönderilmedi`, onPress: publish, tone: 'warn' });
-  const noGas = goals.filter((g) => g.status === 'active' && !g.ratings.some((r) => r.week === thisWeek));
-  if (noGas.length) attention.push({ icon: 'stats-chart-outline', text: `Bu hafta değerlendirilmedi: ${noGas.length} hedef`, onPress: () => openHat(noGas[0].id) });
+  if (unsent) attention.push({ icon: 'paper-plane-outline', text: `${unsent} değişiklik aileye gönderilmedi`, onPress: openPublish, tone: 'warn' });
+  const due = goals.filter((g) => reviewDue(g, today));
+  if (due.length) attention.push({ icon: 'time-outline', text: `Değerlendirme zamanı: ${due.length} hedef`, onPress: () => { openHat(due[0].id); setEvalSheet({ goal: due[0] }); } });
   const idle = plan.modules.filter((m) => m.status === 'active' && pub?.modules[m.id] && logSummary(logs, m.id, 7).practiced === 0);
   if (idle.length) attention.push({ icon: 'time-outline', text: `7 gündür uygulanmadı: ${short(idle[0].title, 26)}${idle.length > 1 ? ` +${idle.length - 1}` : ''}` });
   const low = groups.filter((r) => r.state === 'added' && r.tasks.length).map((r) => ({ r, s: taskSetRate(data.tasks, data.completions, r.tasks.map((t) => t.id), today) }))
@@ -438,7 +483,8 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
     const s = logSummary(logs, m.id, 7);
     const n = links?.[m.id]?.filter((id) => goals.some((g) => g.id === id)).length ?? 0;
     return (
-      <DragView key={`${m.id}-${gid}`} payload={isWeb && linkOK ? `module:${m.id}|${gid ?? '-'}` : null} style={styles.mini}>
+      <DragView key={`${m.id}-${gid}`} payload={isWeb && linkOK ? `module:${m.id}|${gid ?? '-'}` : null}
+        style={[styles.mini, (m.status === 'planned' || unsentMod(m)) && styles.miniPrivate]}>
         <View style={styles.miniHead}>
           <Text style={styles.miniTitle} numberOfLines={2}>{m.title}</Text>
           {unsentMod(m) && <View style={styles.dot} accessibilityLabel="Aileye gönderilmedi" />}
@@ -450,14 +496,8 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
               { text: 'Vazgeç', style: 'cancel' }, { text: 'Sil', style: 'destructive', onPress: () => act(deleteModule(m.id), 'Silinemedi') }])} />
           )}
         </View>
-        <View style={styles.seg}>
-          {MODULE_STATUS.map((x) => (
-            <Pressable key={x.id} onPress={() => m.status !== x.id && act(updateModule(m.id, { status: x.id }))} style={[styles.segItem, m.status === x.id && styles.segOn]}
-              accessibilityRole="radio" accessibilityState={{ selected: m.status === x.id }}>
-              <Text style={[styles.segText, m.status === x.id && styles.segTextOn]}>{x.label}</Text>
-            </Pressable>
-          ))}
-        </View>
+        <StatusChip label={MODULE_STATUS.find((x) => x.id === m.status)?.label ?? m.status} tone={STATUS_TONE[m.status]}
+          onPress={() => moduleStatusMenu(m)} hint="Programın durumunu değiştir" />
         <Text style={styles.tiny}>
           {m.status === 'planned' ? 'Aile görmez (planlandı)' : pub?.modules[m.id] ? `Son 7 gün: ${s.practiced} gün uyguladı (ebeveyn kaydı)` : 'Aileye gönderilmedi'}
           {n > 1 ? ` · ${n} hedefte` : ''}
@@ -477,8 +517,10 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
         : r.state === 'added' ? { t: r.single ? 'Ailede ekli' : `${r.added} / ${r.items.length} görev ailede`, fg: colors.easy.fg, bg: colors.easy.bg }
           : { t: 'Aile eklemedi', fg: colors.muted, bg: '#ECEEF3' };
     return (
-      <DragView key={r.key} payload={isWeb ? `routine:${r.key}` : null} style={styles.mini}>
+      <DragView key={r.key} payload={isWeb ? `routine:${r.key}` : null}
+        style={[styles.mini, (r.state === 'draft' || draftChange) && styles.miniPrivate]}>
         <View style={styles.miniHead}>
+          {(r.state === 'draft' || draftChange) && <View style={styles.dot} accessibilityLabel="Aileye gönderilmedi" />}
           {r.single ? <Text style={{ fontSize: 16 }}>{r.emoji}</Text>
             : <Ionicons name={(r.icon || 'repeat-outline') as keyof typeof Ionicons.glyphMap} size={16} color={colors.navy} />}
           <Text style={styles.miniTitle} numberOfLines={2}>{r.title}</Text>
@@ -507,12 +549,16 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
     );
   };
 
+  // Hedef sütunu (kullanıcı kararları 2 Kasım 2026): aileye gidenler (hedef düzey, süre, açıklama, evde destek) üstte;
+  // aileye gitmeyen GAS özeti bej kutuda (C1), "Değerlendir" ile (A1). Ölçüm türü ve başlangıç düzenleme formunda kalır.
   const goalColumn = (g: PlanGoal) => {
-    const ratings = Object.fromEntries(g.ratings.map((r) => [r.week, r.rating]));
-    const cur = ratings[week];
+    const sorted = [...g.ratings].sort((x, y) => x.week.localeCompare(y.week));
+    const first = sorted[0];
+    const last = sorted[sorted.length - 1];
+    const sign = (v: number) => (v > 0 ? `+${v}` : v === 0 ? '0' : `−${-v}`);
+    const n = goalWeek(g.created_at, today);
     const kv: [string, string][] = [
-      ['Ölçüm', measureLabel(g.measure)], ['Başlangıç', g.baseline || '—'], ['Hedef', g.target || '—'],
-      ['Süre', g.weeks ? `${g.weeks} hafta` : '—'],
+      ['Hedef düzey', g.target || '—'], ['Süre', g.weeks ? `${Math.min(n, g.weeks)}. hafta / ${g.weeks}` : `${n}. hafta`],
     ];
     return (
       <View style={{ gap: 8 }}>
@@ -521,31 +567,19 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
             <View key={k} style={styles.kvItem}><Text style={styles.kvKey}>{k}</Text><Text style={styles.kvVal}>{v}</Text></View>
           ))}
         </View>
-        {!!g.home_support && <Text style={styles.small}>Evde: {g.home_support}</Text>}
-        <View style={styles.inline}>
-          <Switch value={g.shared} onValueChange={(v) => act(updateGoal(g.id, { shared: v }))} trackColor={{ true: colors.navy }}
-            accessibilityLabel="Aile bu hedefi görür" />
-          <Text style={styles.small}>{g.shared ? 'Aile görür' : 'Yalnız sende'}</Text>
+        {!!g.description && <Text style={styles.small}><Text style={{ fontWeight: '700', color: colors.navy }}>{g.shared ? 'Aileye not: ' : 'Not: '}</Text>{g.description}</Text>}
+        {!!g.home_support && <Text style={styles.small}><Text style={{ fontWeight: '700', color: colors.navy }}>Evde: </Text>{g.home_support}</Text>}
+        <View style={styles.private}>
+          <View style={styles.privateHead}>
+            <Ionicons name="eye-off-outline" size={13} color={PRIVATE.fg} />
+            <Text style={styles.privateWho}>YALNIZ SEN GÖRÜRSÜN</Text>
+          </View>
+          <Text style={[styles.small, { color: PRIVATE.text }]}>
+            {last ? `GAS: ${first !== last ? `${sign(first.rating)} (${dayMonth(first.week)}) → ` : ''}${sign(last.rating)} (${dayMonth(last.week)})` : 'Henüz değerlendirilmedi.'}
+            {reviewDue(g, today) ? ' · değerlendirme zamanı' : ''}
+          </Text>
+          <View style={{ alignSelf: 'flex-start' }}><SmallButton label="Değerlendir" onPress={() => setEvalSheet({ goal: g })} /></View>
         </View>
-        <View style={styles.seg}>
-          {GOAL_STATUS.map((s) => (
-            <Pressable key={s.id} onPress={() => g.status !== s.id && act(updateGoal(g.id, { status: s.id }))} style={[styles.segItem, g.status === s.id && styles.segOn]}
-              accessibilityRole="radio" accessibilityState={{ selected: g.status === s.id }}>
-              <Text style={[styles.segText, g.status === s.id && styles.segTextOn]}>{s.label}</Text>
-            </Pressable>
-          ))}
-        </View>
-        <Text style={styles.colSub}>{which === 'this' ? 'Bu haftanın' : 'Geçen haftanın'} değerlendirmesi (GAS, aile görmez)</Text>
-        <View style={styles.scale}>
-          {[-2, -1, 0, 1, 2].map((v) => (
-            <Pressable key={v} onPress={() => act(rateGoal(client.clinic_id, g.id, week, v), 'Puan kaydedilemedi', false)} accessibilityLabel={GAS_LABELS[v]}
-              style={[styles.scaleBtn, cur === v && styles.scaleOn]}>
-              <Text style={[styles.scaleNum, cur === v && { color: '#fff' }]}>{v > 0 ? `+${v}` : v}</Text>
-            </Pressable>
-          ))}
-        </View>
-        {cur !== undefined && <Text style={styles.tiny}>{GAS_LABELS[cur]}</Text>}
-        {g.ratings.length > 1 && <GasLine weeks={weeks} ratings={ratings} height={90} width={300} />}
       </View>
     );
   };
@@ -562,7 +596,7 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
         {!mods.length && linkOK && <Text style={styles.empty}>Bu hedefe bağlı program yok.</Text>}
         {linkOK && want.length > 0 && (
           <View style={styles.sugg}>
-            <Text style={styles.suggLead}>Bu hedef için önerilen:</Text>
+            <Text style={styles.suggLead}>Öneriler</Text>
             {want.map((k) => (
               <Pressable key={k} onPress={() => addTemplateModule(k, g.id)} style={styles.chip} accessibilityRole="button">
                 <Text style={styles.chipText}>+ {MODULE_TEMPLATES.find((m) => m.key === k)?.title ?? k}</Text>
@@ -572,7 +606,7 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
         )}
         {linkOK && loose.length > 0 && (
           <View style={styles.sugg}>
-            <Text style={styles.suggLead}>Planda, bağlı değil:</Text>
+            <Text style={styles.suggLead}>Bağlı değil</Text>
             {loose.map((m) => (
               <Pressable key={m.id} onPress={() => act(linkModuleGoals(client.clinic_id, [[m.id, g.id]]), 'Bağlanamadı')} style={styles.chip} accessibilityRole="button">
                 <Text style={styles.chipText}>↳ {short(m.title, 26)}</Text>
@@ -581,7 +615,7 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
           </View>
         )}
         <Pressable onPress={() => setModuleSheet({ goalId: g.id })} style={styles.add} accessibilityRole="button">
-          <Text style={styles.addText}>+ Program ekle{isWeb && desktop ? ' · ya da kitaplıktan sürükle' : ''}</Text>
+          <Text style={styles.addText}>+ Program ekle</Text>
         </Pressable>
       </View>
     );
@@ -599,7 +633,7 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
         {!rts.length && <Text style={styles.empty}>Bu hedefe bağlı rutin yok.</Text>}
         {offer.length > 0 && (
           <View style={styles.sugg}>
-            <Text style={styles.suggLead}>{band ? `${AGE_LABEL[band]} yaş için uygun:` : 'Uygun rutinler:'}</Text>
+            <Text style={styles.suggLead}>{band ? `Öneriler · ${AGE_LABEL[band]} yaş` : 'Öneriler'}</Text>
             {offer.map((r) => (
               <Pressable key={r.key} onPress={() => setRtSheet({ routine: r, goalId: g.id })} style={styles.chip} accessibilityRole="button">
                 <Text style={styles.chipText}>+ {r.title}</Text>
@@ -609,7 +643,7 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
         )}
         {loose.length > 0 && (
           <View style={styles.sugg}>
-            <Text style={styles.suggLead}>Bağlı değil:</Text>
+            <Text style={styles.suggLead}>Bağlı değil</Text>
             {loose.map((r) => (
               <Pressable key={r.key} onPress={() => setRoutineGoal(r, g.id).catch(fail('Bağlanamadı'))} style={styles.chip} accessibilityRole="button">
                 <Text style={styles.chipText}>↳ {short(r.title, 26)}</Text>
@@ -631,61 +665,105 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
     const rts = rtsOf(g.id);
     const ids = rts.flatMap((r) => r.tasks.map((t) => t.id));
     const rate = ids.length ? taskSetRate(data.tasks, data.completions, ids, today) : null;
-    const last = [...g.ratings].sort((a, b) => a.week.localeCompare(b.week)).pop();
+    const last = lastRating(g);
     return [
-      { k: 'p', b: `${mods.length} program`, s: act7.length ? `uygulama ${days}/${act7.length * 7} gün` : mods.length ? 'aileye kapalı' : '—' },
+      { k: 'p', b: `${mods.length} program`, s: act7.length ? (cols3 ? `${days}/${act7.length * 7} gün uygulandı` : `${days}/${act7.length * 7} gün`) : mods.length ? 'aileye kapalı' : '—' },
       { k: 'r', b: `${rts.length} rutin`, s: rate && rate.planned ? `son 7 gün %${rate.rate}` : rts.some((r) => r.state === 'pending') ? 'karar bekliyor' : rts.some((r) => r.state === 'draft') ? 'taslak' : '—' },
-      { k: 'g', b: `GAS ${last ? (last.rating > 0 ? `+${last.rating}` : last.rating) : '—'}`, s: g.ratings.some((r) => r.week === thisWeek) ? 'bu hafta girildi' : 'bu hafta girilmedi' },
+      { k: 'g', private: true, b: last ? `${cols3 ? 'Son değerlendirme' : 'GAS'} ${last.rating > 0 ? `+${last.rating}` : last.rating === 0 ? '0' : `−${-last.rating}`}` : cols3 ? 'Değerlendirilmedi' : 'GAS —',
+        s: last ? dayMonth(last.week) : reviewDue(g, today) ? 'değerlendirme zamanı' : '—' },
     ];
+  };
+
+  // Sütun etiketleri (H1): kısa gri ad; ne anlattığı (i) içinde
+  const colHeads = {
+    goal: <ColHead q="Hedef" info={[
+      'Neyi değiştiriyoruz, nasıl anlayacağız? Hedefi uzman yazar ve değerlendirir.',
+      'Aileye açık hedefin adı, hedef düzeyi, süresi ve açıklaması aileye gider; GAS değerlendirmen aileye gitmez.',
+      'Hedefe ulaşıldığına sen karar verirsin; oranlar ve davranış kayıtları yardımcıdır.',
+    ]} />,
+    mod: <ColHead q="Aile programı" info={[
+      'Ebeveyn evde nasıl destekler? Ebeveyn uygular, "Bugün uyguladım" der.',
+      'Aile yalnız Etkin ve Tamamlandı programları görür; Planlandı aileye gitmez.',
+      'Bir program birden çok hedefe bağlanabilir.',
+      ...(isWeb && desktop ? ['Kitaplıktan bir programı bu hedefin üstüne sürükleyip bırakabilirsin.'] : []),
+    ]} />,
+    rt: <ColHead q="Rutin ve görevler" info={[
+      'Her gün, hangi anda, hangi adımlarla? Çocuk yapar, ebeveyn onaylar.',
+      'Buradan eklenenler taslaktır; "Aileye gönder" deyince aileye gider.',
+      'Oranlar ebeveynin onay kaydıdır, puan değildir.',
+    ]} />,
   };
 
   const hat = (g: PlanGoal, i: number) => {
     const open = isOpen(g.id);
     const color = GOAL_COLORS[i % GOAL_COLORS.length];
-    const meta = [g.domain && domainLabel(g.domain), `${g.baseline || '—'} → ${g.target || '—'}`, g.weeks ? `${g.weeks} hafta` : '',
-      g.status !== 'active' ? GOAL_STATUS.find((s) => s.id === g.status)?.label : '', g.shared ? '' : 'yalnız sende'].filter(Boolean).join(' · ');
+    const n = goalWeek(g.created_at, today);
+    const meta = [g.domain && domainLabel(g.domain), g.target ? `hedef ${g.target}` : '',
+      g.weeks ? (g.status === 'active' ? `${Math.min(n, g.weeks)}. hafta / ${g.weeks}` : `${g.weeks} hafta`) : g.status === 'active' ? `${n}. hafta` : ''].filter(Boolean).join(' · ');
     const dirty = hatUnsent(g);
+    const st = GOAL_STATUS.find((x) => x.id === g.status);
+    const tab = tabOf[g.id] ?? 'rt';
     const hatButtons = (
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
         <IconButton name="ellipsis-horizontal" label="Diğer işlemler" size={18} onPress={() => hatMenu(g)} />
         <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color={colors.muted} />
       </View>
     );
+    const titleRow = (
+      <View style={{ flex: 1, gap: 3 }}>
+        <View style={styles.titleRow}>
+          {dirty && <View style={styles.dot} accessibilityLabel="Aileye gönderilmedi" />}
+          <Text style={[styles.hatTitle, { flexShrink: 1, minWidth: 0 }]}>{g.title}</Text>
+          {cols3 && <StatusChip label={st?.label ?? g.status} tone={STATUS_TONE[g.status]} onPress={() => statusMenu(g)} hint="Hedefin durumunu değiştir" />}
+          {!g.shared && <PrivateBadge text="Yalnız sende" />}
+        </View>
+        {!cols3 && (
+          <View style={styles.titleRow}>
+            <StatusChip label={st?.label ?? g.status} tone={STATUS_TONE[g.status]} onPress={() => statusMenu(g)} hint="Hedefin durumunu değiştir" />
+            {!!meta && <Text style={[styles.small, { flexShrink: 1 }]}>{meta}</Text>}
+          </View>
+        )}
+        {cols3 && !!meta && <Text style={styles.small}>{meta}</Text>}
+      </View>
+    );
     return (
       <DropView key={g.id} accept={['module', 'routine', 'libmod', 'librt']} onDrop={onDropHat(g.id)} style={[styles.hat, { borderLeftColor: color }]}>
-        <Pressable onPress={() => toggle(g.id)} style={[styles.hatLine, !cols3 && { flexDirection: 'column', alignItems: 'stretch' }]}
+        <Pressable onPress={() => toggle(g.id)} style={[styles.hatLine, open && { backgroundColor: HEAD }, !cols3 && { flexDirection: 'column', alignItems: 'stretch' }]}
           accessibilityRole="button" accessibilityState={{ expanded: open }}>
-          <View style={{ flex: cols3 ? 1 : undefined, flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text style={styles.hatTitle}>{g.title}</Text>
-              <Text style={styles.small}>{meta}</Text>
-              {dirty && <Text style={[styles.tiny, { color: colors.medium.fg, fontWeight: '700' }]}>Aileye gönderilmedi</Text>}
-            </View>
+          <View style={{ flex: cols3 ? 1 : undefined, minWidth: cols3 ? 240 : undefined, flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+            {titleRow}
             {!cols3 && hatButtons}
           </View>
-          <View style={styles.cells}>
+          <View style={[styles.cells, !cols3 && { flexWrap: 'nowrap' }]}>
             {hatSummary(g).map((c) => (
-              <View key={c.k} style={[styles.cell, !cols3 && { flex: 1, minWidth: 0 }]}><Text style={styles.cellB}>{c.b}</Text><Text style={styles.tiny}>{c.s}</Text></View>
+              <View key={c.k} style={[styles.cell, open && { backgroundColor: '#fff' }, c.private && styles.cellPrivate, !cols3 && { flex: 1, minWidth: 0 }]}>
+                <Text style={[styles.cellB, c.private && { color: PRIVATE.fg }]} numberOfLines={cols3 ? 1 : 2}>{c.b}</Text>
+                <Text style={styles.tiny} numberOfLines={1}>{c.s}</Text>
+              </View>
             ))}
           </View>
           {cols3 && hatButtons}
         </Pressable>
-        {open && (
-          <View style={[styles.hatBody, cols3 && { flexDirection: 'row', alignItems: 'flex-start' }]}>
-            <View style={[styles.col, cols3 && styles.col3]}>
-              <Text style={styles.colQ}>Neyi değiştiriyoruz, nasıl anlayacağız?</Text>
-              <Text style={styles.colSub}>Hedef · uzman yazar ve değerlendirir</Text>
-              {goalColumn(g)}
+        {open && cols3 && (
+          <View style={[styles.hatBody, { flexDirection: 'row', alignItems: 'flex-start' }]}>
+            <View style={[styles.col, styles.col3]}>{colHeads.goal}{goalColumn(g)}</View>
+            <View style={[styles.col, styles.col3]}>{colHeads.mod}{programColumn(g)}</View>
+            <View style={[styles.col, styles.col3]}>{colHeads.rt}{routineColumn(g)}</View>
+          </View>
+        )}
+        {/* dar ekran (L2): hedefin içinde sekmeler; en sık kullanılan rutin önce açık */}
+        {open && !cols3 && (
+          <View style={styles.hatBody}>
+            <View style={styles.tabs} accessibilityRole="tablist">
+              {([['goal', 'Hedef', null], ['mod', 'Program', modsOf(g.id).length], ['rt', 'Rutin', rtsOf(g.id).length]] as const).map(([id, label, count]) => (
+                <Pressable key={id} onPress={() => setTabOf((x) => ({ ...x, [g.id]: id }))} accessibilityRole="tab" accessibilityState={{ selected: tab === id }}
+                  style={[styles.tab, tab === id && styles.tabOn]}>
+                  <Text style={[styles.tabText, tab === id && styles.tabTextOn]}>{label}{count !== null ? <Text style={styles.tabCount}>{` ${count}`}</Text> : null}</Text>
+                </Pressable>
+              ))}
             </View>
-            <View style={[styles.col, cols3 && styles.col3]}>
-              <Text style={styles.colQ}>Ebeveyn evde nasıl destekler?</Text>
-              <Text style={styles.colSub}>Aile programı · ebeveyn uygular, "Bugün uyguladım" der</Text>
-              {programColumn(g)}
-            </View>
-            <View style={[styles.col, cols3 && styles.col3]}>
-              <Text style={styles.colQ}>Her gün, hangi anda, hangi adımlarla?</Text>
-              <Text style={styles.colSub}>Rutin ve görevler · çocuk yapar, ebeveyn onaylar</Text>
-              {routineColumn(g)}
+            <View style={styles.col}>
+              {tab === 'goal' ? <>{colHeads.goal}{goalColumn(g)}</> : tab === 'mod' ? <>{colHeads.mod}{programColumn(g)}</> : <>{colHeads.rt}{routineColumn(g)}</>}
             </View>
           </View>
         )}
@@ -714,10 +792,8 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
 
   return (
     <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-      <Text style={styles.intro}>
-        Her hedef bir satır: hedef · ailenin evdeki programı · çocuğun rutini ve görevleri. Eklediklerin taslaktır; aile, sen "Aileye gönder" deyince tek bildirimle görür. Gözlem toplar, tanı koymaz.
-      </Text>
       <View style={styles.toolbar}>
+        <IconButton name={help ? 'information-circle' : 'information-circle-outline'} label="Takip Planı nasıl çalışır?" size={20} onPress={() => setHelp((v) => !v)} />
         <SmallButton label={desktop && width >= 980 ? (libOpen ? 'Kitaplığı gizle' : 'Kitaplık') : 'Kitaplık'} onPress={() => setLibOpen((v) => !v)} />
         {goals.length > 1 && (
           <SmallButton label={(openIds ?? []).length >= goals.length ? 'Hepsini kapat' : 'Hepsini aç'}
@@ -725,12 +801,7 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
         )}
         <SmallButton label="+ Hedef" onPress={() => setGoalSheet({})} />
         <View style={{ flex: 1 }} />
-        {goals.length > 0 && (
-          <View style={{ minWidth: 200 }}>
-            <Segmented options={[{ id: 'this' as const, label: 'Bu hafta' }, { id: 'last' as const, label: 'Geçen hafta' }]} value={which} onChange={setWhich} />
-          </View>
-        )}
-        <Pressable onPress={publish} disabled={busy} style={[styles.send, !unsent && styles.sendQuiet, busy && { opacity: 0.6 }]} accessibilityRole="button">
+        <Pressable onPress={openPublish} disabled={busy} style={[styles.send, !unsent && styles.sendQuiet, busy && { opacity: 0.6 }]} accessibilityRole="button">
           {busy ? <ActivityIndicator color={unsent ? '#fff' : colors.navy} /> : (
             <>
               <Ionicons name="paper-plane-outline" size={16} color={unsent ? '#fff' : colors.navy} />
@@ -739,6 +810,15 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
           )}
         </Pressable>
       </View>
+      {help && (
+        <View style={styles.infoBox}>
+          {[
+            'Her hedef bir satır: hedef · ailenin evdeki programı · çocuğun rutini ve görevleri. Satıra dokununca açılır.',
+            'Eklediklerin taslaktır; aile, sen "Aileye gönder" deyince tek bildirimle görür.',
+            'Takip Planı gözlem toplar, tanı koymaz.',
+          ].map((t) => <Text key={t} style={styles.infoLine}>• {t}</Text>)}
+        </View>
+      )}
       {attention.length > 0 && (
         <View style={styles.attention}>
           {attention.slice(0, 4).map((a, i) => (
@@ -771,10 +851,9 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
 
           {(unlinkedMods.length > 0 || unlinkedRts.length > 0) && (
             <DropView accept={['module', 'routine']} onDrop={onDropUnlinked} style={styles.unlinked}>
-              <Text style={styles.small}>
-                <Text style={{ fontWeight: '700', color: colors.navy }}>Bir hedefe bağlı olmayanlar</Text>
-                {isWeb && desktop ? ' · bir hedefin üstüne sürükle; bağı kaldırmak için kartı buraya bırak' : ' · "Hedefe bağla" ile bir hedefin altına al'}
-              </Text>
+              <ColHead q="Bir hedefe bağlı olmayanlar" info={[isWeb && desktop
+                ? 'Kartı bir hedefin üstüne sürükle; bağı kaldırmak için kartı buraya bırak.'
+                : '"Hedefe bağla" ile bir hedefin altına al.']} />
               <View style={styles.looseGrid}>
                 {unlinkedMods.map((m) => (
                   <View key={m.id} style={styles.looseItem}>
@@ -792,7 +871,7 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
             </DropView>
           )}
           {otherSingles > 0 && (
-            <Text style={[styles.tiny, { marginTop: 8 }]}>Hedefe bağlı olmayan {otherSingles} tek görev daha ailede ekli; Ev rutinleri'nde görünür.</Text>
+            <Text style={[styles.tiny, { marginTop: 8 }]}>Hedefe bağlı olmayan {otherSingles} tek görev daha ailede ekli; Ev Rutinleri'nde görünür.</Text>
           )}
 
           {archived.length > 0 && (
@@ -863,6 +942,10 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
         } : undefined} />
       <ChangeSheet target={edit?.target ?? null} onClose={() => setEdit(null)} onSubmit={submitEdit}
         onWithdraw={edit && edit.target.mode !== 'change' ? () => withdrawGroup(edit.group) : undefined} />
+      <EvaluateSheet goal={evalSheet?.goal ?? null} initialStatus={evalSheet?.status} week={thisWeek} today={today}
+        onClose={() => setEvalSheet(null)} onSave={(r, st) => saveEval(evalSheet!.goal, r, st)} />
+      <PublishSheet items={pubItems} onClose={() => setPubItems(null)} onSend={publish}
+        groups={plan.goals.map((g, i) => ({ id: g.id, title: g.title, color: GOAL_COLORS[Math.max(0, goals.findIndex((x) => x.id === g.id)) % GOAL_COLORS.length], hidden: !g.shared }))} />
       <LinkPicker visible={!!pick} band={band} ownRoutines={ownRoutines} goalTitle={goals.find((g) => g.id === pick)?.title ?? ''}
         loose={unlinkedRts}
         onClose={() => setPick(null)}
@@ -871,6 +954,43 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
         onLoose={(r) => { const gid = pick; setPick(null); if (gid) setRoutineGoal(r, gid).catch(fail('Bağlanamadı')); }} />
       {tplSave && <TemplateSaveSheet goal={tplSave} modules={modsOf(tplSave.id).length} routines={rtsOf(tplSave.id).filter((r) => r.routine).length}
         onClose={() => setTplSave(null)} onSave={(title, shared) => saveTemplate(tplSave, title, shared)} />}
+    </View>
+  );
+}
+
+/* ---------- Sütun etiketi (H1): küçük gri ad + (i); açıklama yalnız (i)'ye dokununca ---------- */
+function ColHead({ q, info }: { q: string; info: string[] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View style={{ gap: 4 }}>
+      <Pressable onPress={() => setOpen((v) => !v)} hitSlop={8} accessibilityRole="button" accessibilityLabel={`${q}: açıklama`}
+        accessibilityState={{ expanded: open }} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start' }}>
+        <Text style={styles.colLabel}>{q}</Text>
+        <Ionicons name={open ? 'information-circle' : 'information-circle-outline'} size={14} color={colors.muted} />
+      </Pressable>
+      {open && <View style={styles.infoBox}>{info.map((t) => <Text key={t} style={styles.infoLine}>• {t}</Text>)}</View>}
+    </View>
+  );
+}
+
+// Durum çipi (S1): seyrek değişen durum başlıkta görünür, dokununca seçenekler
+function StatusChip({ label, tone, onPress, hint }: { label: string; tone: { bg: string; fg: string }; onPress: () => void; hint: string }) {
+  return (
+    <Pressable onPress={onPress} hitSlop={6} accessibilityRole="button" accessibilityLabel={`${label}. ${hint}`}
+      style={[styles.chipSt, { backgroundColor: tone.bg }]}>
+      <View style={[styles.chipDot, { backgroundColor: tone.fg }]} />
+      <Text style={[styles.chipStText, { color: tone.fg }]}>{label}</Text>
+      <Ionicons name="chevron-down" size={11} color={tone.fg} />
+    </Pressable>
+  );
+}
+
+// Aileye gitmeyen şeyin etiketi (C1, D1)
+function PrivateBadge({ text }: { text: string }) {
+  return (
+    <View style={styles.badge}>
+      <Ionicons name="eye-off-outline" size={11} color={PRIVATE.fg} />
+      <Text style={styles.badgeText}>{text}</Text>
     </View>
   );
 }
@@ -1005,7 +1125,7 @@ function LinkPicker({ visible, band, ownRoutines, goalTitle, loose, onClose, onR
                 <Ionicons name="chevron-forward" size={16} color={colors.faint} />
               </Pressable>
             ))}
-            {tab === 'own' && !ownRoutines.length && <Text style={styles.empty}>Ev rutinleri › "+ Aileye öner" › Rutinlerim'den kendi rutinini kurabilirsin.</Text>}
+            {tab === 'own' && !ownRoutines.length && <Text style={styles.empty}>Ev Rutinleri › "+ Aileye öner" › Rutinlerim'den kendi rutinini kurabilirsin.</Text>}
             {tab === 'catalog' && !!band && (
               <Pressable onPress={() => setAll((v) => !v)} hitSlop={6} style={{ alignSelf: 'flex-start' }}>
                 <Text style={styles.link}>{all ? `Yalnız ${AGE_LABEL[band]} yaş rutinleri` : 'Bütün yaş gruplarını göster'}</Text>
@@ -1124,8 +1244,29 @@ const styles = StyleSheet.create({
   chip: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.line, backgroundColor: '#fff' },
   chipOn: { backgroundColor: colors.navy, borderColor: colors.navy },
   chipText: { fontSize: 12, fontWeight: '600', color: colors.navy },
-  add: { borderWidth: 1, borderStyle: 'dashed', borderColor: colors.faint, borderRadius: radius.sm, paddingVertical: 9, alignItems: 'center' },
+  add: { backgroundColor: '#EEF0F4', borderRadius: radius.sm, paddingVertical: 8, alignItems: 'center' },
   addText: { fontSize: 12, fontWeight: '600', color: colors.navy },
+  infoBox: { backgroundColor: '#F3F5FA', borderRadius: radius.sm, padding: 10, gap: 4, marginTop: 4 },
+  colLabel: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase', color: '#6B7387' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  chipSt: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 4, borderRadius: radius.pill, paddingLeft: 7, paddingRight: 6, paddingVertical: 3 },
+  chipDot: { width: 6, height: 6, borderRadius: 3 },
+  chipStText: { fontSize: 11, fontWeight: '700' },
+  badge: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: PRIVATE.bg, borderColor: PRIVATE.line, borderWidth: 1,
+    borderRadius: radius.pill, paddingHorizontal: 7, paddingVertical: 2 },
+  badgeText: { fontSize: 10.5, fontWeight: '700', color: PRIVATE.fg },
+  private: { backgroundColor: PRIVATE.bg, borderColor: PRIVATE.line, borderWidth: 1, borderRadius: radius.sm, padding: 9, gap: 6 },
+  privateHead: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  privateWho: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, color: PRIVATE.fg },
+  cellPrivate: { backgroundColor: PRIVATE.bg, borderWidth: 1, borderColor: PRIVATE.line },
+  miniPrivate: { backgroundColor: PRIVATE.card, borderColor: PRIVATE.line },
+  tabs: { flexDirection: 'row', backgroundColor: '#ECEEF3', borderRadius: 9, padding: 2, gap: 2 },
+  tab: { flex: 1, alignItems: 'center', paddingVertical: 7, borderRadius: 7 },
+  tabOn: { backgroundColor: '#fff' },
+  tabText: { fontSize: 12.5, fontWeight: '600', color: colors.muted },
+  tabTextOn: { color: colors.navy, fontWeight: '700' },
+  tabCount: { fontWeight: '400', color: colors.muted },
+  infoLine: { fontSize: 12, color: colors.text, lineHeight: 17 },
   empty: { fontSize: 12, color: colors.muted, fontStyle: 'italic' },
   small: { fontSize: 12, color: colors.muted, lineHeight: 17 },
   tiny: { fontSize: 11, color: colors.muted, lineHeight: 15 },

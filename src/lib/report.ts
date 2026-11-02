@@ -3,7 +3,7 @@
 import {
   Task, Completion, AbcEvent, weekly, perTask, observations, bySkill, abcSummary, windowStarts, weekStarts, addDays, parseDate, lastFullDay,
   motivationStats, motivationText,
-  DECLINE_LABELS, LIMITS_TEXT, MASTERY_RATE, MASTERY_WEEKS,
+  DECLINE_LABELS, LIMITS_TEXT, MASTERY_RATE, MASTERY_WEEKS, dec,
 } from './metrics';
 import type { Goal } from './clinic';
 import { skillName } from '../skills';
@@ -53,14 +53,18 @@ export function buildReportHtml(r: ReportInput): string {
     <td>${esc(skillName(s.task.skill) || '–')}</td><td class="n">${s.approved}/${s.planned}</td><td>${bar(s.rate)} ${p(s.rate)}</td>
     <td class="n">${s.weeklyRates.map((x) => (x === null ? '–' : x)).join(' · ')}</td></tr>`).join('');
   const skillRows = skills.map((s) => `<tr><td>${esc(s.skill)}</td><td class="n">${s.approved}/${s.planned}</td><td>${bar(s.rate)} ${p(s.rate)}</td></tr>`).join('');
-  // GAS bu haftayı da içerir (uzman içinde bulunulan haftayı puanlayabilir)
-  const gasWeeks = weekStarts(r.today, r.weeks);
+  // GAS değerlendirme anlarında girilir (kullanıcı kararı 2 Kasım 2026, "A1"): sütunlar dönemdeki değerlendirme tarihleri (en çok 8),
+  // dönemden önceki son değerlendirme de başlangıç olarak ilk sütunda. Bu hafta dahil.
+  const periodFrom = weekStarts(r.today, r.weeks)[0];
+  const rated = [...new Set(goals.flatMap((g) => g.ratings.map((x) => x.week)))].sort();
+  const before = rated.filter((x) => x < periodFrom).pop();
+  const gasWeeks = [...(before ? [before] : []), ...rated.filter((x) => x >= periodFrom && x <= r.today)].slice(-8);
   const goalRows = goals.map((g) => {
     const m = Object.fromEntries(g.ratings.map((x) => [x.week, x.rating]));
     return `<tr><td>${esc(g.title)}${g.description ? `<div class="m">${esc(g.description)}</div>` : ''}</td>${gasWeeks
       .map((s) => `<td class="n">${m[s] === undefined ? '·' : m[s] > 0 ? `+${m[s]}` : m[s]}</td>`).join('')}</tr>`;
   }).join('');
-  const abcRows = abc.perWeek.map((x) => `<td class="n">${x.count || '·'}${x.avgIntensity ? `<div class="m">ş ${x.avgIntensity}</div>` : ''}</td>`).join('');
+  const abcRows = abc.perWeek.map((x) => `<td class="n">${x.count || '·'}${x.avgIntensity ? `<div class="m">ş ${dec(x.avgIntensity)}</div>` : ''}</td>`).join('');
 
   return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Ev rutini gözlem raporu – ${esc(r.childLabel)}</title>
 <style>
@@ -95,7 +99,7 @@ export function buildReportHtml(r: ReportInput): string {
 <tr><td>Başlatma (kendiliğinden başlama)</td><td>${p(o.beforeReminderRate)} — hatırlatma saati olan görevlerde "Yaptım" anı hatırlatmadan önce</td></tr>
 <tr><td>Tutarlılık</td><td>${p(o.fullDayRate)} — planlanan her görevin yapıldığı gün oranı</td></tr>
 <tr><td>Görevden kaçınma / uygunluk</td><td>"Yapamam" ${p(o.declineRate)} (${esc(reasons)}); ebeveyn reddi ${p(o.rejectRate)}</td></tr>
-<tr><td>Ebeveyn döngüsü</td><td>"Yaptım" → ebeveyn kararı ortanca ${o.reviewDelayHours === null ? '–' : `${o.reviewDelayHours} saat`}</td></tr>
+<tr><td>Ebeveyn döngüsü</td><td>"Yaptım" → ebeveyn kararı ortanca ${o.reviewDelayHours === null ? '–' : `${dec(o.reviewDelayHours)} saat`}</td></tr>
 ${motivation.answered ? `<tr><td>Motive etmek (ebeveyn gözlemi)</td><td>${esc(motivationText(motivation))} — ${motivation.answered} incelemede ebeveynin yanıtı; puan değildir</td></tr>` : ''}
 </table>
 
@@ -107,7 +111,8 @@ ${motivation.answered ? `<tr><td>Motive etmek (ebeveyn gözlemi)</td><td>${esc(m
 <table><tr><th>Alan</th><th>Onay/plan</th><th>Oran</th></tr>${skillRows || '<tr><td colspan="3">–</td></tr>'}</table>
 
 <h2>Hedefe ulaşma ölçeği (GAS, −2 … +2)</h2>
-${goals.length ? `<table><tr><th>Hedef</th>${gasWeeks.map((s) => `<th class="n">${d(s).slice(0, 5)}</th>`).join('')}</tr>${goalRows}</table>` : '<div class="m">Etkin hedef yok.</div>'}
+${!goals.length ? '<div class="m">Etkin hedef yok.</div>' : !gasWeeks.length ? '<div class="m">Bu dönemde değerlendirme girilmedi.</div>'
+  : `<table><tr><th>Hedef</th>${gasWeeks.map((s) => `<th class="n">${d(s).slice(0, 5)}</th>`).join('')}</tr>${goalRows}</table>`}
 
 <h2>Davranış kayıtları (ebeveyn ABC kaydı)</h2>
 <table><tr><th>Hafta</th>${abc.perWeek.map((x) => `<th class="n">${d(x.start).slice(0, 5)}</th>`).join('')}</tr><tr><td>Kayıt (ş = ort. şiddet 1–5)</td>${abcRows}</tr></table>
