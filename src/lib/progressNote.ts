@@ -4,7 +4,7 @@
 import type { Task, Completion, AbcEvent, DayPart } from './metrics.ts';
 import {
   observations, perTask, motivationStats, motivationText, windowStarts, lastFullDay, addDays, isoDate, dayPart, parseDate,
-  DECLINE_LABELS, MASTERY_WEEKS, MASTERY_RATE,
+  DECLINE_LABELS, MASTERY_WEEKS, MASTERY_RATE, dec,
 } from './metrics.ts';
 
 export type NoteGoal = { title: string; archived: boolean; ratings: { week: string; rating: number }[] };
@@ -78,7 +78,7 @@ export function progressNote(r: NoteInput): string {
   if (!cur.length) lines.push(`• Bu dönemde davranış kaydı yok${before.length ? ` (önceki ${r.weeks} haftada ${before.length})` : ''}.`);
   else {
     const avg = Math.round((cur.reduce((a, e) => a + e.intensity, 0) / cur.length) * 10) / 10;
-    lines.push(`• ${cur.length} kayıt${before.length || r.abc.length > cur.length ? `; önceki ${r.weeks} haftada ${before.length}` : ''}. Ortalama şiddet ${String(avg).replace('.', ',')}/5 (ebeveyn değerlendirmesi).`);
+    lines.push(`• ${cur.length} kayıt${before.length || r.abc.length > cur.length ? `; önceki ${r.weeks} haftada ${before.length}` : ''}. Ortalama şiddet ${dec(avg)}/5 (ebeveyn değerlendirmesi).`);
     const parts = new Map<DayPart, number>();
     cur.forEach((e) => parts.set(dayPart(e), (parts.get(dayPart(e)) ?? 0) + 1));
     const [p, n] = [...parts.entries()].sort((a, b) => b[1] - a[1])[0];

@@ -3,7 +3,7 @@
 import {
   Task, Completion, AbcEvent, weekly, perTask, observations, bySkill, abcSummary, windowStarts, weekStarts, addDays, parseDate, lastFullDay,
   motivationStats, motivationText,
-  DECLINE_LABELS, LIMITS_TEXT, MASTERY_RATE, MASTERY_WEEKS,
+  DECLINE_LABELS, LIMITS_TEXT, MASTERY_RATE, MASTERY_WEEKS, dec,
 } from './metrics';
 import type { Goal } from './clinic';
 import { skillName } from '../skills';
@@ -60,7 +60,7 @@ export function buildReportHtml(r: ReportInput): string {
     return `<tr><td>${esc(g.title)}${g.description ? `<div class="m">${esc(g.description)}</div>` : ''}</td>${gasWeeks
       .map((s) => `<td class="n">${m[s] === undefined ? '·' : m[s] > 0 ? `+${m[s]}` : m[s]}</td>`).join('')}</tr>`;
   }).join('');
-  const abcRows = abc.perWeek.map((x) => `<td class="n">${x.count || '·'}${x.avgIntensity ? `<div class="m">ş ${x.avgIntensity}</div>` : ''}</td>`).join('');
+  const abcRows = abc.perWeek.map((x) => `<td class="n">${x.count || '·'}${x.avgIntensity ? `<div class="m">ş ${dec(x.avgIntensity)}</div>` : ''}</td>`).join('');
 
   return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Ev rutini gözlem raporu – ${esc(r.childLabel)}</title>
 <style>
@@ -95,7 +95,7 @@ export function buildReportHtml(r: ReportInput): string {
 <tr><td>Başlatma (kendiliğinden başlama)</td><td>${p(o.beforeReminderRate)} — hatırlatma saati olan görevlerde "Yaptım" anı hatırlatmadan önce</td></tr>
 <tr><td>Tutarlılık</td><td>${p(o.fullDayRate)} — planlanan her görevin yapıldığı gün oranı</td></tr>
 <tr><td>Görevden kaçınma / uygunluk</td><td>"Yapamam" ${p(o.declineRate)} (${esc(reasons)}); ebeveyn reddi ${p(o.rejectRate)}</td></tr>
-<tr><td>Ebeveyn döngüsü</td><td>"Yaptım" → ebeveyn kararı ortanca ${o.reviewDelayHours === null ? '–' : `${o.reviewDelayHours} saat`}</td></tr>
+<tr><td>Ebeveyn döngüsü</td><td>"Yaptım" → ebeveyn kararı ortanca ${o.reviewDelayHours === null ? '–' : `${dec(o.reviewDelayHours)} saat`}</td></tr>
 ${motivation.answered ? `<tr><td>Motive etmek (ebeveyn gözlemi)</td><td>${esc(motivationText(motivation))} — ${motivation.answered} incelemede ebeveynin yanıtı; puan değildir</td></tr>` : ''}
 </table>
 

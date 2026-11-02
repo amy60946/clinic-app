@@ -433,6 +433,9 @@ export function abcSummary(events: AbcEvent[], today: string, weeks: number): Ab
 
 /* ---------- Metinler ---------- */
 
+// Ondalık sayı Türkçe yazılır: 2.1 → "2,1" (Intl'e bağlı değil; web ve iOS'ta aynı sonuç).
+export const dec = (n: number) => String(n).replace('.', ',');
+
 /* ---------- Motive etmek (ebeveyn gözlemi; puan ya da tanı değildir) ---------- */
 
 // ParentApp İnceleme'de ebeveynin isteğe bağlı yanıtı: 1–2 kolay · 3 orta · 4–5 zor. Eğilim: son 14 gün ile önceki 14 gün
