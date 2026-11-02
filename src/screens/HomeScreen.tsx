@@ -29,6 +29,7 @@ import { billingStatus, hasAccess, daysLeft, packageName } from '../lib/billing'
 import ClientScreen, { Tab } from './client/ClientScreen';
 import NotificationsSheet, { notificationTab } from './NotificationsSheet';
 import Bell from '../components/Bell';
+import ClientBoard from './ClientBoard';
 import { useNotifications } from '../lib/notificationsContext';
 import { AppNotification, notificationChildren, onNotificationTap, unregisterPush } from '../lib/notifications';
 import { track, flush } from '../lib/track';
@@ -409,7 +410,7 @@ export default function HomeScreen() {
                   onSample={openSample} onInvite={inviteFirst}
                   onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide'); }} />
               )}
-              <ClientList clients={state.clients} unread={unreadByChild} me={state.me} team={state.team}
+              <ClientBoard clients={state.clients} unread={unreadByChild} me={state.me} team={state.team}
                 onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
               {/* örnek aile listenin altında kendi satırında: ilk açılıştan sonra 30 gün ya da × ile kaldırılana dek */}
               {(state.clients.length === 0 || !!start?.sampleRow) && (
@@ -448,68 +449,6 @@ export default function HomeScreen() {
       <Onboarding visible={guide} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
       {legalSheets}
     </SafeAreaView>
-  );
-}
-
-// Danışan listesi: aynı adlı çocuklar ebeveyn adıyla ayırt edilir; çok danışanda ad / ebeveyn / etiketle arama
-// Sağda: okunmamış bildirim zili (sayılı) + ok. Çok danışanda içine girmeden hangisinde bildirim olduğu görünür.
-function ClientList({ clients, unread, me, team, onOpen }: {
-  clients: Client[]; unread: Record<string, number>; me: ClinicianMe; team: Member[]; onOpen: (c: Client) => void;
-}) {
-  const [q, setQ] = useState('');
-  const query = q.trim().toLocaleLowerCase('tr');
-  const shown = query
-    ? clients.filter((c) => `${c.child_name} ${c.parents} ${c.label}`.toLocaleLowerCase('tr').includes(query))
-    : clients;
-  return (
-    <>
-      <Label>{`Danışanlar (${clients.length})`}</Label>
-      {clients.length === 0 ? (
-        <Notice icon="people-outline" text={me.role === 'member'
-          ? 'Henüz danışanın yok. Aileyi davet et ya da klinik sahibinin atamasını bekle.'
-          : 'Henüz danışanın yok. Aileyi davet et; ebeveyn onaylayınca çocuk burada görünür.'} />
-      ) : (
-        <>
-          {clients.length > 3 && (
-            <View style={styles.search}>
-              <Ionicons name="search" size={18} color={colors.muted} />
-              <TextInput value={q} onChangeText={setQ} placeholder="Çocuk ya da ebeveyn adı ara" placeholderTextColor={colors.muted}
-                style={{ flex: 1, fontSize: 15, color: colors.navy }} autoCorrect={false} />
-            </View>
-          )}
-          <View style={styles.list}>
-            {shown.length === 0 && <Text style={[styles.small, { padding: 16 }]}>Sonuç bulunamadı.</Text>}
-            {shown.map((c, i) => (
-              <Pressable key={c.link_id} onPress={() => onOpen(c)} accessibilityRole="button"
-                style={({ pressed }) => [styles.row, i > 0 && styles.rowLine, pressed && { backgroundColor: '#F7F8FA' }]}>
-                <View style={styles.initial}>
-                  <Text style={{ fontSize: 16, fontWeight: '700', color: colors.navy }}>{(c.child_name || '?').slice(0, 1).toLocaleUpperCase('tr-TR')}</Text>
-                </View>
-                <View style={{ flex: 1, gap: 2 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <Text style={styles.clientName}>{c.child_name || 'Adsız'}</Text>
-                    {!!c.label && <Text style={styles.tag} numberOfLines={1}>{c.label}</Text>}
-                  </View>
-                  {!!c.parents && (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                      <Ionicons name="person-outline" size={13} color={colors.muted} />
-                      <Text style={styles.parents} numberOfLines={1}>{c.parents}</Text>
-                    </View>
-                  )}
-                  <Text style={styles.small}>
-                    Ebeveyn onayı: {dateText(c.consent_at)}
-                    {me.role === 'owner' && team.length > 1 && c.clinician_id && c.clinician_id !== me.id ? ` · Sorumlu: ${c.clinician_name || 'ekip üyesi'}` : ''}
-                    {me.role === 'member' && c.clinician_id !== me.id && (c.assigned ?? []).includes(me.id) ? ' · Sana atandı' : ''}
-                  </Text>
-                </View>
-                <Bell count={unread[c.child_id] ?? 0} small />
-                <Ionicons name="chevron-forward" size={18} color={colors.faint} />
-              </Pressable>
-            ))}
-          </View>
-        </>
-      )}
-    </>
   );
 }
 

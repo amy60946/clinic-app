@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import type { Attention } from './attention';
 import type { Task, Completion, AbcEvent } from './metrics';
 import type { SamplePlan, SampleNote } from './sample';
 
@@ -64,6 +65,23 @@ function check<T>(data: T, error: { code?: string; message: string } | null): T 
 export async function clinicianMe(): Promise<ClinicianMe | null> {
   const { data, error } = await supabase.rpc('clinician_me');
   return check(data as ClinicianMe | null, error);
+}
+
+// Tüm danışanlar dikkat panosu (ortak clinic_attention_summary, veritabani.md 23): bağlantı kimliğine göre sayılar.
+// İşlev sunucuda yoksa null (pano görünmez, düz liste kalır).
+export async function loadAttention(): Promise<Record<string, Attention> | null> {
+  const { data, error } = await supabase.rpc('clinic_attention_summary');
+  if (error) return null;
+  const out: Record<string, Attention> = {};
+  ((data ?? []) as any[]).forEach((r) => {
+    const n = (v: unknown) => Number(v) || 0;
+    out[r.link_id] = {
+      link_id: r.link_id, last_family_at: r.last_family_at ?? null, done_7d: n(r.done_7d), abc_7d: n(r.abc_7d), abc_last_at: r.abc_last_at ?? null,
+      logs_7d: n(r.logs_7d), decided_7d: n(r.decided_7d), decided_last_at: r.decided_last_at ?? null, pending: n(r.pending), drafts: n(r.drafts),
+      plan_unsent: n(r.plan_unsent), goals_active: n(r.goals_active), review_due: n(r.review_due), plan_published_at: r.plan_published_at ?? null,
+    };
+  });
+  return out;
 }
 
 export async function listClients(): Promise<Client[]> {
