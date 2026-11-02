@@ -3,7 +3,7 @@
 // Saf fonksiyon, testleri tests/progressNote.test.mjs.
 import type { Task, Completion, AbcEvent, DayPart } from './metrics.ts';
 import {
-  observations, perTask, motivationStats, motivationText, windowStarts, lastFullDay, addDays, isoDate, dayPart, parseDate,
+  observations, perTask, motivationStats, motivationText, windowStarts, weekStarts, lastFullDay, addDays, isoDate, dayPart, parseDate,
   DECLINE_LABELS, MASTERY_WEEKS, MASTERY_RATE, dec,
 } from './metrics.ts';
 
@@ -70,11 +70,13 @@ export function progressNote(r: NoteInput): string {
     if (m.answered >= 3) lines.push(`• Motive etmek (ebeveyn gözlemi): ${motivationText(m)}.`);
   }
 
-  // Davranış kayıtları
-  lines.push('', 'Davranış kayıtları');
+  // Davranış kayıtları: ekrandaki ve rapordaki sayıyla aynı aralık (abcSummary: takvim haftaları, bugün dahil).
+  // Oranlar dünde biter; kayıtlar gün içinde de girildiği için aralık başlıkta ayrıca yazılır.
+  const abcFrom = weekStarts(r.today, r.weeks)[0];
+  lines.push('', `Davranış kayıtları (${day(abcFrom)} – ${day(r.today, true)})`);
   const inRange = (a: string, b: string) => r.abc.filter((e) => { const d = isoDate(new Date(e.occurred_at)); return d >= a && d <= b; });
-  const cur = inRange(from, to);
-  const before = inRange(prevFrom, prevTo);
+  const cur = inRange(abcFrom, r.today);
+  const before = inRange(addDays(abcFrom, -7 * r.weeks), addDays(abcFrom, -1));
   if (!cur.length) lines.push(`• Bu dönemde davranış kaydı yok${before.length ? ` (önceki ${r.weeks} haftada ${before.length})` : ''}.`);
   else {
     const avg = Math.round((cur.reduce((a, e) => a + e.intensity, 0) / cur.length) * 10) / 10;
