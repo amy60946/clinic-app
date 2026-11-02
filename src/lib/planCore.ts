@@ -81,3 +81,70 @@ export function shiftDay(d: string, n: number) {
   return t.toISOString().slice(0, 10);
 }
 
+
+/* ---------- Hedef zamanı: kaçıncı hafta, değerlendirme zamanı (kullanıcı kararı 2 Kasım 2026, "A1") ---------- */
+const dayMs = 86400000;
+export const daysBetween = (a: string, b: string) => Math.round((Date.parse(`${b}T12:00:00Z`) - Date.parse(`${a}T12:00:00Z`)) / dayMs);
+// Hedef eklendiği haftadan itibaren kaçıncı haftada (1'den başlar)
+export const goalWeek = (createdAt: string, today: string) => Math.max(1, Math.floor(daysBetween(createdAt.slice(0, 10), today) / 7) + 1);
+export const lastRating = (g: Pick<PlanGoal, 'ratings'>) => [...g.ratings].sort((a, b) => a.week.localeCompare(b.week)).pop() ?? null;
+// GAS her hafta girilmez; gözden geçirme zamanı gelince sorulur: son değerlendirmeden (yoksa eklenişten) 4 hafta geçti
+// ya da süre doldu ve son haftasında değerlendirilmedi. Yalnız süren hedefler.
+export function reviewDue(g: Pick<PlanGoal, 'status' | 'archived' | 'created_at' | 'weeks' | 'ratings'>, today: string): boolean {
+  if (g.status !== 'active' || g.archived) return false;
+  const last = lastRating(g);
+  const start = g.created_at.slice(0, 10);
+  if (daysBetween(last ? last.week : start, today) >= 28) return true;
+  if (g.weeks) {
+    const end = shiftDay(start, g.weeks * 7);
+    if (today >= end && (!last || last.week < shiftDay(end, -7))) return true;
+  }
+  return false;
+}
+
+/* ---------- "Aileye gönder" özeti (kullanıcı kararı 2 Kasım 2026, "G1"; ortak care_plan_publish_selected) ---------- */
+// Her satır bir işaret kutusu: işareti kaldırılırsa `hold` kimlikleri bu gönderimde bekler. GAS ve hiç gönderilmemiş gizli hedef listede yok.
+export type PubItem = {
+  key: string; hold: string[]; kind: 'goal' | 'module' | 'routine' | 'task' | 'change';
+  title: string; detail: string; goalId: string | null;
+};
+export function publishItems(p: {
+  goals: PlanGoal[]; modules: PlanModule[]; groups: RGroup[]; changes: Suggestion[];
+  pub: { goals: Record<string, Pub>; modules: Record<string, Pub> }; links: Record<string, string[]> | null;
+}): PubItem[] {
+  const out: PubItem[] = [];
+  const live = p.goals.filter((g) => !g.archived);
+  for (const g of p.goals) {
+    const was = p.pub.goals[g.id] ?? null;
+    if (!goalUnsent(g, was)) continue;
+    const gone = !g.shared || g.archived;
+    out.push({ key: `g:${g.id}`, hold: [g.id], kind: 'goal', title: g.title, goalId: g.id,
+      detail: gone ? (g.archived ? 'arşivlendi · aileden kalkar' : 'aileden gizlendi · aileden kalkar') : was ? 'değişti' : 'yeni hedef' });
+  }
+  for (const m of p.modules) {
+    const was = p.pub.modules[m.id] ?? null;
+    const linked = p.links ? (p.links[m.id] ?? []).filter((id) => live.some((g) => g.id === id)) : [];
+    const shared = p.links ? linked.filter((id) => live.some((g) => g.id === id && g.shared)) : null;
+    if (!moduleUnsent(m, was, shared)) continue;
+    out.push({ key: `m:${m.id}`, hold: [m.id], kind: 'module', title: m.title, goalId: linked[0] ?? null,
+      detail: m.status === 'planned' ? 'planlandı · aileden kalkar' : was ? 'değişti' : 'yeni program' });
+  }
+  for (const r of p.groups) {
+    const ids = r.items.filter((s) => s.status === 'draft').map((s) => s.id);
+    if (!ids.length) continue;
+    out.push({ key: `r:${r.key}`, hold: ids, kind: r.single ? 'task' : 'routine', title: r.title, goalId: r.goalId,
+      detail: r.single ? 'yeni görev' : r.state === 'added' ? `${ids.length} görev rutine eklenecek` : `${ids.length} görev · yeni rutin` });
+  }
+  const ch = new Map<string, Suggestion[]>();
+  p.changes.filter((s) => s.kind === 'change' && s.status === 'draft').forEach((s) => {
+    const k = s.routine?.group ?? s.target_task_id ?? s.id;
+    ch.set(k, [...(ch.get(k) ?? []), s]);
+  });
+  ch.forEach((list, k) => {
+    const removes = list.filter((s) => s.change_remove).length;
+    out.push({ key: `c:${k}`, hold: list.map((s) => s.id), kind: 'change', title: list[0].routine?.title || list[0].title,
+      goalId: list.find((s) => s.goal_id)?.goal_id ?? null,
+      detail: [`${list.length} değişiklik önerisi`, removes ? `${removes} görev çıkar` : ''].filter(Boolean).join(' · ') });
+  });
+  return out;
+}

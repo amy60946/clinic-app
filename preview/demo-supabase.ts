@@ -335,14 +335,15 @@ const PK: Record<string, string[]> = {
 };
 
 // Aileye gönderilen sürüm (sunucudaki care_plan_snapshot): hedefte aileye açık olan, programda "Planlandı" olmayan
-function snapshot(x: Db, linkId: string) {
-  x.clinic_goals.filter((g: Row) => g.link_id === linkId).forEach((g: Row) => {
+// hold: bu gönderimde bekletilen hedef/program kimlikleri (ortak care_plan_snapshot_hold); program yalnız gönderilmiş hedefleri anar
+function snapshot(x: Db, linkId: string, hold: Set<string> = new Set()) {
+  x.clinic_goals.filter((g: Row) => g.link_id === linkId && !hold.has(g.id)).forEach((g: Row) => {
     g.pub = g.shared && !g.archived ? { title: g.title, description: g.description ?? '', domain: g.domain ?? '', measure: g.measure, baseline: g.baseline ?? '',
       target: g.target ?? '', weeks: g.weeks ?? null, home_support: g.home_support ?? '', status: g.status, position: g.position ?? 0 } : null;
   });
-  x.care_modules.filter((m: Row) => m.link_id === linkId).forEach((m: Row) => {
+  x.care_modules.filter((m: Row) => m.link_id === linkId && !hold.has(m.id)).forEach((m: Row) => {
     const goals = (x.care_module_goals ?? []).filter((c: Row) => c.module_id === m.id).map((c: Row) => c.goal_id)
-      .filter((id: string) => x.clinic_goals.some((g: Row) => g.id === id && g.shared && !g.archived));
+      .filter((id: string) => x.clinic_goals.some((g: Row) => g.id === id && g.pub));
     m.pub = m.status !== 'planned' ? { title: m.title, aim: m.aim ?? '', practice: m.practice ?? '', checklist: m.checklist ?? [], status: m.status,
       position: m.position ?? 0, goal_ids: goals } : null;
   });
@@ -939,6 +940,33 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     return { data: v, error: null };
   }
   // Tek gönderim (ortak migrations/20261102100000): plan anlık görüntüsü + taslak öneriler bekleyen; aileye tek bildirim
+  if (name === 'care_plan_publish_selected') {
+    const l = db.clinic_links.find((x: Row) => x.id === args.p_link_id);
+    if (!l) return err('Paylaşım bulunamadı');
+    const hold = new Set<string>((args.p_hold as string[] | null) ?? []);
+    const pubs = () => JSON.stringify([...db.clinic_goals, ...db.care_modules].filter((r: Row) => r.link_id === l.id).map((r: Row) => [r.id, r.pub ?? null]));
+    const was = pubs();
+    const n = snapshot(db, l.id, hold);
+    const changed = pubs() !== was;
+    const drafts = db.clinic_task_suggestions.filter((s: Row) => s.link_id === l.id && s.status === 'draft' && !hold.has(s.id));
+    const k = drafts.filter((s: Row) => s.kind !== 'change').length;
+    const ch = drafts.length - k;
+    drafts.forEach((s: Row) => { s.status = 'pending'; s.updated_at = now(); });
+    if (!n && !drafts.length && !changed) return err('Aileye gösterilecek bir şey yok: "Aile görür" açık bir hedef, etkin bir program ya da bir öneri ekle');
+    if (drafts.length || (changed && n)) {
+      const child = db.children.find((c: Row) => c.id === l.child_id)?.name ?? '';
+      const body = [changed ? 'Hedefler ve aile programı' : '', k ? `${k} görev önerisi` : '', ch ? `${ch} değişiklik önerisi` : ''].filter(Boolean).join(' · ');
+      db.profiles.filter((p: Row) => p.family_id === l.family_id).forEach((p: Row) => {
+        const nid = db.notifications.reduce((a: number, x: Row) => Math.max(a, Number(x.id) || 0), 0) + 1;
+        db.notifications.push({ id: nid, user_id: p.id, app: 'parent', kind: changed ? 'care_plan_shared' : 'clinic_suggestion',
+          title: changed ? `Takip planı güncellendi: ${child}` : `Uzmanın ${child} için öneri gönderdi`,
+          body: `${body} Uzmanım bölümünde.`, data: { link_id: l.id }, family_id: l.family_id, child_id: l.child_id, created_at: now(), read_at: null });
+      });
+    }
+    l.plan_published_at = now();
+    save();
+    return { data: null, error: null };
+  }
   if (name === 'care_plan_publish') {
     const l = db.clinic_links.find((x: Row) => x.id === args.p_link_id);
     if (!l) return err('Paylaşım bulunamadı');

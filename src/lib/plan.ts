@@ -152,6 +152,17 @@ export async function publishPlan(linkId: string): Promise<void> {
   const { error } = await supabase.rpc('care_plan_publish', { p_link_id: linkId });
   if (error) throw new Error(error.message);
 }
+// "Aileye gönder" özetinden: hold = bu gönderimde bekletilen hedef / program / öneri kimlikleri (ortak care_plan_publish_selected).
+// Sunucuda işlev yoksa: bekletilen yoksa eski tek gönderim, varsa PlanSchemaMissing.
+export async function publishPlanSelected(linkId: string, hold: string[]): Promise<void> {
+  const { error } = await supabase.rpc('care_plan_publish_selected', { p_link_id: linkId, p_hold: hold });
+  if (!error) return;
+  if (error.code === 'PGRST202' || error.code === '42883') {
+    if (!hold.length) return publishPlan(linkId);
+    throw new PlanSchemaMissing('Bir kısmını bekletmek için veritabanı güncellemesi bekleniyor (ortak 20261102500000_plan_publish_selected.sql). Hepsini işaretleyip gönderebilirsin.');
+  }
+  throw new Error(error.message);
+}
 
 /* ---------- Şablondan ---------- */
 export const goalFromTemplate = (g: GoalT, position = 0): GoalInput => ({
