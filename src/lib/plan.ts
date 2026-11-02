@@ -116,10 +116,11 @@ const cleanModule = (m: Partial<ModuleInput>) => ({
   ...(m.checklist !== undefined && { checklist: m.checklist.map((c) => c.trim().slice(0, 120)).filter(Boolean).slice(0, 8) }),
 });
 
-export async function addGoals(t: PlanTarget, list: GoalInput[]): Promise<void> {
-  if (!list.length) return;
-  const { error } = await supabase.from('clinic_goals').insert(list.map((g) => ({ ...owner(t), ...cleanGoal(g) })));
+export async function addGoals(t: PlanTarget, list: GoalInput[]): Promise<string[]> {
+  if (!list.length) return [];
+  const { data, error } = await supabase.from('clinic_goals').insert(list.map((g) => ({ ...owner(t), ...cleanGoal(g) }))).select('id');
   if (error) throw new Error(error.message);
+  return ((data ?? []) as { id: string }[]).map((x) => x.id);
 }
 export async function updateGoal(id: string, g: Partial<GoalInput> & { archived?: boolean }): Promise<void> {
   const { error } = await supabase.from('clinic_goals').update(cleanGoal(g)).eq('id', id);
@@ -129,10 +130,11 @@ export async function deleteGoal(id: string): Promise<void> {
   const { error } = await supabase.from('clinic_goals').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
-export async function addModules(t: PlanTarget, list: ModuleInput[]): Promise<void> {
-  if (!list.length) return;
-  const { error } = await supabase.from('care_modules').insert(list.map((m) => ({ ...owner(t), ...cleanModule(m) })));
+export async function addModules(t: PlanTarget, list: ModuleInput[]): Promise<string[]> {
+  if (!list.length) return [];
+  const { data, error } = await supabase.from('care_modules').insert(list.map((m) => ({ ...owner(t), ...cleanModule(m) }))).select('id');
   if (error) throw new Error(error.message);
+  return ((data ?? []) as { id: string }[]).map((x) => x.id);
 }
 export async function updateModule(id: string, m: Partial<ModuleInput>): Promise<void> {
   const { error } = await supabase.from('care_modules').update(cleanModule(m)).eq('id', id);
@@ -161,14 +163,95 @@ export const moduleFromTemplate = (m: ModuleT, position = 0, status: ModuleStatu
 });
 
 // Paket: seçili hedefler + modüller (ilk modül etkin, diğerleri planlandı; mevcut şablonlar tekrar eklenmez)
-export async function applyPackage(t: PlanTarget, p: PackageT, existing: { goals: PlanGoal[]; modules: PlanModule[] }, goalKeys = p.goals) {
+export async function applyPackage(t: PlanTarget, p: PackageT, existing: { goals: PlanGoal[]; modules: PlanModule[] }, goalKeys = p.goals): Promise<{ goalIds: string[] }> {
   const haveG = new Set(existing.goals.map((g) => g.template_key).filter(Boolean));
   const haveM = new Set(existing.modules.map((m) => m.template_key).filter(Boolean));
   const gs = goalKeys.map((k) => GOAL_TEMPLATES.find((g) => g.key === k)).filter((g): g is GoalT => !!g && !haveG.has(g.key));
   const ms = p.modules.map((k) => MODULE_TEMPLATES.find((m) => m.key === k)).filter((m): m is ModuleT => !!m && !haveM.has(m.key));
   const anyActive = existing.modules.some((m) => m.status === 'active');
-  await addGoals(t, gs.map((g, i) => goalFromTemplate(g, existing.goals.length + i)));
-  await addModules(t, ms.map((m, i) => moduleFromTemplate(m, existing.modules.length + i, !anyActive && i === 0 ? 'active' : 'planned')));
+  const gids = await addGoals(t, gs.map((g, i) => goalFromTemplate(g, existing.goals.length + i)));
+  const mids = await addModules(t, ms.map((m, i) => moduleFromTemplate(m, existing.modules.length + i, !anyActive && i === 0 ? 'active' : 'planned')));
+  // Program ↔ hedef bağı (sunucu destekliyorsa): şablonda hedefin önerdiği programlar o hedefe bağlanır
+  const allGoals = [...existing.goals.map((g) => ({ id: g.id, key: g.template_key })), ...gs.map((g, i) => ({ id: gids[i], key: g.key }))];
+  const allMods = [...existing.modules.map((m) => ({ id: m.id, key: m.template_key })), ...ms.map((m, i) => ({ id: mids[i], key: m.key }))];
+  const pairs: [string, string][] = [];
+  for (const g of allGoals) {
+    const want = GOAL_TEMPLATES.find((x) => x.key === g.key)?.modules ?? [];
+    for (const m of allMods) if (g.id && m.id && m.key && want.includes(m.key) && p.modules.includes(m.key)) pairs.push([m.id, g.id]);
+  }
+  if (t.kind === 'link' && pairs.length) await linkModuleGoals(t.clinicId, pairs).catch(() => {});
+  return { goalIds: gids };
+}
+
+/* ---------- Program ↔ hedef (çoklu; ortak proposed/20261102100000_plan_redesign.sql) ---------- */
+export type ModuleGoals = Record<string, string[]>;   // program kimliği → hedef kimlikleri
+// Sunucuda tablo yoksa null: hedefe bağlama kapalı, programlar "bağlı olmayanlar"da
+export async function loadModuleGoals(moduleIds: string[]): Promise<ModuleGoals | null> {
+  if (!moduleIds.length) {
+    const probe = await supabase.from('care_module_goals').select('module_id').limit(1);
+    return isMissing(probe.error) ? null : {};
+  }
+  const { data, error } = await supabase.from('care_module_goals').select('module_id, goal_id').in('module_id', moduleIds);
+  if (isMissing(error)) return null;
+  if (error) throw new Error(error.message);
+  const out: ModuleGoals = {};
+  ((data ?? []) as { module_id: string; goal_id: string }[]).forEach((x) => { (out[x.module_id] ??= []).push(x.goal_id); });
+  return out;
+}
+export async function linkModuleGoals(clinicId: string, pairs: [string, string][]): Promise<void> {
+  if (!pairs.length) return;
+  const { error } = await supabase.from('care_module_goals')
+    .upsert(pairs.map(([module_id, goal_id]) => ({ module_id, goal_id, clinic_id: clinicId })), { onConflict: 'module_id,goal_id', ignoreDuplicates: true });
+  if (error) throw new Error(error.message);
+}
+export async function unlinkModuleGoal(moduleId: string, goalId: string): Promise<void> {
+  const { error } = await supabase.from('care_module_goals').delete().eq('module_id', moduleId).eq('goal_id', goalId);
+  if (error) throw new Error(error.message);
+}
+
+/* ---------- Aileye gönderilmemiş değişiklikler ---------- */
+// Aile planı sunucudaki gönderilmiş sürümden (pub, care_plan_snapshot) okur. Uzmanın gördüğü hâl ile pub karşılaştırılır;
+// fark "gönderilmedi" sayılır. Sütun yoksa (eski sunucu) null: fark bilinmez.
+import type { Pub } from './planCore';
+export { goalUnsent, moduleUnsent } from './planCore';
+export type Published = { goals: Record<string, Pub>; modules: Record<string, Pub> };
+export async function loadPublished(linkId: string): Promise<Published | null> {
+  const [g, m] = await Promise.all([
+    supabase.from('clinic_goals').select('id, pub').eq('link_id', linkId),
+    supabase.from('care_modules').select('id, pub').eq('link_id', linkId),
+  ]);
+  if (g.error || m.error) return null;
+  const map = (rows: unknown) => Object.fromEntries(((rows ?? []) as { id: string; pub: Pub }[]).map((x) => [x.id, x.pub]));
+  return { goals: map(g.data), modules: map(m.data) };
+}
+/* ---------- Şablonlarım (clinic_plan_templates): hedef + bağlı programlar + rutinler ---------- */
+export type TemplateGoal = { title: string; template_key?: string | null; domain?: string; measure?: Measure; target?: string; weeks?: number | null;
+  home_support?: string; description?: string };
+export type TemplateModule = { template_key?: string | null; title: string; aim?: string; practice?: string; checklist?: string[]; weeks?: number };
+export type TemplateRoutine = { key: string; title: string; icon?: string };
+export type PlanTemplate = {
+  id: string; title: string; shared: boolean; created_by: string | null; updated_at: string;
+  content: { goal: TemplateGoal; modules: TemplateModule[]; routines: TemplateRoutine[] };
+};
+// Sunucuda tablo yoksa null (Şablonlarım görünmez)
+export async function listPlanTemplates(): Promise<PlanTemplate[] | null> {
+  const { data, error } = await supabase.from('clinic_plan_templates').select('id, title, shared, created_by, updated_at, content')
+    .eq('archived', false).order('updated_at', { ascending: false });
+  if (isMissing(error)) return null;
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as PlanTemplate[]).map((t) => ({ ...t, content: { goal: t.content?.goal ?? { title: t.title }, modules: t.content?.modules ?? [], routines: t.content?.routines ?? [] } }));
+}
+export async function savePlanTemplate(title: string, shared: boolean, content: PlanTemplate['content']): Promise<void> {
+  const { error } = await supabase.from('clinic_plan_templates').insert({ title: title.trim().slice(0, 80), shared, content });
+  if (error) throw new Error(error.message);
+}
+export async function updatePlanTemplate(id: string, patch: { title?: string; shared?: boolean }): Promise<void> {
+  const { error } = await supabase.from('clinic_plan_templates').update({ ...patch, ...(patch.title ? { title: patch.title.trim().slice(0, 80) } : {}) }).eq('id', id);
+  if (error) throw new Error(error.message);
+}
+export async function deletePlanTemplate(id: string): Promise<void> {
+  const { error } = await supabase.from('clinic_plan_templates').delete().eq('id', id);
+  if (error) throw new Error(error.message);
 }
 
 /* ---------- Önceki uzmandan devralınan kayıtlar (ebeveyn rızasıyla, salt okunur, önceki uzman adsız) ---------- */

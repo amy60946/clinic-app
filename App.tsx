@@ -13,6 +13,7 @@ import { startTracking } from './src/lib/track';
 import { ClientConfigProvider } from './src/lib/clientConfig';
 import ConfigGate from './src/screens/ConfigGate';
 import CookieNotice from './src/components/CookieNotice';
+import { LayoutProvider } from './src/lib/layout';
 
 function Loading() {
   return (
@@ -60,12 +61,14 @@ function Tracking() {
 export default function App() {
   return (
     <SafeAreaProvider>
+      <LayoutProvider>
       <AuthProvider>
         <View style={{ flex: 1 }}>
           <View style={{ flex: 1 }}><Root /></View>
           <CookieNotice />
         </View>
       </AuthProvider>
+      </LayoutProvider>
     </SafeAreaProvider>
   );
 }

@@ -21,7 +21,8 @@ const KEY = 'pofi-onizleme-v4';
 const TABLES = ['profiles', 'families', 'children', 'tasks', 'task_assignments', 'completions', 'messages', 'saved_templates', 'invite_codes',
   'clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'abc_events',
   'clinic_task_suggestions', 'clinic_routines', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events', 'billing_plans', 'clinic_link_access',
-  'care_modules', 'care_module_logs', 'clinic_link_history', 'clinician_surveys', 'legal_acceptances', 'kvkk_requests'];
+  'care_modules', 'care_module_logs', 'clinic_link_history', 'clinician_surveys', 'legal_acceptances', 'kvkk_requests',
+  'care_module_goals', 'clinic_plan_templates'];
 
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -198,6 +199,19 @@ function upgrade(x: Db): Db {
     x.notifications.forEach((n: Row) => { if (n.app === 'clinic' && latest && n.data?.abc_id === latest.id) n.read_at = null; });
     x.clinicNotifSeeded = true;
   }
+  // Takip planı yeniden tasarımı (ortak proposed/20261102100000): örnek programlar hedeflerine bağlı, plan bir kez gönderilmiş
+  TABLES.forEach((t) => { x[t] = x[t] ?? []; });
+  if (!x.planRedesignSeeded) {
+    if (x.care_modules.some((m: Row) => m.id === 'm-ovgu') && x.clinic_goals.some((g: Row) => g.id === 'g-sabah')) {
+      x.care_module_goals.push({ module_id: 'm-ovgu', goal_id: 'g-sabah', clinic_id: 'demo-clinic', created_at: ago(20 * 1440) });
+    }
+    if (x.care_modules.some((m: Row) => m.id === 'm-gecis') && x.clinic_goals.some((g: Row) => g.id === 'g-gecis')) {
+      x.care_module_goals.push({ module_id: 'm-gecis', goal_id: 'g-gecis', clinic_id: 'demo-clinic', created_at: ago(20 * 1440) });
+    }
+    x.clinic_task_suggestions.forEach((r: Row) => { r.kind = r.kind ?? 'new'; r.target_task_id = r.target_task_id ?? null; r.change_remove = !!r.change_remove; });
+    x.clinic_links.filter((l: Row) => l.status === 'active').forEach((l: Row) => snapshot(x, l.id));
+    x.planRedesignSeeded = true;
+  }
   // Motive etmek (ortak 20261027130000): örnek ailenin onaylı görevlerine ebeveyn gözlemi (eskiler zor, yeniler kolay; bazıları yanıtsız)
   if (!x.motivationSeeded) {
     x.completions.filter((c: Row) => c.child_id === 'c-nazli' && c.status === 'approved' && c.motivation == null).forEach((c: Row, i: number) => {
@@ -317,7 +331,23 @@ const PK: Record<string, string[]> = {
   clinic_invites: ['code'],
   goal_ratings: ['goal_id', 'week'],
   family_subscriptions: ['family_id'],
+  care_module_goals: ['module_id', 'goal_id'],
 };
+
+// Aileye gönderilen sürüm (sunucudaki care_plan_snapshot): hedefte aileye açık olan, programda "Planlandı" olmayan
+function snapshot(x: Db, linkId: string) {
+  x.clinic_goals.filter((g: Row) => g.link_id === linkId).forEach((g: Row) => {
+    g.pub = g.shared && !g.archived ? { title: g.title, description: g.description ?? '', domain: g.domain ?? '', measure: g.measure, baseline: g.baseline ?? '',
+      target: g.target ?? '', weeks: g.weeks ?? null, home_support: g.home_support ?? '', status: g.status, position: g.position ?? 0 } : null;
+  });
+  x.care_modules.filter((m: Row) => m.link_id === linkId).forEach((m: Row) => {
+    const goals = (x.care_module_goals ?? []).filter((c: Row) => c.module_id === m.id).map((c: Row) => c.goal_id)
+      .filter((id: string) => x.clinic_goals.some((g: Row) => g.id === id && g.shared && !g.archived));
+    m.pub = m.status !== 'planned' ? { title: m.title, aim: m.aim ?? '', practice: m.practice ?? '', checklist: m.checklist ?? [], status: m.status,
+      position: m.position ?? 0, goal_ids: goals } : null;
+  });
+  return x.clinic_goals.filter((g: Row) => g.link_id === linkId && g.pub).length + x.care_modules.filter((m: Row) => m.link_id === linkId && m.pub).length;
+}
 
 function cascade(table: string, removed: Row[]) {
   const ids = new Set(removed.map((r) => r.id));
@@ -331,8 +361,15 @@ function cascade(table: string, removed: Row[]) {
     TABLES.filter((t) => t !== 'families' && t !== 'profiles').forEach((t) => { db[t] = db[t].filter((r: Row) => !ids.has(r.family_id)); });
     db.profiles.forEach((p: Row) => { if (ids.has(p.family_id)) p.family_id = null; });
   }
-  if (table === 'clinic_goals') db.goal_ratings = db.goal_ratings.filter((r: Row) => !ids.has(r.goal_id));
-  if (table === 'care_modules') db.care_module_logs = db.care_module_logs.filter((r: Row) => !ids.has(r.module_id));
+  if (table === 'clinic_goals') {
+    db.goal_ratings = db.goal_ratings.filter((r: Row) => !ids.has(r.goal_id));
+    db.care_module_goals = db.care_module_goals.filter((r: Row) => !ids.has(r.goal_id));
+    db.clinic_task_suggestions.forEach((r: Row) => { if (ids.has(r.goal_id)) r.goal_id = null; });
+  }
+  if (table === 'care_modules') {
+    db.care_module_logs = db.care_module_logs.filter((r: Row) => !ids.has(r.module_id));
+    db.care_module_goals = db.care_module_goals.filter((r: Row) => !ids.has(r.module_id));
+  }
 }
 
 // İlişkili tablo gömme: select('…, children(name)') gibi (PostgREST embed). Sütun seçimi yapılmaz, satır bütün döner.
@@ -376,7 +413,12 @@ function visible(table: string, r: Row): boolean {
   if (['user_activity', 'app_events'].includes(table)) return false;
   if (table === 'billing_plans') return r.active;
   const m = myClinician();
+  // Aile: taslak öneriyi, program ↔ hedef tablosunu ve uzman şablonlarını görmez (sunucuda RLS)
+  if (!m && table === 'clinic_task_suggestions') return r.status !== 'draft';
+  if (!m && ['care_module_goals', 'clinic_plan_templates'].includes(table)) return false;
   if (!m) return true;
+  if (table === 'care_module_goals') { const mod = db.care_modules.find((x: Row) => x.id === r.module_id); return r.clinic_id === m.clinic_id && !!mod && (!mod.link_id || linkVisible(m, db.clinic_links.find((l: Row) => l.id === mod.link_id))); }
+  if (table === 'clinic_plan_templates') return r.clinic_id === m.clinic_id && (r.shared || r.created_by === m.id || m.role === 'owner');
   // Deneme/üyelik bitince çocuk verisi ve klinik çalışma alanı kapanır (sunucudaki clinician_access)
   if (!clinicianAccess(m) && [...CHILD_SHARED, 'tasks', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'clinic_task_suggestions', 'care_modules', 'care_module_logs'].includes(table)) return false;
   if (table === 'clinic_link_access') return r.clinic_id === m.clinic_id && (m.role === 'owner' || r.clinician_id === m.id);
@@ -398,7 +440,8 @@ function visible(table: string, r: Row): boolean {
 
 // Sunucudaki sütun varsayılanları (yalnız uygulamanın eklerken boş bıraktıkları)
 const DEFAULTS: Record<string, Row> = {
-  clinic_task_suggestions: { status: 'pending', decided_at: null, task_id: null, updated_at: null },
+  clinic_task_suggestions: { status: 'pending', decided_at: null, task_id: null, updated_at: null, kind: 'new', target_task_id: null, change_remove: false, goal_id: null },
+  clinic_plan_templates: { archived: false, shared: false },
   clinic_goals: { link_id: null, invite_code: null, description: '', archived: false, domain: '', measure: 'level', baseline: '', target: '', weeks: null,
     home_support: '', shared: false, status: 'active', position: 0, template_key: null },
   care_modules: { link_id: null, invite_code: null, aim: '', practice: '', checklist: [], position: 0, status: 'planned', template_key: null },
@@ -415,7 +458,8 @@ class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
 
   constructor(private table: string) {}
 
-  select(cols = '*', opts?: { head?: boolean }) { this.cols = cols; if (opts?.head) this.head = true; return this; }
+  private selected = false;
+  select(cols = '*', opts?: { head?: boolean }) { this.cols = cols; this.selected = true; if (opts?.head) this.head = true; return this; }
   eq(k: string, v: any) { this.filters.push((r) => r[k] === v); return this; }
   match(m: Row) { Object.entries(m).forEach(([k, v]) => this.eq(k, v)); return this; }
   neq(k: string, v: any) { this.filters.push((r) => r[k] !== v); return this; }
@@ -452,10 +496,19 @@ class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
       if (this.head) return { data: null, error: null, count: out.length };
       return { data: this.one ? out[0] ?? null : out, error: null, count: out.length };
     }
+    let inserted: Row[] | null = null;
     if (this.op === 'insert' || this.op === 'upsert') {
+      const me = myClinician();
       const list: Row[] = (Array.isArray(this.payload) ? this.payload : [this.payload]).map((r: Row) => ({
         ...(PK[this.table] ? {} : { id: uuid() }), created_at: now(), ...DEFAULTS[this.table], ...r,
+        // sunucuda tetikleyici yazar: şablonun kliniği ve yazarı
+        ...(this.table === 'clinic_plan_templates' && me ? { clinic_id: me.clinic_id, created_by: me.id, updated_at: now() } : {}),
       }));
+      if (this.table === 'clinic_task_suggestions' && list.some((r) => r.kind === 'change' && db.clinic_task_suggestions.some((x: Row) =>
+        x.kind === 'change' && x.target_task_id === r.target_task_id && ['draft', 'pending'].includes(x.status)))) {
+        return { data: null, error: { message: 'Bu görev için açık bir değişiklik önerisi var', code: '23505' } };
+      }
+      inserted = list;
       const key = this.conflict ?? PK[this.table] ?? ['id'];
       for (const r of list) {
         const i = rows.findIndex((x) => key.every((k) => x[k] === r[k]));
@@ -471,7 +524,7 @@ class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
       cascade(this.table, removed);
     }
     save();
-    return { data: null, error: null };
+    return { data: inserted && this.selected ? inserted.map((r) => ({ ...r })) : null, error: null };
   }
 
   then<A = any, B = never>(ok?: ((v: any) => A | PromiseLike<A>) | null, fail?: ((e: any) => B | PromiseLike<B>) | null) {
@@ -885,16 +938,40 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     try { v = JSON.parse(localStorage.getItem('demo.inherited') || 'null') ?? v; } catch {}
     return { data: v, error: null };
   }
+  // Tek gönderim (ortak proposed/20261102100000): plan anlık görüntüsü + taslak öneriler bekleyen; aileye tek bildirim
   if (name === 'care_plan_publish') {
     const l = db.clinic_links.find((x: Row) => x.id === args.p_link_id);
     if (!l) return err('Paylaşım bulunamadı');
+    const before = db.clinic_goals.filter((g: Row) => g.link_id === l.id && g.pub).length + db.care_modules.filter((m: Row) => m.link_id === l.id && m.pub).length;
+    const n = snapshot(db, l.id);
+    const drafts = db.clinic_task_suggestions.filter((s: Row) => s.link_id === l.id && s.status === 'draft');
+    const k = drafts.filter((s: Row) => s.kind !== 'change').length;
+    const ch = drafts.length - k;
+    drafts.forEach((s: Row) => { s.status = 'pending'; s.updated_at = now(); });
+    if (!n && !before && !drafts.length) return err('Aileye gösterilecek bir şey yok: "Aile görür" açık bir hedef, etkin bir program ya da bir öneri ekle');
+    const child = db.children.find((c: Row) => c.id === l.child_id)?.name ?? '';
+    const body = [n ? 'Hedefler ve aile programı' : '', k ? `${k} görev önerisi` : '', ch ? `${ch} değişiklik önerisi` : ''].filter(Boolean).join(' · ');
     db.profiles.filter((p: Row) => p.family_id === l.family_id).forEach((p: Row) => {
       const nid = db.notifications.reduce((a: number, x: Row) => Math.max(a, Number(x.id) || 0), 0) + 1;
-      db.notifications.push({ id: nid, user_id: p.id, app: 'parent', kind: 'care_plan_shared', title: 'Takip planı güncellendi',
-        body: 'Uzmanının hedefleri ve aile programı Uzmanım bölümünde.', data: { link_id: l.id }, family_id: l.family_id, child_id: l.child_id, created_at: now(), read_at: null });
+      db.notifications.push({ id: nid, user_id: p.id, app: 'parent', kind: n || !drafts.length ? 'care_plan_shared' : 'clinic_suggestion',
+        title: n ? `Takip planı güncellendi: ${child}` : `Uzmanın ${child} için öneri gönderdi`,
+        body: `${body || 'Uzmanının hedefleri ve aile programı'} Uzmanım bölümünde.`, data: { link_id: l.id }, family_id: l.family_id, child_id: l.child_id, created_at: now(), read_at: null });
     });
+    l.plan_published_at = now();
     save();
     return { data: null, error: null };
+  }
+  if (name === 'clinic_set_suggestion_goal') {
+    const m = myClinician();
+    const ids: string[] = args.p_ids ?? [];
+    const rows = db.clinic_task_suggestions.filter((x: Row) => ids.includes(x.id));
+    if (!m || rows.length !== ids.length || rows.some((x: Row) => x.clinic_id !== m.clinic_id)) return err('Öneri bulunamadı');
+    if (args.p_goal_id && rows.some((x: Row) => !db.clinic_goals.some((g: Row) => g.id === args.p_goal_id && g.link_id === x.link_id))) {
+      return err('Hedef bu danışanın takip planında değil');
+    }
+    rows.forEach((x: Row) => { x.goal_id = args.p_goal_id ?? null; });
+    save();
+    return { data: rows.length, error: null };
   }
   if (name === 'clinic_invite_preview') {
     if (!me?.family_id) return err('Önce ebeveyn olarak giriş yapmalısın');
@@ -971,9 +1048,11 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     const m = myClinician();
     const s = db.clinic_task_suggestions.find((x: Row) => x.id === args.p_id && m && x.clinic_id === m.clinic_id);
     if (!s) return err('Öneri bulunamadı');
-    if (s.status !== 'pending') return err('Karar verilmiş öneri değiştirilemez');
+    if (s.status !== 'pending' && s.status !== 'draft') return err('Ebeveyn karar verdi; öneri artık değiştirilemez');
     if (!db.clinic_links.some((l: Row) => l.id === s.link_id && l.status === 'active')) return err('Paylaşım sona ermiş');
-    Object.assign(s, args.p ?? {}, { updated_at: now() });
+    const p = { ...(args.p ?? {}) };
+    if (s.kind !== 'change') delete p.change_remove;
+    Object.assign(s, p, { updated_at: now() });
     save();
     return { data: null, error: null };
   }

@@ -320,7 +320,7 @@ function Chips<T extends string>({ options, value, onChange }: { options: { id: 
   );
 }
 
-function GoalSheet({ editing, legacy, onClose, onSave }: {
+export function GoalSheet({ editing, legacy, onClose, onSave }: {
   editing?: PlanGoal; legacy: boolean; onClose: () => void; onSave: (g: GoalInput) => Promise<void>;
 }) {
   const [step, setStep] = useState<'pick' | 'form'>(editing || legacy ? 'form' : 'pick');
@@ -402,7 +402,7 @@ function GoalSheet({ editing, legacy, onClose, onSave }: {
 
 /* ---------- Modül ekle / düzenle ---------- */
 
-function ModuleSheet({ editing, onClose, onSave }: { editing?: PlanModule; onClose: () => void; onSave: (m: ModuleInput) => Promise<void> }) {
+export function ModuleSheet({ editing, onClose, onSave }: { editing?: PlanModule; onClose: () => void; onSave: (m: ModuleInput) => Promise<void> }) {
   const [step, setStep] = useState<'pick' | 'form'>(editing ? 'form' : 'pick');
   const [f, setF] = useState<ModuleInput>(editing ?? { title: '', aim: '', practice: '', checklist: [], status: 'active' });
   const [checklist, setChecklist] = useState((editing?.checklist ?? []).join('\n'));
@@ -458,7 +458,7 @@ function ModuleSheet({ editing, onClose, onSave }: { editing?: PlanModule; onClo
 
 /* ---------- Paketler ---------- */
 
-function PackageSheet({ onClose, onApply }: { onClose: () => void; onApply: (p: PackageT, goalKeys: string[]) => Promise<void> }) {
+export function PackageSheet({ onClose, onApply }: { onClose: () => void; onApply: (p: PackageT, goalKeys: string[]) => Promise<void> }) {
   const [sel, setSel] = useState<PackageT | null>(null);
   const [goalKeys, setGoalKeys] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);

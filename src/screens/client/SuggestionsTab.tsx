@@ -16,10 +16,11 @@ import { InheritedSuggestions } from './History';
 import RoutineSheet, { RoutineGoal } from './RoutineSheet';
 import RoutineEditor from './RoutineEditor';
 import { Routine, OwnRoutine, routinesFor, childBand, ownToRoutine, agesText, fitsAge, AGE_LABEL } from '../../lib/routines';
-import { loadPlan } from '../../lib/plan';
+import { loadPlan, domainLabel } from '../../lib/plan';
 import { Segmented } from '../../components/ui';
 
 const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: string; icon: keyof typeof Ionicons.glyphMap }> = {
+  draft: { label: 'Taslak · Takip planı\'ndan "Aileye gönder" ile gider', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'document-text-outline' },
   pending: { label: 'Ebeveyn kararı bekleniyor', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'time-outline' },
   accepted: { label: 'Ebeveyn görevlere ekledi', fg: colors.easy.fg, bg: colors.easy.bg, icon: 'checkmark-circle' },
   declined: { label: 'Ebeveyn eklemedi', fg: colors.muted, bg: '#ECEEF3', icon: 'close-circle-outline' },
@@ -27,7 +28,8 @@ const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: stri
 
 // Uzman yalnız önerir; görevi ekleyip eklememek ebeveynin kararıdır (ParentApp › Uzmanım › <uzman> › Görev önerileri).
 // Bekleyen öneri güncellenebilir ya da geri çekilebilir; karar verilmiş öneri değişmez.
-export default function SuggestionsTab({ client, me, data }: ClientCtx) {
+// section: Ev rutinleri'ndeki pencere "Öner" ve "Gönderilenler" bölümlerini ayrı gösterir (yoksa ikisi alt alta)
+export default function SuggestionsTab({ client, me, data, section, onCount }: ClientCtx & { section?: 'suggest' | 'sent'; onCount?: (n: number) => void }) {
   const [items, setItems] = useState<Suggestion[] | null>(null);
   const [editor, setEditor] = useState<{ open: boolean; editing: Suggestion | null }>({ open: false, editing: null });
   const [schemaMissing, setSchemaMissing] = useState(false);
@@ -44,7 +46,7 @@ export default function SuggestionsTab({ client, me, data }: ClientCtx) {
   const catalog = useMemo(() => routinesFor(allAges ? null : band), [band, allAges]);
   const ownRoutines = useMemo(() => (own ?? []).map(ownToRoutine), [own]);
   // çocukta zaten olan görevler ve bekleyen öneriler (rutinde baştan seçili gelmez)
-  const taken = [...data.tasks.map((t) => t.title), ...(items ?? []).filter((s) => s.status === 'pending').map((s) => s.title)];
+  const taken = [...data.tasks.map((t) => t.title), ...(items ?? []).filter((s) => s.status === 'pending' || s.status === 'draft').map((s) => s.title)];
 
   const loadOwn = useCallback(() => { listOwnRoutines().then(setOwn).catch(() => setOwn(null)); }, []);
   useEffect(() => {
@@ -52,7 +54,9 @@ export default function SuggestionsTab({ client, me, data }: ClientCtx) {
     listTeam().then((t) => setTeamSize(t.length)).catch(() => {});
     // hedefe bağlama için bu danışanın etkin hedefleri
     loadPlan({ kind: 'link', linkId: client.link_id, clinicId: client.clinic_id })
-      .then((p) => setGoals(p.goals.filter((g) => !g.archived && g.status !== 'achieved').map((g) => ({ id: g.id, title: g.title }))))
+      .then((p) => setGoals(p.goals.filter((g) => !g.archived && g.status !== 'achieved').map((g) => ({
+        id: g.id, title: g.title, meta: [g.domain && domainLabel(g.domain), g.target && `Hedef: ${g.target}`, g.shared ? '' : 'yalnız sende'].filter(Boolean).join(' · '),
+      }))))
       .catch(() => setGoals([]));
   }, [loadOwn, client.link_id, client.clinic_id]);
 
@@ -73,8 +77,8 @@ export default function SuggestionsTab({ client, me, data }: ClientCtx) {
   };
 
   const load = useCallback(() => {
-    listSuggestions(client.link_id).then(setItems).catch((e) => Alert.alert('Öneriler yüklenemedi', (e as Error).message));
-  }, [client.link_id]);
+    listSuggestions(client.link_id).then((x) => { setItems(x); onCount?.(x.length); }).catch((e) => Alert.alert('Öneriler yüklenemedi', (e as Error).message));
+  }, [client.link_id]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(load, [load]);
 
   const close = () => setEditor({ open: false, editing: null });
@@ -104,8 +108,11 @@ export default function SuggestionsTab({ client, me, data }: ClientCtx) {
     },
   ]);
 
+  const showSuggest = section !== 'sent';
+  const showSent = section !== 'suggest';
   return (
     <View>
+      {showSuggest && (<>
       <Pressable style={styles.cta} onPress={() => setEditor({ open: true, editing: null })}>
         <Ionicons name="add" size={22} color="#fff" />
         <Text style={styles.ctaText}>Aileye görev öner</Text>
@@ -156,10 +163,13 @@ export default function SuggestionsTab({ client, me, data }: ClientCtx) {
           <Text style={styles.link}>{allAges ? `Yalnız ${AGE_LABEL[band]} yaş rutinlerini göster` : 'Bütün yaş gruplarını göster'}</Text>
         </Pressable>
       )}
+      <Text style={[styles.sub, { marginTop: 14 }]}>Bir hedefe bağlı, plandaki diğer değişikliklerle birlikte göndermek için Takip planı'nda hedefin satırındaki "+ Rutin ya da görev bağla"yı kullan.</Text>
+      </>)}
       {schemaMissing && (
         <Notice icon="construct-outline" text="Öneri ayrıntıları (tekrar günleri, hatırlatma, ödül…) için veritabanı güncellemesi bekleniyor. Güncelleme uygulanınca bu özellik açılır." />
       )}
 
+      {showSent && (<>
       <Label>{`Gönderilen öneriler (${items?.length ?? 0})`}</Label>
       {!items ? <ActivityIndicator color={colors.navy} /> : items.length === 0 ? <Empty text="Henüz öneri gönderilmedi." /> : (
         <View style={{ gap: 10 }}>
@@ -171,6 +181,7 @@ export default function SuggestionsTab({ client, me, data }: ClientCtx) {
         </View>
       )}
       <InheritedSuggestions linkId={client.link_id} />
+      </>)}
 
       <RoutineSheet routine={routine} childName={client.child_name} band={band} taken={taken} goals={goals} onClose={() => setRoutine(null)} onSubmit={sendRoutine} />
       <RoutineEditor visible={ownEditor.open} me={me} editing={ownEditor.editing} teamSize={teamSize}
@@ -200,12 +211,13 @@ function Meta({ icon, text }: { icon: keyof typeof Ionicons.glyphMap; text: stri
 // Paketsiz tek öneri kartı
 function SuggestionCard({ s, onEdit }: { s: Suggestion; onEdit: () => void }) {
             const st = STATUS[s.status] ?? STATUS.pending;
-            const pending = s.status === 'pending';
+            const pending = s.status === 'pending' || s.status === 'draft';
             return (
               <Pressable key={s.id} disabled={!pending} onPress={onEdit}
                 accessibilityHint={pending ? 'Öneriyi düzenle' : undefined} style={styles.card}>
                 <Text style={{ fontSize: 22 }}>{s.emoji}</Text>
                 <View style={{ flex: 1, gap: 5 }}>
+                  {s.kind === 'change' && <Text style={[styles.meta, { fontWeight: '700', color: colors.navy }]}>{s.change_remove ? 'Değişiklik önerisi · görevi bitir' : 'Değişiklik önerisi'}</Text>}
                   <Text style={styles.cardTitle}>{s.title}</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <DifficultyBadge d={s.difficulty} coins={s.coins} />
@@ -242,7 +254,8 @@ function groupSent(items: Suggestion[]): SentEntry[] {
   const seen = new Map<string, Suggestion[]>();
   for (const s of items) {
     const g = s.routine?.group;
-    if (!g) { out.push({ kind: 'single', item: s }); continue; }
+    // değişiklik önerisi rutinin paketine karışmaz
+    if (!g || s.kind === 'change') { out.push({ kind: 'single', item: s }); continue; }
     const list = seen.get(g);
     if (list) list.push(s);
     else { const l = [s]; seen.set(g, l); out.push({ kind: 'routine', group: g, items: l }); }
@@ -256,6 +269,7 @@ function RoutinePackage({ items, goals, onEdit }: { items: Suggestion[]; goals: 
   const r = items[0].routine!;
   const added = items.filter((s) => s.status === 'accepted').length;
   const waiting = items.filter((s) => s.status === 'pending').length;
+  const drafts = items.filter((s) => s.status === 'draft').length;
   const goal = goals.find((g) => g.id === items[0].goal_id)?.title;
   return (
     <View style={styles.pkg}>
@@ -264,7 +278,7 @@ function RoutinePackage({ items, goals, onEdit }: { items: Suggestion[]; goals: 
         <View style={{ flex: 1, gap: 3 }}>
           <Text style={styles.cardTitle}>{r.title} · {items.length} görev</Text>
           <Text style={styles.meta}>
-            {[`${added} / ${items.length} eklendi`, waiting ? `${waiting} karar bekliyor` : '', goal ? `Hedef: ${goal}` : ''].filter(Boolean).join(' · ')}
+            {[drafts ? `${drafts} taslak` : `${added} / ${items.length} eklendi`, waiting ? `${waiting} karar bekliyor` : '', goal ? `Hedef: ${goal}` : ''].filter(Boolean).join(' · ')}
           </Text>
           <View style={styles.pkgBar}><View style={[styles.pkgFill, { width: `${Math.round((added / items.length) * 100)}%` }]} /></View>
         </View>
@@ -273,8 +287,8 @@ function RoutinePackage({ items, goals, onEdit }: { items: Suggestion[]; goals: 
       {open && items.map((s) => {
         const st = STATUS[s.status] ?? STATUS.pending;
         return (
-          <Pressable key={s.id} disabled={s.status !== 'pending'} onPress={() => onEdit(s)} style={styles.pkgRow}
-            accessibilityHint={s.status === 'pending' ? 'Öneriyi düzenle' : undefined}>
+          <Pressable key={s.id} disabled={s.status !== 'pending' && s.status !== 'draft'} onPress={() => onEdit(s)} style={styles.pkgRow}
+            accessibilityHint={s.status === 'pending' || s.status === 'draft' ? 'Öneriyi düzenle' : undefined}>
             <Text style={styles.pkgTime}>{s.reminder ?? ''}</Text>
             <Text style={{ fontSize: 18 }}>{s.emoji}</Text>
             <Text style={[styles.meta, { flex: 1, color: colors.text, fontSize: 13 }]}>{s.title}</Text>
