@@ -165,7 +165,7 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
                 </Pressable>
               )}
 
-              {PLAN_IN_INVITE && <Label>Takip planı (isteğe bağlı)</Label>}
+              {PLAN_IN_INVITE && <Label>Takip Planı (isteğe bağlı)</Label>}
               {!PLAN_IN_INVITE ? null : !plan ? (
                 <Pressable style={styles.planBox} onPress={() => setPlan(true)} accessibilityRole="button">
                   <Ionicons name="clipboard-outline" size={20} color={colors.navy} />

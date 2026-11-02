@@ -40,7 +40,7 @@ export const INVITE_HELP = [
   'Hangi çocuğu paylaşacağına ebeveyn karar verir; paylaşımı istediği an durdurabilir.',
   'Çocuğun adını ve yaş grubunu yazarsan yalnız daveti kabul eden ebeveyn görür; kontrol edip onaylar, düzeltirse sana bildirim gelir. E-postada görünmez, davet bitince silinir.',
   'Davet 3 gün geçerli. Davetlerim\'den e-postayı yeniden gönderebilir ya da daveti iptal edebilirsin. E-posta gönderilemezse yedek kod görünür.',
-  'Hedefleri ve aile programını aile bağlanınca danışanın Takip planı bölümünde kurarsın.',
+  'Hedefleri ve aile programını aile bağlanınca danışanın Takip Planı bölümünde kurarsın.',
 ];
 
 export const STATUS_TEXT: Record<InviteStatus, string> = {

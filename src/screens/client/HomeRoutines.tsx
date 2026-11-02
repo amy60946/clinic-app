@@ -44,7 +44,7 @@ export default function HomeRoutines(ctx: ClientCtx & { view: RoutineView; onVie
   useEffect(() => { if (view === 'suggest') { setSheet('sent'); onView('week'); } }, [view]); // eslint-disable-line react-hooks/exhaustive-deps
   const shown: RoutineView = view === 'suggest' ? 'week' : view;
   const views: { id: RoutineView; label: string }[] = [
-    { id: 'week', label: 'Haftalık' }, { id: 'trend', label: 'Zaman içinde' }, { id: 'stats', label: 'Oranlar' },
+    { id: 'week', label: 'Haftalık' }, { id: 'trend', label: 'Zaman İçinde' }, { id: 'stats', label: 'Oranlar' },
   ];
   return (
     <View>

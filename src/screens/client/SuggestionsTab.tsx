@@ -20,7 +20,7 @@ import { loadPlan, domainLabel } from '../../lib/plan';
 import { Segmented } from '../../components/ui';
 
 const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: string; icon: keyof typeof Ionicons.glyphMap }> = {
-  draft: { label: 'Taslak · Takip planı\'ndan "Aileye gönder" ile gider', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'document-text-outline' },
+  draft: { label: 'Taslak · Takip Planı\'ndan "Aileye gönder" ile gider', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'document-text-outline' },
   pending: { label: 'Ebeveyn kararı bekleniyor', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'time-outline' },
   accepted: { label: 'Ebeveyn görevlere ekledi', fg: colors.easy.fg, bg: colors.easy.bg, icon: 'checkmark-circle' },
   declined: { label: 'Ebeveyn eklemedi', fg: colors.muted, bg: '#ECEEF3', icon: 'close-circle-outline' },
@@ -163,7 +163,7 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
           <Text style={styles.link}>{allAges ? `Yalnız ${AGE_LABEL[band]} yaş rutinlerini göster` : 'Bütün yaş gruplarını göster'}</Text>
         </Pressable>
       )}
-      <Text style={[styles.sub, { marginTop: 14 }]}>Bir hedefe bağlı, plandaki diğer değişikliklerle birlikte göndermek için Takip planı'nda hedefin satırındaki "+ Rutin ya da görev bağla"yı kullan.</Text>
+      <Text style={[styles.sub, { marginTop: 14 }]}>Bir hedefe bağlı, plandaki diğer değişikliklerle birlikte göndermek için Takip Planı'nda hedefin satırındaki "+ Rutin ya da görev bağla"yı kullan.</Text>
       </>)}
       {schemaMissing && (
         <Notice icon="construct-outline" text="Öneri ayrıntıları (tekrar günleri, hatırlatma, ödül…) için veritabanı güncellemesi bekleniyor. Güncelleme uygulanınca bu özellik açılır." />

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Alert, Modal, StyleSheet, ActivityIndicator, RefreshControl, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,14 +30,14 @@ type Section = Exclude<Tab, 'suggestions'>;
 // telefonda ve "iPad görünümü"nde gri zeminli seçici (4 + 3)
 type Group = 'plan' | 'watch' | 'record';
 const GROUPS: { id: Group; label: string }[] = [{ id: 'plan', label: 'Planla' }, { id: 'watch', label: 'İzle' }, { id: 'record', label: 'Kayıt' }];
-const SECTIONS: { id: Section; label: string; short: string; icon: keyof typeof Ionicons.glyphMap; group: Group }[] = [
-  { id: 'goals', label: 'Takip planı', short: 'Plan', icon: 'flag-outline', group: 'plan' },
-  { id: 'summary', label: 'Özet', short: 'Özet', icon: 'grid-outline', group: 'watch' },
-  { id: 'routine', label: 'Ev rutinleri', short: 'Rutinler', icon: 'repeat-outline', group: 'watch' },
-  { id: 'abc', label: 'Davranış kayıtları', short: 'Davranış', icon: 'pulse-outline', group: 'watch' },
-  { id: 'notes', label: 'Notlar', short: 'Notlar', icon: 'create-outline', group: 'record' },
-  { id: 'report', label: 'Rapor', short: 'Rapor', icon: 'print-outline', group: 'record' },
-  { id: 'details', label: 'Danışan bilgileri', short: 'Bilgiler', icon: 'person-circle-outline', group: 'record' },
+const SECTIONS: { id: Section; label: string; icon: keyof typeof Ionicons.glyphMap; group: Group }[] = [
+  { id: 'goals', label: 'Takip Planı', icon: 'flag-outline', group: 'plan' },
+  { id: 'summary', label: 'Özet', icon: 'grid-outline', group: 'watch' },
+  { id: 'routine', label: 'Ev Rutinleri', icon: 'repeat-outline', group: 'watch' },
+  { id: 'abc', label: 'Davranış Kayıtları', icon: 'pulse-outline', group: 'watch' },
+  { id: 'notes', label: 'Notlar', icon: 'create-outline', group: 'record' },
+  { id: 'report', label: 'Rapor', icon: 'print-outline', group: 'record' },
+  { id: 'details', label: 'Danışan Bilgileri', icon: 'person-circle-outline', group: 'record' },
 ];
 
 export const MAX_WEEKS = 8;
@@ -58,6 +58,7 @@ export type ClientCtx = {
   data: ClientData;
   today: string;
   weeks: number;
+  reload?: () => Promise<void>;     // çocuğun görev/kayıt verisini yeniden okur (aile az önce bir öneriyi kabul ettiyse)
 };
 
 export default function ClientScreen({
@@ -122,6 +123,15 @@ export default function ClientScreen({
   }, [client.child_id, today, sample]);
 
   useEffect(() => { load(); }, [load]);
+  // Aile bu çocuk için bir öneriye karar verince (bildirim) görevler yeniden okunur; Takip planı ve Ev rutinleri güncel kalır
+  const decided = useMemo(() => items.filter((n) => n.kind === 'suggestion_decided' && notificationChildren(n).includes(client.child_id))
+    .map((n) => n.id).join(','), [items, client.child_id]);
+  const seenDecided = useRef(decided);
+  useEffect(() => {
+    if (decided === seenDecided.current) return;
+    seenDecided.current = decided;
+    load();
+  }, [decided, load]);
 
   const refresh = async () => {
     setRefreshing(true);
@@ -142,7 +152,7 @@ export default function ClientScreen({
   // Çocuk satırı görünmüyorsa rıza geri alınmıştır (RLS)
   const revoked = data && !data.child;
   const shown: Client = { ...client, label };
-  const ctx: ClientCtx | null = data && data.child ? { client: shown, me, data, today, weeks: Number(weeks) } : null;
+  const ctx: ClientCtx | null = data && data.child ? { client: shown, me, data, today, weeks: Number(weeks), reload: load } : null;
   const go = (s: Section) => { setTab(s); if (s === 'routine') setRoutineView('week'); };
   useEffect(() => { if (focusTab) go(sectionOf(focusTab)); }, [focusTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -221,7 +231,7 @@ export default function ClientScreen({
           <View style={styles.sidebar}>
             <Pressable onPress={onBack} style={styles.back} accessibilityRole="button">
               <Ionicons name="chevron-back" size={16} color={colors.navy} />
-              <Text style={styles.backText}>Tüm danışanlar</Text>
+              <Text style={styles.backText}>Tüm Danışanlar</Text>
             </Pressable>
             <Pressable onPress={() => clients.length > 1 && !sample && setSwitcher(true)} style={styles.switch} accessibilityRole="button"
               accessibilityLabel="Danışan değiştir">
@@ -310,10 +320,11 @@ function Switcher({ visible, clients, current, onClose, onPick }: {
   );
 }
 
-// Dönem seçicisiyle aynı görünüm; telefonda 4 + 3 ya da tek satır. Okunmamış bildirim olan bölümde nokta.
+// Dönem seçicisiyle aynı görünüm; dar ekranda 4 + 3, geniş ekranda tek satır. Adlar sol menüdekiyle aynı (gerekirse iki satır).
+// Okunmamış bildirim olan bölümde nokta.
 function TabGrid({ value, onChange, dots }: { value: Section; onChange: (t: Section) => void; dots: Partial<Record<Section, boolean>> }) {
   const { width } = useWindowDimensions();
-  const wide = width >= 700;
+  const wide = width >= 1000;
   const rows = wide ? [SECTIONS] : [SECTIONS.slice(0, 4), SECTIONS.slice(4)];
   return (
     <View style={styles.grid} accessibilityRole="tablist">
@@ -324,7 +335,7 @@ function TabGrid({ value, onChange, dots }: { value: Section; onChange: (t: Sect
             return (
               <Pressable key={t.id} onPress={() => onChange(t.id)} accessibilityRole="tab" accessibilityState={{ selected: on }}
                 style={[styles.gridItem, on && styles.gridActive]}>
-                <Text numberOfLines={1} style={{ fontSize: 13, fontWeight: on ? '700' : '500', color: on ? colors.navy : colors.muted }}>{t.short}</Text>
+                <Text numberOfLines={2} style={{ fontSize: width < 420 ? 12 : 13, textAlign: 'center', fontWeight: on ? '700' : '500', color: on ? colors.navy : colors.muted }}>{t.label}</Text>
                 {dots[t.id] && <View style={styles.tabDot} />}
               </Pressable>
             );
@@ -340,7 +351,7 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 40, flexGrow: 1 },
   grid: { backgroundColor: '#ECEEF3', borderRadius: 10, padding: 3, gap: 3 },
   gridRow: { flexDirection: 'row', gap: 3 },
-  gridItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 9, borderRadius: 8 },
+  gridItem: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 4, borderRadius: 8 },
   gridActive: { backgroundColor: '#fff' },
   tabDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.danger },
   column: { width: '100%', maxWidth: 960, alignSelf: 'center' },

@@ -56,6 +56,17 @@ test('görünürlük: 14 günden eski ret ve ailede bitmiş rutin gizlenir', () 
   assert.deepEqual(vis, ['live', 'new']);
 });
 
+test('görünürlük: aile az önce kabul ettiyse (görev listesi eski) ya da görev kimliği yoksa rutin gizlenmez', () => {
+  const groups = groupSuggestions([
+    sug({ id: 'a', group: 'G1', status: 'accepted', task_id: 't-yeni', goal: 'g1' }),
+    sug({ id: 'b', group: 'G1', status: 'accepted', task_id: 't9', goal: 'g1' }),
+    sug({ id: 'nid', status: 'accepted' }),
+  ], [task('t9', '2026-10-20')], today);
+  const vis = groups.filter((r) => visibleGroup(r, today)).map((r) => r.key).sort();
+  assert.deepEqual(vis, ['G1', 'nid']);
+  assert.equal(groups.find((r) => r.key === 'G1').ended, false);
+});
+
 const goal = (p = {}) => ({ id: 'g1', title: 'Sabah', description: '', archived: false, created_at: '', domain: 'routine', measure: 'yesno',
   baseline: '', target: "7 günün 5'i", weeks: 6, home_support: '', shared: true, status: 'active', position: 0, template_key: null, ratings: [], ...p });
 const pubOf = (g) => ({ title: g.title, description: g.description, domain: g.domain, measure: g.measure, baseline: g.baseline, target: g.target,

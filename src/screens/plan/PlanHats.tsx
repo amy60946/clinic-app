@@ -73,7 +73,7 @@ const splitPayload = (p: string) => { const i = p.indexOf(':'); return [p.slice(
 
 /* ====================================================================== */
 
-export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'client' | 'me' | 'data' | 'today'>) {
+export default function PlanHats({ client, me, data, today, reload }: Pick<ClientCtx, 'client' | 'me' | 'data' | 'today' | 'reload'>) {
   const target: PlanTarget = { kind: 'link', linkId: client.link_id, clinicId: client.clinic_id };
   const { desktop } = useLayout();
   // Ailede ekli rutine değişiklik önerisi, ParentApp "Uzmanın değişiklik önerisi" kartını yayınlayana kadar kapalı: eski ParentApp
@@ -122,7 +122,16 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
     listPlanTemplates().then(setTpls).catch(() => setTpls(null));
     listOwnRoutines().then(setOwn).catch(() => setOwn(null));
   }, []);
-  useEffect(() => { load(); loadLibrary(); }, [load, loadLibrary]);
+  useEffect(() => { loadLibrary(); }, [loadLibrary]);
+  // danışan verisi yenilenince (aşağı çekme, kabul bildirimi) plan da yeniden okunur
+  useEffect(() => { load(); }, [load, data]);
+  // Aile bir öneriyi az önce kabul ettiyse görev listesi eskidir: kabul edilen görev çocuğun listesinde yoksa veriyi bir kez yenile
+  const staleAsked = useRef(false);
+  useEffect(() => {
+    if (staleAsked.current || !reload) return;
+    const known = new Set(data.tasks.map((t) => t.id));
+    if (sugg.some((s) => s.status === 'accepted' && s.task_id && !known.has(s.task_id))) { staleAsked.current = true; reload(); }
+  }, [sugg, data, reload]);
 
   const goals = useMemo(() => (plan?.goals ?? []).filter((g) => !g.archived), [plan]);
   const archived = useMemo(() => (plan?.goals ?? []).filter((g) => g.archived), [plan]);
@@ -792,7 +801,7 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
             </DropView>
           )}
           {otherSingles > 0 && (
-            <Text style={[styles.tiny, { marginTop: 8 }]}>Hedefe bağlı olmayan {otherSingles} tek görev daha ailede ekli; Ev rutinleri'nde görünür.</Text>
+            <Text style={[styles.tiny, { marginTop: 8 }]}>Hedefe bağlı olmayan {otherSingles} tek görev daha ailede ekli; Ev Rutinleri'nde görünür.</Text>
           )}
 
           {archived.length > 0 && (
@@ -1005,7 +1014,7 @@ function LinkPicker({ visible, band, ownRoutines, goalTitle, loose, onClose, onR
                 <Ionicons name="chevron-forward" size={16} color={colors.faint} />
               </Pressable>
             ))}
-            {tab === 'own' && !ownRoutines.length && <Text style={styles.empty}>Ev rutinleri › "+ Aileye öner" › Rutinlerim'den kendi rutinini kurabilirsin.</Text>}
+            {tab === 'own' && !ownRoutines.length && <Text style={styles.empty}>Ev Rutinleri › "+ Aileye öner" › Rutinlerim'den kendi rutinini kurabilirsin.</Text>}
             {tab === 'catalog' && !!band && (
               <Pressable onPress={() => setAll((v) => !v)} hitSlop={6} style={{ alignSelf: 'flex-start' }}>
                 <Text style={styles.link}>{all ? `Yalnız ${AGE_LABEL[band]} yaş rutinleri` : 'Bütün yaş gruplarını göster'}</Text>

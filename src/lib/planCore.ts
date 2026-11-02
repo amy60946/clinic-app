@@ -36,6 +36,7 @@ export type RGroup = {
   key: string; title: string; icon: string; emoji: string; single: boolean; routine: RoutineRef | null; goalId: string | null;
   items: Suggestion[]; state: RState; added: number; waiting: number; drafts: number;
   tasks: Task[];               // ailede ekli ve sürmekte olan görevler
+  ended: boolean;              // ailedeki görevlerin hepsi bitti (görevler biliniyor ve bitiş günleri geçti)
   changes: Suggestion[];       // bu görevlere açık (taslak / bekleyen) değişiklik önerileri
   decidedAt: string | null;
 };
@@ -56,19 +57,22 @@ export function groupSuggestions(list: Suggestion[], tasks: Task[], today: strin
     const drafts = items.filter((s) => s.status === 'draft').length;
     const state: RState = added ? 'added' : drafts ? 'draft' : waiting ? 'pending' : 'declined';
     const ids = items.map((s) => s.task_id).filter((x): x is string => !!x);
-    const ts = tasks.filter((t) => ids.includes(t.id) && (!t.end_date || t.end_date >= today));
+    const known = tasks.filter((t) => ids.includes(t.id));
+    const ts = known.filter((t) => !t.end_date || t.end_date >= today);
+    // Görev listesi henüz gelmediyse (aile az önce kabul etti) ya da öneriye görev kimliği yazılmadıysa bitmiş sayılmaz
+    const ended = ids.length > 0 && known.length === new Set(ids).size && ts.length === 0;
     return {
       key, title: first.routine?.title || first.title, icon: first.routine?.icon ?? '', emoji: first.emoji, single: !first.routine,
       routine: first.routine ?? null, goalId: items.find((s) => s.goal_id)?.goal_id ?? null, items, state, added, waiting, drafts,
-      tasks: ts, changes: opens.filter((c) => !!c.target_task_id && ts.some((t) => t.id === c.target_task_id)),
+      tasks: ts, ended, changes: opens.filter((c) => !!c.target_task_id && ts.some((t) => t.id === c.target_task_id)),
       decidedAt: items.map((s) => s.decided_at).filter((x): x is string => !!x).sort().pop() ?? null,
     };
   });
 }
-// Planda görünenler: reddedilen (14 günden eski) ve ailede bitmiş rutinler gizlenir
+// Planda görünenler: reddedilen (14 günden eski) ve ailede bittiği bilinen rutinler gizlenir
 export const visibleGroup = (r: RGroup, today: string) => {
   if (r.state === 'declined') return !!r.decidedAt && r.decidedAt.slice(0, 10) >= shiftDay(today, -14);
-  if (r.state === 'added') return r.tasks.length > 0 || r.waiting > 0 || r.drafts > 0;
+  if (r.state === 'added') return !r.ended || r.waiting > 0 || r.drafts > 0;
   return true;
 };
 export function shiftDay(d: string, n: number) {
