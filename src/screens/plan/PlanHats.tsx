@@ -26,6 +26,7 @@ import type { AgeGroup } from '../../templates';
 import { useDragSource, useDropZone } from '../../lib/dnd';
 import { RGroup, groupSuggestions, visibleGroup, goalUnsent, moduleUnsent } from '../../lib/planCore';
 import { useLayout } from '../../lib/layout';
+import { useClientConfig } from '../../lib/clientConfig';
 import RoutineSheet, { RoutineGoal } from '../client/RoutineSheet';
 import SuggestionEditor from '../client/SuggestionEditor';
 import ChangeSheet, { EditTarget, EditResult } from './ChangeSheet';
@@ -75,6 +76,9 @@ const splitPayload = (p: string) => { const i = p.indexOf(':'); return [p.slice(
 export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'client' | 'me' | 'data' | 'today'>) {
   const target: PlanTarget = { kind: 'link', linkId: client.link_id, clinicId: client.clinic_id };
   const { desktop } = useLayout();
+  // Ailede ekli rutine değişiklik önerisi, ParentApp "Uzmanın değişiklik önerisi" kartını yayınlayana kadar kapalı: eski ParentApp
+  // değişiklik önerisini yeni görev gibi ekler (çift görev). Yönetim panelinde `plan_change_suggestions` bayrağı açılınca görünür.
+  const changeOn = useClientConfig().flag('plan_change_suggestions');
   const band = childBand(data.child);
   const [plan, setPlan] = useState<{ goals: PlanGoal[]; modules: PlanModule[]; legacy: boolean } | null>(null);
   const [logs, setLogs] = useState<ModuleLog[]>([]);
@@ -494,7 +498,8 @@ export default function PlanHats({ client, me, data, today }: Pick<ClientCtx, 'c
           <Text style={[styles.tiny, { color: colors.medium.fg }]}>{draftChange ? 'Değişiklik taslağı · gönderilmedi' : 'Değişiklik önerildi · ebeveyn kararı bekleniyor'}</Text>
         )}
         <View style={styles.miniActions}>
-          {r.state === 'added' && r.tasks.length > 0 && <SmallButton label={r.changes.length ? 'Değişikliği düzenle' : 'Değişiklik öner'} onPress={() => openEdit(r)} />}
+          {r.state === 'added' && r.tasks.length > 0 && (changeOn || r.changes.length > 0)
+            && <SmallButton label={r.changes.length ? 'Değişikliği düzenle' : 'Değişiklik öner'} onPress={() => openEdit(r)} />}
           {(r.state === 'draft' || r.state === 'pending') && <SmallButton label="Düzenle" onPress={() => openEdit(r)} />}
           {(r.state === 'draft' || r.state === 'pending') && <SmallButton label={r.state === 'draft' ? 'Sil' : 'Geri çek'} danger onPress={() => withdrawGroup(r)} />}
         </View>
