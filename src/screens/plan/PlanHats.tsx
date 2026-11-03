@@ -753,8 +753,10 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
     const open = isOpen(g.id);
     const color = GOAL_COLORS[i % GOAL_COLORS.length];
     const n = goalWeek(g.created_at, today);
-    const meta = [g.domain && domainLabel(g.domain), g.target ? `hedef ${g.target}` : '',
-      g.weeks ? (g.status === 'active' ? `${Math.min(n, g.weeks)}. hafta / ${g.weeks}` : `${g.weeks} hafta`) : g.status === 'active' ? `${n}. hafta` : ''].filter(Boolean).join(' · ');
+    // Başlık altı (kullanıcı isteği 3 Kasım 2026): alan hep görünür; hedef düzey ve hafta yalnız satır kapalıyken — açıkken hedef
+    // sütununda "Hedef düzey" ve "Süre" zaten yazıyor, başlıkta tekrarı kalabalık yapıyordu.
+    const meta = [g.domain && domainLabel(g.domain), ...(open ? [] : [g.target ? `hedef ${g.target}` : '',
+      g.weeks ? (g.status === 'active' ? `${Math.min(n, g.weeks)}. hafta / ${g.weeks}` : `${g.weeks} hafta`) : g.status === 'active' ? `${n}. hafta` : ''])].filter(Boolean).join(' · ');
     const dirty = hatUnsent(g);
     const st = GOAL_STATUS.find((x) => x.id === g.status);
     const tab = tabOf[g.id] ?? 'rt';
