@@ -476,8 +476,7 @@ export default function HomeScreen() {
                 </Pressable>
               )}
               <Text style={styles.footnote}>
-                Bu panel gözlem toplar, tanı koymaz. Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
-                {' '}ClinicApp acil yardım hizmeti değildir; acil durumda 112'yi ara.
+                Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
               </Text>
               <View style={styles.accountLinks}>
                 <Pressable onPress={() => setHelp(true)} hitSlop={8} accessibilityRole="button"><Text style={styles.link}>Nasıl kullanılır?</Text></Pressable>

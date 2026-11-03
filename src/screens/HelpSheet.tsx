@@ -21,7 +21,7 @@ const ITEMS: Item[] = [
   { key: 'routine', q: 'Rutin ya da görev nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Takip Planı\'ndan eklersen taslak olur. Eklemek ebeveynin kararı.'] },
   { key: 'publish', q: '"Aileye gönder" ne yapar?', show: 'plan', showLabel: 'Takip Planı', a: ['Taslakları (bej) aileye yollar. Önce özet açılır; işaretliler tek bildirimle gider.'] },
   { key: 'evaluate', q: 'Ne zaman değerlendiririm?', show: 'plan', showLabel: 'Takip Planı', a: ['Dört haftada bir "Değerlendirme zamanı" çıkar › "Değerlendir" › puan › "Kaydet". Aile görmez.'] },
-  { key: 'board', q: 'Ana ekrandaki bölümler?', show: 'home', showLabel: 'Ana ekran', a: ['Senin sıran: senden bekleyen. Aileden yeni: son 7 gün. Sessiz kalanlar: 7 gündür kayıt yok. Puan değildir.'] },
+  { key: 'board', q: 'Ana ekrandaki bölümler?', show: 'home', showLabel: 'Ana ekran', a: ['Senin sıran: senden bekleyen. Aileden yeni: son 7 gün. Sessiz kalanlar: 7 gündür kayıt yok.'] },
   { key: 'report', q: 'Raporu nasıl alırım?', show: 'report', showLabel: 'Rapor', a: ['Rapor › "Raporu aç" (PDF). İlerleme notu için "Notu kopyala"; yapay zekâ yok.'] },
   { key: 'team', q: 'Ekibime uzman nasıl eklerim?', show: 'team', showLabel: 'Ayarlar', ownerOnly: true, a: ['Ayarlar › "Ekibe uzman davet et" › kodu ver (15 dk). Uzman "Kodum var" ile katılır.'] },
 ];
@@ -78,7 +78,6 @@ export default function HelpSheet({ visible, owner, onClose, onIntro, onSample, 
                 );
               })}
             </View>
-            <Text style={styles.foot}>Gözlem toplar, tanı koymaz. Acil durumda 112.</Text>
           </ScrollView>
         </View>
       </SafeAreaView>
@@ -147,5 +146,4 @@ const styles = StyleSheet.create({
   seeNone: { backgroundColor: '#EEF0F4' },
   seeTitle: { fontSize: 13, fontWeight: '700', color: colors.navy },
   seeItem: { fontSize: 13, color: colors.text, lineHeight: 18 },
-  foot: { fontSize: 12, color: colors.muted, lineHeight: 17, marginTop: 4 },
 });

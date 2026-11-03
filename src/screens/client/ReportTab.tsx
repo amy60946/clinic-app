@@ -9,7 +9,6 @@ import { Card, Label, Cta, Segmented, SmallButton } from '../../components/ui';
 import { progressNote } from '../../lib/progressNote';
 import { Goal, listGoals } from '../../lib/clinic';
 import { buildReportHtml } from '../../lib/report';
-import { Limits } from './ObservationTabs';
 import { ageText, type ClientCtx } from './ClientScreen';
 import { track } from '../../lib/track';
 
@@ -142,7 +141,6 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
           <SmallButton label={copied ? 'Kopyalandı' : 'Notu kopyala'} onPress={copyNote} />
         </View>
       </Card>
-      <Limits />
     </View>
   );
 }

@@ -110,7 +110,7 @@ export function SampleRow({ onOpen, onHide }: { onOpen: () => void; onHide?: () 
 // Gerçek danışanda bölüm ilk açıldığında bir kez: kısa ipucu (örnek aile turunun bölüm metinleri, gerçek veriye göre)
 // Kısa (kullanıcı isteği 3 Kasım 2026: "yazıları daha kısa tut"); dokunulacak tuş tırnak içinde
 export const SECTION_HINTS: Partial<Record<Tab, { title: string; text: string }>> = {
-  summary: { title: 'Özet', text: 'Dönemin ev rutini: tamamlama, tam gün, kendiliğinden başlama. Puan değildir.' },
+  summary: { title: 'Özet', text: 'Dönemin ev rutini: tamamlama, tam gün, kendiliğinden başlama.' },
   routine: { title: 'Ev Rutinleri', text: 'Bir göreve dokun: gün gün ayrıntı. Öneri için "+ Aileye öner".' },
   abc: { title: 'Davranış Kayıtları', text: 'Ebeveynin ABC kayıtları. Tabloyu "İndir (CSV)" ile al.' },
   goals: { title: 'Takip Planı', text: 'Eklediğin her şey taslak (bej), aile görmez. Göndermek için "Aileye gönder".' },

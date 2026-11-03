@@ -585,7 +585,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
         {rate && rate.planned > 0 && (
           <>
             <View style={styles.bar}><View style={[styles.fill, { width: `${rate.rate ?? 0}%` }]} /></View>
-            <Text style={styles.tiny}>Son 7 gün %{rate.rate} · {rate.approved}/{rate.planned} onaylı (ebeveyn kaydı, puan değil)</Text>
+            <Text style={styles.tiny}>Son 7 gün %{rate.rate} · {rate.approved}/{rate.planned} onaylı (ebeveyn kaydı)</Text>
           </>
         )}
         {(draftChange || pendingChange) && (
@@ -774,7 +774,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
     rt: <ColHead q="Rutin ve görevler" info={[
       'Her gün, hangi anda, hangi adımlarla? Çocuk yapar, ebeveyn onaylar.',
       'Buradan eklenenler taslaktır; "Aileye gönder" deyince aileye gider.',
-      'Oranlar ebeveynin onay kaydıdır, puan değildir.',
+      'Oranlar ebeveynin onay kaydıdır.',
     ]} />,
   };
 
@@ -908,7 +908,6 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
           {[
             'Her hedef bir satır: hedef · ailenin evdeki programı · çocuğun rutini ve görevleri. Satıra dokununca açılır.',
             'Eklediklerin taslaktır; aile, sen "Aileye gönder" deyince tek bildirimle görür.',
-            'Takip Planı gözlem toplar, tanı koymaz.',
           ].map((t) => <Text key={t} style={styles.infoLine}>• {t}</Text>)}
           <Text style={[styles.infoLine, { fontWeight: '700', color: colors.navy, marginTop: 6 }]}>Aile neyi görür?</Text>
           <FamilySees compact />
