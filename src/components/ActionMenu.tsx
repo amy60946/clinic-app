@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, Modal, StyleSheet, Platform, useWindowDimensions, GestureResponderEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +13,7 @@ import { colors, radius } from '../theme';
 export type MenuItem = {
   label: string; icon?: keyof typeof Ionicons.glyphMap; onPress?: () => void;
   destructive?: boolean; checked?: boolean; hint?: string;
+  info?: string;                       // (i): dokununca satırın altında kısa açıklama; işlem çalışmaz
 };
 export type MenuSpec = { title?: string; message?: string; items: MenuItem[]; cancel?: boolean };
 type Open = MenuSpec & { at?: { x: number; y: number } };
@@ -33,6 +34,8 @@ export const confirmSpec = (title: string, message: string, label: string, onCon
 function ActionMenu({ spec, onClose }: { spec: Open | null; onClose: () => void }) {
   const { width, height } = useWindowDimensions();
   const [h, setH] = useState(0);
+  const [infoOf, setInfoOf] = useState<string | null>(null);
+  useEffect(() => { setInfoOf(null); }, [spec]);
   const pending = useRef<(() => void) | null>(null);
   const wide = width >= 600;
   const W = 300;
@@ -59,7 +62,14 @@ function ActionMenu({ spec, onClose }: { spec: Open | null; onClose: () => void 
       <View style={{ flex: 1, gap: 1 }}>
         <Text style={[styles.label, it.destructive && { color: colors.hard.fg }, it.checked && { fontWeight: '800' }]}>{it.label}</Text>
         {!!it.hint && <Text style={styles.hint}>{it.hint}</Text>}
+        {!!it.info && infoOf === it.label && <Text style={styles.info}>{it.info}</Text>}
       </View>
+      {!!it.info && (
+        <Pressable onPress={() => setInfoOf((x) => (x === it.label ? null : it.label))} hitSlop={10} accessibilityRole="button"
+          accessibilityLabel={`${it.label}: açıklama`}>
+          <Ionicons name={infoOf === it.label ? 'information-circle' : 'information-circle-outline'} size={20} color={colors.muted} />
+        </Pressable>
+      )}
       {it.checked && <Ionicons name="checkmark" size={18} color={colors.navy} />}
     </Pressable>
   ));
@@ -112,4 +122,5 @@ const styles = StyleSheet.create({
   line: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line, marginTop: 4 },
   label: { fontSize: 15, fontWeight: '600', color: colors.navy },
   hint: { fontSize: 12, color: colors.muted },
+  info: { fontSize: 12.5, color: colors.text, lineHeight: 17, marginTop: 4, backgroundColor: '#F3F5FA', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 6 },
 });

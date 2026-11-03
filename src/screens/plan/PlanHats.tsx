@@ -378,7 +378,9 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
     { label: 'Hedefi düzenle', icon: 'create-outline', onPress: () => setGoalSheet({ editing: g }) },
     { label: 'Değerlendir', icon: 'clipboard-outline', onPress: () => setEvalSheet({ goal: g }) },
     // D1: "Aile görür" anahtarı satırdan menüye taşındı; kapalıysa başlıkta "Yalnız sende"
-    { label: g.shared ? 'Aileden gizle' : 'Aileye göster', icon: g.shared ? 'eye-off-outline' : 'eye-outline', onPress: () => act(updateGoal(g.id, { shared: !g.shared })) },
+    { label: g.shared ? 'Aileden gizle' : 'Aileye göster', icon: g.shared ? 'eye-off-outline' : 'eye-outline', onPress: () => act(updateGoal(g.id, { shared: !g.shared })),
+      info: g.shared ? 'Sonraki gönderimde hedefin adı, düzeyi ve notu aileden kalkar. Bağlı program ve rutinler ailede kalır.'
+        : 'Hedef sonraki gönderimde aileye gider.' },
     { label: 'Şablon olarak kaydet', icon: 'bookmark-outline', onPress: () => (tpls === null
       ? Alert.alert('Veritabanı güncellemesi bekleniyor', 'Şablonlarım için ortak 20261102100000_plan_redesign.sql uygulanmalı.')
       : setTplSave(g)) },
