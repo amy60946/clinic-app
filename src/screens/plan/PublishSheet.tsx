@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal, StyleSheet, ActivityIndicator
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
-import { CoachBanner } from '../../lib/coach';
+import { CoachSheetOverlay, CoachTarget } from '../../lib/coach';
 import { IconButton } from '../../components/ui';
 import type { PubItem } from '../../lib/planCore';
 
@@ -56,8 +56,8 @@ function Body({ items, groups, onClose, onSend }: {
             <Text style={styles.small}>Ebeveyn tek bildirim alır. İşaretini kaldırdığın bekler, sonra gönderirsin.</Text>
           </View>
         </View>
-        <CoachBanner sheet="publish" />
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 8 }}>
+          <CoachTarget id="sheet.publish.list" style={{ gap: 8 }}>
           {sections.map(({ g, list }) => (
             <View key={g.id ?? 'loose'} style={{ gap: 6 }}>
               <View style={styles.group}>
@@ -80,14 +80,16 @@ function Body({ items, groups, onClose, onSend }: {
               })}
             </View>
           ))}
+          </CoachTarget>
           <Text style={[styles.small, { marginTop: 6 }]}>GAS değerlendirmeleri ve "Yalnız sende" hedefler aileye hiç gitmez.</Text>
-          <Pressable onPress={send} disabled={busy || !picked.length} style={[styles.cta, (busy || !picked.length) && { opacity: 0.5 }]} accessibilityRole="button">
+          <CoachTarget id="sheet.publish.send"><Pressable onPress={send} disabled={busy || !picked.length} style={[styles.cta, (busy || !picked.length) && { opacity: 0.5 }]} accessibilityRole="button">
             {busy ? <ActivityIndicator color="#fff" /> : (
               <Text style={styles.ctaText}>{picked.length === items.length ? `Hepsini gönder (${items.length})` : `Seçilenleri gönder (${picked.length})`}</Text>
             )}
-          </Pressable>
+          </Pressable></CoachTarget>
         </ScrollView>
       </View>
+      <CoachSheetOverlay sheet="publish" />
     </SafeAreaView>
   );
 }

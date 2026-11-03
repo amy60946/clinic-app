@@ -347,7 +347,7 @@ export default function HomeScreen() {
         overlay={tourStep !== null ? <CoachOverlay finalLabel="İlk aileni davet et" /> : undefined}
       />
     );
-    if (tourStep === null) return screen;
+    // sağlayıcı tur kapalıyken de sarar: ağaç değişmez, örnekte yapılanlar tur kapanınca kaybolmaz
     return (
       <CoachProvider steps={TOUR} index={tourStep}
         onIndex={(i) => { if (i >= TOUR.length) setTourStep(null); else { setTourStep(i); track('sample.tour_step', { step: TOUR[i].key }); } }}

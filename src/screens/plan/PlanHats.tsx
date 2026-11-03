@@ -36,7 +36,7 @@ import { PRIVATE, HEAD, STATUS_TONE } from './tones';
 import type { ClientCtx } from '../client/ClientScreen';
 import type { SamplePlan } from '../../lib/sample';
 import { FamilySees } from '../HelpSheet';
-import { CoachTarget, CoachBanner, useCoachEmit } from '../../lib/coach';
+import { CoachTarget, useCoachEmit } from '../../lib/coach';
 
 // Takip planı — hedef hatları (kullanıcı kararları 30 Ekim ve 2 Kasım 2026, "C"; ortak akislar.md 12.1):
 // her hedef bir satır: hedef (uzman yazar ve değerlendirir) · aile programı (ebeveyn evde uygular) · rutin ve görevler

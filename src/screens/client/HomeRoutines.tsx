@@ -17,7 +17,7 @@ import SuggestionsTab from './SuggestionsTab';
 import ExportButton from '../../components/ExportButton';
 import { routineRows, csvName, ROUTINE_HEADER } from '../../lib/csv';
 import { listSuggestions } from '../../lib/clinic';
-import { CoachTarget, CoachBanner, useCoachEmit } from '../../lib/coach';
+import { CoachTarget, CoachSheetOverlay, useCoachEmit } from '../../lib/coach';
 
 // Ev rutinleri (uzman): haftalık tablo (gün gün), zaman içinde (haftalık sayı, çoklu görev), oranlar (görev başına, beceri,
 // "Yapamam", ret notları) ve öneriler. Görev eklemek uzmanın önerisidir; ebeveyn ParentApp'te onaylayınca çocuğa gider.
@@ -197,10 +197,10 @@ function TaskDetailBody({ task, ctx, onClose }: { task: Task; ctx: ClientCtx; on
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       <View style={styles.column}>
         <View style={styles.sheetHead}>
-          <IconButton name="close" onPress={onClose} label="Kapat" />
+          <CoachTarget id="sheet.task.close"><IconButton name="close" onPress={onClose} label="Kapat" /></CoachTarget>
           <Text style={styles.sheetTitle} numberOfLines={2}>{task.emoji} {task.title}</Text>
         </View>
-        <CoachBanner sheet="taskDetail" />
+        <CoachTarget id="sheet.task.body" style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 4 }}>
           <Card style={{ gap: 6 }}>
             <Info k="Başlangıç" v={parseDate(task.start_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })} />
@@ -232,7 +232,9 @@ function TaskDetailBody({ task, ctx, onClose }: { task: Task; ctx: ClientCtx; on
           </Card>
           <Limits />
         </ScrollView>
+        </CoachTarget>
       </View>
+      <CoachSheetOverlay sheet="taskDetail" />
     </SafeAreaView>
   );
 }

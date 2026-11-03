@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal, Switch, Alert, StyleSheet, Ac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
-import { CoachBanner } from '../../lib/coach';
+import { CoachSheetOverlay, CoachTarget } from '../../lib/coach';
 import { Card, Label, Input, Cta, Empty, SmallButton, IconButton, Notice } from '../../components/ui';
 import { GasLine } from '../../components/charts';
 import { weekStarts } from '../../lib/metrics';
@@ -301,9 +301,9 @@ function Sheet({ title, onClose, children, coach }: { title: string; onClose: ()
             <IconButton name="close" label="Kapat" onPress={onClose} />
             <Text style={styles.sheetTitle}>{title}</Text>
           </View>
-          {!!coach && <CoachBanner sheet={coach} />}
           <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" automaticallyAdjustKeyboardInsets>{children}</ScrollView>
         </View>
+        {!!coach && <CoachSheetOverlay sheet={coach} />}
       </SafeAreaView>
     </Modal>
   );
@@ -347,14 +347,16 @@ export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
         <Chips options={[{ id: '', label: 'Tümü' } as { id: string; label: string }, ...DOMAINS.map((d) => ({ id: d.key, label: d.label }))]}
           value={domain} onChange={setDomain} />
         <View style={{ gap: 8, marginTop: 14 }}>
-          {list.map((g) => (
-            <Pressable key={g.key} style={styles.tpl} onPress={() => { setF({ ...goalFromTemplate(g) }); setStep('form'); }}>
+          {list.map((g, i) => (
+            <CoachTarget key={g.key} id={i === 0 ? 'sheet.goal.pick' : `sheet.goal.pick.${i}`}>
+            <Pressable style={styles.tpl} onPress={() => { setF({ ...goalFromTemplate(g) }); setStep('form'); }}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={styles.title}>{g.title}</Text>
                 <Text style={styles.small}>{domainLabel(g.domain)} · hedef {g.target} · {g.weeks} hafta</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.faint} />
             </Pressable>
+            </CoachTarget>
           ))}
         </View>
         <View style={{ marginTop: 16 }}><Cta label="Kendi hedefimi yazacağım" onPress={() => { set({ domain }); setStep('form'); }} /></View>
@@ -406,7 +408,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
           <InfoDot info="Kapalıysa hedef aileye gitmez, planda &quot;Yalnız sende&quot; yazar; bağlı program ve rutinler yine gider. Takip Planı'nda ⋯ menüsünden de değiştirilir." />
         </View>
       )}
-      <View style={{ marginTop: 18 }}><Cta label="Kaydet" onPress={save} busy={busy} /></View>
+      <CoachTarget id="sheet.goal.save"><View style={{ marginTop: 18 }}><Cta label="Kaydet" onPress={save} busy={busy} /></View></CoachTarget>
     </Sheet>
   );
 }

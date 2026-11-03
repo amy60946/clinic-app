@@ -159,28 +159,55 @@ export function OnceHint({ userId, id, hint }: { userId: string; id: string; hin
 // Yaptırarak öğreten tur (kullanıcı isteği 3 Kasım 2026): örnek aile Deniz üzerinde her adım tek bir tuşu vurgular, ekranın
 // geri kalanı hafif kararır; uzman o tuşa dokununca adım ilerler. Yazılar kısa, dokunulacak tuş kalın. Yapılanlar örnekte kalır.
 // Olaylar: PlanHats (goal_added, routine_added, published, evaluated), HomeRoutines (routine_row), ReportTab (report_action).
+// Yazı en az, gösterim önde (kullanıcı isteği 3 Kasım 2026): kartta başlık + en çok bir kısa satır; pencerelerde de perdeyle
+// sırayla gösterilir (önce "bak" → "Tamam", sonra dokunulacak tuş).
 export const TOUR: (CoachStep & { tab: Tab })[] = [
-  { key: 'intro', tab: 'goals', title: 'Deniz’le dene', text: 'Örnek bir aile. Birkaç dokunuşla planı kur; kaydedilmez, aileye gitmez.' },
+  { key: 'intro', tab: 'goals', title: 'Deniz’le dene', text: 'Örnek aile. Kaydedilmez, aileye gitmez.' },
   {
-    key: 'goal', tab: 'goals', target: 'plan.addGoal', until: 'goal_added', title: 'Hedef ekle', text: '**+ Hedef**’e dokun.',
-    sheet: { goal: 'Hazır bir hedefe dokun.', goalForm: 'Alanlar dolu. En alttaki **Kaydet**’e dokun.' },
+    key: 'goal', tab: 'goals', target: 'plan.addGoal', until: 'goal_added', title: 'Hedef ekle', text: '**+ Hedef**',
+    sheets: {
+      goal: [{ target: 'sheet.goal.pick', title: 'Hazır hedef seç' }],
+      goalForm: [{ target: 'sheet.goal.save', title: 'Kaydet', text: 'Alanlar hazır.' }],
+    },
   },
   {
-    key: 'routine', tab: 'goals', target: 'plan.newRoutine', until: 'routine_added', title: 'Rutin bağla', text: 'Yaşına uygun rutin ekle: **{label}**',
-    sheet: { routine: 'Görevler ve saatler hazır. En alttaki **Plana ekle**’ye dokun.' },
+    key: 'routine', tab: 'goals', target: 'plan.newRoutine', until: 'routine_added', title: 'Rutin ekle', text: '**{label}**',
+    sheets: {
+      routine: [
+        { target: 'sheet.routine.goal', title: 'Hedefe bağlı', text: 'Rutin bu hedefin altına gelir.', info: true },
+        { target: 'sheet.routine.add', title: 'Plana ekle' },
+      ],
+    },
   },
   {
-    key: 'publish', tab: 'goals', target: 'plan.publish', until: 'published', title: 'Aileye gönder', text: 'Bej = taslak, aile görmez. **Aileye gönder**’e dokun.',
-    sheet: { publish: 'İşaretliler tek bildirimle gider. **Hepsini gönder**’e dokun.' },
+    key: 'publish', tab: 'goals', target: 'plan.publish', until: 'published', title: 'Aileye gönder', text: 'Bej = taslak. **Aileye gönder**',
+    sheets: {
+      publish: [
+        { target: 'sheet.publish.list', title: 'Gidecekler', text: 'İşareti kaldırılan bekler.', info: true },
+        { target: 'sheet.publish.send', title: 'Gönder' },
+      ],
+    },
   },
   {
-    key: 'evaluate', tab: 'goals', target: 'plan.evaluate', until: 'evaluated', title: 'Değerlendir', text: 'Dört haftada bir sorulur. **Değerlendirme zamanı**’na dokun.',
-    sheet: { evaluate: 'Bir puan seç, **Kaydet**’e dokun. Aile görmez.' },
+    key: 'evaluate', tab: 'goals', target: 'plan.evaluate', until: 'evaluated', title: 'Değerlendir', text: '**Değerlendirme zamanı**',
+    sheets: {
+      evaluate: [
+        { target: 'sheet.eval.scale', title: 'Puan seç', until: 'rated' },
+        { target: 'sheet.eval.save', title: 'Kaydet', text: 'Aile görmez.' },
+      ],
+    },
   },
-  { key: 'watch', tab: 'routine', target: 'routine.row', until: 'routine_row', title: 'Ailenin kaydı', text: 'Bir **göreve** dokun, ayrıntıya bak, kapat.',
-    sheet: { taskDetail: 'Gün gün ebeveyn kaydı. Bakınca sol üstteki **Kapat**.' } },
-  { key: 'report', tab: 'report', target: 'report.open', until: 'report_action', title: 'Rapor', text: 'Dönem sonu: **Raporu aç**’a dokun.' },
-  { key: 'done', tab: 'report', title: 'Hazırsın', text: 'Sıra gerçek ailede: ebeveyni e-postayla davet et.', final: true },
+  {
+    key: 'watch', tab: 'routine', target: 'routine.row', until: 'routine_row', title: 'Ailenin kaydı', text: 'Bir **göreve** dokun',
+    sheets: {
+      taskDetail: [
+        { target: 'sheet.task.body', title: 'Gün gün kayıt', info: true },
+        { target: 'sheet.task.close', title: 'Kapat' },
+      ],
+    },
+  },
+  { key: 'report', tab: 'report', target: 'report.open', until: 'report_action', title: 'Rapor', text: '**Raporu aç**' },
+  { key: 'done', tab: 'report', title: 'Hazırsın', text: 'Sıra gerçek ailede.', final: true },
 ];
 
 const styles = StyleSheet.create({

@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal, Alert, StyleSheet, ActivityIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
-import { CoachBanner } from '../../lib/coach';
+import { CoachSheetOverlay, CoachTarget, useCoachEmit } from '../../lib/coach';
 import { IconButton } from '../../components/ui';
 import { formatTR } from '../../dates';
 import type { PlanGoal, GoalStatus } from '../../lib/plan';
@@ -36,6 +36,7 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
 }) {
   const current = goal.ratings.find((r) => r.week === week)?.rating;
   const [rating, setRating] = useState<number | null>(current ?? null);
+  const emit = useCoachEmit();
   const [status, setStatus] = useState<GoalStatus>(initialStatus ?? goal.status);
   const [busy, setBusy] = useState(false);
   const past = [...goal.ratings].filter((r) => r.week !== week).sort((a, b) => a.week.localeCompare(b.week)).slice(-5);
@@ -70,7 +71,6 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
             <Text style={styles.badgeText}>Aile görmez</Text>
           </View>
         </View>
-        <CoachBanner sheet="evaluate" />
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 12 }}>
           <Text style={styles.small}>
             {formatTR(today)} · {goal.weeks ? `${Math.min(n, goal.weeks)}. hafta / ${goal.weeks}` : `${n}. hafta`}
@@ -83,14 +83,14 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
           {!!goal.target && <Text style={styles.body}>Hedef düzey: <Text style={{ fontWeight: '700' }}>{goal.target}</Text></Text>}
 
           <Text style={styles.label}>Hedefe ulaşma düzeyi (GAS)</Text>
-          <View style={styles.scale}>
+          <CoachTarget id="sheet.eval.scale"><View style={styles.scale}>
             {[-2, -1, 0, 1, 2].map((v) => (
-              <Pressable key={v} onPress={() => setRating(v)} accessibilityRole="radio" accessibilityState={{ selected: rating === v }}
+              <Pressable key={v} onPress={() => { setRating(v); emit('rated'); }} accessibilityRole="radio" accessibilityState={{ selected: rating === v }}
                 accessibilityLabel={GAS_LABELS[v]} style={[styles.scaleBtn, rating === v && styles.scaleOn]}>
                 <Text style={[styles.scaleNum, rating === v && { color: '#fff' }]}>{v > 0 ? `+${v}` : v === 0 ? '0' : `−${-v}`}</Text>
               </Pressable>
             ))}
-          </View>
+          </View></CoachTarget>
           <Text style={styles.small}>{rating !== null ? GAS_LABELS[rating] : '0 = beklenen düzey. Uygulamadaki oranlar ve davranış kayıtları yardımcıdır; karar senin.'}</Text>
           {past.length > 0 && (
             <Text style={styles.small}>Önceki: {past.map((r) => `${dayMonth(r.week)} ${r.rating > 0 ? `+${r.rating}` : r.rating}`).join(' · ')}</Text>
@@ -109,11 +109,12 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
             <Text style={styles.small}>Durum aileye "Aileye gönder" ile gider (hedef aileye açıksa).</Text>
           )}
 
-          <Pressable onPress={save} disabled={busy} style={[styles.cta, busy && { opacity: 0.6 }]} accessibilityRole="button">
+          <CoachTarget id="sheet.eval.save"><Pressable onPress={save} disabled={busy} style={[styles.cta, busy && { opacity: 0.6 }]} accessibilityRole="button">
             {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.ctaText}>Kaydet</Text>}
-          </Pressable>
+          </Pressable></CoachTarget>
         </ScrollView>
       </View>
+      <CoachSheetOverlay sheet="evaluate" />
     </SafeAreaView>
   );
 }
