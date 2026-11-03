@@ -55,11 +55,12 @@ const NOTES_OK = ['Hatırlatmadan yaptı.', 'Bugün çok istekliydi.', 'Kardeşi
 const NOTES_REJECT = ['Yarısında bıraktı.', 'Yaptım dedi ama yapılmamıştı.', 'Çok aceleyle yaptı, birlikte tekrar ettik.'];
 const DECLINES: DeclineReason[] = ['hard', 'no_time', 'did_not_want', 'hard'];
 
-const ABC: { a: string; b: string; c: string; part: AbcEvent['day_part'] }[] = [
-  { a: 'Tablet kapatılması istendi', b: 'Bağırdı, tableti bırakmadı', c: 'Tablet 5 dakika sonra kapatıldı, sakinleşince konuştuk', part: 'evening' },
+// g: ebeveynin seçtiği hedef (s-g1 sabah rutini, s-g2 sakinleşme); seçmediyse boş
+const ABC: { a: string; b: string; c: string; part: AbcEvent['day_part']; g?: string }[] = [
+  { a: 'Tablet kapatılması istendi', b: 'Bağırdı, tableti bırakmadı', c: 'Tablet 5 dakika sonra kapatıldı, sakinleşince konuştuk', part: 'evening', g: 's-g2' },
   { a: 'Ödeve başlama zamanı geldi', b: 'Masaya oturmayı reddetti, ağladı', c: 'İlk soruyu birlikte yaptık', part: 'noon' },
-  { a: 'Sabah giyinme sırasında acele', b: 'Kıyafetini fırlattı', c: 'Sakin bir sesle tek seçenek sunuldu', part: 'morning' },
-  { a: 'Kardeşi oyuncağını aldı', b: 'Kardeşini itti', c: 'İkisi ayrı odaya alındı, sonra özür diledi', part: 'evening' },
+  { a: 'Sabah giyinme sırasında acele', b: 'Kıyafetini fırlattı', c: 'Sakin bir sesle tek seçenek sunuldu', part: 'morning', g: 's-g1' },
+  { a: 'Kardeşi oyuncağını aldı', b: 'Kardeşini itti', c: 'İkisi ayrı odaya alındı, sonra özür diledi', part: 'evening', g: 's-g2' },
   { a: 'Yatma saati hatırlatıldı', b: 'Odadan çıkmayı reddetti, kapıyı çarptı', c: 'Görsel çizelgeye bakıldı, kitap okundu', part: 'night' },
 ];
 
@@ -125,7 +126,7 @@ export function sampleBundle(today: string): SampleBundle {
       const e = ABC[Math.floor(r() * ABC.length)];
       const hm = e.part === 'morning' ? '07:50' : e.part === 'noon' ? '15:30' : e.part === 'evening' ? '19:10' : '21:40';
       abc.push({ id: `s-abc-${w}-${i}`, occurred_at: at(d, hm), antecedent: e.a, behavior: e.b, consequence: e.c,
-        intensity: Math.max(1, Math.min(5, Math.round(4 - w * 0.3 + (r() - 0.5) * 2))), day_part: e.part, group_id: null, audio_path: null, duration_ms: null });
+        intensity: Math.max(1, Math.min(5, Math.round(4 - w * 0.3 + (r() - 0.5) * 2))), day_part: e.part, group_id: null, audio_path: null, duration_ms: null, goal_id: e.g ?? null });
     }
   }
   abc.sort((a, b) => b.occurred_at.localeCompare(a.occurred_at));

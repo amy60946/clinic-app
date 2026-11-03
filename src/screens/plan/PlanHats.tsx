@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
 import { Input, Notice, SmallButton, IconButton, Segmented } from '../../components/ui';
-import { weekStarts, taskSetRate, Task } from '../../lib/metrics';
+import { weekStarts, taskSetRate, Task, goalAbcWeeks } from '../../lib/metrics';
 import { track } from '../../lib/track';
 import { todayISO } from '../../dates';
 import {
@@ -83,7 +83,7 @@ const splitPayload = (p: string) => { const i = p.indexOf(':'); return [p.slice(
 // preset: örnek aile (ilk kullanım "Ö1", 3 Kasım 2026) — aynı ekran, veri cihazda. Deneme alanı: hedef ekle, önerilen rutini taslak
 // olarak bağla, Aileye gönder (özet), Değerlendir yerel durumda çalışır (yaptırarak öğreten tur bunları kullanır; olaylar
 // useCoachEmit). Öteki düzenlemeler gizli ya da "örnek" der; sunucuya hiçbir şey gitmez, örnek kapanınca sıfırlanır.
-export default function PlanHats({ client, me, data, today, reload, preset }: Pick<ClientCtx, 'client' | 'me' | 'data' | 'today' | 'reload'> & { preset?: SamplePlan }) {
+export default function PlanHats({ client, me, data, today, reload, preset, openAbc }: Pick<ClientCtx, 'client' | 'me' | 'data' | 'today' | 'reload' | 'openAbc'> & { preset?: SamplePlan }) {
   const target: PlanTarget = { kind: 'link', linkId: client.link_id, clinicId: client.clinic_id };
   const ro = !!preset;
   const emit = useCoachEmit();
@@ -605,6 +605,7 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
   // aileye gitmeyen GAS özeti bej kutuda (C1), "Değerlendir" ile (A1). Ölçüm türü ve başlangıç düzenleme formunda kalır.
   const goalColumn = (g: PlanGoal) => {
     const notes = goalTimeline(g, goalNotes);
+    const abcW = goalAbcWeeks(data.abc, g.id, today);   // yalnız son 4 haftada kayıt varsa satır görünür
     const sorted = [...g.ratings].sort((x, y) => x.week.localeCompare(y.week));
     const first = sorted[0];
     const last = sorted[sorted.length - 1];
@@ -621,6 +622,17 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
           ))}
         </View>
         {!!g.description && <Text style={styles.small}><Text style={{ fontWeight: '700', color: colors.navy }}>{g.shared ? 'Aileye not: ' : 'Not: '}</Text>{g.description}</Text>}
+        {/* ebeveynin bu hedefe bağladığı davranış kayıtları (ortak abc_goal): tek satır, dokununca Davranış Kayıtları bu hedefe süzülü */}
+        {abcW.some((w) => w.count > 0) && (
+          <Pressable onPress={() => openAbc?.(g.id)} disabled={!openAbc} accessibilityRole="button" style={styles.abcLine}
+            accessibilityLabel="Bu hedefin davranış kayıtları">
+            <Text style={[styles.small, { flex: 1 }]}>
+              <Text style={{ fontWeight: '700', color: colors.navy }}>Davranış kaydı</Text>{' · son 4 hafta: '}
+              {abcW.map((w) => w.count).join(' · ')}
+            </Text>
+            {!!openAbc && <Ionicons name="chevron-forward" size={14} color={colors.muted} />}
+          </Pressable>
+        )}
         {!!g.home_support && <Text style={styles.small}><Text style={{ fontWeight: '700', color: colors.navy }}>Evde: </Text>{g.home_support}</Text>}
         <View style={styles.private}>
           <View style={styles.privateHead}>
@@ -1371,6 +1383,7 @@ const styles = StyleSheet.create({
   private: { backgroundColor: PRIVATE.bg, borderColor: PRIVATE.line, borderWidth: 1, borderRadius: radius.sm, padding: 9, gap: 6 },
   privateHead: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   privateWho: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, color: PRIVATE.fg },
+  abcLine: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   noteBtn: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 4, paddingVertical: 2 },
   noteCount: { fontSize: 11, fontWeight: '800', color: PRIVATE.fg },
   lastNote: { fontSize: 12, color: PRIVATE.text, fontStyle: 'italic' },

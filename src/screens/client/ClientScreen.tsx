@@ -59,6 +59,9 @@ export type ClientCtx = {
   today: string;
   weeks: number;
   reload?: () => Promise<void>;     // çocuğun görev/kayıt verisini yeniden okur (aile az önce bir öneriyi kabul ettiyse)
+  // Takip Planı'ndan bir hedefin davranış kayıtlarını aç (Davranış Kayıtları o hedefe süzülü); abcGoal: açılışta seçili hedef
+  openAbc?: (goalId: string) => void;
+  abcGoal?: string | null;
 };
 
 export default function ClientScreen({
@@ -75,6 +78,7 @@ export default function ClientScreen({
   focusTab?: Tab;                                  // tur adımı değişince o bölüm açılır
 }) {
   const [tab, setTab] = useState<Section>(initialTab === 'suggestions' ? 'routine' : initialTab);
+  const [abcGoal, setAbcGoal] = useState<string | null>(null);
   const [routineView, setRoutineView] = useState<RoutineView>(initialTab === 'suggestions' ? 'suggest' : 'week');
   const [bell, setBell] = useState(false);
   const [access, setAccess] = useState(false);
@@ -153,8 +157,11 @@ export default function ClientScreen({
   // Çocuk satırı görünmüyorsa rıza geri alınmıştır (RLS)
   const revoked = data && !data.child;
   const shown: Client = { ...client, label };
-  const ctx: ClientCtx | null = data && data.child ? { client: shown, me, data, today, weeks: Number(weeks), reload: load } : null;
-  const go = (s: Section) => { setTab(s); if (s === 'routine') setRoutineView('week'); };
+  const go = (s: Section) => { setTab(s); if (s === 'routine') setRoutineView('week'); if (s !== 'abc') setAbcGoal(null); };
+  const ctx: ClientCtx | null = data && data.child ? {
+    client: shown, me, data, today, weeks: Number(weeks), reload: load, abcGoal,
+    openAbc: (gid) => { setAbcGoal(gid); go('abc'); },
+  } : null;
   useEffect(() => { if (focusTab) go(sectionOf(focusTab)); }, [focusTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const header = (
@@ -210,7 +217,7 @@ export default function ClientScreen({
             {!sample && <SectionHint userId={me.id} section={tab} />}
             {tab === 'summary' && <SummaryTab {...ctx} />}
             {tab === 'routine' && <HomeRoutines {...ctx} view={routineView} onView={setRoutineView} />}
-            {tab === 'abc' && <AbcTab {...ctx} />}
+            {tab === 'abc' && <AbcTab key={abcGoal ?? 'all'} {...ctx} />}
             {tab === 'goals' && <PlanTab {...ctx} />}
             {tab === 'notes' && <NotesTab {...ctx} />}
             {tab === 'report' && <ReportTab {...ctx} />}

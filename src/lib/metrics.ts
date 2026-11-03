@@ -44,7 +44,19 @@ export type AbcEvent = {
   group_id?: string | null;
   audio_path?: string | null;
   duration_ms?: number | null;
+  // ebeveynin seçtiği uzman hedefi (ortak 20261103120000_abc_goal, uygulandı 3 Kasım 2026); seçmezse boş
+  goal_id?: string | null;
 };
+
+// Bir hedefe bağlı davranış kaydı sayısı, son n takvim haftası (pazartesiden; bugün dahil), eskiden yeniye
+export function goalAbcWeeks(abc: AbcEvent[], goalId: string, today: string, n = 4): { start: string; count: number }[] {
+  const t = new Date(`${today}T12:00:00Z`);
+  const monday = new Date(t); monday.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7));
+  const starts = Array.from({ length: n }, (_, i) => { const d = new Date(monday); d.setUTCDate(monday.getUTCDate() - 7 * (n - 1 - i)); return d.toISOString().slice(0, 10); });
+  const day = (e: AbcEvent) => { const d = new Date(e.occurred_at); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+  const mine = abc.filter((e) => e.goal_id === goalId).map(day);
+  return starts.map((s, i) => ({ start: s, count: mine.filter((d) => d >= s && (i === n - 1 ? d <= today : d < starts[i + 1])).length }));
+}
 
 /* ---------- Tarih yardımcıları (yerel takvim günü, YYYY-MM-DD) ---------- */
 

@@ -1,8 +1,9 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
-import { Card, Label, Empty, Segmented } from '../../components/ui';
+import { Card, Label, Empty, Segmented, ChipBar } from '../../components/ui';
+import { listGoals } from '../../lib/clinic';
 import { WeeklyRateBars, RateBar, Stat, CountBars } from '../../components/charts';
 import ExportButton from '../../components/ExportButton';
 import { abcRows, csvName, ABC_HEADER } from '../../lib/csv';
@@ -191,12 +192,25 @@ function abcWhen(e: AbcEvent) {
   return `${day} · ${d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-export function AbcTab({ client, data, today, weeks }: ClientCtx) {
+// Hedef etiketi ve süzgeç (ebeveyn kaydı uzmanın hedefine bağlayabilir; ortak 20261103120000_abc_goal, 3 Kasım 2026).
+// Süzgeç yalnız dönemde hedefe bağlı kayıt varsa görünür; sayılar ve grafik süzgeçten bağımsız (bütün kayıtlar).
+type GoalFilter = 'all' | 'none' | string;
+export function AbcTab({ client, data, today, weeks, abcGoal }: ClientCtx) {
   const s = useMemo(() => abcSummary(data.abc, today, weeks), [data, today, weeks]);
   const [view, setView] = useState<'cards' | 'table'>('cards');
+  const [goalF, setGoalF] = useState<GoalFilter>(abcGoal ?? 'all');
+  const [titles, setTitles] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (data.sample) { setTitles(Object.fromEntries((data.samplePlan?.goals ?? []).map((g) => [g.id, g.title]))); return; }
+    listGoals(client.link_id).then((gs) => setTitles(Object.fromEntries(gs.map((g) => [g.id, g.title])))).catch(() => {});
+  }, [client.link_id, data]);
   const { width } = useWindowDimensions();
   const from = s.perWeek[0].start;
-  const list = data.abc.filter((e) => isoDate(new Date(e.occurred_at)) >= from);
+  const all = data.abc.filter((e) => isoDate(new Date(e.occurred_at)) >= from);
+  const goalIds = [...new Set(all.map((e) => e.goal_id).filter((x): x is string => !!x))];
+  const list = goalF === 'all' ? all : goalF === 'none' ? all.filter((e) => !e.goal_id) : all.filter((e) => e.goal_id === goalF);
+  const goalName = (id: string) => titles[id] ?? 'Hedef';
+  const short = (t: string) => (t.length > 28 ? `${t.slice(0, 27)}…` : t);
 
   if (!s.total) return <View><Emergency /><Empty text="Bu dönemde ebeveyn davranış kaydı girmedi. Ebeveyn kaydı ParentApp › Uzmanım › (senin adın) › Davranış kaydı ekle'den girer." /></View>;
   return (
@@ -219,13 +233,24 @@ export function AbcTab({ client, data, today, weeks }: ClientCtx) {
         {PARTS.map((x) => <Row key={x.id} k={x.label} v={String(s.byDayPart[x.id])} />)}
       </Card>
       <View style={styles.listHead}>
-        <Text style={[styles.listTitle, { flex: 1 }]}>{`Kayıtlar (${list.length})`}</Text>
+        <Text style={[styles.listTitle, { flex: 1 }]}>{`Kayıtlar (${list.length}${goalF === 'all' ? '' : ` / ${all.length}`})`}</Text>
         <View style={{ width: 180 }}>
           <Segmented options={[{ id: 'cards', label: 'Kartlar' }, { id: 'table', label: 'Tablo' }]} value={view} onChange={setView} />
         </View>
         <ExportButton name={csvName('davranis-kayitlari', client.child_name, from, today)} header={ABC_HEADER} event="export.abc"
           rows={() => abcRows(data.abc, from, today)} />
       </View>
+      {(goalIds.length > 0 || goalF !== 'all') && (
+        <View style={{ marginBottom: 8 }}>
+          <ChipBar<GoalFilter> value={goalF} onChange={setGoalF} options={[
+            { id: 'all', label: 'Hepsi' },
+            ...goalIds.map((id) => ({ id, label: short(goalName(id)), icon: 'flag-outline' as const })),
+            ...(goalF !== 'all' && goalF !== 'none' && !goalIds.includes(goalF) ? [{ id: goalF, label: short(goalName(goalF)), icon: 'flag-outline' as const }] : []),
+            { id: 'none', label: 'Hedefsiz' },
+          ]} />
+        </View>
+      )}
+      {list.length === 0 && <Empty text="Bu süzgeçte kayıt yok." />}
       {view === 'table' ? (
         <ScrollView horizontal={width < 900} contentContainerStyle={{ minWidth: '100%' }}>
           <Card style={{ padding: 0, overflow: 'hidden', minWidth: 820, flex: 1 }}>
@@ -236,7 +261,7 @@ export function AbcTab({ client, data, today, weeks }: ClientCtx) {
               <View key={e.id} style={[styles.tr, i % 2 === 1 && { backgroundColor: '#FAFBFC' }]}>
                 <Text style={[styles.td, { width: 150 }]}>{abcWhen(e)}</Text>
                 <Text style={[styles.td, { flex: 1 }]}>{e.antecedent || '–'}</Text>
-                <Text style={[styles.td, { flex: 1 }]}>{e.behavior}</Text>
+                <Text style={[styles.td, { flex: 1 }]}>{e.behavior}{e.goal_id ? <Text style={styles.goalInline}>{`\n${goalName(e.goal_id)}`}</Text> : null}</Text>
                 <Text style={[styles.td, { flex: 1 }]}>{e.consequence || '–'}</Text>
                 <Text style={[styles.td, { width: 60, textAlign: 'center' }]}>{`${e.intensity}/5`}</Text>
                 <View style={{ width: 44, alignItems: 'center' }}>
@@ -253,6 +278,7 @@ export function AbcTab({ client, data, today, weeks }: ClientCtx) {
               <Text style={styles.small}>
                 {abcWhen(e)} · şiddet {e.intensity}/5
               </Text>
+              {!!e.goal_id && <Text style={styles.goalTag} numberOfLines={1}>Hedef: {goalName(e.goal_id)}</Text>}
               {e.antecedent ? <Text style={styles.body}><Text style={styles.abcKey}>Öncesi: </Text>{e.antecedent}</Text> : null}
               <Text style={styles.body}><Text style={styles.abcKey}>Davranış: </Text>{e.behavior}</Text>
               {e.consequence ? <Text style={styles.body}><Text style={styles.abcKey}>Sonucu: </Text>{e.consequence}</Text> : null}
@@ -289,6 +315,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden',
   },
   abcKey: { fontWeight: '600' },
+  goalTag: { alignSelf: 'flex-start', maxWidth: '100%', fontSize: 11.5, fontWeight: '700', color: '#2C4A9A', backgroundColor: '#E6EAF5', borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2, overflow: 'hidden' },
+  goalInline: { fontSize: 11.5, fontWeight: '700', color: '#2C4A9A' },
   listHead: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginTop: 20, marginBottom: 8 },
   listTitle: { fontSize: 13, fontWeight: '600', color: colors.muted },
   tr: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingHorizontal: 14, paddingVertical: 10 },
