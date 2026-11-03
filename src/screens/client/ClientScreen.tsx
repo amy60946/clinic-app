@@ -62,7 +62,7 @@ export type ClientCtx = {
 };
 
 export default function ClientScreen({
-  client, me, team = [], clients = [], initialTab = 'summary', sample, focusTab, onBack, onRevoked, onOpenNotification, onTeamChanged, onSwitch, footer,
+  client, me, team = [], clients = [], initialTab = 'summary', sample, focusTab, onBack, onRevoked, onOpenNotification, onTeamChanged, onSwitch, footer, overlay,
 }: {
   client: Client; me: ClinicianMe; team?: Member[]; initialTab?: Tab; onBack: () => void; onRevoked: () => void;
   onOpenNotification: (n: AppNotification) => void;
@@ -70,7 +70,8 @@ export default function ClientScreen({
   clients?: Client[];                              // sol menüdeki danışan seçici
   onSwitch?: (c: Client, tab: Tab) => void;
   sample?: ClientData;                             // örnek aile: veri yüklenmez, salt okunur
-  footer?: React.ReactNode;                        // örnek ailede tanıtım turu
+  footer?: React.ReactNode;
+  overlay?: React.ReactNode;                       // örnek ailede yaptırarak öğreten tur: perde + kart, her şeyin üstünde
   focusTab?: Tab;                                  // tur adımı değişince o bölüm açılır
 }) {
   const [tab, setTab] = useState<Section>(initialTab === 'suggestions' ? 'routine' : initialTab);
@@ -268,6 +269,7 @@ export default function ClientScreen({
       </View>
       {/* tanıtım turu içeriğin üstünde, altta durur; içerik altına boşluk bırakılır */}
       {!!footer && <View pointerEvents="box-none" style={[styles.footer, sidebar && { left: 232 }]}>{footer}</View>}
+      {overlay}
       {owner && !sample && (
         <TeamAccessSheet visible={access} onClose={() => setAccess(false)} client={client} me={me} team={team}
           onChanged={() => onTeamChanged?.()} />

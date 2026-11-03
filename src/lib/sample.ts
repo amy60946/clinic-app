@@ -3,13 +3,19 @@
 // Aynı gün için hep aynı veri (tohumlu rastgele) — testler tests/sample.test.mjs.
 import type { Task, Completion, AbcEvent, DeclineReason } from './metrics.ts';
 import { addDays, occursOn } from './metrics.ts';
-import type { PlanGoal, PlanModule, ModuleLog } from './plan.ts';
-import type { Client, ClientData } from './clinic.ts';
+import { goalSnapshot, moduleSnapshot } from './planCore.ts';
+import type { PlanGoal, PlanModule, ModuleLog, ModuleGoals, Published } from './plan.ts';
+import type { Client, ClientData, Suggestion, SuggestionInput } from './clinic.ts';
 
 export const SAMPLE_LINK = 'sample';
 
 export type SampleNote = { id: string; body: string; created_at: string; author_id: string | null; author: string };
-export type SamplePlan = { goals: PlanGoal[]; modules: PlanModule[]; logs: ModuleLog[] };
+// Takip Planı'nın örnek hâli (gerçek ekran PlanHats ile salt okunur; ilk kullanım "Ö1", 3 Kasım 2026): program ↔ hedef bağları,
+// rutin paketleri (ailede ekli + bir taslak), gönderilmiş sürüm (biri değişmiş: "Aileye gönder (2)") ve değerlendirme zamanı gelmiş bir hedef
+export type SamplePlan = {
+  goals: PlanGoal[]; modules: PlanModule[]; logs: ModuleLog[];
+  links: ModuleGoals; suggestions: Suggestion[]; pub: Published;
+};
 
 // mulberry32: küçük, tohumlu rastgele sayı üreteci
 function rng(seed: number) {
@@ -43,7 +49,7 @@ function tasks(start: string): Task[] {
   ];
 }
 // Uzmanın önerip ebeveynin onayladığı görevler ("Ekleyen" süzgeci)
-const FROM_CLINIC = ['s-read', 's-breathe'];
+const FROM_CLINIC = ['s-teeth', 's-bed', 's-read', 's-breathe'];
 
 const NOTES_OK = ['Hatırlatmadan yaptı.', 'Bugün çok istekliydi.', 'Kardeşiyle birlikte yaptı.'];
 const NOTES_REJECT = ['Yarısında bıraktı.', 'Yaptım dedi ama yapılmamıştı.', 'Çok aceleyle yaptı, birlikte tekrar ettik.'];
@@ -124,23 +130,24 @@ export function sampleBundle(today: string): SampleBundle {
   }
   abc.sort((a, b) => b.occurred_at.localeCompare(a.occurred_at));
 
-  return { tasks: ts, completions, abc, fromClinic: FROM_CLINIC, plan: samplePlan(today, start, r), notes: sampleNotes(today), consentAt: at(start, '10:00') };
+  return { tasks: ts, completions, abc, fromClinic: FROM_CLINIC, plan: samplePlan(today, start, r, ts), notes: sampleNotes(today), consentAt: at(start, '10:00') };
 }
 
-function samplePlan(today: string, start: string, r: () => number): SamplePlan {
+function samplePlan(today: string, start: string, r: () => number, ts: Task[]): SamplePlan {
   const created = new Date(`${start}T10:00:00`).toISOString();
   const monday = (d: string) => { const x = new Date(`${d}T12:00:00`); const w = x.getDay() || 7; return addDays(d, 1 - w); };
   const weeks = Array.from({ length: WEEKS }, (_, i) => monday(addDays(start, i * 7))).filter((w) => w < today);
-  const goal = (id: string, title: string, domain: string, rating: (i: number) => number, o: Partial<PlanGoal> = {}): PlanGoal => ({
+  // GAS haftalık değil, dört haftada bir (2 Kasım 2026): g1 son değerlendirmeden 4+ hafta geçti (Değerlendirme zamanı), g2 yakın
+  const rated = (pairs: [number, number][]) => pairs.filter(([i]) => i < weeks.length).map(([i, rating]) => ({ week: weeks[i], rating, note: '' }));
+  const goal = (id: string, title: string, domain: string, ratings: PlanGoal['ratings'], o: Partial<PlanGoal> = {}): PlanGoal => ({
     id, title, description: '', archived: false, created_at: created, domain, measure: 'yesno', baseline: '', target: '7 günün 5\'i',
-    weeks: 8, home_support: '', shared: true, status: 'active', position: 0, template_key: null,
-    ratings: weeks.map((w, i) => ({ week: w, rating: rating(i), note: '' })), ...o,
+    weeks: 12, home_support: '', shared: true, status: 'active', position: 0, template_key: null, ratings, ...o,
   });
   const goals = [
-    goal('s-g1', 'Sabah rutinini görsel çizelgeyle en çok 1 hatırlatmayla bitirir', 'routine', (i) => Math.min(2, -2 + Math.floor(i / 2)),
-      { baseline: '7 günün 2\'si', home_support: 'Resimli sabah çizelgesi; bitince kısa övgü.', position: 0 }),
-    goal('s-g2', 'Öfkelendiğinde sakinleşme köşesini kullanır', 'emotion', (i) => Math.min(1, -2 + Math.floor(i / 3)),
-      { measure: 'frequency', baseline: 'Haftada 0', target: 'Haftada 3', position: 1 }),
+    goal('s-g1', 'Sabah rutinini görsel çizelgeyle en çok 1 hatırlatmayla bitirir', 'routine', rated([[0, -2], [4, 1]]),
+      { description: 'Resimli sabah çizelgesini göz hizasına asın; her adım bitince kısa ve somut övün.', position: 0 }),
+    goal('s-g2', 'Öfkelendiğinde sakinleşme köşesini kullanır', 'emotion', rated([[0, -2], [4, -1], [6, 0], [8, 1]]),
+      { measure: 'frequency', target: 'Haftada 3', description: 'Sakin bir anda köşeyi birlikte deneyin; öfke anında yalnız "Köşe" deyin.', position: 1 }),
   ];
   const mod = (id: string, title: string, aim: string, practice: string, checklist: string[], status: PlanModule['status'], position: number): PlanModule =>
     ({ id, title, aim, practice, checklist, position, status, template_key: null, created_at: created });
@@ -152,11 +159,47 @@ function samplePlan(today: string, start: string, r: () => number): SamplePlan {
     mod('s-m3', 'Planlı görmezden gelme', 'Zararsız dikkat arayışını pekiştirmemek.', 'Sızlanmaya tepki verme, sakinleşince ilgilen.',
       ['Tepki vermedim', 'Sakinleşince övdüm'], 'planned', 2),
   ];
+  // Övgü programı iki hedefi destekler (bir program birden çok hedefe bağlanır)
+  const links: ModuleGoals = { 's-m1': ['s-g1', 's-g2'], 's-m2': ['s-g1'], 's-m3': ['s-g2'] };
   const logs: ModuleLog[] = [];
   for (let d = addDays(today, -20); d < today; d = addDays(d, 1)) {
     if (r() < 0.6) logs.push({ module_id: 's-m1', day: d, practiced: r() < 0.85, difficulty: 1 + Math.floor(r() * 4), barrier: null, note: MODULE_LOG_NOTES[Math.floor(r() * 3)] });
   }
-  return { goals, modules, logs };
+  // Rutin ve görevler: sabah paketi ve sakinleşme görevi ailede (uzmanın önerisi, ebeveyn ekledi); akşam paketi taslak (aile görmez)
+  const decided = new Date(`${addDays(start, 1)}T09:00:00`).toISOString();
+  const fromTask = (t: Task): SuggestionInput => ({
+    title: t.title, emoji: t.emoji, skill: t.skill, description: '', category: null, template_key: null, difficulty: 'easy', coins: 10,
+    start_date: t.start_date, recurring: t.recurring, repeat_kind: t.repeat_kind, repeat_days: t.repeat_days, end_date: null,
+    reminder: t.reminder, requires_review: t.requires_review, note: '',
+  });
+  const sug = (id: string, input: SuggestionInput, o: Partial<Suggestion>): Suggestion => ({
+    ...input, id, status: 'accepted', created_at: created, updated_at: null, decided_at: decided, task_title: input.title, task_id: null,
+    kind: 'new', target_task_id: null, change_remove: false, routine: null, goal_id: null, ...o,
+  });
+  const task = (id: string) => ts.find((t) => t.id === id)!;
+  const morning = { group: 's-r1', title: 'Güne hazır sabah', icon: 'sunny-outline', key: 'morning' };
+  const evening = { group: 's-r2', title: 'Sakin akşam', icon: 'moon-outline', key: 'evening' };
+  const draftTask = (title: string, emoji: string, skill: string, reminder: string): SuggestionInput => ({
+    ...fromTask(task('s-toys')), title, emoji, skill, reminder, start_date: today, recurring: true, repeat_kind: 'daily', repeat_days: [],
+  });
+  const suggestions: Suggestion[] = [
+    sug('s-s1', fromTask(task('s-teeth')), { task_id: 's-teeth', goal_id: 's-g1', routine: { ...morning, position: 0 } }),
+    sug('s-s2', fromTask(task('s-bed')), { task_id: 's-bed', goal_id: 's-g1', routine: { ...morning, position: 1 } }),
+    sug('s-s3', fromTask(task('s-breathe')), { task_id: 's-breathe', goal_id: 's-g2' }),
+    sug('s-s4', fromTask(task('s-read')), { task_id: 's-read' }),
+    sug('s-s5', draftTask('Yarınki kıyafetini hazırla', '👕', 'teamwork', '20:00'),
+      { status: 'draft', decided_at: null, task_title: null, goal_id: 's-g1', routine: { ...evening, position: 0 } }),
+    sug('s-s6', draftTask('Pijamalarını giy', '🌙', 'strength', '20:20'),
+      { status: 'draft', decided_at: null, task_title: null, goal_id: 's-g1', routine: { ...evening, position: 1 } }),
+  ];
+  // Aileye gönderilmiş sürüm: g2'nin aileye notu sonradan değişti (gönderilmedi); Planlandı program aileye gitmez
+  const goalPub = (g: PlanGoal) => goalSnapshot(g)!;
+  const modPub = (m: PlanModule) => ({ ...moduleSnapshot(m)!, goal_ids: links[m.id] });
+  const pub: Published = {
+    goals: { 's-g1': goalPub(goals[0]), 's-g2': { ...goalPub(goals[1]), description: 'Öfke anında sakinleşme köşesini hatırlatın.' } },
+    modules: { 's-m1': modPub(modules[0]), 's-m2': modPub(modules[1]) },
+  };
+  return { goals, modules, logs, links, suggestions, pub };
 }
 
 function sampleNotes(today: string): SampleNote[] {

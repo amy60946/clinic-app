@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal, Switch, Alert, StyleSheet, Ac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
+import { CoachSheetOverlay, CoachTarget } from '../../lib/coach';
 import { Card, Label, Input, Cta, Empty, SmallButton, IconButton, Notice } from '../../components/ui';
 import { GasLine } from '../../components/charts';
 import { weekStarts } from '../../lib/metrics';
@@ -291,7 +292,7 @@ function ModuleCard({ m, isLink, readOnly, logs, onEdit, onStatus, onDelete }: {
 
 /* ---------- Hedef ekle / düzenle ---------- */
 
-function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Sheet({ title, onClose, children, coach }: { title: string; onClose: () => void; children: React.ReactNode; coach?: string }) {
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -302,6 +303,7 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
           </View>
           <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" automaticallyAdjustKeyboardInsets>{children}</ScrollView>
         </View>
+        {!!coach && <CoachSheetOverlay sheet={coach} />}
       </SafeAreaView>
     </Modal>
   );
@@ -320,8 +322,9 @@ function Chips<T extends string>({ options, value, onChange }: { options: { id: 
   );
 }
 
-export function GoalSheet({ editing, legacy, onClose, onSave }: {
+export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
   editing?: PlanGoal; legacy: boolean; onClose: () => void; onSave: (g: GoalInput) => Promise<void>;
+  exclude?: string[];                 // planda zaten olan hedeflerin adları: hazır listede gösterilmez
 }) {
   const [step, setStep] = useState<'pick' | 'form'>(editing || legacy ? 'form' : 'pick');
   const [domain, setDomain] = useState(editing?.domain ?? '');
@@ -330,7 +333,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave }: {
   });
   const [busy, setBusy] = useState(false);
   const set = (p: Partial<GoalInput>) => setF((x) => ({ ...x, ...p }));
-  const list = useMemo(() => GOAL_TEMPLATES.filter((g) => !domain || g.domain === domain), [domain]);
+  const list = useMemo(() => GOAL_TEMPLATES.filter((g) => (!domain || g.domain === domain) && !exclude.includes(g.title)), [domain, exclude]);
 
   const save = async () => {
     if (!f.title.trim()) return Alert.alert('Hedef davranışı yaz.');
@@ -340,18 +343,20 @@ export function GoalSheet({ editing, legacy, onClose, onSave }: {
 
   if (step === 'pick') {
     return (
-      <Sheet title="Hedef ekle" onClose={onClose}>
+      <Sheet title="Hedef ekle" onClose={onClose} coach="goal">
         <Chips options={[{ id: '', label: 'Tümü' } as { id: string; label: string }, ...DOMAINS.map((d) => ({ id: d.key, label: d.label }))]}
           value={domain} onChange={setDomain} />
         <View style={{ gap: 8, marginTop: 14 }}>
-          {list.map((g) => (
-            <Pressable key={g.key} style={styles.tpl} onPress={() => { setF({ ...goalFromTemplate(g) }); setStep('form'); }}>
+          {list.map((g, i) => (
+            <CoachTarget key={g.key} id={i === 0 ? 'sheet.goal.pick' : `sheet.goal.pick.${i}`}>
+            <Pressable style={styles.tpl} onPress={() => { setF({ ...goalFromTemplate(g) }); setStep('form'); }}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={styles.title}>{g.title}</Text>
                 <Text style={styles.small}>{domainLabel(g.domain)} · hedef {g.target} · {g.weeks} hafta</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.faint} />
             </Pressable>
+            </CoachTarget>
           ))}
         </View>
         <View style={{ marginTop: 16 }}><Cta label="Kendi hedefimi yazacağım" onPress={() => { set({ domain }); setStep('form'); }} /></View>
@@ -359,7 +364,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave }: {
     );
   }
   return (
-    <Sheet title={editing ? 'Hedefi düzenle' : 'Hedef'} onClose={onClose}>
+    <Sheet title={editing ? 'Hedefi düzenle' : 'Hedef'} onClose={onClose} coach={editing ? undefined : 'goalForm'}>
       <Text style={styles.small}>Hedefi gözlenebilir yaz: "… yapar". Hiçbir hedef tanı ya da puan değildir.</Text>
       {!legacy && (<><Label>Alan</Label>
         <Chips options={DOMAINS.map((d) => ({ id: d.key, label: d.label }))} value={f.domain} onChange={(v) => set({ domain: v })} /></>)}
@@ -403,7 +408,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave }: {
           <InfoDot info="Kapalıysa hedef aileye gitmez, planda &quot;Yalnız sende&quot; yazar; bağlı program ve rutinler yine gider. Takip Planı'nda ⋯ menüsünden de değiştirilir." />
         </View>
       )}
-      <View style={{ marginTop: 18 }}><Cta label="Kaydet" onPress={save} busy={busy} /></View>
+      <CoachTarget id="sheet.goal.save" style={{ marginTop: 18 }}><Cta label="Kaydet" onPress={save} busy={busy} /></CoachTarget>
     </Sheet>
   );
 }

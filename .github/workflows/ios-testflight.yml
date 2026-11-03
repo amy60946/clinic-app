@@ -5,6 +5,12 @@ name: iOS (TestFlight)
 # Elle: Actions → "iOS (TestFlight)" → Run workflow. Otomatik: main'e gelen commit mesajında [ios] geçerse.
 on:
   workflow_dispatch:
+    inputs:
+      runner:
+        description: "Mac makinesi (macos-15 = Apple işlemci; kuyrukta kalırsa macos-15-intel)"
+        type: choice
+        options: [macos-15, macos-15-intel]
+        default: macos-15
   push:
     branches: [main]
 
@@ -15,7 +21,9 @@ concurrency:
 jobs:
   testflight:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[ios]')
-    runs-on: macos-15
+    # GitHub'da Apple işlemcili (arm64) Mac kapasitesi dolunca iş 15 dk sonra "not acquired" ile düşer (2 Kasım 2026, çalışma 88;
+    # ParentApp'te de); o zaman elle başlatmada macos-15-intel seçilir.
+    runs-on: ${{ inputs.runner || 'macos-15' }}
     timeout-minutes: 120
     env:
       SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}

@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal, Alert, StyleSheet, ActivityIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
+import { CoachSheetOverlay, CoachTarget } from '../../lib/coach';
 import { Input, IconButton, DifficultyBadge, Segmented } from '../../components/ui';
 import { todayISO } from '../../dates';
 import { SuggestionInput } from '../../lib/clinic';
@@ -153,7 +154,7 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initi
           {goals.length > 0 && (
             <>
               <Text style={styles.label}>Hangi hedef için? (isteğe bağlı)</Text>
-              <View style={styles.goals}>
+              <CoachTarget id="sheet.routine.goal"><View style={styles.goals}>
                 {[{ id: '', title: 'Hedefe bağlama' }, ...goals].map((g) => {
                   const on = (goalId ?? '') === g.id;
                   return (
@@ -167,18 +168,19 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initi
                     </Pressable>
                   );
                 })}
-              </View>
+              </View></CoachTarget>
               <Text style={styles.small}>Bağlarsan Takip Planı'nda hedefin altında rutinin evde ne kadar yapıldığı görünür (ebeveyn kaydı, puan değil).</Text>
             </>
           )}
 
           <Text style={styles.label}>Aileye notun (isteğe bağlı)</Text>
           <Input value={note} onChangeText={setNote} placeholder="Ör. İlk hafta yalnız sabah görevlerine odaklanın" maxLength={140} />
-          <Pressable onPress={send} disabled={busy || !picked} style={[styles.cta, (busy || !picked) && { opacity: 0.5 }]} accessibilityRole="button">
+          <CoachTarget id="sheet.routine.add" style={{ marginTop: 8 }}><Pressable onPress={send} disabled={busy || !picked} style={[styles.cta, { marginTop: 0 }, (busy || !picked) && { opacity: 0.5 }]} accessibilityRole="button">
             {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.ctaText}>{asDraft ? `Plana ekle (${picked} görev)` : `Rutini öner (${picked} görev)`}</Text>}
-          </Pressable>
+          </Pressable></CoachTarget>
         </ScrollView>
       </View>
+      <CoachSheetOverlay sheet="routine" />
     </SafeAreaView>
   );
 }

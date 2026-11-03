@@ -23,7 +23,7 @@ import {
 } from '../../lib/routines';
 import type { AgeGroup } from '../../templates';
 import { useDragSource, useDropZone } from '../../lib/dnd';
-import { RGroup, PubItem, groupSuggestions, visibleGroup, goalUnsent, moduleUnsent, goalWeek, lastRating, reviewDue, publishItems } from '../../lib/planCore';
+import { RGroup, PubItem, groupSuggestions, visibleGroup, goalUnsent, moduleUnsent, goalWeek, lastRating, reviewDue, publishItems, goalSnapshot, moduleSnapshot } from '../../lib/planCore';
 import { useLayout } from '../../lib/layout';
 import { useClientConfig } from '../../lib/clientConfig';
 import RoutineSheet, { RoutineGoal } from '../client/RoutineSheet';
@@ -34,6 +34,9 @@ import EvaluateSheet, { dayMonth } from './EvaluateSheet';
 import PublishSheet from './PublishSheet';
 import { PRIVATE, HEAD, STATUS_TONE } from './tones';
 import type { ClientCtx } from '../client/ClientScreen';
+import type { SamplePlan } from '../../lib/sample';
+import { FamilySees } from '../HelpSheet';
+import { CoachTarget, useCoachEmit } from '../../lib/coach';
 
 // Takip planı — hedef hatları (kullanıcı kararları 30 Ekim ve 2 Kasım 2026, "C"; ortak akislar.md 12.1):
 // her hedef bir satır: hedef (uzman yazar ve değerlendirir) · aile programı (ebeveyn evde uygular) · rutin ve görevler
@@ -75,8 +78,15 @@ const splitPayload = (p: string) => { const i = p.indexOf(':'); return [p.slice(
 
 /* ====================================================================== */
 
-export default function PlanHats({ client, me, data, today, reload }: Pick<ClientCtx, 'client' | 'me' | 'data' | 'today' | 'reload'>) {
+// preset: örnek aile (ilk kullanım "Ö1", 3 Kasım 2026) — aynı ekran, veri cihazda. Deneme alanı: hedef ekle, önerilen rutini taslak
+// olarak bağla, Aileye gönder (özet), Değerlendir yerel durumda çalışır (yaptırarak öğreten tur bunları kullanır; olaylar
+// useCoachEmit). Öteki düzenlemeler gizli ya da "örnek" der; sunucuya hiçbir şey gitmez, örnek kapanınca sıfırlanır.
+export default function PlanHats({ client, me, data, today, reload, preset }: Pick<ClientCtx, 'client' | 'me' | 'data' | 'today' | 'reload'> & { preset?: SamplePlan }) {
   const target: PlanTarget = { kind: 'link', linkId: client.link_id, clinicId: client.clinic_id };
+  const ro = !!preset;
+  const emit = useCoachEmit();
+  const localId = () => `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+  const sampleOnly = () => Alert.alert('Örnek aile', 'Bu bir örnek: burada bir şey değişmez ve aileye gitmez. Gerçek bir ailede bu düğme çalışır.');
   const { desktop } = useLayout();
   // Ailede ekli rutine değişiklik önerisi, ParentApp "Uzmanın değişiklik önerisi" kartını yayınlayana kadar kapalı: eski ParentApp
   // değişiklik önerisini yeni görev gibi ekler (çift görev). Yönetim panelinde `plan_change_suggestions` bayrağı açılınca görünür.
@@ -112,6 +122,11 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
   const [tplSave, setTplSave] = useState<PlanGoal | null>(null);
 
   const load = useCallback(async () => {
+    if (preset) {
+      setPlan({ goals: preset.goals, modules: preset.modules, legacy: false });
+      setSugg(preset.suggestions); setLogs(preset.logs); setLinks(preset.links); setPub(preset.pub);
+      return;
+    }
     try {
       const [p, s] = await Promise.all([loadPlan(target), listSuggestions(client.link_id).catch(() => [] as Suggestion[])]);
       const ids = p.modules.map((m) => m.id);
@@ -122,11 +137,12 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
     } catch (e) {
       setError(e instanceof PlanSchemaMissing ? e.message : (e as Error).message);
     }
-  }, [client.link_id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [client.link_id, preset]); // eslint-disable-line react-hooks/exhaustive-deps
   const loadLibrary = useCallback(() => {
+    if (ro) return;
     listPlanTemplates().then(setTpls).catch(() => setTpls(null));
     listOwnRoutines().then(setOwn).catch(() => setOwn(null));
-  }, []);
+  }, [ro]);
   useEffect(() => { loadLibrary(); }, [loadLibrary]);
   // danışan verisi yenilenince (aşağı çekme, kabul bildirimi) plan da yeniden okunur
   useEffect(() => { load(); }, [load, data]);
@@ -174,7 +190,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
     setFocus(gid);
   };
   const libTarget = focus && goals.some((g) => g.id === focus) ? focus : goals[0]?.id ?? null;
-  const showLib = desktop && !!libOpen && width >= 980;
+  const showLib = !ro && desktop && !!libOpen && width >= 980;
   const cols3 = (showLib ? width - 316 : width) >= 760;
   const taken = [...data.tasks.map((t) => t.title), ...sugg.filter((s) => s.status === 'pending' || s.status === 'draft').map((s) => s.title)];
   const richGoals: RoutineGoal[] = goals.filter((g) => g.status !== 'achieved').map((g) => ({
@@ -280,6 +296,17 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
 
   // rutin taslağı (hedef satırından ya da kitaplıktan)
   const submitRoutine = async (list: SuggestionInput[]) => {
+    if (ro) {
+      const at = new Date().toISOString();
+      const add: Suggestion[] = list.map((x) => ({
+        ...x, id: localId(), status: 'draft', created_at: at, updated_at: null, decided_at: null, task_title: null, task_id: null,
+        kind: 'new', target_task_id: null, change_remove: false, routine: x.routine ?? null, goal_id: x.goal_id ?? null,
+      }));
+      setSugg((cur) => [...cur, ...add]);
+      setRtSheet(null);
+      emit('routine_added');
+      return;
+    }
     const res = await addSuggestions(client, me.id, list, { draft: true });
     track('suggestion.routine', { routine: list[0]?.routine?.key ?? '', n: list.length, grouped: res.grouped, goal: !!list[0]?.goal_id, draft: res.draft, from: 'plan' });
     setRtSheet(null);
@@ -353,7 +380,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
       ]);
   };
 
-  const hatMenu = (g: PlanGoal) => Alert.alert(short(g.title, 60), undefined, [
+  const hatMenu = (g: PlanGoal) => ro ? sampleOnly() : Alert.alert(short(g.title, 60), undefined, [
     { text: 'Hedefi düzenle', onPress: () => setGoalSheet({ editing: g }) },
     { text: 'Değerlendir', onPress: () => setEvalSheet({ goal: g }) },
     // D1: "Aile görür" anahtarı satırdan menüye taşındı; kapalıysa başlıkta "Yalnız sende"
@@ -429,6 +456,23 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
     setPubItems(sendItems);
   };
   const publish = async (hold: string[]) => {
+    if (ro) {
+      // örnek: gönderilmiş sürüm yerelde güncellenir; taslaklar "ebeveyn kararı bekleniyor" olur
+      const shared = new Set(plan.goals.filter((g) => g.shared && !g.archived).map((g) => g.id));
+      setPub((p) => {
+        const next = { goals: { ...(p?.goals ?? {}) }, modules: { ...(p?.modules ?? {}) } };
+        plan.goals.filter((g) => !hold.includes(g.id)).forEach((g) => { next.goals[g.id] = goalSnapshot(g); });
+        plan.modules.filter((m) => !hold.includes(m.id)).forEach((m) => {
+          const snap = moduleSnapshot(m);
+          next.modules[m.id] = snap && { ...snap, goal_ids: (links?.[m.id] ?? []).filter((id) => shared.has(id)) };
+        });
+        return next;
+      });
+      setSugg((cur) => cur.map((x) => (x.status === 'draft' && !hold.includes(x.id) ? { ...x, status: 'pending' } : x)));
+      setPubItems(null);
+      emit('published');
+      return;
+    }
     setBusy(true);
     try {
       await (pub ? publishPlanSelected(client.link_id, hold) : publishPlan(client.link_id));
@@ -446,19 +490,27 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
   };
   // A1 + S1: değerlendirme ve durum
   const saveEval = async (g: PlanGoal, rating: number | null, status: GoalStatus) => {
+    if (ro) {
+      setPlan((p) => p && ({ ...p, goals: p.goals.map((x) => (x.id !== g.id ? x : {
+        ...x, status, ratings: rating === null ? x.ratings : [...x.ratings.filter((r) => r.week !== thisWeek), { week: thisWeek, rating, note: '' }],
+      })) }));
+      setEvalSheet(null);
+      emit('evaluated');
+      return;
+    }
     if (rating !== null) await rateGoal(client.clinic_id, g.id, thisWeek, rating);
     if (status !== g.status) await updateGoal(g.id, { status });
     track('plan.evaluate', { rated: rating !== null, status });
     setEvalSheet(null);
     await after(status !== g.status);
   };
-  const statusMenu = (g: PlanGoal) => Alert.alert(short(g.title, 60), 'Hedefin durumu', [
+  const statusMenu = (g: PlanGoal) => ro ? sampleOnly() : Alert.alert(short(g.title, 60), 'Hedefin durumu', [
     ...(g.status !== 'active' ? [{ text: 'Sürüyor', onPress: () => act(updateGoal(g.id, { status: 'active' })) }] : []),
     ...(g.status !== 'achieved' ? [{ text: 'Ulaşıldı · değerlendir', onPress: () => setEvalSheet({ goal: g, status: 'achieved' }) }] : []),
     ...(g.status !== 'paused' ? [{ text: 'Ara ver', onPress: () => act(updateGoal(g.id, { status: 'paused' })) }] : []),
     { text: 'Vazgeç', style: 'cancel' as const },
   ]);
-  const moduleStatusMenu = (m: PlanModule) => Alert.alert(short(m.title, 60), 'Programın durumu', [
+  const moduleStatusMenu = (m: PlanModule) => ro ? sampleOnly() : Alert.alert(short(m.title, 60), 'Programın durumu', [
     ...MODULE_STATUS.filter((x) => x.id !== m.status).map((x) => ({
       text: x.id === 'planned' ? 'Planlandı (aile görmez)' : x.label, onPress: () => act(updateModule(m.id, { status: x.id })),
     })),
@@ -466,10 +518,10 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
   ]);
 
   /* ---------- dikkat ---------- */
-  const attention: { icon: keyof typeof Ionicons.glyphMap; text: string; onPress?: () => void; tone?: 'warn' }[] = [];
+  const attention: { icon: keyof typeof Ionicons.glyphMap; text: string; onPress?: () => void; tone?: 'warn'; coach?: string }[] = [];
   if (unsent) attention.push({ icon: 'paper-plane-outline', text: `${unsent} değişiklik aileye gönderilmedi`, onPress: openPublish, tone: 'warn' });
   const due = goals.filter((g) => reviewDue(g, today));
-  if (due.length) attention.push({ icon: 'time-outline', text: `Değerlendirme zamanı: ${due.length} hedef`, onPress: () => { openHat(due[0].id); setEvalSheet({ goal: due[0] }); } });
+  if (due.length) attention.push({ icon: 'time-outline', text: `Değerlendirme zamanı: ${due.length} hedef`, onPress: () => { openHat(due[0].id); setEvalSheet({ goal: due[0] }); }, coach: 'plan.evaluate' });
   const idle = plan.modules.filter((m) => m.status === 'active' && pub?.modules[m.id] && logSummary(logs, m.id, 7).practiced === 0);
   if (idle.length) attention.push({ icon: 'time-outline', text: `7 gündür uygulanmadı: ${short(idle[0].title, 26)}${idle.length > 1 ? ` +${idle.length - 1}` : ''}` });
   const low = groups.filter((r) => r.state === 'added' && r.tasks.length).map((r) => ({ r, s: taskSetRate(data.tasks, data.completions, r.tasks.map((t) => t.id), today) }))
@@ -483,13 +535,13 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
     const s = logSummary(logs, m.id, 7);
     const n = links?.[m.id]?.filter((id) => goals.some((g) => g.id === id)).length ?? 0;
     return (
-      <DragView key={`${m.id}-${gid}`} payload={isWeb && linkOK ? `module:${m.id}|${gid ?? '-'}` : null}
+      <DragView key={`${m.id}-${gid}`} payload={isWeb && linkOK && !ro ? `module:${m.id}|${gid ?? '-'}` : null}
         style={[styles.mini, (m.status === 'planned' || unsentMod(m)) && styles.miniPrivate]}>
         <View style={styles.miniHead}>
           <Text style={styles.miniTitle} numberOfLines={2}>{m.title}</Text>
           {unsentMod(m) && <View style={styles.dot} accessibilityLabel="Aileye gönderilmedi" />}
-          <IconButton name="create-outline" label="Programı düzenle" size={16} onPress={() => setModuleSheet({ editing: m, goalId: gid })} />
-          {gid ? (
+          {!ro && <IconButton name="create-outline" label="Programı düzenle" size={16} onPress={() => setModuleSheet({ editing: m, goalId: gid })} />}
+          {ro ? null : gid ? (
             <IconButton name="unlink-outline" label="Bu hedeften ayır" size={16} onPress={() => act(unlinkModuleGoal(m.id, gid), 'Bağ kaldırılamadı')} />
           ) : (
             <IconButton name="trash-outline" label="Programı sil" size={16} onPress={() => Alert.alert('Program silinsin mi?', 'Ailenin bu programdaki uygulama kayıtları da silinir.', [
@@ -517,14 +569,14 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
         : r.state === 'added' ? { t: r.single ? 'Ailede ekli' : `${r.added} / ${r.items.length} görev ailede`, fg: colors.easy.fg, bg: colors.easy.bg }
           : { t: 'Aile eklemedi', fg: colors.muted, bg: '#ECEEF3' };
     return (
-      <DragView key={r.key} payload={isWeb ? `routine:${r.key}` : null}
+      <DragView key={r.key} payload={isWeb && !ro ? `routine:${r.key}` : null}
         style={[styles.mini, (r.state === 'draft' || draftChange) && styles.miniPrivate]}>
         <View style={styles.miniHead}>
           {(r.state === 'draft' || draftChange) && <View style={styles.dot} accessibilityLabel="Aileye gönderilmedi" />}
           {r.single ? <Text style={{ fontSize: 16 }}>{r.emoji}</Text>
             : <Ionicons name={(r.icon || 'repeat-outline') as keyof typeof Ionicons.glyphMap} size={16} color={colors.navy} />}
           <Text style={styles.miniTitle} numberOfLines={2}>{r.title}</Text>
-          {r.goalId && <IconButton name="unlink-outline" label="Hedeften ayır" size={16} onPress={() => setRoutineGoal(r, null).catch(fail('Bağ kaldırılamadı'))} />}
+          {r.goalId && !ro && <IconButton name="unlink-outline" label="Hedeften ayır" size={16} onPress={() => setRoutineGoal(r, null).catch(fail('Bağ kaldırılamadı'))} />}
         </View>
         <Text style={styles.tiny}>
           {[r.single ? 'Tek görev' : `${r.items.length} görev`, times.length ? (times.length > 1 && times[0] !== times[times.length - 1] ? `${times[0]}–${times[times.length - 1]}` : times[0]) : ''].filter(Boolean).join(' · ')}
@@ -539,12 +591,12 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
         {(draftChange || pendingChange) && (
           <Text style={[styles.tiny, { color: colors.medium.fg }]}>{draftChange ? 'Değişiklik taslağı · gönderilmedi' : 'Değişiklik önerildi · ebeveyn kararı bekleniyor'}</Text>
         )}
-        <View style={styles.miniActions}>
+        {!ro && <View style={styles.miniActions}>
           {r.state === 'added' && r.tasks.length > 0 && (changeOn || r.changes.length > 0)
             && <SmallButton label={r.changes.length ? 'Değişikliği düzenle' : 'Değişiklik öner'} onPress={() => openEdit(r)} />}
           {(r.state === 'draft' || r.state === 'pending') && <SmallButton label="Düzenle" onPress={() => openEdit(r)} />}
           {(r.state === 'draft' || r.state === 'pending') && <SmallButton label={r.state === 'draft' ? 'Sil' : 'Geri çek'} danger onPress={() => withdrawGroup(r)} />}
-        </View>
+        </View>}
       </DragView>
     );
   };
@@ -594,7 +646,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
         {!linkOK && <Text style={styles.tiny}>Programı hedefe bağlamak için veritabanı güncellemesi bekleniyor; programlar aşağıda "Bir hedefe bağlı olmayanlar"da.</Text>}
         {mods.map((m) => moduleMini(m, g.id))}
         {!mods.length && linkOK && <Text style={styles.empty}>Bu hedefe bağlı program yok.</Text>}
-        {linkOK && want.length > 0 && (
+        {!ro && linkOK && want.length > 0 && (
           <View style={styles.sugg}>
             <Text style={styles.suggLead}>Öneriler</Text>
             {want.map((k) => (
@@ -604,7 +656,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
             ))}
           </View>
         )}
-        {linkOK && loose.length > 0 && (
+        {!ro && linkOK && loose.length > 0 && (
           <View style={styles.sugg}>
             <Text style={styles.suggLead}>Bağlı değil</Text>
             {loose.map((m) => (
@@ -614,16 +666,19 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
             ))}
           </View>
         )}
-        <Pressable onPress={() => setModuleSheet({ goalId: g.id })} style={styles.add} accessibilityRole="button">
-          <Text style={styles.addText}>+ Program ekle</Text>
-        </Pressable>
+        {!ro && (
+          <Pressable onPress={() => setModuleSheet({ goalId: g.id })} style={styles.add} accessibilityRole="button">
+            <Text style={styles.addText}>+ Program ekle</Text>
+          </Pressable>
+        )}
       </View>
     );
   };
 
   const routineColumn = (g: PlanGoal) => {
     const rts = rtsOf(g.id);
-    const themes = DOMAIN_THEMES[g.domain] ?? [];
+    const themes = DOMAIN_THEMES[g.domain] ?? (ro ? ['afterschool'] : []);
+    const coachHere = ro && g.id === goals.find((x) => x.id.startsWith('local-'))?.id;
     const offer = themes.map((th) => ROUTINES.find((r) => r.theme === th && fitsAge(r, band))).filter((r): r is Routine => !!r)
       .filter((r) => !rts.some((x) => x.routine?.key === r.key));
     const loose = unlinkedRts.slice(0, 4);
@@ -634,14 +689,17 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
         {offer.length > 0 && (
           <View style={styles.sugg}>
             <Text style={styles.suggLead}>{band ? `Öneriler · ${AGE_LABEL[band]} yaş` : 'Öneriler'}</Text>
-            {offer.map((r) => (
-              <Pressable key={r.key} onPress={() => setRtSheet({ routine: r, goalId: g.id })} style={styles.chip} accessibilityRole="button">
-                <Text style={styles.chipText}>+ {r.title}</Text>
-              </Pressable>
-            ))}
+            {offer.map((r, i) => {
+              const chip = (
+                <Pressable key={r.key} onPress={() => setRtSheet({ routine: r, goalId: g.id })} style={styles.chip} accessibilityRole="button">
+                  <Text style={styles.chipText}>+ {r.title}</Text>
+                </Pressable>
+              );
+              return coachHere && i === 0 ? <CoachTarget key={r.key} id="plan.newRoutine" label={`+ ${r.title}`}>{chip}</CoachTarget> : chip;
+            })}
           </View>
         )}
-        {loose.length > 0 && (
+        {!ro && loose.length > 0 && (
           <View style={styles.sugg}>
             <Text style={styles.suggLead}>Bağlı değil</Text>
             {loose.map((r) => (
@@ -651,9 +709,11 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
             ))}
           </View>
         )}
-        <Pressable onPress={() => setPick(g.id)} style={styles.add} accessibilityRole="button">
-          <Text style={styles.addText}>+ Rutin ya da görev bağla</Text>
-        </Pressable>
+        {!ro && (
+          <Pressable onPress={() => setPick(g.id)} style={styles.add} accessibilityRole="button">
+            <Text style={styles.addText}>+ Rutin ya da görev bağla</Text>
+          </Pressable>
+        )}
       </View>
     );
   };
@@ -705,7 +765,7 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
     const tab = tabOf[g.id] ?? 'rt';
     const hatButtons = (
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-        <IconButton name="ellipsis-horizontal" label="Diğer işlemler" size={18} onPress={() => hatMenu(g)} />
+        {!ro && <IconButton name="ellipsis-horizontal" label="Diğer işlemler" size={18} onPress={() => hatMenu(g)} />}
         <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color={colors.muted} />
       </View>
     );
@@ -794,22 +854,32 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
     <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
       <View style={styles.toolbar}>
         <IconButton name={help ? 'information-circle' : 'information-circle-outline'} label="Takip Planı nasıl çalışır?" size={20} onPress={() => setHelp((v) => !v)} />
-        <SmallButton label={desktop && width >= 980 ? (libOpen ? 'Kitaplığı gizle' : 'Kitaplık') : 'Kitaplık'} onPress={() => setLibOpen((v) => !v)} />
+        {!ro && <SmallButton label={desktop && width >= 980 ? (libOpen ? 'Kitaplığı gizle' : 'Kitaplık') : 'Kitaplık'} onPress={() => setLibOpen((v) => !v)} />}
         {goals.length > 1 && (
           <SmallButton label={(openIds ?? []).length >= goals.length ? 'Hepsini kapat' : 'Hepsini aç'}
             onPress={() => setOpenIds((openIds ?? []).length >= goals.length ? [] : goals.map((g) => g.id))} />
         )}
-        <SmallButton label="+ Hedef" onPress={() => setGoalSheet({})} />
+        <CoachTarget id="plan.addGoal"><SmallButton label="+ Hedef" onPress={() => setGoalSheet({})} /></CoachTarget>
         <View style={{ flex: 1 }} />
-        <Pressable onPress={openPublish} disabled={busy} style={[styles.send, !unsent && styles.sendQuiet, busy && { opacity: 0.6 }]} accessibilityRole="button">
-          {busy ? <ActivityIndicator color={unsent ? '#fff' : colors.navy} /> : (
-            <>
-              <Ionicons name="paper-plane-outline" size={16} color={unsent ? '#fff' : colors.navy} />
-              <Text style={[styles.sendText, !unsent && { color: colors.navy }]}>Aileye gönder{unsent ? ` (${unsent})` : ''}</Text>
-            </>
-          )}
-        </Pressable>
+        <CoachTarget id="plan.publish">
+          <Pressable onPress={openPublish} disabled={busy} style={[styles.send, !unsent && styles.sendQuiet, busy && { opacity: 0.6 }]} accessibilityRole="button">
+            {busy ? <ActivityIndicator color={unsent ? '#fff' : colors.navy} /> : (
+              <>
+                <Ionicons name="paper-plane-outline" size={16} color={unsent ? '#fff' : colors.navy} />
+                <Text style={[styles.sendText, !unsent && { color: colors.navy }]}>Aileye gönder{unsent ? ` (${unsent})` : ''}</Text>
+              </>
+            )}
+          </Pressable>
+        </CoachTarget>
       </View>
+      {ro && (
+        <View style={styles.sampleBox}>
+          <Ionicons name="eye-outline" size={14} color={PRIVATE.fg} />
+          <Text style={[styles.small, { color: PRIVATE.text, flex: 1 }]}>
+            Örnek aile: hedef ekle, rutin bağla, gönder, değerlendir. Kaydedilmez, aileye gitmez.
+          </Text>
+        </View>
+      )}
       {help && (
         <View style={styles.infoBox}>
           {[
@@ -817,16 +887,21 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
             'Eklediklerin taslaktır; aile, sen "Aileye gönder" deyince tek bildirimle görür.',
             'Takip Planı gözlem toplar, tanı koymaz.',
           ].map((t) => <Text key={t} style={styles.infoLine}>• {t}</Text>)}
+          <Text style={[styles.infoLine, { fontWeight: '700', color: colors.navy, marginTop: 6 }]}>Aile neyi görür?</Text>
+          <FamilySees compact />
         </View>
       )}
       {attention.length > 0 && (
         <View style={styles.attention}>
-          {attention.slice(0, 4).map((a, i) => (
-            <Pressable key={i} onPress={a.onPress} disabled={!a.onPress} style={[styles.att, a.tone === 'warn' && styles.attWarn]} accessibilityRole={a.onPress ? 'button' : undefined}>
-              <Ionicons name={a.icon} size={14} color={a.tone === 'warn' ? colors.medium.fg : colors.navy} />
-              <Text style={[styles.attText, a.tone === 'warn' && { color: colors.medium.fg }]}>{a.text}</Text>
-            </Pressable>
-          ))}
+          {attention.slice(0, 4).map((a, i) => {
+            const chip = (
+              <Pressable key={i} onPress={a.onPress} disabled={!a.onPress} style={[styles.att, a.tone === 'warn' && styles.attWarn]} accessibilityRole={a.onPress ? 'button' : undefined}>
+                <Ionicons name={a.icon} size={14} color={a.tone === 'warn' ? colors.medium.fg : colors.navy} />
+                <Text style={[styles.attText, a.tone === 'warn' && { color: colors.medium.fg }]}>{a.text}</Text>
+              </Pressable>
+            );
+            return a.coach ? <CoachTarget key={i} id={a.coach}>{chip}</CoachTarget> : chip;
+          })}
         </View>
       )}
 
@@ -858,13 +933,13 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
                 {unlinkedMods.map((m) => (
                   <View key={m.id} style={styles.looseItem}>
                     {moduleMini(m, null)}
-                    {linkOK && goals.length > 0 && <SmallButton label="Hedefe bağla" onPress={() => pickGoal(m.title, (gid) => act(linkModuleGoals(client.clinic_id, [[m.id, gid]]), 'Bağlanamadı'))} />}
+                    {!ro && linkOK && goals.length > 0 && <SmallButton label="Hedefe bağla" onPress={() => pickGoal(m.title, (gid) => act(linkModuleGoals(client.clinic_id, [[m.id, gid]]), 'Bağlanamadı'))} />}
                   </View>
                 ))}
                 {unlinkedRts.map((r) => (
                   <View key={r.key} style={styles.looseItem}>
                     {routineMini(r)}
-                    {goals.length > 0 && <SmallButton label="Hedefe bağla" onPress={() => pickGoal(r.title, (gid) => { setRoutineGoal(r, gid).catch(fail('Bağlanamadı')); })} />}
+                    {!ro && goals.length > 0 && <SmallButton label="Hedefe bağla" onPress={() => pickGoal(r.title, (gid) => { setRoutineGoal(r, gid).catch(fail('Bağlanamadı')); })} />}
                   </View>
                 ))}
               </View>
@@ -903,8 +978,22 @@ export default function PlanHats({ client, me, data, today, reload }: Pick<Clien
       </Modal>
 
       {goalSheet && (
-        <GoalSheet editing={goalSheet.editing} legacy={false} onClose={() => setGoalSheet(null)}
+        <GoalSheet editing={goalSheet.editing} legacy={false} onClose={() => setGoalSheet(null)} exclude={goals.map((g) => g.title)}
           onSave={async (input) => {
+            if (ro) {
+              // örnek: yeni hedef yerelde, en üstte ve açık
+              const g: PlanGoal = {
+                id: localId(), title: input.title, description: input.description, archived: false, created_at: new Date().toISOString(),
+                domain: input.domain, measure: input.measure, baseline: input.baseline, target: input.target, weeks: input.weeks,
+                home_support: input.home_support, shared: input.shared, status: input.status, position: -1, template_key: input.template_key ?? null, ratings: [],
+              };
+              setPlan((p) => p && ({ ...p, goals: [g, ...p.goals] }));
+              setGoalSheet(null);
+              openHat(g.id);
+              setTabOf((x) => ({ ...x, [g.id]: 'rt' }));
+              emit('goal_added');
+              return;
+            }
             if (goalSheet.editing) await updateGoal(goalSheet.editing.id, input);
             else {
               const [gid] = await addGoals(target, [{ ...input, position: plan.goals.length }]);
@@ -1247,6 +1336,7 @@ const styles = StyleSheet.create({
   add: { backgroundColor: '#EEF0F4', borderRadius: radius.sm, paddingVertical: 8, alignItems: 'center' },
   addText: { fontSize: 12, fontWeight: '600', color: colors.navy },
   infoBox: { backgroundColor: '#F3F5FA', borderRadius: radius.sm, padding: 10, gap: 4, marginTop: 4 },
+  sampleBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: PRIVATE.bg, borderWidth: 1, borderColor: PRIVATE.line, borderRadius: radius.sm, padding: 10, marginTop: 4 },
   colLabel: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase', color: '#6B7387' },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   chipSt: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 4, borderRadius: radius.pill, paddingLeft: 7, paddingRight: 6, paddingVertical: 3 },

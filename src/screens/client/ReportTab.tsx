@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { markReportSeen } from '../SampleTour';
+import { CoachTarget, useCoachEmit } from '../../lib/coach';
 import { View, Text, Alert, Platform, StyleSheet } from 'react-native';
 import * as Print from 'expo-print';
 import * as Clipboard from 'expo-clipboard';
@@ -19,7 +21,8 @@ function initials(name: string) {
 
 // Web'de rapor sayfanın üstünde bir pencerede açılır; "Yazdır / PDF" tarayıcının yazdırma penceresini getirir
 // ("PDF olarak kaydet" oradan). iPad'de sistem yazdırma/paylaşma (expo-print).
-function showWebReport(html: string) {
+// Kapat'a basılınca biter (yaptırarak öğreten tur son kartı rapor kapanınca gösterir)
+function showWebReport(html: string): Promise<void> {
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(15,27,61,.45);display:flex;flex-direction:column;padding:16px;gap:10px';
   const bar = document.createElement('div');
@@ -40,7 +43,7 @@ function showWebReport(html: string) {
   frame.srcdoc = html;
   overlay.append(bar, frame);
   document.body.appendChild(overlay);
-  close.onclick = () => overlay.remove();
+  const closed = new Promise<void>((done) => { close.onclick = () => { overlay.remove(); done(); }; });
   print.onclick = () => {
     try {
       frame.contentWindow?.focus();
@@ -49,6 +52,7 @@ function showWebReport(html: string) {
       Alert.alert('Yazdırılamadı', 'Bu sayfada yazdırma kapalı. Raporu tarayıcıda ClinicApp\'in kendi adresinden aç.');
     }
   };
+  return closed;
 }
 
 async function printHtml(html: string) {
@@ -64,6 +68,7 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
 
   useEffect(() => {
     // örnek ailede hedefler hazır veriden (sunucuya gidilmez)
+    if (!data.sample) markReportSeen(me.id);
     if (data.sample) { setGoals((data.samplePlan?.goals ?? []).map(({ id, title, description, archived, created_at, ratings }) => ({ id, title, description, archived, created_at, ratings }))); return; }
     listGoals(client.link_id).then(setGoals).catch(() => setGoals([]));
   }, [client.link_id, data]);
@@ -77,10 +82,12 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
   const copyNote = async () => {
     await Clipboard.setStringAsync(note);
     track('report.note_copy');
+    emit('report_action');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const emit = useCoachEmit();
   const open = async () => {
     setBusy(true);
     try {
@@ -96,6 +103,7 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
         today,
         weeks,
       }));
+      emit('report_action');
     } catch (e) {
       Alert.alert('Rapor açılamadı', (e as Error).message);
     } finally {
@@ -116,7 +124,7 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
           value={mode} onChange={setMode}
         />
         <Text style={styles.small}>Görünecek: {childLabel || '—'}</Text>
-        <Cta label={Platform.OS === 'web' ? 'Raporu aç' : 'Raporu yazdır / paylaş'} onPress={open} busy={busy} />
+        <CoachTarget id="report.open"><Cta label={Platform.OS === 'web' ? 'Raporu aç' : 'Raporu yazdır / paylaş'} onPress={open} busy={busy} /></CoachTarget>
         <Text style={styles.small}>
           Rapor kişisel sağlık verisi içerir. Yalnız tedavi amacıyla, güvenli kanaldan ve ebeveynin bilgisiyle paylaş.
         </Text>
