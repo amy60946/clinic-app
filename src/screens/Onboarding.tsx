@@ -10,6 +10,8 @@ import { track } from '../lib/track';
 // https://claude.ai/artifact/NfSc3FCuCntqgqRWruwnbX v2; 26 Ekim: davet bağlantısı ve Plan sekmesine göre güncellendi): uygulamanın kendi ekranı tam boy ve %60 lacivertle
 // karartılmış, dokunulacak yer altın halka + ① ② numarası, iki dokunuş arasında altın kesikli çizgi;
 // yazı yalnız başlık + tek kısa satır. Yeni hesapta bir kez açılır, ana ekrandaki "Nasıl kullanılır" ile yeniden.
+// 3 Kasım 2026 (ilk kullanım "T1"): ekranlar güncellendi — ana ekran bölümleri (dikkat panosu), Takip Planı'nda
+// "önce taslak, sonra Aileye gönder" kuralı, gruplu menü (Planla · İzle · Kayıt). 4 ekran kalır (3–4 adımlı turlar en çok bitiriliyor).
 
 const KEY = (userId: string) => `clinic.onboarding.v1.${userId}`;
 export const onboardingSeen = async (userId: string) => {
@@ -31,12 +33,12 @@ const FAINT = dim('#E9ECF1');
 const INK = colors.navy;
 const SOFT = dim('#A0A6B6');
 
-type Step = { title: string; line: string; screen: 'invite' | 'client' | 'plan' | 'report' };
+type Step = { title: string; line: string; screen: 'invite' | 'board' | 'plan' | 'watch' };
 const STEPS: Step[] = [
-  { title: 'Aileyi davet et', line: 'Davet senin adınla e-postayla gider', screen: 'invite' },
-  { title: 'Danışanını aç', line: 'Aile paylaşınca burada belirir', screen: 'client' },
-  { title: 'Takip Planını kur', line: 'Hazır paketle başla, sonra düzenle', screen: 'plan' },
-  { title: 'Raporunu al', line: 'PDF kaydet ya da yazdır', screen: 'report' },
+  { title: 'Aileyi davet et', line: 'Ebeveynin e-postasını yaz; davet senin adınla gider', screen: 'invite' },
+  { title: 'Kimde ne var, ana ekranda', line: 'Senin sıran · Aileden yeni · Sessiz kalanlar. Puan değil, olgu.', screen: 'board' },
+  { title: 'Planı kur, sonra gönder', line: 'Eklediğin her şey önce taslaktır (bej); aile "Aileye gönder" deyince görür', screen: 'plan' },
+  { title: 'İzle ve raporla', line: 'Ev rutinleri ve davranış kayıtları; dönem sonunda rapor', screen: 'watch' },
 ];
 
 export default function Onboarding({ visible, onClose }: { visible: boolean; onClose: (completed: boolean) => void }) {
@@ -71,9 +73,9 @@ export default function Onboarding({ visible, onClose }: { visible: boolean; onC
             <SafeAreaView key={s.screen} style={{ width, flex: 1 }} edges={['top']}>
               <View style={[styles.column, wide && { maxWidth: 960, paddingHorizontal: 32 }]}>
                 {s.screen === 'invite' && <InviteMock />}
-                {s.screen === 'client' && <ClientListMock />}
-                {s.screen === 'plan' && <ClientMock tab="Plan" wide={wide} />}
-                {s.screen === 'report' && <ClientMock tab="Rapor" wide={wide} />}
+                {s.screen === 'board' && <BoardMock />}
+                {s.screen === 'plan' && <PlanMock wide={wide} />}
+                {s.screen === 'watch' && <MenuMock />}
               </View>
             </SafeAreaView>
           ))}
@@ -147,14 +149,16 @@ function InviteMock() {
     <View style={{ gap: 8 }}>
       <Header title="Mavi Çocuk ve Aile Merkezi" sub="Dr. Elif Kaya · Klinik Psikolog" />
       <View style={[styles.block, { height: 56, backgroundColor: dim('#E6EAF5') }]} />
-      <Label>Danışanlar (0)</Label>
-      <Block h={60} />
+      <Label>Başlarken</Label>
+      <Block h={92} />
       <Label>Aileyi davet et</Label>
       <View style={[styles.block, { padding: 16, gap: 10 }]}>
-        <View style={{ height: 34, borderRadius: 8, backgroundColor: FAINT }} />
-        <View style={{ height: 40, borderRadius: 12, backgroundColor: BG }} />
+        <View style={{ height: 40, borderRadius: 12, backgroundColor: BG, justifyContent: 'center', paddingHorizontal: 12 }}>
+          <Text style={{ fontSize: 13, color: SOFT }}>ebeveyn@ornek.com</Text>
+        </View>
         <View style={styles.target}>
-          <Text style={styles.ctaText}>Aileyi davet et</Text>
+          <Ionicons name="mail-outline" size={18} color="#fff" />
+          <Text style={styles.ctaText}>E-posta gönder</Text>
           <Badge n={1} />
         </View>
       </View>
@@ -162,83 +166,100 @@ function InviteMock() {
   );
 }
 
-function ClientListMock() {
+// Ana ekran: danışanlar bölümlere ayrılır (dikkat panosu); neden çipleri olgu, hepsi aynı nötr renk
+function BoardMock() {
+  const row = (name: string, chip: string, lit = false) => (
+    <View style={[styles.row, !lit && { backgroundColor: CARD }]}>
+      <View style={[styles.avatar, !lit && { backgroundColor: FAINT }]}><Text style={{ fontSize: 16, fontWeight: '800', color: lit ? '#2C4A9A' : INK }}>{name[0]}</Text></View>
+      <Text style={{ flex: 1, fontSize: 15, fontWeight: '800', color: INK }}>{name}</Text>
+      <View style={[styles.chip, !lit && { backgroundColor: FAINT }]}><Text style={[styles.chipText, !lit && { color: INK }]}>{chip}</Text></View>
+    </View>
+  );
   return (
     <View style={{ gap: 8 }}>
       <Header title="Mavi Çocuk ve Aile Merkezi" sub="Dr. Elif Kaya · Klinik Psikolog" />
-      <View style={[styles.block, { height: 56, backgroundColor: dim('#E6EAF5') }]} />
-      <Label>Danışanlar (1)</Label>
-      <View style={[styles.row, styles.ring]}>
-        <View style={styles.avatar}><Text style={{ fontSize: 17, fontWeight: '800', color: '#2C4A9A' }}>N</Text></View>
-        <View style={{ flex: 1, gap: 3 }}>
-          <Text style={{ fontSize: 16, fontWeight: '800', color: colors.navy }}>Nazlı</Text>
-          <Text style={{ fontSize: 12, color: '#5B6274' }}>Ayşe · ebeveyn onayı</Text>
+      <View>
+        <View style={[styles.lit, { gap: 8 }]}>
+          <Text style={styles.sec}>Senin sıran</Text>
+          {row('Nazlı', '2 değişiklik gönderilmedi', true)}
+          <Text style={styles.sec}>Aileden yeni</Text>
+          {row('Arda', '2 davranış kaydı', true)}
+          <Text style={styles.sec}>Sessiz kalanlar</Text>
+          {row('Ece', '9 gündür kayıt yok', true)}
         </View>
-        <Ionicons name="chevron-forward" size={18} color="#6B7286" />
         <Badge n={1} />
       </View>
-      <Label>Aileyi davet et</Label>
-      <Block h={150} />
+      <Label>Diğer danışanlar</Label>
+      {row('Mert', 'bekleyen bir şey yok')}
     </View>
   );
 }
 
-const TABS = ['Plan', 'Özet', 'Rutinler', 'Davranış', 'Notlar', 'Rapor', 'Bilgiler'];
-
-function ClientMock({ tab, wide }: { tab: 'Plan' | 'Rapor'; wide: boolean }) {
-  const cols = wide ? 7 : 4;
-  const at = TABS.indexOf(tab);
-  const col = at % cols;
-  const rows = [TABS.slice(0, cols), TABS.slice(cols)].filter((r) => r.length);
+// Takip Planı: hedef satırı; taslak bej (aile görmez) ① → "Aileye gönder (2)" ②
+function PlanMock({ wide }: { wide: boolean }) {
   return (
     <View style={{ gap: 8 }}>
-      <Header title="Nazlı · Sabah rutini" sub="8 yaş · Sorumlu: sen" back />
-      <View>
-        <View style={[styles.tabs, { backgroundColor: FAINT }]}>
-          {rows.map((r, ri) => (
-            <View key={ri} style={{ flexDirection: 'row', gap: 4 }}>
-              {Array.from({ length: cols }).map((_, ci) => {
-                const t = r[ci];
-                const on = t === tab;
-                return (
-                  <View key={ci} style={[styles.tab, on && styles.tabOn]}>
-                    {!!t && <Text style={[styles.tabText, on && { color: colors.navy, fontWeight: '800' }]}>{t}</Text>}
-                    {on && <Badge n={1} />}
-                  </View>
-                );
-              })}
-            </View>
-          ))}
+      <Header title="Nazlı · Takip Planı" sub="8 yaş · Sorumlu: sen" back />
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, alignItems: 'center' }}>
+        <View style={[styles.pillDim]}><Text style={{ fontSize: 12, fontWeight: '700', color: INK }}>Kitaplık</Text></View>
+        <View style={[styles.pillDim]}><Text style={{ fontSize: 12, fontWeight: '700', color: INK }}>+ Hedef</Text></View>
+        <View>
+          <View style={[styles.target, { height: 44, paddingHorizontal: 16 }]}>
+            <Ionicons name="paper-plane-outline" size={16} color="#fff" />
+            <Text style={styles.ctaText}>Aileye gönder (2)</Text>
+          </View>
+          <Badge n={2} side="right" />
         </View>
-        {/* ① → ② kesikli yol */}
-        <View style={[styles.path, { left: `${((col + 0.5) / cols) * 100}%` }]} />
       </View>
-      {tab === 'Plan' ? (
-        <>
-          <View style={[styles.target, { marginTop: 18 }]}>
-            <Ionicons name="albums-outline" size={20} color="#fff" />
-            <Text style={styles.ctaText}>Hazır paketle başla</Text>
-            <Badge n={2} side="right" />
-          </View>
-          <Block h={92} />
-          <Block h={92} />
-        </>
-      ) : (
-        <View style={[styles.block, { padding: 16, gap: 12, marginTop: 18 }]}>
-          <Text style={{ fontSize: 15, fontWeight: '700', color: INK }}>Ev rutini gözlem raporu</Text>
-          <View style={{ flexDirection: 'row', gap: 6 }}>
-            {['Baş harf', 'Tam ad', 'Etiket'].map((x) => (
-              <View key={x} style={{ borderRadius: 8, paddingVertical: 5, paddingHorizontal: 9, backgroundColor: FAINT }}>
-                <Text style={{ fontSize: 12, fontWeight: '600', color: INK }}>{x}</Text>
-              </View>
-            ))}
-          </View>
-          <View style={styles.target}>
-            <Text style={styles.ctaText}>Raporu aç</Text>
-            <Badge n={2} side="right" />
+      <View style={[styles.block, { padding: 14, gap: 6 }]}>
+        <Text style={{ fontSize: 15, fontWeight: '800', color: INK }}>Sabah hazırlığını kendi başına yapar</Text>
+        <Text style={{ fontSize: 12, color: SOFT }}>Günlük yaşam · 3. hafta / 8</Text>
+        <View style={{ flexDirection: wide ? 'row' : 'column', gap: 8, marginTop: 4 }}>
+          <View style={[styles.block, { flex: 1, height: 56, backgroundColor: FAINT }]} />
+          <View style={[styles.block, { flex: 1, height: 56, backgroundColor: FAINT }]} />
+          <View style={{ flex: 1 }}>
+            <View style={styles.draft}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: '#7A5A1E' }}>Taslak · Akşam hazırlığı</Text>
+              <Text style={{ fontSize: 12, color: '#7A5A1E' }}>aile görmez</Text>
+            </View>
+            <Badge n={1} />
           </View>
         </View>
-      )}
+      </View>
+      <Block h={64} />
+    </View>
+  );
+}
+
+// Danışan menüsü: Planla · İzle · Kayıt; İzle ① ve Rapor ②
+function MenuMock() {
+  const group = (head: string, items: string[], lit?: string[]) => (
+    <View style={[styles.block, { padding: 12, gap: 6 }, lit && { backgroundColor: '#fff' }, lit && styles.ring]}>
+      <Text style={[styles.sec, { marginTop: 0 }, lit && { color: '#6B7286' }]}>{head}</Text>
+      {items.map((x) => (
+        <Text key={x} style={{ fontSize: 15, fontWeight: lit?.includes(x) ? '800' : '600', color: INK }}>{x}</Text>
+      ))}
+    </View>
+  );
+  return (
+    <View style={{ gap: 8 }}>
+      <Header title="Nazlı" sub="8 yaş · Sorumlu: sen" back />
+      {group('Planla', ['Takip Planı'])}
+      <View>
+        {group('İzle', ['Özet', 'Ev Rutinleri', 'Davranış Kayıtları'], ['Ev Rutinleri', 'Davranış Kayıtları'])}
+        <Badge n={1} />
+      </View>
+      <View>
+        <View style={[styles.block, { padding: 12, gap: 6 }]}>
+          <Text style={[styles.sec, { marginTop: 0 }]}>Kayıt</Text>
+          <Text style={{ fontSize: 15, fontWeight: '600', color: INK }}>Notlar</Text>
+          <View style={[styles.ring, { backgroundColor: '#fff', borderRadius: 10, paddingVertical: 6, paddingHorizontal: 8, alignSelf: 'flex-start' }]}>
+            <Text style={{ fontSize: 15, fontWeight: '800', color: colors.navy }}>Rapor · PDF ve ilerleme notu</Text>
+          </View>
+          <Text style={{ fontSize: 15, fontWeight: '600', color: INK }}>Danışan Bilgileri</Text>
+        </View>
+        <Badge n={2} side="right" />
+      </View>
     </View>
   );
 }
@@ -256,11 +277,12 @@ const styles = StyleSheet.create({
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#E6EAF5', alignItems: 'center', justifyContent: 'center' },
   target: { ...ring, height: 52, borderRadius: 14, backgroundColor: colors.navy, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   ctaText: { color: '#fff', fontSize: 15, fontWeight: '700' },
-  tabs: { borderRadius: 14, padding: 4, gap: 4 },
-  tab: { flex: 1, height: 38, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  tabOn: { ...ring, borderWidth: 3, backgroundColor: '#fff' },
-  tabText: { fontSize: 13, fontWeight: '600', color: INK },
-  path: { position: 'absolute', top: '100%', width: 0, height: 22, marginLeft: -1.5, borderLeftWidth: 3, borderColor: colors.gold, borderStyle: 'dashed' },
+  lit: { ...ring, borderRadius: 18, backgroundColor: colors.bg, padding: 10 },
+  sec: { fontSize: 11, fontWeight: '800', letterSpacing: 0.6, textTransform: 'uppercase', color: '#6B7286', marginTop: 2 },
+  chip: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 4, backgroundColor: '#E6EAF5' },
+  chipText: { fontSize: 12, fontWeight: '700', color: '#2C4A9A' },
+  pillDim: { height: 36, borderRadius: 10, paddingHorizontal: 12, backgroundColor: CARD, alignItems: 'center', justifyContent: 'center' },
+  draft: { ...ring, borderRadius: 12, backgroundColor: '#F7F1E6', padding: 10, gap: 2, minHeight: 56, justifyContent: 'center' },
   badge: { position: 'absolute', top: -14, width: 26, height: 26, borderRadius: 13, backgroundColor: colors.gold, alignItems: 'center', justifyContent: 'center' },
   badgeText: { fontSize: 13, fontWeight: '800', color: colors.navy },
   cardWrap: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingBottom: 20, alignItems: 'center' },

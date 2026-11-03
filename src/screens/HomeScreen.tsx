@@ -11,7 +11,8 @@ import {
   clinicianMe, listClients, listTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Member,
 } from '../lib/clinic';
 import SettingsScreen from './SettingsScreen';
-import { StartCard, SampleRow, TourBar, TOUR, StartFlags, startFlags, markSampleSeen, hideStart, hideSample } from './SampleTour';
+import { StartCard, SampleRow, TourBar, TOUR, StartFlags, StartProgress, startFlags, startDone, markSampleSeen, hideStart, hideSample } from './SampleTour';
+import type { Attention } from '../lib/attention';
 import { sampleClient } from '../lib/sample';
 import { isoDate } from '../lib/metrics';
 import MembershipScreen from './MembershipScreen';
@@ -20,6 +21,7 @@ import InvitesCard from './invite/InvitesCard';
 import VerificationSheet from './VerificationSheet';
 import { VerificationState, loadVerification } from '../lib/verification';
 import Onboarding, { onboardingSeen, markOnboardingSeen } from './Onboarding';
+import HelpSheet, { HelpAction } from './HelpSheet';
 import WelcomeSurvey, { SurveyAction } from './WelcomeSurvey';
 import { surveyAnswered } from '../lib/survey';
 import { LegalDoc, legalPending } from '../lib/legal';
@@ -75,9 +77,11 @@ export default function HomeScreen() {
   const stateRef = useRef(state);
   const [refreshing, setRefreshing] = useState(false);
   const [selected, setSelected] = useState<{ client: Client; tab: Tab; key: number } | null>(null);
+  const [attention, setAttention] = useState<Record<string, Attention> | null>(null);
   const [bell, setBell] = useState(false);
   const [plans, setPlans] = useState(false);
   const [guide, setGuide] = useState(false);
+  const [help, setHelp] = useState(false);          // "Nasıl kullanılır?" (kısa tanıtım + kısa yanıtlar)
   const [invitesKey, setInvitesKey] = useState(0);
   const [verify, setVerify] = useState(false);
   const [verification, setVerification] = useState<VerificationState | null>(null);
@@ -88,6 +92,7 @@ export default function HomeScreen() {
   // Ayarlar (sağ üstteki ad), örnek aile + tur, "Başlarken" kartı
   const [settings, setSettings] = useState(false);
   const [sampleOpen, setSampleOpen] = useState(false);
+  const [sampleTab, setSampleTab] = useState<Tab>('summary');     // "Göster" örnek ailede bir bölümü açar (tur olmadan)
   const [tourStep, setTourStep] = useState<number | null>(null);
   const [start, setStart] = useState<StartFlags | null>(null);
   const [inviteCount, setInviteCount] = useState(0);
@@ -143,15 +148,45 @@ export default function HomeScreen() {
     surveyAnswered().then((a) => setSurvey(a === false ? 'show' : 'hidden'));
     startFlags(meId).then(setStart);
   }, [meId]);
+  // danışandan dönünce Başlarken yeniden okunur (rapor açıldı mı)
+  useEffect(() => { if (meId && !selected) startFlags(meId).then(setStart); }, [selected]); // eslint-disable-line react-hooks/exhaustive-deps
   const sample = useMemo(() => (sampleOpen ? sampleClient(isoDate(new Date())) : null), [sampleOpen]);
-  const openSample = () => {
+  const openSample = (tab?: Tab) => {
     setSettings(false);
     setSampleOpen(true);
-    setTourStep(0);
+    setSampleTab(tab ?? 'summary');
+    setTourStep(tab ? null : 0);
     track('sample.open');
     if (meId) markSampleSeen(meId);
     setStart((s) => (s ? { ...s, sampleSeen: true } : s));
   };
+  // Başlarken: gerçek duruma göre beş adım; "İlk hedefi ekle / Aileye gönder / İlk raporu aç" uygun ilk danışanı açar
+  const clientList = state.kind === 'ready' ? state.clients : [];
+  const attRows = Object.values(attention ?? {});
+  const progressOf = (f: StartFlags): StartProgress => ({
+    sampleSeen: f.sampleSeen, invited: inviteCount > 0 || clientList.length > 0, hasClient: clientList.length > 0,
+    planned: attRows.some((a) => a.goals_active > 0 || !!a.plan_published_at), published: attRows.some((a) => !!a.plan_published_at), report: f.report,
+  });
+  const openFirst = (step: 'plan' | 'publish' | 'report') => {
+    const att = (c: Client) => attention?.[c.link_id];
+    const pick = step === 'plan' ? clientList.find((c) => !att(c)?.goals_active)
+      : step === 'publish' ? clientList.find((c) => (att(c)?.plan_unsent ?? 0) + (att(c)?.drafts ?? 0) > 0) : undefined;
+    const c = pick ?? clientList[0];
+    if (!c) return;
+    track('start.step', { step });
+    setSelected({ client: c, tab: step === 'report' ? 'report' : 'goals', key: Date.now() });
+  };
+  // "Nasıl kullanılır?" › Göster: gerçek danışan varsa ilkinde, yoksa örnek ailede açar (iOS'ta pencere kapanınca)
+  const afterSheet = (f: () => void) => { setHelp(false); if (Platform.OS === 'ios') setTimeout(f, 450); else f(); };
+  const onHelpAction = (a: HelpAction) => afterSheet(() => {
+    if (a === 'home') return;
+    if (a === 'invite') return inviteFirst();
+    if (a === 'team') return setSettings(true);
+    const tab: Tab = a === 'routine' ? 'routine' : a === 'plan' ? 'goals' : 'report';
+    const c = clientList[0];
+    if (c) setSelected({ client: c, tab, key: Date.now() });
+    else openSample(tab);
+  });
   const inviteFirst = () => {
     setSampleOpen(false);
     setTourStep(null);
@@ -302,7 +337,7 @@ export default function HomeScreen() {
   if (sample && state.kind === 'ready') {
     return (
       <ClientScreen
-        client={sample.client} me={state.me} sample={sample.data}
+        client={sample.client} me={state.me} sample={sample.data} initialTab={sampleTab}
         focusTab={tourStep !== null ? TOUR[tourStep].tab : undefined}
         onBack={() => { setSampleOpen(false); setTourStep(null); }}
         onRevoked={() => setSampleOpen(false)}
@@ -324,9 +359,9 @@ export default function HomeScreen() {
           verified={!!verification?.verified_at} legalOn={Array.isArray(legal)}
           onBack={() => setSettings(false)} onChanged={load} onPlans={() => setPlans(true)}
           onOpenClient={(c) => { setSettings(false); setSelected({ client: c, tab: 'summary', key: Date.now() }); }}
-          onSample={openSample}
+          onSample={() => openSample()}
           onLegal={() => setLegalOpen('docs')}
-          onGuide={() => { setSettings(false); setGuide(true); }}
+          onGuide={() => { setSettings(false); setHelp(true); }}
           onLogout={logout} onDelete={removeAccount}
         />
         {legalSheets}
@@ -405,16 +440,16 @@ export default function HomeScreen() {
             <>
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
               {!!verification?.enabled && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
-              {start && !start.hidden && !(start.sampleSeen && (inviteCount > 0 || state.clients.length > 0)) && (
-                <StartCard sampleSeen={start.sampleSeen} invited={inviteCount > 0 || state.clients.length > 0}
-                  onSample={openSample} onInvite={inviteFirst}
-                  onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide'); }} />
+              {start && !start.hidden && startDone(progressOf(start)) < 5 && (
+                <StartCard progress={progressOf(start)} onSample={() => openSample()} onInvite={inviteFirst}
+                  onPlan={() => openFirst('plan')} onPublish={() => openFirst('publish')} onReport={() => openFirst('report')}
+                  onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide', { done: startDone(progressOf(start)) }); }} />
               )}
-              <ClientBoard clients={state.clients} unread={unreadByChild} me={state.me} team={state.team}
+              <ClientBoard clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onAttention={setAttention}
                 onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
               {/* örnek aile listenin altında kendi satırında: ilk açılıştan sonra 30 gün ya da × ile kaldırılana dek */}
               {(state.clients.length === 0 || !!start?.sampleRow) && (
-                <SampleRow onOpen={openSample} onHide={state.clients.length === 0 ? undefined : () => {
+                <SampleRow onOpen={() => openSample()} onHide={state.clients.length === 0 ? undefined : () => {
                   if (meId) hideSample(meId);
                   setStart((s) => (s ? { ...s, sampleRow: false } : s));
                   track('sample.hide');
@@ -437,7 +472,7 @@ export default function HomeScreen() {
                 {' '}ClinicApp acil yardım hizmeti değildir; acil durumda 112'yi ara.
               </Text>
               <View style={styles.accountLinks}>
-                <Pressable onPress={() => setGuide(true)} hitSlop={8} accessibilityRole="button"><Text style={styles.link}>Nasıl kullanılır?</Text></Pressable>
+                <Pressable onPress={() => setHelp(true)} hitSlop={8} accessibilityRole="button"><Text style={styles.link}>Nasıl kullanılır?</Text></Pressable>
                 <Pressable onPress={() => setSettings(true)} hitSlop={8}><Text style={styles.link}>Ayarlar</Text></Pressable>
               </View>
             </>
@@ -447,6 +482,10 @@ export default function HomeScreen() {
       <NotificationsSheet visible={bell} onClose={() => setBell(false)} onOpen={openTarget} />
       <VerificationSheet visible={verify} onClose={() => { setVerify(false); loadVerify(); }} />
       <Onboarding visible={guide} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
+      {state.kind === 'ready' && (
+        <HelpSheet visible={help} owner={state.me.role === 'owner'} onClose={() => setHelp(false)}
+          onIntro={() => afterSheet(() => setGuide(true))} onSample={() => afterSheet(() => openSample())} onAction={onHelpAction} />
+      )}
       {legalSheets}
     </SafeAreaView>
   );

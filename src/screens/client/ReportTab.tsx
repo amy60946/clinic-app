@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { markReportSeen } from '../SampleTour';
 import { View, Text, Alert, Platform, StyleSheet } from 'react-native';
 import * as Print from 'expo-print';
 import * as Clipboard from 'expo-clipboard';
@@ -64,6 +65,7 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
 
   useEffect(() => {
     // örnek ailede hedefler hazır veriden (sunucuya gidilmez)
+    if (!data.sample) markReportSeen(me.id);
     if (data.sample) { setGoals((data.samplePlan?.goals ?? []).map(({ id, title, description, archived, created_at, ratings }) => ({ id, title, description, archived, created_at, ratings }))); return; }
     listGoals(client.link_id).then(setGoals).catch(() => setGoals([]));
   }, [client.link_id, data]);

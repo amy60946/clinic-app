@@ -7,6 +7,7 @@ import { Label, Notice } from '../components/ui';
 import Bell from '../components/Bell';
 import { Client, ClinicianMe, Member, loadAttention } from '../lib/clinic';
 import { Attention, BoardRow, Section, buildBoard } from '../lib/attention';
+import { OnceHint, BOARD_HINT } from './SampleTour';
 import { track } from '../lib/track';
 
 // Tüm danışanlar (kullanıcı kararı 2 Kasım 2026: dikkat panosu "liste + neden"; ortak clinic_attention_summary, veritabani.md 23).
@@ -24,14 +25,17 @@ const SECTIONS: { id: Section; title: string; info: string }[] = [
   { id: 'rest', title: 'Diğer danışanlar', info: 'Şu an bir şey beklemeyen danışanlar.' },
 ];
 
-export default function ClientBoard({ clients, unread, me, team, onOpen }: {
+export default function ClientBoard({ clients, unread, me, team, onOpen, onAttention }: {
   clients: Client[]; unread: Record<string, number>; me: ClinicianMe; team: Member[]; onOpen: (c: Client) => void;
+  onAttention?: (a: Record<string, Attention> | null) => void;      // ana ekrandaki Başlarken kartı aynı özeti kullanır
 }) {
   const [q, setQ] = useState('');
   const [att, setAtt] = useState<Record<string, Attention> | null>(null);
   const [seen, setSeen] = useState<Record<string, string>>({});
   const [who, setWho] = useState<string>('all');
-  useEffect(() => { loadAttention().then(setAtt).catch(() => setAtt(null)); }, [clients]);
+  useEffect(() => {
+    loadAttention().then((a) => { setAtt(a); onAttention?.(a); }).catch(() => { setAtt(null); onAttention?.(null); });
+  }, [clients]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     AsyncStorage.getItem(SEEN_KEY(me.id)).then((v) => { if (v) setSeen(JSON.parse(v)); }).catch(() => {});
   }, [me.id]);
@@ -127,12 +131,15 @@ export default function ClientBoard({ clients, unread, me, team, onOpen }: {
           {searched.length === 0 ? (
             <View style={styles.list}><Text style={[styles.small, { padding: 16 }]}>{query ? 'Sonuç bulunamadı.' : 'Bu uzmana bağlı danışan yok.'}</Text></View>
           ) : board && !onlyRest ? (
-            sections.map((s) => (
+            <>
+            <View style={{ marginTop: 10 }}><OnceHint userId={me.id} id="board" hint={BOARD_HINT} /></View>
+            {sections.map((s) => (
               <View key={s.id} style={{ gap: 6, marginTop: 10 }}>
                 <SectionHead title={s.title} count={board[s.id].length} info={s.info} />
                 <View style={styles.list}>{board[s.id].map(row)}</View>
               </View>
-            ))
+            ))}
+            </>
           ) : (
             <View style={styles.list}>{(board ? board.rest : searched.map((c) => ({ client: c, reasons: [] as [], fresh: false as const }))).map(row)}</View>
           )}

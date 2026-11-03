@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { colors } from '../../theme';
+import { View } from 'react-native';
 import { Label } from '../../components/ui';
 import PlanEditor from '../plan/PlanEditor';
 import PlanHats from '../plan/PlanHats';
@@ -8,16 +7,9 @@ import { useHistory, HistoryHeader } from './History';
 import type { ClientCtx } from './ClientScreen';
 
 // Danışan › Takip planı: hedef hatları (hedef · aile programı · rutin ve görevler; ortak akislar.md 12.1) + önceki uzmandan
-// devralınan plan (salt okunur, akislar.md 11). Örnek ailede eski salt okunur görünüm.
+// devralınan plan (salt okunur, akislar.md 11). Örnek ailede aynı ekran, salt okunur (ilk kullanım "Ö1", 3 Kasım 2026).
 export default function PlanTab({ client, me, today, data, reload }: ClientCtx) {
-  if (data.sample && data.samplePlan) {
-    return (
-      <View>
-        <Text style={styles.intro}>Takip Planı: çocuğun hedefleri, haftalık değerlendirmen (aile görmez) ve ailenin evde uyguladığı program. Örnek ailede salt okunur.</Text>
-        <PlanEditor target={{ kind: 'link', linkId: client.link_id, clinicId: '' }} readOnly preset={data.samplePlan} today={today} />
-      </View>
-    );
-  }
+  if (data.sample && data.samplePlan) return <PlanHats client={client} me={me} data={data} today={today} preset={data.samplePlan} />;
   return (
     <View>
       <PlanHats client={client} me={me} data={data} today={today} reload={reload} />
@@ -41,7 +33,3 @@ function Inherited({ linkId, today }: { linkId: string; today: string }) {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  intro: { fontSize: 13, color: colors.muted, lineHeight: 19, marginTop: 8 },
-});
