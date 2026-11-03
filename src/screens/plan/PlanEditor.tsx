@@ -401,13 +401,8 @@ export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
           </View>
         </View>
       )}
-      {!legacy && (
-        <View style={[styles.inline, { marginTop: 14 }]}>
-          <Switch value={f.shared} onValueChange={(v) => set({ shared: v })} trackColor={{ true: colors.navy }} />
-          <Text style={styles.body}>Aile bu hedefi görür</Text>
-          <InfoDot info="Kapalıysa hedef aileye gitmez, planda &quot;Yalnız sende&quot; yazar; bağlı program ve rutinler yine gider. Takip Planı'nda ⋯ menüsünden de değiştirilir." />
-        </View>
-      )}
+      {/* G1 (kullanıcı kararı 3 Kasım 2026): "Aile bu hedefi görür" anahtarı formdan kalktı; taslak/gönder zaten "ne zaman gider"i
+          belirliyor. Yeni hedef aileye açık; gizlemek nadir iş: hedef satırı ⋯ › "Aileden gizle". Düzenlemede mevcut değer korunur. */}
       <CoachTarget id="sheet.goal.save" style={{ marginTop: 18 }}><Cta label="Kaydet" onPress={save} busy={busy} /></CoachTarget>
     </Sheet>
   );
@@ -425,17 +420,6 @@ function LabelInfo({ text, info }: { text: string; info: string }) {
       </Pressable>
       {open && <Text style={styles.infoBox}>{info}</Text>}
     </View>
-  );
-}
-function InfoDot({ info }: { info: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <Pressable onPress={() => setOpen((v) => !v)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Açıklama">
-        <Ionicons name={open ? 'information-circle' : 'information-circle-outline'} size={16} color={colors.muted} />
-      </Pressable>
-      {open && <Text style={[styles.infoBox, { flexBasis: '100%' }]}>{info}</Text>}
-    </>
   );
 }
 
