@@ -144,8 +144,9 @@ export async function deleteModule(id: string): Promise<void> {
   const { error } = await supabase.from('care_modules').delete().eq('id', id);
   if (error) throw new Error(error.message);
 }
-export async function rateGoal(clinicId: string, goalId: string, week: string, rating: number): Promise<void> {
-  const { error } = await supabase.from('goal_ratings').upsert({ goal_id: goalId, clinic_id: clinicId, week, rating, note: '' }, { onConflict: 'goal_id,week' });
+// note: değerlendirmenin kısa gerekçesi (≤ 300, yalnız klinik; "N3", 3 Kasım 2026)
+export async function rateGoal(clinicId: string, goalId: string, week: string, rating: number, note = ''): Promise<void> {
+  const { error } = await supabase.from('goal_ratings').upsert({ goal_id: goalId, clinic_id: clinicId, week, rating, note: note.trim().slice(0, 300) }, { onConflict: 'goal_id,week' });
   if (error) throw new Error(error.message);
 }
 export async function publishPlan(linkId: string): Promise<void> {

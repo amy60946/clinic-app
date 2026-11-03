@@ -138,13 +138,13 @@ function samplePlan(today: string, start: string, r: () => number, ts: Task[]): 
   const monday = (d: string) => { const x = new Date(`${d}T12:00:00`); const w = x.getDay() || 7; return addDays(d, 1 - w); };
   const weeks = Array.from({ length: WEEKS }, (_, i) => monday(addDays(start, i * 7))).filter((w) => w < today);
   // GAS haftalık değil, dört haftada bir (2 Kasım 2026): g1 son değerlendirmeden 4+ hafta geçti (Değerlendirme zamanı), g2 yakın
-  const rated = (pairs: [number, number][]) => pairs.filter(([i]) => i < weeks.length).map(([i, rating]) => ({ week: weeks[i], rating, note: '' }));
+  const rated = (pairs: [number, number, string?][]) => pairs.filter(([i]) => i < weeks.length).map(([i, rating, note]) => ({ week: weeks[i], rating, note: note ?? '' }));
   const goal = (id: string, title: string, domain: string, ratings: PlanGoal['ratings'], o: Partial<PlanGoal> = {}): PlanGoal => ({
     id, title, description: '', archived: false, created_at: created, domain, measure: 'yesno', baseline: '', target: '7 günün 5\'i',
     weeks: 12, home_support: '', shared: true, status: 'active', position: 0, template_key: null, ratings, ...o,
   });
   const goals = [
-    goal('s-g1', 'Sabah rutinini görsel çizelgeyle en çok 1 hatırlatmayla bitirir', 'routine', rated([[0, -2], [4, 1]]),
+    goal('s-g1', 'Sabah rutinini görsel çizelgeyle en çok 1 hatırlatmayla bitirir', 'routine', rated([[0, -2], [4, 1, 'Çizelge tutarlı kullanılıyor; hatırlatma 2\'ye indi.']]),
       { description: 'Resimli sabah çizelgesini göz hizasına asın; her adım bitince kısa ve somut övün.', position: 0 }),
     goal('s-g2', 'Öfkelendiğinde sakinleşme köşesini kullanır', 'emotion', rated([[0, -2], [4, -1], [6, 0], [8, 1]]),
       { measure: 'frequency', target: 'Haftada 3', description: 'Sakin bir anda köşeyi birlikte deneyin; öfke anında yalnız "Köşe" deyin.', position: 1 }),

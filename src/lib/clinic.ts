@@ -179,19 +179,31 @@ export async function abcAudioUrl(path: string): Promise<string> {
 
 /* ---------- Uzman notları (aile görmez) ---------- */
 
-export type Note = { id: string; body: string; created_at: string; author_id: string | null; author: string };
+// goal_id: hedefe bağlı not (ortak proposed/20261103100000_goal_notes.sql, veritabani.md 24); sütun yoksa null
+export type Note = { id: string; body: string; created_at: string; author_id: string | null; author: string; goal_id?: string | null };
+const missingColumn = (e: { code?: string } | null) => !!e && (e.code === '42703' || e.code === 'PGRST204');
 
 export async function listNotes(linkId: string): Promise<Note[]> {
-  const { data, error } = await supabase.from('clinic_notes')
-    .select('id, body, created_at, author_id, clinicians(name)')
-    .eq('link_id', linkId).order('created_at', { ascending: false });
-  const rows = check(data ?? [], error) as unknown as (Omit<Note, 'author'> & { clinicians: { name: string } | null })[];
-  return rows.map(({ clinicians, ...n }) => ({ ...n, author: clinicians?.name ?? '' }));
+  return (await listNotesRaw(linkId)).notes;
+}
+// goals: sunucuda notun hedef bağı var mı (yoksa hedef notu simgesi görünmez)
+async function listNotesRaw(linkId: string): Promise<{ notes: Note[]; goals: boolean }> {
+  const q = (cols: string) => supabase.from('clinic_notes').select(cols).eq('link_id', linkId).order('created_at', { ascending: false });
+  let goals = true;
+  let res = await q('id, body, created_at, author_id, goal_id, clinicians(name)');
+  if (missingColumn(res.error)) { goals = false; res = await q('id, body, created_at, author_id, clinicians(name)'); }
+  const rows = check(res.data ?? [], res.error) as unknown as (Omit<Note, 'author'> & { clinicians: { name: string } | null })[];
+  return { notes: rows.map(({ clinicians, ...n }) => ({ ...n, author: clinicians?.name ?? '' })), goals };
+}
+// Takip Planı: hedefe bağlı notlar; sunucuda bağ yoksa null
+export async function listGoalNotes(linkId: string): Promise<Note[] | null> {
+  const r = await listNotesRaw(linkId);
+  return r.goals ? r.notes.filter((n) => !!n.goal_id) : null;
 }
 
-export async function addNote(c: Client, authorId: string, body: string): Promise<void> {
+export async function addNote(c: Pick<Client, 'link_id' | 'clinic_id'>, authorId: string, body: string, goalId?: string | null): Promise<void> {
   const { error } = await supabase.from('clinic_notes')
-    .insert({ link_id: c.link_id, clinic_id: c.clinic_id, author_id: authorId, body: body.trim() });
+    .insert({ link_id: c.link_id, clinic_id: c.clinic_id, author_id: authorId, body: body.trim(), ...(goalId ? { goal_id: goalId } : {}) });
   check(null, error);
 }
 

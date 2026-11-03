@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
 import { CoachSheetOverlay, CoachTarget, useCoachEmit } from '../../lib/coach';
-import { IconButton } from '../../components/ui';
+import { IconButton, Input } from '../../components/ui';
 import { formatTR } from '../../dates';
 import type { PlanGoal, GoalStatus } from '../../lib/plan';
 import { goalWeek, lastRating, shiftDay } from '../../lib/planCore';
@@ -21,7 +21,7 @@ const NEXT: { id: GoalStatus; label: string }[] = [
 
 export default function EvaluateSheet({ goal, week, today, initialStatus, onClose, onSave }: {
   goal: PlanGoal | null; week: string; today: string; initialStatus?: GoalStatus;
-  onClose: () => void; onSave: (rating: number | null, status: GoalStatus) => Promise<void>;
+  onClose: () => void; onSave: (rating: number | null, status: GoalStatus, note: string) => Promise<void>;
 }) {
   return (
     <Modal visible={!!goal} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -32,10 +32,12 @@ export default function EvaluateSheet({ goal, week, today, initialStatus, onClos
 
 function Body({ goal, week, today, initialStatus, onClose, onSave }: {
   goal: PlanGoal; week: string; today: string; initialStatus?: GoalStatus;
-  onClose: () => void; onSave: (rating: number | null, status: GoalStatus) => Promise<void>;
+  onClose: () => void; onSave: (rating: number | null, status: GoalStatus, note: string) => Promise<void>;
 }) {
   const current = goal.ratings.find((r) => r.week === week)?.rating;
   const [rating, setRating] = useState<number | null>(current ?? null);
+  // değerlendirmenin kısa notu (N3): puan seçilince görünür, yalnız sende
+  const [note, setNote] = useState(goal.ratings.find((r) => r.week === week)?.note ?? '');
   const emit = useCoachEmit();
   const [status, setStatus] = useState<GoalStatus>(initialStatus ?? goal.status);
   const [busy, setBusy] = useState(false);
@@ -49,7 +51,8 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
     if (rating === null && status === goal.status) return Alert.alert('Bir düzey seç', 'Hedefe ulaşma düzeyini (−2 … +2) seç ya da hedefin durumunu değiştir.');
     setBusy(true);
     try {
-      await onSave(rating === current ? (current ?? null) : rating, status);
+      const noteChanged = note.trim() !== (goal.ratings.find((r) => r.week === week)?.note ?? '');
+      await onSave(rating === current && !noteChanged ? (current ?? null) : rating, status, rating !== null ? note : '');
     } catch (e) {
       Alert.alert('Kaydedilemedi', (e as Error).message);
     } finally {
@@ -92,6 +95,9 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
             ))}
           </View></CoachTarget>
           <Text style={styles.small}>{rating !== null ? GAS_LABELS[rating] : '0 = beklenen düzey. Uygulamadaki oranlar ve davranış kayıtları yardımcıdır; karar senin.'}</Text>
+          {rating !== null && (
+            <Input value={note} onChangeText={setNote} placeholder="Not (isteğe bağlı, yalnız sen): neye dayanarak?" maxLength={300} multiline />
+          )}
           {past.length > 0 && (
             <Text style={styles.small}>Önceki: {past.map((r) => `${dayMonth(r.week)} ${r.rating > 0 ? `+${r.rating}` : r.rating}`).join(' · ')}</Text>
           )}
