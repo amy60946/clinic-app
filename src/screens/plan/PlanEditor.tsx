@@ -322,8 +322,9 @@ function Chips<T extends string>({ options, value, onChange }: { options: { id: 
   );
 }
 
-export function GoalSheet({ editing, legacy, onClose, onSave }: {
+export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
   editing?: PlanGoal; legacy: boolean; onClose: () => void; onSave: (g: GoalInput) => Promise<void>;
+  exclude?: string[];                 // planda zaten olan hedeflerin adları: hazır listede gösterilmez
 }) {
   const [step, setStep] = useState<'pick' | 'form'>(editing || legacy ? 'form' : 'pick');
   const [domain, setDomain] = useState(editing?.domain ?? '');
@@ -332,7 +333,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave }: {
   });
   const [busy, setBusy] = useState(false);
   const set = (p: Partial<GoalInput>) => setF((x) => ({ ...x, ...p }));
-  const list = useMemo(() => GOAL_TEMPLATES.filter((g) => !domain || g.domain === domain), [domain]);
+  const list = useMemo(() => GOAL_TEMPLATES.filter((g) => (!domain || g.domain === domain) && !exclude.includes(g.title)), [domain, exclude]);
 
   const save = async () => {
     if (!f.title.trim()) return Alert.alert('Hedef davranışı yaz.');

@@ -132,7 +132,10 @@ export function CoachOverlay({ finalLabel }: { finalLabel: string }) {
   const cardW = Math.min(360, W - 24);
   // kart: hedefin altında yer varsa altta, yoksa üstte; hedef yoksa altta ortada
   let cardPos: object = { left: (W - cardW) / 2, bottom: 16 };
-  if (hole) {
+  if (hole && W < 600) {
+    // dar ekranda kart yakındaki düğmelerin üstüne binmesin: altta sabit, hedef alttaysa üstte
+    if (hole.y + hole.h > H - cardH - 32) cardPos = { left: (W - cardW) / 2, top: 16 };
+  } else if (hole) {
     const left = Math.max(12, Math.min(W - cardW - 12, hole.x + hole.w / 2 - cardW / 2));
     cardPos = hole.y + hole.h + 12 + cardH < H ? { left, top: hole.y + hole.h + 12 } : { left, top: Math.max(8, hole.y - cardH - 12) };
   }
@@ -148,7 +151,7 @@ export function CoachOverlay({ finalLabel }: { finalLabel: string }) {
           <View pointerEvents="auto" style={[styles.dim, { left: 0, top: hole.y + hole.h, width: W, height: Math.max(0, H - hole.y - hole.h) }]} />
           <View pointerEvents="auto" style={[styles.dim, { left: 0, top: hole.y, width: Math.max(0, hole.x), height: hole.h }]} />
           <View pointerEvents="auto" style={[styles.dim, { left: hole.x + hole.w, top: hole.y, width: Math.max(0, W - hole.x - hole.w), height: hole.h }]} />
-          <View pointerEvents="none" style={[styles.ring, { left: hole.x, top: hole.y, width: hole.w, height: hole.h }]} />
+          <View pointerEvents="none" style={[styles.ring, { left: hole.x - 4, top: hole.y - 4, width: hole.w + 8, height: hole.h + 8 }]} />
         </>
       ) : (
         <View pointerEvents={lost ? 'none' : 'auto'} style={[styles.dim, StyleSheet.absoluteFill]} />
@@ -181,7 +184,7 @@ export function CoachOverlay({ finalLabel }: { finalLabel: string }) {
 
 const styles = StyleSheet.create({
   dim: { position: 'absolute', backgroundColor: DIM },
-  ring: { position: 'absolute', borderWidth: 3, borderColor: colors.gold, borderRadius: 12 },
+  ring: { position: 'absolute', borderWidth: 4, borderColor: colors.gold, borderRadius: 4 },
   card: { position: 'absolute', backgroundColor: colors.navy, borderRadius: radius.md, padding: 14, gap: 6,
     shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 8 },
   count: { fontSize: 11, fontWeight: '800', color: colors.gold },

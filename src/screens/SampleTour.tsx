@@ -167,7 +167,7 @@ export const TOUR: (CoachStep & { tab: Tab })[] = [
   },
   {
     key: 'routine', tab: 'goals', target: 'plan.newRoutine', until: 'routine_added', title: 'Rutin bağla', text: 'Yaşına uygun rutin ekle: **{label}**',
-    sheet: { routine: 'Görevler ve saatler hazır. **Plana ekle**’ye dokun.' },
+    sheet: { routine: 'Görevler ve saatler hazır. En alttaki **Plana ekle**’ye dokun.' },
   },
   {
     key: 'publish', tab: 'goals', target: 'plan.publish', until: 'published', title: 'Aileye gönder', text: 'Bej = taslak, aile görmez. **Aileye gönder**’e dokun.',
@@ -177,7 +177,8 @@ export const TOUR: (CoachStep & { tab: Tab })[] = [
     key: 'evaluate', tab: 'goals', target: 'plan.evaluate', until: 'evaluated', title: 'Değerlendir', text: 'Dört haftada bir sorulur. **Değerlendirme zamanı**’na dokun.',
     sheet: { evaluate: 'Bir puan seç, **Kaydet**’e dokun. Aile görmez.' },
   },
-  { key: 'watch', tab: 'routine', target: 'routine.row', until: 'routine_row', title: 'Ailenin kaydı', text: 'Bir **göreve** dokun, ayrıntıya bak, kapat.' },
+  { key: 'watch', tab: 'routine', target: 'routine.row', until: 'routine_row', title: 'Ailenin kaydı', text: 'Bir **göreve** dokun, ayrıntıya bak, kapat.',
+    sheet: { taskDetail: 'Gün gün ebeveyn kaydı. Bakınca sol üstteki **Kapat**.' } },
   { key: 'report', tab: 'report', target: 'report.open', until: 'report_action', title: 'Rapor', text: 'Dönem sonu: **Raporu aç**’a dokun.' },
   { key: 'done', tab: 'report', title: 'Hazırsın', text: 'Sıra gerçek ailede: ebeveyni e-postayla davet et.', final: true },
 ];

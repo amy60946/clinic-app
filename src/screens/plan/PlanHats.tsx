@@ -978,7 +978,7 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
       </Modal>
 
       {goalSheet && (
-        <GoalSheet editing={goalSheet.editing} legacy={false} onClose={() => setGoalSheet(null)}
+        <GoalSheet editing={goalSheet.editing} legacy={false} onClose={() => setGoalSheet(null)} exclude={goals.map((g) => g.title)}
           onSave={async (input) => {
             if (ro) {
               // örnek: yeni hedef yerelde, en üstte ve açık

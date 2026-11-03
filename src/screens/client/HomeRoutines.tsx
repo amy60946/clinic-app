@@ -17,7 +17,7 @@ import SuggestionsTab from './SuggestionsTab';
 import ExportButton from '../../components/ExportButton';
 import { routineRows, csvName, ROUTINE_HEADER } from '../../lib/csv';
 import { listSuggestions } from '../../lib/clinic';
-import { CoachTarget, useCoachEmit } from '../../lib/coach';
+import { CoachTarget, CoachBanner, useCoachEmit } from '../../lib/coach';
 
 // Ev rutinleri (uzman): haftalık tablo (gün gün), zaman içinde (haftalık sayı, çoklu görev), oranlar (görev başına, beceri,
 // "Yapamam", ret notları) ve öneriler. Görev eklemek uzmanın önerisidir; ebeveyn ParentApp'te onaylayınca çocuğa gider.
@@ -200,6 +200,7 @@ function TaskDetailBody({ task, ctx, onClose }: { task: Task; ctx: ClientCtx; on
           <IconButton name="close" onPress={onClose} label="Kapat" />
           <Text style={styles.sheetTitle} numberOfLines={2}>{task.emoji} {task.title}</Text>
         </View>
+        <CoachBanner sheet="taskDetail" />
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 4 }}>
           <Card style={{ gap: 6 }}>
             <Info k="Başlangıç" v={parseDate(task.start_date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })} />

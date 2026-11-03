@@ -21,7 +21,8 @@ function initials(name: string) {
 
 // Web'de rapor sayfanın üstünde bir pencerede açılır; "Yazdır / PDF" tarayıcının yazdırma penceresini getirir
 // ("PDF olarak kaydet" oradan). iPad'de sistem yazdırma/paylaşma (expo-print).
-function showWebReport(html: string) {
+// Kapat'a basılınca biter (yaptırarak öğreten tur son kartı rapor kapanınca gösterir)
+function showWebReport(html: string): Promise<void> {
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(15,27,61,.45);display:flex;flex-direction:column;padding:16px;gap:10px';
   const bar = document.createElement('div');
@@ -42,7 +43,7 @@ function showWebReport(html: string) {
   frame.srcdoc = html;
   overlay.append(bar, frame);
   document.body.appendChild(overlay);
-  close.onclick = () => overlay.remove();
+  const closed = new Promise<void>((done) => { close.onclick = () => { overlay.remove(); done(); }; });
   print.onclick = () => {
     try {
       frame.contentWindow?.focus();
@@ -51,6 +52,7 @@ function showWebReport(html: string) {
       Alert.alert('Yazdırılamadı', 'Bu sayfada yazdırma kapalı. Raporu tarayıcıda ClinicApp\'in kendi adresinden aç.');
     }
   };
+  return closed;
 }
 
 async function printHtml(html: string) {
@@ -87,7 +89,6 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
 
   const emit = useCoachEmit();
   const open = async () => {
-    emit('report_action');
     setBusy(true);
     try {
       await printHtml(buildReportHtml({
@@ -102,6 +103,7 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
         today,
         weeks,
       }));
+      emit('report_action');
     } catch (e) {
       Alert.alert('Rapor açılamadı', (e as Error).message);
     } finally {
