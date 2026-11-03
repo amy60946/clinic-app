@@ -109,7 +109,7 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
             <Text style={styles.small}>Durum aileye "Aileye gönder" ile gider (hedef aileye açıksa).</Text>
           )}
 
-          <CoachTarget id="sheet.eval.save"><Pressable onPress={save} disabled={busy} style={[styles.cta, busy && { opacity: 0.6 }]} accessibilityRole="button">
+          <CoachTarget id="sheet.eval.save" style={{ marginTop: 10 }}><Pressable onPress={save} disabled={busy} style={[styles.cta, { marginTop: 0 }, busy && { opacity: 0.6 }]} accessibilityRole="button">
             {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.ctaText}>Kaydet</Text>}
           </Pressable></CoachTarget>
         </ScrollView>

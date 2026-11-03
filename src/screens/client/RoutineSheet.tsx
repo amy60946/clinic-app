@@ -175,7 +175,7 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initi
 
           <Text style={styles.label}>Aileye notun (isteğe bağlı)</Text>
           <Input value={note} onChangeText={setNote} placeholder="Ör. İlk hafta yalnız sabah görevlerine odaklanın" maxLength={140} />
-          <CoachTarget id="sheet.routine.add"><Pressable onPress={send} disabled={busy || !picked} style={[styles.cta, (busy || !picked) && { opacity: 0.5 }]} accessibilityRole="button">
+          <CoachTarget id="sheet.routine.add" style={{ marginTop: 8 }}><Pressable onPress={send} disabled={busy || !picked} style={[styles.cta, { marginTop: 0 }, (busy || !picked) && { opacity: 0.5 }]} accessibilityRole="button">
             {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.ctaText}>{asDraft ? `Plana ekle (${picked} görev)` : `Rutini öner (${picked} görev)`}</Text>}
           </Pressable></CoachTarget>
         </ScrollView>

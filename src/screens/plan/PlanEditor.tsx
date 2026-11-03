@@ -408,7 +408,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
           <InfoDot info="Kapalıysa hedef aileye gitmez, planda &quot;Yalnız sende&quot; yazar; bağlı program ve rutinler yine gider. Takip Planı'nda ⋯ menüsünden de değiştirilir." />
         </View>
       )}
-      <CoachTarget id="sheet.goal.save"><View style={{ marginTop: 18 }}><Cta label="Kaydet" onPress={save} busy={busy} /></View></CoachTarget>
+      <CoachTarget id="sheet.goal.save" style={{ marginTop: 18 }}><Cta label="Kaydet" onPress={save} busy={busy} /></CoachTarget>
     </Sheet>
   );
 }

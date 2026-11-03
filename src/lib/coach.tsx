@@ -74,7 +74,8 @@ export function CoachTarget({ id, label, children, style }: { id: string; label?
   const ref = useRef<View>(null);
   const register = c?.register;
   useEffect(() => (register ? register(id, { ref, label }) : undefined), [register, id, label]);
-  if (!c) return <>{children}</>;
+  // style (ör. üst boşluk) sarıcıda durur ki çerçeve yalnız öğeyi sarsın; tur kapalıyken de aynı yerleşim
+  if (!c) return style ? <View style={style}>{children}</View> : <>{children}</>;
   return <View ref={ref} collapsable={false} style={style}>{children}</View>;
 }
 
@@ -148,7 +149,11 @@ function Spot({ c, target, card }: { c: Ctx; target?: string; card: Card }) {
   const W = box.w || 400;
   const H = box.h || 700;
   const visible = !!rect && rect.y + rect.h > 8 && rect.y < H - 8;
-  const hole = visible && rect ? { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 } : null;
+  // delik ve çerçeve ekranın içinde kalır (büyük alanlar, ör. pencerenin gövdesi)
+  const hole = visible && rect ? (() => {
+    const x = Math.max(6, rect.x - PAD); const y = Math.max(6, rect.y - PAD);
+    return { x, y, w: Math.min(W - 6, rect.x + rect.w + PAD) - x, h: Math.min(H - 6, rect.y + rect.h + PAD) - y };
+  })() : null;
   const cardW = Math.min(340, W - 24);
   const mid = { left: (W - cardW) / 2 };
   let cardPos: object = { ...mid, bottom: 16 };

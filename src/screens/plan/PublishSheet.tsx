@@ -82,7 +82,7 @@ function Body({ items, groups, onClose, onSend }: {
           ))}
           </CoachTarget>
           <Text style={[styles.small, { marginTop: 6 }]}>GAS değerlendirmeleri ve "Yalnız sende" hedefler aileye hiç gitmez.</Text>
-          <CoachTarget id="sheet.publish.send"><Pressable onPress={send} disabled={busy || !picked.length} style={[styles.cta, (busy || !picked.length) && { opacity: 0.5 }]} accessibilityRole="button">
+          <CoachTarget id="sheet.publish.send" style={{ marginTop: 10 }}><Pressable onPress={send} disabled={busy || !picked.length} style={[styles.cta, { marginTop: 0 }, (busy || !picked.length) && { opacity: 0.5 }]} accessibilityRole="button">
             {busy ? <ActivityIndicator color="#fff" /> : (
               <Text style={styles.ctaText}>{picked.length === items.length ? `Hepsini gönder (${items.length})` : `Seçilenleri gönder (${picked.length})`}</Text>
             )}
