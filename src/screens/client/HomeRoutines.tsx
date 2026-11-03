@@ -12,7 +12,7 @@ import {
 import { categories, skillKey, skillName } from '../../skills';
 import { repeatSummary } from './SuggestionEditor';
 import type { ClientCtx } from './ClientScreen';
-import { RoutineTab, Limits } from './ObservationTabs';
+import { RoutineTab } from './ObservationTabs';
 import SuggestionsTab from './SuggestionsTab';
 import ExportButton from '../../components/ExportButton';
 import { routineRows, csvName, ROUTINE_HEADER } from '../../lib/csv';
@@ -230,7 +230,6 @@ function TaskDetailBody({ task, ctx, onClose }: { task: Task; ctx: ClientCtx; on
               );
             })}
           </Card>
-          <Limits />
         </ScrollView>
         </CoachTarget>
       </View>
@@ -344,7 +343,6 @@ function Trend({ data, today, weeks }: ClientCtx) {
         Haftalık ortalama, görevin planlı olduğu haftalarda onaylanan gün sayısının ortalamasıdır. En çok {SERIES_COLORS.length} görev birlikte çizilir.
         Dönem {parseDate(starts[0]).toLocaleDateString('tr-TR')} – {parseDate(lastFullDay(today)).toLocaleDateString('tr-TR')}.
       </Text>
-      <Limits />
     </View>
   );
 }

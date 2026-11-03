@@ -490,6 +490,7 @@ export const DECLINE_LABELS: Record<DeclineReason | 'unknown', string> = {
   unknown: 'Neden belirtilmedi',
 };
 
+// Yalnız yazdırılan raporda (uzman arayüzünde gösterilmez; kullanıcı kararı 3 Kasım 2026, sözleşme 3.3)
 export const LIMITS_TEXT =
   'Bu oranlar ev rutinine ilişkin gözlem özetidir; tanı, zekâ ya da dikkat puanı değildir. Veri ebeveynin onayına ve cihaz kullanımına bağlıdır. ' +
   'Çocuk yalnız kendi geçmişiyle karşılaştırılır (norm yok). Klinik geçerlik bir pilot çalışmayla gösterilene kadar sonuç çıkarmak için tek başına kullanılmamalıdır.';

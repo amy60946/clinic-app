@@ -8,7 +8,7 @@ import { WeeklyRateBars, RateBar, Stat, CountBars } from '../../components/chart
 import ExportButton from '../../components/ExportButton';
 import { abcRows, csvName, ABC_HEADER } from '../../lib/csv';
 import {
-  weekly, perTask, observations, bySkill, abcSummary, windowStarts, lastFullDay, parseDate, isoDate, DECLINE_LABELS, LIMITS_TEXT,
+  weekly, perTask, observations, bySkill, abcSummary, windowStarts, lastFullDay, parseDate, isoDate, DECLINE_LABELS,
   motivationStats, motivationText, MOTIVATION_TREND_TEXT, Completion,
   MASTERY_RATE, MASTERY_WEEKS, DayPart, AbcEvent, dayPart, dec,
 } from '../../lib/metrics';
@@ -17,22 +17,6 @@ import type { ClientCtx } from './ClientScreen';
 import { skillName } from '../../skills';
 
 const p = (v: number | null) => (v === null ? '–' : `%${v}`);
-
-export function Limits() {
-  return <Text style={styles.limits}>{LIMITS_TEXT}</Text>;
-}
-
-// Davranış kayıtları bölümünün üstü (ortak hukuk/50-uygulama-ici-metinler.md 9)
-function Emergency() {
-  return (
-    <View style={styles.emergency}>
-      <Ionicons name="call-outline" size={16} color={colors.medium.fg} />
-      <Text style={styles.emergencyText}>
-        ClinicApp acil yardım ya da kriz izleme hizmeti değildir. Ailelerin kayıtları sana gecikmeyle ulaşabilir. Acil bir durum fark edersen 112'yi ara ya da aileyi hemen 112'ye yönlendir.
-      </Text>
-    </View>
-  );
-}
 
 /* ---------- Özet ---------- */
 
@@ -61,7 +45,6 @@ export function SummaryTab({ data, today, weeks }: ClientCtx) {
         <Row k="Ebeveyn ret oranı" v={p(o.rejectRate)} />
         <Row k={'"Yaptım" → ebeveyn kararı (ortanca)'} v={o.reviewDelayHours === null ? '–' : `${dec(o.reviewDelayHours)} saat`} />
       </Card>
-      <Limits />
     </View>
   );
 }
@@ -138,7 +121,7 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
             <Row k="Zor" v={String(motivation.hard)} />
             {motivation.trend && <Text style={styles.small}>Ebeveynin yanıtlarına göre {MOTIVATION_TREND_TEXT[motivation.trend]}.</Text>}
           </Card>
-          <Text style={styles.note}>Ebeveynin incelemede verdiği isteğe bağlı yanıt ("Motive etmek ne kadar zordu?"). Puan ya da tanı değildir; görevin çocuğa uygunluğunu konuşmak için bir ipucudur.</Text>
+          <Text style={styles.note}>Ebeveynin incelemede verdiği isteğe bağlı yanıt ("Motive etmek ne kadar zordu?"). Görevin çocuğa uygunluğunu konuşmak için bir ipucudur.</Text>
         </>
       )}
 
@@ -150,7 +133,7 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
             .map((k) => <Row key={k} k={DECLINE_LABELS[k]} v={String(o.declineReasons[k])} />)
         )}
       </Card>
-      <Text style={styles.note}>Neden, görevin çocuğa uygun olup olmadığını ve açıklamanın netliğini gösterir; dürüstlük yargısı değildir.</Text>
+      <Text style={styles.note}>Neden, görevin çocuğa uygun olup olmadığını ve açıklamanın netliğini gösterir.</Text>
 
       <Label>Ebeveynin ret notları</Label>
       <Card style={{ gap: 8 }}>
@@ -161,7 +144,6 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
           </Text>
         ))}
       </Card>
-      <Limits />
     </View>
   );
 }
@@ -212,10 +194,9 @@ export function AbcTab({ client, data, today, weeks, abcGoal }: ClientCtx) {
   const goalName = (id: string) => titles[id] ?? 'Hedef';
   const short = (t: string) => (t.length > 28 ? `${t.slice(0, 27)}…` : t);
 
-  if (!s.total) return <View><Emergency /><Empty text="Bu dönemde ebeveyn davranış kaydı girmedi. Ebeveyn kaydı ParentApp › Uzmanım › (senin adın) › Davranış kaydı ekle'den girer." /></View>;
+  if (!s.total) return <Empty text="Bu dönemde ebeveyn davranış kaydı girmedi. Ebeveyn kaydı ParentApp › Uzmanım › (senin adın) › Davranış kaydı ekle'den girer." />;
   return (
     <View>
-      <Emergency />
       <Label>Haftalık davranış kaydı sayısı</Label>
       <Card style={{ gap: 6 }}>
         <CountBars data={s.perWeek.map((w) => ({ start: w.start, value: w.count }))} />
@@ -288,7 +269,6 @@ export function AbcTab({ client, data, today, weeks, abcGoal }: ClientCtx) {
         </View>
       )}
       {view === 'table' && list.some((e) => e.audio_path) && <Text style={styles.note}>Sesli kayıtları dinlemek için "Kartlar" görünümüne geç.</Text>}
-      <Limits />
     </View>
   );
 }
@@ -307,9 +287,6 @@ const styles = StyleSheet.create({
   body: { fontSize: 14, color: colors.text, lineHeight: 20 },
   small: { fontSize: 12, color: colors.muted },
   note: { fontSize: 11, color: colors.muted, marginTop: 6, lineHeight: 16 },
-  limits: { fontSize: 11, color: colors.muted, marginTop: 24, lineHeight: 16 },
-  emergency: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: colors.medium.bg, borderRadius: radius.sm, padding: 12, marginTop: 8 },
-  emergencyText: { flex: 1, fontSize: 12, color: colors.text, lineHeight: 17 },
   badge: {
     fontSize: 11, fontWeight: '700', color: colors.ok, backgroundColor: colors.easy.bg,
     paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden',

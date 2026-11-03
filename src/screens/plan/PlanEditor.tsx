@@ -282,7 +282,7 @@ function ModuleCard({ m, isLink, readOnly, logs, onEdit, onStatus, onDelete }: {
             {s.practiced} gün uyguladı{ease ? ` · ailenin bildirdiği zorluk: ${ease}` : ''}
           </Text>
           {!!barriers && <Text style={styles.small}>Uygulayamadığı günler: {barriers}</Text>}
-          <Text style={styles.tiny}>Ailenin kendi bildirimi; bir puan ya da değerlendirme değildir.</Text>
+          <Text style={styles.tiny}>Ailenin kendi bildirimi.</Text>
         </View>
       )}
       {!readOnly && <View style={{ alignItems: 'flex-start' }}><SmallButton label="Sil" danger onPress={onDelete} /></View>}
@@ -365,7 +365,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
   }
   return (
     <Sheet title={editing ? 'Hedefi düzenle' : 'Hedef'} onClose={onClose} coach={editing ? undefined : 'goalForm'}>
-      <Text style={styles.small}>Hedefi gözlenebilir yaz: "… yapar". Hiçbir hedef tanı ya da puan değildir.</Text>
+      <Text style={styles.small}>Hedefi gözlenebilir yaz: "… yapar".</Text>
       {!legacy && (<><Label>Alan</Label>
         <Chips options={DOMAINS.map((d) => ({ id: d.key, label: d.label }))} value={f.domain} onChange={(v) => set({ domain: v })} /></>)}
       <Label>Hedef davranış</Label>

@@ -36,7 +36,7 @@ const SOFT = dim('#A0A6B6');
 type Step = { title: string; line: string; screen: 'invite' | 'board' | 'plan' | 'watch' };
 const STEPS: Step[] = [
   { title: 'Aileyi davet et', line: 'E-postayı yaz, "E-posta gönder".', screen: 'invite' },
-  { title: 'Kimde ne var', line: 'Ana ekran üç bölüm; puan değil.', screen: 'board' },
+  { title: 'Kimde ne var', line: 'Ana ekran üç bölüm.', screen: 'board' },
   { title: 'Taslak, sonra gönder', line: 'Bej = taslak. "Aileye gönder" ile gider.', screen: 'plan' },
   { title: 'İzle ve raporla', line: 'İzle bölümü; dönem sonunda "Rapor".', screen: 'watch' },
 ];
