@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, Pressable, ScrollView, Modal, Alert, StyleSheet, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, Pressable, ScrollView, Modal, Alert, StyleSheet, ActivityIndicator, Platform, GestureResponderEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
@@ -37,6 +37,7 @@ import type { ClientCtx } from '../client/ClientScreen';
 import type { SamplePlan } from '../../lib/sample';
 import { FamilySees } from '../HelpSheet';
 import { CoachTarget, useCoachEmit } from '../../lib/coach';
+import { useActionMenu, confirmSpec } from '../../components/ActionMenu';
 
 // Takip planı — hedef hatları (kullanıcı kararları 30 Ekim ve 2 Kasım 2026, "C"; ortak akislar.md 12.1):
 // her hedef bir satır: hedef (uzman yazar ve değerlendirir) · aile programı (ebeveyn evde uygular) · rutin ve görevler
@@ -85,6 +86,7 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
   const target: PlanTarget = { kind: 'link', linkId: client.link_id, clinicId: client.clinic_id };
   const ro = !!preset;
   const emit = useCoachEmit();
+  const [menu, openMenu] = useActionMenu();      // uygulamanın kendi menüsü (Apple uyarı penceresi yerine)
   const localId = () => `local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
   const sampleOnly = () => Alert.alert('Örnek aile', 'Bu bir örnek: burada bir şey değişmez ve aileye gitmez. Gerçek bir ailede bu düğme çalışır.');
   const { desktop } = useLayout();
@@ -286,12 +288,9 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
     else if (type === 'libpkg') { const pk = PACKAGES.find((x) => x.key === rest); if (pk) addPackage(pk).catch(fail('Paket eklenemedi')); }
     else if (type === 'libtpl') { const t = tpls?.find((x) => x.id === rest); if (t) applyTemplate(t); }
   };
-  const pickGoal = (title: string, cb: (gid: string) => void) => {
+  const pickGoal = (title: string, cb: (gid: string) => void, e?: GestureResponderEvent) => {
     if (!goals.length) return Alert.alert('Önce bir hedef ekle');
-    Alert.alert('Hangi hedefe bağlansın?', title, [
-      ...goals.map((g) => ({ text: short(g.title, 40), onPress: () => cb(g.id) })),
-      { text: 'Vazgeç', style: 'cancel' as const },
-    ]);
+    openMenu({ title: 'Hangi hedefe bağlansın?', message: title, items: goals.map((g) => ({ label: short(g.title, 48), icon: 'flag-outline' as const, onPress: () => cb(g.id) })) }, e);
   };
 
   // rutin taslağı (hedef satırından ya da kitaplıktan)
@@ -367,30 +366,24 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
     setEdit(null);
     await load();
   };
-  const withdrawGroup = (r: RGroup) => {
+  const withdrawGroup = (r: RGroup, e?: GestureResponderEvent) => {
     const open = r.items.filter((s) => s.status === 'draft' || s.status === 'pending');
-    Alert.alert(r.state === 'draft' ? 'Taslak silinsin mi?' : 'Öneri geri çekilsin mi?',
-      r.state === 'draft' ? 'Aile bu taslağı hiç görmedi.' : 'Ebeveyn bu öneriyi artık görmez.', [
-        { text: 'Vazgeç', style: 'cancel' },
-        {
-          text: r.state === 'draft' ? 'Sil' : 'Geri çek', style: 'destructive',
-          onPress: () => Promise.all(open.map((s) => withdrawSuggestion(s.id))).then(() => { setEdit(null); setTaskSheet(null); return load(); })
-            .catch(fail('Geri çekilemedi')),
-        },
-      ]);
+    openMenu(confirmSpec(r.state === 'draft' ? 'Taslak silinsin mi?' : 'Öneri geri çekilsin mi?',
+      r.state === 'draft' ? 'Aile bu taslağı hiç görmedi.' : 'Ebeveyn bu öneriyi artık görmez.', r.state === 'draft' ? 'Sil' : 'Geri çek',
+      () => { Promise.all(open.map((s) => withdrawSuggestion(s.id))).then(() => { setEdit(null); setTaskSheet(null); return load(); }).catch(fail('Geri çekilemedi')); },
+      r.state === 'draft' ? 'trash-outline' : 'arrow-undo-outline'), e);
   };
 
-  const hatMenu = (g: PlanGoal) => ro ? sampleOnly() : Alert.alert(short(g.title, 60), undefined, [
-    { text: 'Hedefi düzenle', onPress: () => setGoalSheet({ editing: g }) },
-    { text: 'Değerlendir', onPress: () => setEvalSheet({ goal: g }) },
+  const hatMenu = (g: PlanGoal, e?: GestureResponderEvent) => (ro ? sampleOnly() : openMenu({ title: short(g.title, 60), items: [
+    { label: 'Hedefi düzenle', icon: 'create-outline', onPress: () => setGoalSheet({ editing: g }) },
+    { label: 'Değerlendir', icon: 'clipboard-outline', onPress: () => setEvalSheet({ goal: g }) },
     // D1: "Aile görür" anahtarı satırdan menüye taşındı; kapalıysa başlıkta "Yalnız sende"
-    { text: g.shared ? 'Aileden gizle' : 'Aileye göster', onPress: () => act(updateGoal(g.id, { shared: !g.shared })) },
-    { text: 'Şablon olarak kaydet', onPress: () => (tpls === null
+    { label: g.shared ? 'Aileden gizle' : 'Aileye göster', icon: g.shared ? 'eye-off-outline' : 'eye-outline', onPress: () => act(updateGoal(g.id, { shared: !g.shared })) },
+    { label: 'Şablon olarak kaydet', icon: 'bookmark-outline', onPress: () => (tpls === null
       ? Alert.alert('Veritabanı güncellemesi bekleniyor', 'Şablonlarım için ortak 20261102100000_plan_redesign.sql uygulanmalı.')
       : setTplSave(g)) },
-    { text: 'Arşivle', style: 'destructive', onPress: () => act(updateGoal(g.id, { archived: true })) },
-    { text: 'Vazgeç', style: 'cancel' },
-  ]);
+    { label: 'Arşivle', icon: 'archive-outline', destructive: true, onPress: () => act(updateGoal(g.id, { archived: true })) },
+  ] }, e));
 
   // Şablonlarım: hedef + bağlı programlar + rutinler; çocuğa ait kayıt girmez
   const saveTemplate = async (g: PlanGoal, title: string, shared: boolean) => {
@@ -504,18 +497,18 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
     setEvalSheet(null);
     await after(status !== g.status);
   };
-  const statusMenu = (g: PlanGoal) => ro ? sampleOnly() : Alert.alert(short(g.title, 60), 'Hedefin durumu', [
-    ...(g.status !== 'active' ? [{ text: 'Sürüyor', onPress: () => act(updateGoal(g.id, { status: 'active' })) }] : []),
-    ...(g.status !== 'achieved' ? [{ text: 'Ulaşıldı · değerlendir', onPress: () => setEvalSheet({ goal: g, status: 'achieved' }) }] : []),
-    ...(g.status !== 'paused' ? [{ text: 'Ara ver', onPress: () => act(updateGoal(g.id, { status: 'paused' })) }] : []),
-    { text: 'Vazgeç', style: 'cancel' as const },
-  ]);
-  const moduleStatusMenu = (m: PlanModule) => ro ? sampleOnly() : Alert.alert(short(m.title, 60), 'Programın durumu', [
-    ...MODULE_STATUS.filter((x) => x.id !== m.status).map((x) => ({
-      text: x.id === 'planned' ? 'Planlandı (aile görmez)' : x.label, onPress: () => act(updateModule(m.id, { status: x.id })),
-    })),
-    { text: 'Vazgeç', style: 'cancel' as const },
-  ]);
+  // durum menüsü: üç durum, şu anki işaretli (uygulamanın menüsü)
+  const statusMenu = (g: PlanGoal, e?: GestureResponderEvent) => (ro ? sampleOnly() : openMenu({ title: 'Hedefin durumu', message: short(g.title, 60), items: [
+    { label: 'Sürüyor', icon: 'play-circle-outline', checked: g.status === 'active', onPress: () => act(updateGoal(g.id, { status: 'active' })) },
+    { label: 'Ulaşıldı', hint: 'Önce değerlendirilir', icon: 'checkmark-done-outline', checked: g.status === 'achieved', onPress: () => setEvalSheet({ goal: g, status: 'achieved' }) },
+    { label: 'Ara verildi', icon: 'pause-circle-outline', checked: g.status === 'paused', onPress: () => act(updateGoal(g.id, { status: 'paused' })) },
+  ] }, e));
+  const MODULE_ICON = { planned: 'eye-off-outline', active: 'play-circle-outline', done: 'checkmark-done-outline' } as const;
+  const moduleStatusMenu = (m: PlanModule, e?: GestureResponderEvent) => (ro ? sampleOnly() : openMenu({ title: 'Programın durumu', message: short(m.title, 60),
+    items: MODULE_STATUS.map((x) => ({
+      label: x.label, hint: x.id === 'planned' ? 'Aile görmez' : undefined, icon: MODULE_ICON[x.id], checked: x.id === m.status,
+      onPress: () => act(updateModule(m.id, { status: x.id })),
+    })) }, e));
 
   /* ---------- dikkat ---------- */
   const attention: { icon: keyof typeof Ionicons.glyphMap; text: string; onPress?: () => void; tone?: 'warn'; coach?: string }[] = [];
@@ -544,12 +537,12 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
           {ro ? null : gid ? (
             <IconButton name="unlink-outline" label="Bu hedeften ayır" size={16} onPress={() => act(unlinkModuleGoal(m.id, gid), 'Bağ kaldırılamadı')} />
           ) : (
-            <IconButton name="trash-outline" label="Programı sil" size={16} onPress={() => Alert.alert('Program silinsin mi?', 'Ailenin bu programdaki uygulama kayıtları da silinir.', [
-              { text: 'Vazgeç', style: 'cancel' }, { text: 'Sil', style: 'destructive', onPress: () => act(deleteModule(m.id), 'Silinemedi') }])} />
+            <IconButton name="trash-outline" label="Programı sil" size={16} onPress={(e) => openMenu(confirmSpec('Program silinsin mi?',
+              'Ailenin bu programdaki uygulama kayıtları da silinir.', 'Sil', () => act(deleteModule(m.id), 'Silinemedi')), e)} />
           )}
         </View>
         <StatusChip label={MODULE_STATUS.find((x) => x.id === m.status)?.label ?? m.status} tone={STATUS_TONE[m.status]}
-          onPress={() => moduleStatusMenu(m)} hint="Programın durumunu değiştir" />
+          onPress={(e) => moduleStatusMenu(m, e)} hint="Programın durumunu değiştir" />
         <Text style={styles.tiny}>
           {m.status === 'planned' ? 'Aile görmez (planlandı)' : pub?.modules[m.id] ? `Son 7 gün: ${s.practiced} gün uyguladı (ebeveyn kaydı)` : 'Aileye gönderilmedi'}
           {n > 1 ? ` · ${n} hedefte` : ''}
@@ -595,7 +588,7 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
           {r.state === 'added' && r.tasks.length > 0 && (changeOn || r.changes.length > 0)
             && <SmallButton label={r.changes.length ? 'Değişikliği düzenle' : 'Değişiklik öner'} onPress={() => openEdit(r)} />}
           {(r.state === 'draft' || r.state === 'pending') && <SmallButton label="Düzenle" onPress={() => openEdit(r)} />}
-          {(r.state === 'draft' || r.state === 'pending') && <SmallButton label={r.state === 'draft' ? 'Sil' : 'Geri çek'} danger onPress={() => withdrawGroup(r)} />}
+          {(r.state === 'draft' || r.state === 'pending') && <SmallButton label={r.state === 'draft' ? 'Sil' : 'Geri çek'} danger onPress={(e) => withdrawGroup(r, e)} />}
         </View>}
       </DragView>
     );
@@ -765,7 +758,7 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
     const tab = tabOf[g.id] ?? 'rt';
     const hatButtons = (
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-        {!ro && <IconButton name="ellipsis-horizontal" label="Diğer işlemler" size={18} onPress={() => hatMenu(g)} />}
+        {!ro && <IconButton name="ellipsis-horizontal" label="Diğer işlemler" size={18} onPress={(e) => hatMenu(g, e)} />}
         <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color={colors.muted} />
       </View>
     );
@@ -774,12 +767,12 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
         <View style={styles.titleRow}>
           {dirty && <View style={styles.dot} accessibilityLabel="Aileye gönderilmedi" />}
           <Text style={[styles.hatTitle, { flexShrink: 1, minWidth: 0 }]}>{g.title}</Text>
-          {cols3 && <StatusChip label={st?.label ?? g.status} tone={STATUS_TONE[g.status]} onPress={() => statusMenu(g)} hint="Hedefin durumunu değiştir" />}
+          {cols3 && <StatusChip label={st?.label ?? g.status} tone={STATUS_TONE[g.status]} onPress={(e) => statusMenu(g, e)} hint="Hedefin durumunu değiştir" />}
           {!g.shared && <PrivateBadge text="Yalnız sende" />}
         </View>
         {!cols3 && (
           <View style={styles.titleRow}>
-            <StatusChip label={st?.label ?? g.status} tone={STATUS_TONE[g.status]} onPress={() => statusMenu(g)} hint="Hedefin durumunu değiştir" />
+            <StatusChip label={st?.label ?? g.status} tone={STATUS_TONE[g.status]} onPress={(e) => statusMenu(g, e)} hint="Hedefin durumunu değiştir" />
             {!!meta && <Text style={[styles.small, { flexShrink: 1 }]}>{meta}</Text>}
           </View>
         )}
@@ -841,13 +834,10 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
       onModule={(k) => fromLib(() => addTemplateModule(k, libTarget))}
       onRoutine={(r) => fromLib(() => setRtSheet({ routine: r, goalId: libTarget }))}
       onTemplate={(t) => fromLib(() => applyTemplate(t))}
-      onTemplateMenu={(t) => Alert.alert(t.title, t.shared ? 'Ekibine açık' : 'Yalnız sende', [
-        ...(t.created_by === me.id || me.role === 'owner' ? [
-          { text: t.shared ? 'Yalnız bende kalsın' : 'Ekibime aç', onPress: () => updatePlanTemplate(t.id, { shared: !t.shared }).then(loadLibrary).catch(fail('Kaydedilemedi')) },
-          { text: 'Sil', style: 'destructive' as const, onPress: () => deletePlanTemplate(t.id).then(loadLibrary).catch(fail('Silinemedi')) },
-        ] : []),
-        { text: 'Kapat', style: 'cancel' as const },
-      ])} />
+      onTemplateMenu={(t, e) => openMenu({ title: t.title, message: t.shared ? 'Ekibine açık' : 'Yalnız sende', items: t.created_by === me.id || me.role === 'owner' ? [
+        { label: t.shared ? 'Yalnız bende kalsın' : 'Ekibime aç', icon: t.shared ? 'person-outline' : 'people-outline', onPress: () => { updatePlanTemplate(t.id, { shared: !t.shared }).then(loadLibrary).catch(fail('Kaydedilemedi')); } },
+        { label: 'Sil', icon: 'trash-outline', destructive: true, onPress: () => { deletePlanTemplate(t.id).then(loadLibrary).catch(fail('Silinemedi')); } },
+      ] : [{ label: 'Ekip üyesinin şablonu; yalnız sahibi değiştirir', icon: 'information-circle-outline' }] }, e)} />
   );
 
   return (
@@ -933,13 +923,13 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
                 {unlinkedMods.map((m) => (
                   <View key={m.id} style={styles.looseItem}>
                     {moduleMini(m, null)}
-                    {!ro && linkOK && goals.length > 0 && <SmallButton label="Hedefe bağla" onPress={() => pickGoal(m.title, (gid) => act(linkModuleGoals(client.clinic_id, [[m.id, gid]]), 'Bağlanamadı'))} />}
+                    {!ro && linkOK && goals.length > 0 && <SmallButton label="Hedefe bağla" onPress={(e) => pickGoal(m.title, (gid) => act(linkModuleGoals(client.clinic_id, [[m.id, gid]]), 'Bağlanamadı'), e)} />}
                   </View>
                 ))}
                 {unlinkedRts.map((r) => (
                   <View key={r.key} style={styles.looseItem}>
                     {routineMini(r)}
-                    {!ro && goals.length > 0 && <SmallButton label="Hedefe bağla" onPress={() => pickGoal(r.title, (gid) => { setRoutineGoal(r, gid).catch(fail('Bağlanamadı')); })} />}
+                    {!ro && goals.length > 0 && <SmallButton label="Hedefe bağla" onPress={(e) => pickGoal(r.title, (gid) => { setRoutineGoal(r, gid).catch(fail('Bağlanamadı')); }, e)} />}
                   </View>
                 ))}
               </View>
@@ -1033,6 +1023,7 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
         onWithdraw={edit && edit.target.mode !== 'change' ? () => withdrawGroup(edit.group) : undefined} />
       <EvaluateSheet goal={evalSheet?.goal ?? null} initialStatus={evalSheet?.status} week={thisWeek} today={today}
         onClose={() => setEvalSheet(null)} onSave={(r, st) => saveEval(evalSheet!.goal, r, st)} />
+      {menu}
       <PublishSheet items={pubItems} onClose={() => setPubItems(null)} onSend={publish}
         groups={plan.goals.map((g, i) => ({ id: g.id, title: g.title, color: GOAL_COLORS[Math.max(0, goals.findIndex((x) => x.id === g.id)) % GOAL_COLORS.length], hidden: !g.shared }))} />
       <LinkPicker visible={!!pick} band={band} ownRoutines={ownRoutines} goalTitle={goals.find((g) => g.id === pick)?.title ?? ''}
@@ -1063,7 +1054,7 @@ function ColHead({ q, info }: { q: string; info: string[] }) {
 }
 
 // Durum çipi (S1): seyrek değişen durum başlıkta görünür, dokununca seçenekler
-function StatusChip({ label, tone, onPress, hint }: { label: string; tone: { bg: string; fg: string }; onPress: () => void; hint: string }) {
+function StatusChip({ label, tone, onPress, hint }: { label: string; tone: { bg: string; fg: string }; onPress: (e: GestureResponderEvent) => void; hint: string }) {
   return (
     <Pressable onPress={onPress} hitSlop={6} accessibilityRole="button" accessibilityLabel={`${label}. ${hint}`}
       style={[styles.chipSt, { backgroundColor: tone.bg }]}>
@@ -1090,7 +1081,7 @@ function Library({ band, goals, target, onTarget, tpls, ownRoutines, meId, owner
   band: AgeGroup | null; goals: PlanGoal[]; target: string | null; onTarget: (gid: string) => void;
   tpls: PlanTemplate[] | null; ownRoutines: Routine[]; meId: string; owner: boolean;
   onGoal: (g: GoalT) => void; onPackage: (p: PackageT) => void; onModule: (key: string) => void; onRoutine: (r: Routine) => void;
-  onTemplate: (t: PlanTemplate) => void; onTemplateMenu: (t: PlanTemplate) => void;
+  onTemplate: (t: PlanTemplate) => void; onTemplateMenu: (t: PlanTemplate, e?: GestureResponderEvent) => void;
 }) {
   const [tab, setTab] = useState<LibTab>(tpls?.length ? 'tpl' : 'pkg');
   const [domain, setDomain] = useState('');
@@ -1173,7 +1164,7 @@ function Library({ band, goals, target, onTarget, tpls, ownRoutines, meId, owner
           {tpls.map((t) => row(t.id, `libtpl:${t.id}`, t.title,
             [`${t.content.modules.length} program`, `${t.content.routines.length} rutin`, t.shared ? (t.created_by === meId ? 'ekibine açık' : 'ekipten') : 'yalnız sende'].join(' · '),
             () => onTemplate(t),
-            (t.created_by === meId || owner) ? <IconButton name="ellipsis-horizontal" label="Şablon işlemleri" size={16} onPress={() => onTemplateMenu(t)} /> : null))}
+            (t.created_by === meId || owner) ? <IconButton name="ellipsis-horizontal" label="Şablon işlemleri" size={16} onPress={(e) => onTemplateMenu(t, e)} /> : null))}
         </View>
       )}
     </View>

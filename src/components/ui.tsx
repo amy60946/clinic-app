@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, StyleSheet, ActivityIndicator, TextInputProps, ViewStyle } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, StyleSheet, ActivityIndicator, TextInputProps, ViewStyle, GestureResponderEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, Difficulty, difficultyMeta } from '../theme';
 
@@ -102,7 +102,7 @@ export function DifficultyBadge({ d, coins }: { d: Difficulty; coins: number }) 
 }
 
 export function IconButton({ name, onPress, label, size = 20 }: {
-  name: keyof typeof Ionicons.glyphMap; onPress?: () => void; label: string; size?: number;
+  name: keyof typeof Ionicons.glyphMap; onPress?: (e: GestureResponderEvent) => void; label: string; size?: number;
 }) {
   return (
     <Pressable onPress={onPress} accessibilityLabel={label} hitSlop={8} style={styles.iconBtn}>
@@ -134,7 +134,7 @@ export function ChipBar<T extends string>({ options, value, onChange, inset = 0 
 }
 
 // Küçük düğme (ikincil eylem)
-export function SmallButton({ label, onPress, danger, busy }: { label: string; onPress: () => void; danger?: boolean; busy?: boolean }) {
+export function SmallButton({ label, onPress, danger, busy }: { label: string; onPress: (e: GestureResponderEvent) => void; danger?: boolean; busy?: boolean }) {
   return (
     <Pressable onPress={onPress} disabled={busy} hitSlop={6}
       style={[styles.small, danger && { borderColor: colors.danger }, busy && { opacity: 0.6 }]}>
