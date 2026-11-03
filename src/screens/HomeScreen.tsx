@@ -11,7 +11,8 @@ import {
   clinicianMe, listClients, listTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Member,
 } from '../lib/clinic';
 import SettingsScreen from './SettingsScreen';
-import { StartCard, SampleRow, TourBar, TOUR, StartFlags, StartProgress, startFlags, startDone, markSampleSeen, hideStart, hideSample } from './SampleTour';
+import { CoachProvider, CoachOverlay } from '../lib/coach';
+import { StartCard, SampleRow, TOUR, StartFlags, StartProgress, startFlags, startDone, markSampleSeen, hideStart, hideSample } from './SampleTour';
 import type { Attention } from '../lib/attention';
 import { sampleClient } from '../lib/sample';
 import { isoDate } from '../lib/metrics';
@@ -209,8 +210,9 @@ export default function HomeScreen() {
     if (!meId || survey !== 'hidden' || skipGuide.current) return;
     onboardingSeen(meId).then((seen) => {
       if (seen) return;
-      if (noClients) setGuide(true);
-      else markOnboardingSeen(meId);
+      // İlk giriş (kullanıcı isteği 3 Kasım 2026): bilgilendirme örnek aile üzerinde, yaptırarak (tur); 4 ekranlık tanıtım "Nasıl kullanılır?"da
+      markOnboardingSeen(meId);
+      if (noClients) openSample();
     });
   }, [meId, survey]); // eslint-disable-line react-hooks/exhaustive-deps
   // Anket bitti: davet ya da paket seçildiyse rehber bu açılışta gösterilmez (danışan yoksa sonraki açılışta gelir)
@@ -335,18 +337,24 @@ export default function HomeScreen() {
   }
 
   if (sample && state.kind === 'ready') {
-    return (
+    const screen = (
       <ClientScreen
-        client={sample.client} me={state.me} sample={sample.data} initialTab={sampleTab}
+        client={sample.client} me={state.me} sample={sample.data} initialTab={tourStep !== null ? TOUR[tourStep].tab : sampleTab}
         focusTab={tourStep !== null ? TOUR[tourStep].tab : undefined}
         onBack={() => { setSampleOpen(false); setTourStep(null); }}
         onRevoked={() => setSampleOpen(false)}
         onOpenNotification={openTarget}
-        footer={tourStep !== null ? (
-          <TourBar step={tourStep} onStep={setTourStep} onInvite={inviteFirst}
-            onClose={() => { setTourStep(null); track('sample.tour', { step: tourStep }); }} />
-        ) : undefined}
+        overlay={tourStep !== null ? <CoachOverlay finalLabel="İlk aileni davet et" /> : undefined}
       />
+    );
+    if (tourStep === null) return screen;
+    return (
+      <CoachProvider steps={TOUR} index={tourStep}
+        onIndex={(i) => { if (i >= TOUR.length) setTourStep(null); else { setTourStep(i); track('sample.tour_step', { step: TOUR[i].key }); } }}
+        onClose={(i) => { setTourStep(null); track('sample.tour', { step: TOUR[i]?.key ?? i }); }}
+        onFinish={() => { track('sample.tour_done'); inviteFirst(); }}>
+        {screen}
+      </CoachProvider>
     );
   }
 

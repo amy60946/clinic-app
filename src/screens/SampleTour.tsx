@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius } from '../theme';
 import type { Tab } from './client/ClientScreen';
+import type { CoachStep } from '../lib/coach';
 
 // "Başlarken" (ana ekran) ve örnek aile turu. Joon'un "Get started" + "sample patient" işlevinin karşılığı; metinler özgün.
 // Örnek aile gerçek danışan listesine karışmaz (Joon'da karışıyor): kendi satırında, listenin altında durur.
@@ -48,11 +49,11 @@ export function StartCard({ progress: p, onSample, onInvite, onPlan, onPublish, 
   progress: StartProgress; onSample: () => void; onInvite: () => void; onPlan: () => void; onPublish: () => void; onReport: () => void; onHide: () => void;
 }) {
   const items = [
-    { done: p.sampleSeen, title: 'Örnek aileyi incele', sub: 'Uydurma bir ailenin verisiyle ekranları gez', icon: 'sparkles-outline' as const, on: onSample, needs: false },
-    { done: p.invited, title: 'İlk aileni davet et', sub: p.invited && !p.hasClient ? 'Davet gönderildi · ebeveyn onaylayınca çocuk burada görünür' : 'Ebeveynin e-postasını yaz; davet senin adınla gider', icon: 'mail-outline' as const, on: onInvite, needs: false },
-    { done: p.planned, title: 'İlk hedefi ekle', sub: 'Danışan › Takip Planı › + Hedef ya da hazır paket', icon: 'flag-outline' as const, on: onPlan, needs: true },
-    { done: p.published, title: 'Aileye gönder', sub: 'Eklediklerin taslaktır; aile "Aileye gönder" deyince tek bildirimle görür', icon: 'paper-plane-outline' as const, on: onPublish, needs: true },
-    { done: p.report, title: 'İlk raporu aç', sub: 'Danışan › Rapor › PDF ya da ilerleme notu', icon: 'document-text-outline' as const, on: onReport, needs: true },
+    { done: p.sampleSeen, title: 'Örnek aileyle dene', sub: 'Deniz’le hedef aç, rutin bağla, gönder', icon: 'sparkles-outline' as const, on: onSample, needs: false },
+    { done: p.invited, title: 'İlk aileni davet et', sub: p.invited && !p.hasClient ? 'Davet gitti; ebeveyn onaylayınca burada' : '"Aileyi davet et" › e-posta', icon: 'mail-outline' as const, on: onInvite, needs: false },
+    { done: p.planned, title: 'İlk hedefi ekle', sub: 'Takip Planı › "+ Hedef"', icon: 'flag-outline' as const, on: onPlan, needs: true },
+    { done: p.published, title: 'Aileye gönder', sub: 'Takip Planı › "Aileye gönder"', icon: 'paper-plane-outline' as const, on: onPublish, needs: true },
+    { done: p.report, title: 'İlk raporu aç', sub: 'Rapor › "Raporu aç"', icon: 'document-text-outline' as const, on: onReport, needs: true },
   ];
   const done = startDone(p);
   return (
@@ -107,14 +108,15 @@ export function SampleRow({ onOpen, onHide }: { onOpen: () => void; onHide?: () 
 }
 
 // Gerçek danışanda bölüm ilk açıldığında bir kez: kısa ipucu (örnek aile turunun bölüm metinleri, gerçek veriye göre)
+// Kısa (kullanıcı isteği 3 Kasım 2026: "yazıları daha kısa tut"); dokunulacak tuş tırnak içinde
 export const SECTION_HINTS: Partial<Record<Tab, { title: string; text: string }>> = {
-  summary: { title: 'Özet', text: 'Seçtiğin dönemin ev rutini özeti: tamamlama, tam gün, hatırlatmadan önce başlama. Oranlar dünkü güne kadar hesaplanır; puan değildir.' },
-  routine: { title: 'Ev Rutinleri', text: 'Haftalık tabloda her görevin günleri; bir göreve dokun, gün gün ayrıntısı açılır. "Zaman İçinde" görevleri haftadan haftaya karşılaştırır. "+ Aileye öner" ile rutin ya da görev önerirsin; gönderdiklerin "Gönderilenler"de.' },
-  abc: { title: 'Davranış Kayıtları', text: 'Ebeveynin girdiği kayıtlar: öncesi, davranış, sonrası (ABC). Tablo görünümünü dosya olarak indirebilirsin.' },
-  goals: { title: 'Takip Planı', text: 'Her hedef bir satır: hedef, ailenin evdeki programı, çocuğun rutini. Eklediğin her şey önce taslaktır; bej olanları aile görmez, "Aileye gönder" deyince aile tek bildirimle görür. Kitaplık\'tan paket, hazır hedef ya da kendi şablonunu ekleyebilirsin. Aile neyi görür: üstteki (i).' },
-  notes: { title: 'Notlar', text: 'Klinik notların yalnız sende ve yetkili ekibinde; aile görmez.' },
-  report: { title: 'Rapor', text: 'Dönemin yazdırılabilir gözlem raporu ve kopyalanabilir ilerleme notu.' },
-  details: { title: 'Danışan Bilgileri', text: 'Klinik etiketin, ebeveyn adları, onay tarihi ve ekip erişimi.' },
+  summary: { title: 'Özet', text: 'Dönemin ev rutini: tamamlama, tam gün, kendiliğinden başlama. Puan değildir.' },
+  routine: { title: 'Ev Rutinleri', text: 'Bir göreve dokun: gün gün ayrıntı. Öneri için "+ Aileye öner".' },
+  abc: { title: 'Davranış Kayıtları', text: 'Ebeveynin ABC kayıtları. Tabloyu "İndir (CSV)" ile al.' },
+  goals: { title: 'Takip Planı', text: 'Eklediğin her şey taslak (bej), aile görmez. Göndermek için "Aileye gönder".' },
+  notes: { title: 'Notlar', text: 'Yalnız sen ve yetkili ekibin görür.' },
+  report: { title: 'Rapor', text: 'PDF için "Raporu aç"; not için "Notu kopyala".' },
+  details: { title: 'Danışan Bilgileri', text: 'Etiket, ebeveyn adları, onay tarihi, ekip erişimi.' },
 };
 
 export function SectionHint({ userId, section }: { userId: string; section: Tab }) {
@@ -124,7 +126,7 @@ export function SectionHint({ userId, section }: { userId: string; section: Tab 
 // Ana ekran: danışan bölümleri ilk göründüğünde bir kez (ilk kullanım "İ", 3 Kasım 2026)
 export const BOARD_HINT = {
   title: 'Danışanlar bölümlere ayrılır',
-  text: 'Senin sıran: gönderilmemiş değişikliğin ya da değerlendirme zamanı. Aileden yeni: son 7 günün kayıtları. Sessiz kalanlar: ailenin 7 gündür kaydı yok. Sıralama puan değildir; ayrıntı başlıklardaki (i) içinde.',
+  text: 'Senin sıran · Aileden yeni · Sessiz kalanlar. Puan değil; ayrıntı başlıktaki (i).',
 };
 
 // Bir kez gösterilen ipucu kartı ("Anladım" ile kapanır, bu cihazda hatırlanır)
@@ -154,51 +156,31 @@ export function OnceHint({ userId, id, hint }: { userId: string; id: string; hin
   );
 }
 
-type Step = { tab: Tab; title: string; text: string };
-// 5 adım (ilk kullanım "Ö1", 3 Kasım 2026: 3–4 adımlı turlar en çok bitiriliyor; hoş geldin Özet'le birleşti, Danışan Bilgileri çıktı)
-export const TOUR: Step[] = [
-  { tab: 'summary', title: 'Örnek aile: Deniz', text: 'Uydurma bir aile; gerçek bir aile bağlandığında göreceğin ekranlar bunlar. Özet, seçtiğin dönemin ev rutinini gösterir: tamamlama, tam gün, hatırlatmadan önce başlama. Oranlar gözlemdir, puan değildir.' },
-  { tab: 'routine', title: 'Ev Rutinleri', text: 'Haftalık tabloda her görevin günleri. Bir göreve dokun, gün gün ayrıntısı açılır; "Zaman İçinde" görevleri haftadan haftaya karşılaştırır. "+ Aileye öner" ile rutin ya da görev önerirsin.' },
-  { tab: 'abc', title: 'Davranış Kayıtları', text: 'Ebeveynin girdiği kayıtlar: öncesi, davranış, sonrası (ABC). Haftalık sayı grafiği ve tablo; tabloyu dosya olarak indirebilirsin.' },
-  { tab: 'goals', title: 'Takip Planı: önce taslak, sonra gönder', text: 'Her hedef bir satır: hedef, ailenin programı, çocuğun rutini. Eklediğin her şey önce taslaktır; bej olanları aile görmez. "Aileye gönder" deyince aile tek bildirimle görür. Değerlendirme dört haftada bir sorulur.' },
-  { tab: 'report', title: 'Rapor ve ilerleme notu', text: 'Dönemin yazdırılabilir gözlem raporu ve kopyalanabilir ilerleme notu. Sıra gerçek ailede: aileyi e-postayla davet et, ebeveyn onaylayınca çocuk danışanların arasında görünür.' },
+// Yaptırarak öğreten tur (kullanıcı isteği 3 Kasım 2026): örnek aile Deniz üzerinde her adım tek bir tuşu vurgular, ekranın
+// geri kalanı hafif kararır; uzman o tuşa dokununca adım ilerler. Yazılar kısa, dokunulacak tuş kalın. Yapılanlar örnekte kalır.
+// Olaylar: PlanHats (goal_added, routine_added, published, evaluated), HomeRoutines (routine_row), ReportTab (report_action).
+export const TOUR: (CoachStep & { tab: Tab })[] = [
+  { key: 'intro', tab: 'goals', title: 'Deniz’le dene', text: 'Örnek bir aile. Birkaç dokunuşla planı kur; kaydedilmez, aileye gitmez.' },
+  {
+    key: 'goal', tab: 'goals', target: 'plan.addGoal', until: 'goal_added', title: 'Hedef ekle', text: '**+ Hedef**’e dokun.',
+    sheet: { goal: 'Hazır bir hedefe dokun.', goalForm: 'Alanlar dolu. En alttaki **Kaydet**’e dokun.' },
+  },
+  {
+    key: 'routine', tab: 'goals', target: 'plan.newRoutine', until: 'routine_added', title: 'Rutin bağla', text: 'Yaşına uygun rutin ekle: **{label}**',
+    sheet: { routine: 'Görevler ve saatler hazır. **Plana ekle**’ye dokun.' },
+  },
+  {
+    key: 'publish', tab: 'goals', target: 'plan.publish', until: 'published', title: 'Aileye gönder', text: 'Bej = taslak, aile görmez. **Aileye gönder**’e dokun.',
+    sheet: { publish: 'İşaretliler tek bildirimle gider. **Hepsini gönder**’e dokun.' },
+  },
+  {
+    key: 'evaluate', tab: 'goals', target: 'plan.evaluate', until: 'evaluated', title: 'Değerlendir', text: 'Dört haftada bir sorulur. **Değerlendirme zamanı**’na dokun.',
+    sheet: { evaluate: 'Bir puan seç, **Kaydet**’e dokun. Aile görmez.' },
+  },
+  { key: 'watch', tab: 'routine', target: 'routine.row', until: 'routine_row', title: 'Ailenin kaydı', text: 'Bir **göreve** dokun, ayrıntıya bak, kapat.' },
+  { key: 'report', tab: 'report', target: 'report.open', until: 'report_action', title: 'Rapor', text: 'Dönem sonu: **Raporu aç**’a dokun.' },
+  { key: 'done', tab: 'report', title: 'Hazırsın', text: 'Sıra gerçek ailede: ebeveyni e-postayla davet et.', final: true },
 ];
-
-// Danışan ekranının altında duran tur kartı
-export function TourBar({ step, onStep, onClose, onInvite }: {
-  step: number; onStep: (n: number) => void; onClose: () => void; onInvite: () => void;
-}) {
-  const { width } = useWindowDimensions();
-  const s = TOUR[step];
-  const last = step === TOUR.length - 1;
-  return (
-    <View pointerEvents="box-none" style={styles.tourWrap}>
-      <View style={[styles.tour, width >= 720 && { maxWidth: 520, alignSelf: 'center' }]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Text style={styles.tourStep}>{`${step + 1} / ${TOUR.length}`}</Text>
-          <Text style={[styles.tourTitle, { flex: 1 }]}>{s.title}</Text>
-          <Pressable onPress={onClose} hitSlop={8} accessibilityLabel="Turu kapat">
-            <Ionicons name="close" size={18} color="#C9CFE0" />
-          </Pressable>
-        </View>
-        <Text style={styles.tourText}>{s.text}</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4 }}>
-          <View style={{ flexDirection: 'row', gap: 4, flex: 1 }}>
-            {TOUR.map((_, i) => <View key={i} style={[styles.dot, i === step && { backgroundColor: colors.gold, width: 14 }]} />)}
-          </View>
-          {step > 0 && (
-            <Pressable onPress={() => onStep(step - 1)} hitSlop={6} style={styles.ghost} accessibilityRole="button">
-              <Text style={styles.ghostText}>Geri</Text>
-            </Pressable>
-          )}
-          <Pressable onPress={last ? onInvite : () => onStep(step + 1)} style={styles.next} accessibilityRole="button">
-            <Text style={styles.nextText}>{last ? 'İlk aileni davet et' : step === 0 ? 'Başla' : 'İleri'}</Text>
-          </Pressable>
-        </View>
-      </View>
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   card: { backgroundColor: '#fff', borderRadius: radius.md, padding: 16, paddingBottom: 6, marginTop: 12, borderWidth: 1, borderColor: colors.today },
@@ -220,14 +202,4 @@ const styles = StyleSheet.create({
   hintText: { fontSize: 13, color: colors.text, lineHeight: 19 },
   hintBtn: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: radius.pill, backgroundColor: '#fff' },
   hintBtnText: { fontSize: 12, fontWeight: '700', color: colors.navy },
-  tourWrap: { paddingHorizontal: 12, paddingBottom: 12 },
-  tour: { width: '100%', backgroundColor: colors.navy, borderRadius: radius.md, padding: 16, gap: 8 },
-  tourStep: { fontSize: 11, fontWeight: '700', color: colors.gold },
-  tourTitle: { fontSize: 15, fontWeight: '700', color: '#fff' },
-  tourText: { fontSize: 13, color: '#DDE2EE', lineHeight: 19 },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#3A4566' },
-  ghost: { paddingHorizontal: 10, paddingVertical: 8 },
-  ghostText: { fontSize: 13, fontWeight: '600', color: '#C9CFE0' },
-  next: { backgroundColor: colors.gold, borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 9 },
-  nextText: { fontSize: 13, fontWeight: '700', color: colors.navy },
 });

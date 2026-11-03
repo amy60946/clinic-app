@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal, Alert, StyleSheet, ActivityIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
+import { CoachBanner } from '../../lib/coach';
 import { Input, IconButton, DifficultyBadge, Segmented } from '../../components/ui';
 import { todayISO } from '../../dates';
 import { SuggestionInput } from '../../lib/clinic';
@@ -77,6 +78,7 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initi
           <IconButton name="close" onPress={onClose} label="Kapat" />
           <Text style={styles.title}>Günlük rutin önerisi</Text>
         </View>
+        <CoachBanner sheet="routine" />
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 12 }} keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive" automaticallyAdjustKeyboardInsets>
           <View style={[styles.hero, { backgroundColor: routine.tint }]}>

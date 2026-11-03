@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { markReportSeen } from '../SampleTour';
+import { CoachTarget, useCoachEmit } from '../../lib/coach';
 import { View, Text, Alert, Platform, StyleSheet } from 'react-native';
 import * as Print from 'expo-print';
 import * as Clipboard from 'expo-clipboard';
@@ -79,11 +80,14 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
   const copyNote = async () => {
     await Clipboard.setStringAsync(note);
     track('report.note_copy');
+    emit('report_action');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const emit = useCoachEmit();
   const open = async () => {
+    emit('report_action');
     setBusy(true);
     try {
       await printHtml(buildReportHtml({
@@ -118,7 +122,7 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
           value={mode} onChange={setMode}
         />
         <Text style={styles.small}>Görünecek: {childLabel || '—'}</Text>
-        <Cta label={Platform.OS === 'web' ? 'Raporu aç' : 'Raporu yazdır / paylaş'} onPress={open} busy={busy} />
+        <CoachTarget id="report.open"><Cta label={Platform.OS === 'web' ? 'Raporu aç' : 'Raporu yazdır / paylaş'} onPress={open} busy={busy} /></CoachTarget>
         <Text style={styles.small}>
           Rapor kişisel sağlık verisi içerir. Yalnız tedavi amacıyla, güvenli kanaldan ve ebeveynin bilgisiyle paylaş.
         </Text>

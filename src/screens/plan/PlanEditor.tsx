@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal, Switch, Alert, StyleSheet, Ac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
+import { CoachBanner } from '../../lib/coach';
 import { Card, Label, Input, Cta, Empty, SmallButton, IconButton, Notice } from '../../components/ui';
 import { GasLine } from '../../components/charts';
 import { weekStarts } from '../../lib/metrics';
@@ -291,7 +292,7 @@ function ModuleCard({ m, isLink, readOnly, logs, onEdit, onStatus, onDelete }: {
 
 /* ---------- Hedef ekle / düzenle ---------- */
 
-function Sheet({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+function Sheet({ title, onClose, children, coach }: { title: string; onClose: () => void; children: React.ReactNode; coach?: string }) {
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
@@ -300,6 +301,7 @@ function Sheet({ title, onClose, children }: { title: string; onClose: () => voi
             <IconButton name="close" label="Kapat" onPress={onClose} />
             <Text style={styles.sheetTitle}>{title}</Text>
           </View>
+          {!!coach && <CoachBanner sheet={coach} />}
           <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" automaticallyAdjustKeyboardInsets>{children}</ScrollView>
         </View>
       </SafeAreaView>
@@ -340,7 +342,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave }: {
 
   if (step === 'pick') {
     return (
-      <Sheet title="Hedef ekle" onClose={onClose}>
+      <Sheet title="Hedef ekle" onClose={onClose} coach="goal">
         <Chips options={[{ id: '', label: 'Tümü' } as { id: string; label: string }, ...DOMAINS.map((d) => ({ id: d.key, label: d.label }))]}
           value={domain} onChange={setDomain} />
         <View style={{ gap: 8, marginTop: 14 }}>
@@ -359,7 +361,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave }: {
     );
   }
   return (
-    <Sheet title={editing ? 'Hedefi düzenle' : 'Hedef'} onClose={onClose}>
+    <Sheet title={editing ? 'Hedefi düzenle' : 'Hedef'} onClose={onClose} coach={editing ? undefined : 'goalForm'}>
       <Text style={styles.small}>Hedefi gözlenebilir yaz: "… yapar". Hiçbir hedef tanı ya da puan değildir.</Text>
       {!legacy && (<><Label>Alan</Label>
         <Chips options={DOMAINS.map((d) => ({ id: d.key, label: d.label }))} value={f.domain} onChange={(v) => set({ domain: v })} /></>)}

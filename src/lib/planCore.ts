@@ -11,18 +11,20 @@ const differs = (want: Record<string, unknown> | null, pub: Pub) => {
   if (!want || !pub) return !want !== !pub;
   return Object.keys(want).some((k) => str(want[k]) !== str(pub[k]));
 };
+// Ailenin gördüğü hâl (care_plan_snapshot ile aynı alanlar); aileye gitmeyen hedef/program için null
+export const goalSnapshot = (g: PlanGoal): Record<string, unknown> | null => (g.shared && !g.archived ? {
+  title: g.title, description: g.description, domain: g.domain, measure: g.measure, baseline: g.baseline, target: g.target,
+  weeks: g.weeks, home_support: g.home_support, status: g.status, position: g.position,
+} : null);
+export const moduleSnapshot = (m: PlanModule): Record<string, unknown> | null => (m.status !== 'planned' ? {
+  title: m.title, aim: m.aim, practice: m.practice, checklist: m.checklist, status: m.status, position: m.position,
+} : null);
 export function goalUnsent(g: PlanGoal, pub: Pub): boolean {
-  const want = g.shared && !g.archived ? {
-    title: g.title, description: g.description, domain: g.domain, measure: g.measure, baseline: g.baseline, target: g.target,
-    weeks: g.weeks, home_support: g.home_support, status: g.status, position: g.position,
-  } : null;
-  return differs(want, pub);
+  return differs(goalSnapshot(g), pub);
 }
 // sharedGoals: programın bağlı olduğu, aileye açık ve arşivlenmemiş hedefler (sıra önemsiz); null: bağ bilinmiyor
 export function moduleUnsent(m: PlanModule, pub: Pub, sharedGoals: string[] | null): boolean {
-  const want = m.status !== 'planned' ? {
-    title: m.title, aim: m.aim, practice: m.practice, checklist: m.checklist, status: m.status, position: m.position,
-  } : null;
+  const want = moduleSnapshot(m);
   if (differs(want, pub)) return true;
   if (!want || !pub || sharedGoals === null) return false;
   const was = Array.isArray(pub.goal_ids) ? (pub.goal_ids as string[]) : [];

@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal, Alert, StyleSheet, ActivityIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
+import { CoachBanner } from '../../lib/coach';
 import { IconButton } from '../../components/ui';
 import { formatTR } from '../../dates';
 import type { PlanGoal, GoalStatus } from '../../lib/plan';
@@ -69,6 +70,7 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
             <Text style={styles.badgeText}>Aile görmez</Text>
           </View>
         </View>
+        <CoachBanner sheet="evaluate" />
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 12 }}>
           <Text style={styles.small}>
             {formatTR(today)} · {goal.weeks ? `${Math.min(n, goal.weeks)}. hafta / ${goal.weeks}` : `${n}. hafta`}

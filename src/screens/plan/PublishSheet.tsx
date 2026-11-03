@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, Modal, StyleSheet, ActivityIndicator
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
+import { CoachBanner } from '../../lib/coach';
 import { IconButton } from '../../components/ui';
 import type { PubItem } from '../../lib/planCore';
 
@@ -55,6 +56,7 @@ function Body({ items, groups, onClose, onSend }: {
             <Text style={styles.small}>Ebeveyn tek bildirim alır. İşaretini kaldırdığın bekler, sonra gönderirsin.</Text>
           </View>
         </View>
+        <CoachBanner sheet="publish" />
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 8 }}>
           {sections.map(({ g, list }) => (
             <View key={g.id ?? 'loose'} style={{ gap: 6 }}>

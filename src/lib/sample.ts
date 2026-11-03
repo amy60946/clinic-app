@@ -3,6 +3,7 @@
 // Aynı gün için hep aynı veri (tohumlu rastgele) — testler tests/sample.test.mjs.
 import type { Task, Completion, AbcEvent, DeclineReason } from './metrics.ts';
 import { addDays, occursOn } from './metrics.ts';
+import { goalSnapshot, moduleSnapshot } from './planCore.ts';
 import type { PlanGoal, PlanModule, ModuleLog, ModuleGoals, Published } from './plan.ts';
 import type { Client, ClientData, Suggestion, SuggestionInput } from './clinic.ts';
 
@@ -192,13 +193,8 @@ function samplePlan(today: string, start: string, r: () => number, ts: Task[]): 
       { status: 'draft', decided_at: null, task_title: null, goal_id: 's-g1', routine: { ...evening, position: 1 } }),
   ];
   // Aileye gönderilmiş sürüm: g2'nin aileye notu sonradan değişti (gönderilmedi); Planlandı program aileye gitmez
-  const goalPub = (g: PlanGoal) => ({
-    title: g.title, description: g.description, domain: g.domain, measure: g.measure, baseline: g.baseline, target: g.target,
-    weeks: g.weeks, home_support: g.home_support, status: g.status, position: g.position,
-  });
-  const modPub = (m: PlanModule) => ({
-    title: m.title, aim: m.aim, practice: m.practice, checklist: m.checklist, status: m.status, position: m.position, goal_ids: links[m.id],
-  });
+  const goalPub = (g: PlanGoal) => goalSnapshot(g)!;
+  const modPub = (m: PlanModule) => ({ ...moduleSnapshot(m)!, goal_ids: links[m.id] });
   const pub: Published = {
     goals: { 's-g1': goalPub(goals[0]), 's-g2': { ...goalPub(goals[1]), description: 'Öfke anında sakinleşme köşesini hatırlatın.' } },
     modules: { 's-m1': modPub(modules[0]), 's-m2': modPub(modules[1]) },

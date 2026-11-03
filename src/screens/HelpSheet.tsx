@@ -14,58 +14,16 @@ import { track } from '../lib/track';
 export type HelpAction = 'invite' | 'routine' | 'plan' | 'report' | 'team' | 'home';
 type Item = { key: string; q: string; a?: string[]; card?: boolean; show?: HelpAction; showLabel?: string; ownerOnly?: boolean };
 
+// Kısa yanıt (kullanıcı isteği 3 Kasım 2026): bir iki cümle, dokunulacak tuş tırnak içinde
 const ITEMS: Item[] = [
-  {
-    key: 'invite', q: 'Bir aileyi nasıl davet ederim?', show: 'invite', showLabel: 'Davet penceresini aç',
-    a: [
-      'Ana ekranda "Aileyi davet et"e dokun, ebeveynin e-postasını yaz; istersen çocuğun adını ve yaş grubunu ekle.',
-      'Davet senin adınla e-postayla gider ve 3 gün geçerlidir. Ebeveyn ParentApp\'te daveti kabul edip çocuğu paylaşınca çocuk ana ekranında görünür.',
-    ],
-  },
-  { key: 'sees', q: 'Aile neyi görür, neyi görmez?', card: true },
-  {
-    key: 'routine', q: 'Aileye rutin ya da görev nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri\'ni aç',
-    a: [
-      'Danışan › Ev Rutinleri › "+ Aileye öner": çocuğun yaşına uygun hazır bir rutin ya da tek bir görev seç, saatleri düzenle, gönder.',
-      'Takip Planı\'nda bir hedefin altından eklersen taslak olur ve "Aileye gönder" ile gider. Görevi ekleme kararı ebeveynindir; gönderdiklerin "Gönderilenler"de.',
-    ],
-  },
-  {
-    key: 'publish', q: '"Aileye gönder" ne yapar?', show: 'plan', showLabel: 'Takip Planı\'nı aç',
-    a: [
-      'Takip Planı\'nda eklediğin hedef, program ve rutinler önce taslaktır; bej olanları aile görmez.',
-      '"Aileye gönder" önce bir özet açar: işaretli olanlar aileye tek bildirimle gider, işaretini kaldırdıkların bekler. Sonradan yaptığın değişiklikler yeniden "gönderilmedi" sayılır.',
-    ],
-  },
-  {
-    key: 'evaluate', q: 'Hedefi ne zaman değerlendiririm?', show: 'plan', showLabel: 'Takip Planı\'nı aç',
-    a: [
-      'Dört haftada bir ya da hedefin süresi dolunca; zamanı gelince Takip Planı\'nda "Değerlendirme zamanı" çıkar.',
-      '"Değerlendir" ile GAS (−2…+2) seçer, sonra Sürdür, Ulaşıldı ya da Ara ver dersin. Değerlendirme aileye gitmez; raporda tarihleriyle yer alır.',
-    ],
-  },
-  {
-    key: 'board', q: 'Ana ekrandaki bölümler ne anlama geliyor?', show: 'home', showLabel: 'Ana ekrana dön',
-    a: [
-      'Senin sıran: aileye gönderilmemiş değişikliğin, değerlendirme zamanı gelen hedefin ya da planı olmayan danışan.',
-      'Aileden yeni: son 7 günün davranış kayıtları ve öneri kararları; "Gördüm" deyince yeni bir şey gelene kadar kapanır. Sessiz kalanlar: ailenin 7 gündür kaydı yok.',
-      'Bu bir hatırlatmadır; sıralama ya da puan değildir.',
-    ],
-  },
-  {
-    key: 'report', q: 'Raporu ve ilerleme notunu nasıl alırım?', show: 'report', showLabel: 'Rapor\'u aç',
-    a: [
-      'Danışan › Rapor: dönemi ve çocuğun adının nasıl görüneceğini seç. Web\'de PDF olarak kaydedersin, iPad\'de yazdırma ya da paylaşma açılır.',
-      '"İlerleme notu" dönemin kayıtlarından kuralla derlenir; kopyalayıp kendi notuna eklersin. Yapay zekâ kullanılmaz, veri cihazdan çıkmaz.',
-    ],
-  },
-  {
-    key: 'team', q: 'Ekibime nasıl uzman eklerim?', show: 'team', showLabel: 'Ayarlar › Ekip', ownerOnly: true,
-    a: [
-      'Ayarlar › Ekip › "Ekibe uzman davet et": kod 15 dakika geçerlidir. Uzman ClinicApp\'te "Kodum var" ile katılır.',
-      'Ekip üyesi yalnız kendi davet ettiği aileleri ve senin atadıklarını görür; atamayı danışan › Danışan Bilgileri › "Ekip erişimini yönet"ten yaparsın.',
-    ],
-  },
+  { key: 'invite', q: 'Aileyi nasıl davet ederim?', show: 'invite', showLabel: 'Davet et', a: ['"Aileyi davet et" › ebeveynin e-postası › "E-posta gönder". Davet 3 gün geçerli; ebeveyn onaylayınca çocuk ana ekranda.'] },
+  { key: 'sees', q: 'Aile neyi görür?', card: true },
+  { key: 'routine', q: 'Rutin ya da görev nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Takip Planı\'ndan eklersen taslak olur. Eklemek ebeveynin kararı.'] },
+  { key: 'publish', q: '"Aileye gönder" ne yapar?', show: 'plan', showLabel: 'Takip Planı', a: ['Taslakları (bej) aileye yollar. Önce özet açılır; işaretliler tek bildirimle gider.'] },
+  { key: 'evaluate', q: 'Ne zaman değerlendiririm?', show: 'plan', showLabel: 'Takip Planı', a: ['Dört haftada bir "Değerlendirme zamanı" çıkar › "Değerlendir" › puan › "Kaydet". Aile görmez.'] },
+  { key: 'board', q: 'Ana ekrandaki bölümler?', show: 'home', showLabel: 'Ana ekran', a: ['Senin sıran: senden bekleyen. Aileden yeni: son 7 gün. Sessiz kalanlar: 7 gündür kayıt yok. Puan değildir.'] },
+  { key: 'report', q: 'Raporu nasıl alırım?', show: 'report', showLabel: 'Rapor', a: ['Rapor › "Raporu aç" (PDF). İlerleme notu için "Notu kopyala"; yapay zekâ yok.'] },
+  { key: 'team', q: 'Ekibime uzman nasıl eklerim?', show: 'team', showLabel: 'Ayarlar', ownerOnly: true, a: ['Ayarlar › "Ekibe uzman davet et" › kodu ver (15 dk). Uzman "Kodum var" ile katılır.'] },
 ];
 
 export default function HelpSheet({ visible, owner, onClose, onIntro, onSample, onAction }: {
@@ -87,13 +45,13 @@ export default function HelpSheet({ visible, owner, onClose, onIntro, onSample, 
           </View>
           <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 10 }}>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              <Pressable onPress={onIntro} style={styles.primary} accessibilityRole="button">
-                <Ionicons name="play-circle-outline" size={18} color="#fff" />
-                <Text style={styles.primaryText}>Kısa tanıtım (4 ekran)</Text>
+              <Pressable onPress={onSample} style={styles.primary} accessibilityRole="button">
+                <Ionicons name="sparkles-outline" size={18} color="#fff" />
+                <Text style={styles.primaryText}>Örnek aileyle dene</Text>
               </Pressable>
-              <Pressable onPress={onSample} style={styles.secondary} accessibilityRole="button">
-                <Ionicons name="sparkles-outline" size={16} color={colors.navy} />
-                <Text style={styles.secondaryText}>Örnek aileyi aç</Text>
+              <Pressable onPress={onIntro} style={styles.secondary} accessibilityRole="button">
+                <Ionicons name="play-circle-outline" size={16} color={colors.navy} />
+                <Text style={styles.secondaryText}>Kısa tanıtım</Text>
               </Pressable>
             </View>
             <View style={styles.list}>
@@ -120,7 +78,7 @@ export default function HelpSheet({ visible, owner, onClose, onIntro, onSample, 
                 );
               })}
             </View>
-            <Text style={styles.foot}>ClinicApp gözlem toplar, tanı koymaz. Acil yardım hizmeti değildir; acil durumda 112'yi ara.</Text>
+            <Text style={styles.foot}>Gözlem toplar, tanı koymaz. Acil durumda 112.</Text>
           </ScrollView>
         </View>
       </SafeAreaView>
@@ -132,21 +90,21 @@ export default function HelpSheet({ visible, owner, onClose, onIntro, onSample, 
 const SEES: { title: string; tone: 'family' | 'private' | 'none'; icon: keyof typeof Ionicons.glyphMap; items: string[] }[] = [
   {
     title: 'Aile görür (sen gönderince)', tone: 'family', icon: 'people-outline',
-    items: ['"Aile görür" açık hedefler: hedef düzeyi, süresi ve aileye notun', 'Etkin ve tamamlanan programlar', 'Rutin ve görev önerilerin; eklemek ebeveynin kararı', 'Değişiklik önerilerin'],
+    items: ['Hedef, hedef düzeyi, süre, aileye not', 'Etkin ve tamamlanan programlar', 'Rutin ve görev önerileri', 'Değişiklik önerileri'],
   },
   {
     title: 'Yalnız sen ve yetkili ekibin', tone: 'private', icon: 'eye-off-outline',
-    items: ['Klinik notların', 'Değerlendirmeler (GAS)', 'Taslaklar ve "Planlandı" programlar', '"Yalnız sende" hedefler', 'Klinik etiketi ve davetteki kendi notun'],
+    items: ['Notlar', 'Değerlendirmeler (GAS)', 'Taslaklar, "Planlandı" programlar', '"Yalnız sende" hedefler', 'Klinik etiketi'],
   },
   {
     title: 'Sen de görmezsin', tone: 'none', icon: 'lock-closed-outline',
-    items: ['Ebeveynin e-postası ve telefonu', 'Ailenin posta kutusu ve coin defteri'],
+    items: ['Ebeveynin e-posta ve telefonu', 'Ailenin posta kutusu, coin defteri'],
   },
 ];
 export function FamilySees({ compact }: { compact?: boolean }) {
   return (
     <View style={{ gap: 8 }}>
-      {!compact && <Text style={styles.aText}>Bej renk her yerde aynı anlama gelir: aileye gitmez.</Text>}
+      {!compact && <Text style={styles.aText}>Bej = aileye gitmez.</Text>}
       <View style={styles.sees}>
         {SEES.map((c) => (
           <View key={c.title} style={[styles.seeCol, c.tone === 'family' ? styles.seeFamily : c.tone === 'private' ? styles.seePrivate : styles.seeNone]}>
@@ -158,7 +116,7 @@ export function FamilySees({ compact }: { compact?: boolean }) {
           </View>
         ))}
       </View>
-      <Text style={styles.small}>Ebeveyn paylaşımı her an durdurabilir; durdurunca erişimin hemen biter.</Text>
+      <Text style={styles.small}>Ebeveyn paylaşımı her an durdurabilir; erişimin hemen biter.</Text>
     </View>
   );
 }

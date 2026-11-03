@@ -17,6 +17,7 @@ import SuggestionsTab from './SuggestionsTab';
 import ExportButton from '../../components/ExportButton';
 import { routineRows, csvName, ROUTINE_HEADER } from '../../lib/csv';
 import { listSuggestions } from '../../lib/clinic';
+import { CoachTarget, useCoachEmit } from '../../lib/coach';
 
 // Ev rutinleri (uzman): haftalık tablo (gün gün), zaman içinde (haftalık sayı, çoklu görev), oranlar (görev başına, beceri,
 // "Yapamam", ret notları) ve öneriler. Görev eklemek uzmanın önerisidir; ebeveyn ParentApp'te onaylayınca çocuğa gider.
@@ -107,6 +108,7 @@ function WeekGrid(ctx: ClientCtx) {
   const wide = width >= 760;
   const { dates, rows } = useMemo(() => weekGrid(data.tasks, data.completions, today), [data, today]);
   const [open, setOpen] = useState<Task | null>(null);
+  const emit = useCoachEmit();
   if (!rows.length) return <Empty text="Son 7 günde planlı görev yok. Görevler ebeveynin ParentApp'te eklediği ya da önerini onayladığı görevlerdir." />;
   return (
     <View>
@@ -122,7 +124,8 @@ function WeekGrid(ctx: ClientCtx) {
           ))}
         </View>
         {rows.map((r, i) => (
-          <Pressable key={r.task.id} onPress={() => setOpen(r.task)} accessibilityRole="button" accessibilityLabel={`${r.task.title} ayrıntısı`}
+          <CoachTarget key={r.task.id} id={i === 0 ? 'routine.row' : `routine.row.${i}`}>
+          <Pressable onPress={() => setOpen(r.task)} accessibilityRole="button" accessibilityLabel={`${r.task.title} ayrıntısı`}
             style={({ pressed }) => [styles.row, i > 0 && styles.rowLine, pressed && { backgroundColor: '#F7F8FA' }]}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, minWidth: 0 }}>
               <Text style={{ fontSize: 15 }}>{r.task.emoji}</Text>
@@ -142,6 +145,7 @@ function WeekGrid(ctx: ClientCtx) {
               </View>
             ))}
           </Pressable>
+          </CoachTarget>
         ))}
       </Card>
       <View style={styles.legend}>
@@ -154,7 +158,7 @@ function WeekGrid(ctx: ClientCtx) {
         <View style={styles.legendItem}><Text style={{ color: colors.faint, fontSize: 12 }}>–</Text><Text style={styles.small}>Planlı değil</Text></View>
       </View>
       <Text style={styles.note}>Satıra dokununca görevin gün gün geçmişi açılır. Bugün henüz bitmediği için oranlarda sayılmaz.</Text>
-      <TaskDetail task={open} ctx={ctx} onClose={() => setOpen(null)} />
+      <TaskDetail task={open} ctx={ctx} onClose={() => { setOpen(null); emit('routine_row'); }} />
     </View>
   );
 }
