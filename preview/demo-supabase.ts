@@ -233,6 +233,13 @@ function upgrade(x: Db): Db {
       x.legal_acceptances.push({ user_id: m.id, doc_key: k, version: 'v1', app: 'clinic', accepted_at: ago(3 * 1440) })));
     x.legalSeeded = true;
   }
+  // Önizleme deposu tarayıcıda günlerce kalır: deneme süreleri açılış gününe göre yazıldığı için zamanla "deneme bitti"ye düşüyordu
+  // (kullanıcı, 3 Kasım 2026). Önizlemede deneme bitmez; bitmiş deneme yalnız bitti@clinicapp.app hesabında gösterilir.
+  x.clinics.forEach((c: Row) => {
+    if (c.plan === 'trial' && c.id !== 'demo-clinic-expired' && c.trial_ends_at < new Date(Date.now() + 2 * 864e5).toISOString()) {
+      c.trial_ends_at = new Date(Date.now() + 5 * 864e5).toISOString();
+    }
+  });
   return x;
 }
 
