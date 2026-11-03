@@ -8,11 +8,11 @@ import type { ClientCtx } from './ClientScreen';
 
 // Danışan › Takip planı: hedef hatları (hedef · aile programı · rutin ve görevler; ortak akislar.md 12.1) + önceki uzmandan
 // devralınan plan (salt okunur, akislar.md 11). Örnek ailede aynı ekran, salt okunur (ilk kullanım "Ö1", 3 Kasım 2026).
-export default function PlanTab({ client, me, today, data, reload }: ClientCtx) {
-  if (data.sample && data.samplePlan) return <PlanHats client={client} me={me} data={data} today={today} preset={data.samplePlan} />;
+export default function PlanTab({ client, me, today, data, reload, openAbc }: ClientCtx) {
+  if (data.sample && data.samplePlan) return <PlanHats client={client} me={me} data={data} today={today} preset={data.samplePlan} openAbc={openAbc} />;
   return (
     <View>
-      <PlanHats client={client} me={me} data={data} today={today} reload={reload} />
+      <PlanHats client={client} me={me} data={data} today={today} reload={reload} openAbc={openAbc} />
       <Inherited linkId={client.link_id} today={today} />
     </View>
   );

@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { colors } from '../../theme';
 import { Card, Label, Input, Cta, Empty, SmallButton } from '../../components/ui';
-import { Note, listNotes, addNote, deleteNote } from '../../lib/clinic';
+import { Note, listNotes, addNote, deleteNote, listGoals } from '../../lib/clinic';
+import { PRIVATE } from '../plan/tones';
 import type { ClientCtx } from './ClientScreen';
 import { InheritedNotes } from './History';
 
@@ -28,6 +29,10 @@ export default function NotesTab({ client, me, data }: ClientCtx) {
 
 function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
   const [notes, setNotes] = useState<Note[] | null>(null);
+  const [goalTitle, setGoalTitle] = useState<Record<string, string>>({});   // hedefe bağlı notun etiketi (N3)
+  useEffect(() => {
+    listGoals(client.link_id).then((gs) => setGoalTitle(Object.fromEntries(gs.map((g) => [g.id, g.title])))).catch(() => {});
+  }, [client.link_id]);
   const [body, setBody] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -75,6 +80,9 @@ function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
                 </Text>
                 {n.author_id === me.id && <SmallButton label="Sil" danger onPress={() => remove(n)} />}
               </View>
+              {!!n.goal_id && (
+                <Text style={styles.goalTag} numberOfLines={1}>Hedef: {goalTitle[n.goal_id] ?? 'silinmiş hedef'}</Text>
+              )}
               <Text style={styles.body}>{n.body}</Text>
             </Card>
           ))}
@@ -88,4 +96,5 @@ function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
 const styles = StyleSheet.create({
   body: { fontSize: 14, color: colors.text, lineHeight: 20 },
   small: { fontSize: 12, color: colors.muted },
+  goalTag: { alignSelf: 'flex-start', fontSize: 11.5, fontWeight: '700', color: PRIVATE.fg, backgroundColor: PRIVATE.bg, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2, overflow: 'hidden', maxWidth: '100%' },
 });

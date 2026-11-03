@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
 import { Input, Notice, SmallButton, IconButton, Segmented } from '../../components/ui';
-import { weekStarts, taskSetRate, Task } from '../../lib/metrics';
+import { weekStarts, taskSetRate, Task, goalAbcWeeks } from '../../lib/metrics';
 import { track } from '../../lib/track';
 import { todayISO } from '../../dates';
 import {
@@ -16,7 +16,7 @@ import {
 } from '../../lib/plan';
 import {
   Suggestion, SuggestionInput, SuggestionSchemaMissing, RoutineRef, ChangeInput, listSuggestions, addSuggestions, withdrawSuggestion,
-  proposeChanges, updateSuggestion, updateSuggestionFields, setSuggestionGoal, listOwnRoutines,
+  proposeChanges, updateSuggestion, updateSuggestionFields, setSuggestionGoal, listOwnRoutines, Note, listGoalNotes, addNote,
 } from '../../lib/clinic';
 import {
   ROUTINES, Routine, OwnRoutine, routinesFor, childBand, ownToRoutine, fitsAge, draftOf, routineSuggestions, newGroupId, AGE_LABEL, agesText,
@@ -32,6 +32,7 @@ import ChangeSheet, { EditTarget, EditResult } from './ChangeSheet';
 import PlanEditor, { GoalSheet, ModuleSheet, PackageSheet } from './PlanEditor';
 import EvaluateSheet, { dayMonth } from './EvaluateSheet';
 import PublishSheet from './PublishSheet';
+import GoalNotesSheet, { goalTimeline } from './GoalNotesSheet';
 import { PRIVATE, HEAD, STATUS_TONE } from './tones';
 import type { ClientCtx } from '../client/ClientScreen';
 import type { SamplePlan } from '../../lib/sample';
@@ -82,7 +83,7 @@ const splitPayload = (p: string) => { const i = p.indexOf(':'); return [p.slice(
 // preset: örnek aile (ilk kullanım "Ö1", 3 Kasım 2026) — aynı ekran, veri cihazda. Deneme alanı: hedef ekle, önerilen rutini taslak
 // olarak bağla, Aileye gönder (özet), Değerlendir yerel durumda çalışır (yaptırarak öğreten tur bunları kullanır; olaylar
 // useCoachEmit). Öteki düzenlemeler gizli ya da "örnek" der; sunucuya hiçbir şey gitmez, örnek kapanınca sıfırlanır.
-export default function PlanHats({ client, me, data, today, reload, preset }: Pick<ClientCtx, 'client' | 'me' | 'data' | 'today' | 'reload'> & { preset?: SamplePlan }) {
+export default function PlanHats({ client, me, data, today, reload, preset, openAbc }: Pick<ClientCtx, 'client' | 'me' | 'data' | 'today' | 'reload' | 'openAbc'> & { preset?: SamplePlan }) {
   const target: PlanTarget = { kind: 'link', linkId: client.link_id, clinicId: client.clinic_id };
   const ro = !!preset;
   const emit = useCoachEmit();
@@ -99,6 +100,8 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
   const [links, setLinks] = useState<ModuleGoals | null>(null);     // null: program ↔ hedef bağı sunucuda yok
   const [sugg, setSugg] = useState<Suggestion[]>([]);
   const [pub, setPub] = useState<Published | null>(null);
+  const [goalNotes, setGoalNotes] = useState<Note[] | null>(null);   // null: notun hedef bağı sunucuda yok (yalnız değerlendirme notu)
+  const [notesOf, setNotesOf] = useState<PlanGoal | null>(null);
   const [tpls, setTpls] = useState<PlanTemplate[] | null>(null);    // null: Şablonlarım sunucuda yok
   const [own, setOwn] = useState<OwnRoutine[] | null>(null);
   const [error, setError] = useState('');
@@ -127,15 +130,17 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
     if (preset) {
       setPlan({ goals: preset.goals, modules: preset.modules, legacy: false });
       setSugg(preset.suggestions); setLogs(preset.logs); setLinks(preset.links); setPub(preset.pub);
+      setGoalNotes((x) => x ?? []);
       return;
     }
     try {
       const [p, s] = await Promise.all([loadPlan(target), listSuggestions(client.link_id).catch(() => [] as Suggestion[])]);
       const ids = p.modules.map((m) => m.id);
-      const [l, lk, pb] = await Promise.all([
+      const [l, lk, pb, gn] = await Promise.all([
         loadLogs(ids), p.legacy ? Promise.resolve(null) : loadModuleGoals(ids).catch(() => null), loadPublished(client.link_id),
+        listGoalNotes(client.link_id).catch(() => null),
       ]);
-      setPlan(p); setSugg(s); setLogs(l); setLinks(lk); setPub(pb); setError('');
+      setPlan(p); setSugg(s); setLogs(l); setLinks(lk); setPub(pb); setGoalNotes(gn); setError('');
     } catch (e) {
       setError(e instanceof PlanSchemaMissing ? e.message : (e as Error).message);
     }
@@ -484,18 +489,18 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
     }
   };
   // A1 + S1: değerlendirme ve durum
-  const saveEval = async (g: PlanGoal, rating: number | null, status: GoalStatus) => {
+  const saveEval = async (g: PlanGoal, rating: number | null, status: GoalStatus, note = '') => {
     if (ro) {
       setPlan((p) => p && ({ ...p, goals: p.goals.map((x) => (x.id !== g.id ? x : {
-        ...x, status, ratings: rating === null ? x.ratings : [...x.ratings.filter((r) => r.week !== thisWeek), { week: thisWeek, rating, note: '' }],
+        ...x, status, ratings: rating === null ? x.ratings : [...x.ratings.filter((r) => r.week !== thisWeek), { week: thisWeek, rating, note: note.trim() }],
       })) }));
       setEvalSheet(null);
       emit('evaluated');
       return;
     }
-    if (rating !== null) await rateGoal(client.clinic_id, g.id, thisWeek, rating);
+    if (rating !== null) await rateGoal(client.clinic_id, g.id, thisWeek, rating, note);
     if (status !== g.status) await updateGoal(g.id, { status });
-    track('plan.evaluate', { rated: rating !== null, status });
+    track('plan.evaluate', { rated: rating !== null, status, note: !!note.trim() });
     setEvalSheet(null);
     await after(status !== g.status);
   };
@@ -599,6 +604,8 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
   // Hedef sütunu (kullanıcı kararları 2 Kasım 2026): aileye gidenler (hedef düzey, süre, açıklama, evde destek) üstte;
   // aileye gitmeyen GAS özeti bej kutuda (C1), "Değerlendir" ile (A1). Ölçüm türü ve başlangıç düzenleme formunda kalır.
   const goalColumn = (g: PlanGoal) => {
+    const notes = goalTimeline(g, goalNotes);
+    const abcW = goalAbcWeeks(data.abc, g.id, today);   // yalnız son 4 haftada kayıt varsa satır görünür
     const sorted = [...g.ratings].sort((x, y) => x.week.localeCompare(y.week));
     const first = sorted[0];
     const last = sorted[sorted.length - 1];
@@ -615,16 +622,38 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
           ))}
         </View>
         {!!g.description && <Text style={styles.small}><Text style={{ fontWeight: '700', color: colors.navy }}>{g.shared ? 'Aileye not: ' : 'Not: '}</Text>{g.description}</Text>}
+        {/* ebeveynin bu hedefe bağladığı davranış kayıtları (ortak abc_goal): tek satır, dokununca Davranış Kayıtları bu hedefe süzülü */}
+        {abcW.some((w) => w.count > 0) && (
+          <Pressable onPress={() => openAbc?.(g.id)} disabled={!openAbc} accessibilityRole="button" style={styles.abcLine}
+            accessibilityLabel="Bu hedefin davranış kayıtları">
+            <Text style={[styles.small, { flex: 1 }]}>
+              <Text style={{ fontWeight: '700', color: colors.navy }}>Davranış kaydı</Text>{' · son 4 hafta: '}
+              {abcW.map((w) => w.count).join(' · ')}
+            </Text>
+            {!!openAbc && <Ionicons name="chevron-forward" size={14} color={colors.muted} />}
+          </Pressable>
+        )}
         {!!g.home_support && <Text style={styles.small}><Text style={{ fontWeight: '700', color: colors.navy }}>Evde: </Text>{g.home_support}</Text>}
         <View style={styles.private}>
           <View style={styles.privateHead}>
             <Ionicons name="eye-off-outline" size={13} color={PRIVATE.fg} />
-            <Text style={styles.privateWho}>YALNIZ SEN GÖRÜRSÜN</Text>
+            <Text style={[styles.privateWho, { flex: 1 }]}>YALNIZ SEN GÖRÜRSÜN</Text>
+            {(goalNotes !== null || notes.length > 0) && (
+              <Pressable onPress={() => setNotesOf(g)} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Notlar (${notes.length})`} style={styles.noteBtn}>
+                <Ionicons name="document-text-outline" size={15} color={PRIVATE.fg} />
+                {notes.length > 0 && <Text style={styles.noteCount}>{notes.length}</Text>}
+              </Pressable>
+            )}
           </View>
           <Text style={[styles.small, { color: PRIVATE.text }]}>
             {last ? `GAS: ${first !== last ? `${sign(first.rating)} (${dayMonth(first.week)}) → ` : ''}${sign(last.rating)} (${dayMonth(last.week)})` : 'Henüz değerlendirilmedi.'}
             {reviewDue(g, today) ? ' · değerlendirme zamanı' : ''}
           </Text>
+          {notes.length > 0 && (
+            <Pressable onPress={() => setNotesOf(g)} accessibilityRole="button" accessibilityLabel="Son not">
+              <Text style={styles.lastNote} numberOfLines={1}>“{notes[0].text}”</Text>
+            </Pressable>
+          )}
           <View style={{ alignSelf: 'flex-start' }}><SmallButton label="Değerlendir" onPress={() => setEvalSheet({ goal: g })} /></View>
         </View>
       </View>
@@ -753,8 +782,10 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
     const open = isOpen(g.id);
     const color = GOAL_COLORS[i % GOAL_COLORS.length];
     const n = goalWeek(g.created_at, today);
-    const meta = [g.domain && domainLabel(g.domain), g.target ? `hedef ${g.target}` : '',
-      g.weeks ? (g.status === 'active' ? `${Math.min(n, g.weeks)}. hafta / ${g.weeks}` : `${g.weeks} hafta`) : g.status === 'active' ? `${n}. hafta` : ''].filter(Boolean).join(' · ');
+    // Başlık altı (kullanıcı isteği 3 Kasım 2026): alan hep görünür; hedef düzey ve hafta yalnız satır kapalıyken — açıkken hedef
+    // sütununda "Hedef düzey" ve "Süre" zaten yazıyor, başlıkta tekrarı kalabalık yapıyordu.
+    const meta = [g.domain && domainLabel(g.domain), ...(open ? [] : [g.target ? `hedef ${g.target}` : '',
+      g.weeks ? (g.status === 'active' ? `${Math.min(n, g.weeks)}. hafta / ${g.weeks}` : `${g.weeks} hafta`) : g.status === 'active' ? `${n}. hafta` : ''])].filter(Boolean).join(' · ');
     const dirty = hatUnsent(g);
     const st = GOAL_STATUS.find((x) => x.id === g.status);
     const tab = tabOf[g.id] ?? 'rt';
@@ -1024,7 +1055,18 @@ export default function PlanHats({ client, me, data, today, reload, preset }: Pi
       <ChangeSheet target={edit?.target ?? null} onClose={() => setEdit(null)} onSubmit={submitEdit}
         onWithdraw={edit && edit.target.mode !== 'change' ? () => withdrawGroup(edit.group) : undefined} />
       <EvaluateSheet goal={evalSheet?.goal ?? null} initialStatus={evalSheet?.status} week={thisWeek} today={today}
-        onClose={() => setEvalSheet(null)} onSave={(r, st) => saveEval(evalSheet!.goal, r, st)} />
+        onClose={() => setEvalSheet(null)} onSave={(r, st, note) => saveEval(evalSheet!.goal, r, st, note)} />
+      <GoalNotesSheet goal={notesOf} notes={goalNotes} canWrite={goalNotes !== null} onClose={() => setNotesOf(null)}
+        onAdd={async (body) => {
+          const g = notesOf!;
+          if (ro) {
+            setGoalNotes((x) => [{ id: localId(), body, created_at: new Date().toISOString(), author_id: me.id, author: me.name, goal_id: g.id }, ...(x ?? [])]);
+            return;
+          }
+          await addNote(client, me.id, body, g.id);
+          track('plan.goal_note');
+          setGoalNotes(await listGoalNotes(client.link_id).catch(() => goalNotes));
+        }} />
       {menu}
       <PublishSheet items={pubItems} onClose={() => setPubItems(null)} onSend={publish}
         groups={plan.goals.map((g, i) => ({ id: g.id, title: g.title, color: GOAL_COLORS[Math.max(0, goals.findIndex((x) => x.id === g.id)) % GOAL_COLORS.length], hidden: !g.shared }))} />
@@ -1341,6 +1383,10 @@ const styles = StyleSheet.create({
   private: { backgroundColor: PRIVATE.bg, borderColor: PRIVATE.line, borderWidth: 1, borderRadius: radius.sm, padding: 9, gap: 6 },
   privateHead: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   privateWho: { fontSize: 10, fontWeight: '700', letterSpacing: 0.4, color: PRIVATE.fg },
+  abcLine: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  noteBtn: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 4, paddingVertical: 2 },
+  noteCount: { fontSize: 11, fontWeight: '800', color: PRIVATE.fg },
+  lastNote: { fontSize: 12, color: PRIVATE.text, fontStyle: 'italic' },
   cellPrivate: { backgroundColor: PRIVATE.bg, borderWidth: 1, borderColor: PRIVATE.line },
   miniPrivate: { backgroundColor: PRIVATE.card, borderColor: PRIVATE.line },
   tabs: { flexDirection: 'row', backgroundColor: '#ECEEF3', borderRadius: 9, padding: 2, gap: 2 },
