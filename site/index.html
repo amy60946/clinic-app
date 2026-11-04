@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ClinicApp · Uzman paneli</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="ClinicApp: uzmanın ev programı, çocuğun oyununda göreve dönüşür. Ebeveyn onaylar, uzman ebeveynin izniyle gün gün izler.">
+<meta name="description" content="ClinicApp: ev programını oyuna dönüştüren, evdeki veriyi uzmana getiren platform. Ebeveyn onaylar, uzman ebeveynin izniyle izler.">
 <link rel="icon" href="assets/icon.png">
 <style>
 /* Yazı tipi sitenin kendi dosyasından (SIL Open Font License): Google Fonts'a istek gitmez, ziyaretçinin IP adresi
@@ -44,7 +44,7 @@ h3 { font-size: 19px; font-weight: 800; letter-spacing: -0.012em; line-height: 1
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
 .eyebrow { font-size: 12.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--fam-fg); }
-.sub { font-size: clamp(17px, 1.7vw, 20px); color: var(--muted); max-width: 46ch; }
+.sub { font-size: clamp(17px, 1.7vw, 20px); color: var(--muted); max-width: 58ch; }
 
 /* Düğmeler */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 24px; border-radius: 12px; font: inherit; font-weight: 750; font-size: 16px; text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: background .15s, border-color .15s, transform .15s; white-space: nowrap; }
@@ -95,7 +95,7 @@ header.top.scrolled { border-bottom-color: var(--line); }
 /* Açılış: ortada manşet, altında büyük ürün ekranı + üstünde işaretler */
 .hero { overflow: clip; }
 .hero .copy { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; padding-block: 72px 44px; }
-.hero h1 { max-width: 17ch; }
+.hero h1 { max-width: 22ch; font-size: clamp(36px, 5vw, 60px); }
 .hero .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 6px; }
 .hero .meta { font-size: 13.5px; color: var(--muted); }
 .stage { position: relative; max-width: 1120px; margin: 0 auto; }
@@ -177,7 +177,7 @@ section.alt { background: var(--card); border-block: 1px solid var(--line); }
 .vp .ic svg { width: 21px; height: 21px; stroke: var(--fam-fg); fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .vp p { color: var(--muted); font-size: 15.5px; }
 @media (max-width: 860px) { .vps { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; } }
-.stepn { display: inline-flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--fam-fg); }
+.stepn { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 800; color: var(--fam-fg); }
 .stepn b { width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 14px; letter-spacing: 0; }
 .vis-c { display: grid; place-items: center; background: var(--head); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 36px 20px; }
 .layer .front .mock { width: 100%; }
@@ -332,13 +332,13 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
     <div class="wrap">
       <div class="copy">
         <span class="eyebrow">Çocuk ve aile uzmanları için</span>
-        <h1 id="h-hero">Ev programınız oyunda göreve dönüşür.</h1>
-        <p class="sub">Çocuk oynayarak yapar, ebeveyn onaylar, evden gelen veri gün gün panelinizde.</p>
+        <h1 id="h-hero">Ev programını oyuna dönüştüren, evdeki veriyi size getiren uzman platformu.</h1>
+        <p class="sub">Rutin ve görev atayın, ebeveynin tuttuğu davranış kayıtlarını izleyin, çocuk görevleri oyunda yapsın. Çocuk ve aile uzmanları için tasarlandı.</p>
         <div class="actions">
-          <a class="btn btn-primary" data-app="signup" href="app/?kayit">7 gün ücretsiz deneyin</a>
+          <a class="btn btn-primary" data-app="signup" href="app/?kayit">Ücretsiz denemeye başlayın →</a>
           <a class="btn btn-ghost" data-app="login" href="app/">Giriş yap</a>
         </div>
-        <p class="meta">Kart gerekmez · Web, iPad ve iPhone</p>
+        <p class="meta">Kart gerekmez. Ebeveyn onayıyla. Web, iPad ve iPhone.</p>
       </div>
       <div class="stage">
         <div class="ui">
@@ -367,23 +367,23 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
     <div class="wrap">
       <div class="head center">
         <span class="eyebrow">Neden ClinicApp</span>
-        <h2 id="h-deger">Seans biter, takip sürer.</h2>
+        <h2 id="h-deger">Klinik kaliteyi ve zaman verimliliğini artırın.</h2>
       </div>
       <div class="vps">
         <div class="vp">
           <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M4 10h16M10 10v9"/></svg></span>
-          <h3>Hazır şablonlarla kurun</h3>
-          <p>Yaşa göre rutinler, görev ve hedef paketleri.</p>
+          <h3>Ev programı kurulumunu otomatikleştirin</h3>
+          <p>Hazır şablonlardan yaşa uygun hedef, rutin ve görev.</p>
         </div>
         <div class="vp">
           <span class="ic"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg></span>
-          <h3>Hatırlatmayı uygulama yapar</h3>
-          <p>Aileye hatırlatır, çocuk oyunda yapar.</p>
+          <h3>Aileyi seans dışında da dahil edin</h3>
+          <p>Hatırlatmayı uygulama yapar; siz yokken de davranış kaydı toplanır.</p>
         </div>
         <div class="vp">
           <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span>
-          <h3>Veri ve rapor hazır gelir</h3>
-          <p>Grafik, gözlem raporu, ilerleme notu.</p>
+          <h3>Raporlamada zaman kazanın</h3>
+          <p>Grafik, gözlem raporu ve ilerleme notu hazır gelir.</p>
         </div>
       </div>
     </div>
@@ -393,14 +393,14 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
     <div class="wrap">
       <div class="head center">
         <span class="eyebrow">Nasıl çalışır</span>
-        <h2 id="h-nasil">Planınızdan çocuğun oyununa, dört adım.</h2>
+        <h2 id="h-nasil">ClinicApp nasıl çalışır?</h2>
       </div>
 
       <div class="feat" id="urun">
         <div class="txt">
-          <span class="stepn"><b>1</b>Adım</span>
-          <h2>Planınız ailenin uygulamasına gider.</h2>
-          <p>Hedef, rutin ve görevler tek bildirimle ParentApp'te.</p>
+          <span class="stepn"><b>1</b>Hedefleri doğrudan ailenin uygulamasına aktarıyoruz</span>
+          <h2>Aileyi kullanımı kolay bir uygulamayla dahil edin.</h2>
+          <p>Hedef, rutin ve görevler ailenin günlük düzenine oturur. Hatırlatmayı biz yaparız, siz veriyi izlersiniz.</p>
           <div class="chips"><span class="chip plain">Hazır şablonlar</span><span class="chip pri">Taslak: aile görmez</span></div>
         </div>
         <div class="vis">
@@ -419,9 +419,9 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
 
       <div class="feat flip">
         <div class="txt">
-          <span class="stepn"><b>2</b>Adım</span>
-          <h2>Evde olan, panelinize gelir.</h2>
-          <p>Davranış kaydı: öncesi, davranış, sonrası. Varsa sesli not.</p>
+          <span class="stepn"><b>2</b>Evden davranış kaydı ve ebeveyn ilerlemesi toplayın</span>
+          <h2>Davranışın tetikleyicilerini ve eğilimlerini görün.</h2>
+          <p>Ebeveyn evde, siz yokken kaydeder: öncesi, davranış, sonrası. Neyin tetiklediğini ve nasıl yanıt verildiğini görürsünüz.</p>
           <div class="chips"><span class="chip plain">Hedefe göre süz</span><span class="chip plain">CSV</span></div>
         </div>
         <div class="vis vis-c"><div class="ui phone"><img src="assets/m-abc.webp" width="1170" height="1680" alt="Davranış kaydı kartları: öncesi, davranış ve sonrası." loading="lazy"></div></div>
@@ -429,9 +429,9 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
 
       <div class="feat">
         <div class="txt">
-          <span class="stepn"><b>3</b>Adım</span>
-          <h2>İlerleme kendiliğinden izlenir.</h2>
-          <p>Rutinler gün gün, hedefler değerlendirmeyle.</p>
+          <span class="stepn"><b>3</b>Hedeflere doğru ilerlemeyi otomatik izleyin</span>
+          <h2>İlerleme raporlamasında zaman kazanın.</h2>
+          <p>Rutinleri gün gün grafiğe döker, hedef değerlendirmelerini bir arada tutarız. Rapor ve ilerleme notu hazır.</p>
           <div class="chips"><span class="chip plain">Gözlem raporu (PDF)</span><span class="chip plain">İlerleme notu</span><span class="chip plain">Yapay zekâ yok</span></div>
         </div>
         <div class="vis vis-c"><div class="ui phone"><img src="assets/m-routines.webp" width="1170" height="1680" alt="Son 7 günün görev ve gün tablosu: yapıldı, onaylandı, yapılamadı." loading="lazy"></div></div>
@@ -439,10 +439,10 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
 
       <div class="feat flip">
         <div class="txt">
-          <span class="stepn"><b>4</b>Adım</span>
-          <h2>Çocuk oyunla pekiştirir.</h2>
-          <p>Görevler Pofi Adası'nda. Ebeveyn onaylayınca ödül oyunda.</p>
-          <div class="chips"><span class="chip ok">Bizde temel parça, ek paket değil</span></div>
+          <span class="stepn"><b>4</b>Olumlu pekiştirme ve coin sistemi, baştan içinde</span>
+          <h2>Çocuk için deneyimi oyunlaştırın.</h2>
+          <p>Görevler Pofi Adası'nda oyuna dönüşür; ebeveyn onaylayınca çocuk coin toplar.</p>
+          <div class="chips"><span class="chip ok">Ek paket değil, sistemin parçası</span></div>
         </div>
         <div class="vis vis-c">
           <div class="mock game" role="img" aria-label="Pofi Adası'nda bugünün görevleri: biri onaylandı, biri ebeveyn onayı bekliyor, biri yapılacak.">
@@ -603,9 +603,9 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
 
   <section class="closing" aria-labelledby="h-son">
     <div class="wrap">
-      <h2 id="h-son">Bir sonraki seansa evden gelen veriyle girin.</h2>
+      <h2 id="h-son">Ailelere seans dışında da destek olmak için aramıza katılın.</h2>
       <div class="actions">
-        <a class="btn btn-light" data-app="signup" href="app/?kayit">7 gün ücretsiz deneyin</a>
+        <a class="btn btn-light" data-app="signup" href="app/?kayit">Ücretsiz deneyin</a>
         <a class="btn btn-line" data-app="login" href="app/">Giriş yap</a>
       </div>
       <p class="code">Ekip kodunuz mu var? <a data-app="join" href="app/?kod">Kodla katılın</a></p>
