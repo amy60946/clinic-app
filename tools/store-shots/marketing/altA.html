@@ -1,0 +1,39 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css"><style>
+/* A · Klinik sakinlik (Linear · Spruce · SimplePractice): açık zemin, solda iki katlı başlık, çerçevesiz ekran kartı alttan taşar */
+.frame { background: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 22%, #ECF0F8 100%); }
+.cap { position: absolute; left: 32px; right: 30px; top: 62px; }
+.kick { font-size: 12px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; color: #4A5D93; margin-bottom: 12px; }
+h1 { font-size: 33px; line-height: 1.08; letter-spacing: -.018em; font-weight: 800; color: var(--ink); text-wrap: balance; }
+p.sub { font-size: 16.5px; line-height: 1.38; font-weight: 500; color: var(--muted); margin-top: 11px; text-wrap: balance; }
+.brand { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 800; color: var(--ink); margin-bottom: 18px; letter-spacing: -.01em; }
+.brand img { width: 30px; height: 30px; border-radius: 8px; }
+.f1 .cap { top: 46px; }
+.frame .card { left: 24px; right: 24px; top: 292px; height: 700px; }
+.frame .paper { left: 30px; right: 30px; top: 292px; height: 720px; }
+.call { position: absolute; }
+</style></head><body>
+<div class="frame f1" data-name="01"><div class="cap"><div class="brand"><img src="../../../assets/icon.png">ClinicApp</div>
+  <h1>Ev programı oyunda göreve dönüşür</h1><p class="sub">Hedef ve rutinleri aileye gönderin, evdeki kayıtları görün.</p></div>
+  <div class="card" data-src="plan-top" data-y="0"></div>
+  <div class="game" style="left:36px;right:36px;width:auto;top:852px"><div class="gt">Çocuğun oyununda<span class="pearl"><i></i>42 tane inci</span></div>
+    <div class="gr"><span class="e">👕</span>Okul için giyin<span class="b">Yaptım</span></div><div class="cap2">Çizim</div></div></div>
+<div class="frame" data-name="02"><div class="cap"><div class="kick">Davranış kayıtları</div>
+  <h1>Evdeki kayıtlar size gelir</h1><p class="sub">Ebeveynin evde girdiği ABC kaydı, panelinizde.</p></div>
+  <div class="card" data-src="abc-cards" data-y="0"></div></div>
+<div class="frame" data-name="03"><div class="cap"><div class="kick">Gizlilik</div>
+  <h1>Kim neyi görür, baştan belli</h1><p class="sub">Veri yalnız ebeveynin onayıyla paylaşılır; ebeveyn istediği an durdurur.</p></div>
+  <div class="card" data-src="help-sees" data-x="16" data-w="408" data-y="176" style="background:#fff"></div></div>
+<div class="frame" data-name="04"><div class="cap"><div class="kick">Özet</div>
+  <h1>İlerlemeyi hafta hafta görün</h1><p class="sub">Tamamlama, tam gün ve hatırlatmadan önce başlama.</p></div>
+  <div class="card" data-src="ozet" data-y="180"></div></div>
+<div class="frame" data-name="05"><div class="cap"><div class="kick">Haftalık tablo</div>
+  <h1>Evde ne yapıldı, gün gün görün</h1><p class="sub">Çocuk oyunda “Yaptım” der, ebeveyn onaylar.</p></div>
+  <div class="card" data-src="haftalik" data-y="231"></div></div>
+<div class="frame" data-name="06"><div class="cap"><div class="kick">Rapor</div>
+  <h1>Raporunuz hazır gelir</h1><p class="sub">Gözlem raporu ve ilerleme notu, dönemin kayıtlarından.</p></div>
+  <div class="excerpt" data-src="report" style="left:30px;right:30px;top:292px;height:211px"></div>
+  <div class="call" style="left:30px;right:30px;top:528px;padding:0;border-radius:16px;overflow:hidden;background:#F5F6F8"><div class="crop" data-src="rapor" data-box="12,620,416,600" data-s="0.9135"></div></div></div>
+<div class="frame" data-name="07"><div class="cap"><div class="kick">Danışanlar</div>
+  <h1>Sıra kimde, tek bakışta</h1><p class="sub">Sizi bekleyen, aileden yeni gelen, sessiz kalan.</p></div>
+  <div class="card" data-src="board" data-y="312"></div></div>
+<script src="raw/boxes.js"></script><script src="kit.js"></script></body></html>

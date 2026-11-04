@@ -97,7 +97,7 @@ const SEES: { title: string; tone: 'family' | 'private' | 'none'; icon: keyof ty
   },
   {
     title: 'Sen de görmezsin', tone: 'none', icon: 'lock-closed-outline',
-    items: ['Ebeveynin e-posta ve telefonu', 'Ailenin posta kutusu, coin defteri'],
+    items: ['Ebeveynin e-posta ve telefonu', 'Ailenin posta kutusu, İnci defteri'],
   },
 ];
 export function FamilySees({ compact }: { compact?: boolean }) {

@@ -147,6 +147,26 @@ module.exports = function editDb() {
   abc(10, 'evening', 'Tablet süresi bitti', 'Kısa bir itirazdan sonra kapattı', 'Birlikte oyun oynandı', 1);
   abc(4, 'night', 'Yatma saati geldi', 'Bir masal daha istedi, ağlamaklı oldu', 'Kısa bir masal okundu, uyudu', 1);
 
+  /* 5. The other clients look in use on the board: Defne (plan sent, new behaviour records), Ege (evaluation due),
+     Kerem (6 days old, no plan yet). A sent goal carries its snapshot (`pub`), so it is not "unsent". */
+  const monday = (w) => { const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7) - 7 * w); return iso(d); };
+  const goal = (gid, lid, title, domain, target, weeks, days, by) => {
+    const g = { id: gid, link_id: lid, clinic_id: K, title, description: '', domain, measure: 'level', baseline: '', target, weeks, home_support: '',
+      shared: true, status: 'active', position: 0, archived: false, created_by: by, created_at: ago(days * 1440) };
+    g.pub = { title, description: '', domain, measure: 'level', baseline: '', target, weeks, home_support: '', status: 'active', position: 0 };
+    db.clinic_goals.push(g);
+    const l = db.clinic_links.find((x) => x.id === lid);
+    if (l) l.plan_published_at = ago(days * 1440 - 60);
+  };
+  goal('g-defne', 'shot-link-defne', 'Yatma saatinde 20 dakikada uykuya geçer', 'sleep', "7 gecenin 5'i", 8, 12, M2);
+  db.goal_ratings.push({ goal_id: 'g-defne', clinic_id: K, week: monday(1), rating: 0, note: '', rated_by: M2, created_at: ago(6 * 1440) });
+  goal('g-ege', 'shot-link-ege', 'Ödeve hatırlatmadan başlar', 'school', "5 günün 4'ü", 8, 30, D);
+  const abcOf = (fid, cid, n, part, a, b, c, intensity) => db.abc_events.push({ id: id('a'), family_id: fid, child_id: cid, occurred_at: at(-n, PART_TIME[part], 0),
+    day_part: part, antecedent: a, behavior: b, consequence: c, intensity, created_by: `${fid}-p0`, created_at: at(-n, PART_TIME[part], 20) });
+  abcOf('shot-fam-defne', 'c-defne', 3, 'night', 'Işıklar kapandı', 'Odadan çıkıp salona geldi', 'Sakin bir sesle yatağına geri götürüldü', 2);
+  abcOf('shot-fam-defne', 'c-defne', 1, 'night', 'Yatma saati geldi', 'Bir bardak su daha istedi', 'Su yatmadan önce verildi, yatağa döndü', 1);
+  abcOf('shot-fam-ege', 'c-ege', 9, 'noon', 'Ödev zamanı geldi', 'Masaya oturmayı erteledi', 'Zamanlayıcı kuruldu, 10 dakika sonra başladı', 2);
+
   localStorage.setItem(KEY, JSON.stringify(db));
   return { tasks: db.tasks.length, abc: db.abc_events.length };
 };

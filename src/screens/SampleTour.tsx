@@ -126,7 +126,7 @@ export function SectionHint({ userId, section }: { userId: string; section: Tab 
 // Ana ekran: danışan bölümleri ilk göründüğünde bir kez (ilk kullanım "İ", 3 Kasım 2026)
 export const BOARD_HINT = {
   title: 'Danışanlar bölümlere ayrılır',
-  text: 'Senin sıran · Aileden yeni · Sessiz kalanlar. Puan değil; ayrıntı başlıktaki (i).',
+  text: 'Senin sıran · Aileden yeni · Sessiz kalanlar. Ayrıntı başlıktaki (i).',
 };
 
 // Bir kez gösterilen ipucu kartı ("Anladım" ile kapanır, bu cihazda hatırlanır)

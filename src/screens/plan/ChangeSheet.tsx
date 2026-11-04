@@ -11,7 +11,7 @@ import { shiftTime, normalizeTime } from '../../lib/routines';
 //  - 'draft'   : taslak (aileye gitmedi) → değişiklik hemen kaydedilir, "Aileye gönder" ile gider
 //  - 'pending' : gönderildi, ebeveyn karar vermedi → öneri hemen güncellenir (ebeveyn yeni hâlini görür)
 //  - 'change'  : ailede ekli → uzman doğrudan değiştirmez, DEĞİŞİKLİK ÖNERİR (taslak); ebeveyn "Uygula" derse görevler
-//                güncellenir, yapılan adımlar ve coin korunur, çıkarılan görev bitiş tarihi alır.
+//                güncellenir, yapılan adımlar ve inciler korunur, çıkarılan görev bitiş tarihi alır.
 export type EditItem = { id: string; title: string; emoji: string; reminder: string | null };
 export type EditResult = { id: string; reminder: string | null; remove: boolean };
 export type EditMode = 'draft' | 'pending' | 'change';
@@ -43,7 +43,7 @@ const TEXT: Record<EditMode, { head: string; sub: string; note: string; cta: str
   },
   change: {
     head: 'Değişiklik öner', sub: 'Ailede ekli',
-    note: 'Bu görevler ailede ekli. Değişikliğin öneri olarak gider; ebeveyn "Uygula" derse görevler güncellenir. Yapılan adımlar ve coin korunur; çıkardığın görev silinmez, o gün biter.',
+    note: 'Bu görevler ailede ekli. Değişikliğin öneri olarak gider; ebeveyn "Uygula" derse görevler güncellenir. Yapılan adımlar ve kazanılan inciler korunur; çıkardığın görev silinmez, o gün biter.',
     cta: 'Değişikliği plana ekle',
   },
 };
