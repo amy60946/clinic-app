@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import './src/lib/webAlert';
 import { AuthProvider, useAuth } from './src/lib/auth';
@@ -23,9 +23,16 @@ function Loading() {
   );
 }
 
+// Tanıtım sitesinden gelen bağlantı (yalnız web): /app/?kayit → kayıt, /app/?kod → ekip koduyla katıl, yoksa giriş
+function linkedRoute(): AuthRoute {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return 'login';
+  const q = new URLSearchParams(window.location.search);
+  return q.has('kayit') ? 'signup' : q.has('kod') ? 'join' : 'login';
+}
+
 function AuthFlow() {
   const { noAccount, clearNoAccount } = useAuth();
-  const [route, setRoute] = useState<{ name: AuthRoute; email?: string }>({ name: noAccount ? 'noaccount' : 'login' });
+  const [route, setRoute] = useState<{ name: AuthRoute; email?: string }>(() => ({ name: noAccount ? 'noaccount' : linkedRoute() }));
   useEffect(() => clearNoAccount(), [clearNoAccount]);
   const go = (name: AuthRoute, email?: string) => setRoute({ name, email });
   if (route.name === 'signup' || route.name === 'join' || route.name === 'noaccount') {
