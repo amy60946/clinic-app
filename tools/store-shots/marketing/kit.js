@@ -15,7 +15,8 @@ function clean(src, top, bottom) {
 // height (raw px) of the bottom safe strip under the home indicator: at least `min`, its top edge in a gap between lines
 function strip(src, bottom, min) {
   const items = (B[src] || []).filter((x) => x[4] > 0);
-  for (let h = min; h < min + 120; h++) { const e = bottom - h; if (!items.some(([, , y, , ih]) => y < e + 4 && y + ih > e - 4)) return h; }
+  const tops = (B[src + ':panels'] || []).map(([, py]) => py);       // keep a card's rounded top from peeking above the strip
+  for (let h = min; h < min + 120; h++) { const e = bottom - h; if (!items.some(([, , y, , ih]) => y < e + 4 && y + ih > e - 4) && !tops.some((t) => e > t - 2 && e < t + 34)) return h; }
   return min;
 }
 function win(el, withBar) {
