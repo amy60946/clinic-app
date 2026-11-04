@@ -24,7 +24,7 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 - Şifre/anahtar/lisansı sohbete yapıştırmasını **asla** isteme. Bunlar GitHub → Settings → Secrets and variables → Actions'a eklenir.
 - Belirsiz kararda tahmin etme, kısa soru sor. Kapsam dışına çıkma; öneriler not olarak yazılır ve sorulur.
 - Önizleme yalnızca kullanıcı isteyince ya da büyük bir aşama bitince yayınlanır.
-- Push yalnız oturumun belirlenen `claude/...` dalına yapılır. Kullanıcı istemedikçe PR açılmaz.
+- Push yalnız oturumun belirlenen `claude/...` dalına yapılır. **PR'lar (kullanıcı kararı 4 Kasım 2026: "süreçler için önemliyse sen hallet"):** iş ana dala alınacak noktaya gelince Claude kendi dalının PR'ını açar, denetim yeşilse birleştirir, dalı ana daldan yeniden kurar; başka pencerenin PR'ına dokunulmaz.
 - Adlandırma: "Fidan" ve eski oyun adı hiçbir yerde kullanılmaz. Ürün adları: GameApp, ParentApp, ClinicApp.
 - **Benchmark alışkanlığı (kullanıcı kararı 2 Kasım 2026, bütün pencereler; ortak CLAUDE.md kural 7):** her yeni özellik, özellik çıkarma ve iyileştirmede (akış, tasarım, metin, arayüz, iş kuralı) önce aynı işi yapan başarılı global uygulamalar araştırılır, artı/eksileriyle değerlendirilir, ürüne (uzman, Türkiye) uyanlar kullanıcıya seçenek ve öneri olarak sunulur; kaynaklar yazılır, içerik/metin/ekran kopyalanmaz.
 - **Canlıya alma elle (kullanıcı kararı 2 Kasım 2026):** App Store Connect'te "Manually release this version"; Apple onayından sonra sürüm kullanıcı onayıyla yayına alınır. ClinicApp web'inin canlıya geçişi de kullanıcı onayıyla. Adımlar `ortak/CANLIYA_ALMA.md`.
