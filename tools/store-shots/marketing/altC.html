@@ -1,0 +1,101 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css"><style>
+/* C · Tek döngü (SimplePractice iş akışı · ClassDojo iki taraflı anlatım · Spruce kitle etiketi): açık mavi zemin,
+   kareleri bağlayan ince çizgi; her karede rol + adım (1 Uzman · 2 Aile · 3 Çocuk · 4–5 Uzman · ✓ Gizlilik) */
+.pano { width: 2640px; height: 956px; position: relative; overflow: hidden; flex: none; background: #E9EFFA; --fam-bg: #E6EAF5; --fam-fg: #2C4A9A; --ok: #2F7D4A; }
+.loop { position: absolute; left: 0; top: 0; }
+.cell { position: absolute; top: 0; width: 440px; height: 956px; }
+.step { position: absolute; left: 30px; top: 56px; display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 13px 0 5px; border-radius: 99px;
+  background: var(--ink); color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.step b { width: 21px; height: 21px; border-radius: 50%; background: #fff; color: var(--ink); display: grid; place-items: center; font-size: 12px; letter-spacing: 0; }
+.step.fam { background: #2C4A9A; } .step.child { background: #2F7D4A; }
+.brand { position: absolute; right: 30px; top: 53px; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px 0 4px; border-radius: 99px;
+  background: #fff; color: var(--ink); font-size: 15px; font-weight: 800; box-shadow: 0 0 0 1px #D5DDEE; }
+.brand img { width: 28px; height: 28px; border-radius: 8px; }
+.cap { position: absolute; left: 30px; right: 30px; top: 112px; }
+h1 { font-size: 31px; line-height: 1.09; letter-spacing: -.018em; font-weight: 800; color: var(--ink); text-wrap: balance; }
+p.sub { font-size: 16px; line-height: 1.38; font-weight: 500; color: var(--muted); margin-top: 10px; text-wrap: balance; }
+.cell .card, .scrn { left: 22px; right: 22px; top: 300px; height: 700px; border-radius: 26px; }
+.cell .paper { left: 28px; right: 28px; top: 300px; height: 700px; }
+.scrn { position: absolute; overflow: hidden; background: #F5F6F8; box-shadow: 0 0 0 1px rgba(15,27,61,.07), 0 30px 60px -28px rgba(15,27,61,.35); color: var(--ink); }
+.tagd { position: absolute; right: 14px; top: 14px; z-index: 2; font-size: 11px; font-weight: 750; color: #5E6780; background: rgba(255,255,255,.92); border-radius: 99px; padding: 4px 10px; box-shadow: 0 0 0 1px #E3E7EF; }
+.call { position: absolute; background: #fff; border-radius: 18px; padding: 7px; box-shadow: 0 24px 50px -18px rgba(15,27,61,.45), 0 0 0 1px rgba(15,27,61,.06); }
+.call .crop { border-radius: 12px; }
+/* aile uygulaması çizimi */
+.pa .top { height: 58px; display: flex; align-items: center; gap: 10px; padding: 0 18px; background: #fff; border-bottom: 1px solid #E8EAEF; font-size: 17px; font-weight: 800; }
+.pa .top i { width: 9px; height: 9px; border-left: 2.4px solid var(--ink); border-bottom: 2.4px solid var(--ink); transform: rotate(45deg); margin-right: 4px; }
+.pa .body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.blk { background: #fff; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 11px; box-shadow: 0 0 0 1px #E8EAEF; }
+.who { display: flex; align-items: center; gap: 11px; } .av { width: 42px; height: 42px; border-radius: 50%; background: var(--fam-bg); color: var(--fam-fg); display: grid; place-items: center; font-weight: 800; font-size: 14px; }
+.who b { display: block; font-size: 16px; line-height: 1.2; } .who span { font-size: 13px; color: var(--muted); }
+.kid { display: flex; align-items: center; justify-content: space-between; border: 1.6px solid var(--fam-fg); border-radius: 13px; padding: 12px 14px; font-size: 15.5px; font-weight: 750; }
+.kid i, .chk { width: 21px; height: 21px; border-radius: 6px; background: var(--fam-fg); display: grid; place-items: center; flex: none; }
+.kid i::after, .chk::after { content: ""; width: 9px; height: 4.5px; border-left: 2.2px solid #fff; border-bottom: 2.2px solid #fff; transform: rotate(-45deg) translate(1px, -1px); }
+.kid.off { border-color: #E3E7EF; color: var(--muted); font-weight: 650; } .kid.off i { background: transparent; border: 1.6px solid #E3E7EF; } .kid.off i::after { display: none; }
+.go { background: var(--ink); color: #fff; border-radius: 13px; text-align: center; font-weight: 800; font-size: 15.5px; padding: 13px; }
+.note { font-size: 12.5px; color: var(--muted); text-align: center; margin-top: -3px; }
+.lab { font-size: 11.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #4A5D93; }
+.rt { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 650; padding: 8px 0; border-top: 1px solid #EEF0F4; } .rt:first-of-type { border-top: 0; }
+.rt .e { font-size: 20px; width: 26px; text-align: center; } .rt small { margin-left: auto; color: var(--muted); font-size: 13px; font-weight: 650; }
+/* oyun çizimi */
+.gm { background: #F3F8FB; }
+.sky { height: 150px; position: relative; background: linear-gradient(180deg, #D6ECF8 0%, #EAF6FB 100%); } .sky .wv { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 70px; }
+.sky .isl { position: absolute; left: 50%; bottom: 26px; width: 210px; height: 50px; transform: translateX(-50%); border-radius: 50%; background: #F1E3C2; }
+.sky .hill { position: absolute; left: 50%; bottom: 52px; width: 140px; height: 64px; transform: translateX(-46%); border-radius: 70px 70px 10px 10px; background: #8CC79A; }
+.sky .sun { position: absolute; right: 54px; top: 28px; width: 38px; height: 38px; border-radius: 50%; background: #FFFFFF; opacity: .9; }
+.sky .pearl { position: absolute; left: 16px; top: 52px; z-index: 1; display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,.95); border-radius: 99px; padding: 6px 14px 6px 7px; font-size: 14px; font-weight: 800; color: var(--fam-fg); }
+.sky .pearl i { width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFFFFF 0 22%, #E7E3F2 45%, #C9C6DD 100%); box-shadow: 0 0 0 1px rgba(44,74,154,.18); }
+.gm .body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.gm h4 { font-size: 18px; font-weight: 800; margin: 2px 2px 2px; }
+.task { background: #fff; border-radius: 18px; padding: 13px 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 0 0 1px #E3EBF0; }
+.task .e { width: 48px; height: 48px; border-radius: 14px; background: #EEF5F9; display: grid; place-items: center; font-size: 26px; }
+.task b { display: block; font-size: 16px; } .task span { font-size: 13px; color: var(--muted); }
+.task .st { margin-left: auto; font-size: 13px; font-weight: 800; border-radius: 99px; padding: 8px 13px; white-space: nowrap; }
+.st.ok { background: #E6F4EA; color: #2F7D4A; } .st.wait { background: #ECEEF3; color: #5D6680; } .st.do { background: var(--ink); color: #fff; }
+</style></head><body>
+<div class="pano">
+<svg class="loop" width="2640" height="956"><line x1="30" y1="71" x2="2236" y2="71" stroke="#0F1B3D" stroke-opacity=".28" stroke-width="2"/></svg>
+
+<div class="cell" style="left:0"><span class="step"><b>1</b>Uzman</span><span class="brand"><img src="../../../assets/icon.png">ClinicApp</span>
+  <div class="cap"><h1>Uzman planlar, <br>aile uygular, çocuk oynar</h1><p class="sub">Ev programını oyuna dönüştüren uzman platformu.</p></div>
+  <div class="card" data-src="plan-top" data-y="190"></div></div>
+
+<div class="cell" style="left:440px"><span class="step fam"><b>2</b>Aile</span>
+  <div class="cap"><h1>Ebeveyn onaylar, paylaşım başlar</h1><p class="sub">İstediği an durdurur; erişiminiz o&nbsp;an biter.</p></div>
+  <div class="scrn pa"><span class="tagd" style="top:auto;bottom:14px">Çizim · aile uygulaması</span>
+    <div class="top"><i></i>Uzman daveti</div>
+    <div class="body">
+      <div class="blk"><div class="who"><span class="av">EÖ</span><div><b>Elif Örnek</b><span>Uzm. Klinik Psikolog</span></div></div>
+        <div class="kid">Nazlı · 8 yaş<i></i></div><div class="kid off">Arven · 6 yaş<i></i></div>
+        <div class="go">Onayla ve paylaş</div><div class="note">İstediğin an durdurabilirsin</div></div>
+      <div class="blk"><span class="lab">Uzmanının önerisi</span><b style="font-size:17px">Güne hazır sabah</b>
+        <div><div class="rt"><span class="e">👕</span>Okul için giyin<small>07:20</small></div><div class="rt"><span class="e">🥣</span>Kahvaltını yap<small>07:30</small></div><div class="rt"><span class="e">🎒</span>Çantanı hazırla<small>07:45</small></div></div>
+        <div class="go">Hepsini ekle</div></div>
+    </div></div></div>
+
+<div class="cell" style="left:880px"><span class="step child"><b>3</b>Çocuk</span>
+  <div class="cap"><h1>Çocuk görevi oyunda görür</h1><p class="sub">Yapınca işaretler; ebeveyn onaylayınca inci kazanır.</p></div>
+  <div class="scrn gm"><span class="tagd" style="left:14px;right:auto">Çizim · çocuğun oyunu</span>
+    <div class="sky"><span class="pearl"><i></i>42 tane inci</span><svg class="wv" viewBox="0 0 396 70" preserveAspectRatio="none"><path d="M0 34 C 60 18, 120 46, 198 30 S 330 16, 396 32 L396 70 L0 70Z" fill="#BFE2EE"/><path d="M0 50 C 70 38, 140 62, 210 48 S 340 38, 396 50 L396 70 L0 70Z" fill="#A9D8E8"/></svg></div>
+    <div class="body"><h4>Bugünün görevleri</h4>
+      <div class="task"><span class="e">🪥</span><div><b>Dişlerini fırçala</b><span>Sabah</span></div><span class="st ok">Onaylandı</span></div>
+      <div class="task"><span class="e">🥣</span><div><b>Kahvaltını yap</b><span>07:30</span></div><span class="st wait">Onay bekliyor</span></div>
+      <div class="task"><span class="e">🎒</span><div><b>Çantanı hazırla</b><span>07:45</span></div><span class="st do">Yaptım</span></div>
+      <div class="task"><span class="e">📖</span><div><b>10 dakika kitap oku</b><span>Akşam</span></div><span class="st wait">Sırada</span></div>
+      <div class="task"><span class="e">🧸</span><div><b>Oyuncaklarını topla</b><span>19:30</span></div><span class="st wait">Sırada</span></div>
+      <div class="task"><span class="e">🛏️</span><div><b>Yatağını topla</b><span>Sabah</span></div><span class="st ok">Onaylandı</span></div>
+    </div></div></div>
+
+<div class="cell" style="left:1320px"><span class="step"><b>4</b>Uzman</span>
+  <div class="cap"><h1>Evde olan panelinize gelir</h1><p class="sub">Ebeveynin evde girdiği ABC kayıtları, o&nbsp;gün.</p></div>
+  <div class="card" data-src="abc-cards" data-y="0"></div></div>
+
+<div class="cell" style="left:1760px"><span class="step"><b>5</b>Uzman</span>
+  <div class="cap"><h1>Raporunuz hazır gelir</h1><p class="sub">Gözlem raporu ve ilerleme notu, dönemin kayıtlarından.</p></div>
+  <div class="excerpt" data-src="report" style="left:28px;right:28px;top:300px;height:213px"></div>
+  <div class="call" style="left:28px;right:28px;top:536px;padding:0;border-radius:16px;overflow:hidden;background:#F5F6F8"><div class="crop" data-src="rapor" data-box="12,620,416,600" data-s="0.9135"></div></div></div>
+
+<div class="cell" style="left:2200px"><span class="step"><b>✓</b>Gizlilik</span>
+  <div class="cap"><h1>Kim neyi görür, baştan belli</h1><p class="sub">Veri yalnız ebeveynin onayıyla paylaşılır.</p></div>
+  <div class="card" data-src="help-sees" data-x="16" data-w="408" data-y="176" style="background:#fff"></div></div>
+</div>
+<script src="raw/boxes.js"></script><script src="kit.js"></script></body></html>

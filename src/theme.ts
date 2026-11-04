@@ -11,6 +11,9 @@ export const colors = {
   today: '#E6EAF5',
   ok: '#2F7D4A',
   gold: '#E9B22B',
+  // oyun parası İnci (GameApp kararı 3 Kasım 2026: sedef, sarı/altın simge yok)
+  pearl: '#ECE9F4',
+  pearlEdge: '#C9C6DD',
   danger: '#B3263E',
   easy: { bg: '#E6F4EA', fg: '#2F7D4A' },
   medium: { bg: '#FFF3D6', fg: '#9A6B00' },

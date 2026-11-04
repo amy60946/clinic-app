@@ -1,0 +1,55 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><link rel="stylesheet" href="kit.css"><style>
+/* B · Lacivert marka alanı (Slack · monday · Doctoralia): tek lacivert zemin, ortalı beyaz başlık, ince çerçeveli cihaz,
+   her karede telefondaki bir parçanın büyütülüp öne çıkması */
+.pano { width: 3080px; height: 956px; position: relative; overflow: hidden; flex: none; background: #0F1B3D; }
+.ribbon { position: absolute; left: 0; top: 0; }
+.cell { position: absolute; top: 0; width: 440px; height: 956px; }
+.cap { position: absolute; left: 28px; right: 28px; top: 0; height: 258px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; color: #fff; }
+h1 { font-size: 33px; line-height: 1.08; letter-spacing: -.018em; font-weight: 800; text-wrap: balance; }
+h1 em { font-style: normal; color: #A8BEF5; }
+p.sub { font-size: 16px; line-height: 1.38; font-weight: 500; color: #B9C5E4; margin-top: 10px; text-wrap: balance; }
+.call.free { transform: none; }
+.brand { display: flex; align-items: center; gap: 9px; font-size: 16px; font-weight: 800; margin-bottom: 16px; }
+.brand img { width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 0 0 1px rgba(255,255,255,.3); }
+.cell .phone { --w: 316px; left: 62px; top: 288px; box-shadow: 0 0 0 1.2px #59647F inset, 0 40px 80px -24px rgba(0,0,0,.65); }
+.call { position: absolute; left: 50%; transform: translateX(-50%); background: #fff; border-radius: 18px; padding: 7px;
+  box-shadow: 0 26px 50px -14px rgba(0,0,0,.6), 0 0 0 1px rgba(15,27,61,.08); }
+.call .crop { border-radius: 12px; }
+.paper { left: 150px; width: 270px; height: 420px; top: 520px; transform: rotate(3deg); box-shadow: 0 30px 60px -16px rgba(0,0,0,.6); }
+</style></head><body>
+<div class="pano">
+<svg class="ribbon" width="3080" height="956" viewBox="0 0 3080 956">
+  <path d="M0 640 C 400 520, 700 760, 1100 640 S 1800 520, 2200 650 S 2800 760, 3080 600 L 3080 956 L 0 956 Z" fill="#22366E" opacity=".55"/>
+  <path d="M0 720 C 380 640, 760 820, 1150 720 S 1850 610, 2250 730 S 2850 820, 3080 690 L 3080 956 L 0 956 Z" fill="#14244F" opacity=".9"/></svg>
+
+<div class="cell" style="left:0"><div class="cap"><div class="brand"><img src="../../../assets/icon.png">ClinicApp</div>
+  <h1>Ev programı <em>oyunda</em> göreve dönüşür</h1><p class="sub">Hedef ve rutinleri aileye gönderin, evdeki kayıtları görün.</p></div>
+  <div class="phone"><div class="scr" id="b1" data-src="plan-top"></div></div>
+<div class="game" style="left:40px;right:40px;width:auto;top:759px"><div class="gt">Çocuğun oyununda<span class="pearl"><i></i>42 tane inci</span></div>
+    <div class="gr"><span class="e">👕</span>Okul için giyin<span class="b">Yaptım</span></div><div class="cap2">Çizim</div></div></div>
+
+<div class="cell" style="left:440px"><div class="cap"><h1>Evdeki kayıtlar <em>size gelir</em></h1><p class="sub">Ebeveynin evde girdiği ABC kaydı, panelinizde.</p></div>
+  <div class="phone"><div class="scr" id="b2" data-src="abc-cards"></div></div>
+  <div class="call" data-lift="b2"><div class="crop" data-src="abc-cards" data-box="12,301,416,155" data-s="0.98"></div></div></div>
+
+<div class="cell" style="left:880px"><div class="cap"><h1>Kim neyi görür, <em>baştan belli</em></h1><p class="sub">Veri yalnız ebeveynin onayıyla paylaşılır.</p></div>
+  <div class="phone"><div class="scr" id="b3" data-src="help-sees" data-y="176"></div></div>
+  <div class="call" data-lift="b3"><div class="crop" data-src="help-sees" data-box="25,244,390,136" data-s="0.98"></div></div></div>
+
+<div class="cell" style="left:1320px"><div class="cap"><h1>İlerlemeyi <em>hafta hafta</em> görün</h1><p class="sub">Tamamlama, tam gün ve hatırlatmadan önce başlama.</p></div>
+  <div class="phone"><div class="scr" id="b4" data-src="ozet" data-y="0"></div></div>
+  <div class="call" data-lift="b4"><div class="crop" data-src="ozet" data-box="20,245,400,262" data-s="0.92"></div></div></div>
+
+<div class="cell" style="left:1760px"><div class="cap"><h1>Evde ne yapıldı, <em>gün gün</em></h1><p class="sub">Çocuk oyunda “Yaptım” der, ebeveyn onaylar.</p></div>
+  <div class="phone"><div class="scr" id="b5" data-src="haftalik" data-y="0"></div></div>
+  <div class="call" data-lift="b5"><div class="crop" data-src="haftalik" data-box="20,335,400,195" data-s="0.98"></div></div></div>
+
+<div class="cell" style="left:2200px"><div class="cap"><h1>Raporunuz <em>hazır</em> gelir</h1><p class="sub">Gözlem raporu ve ilerleme notu, dönemin kayıtlarından.</p></div>
+  <div class="phone"><div class="scr" id="b6" data-src="rapor" data-y="372" data-dim="1"></div></div>
+  <div class="excerpt" data-src="report" style="left:40px;width:360px;top:732px;height:200px;box-shadow:0 30px 60px -16px rgba(0,0,0,.6)"></div></div>
+
+<div class="cell" style="left:2640px"><div class="cap"><h1>Sıra kimde, <em>tek bakışta</em></h1><p class="sub">Sizi bekleyen, aileden yeni gelen, sessiz kalan.</p></div>
+  <div class="phone"><div class="scr" id="b7" data-src="board" data-y="345"></div></div>
+  <div class="call" data-lift="b7"><div class="crop" data-src="board" data-box="16,598,408,276" data-s="0.9"></div></div></div>
+</div>
+<script src="raw/boxes.js"></script><script src="kit.js"></script></body></html>

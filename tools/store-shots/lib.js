@@ -3,7 +3,7 @@ const editDb = require('./editdb');
 // iOS-wording build per device (native-build.sh); SHOT_URL=... overrides (e.g. the plain preview/out build)
 const urlFor = (device) => process.env.SHOT_URL || `file://${__dirname}/native/${device}/clinic.html`;
 const ID = 'demo-clinician';
-const SECTIONS = ['goals', 'summary', 'routine', 'abc', 'notes', 'report', 'details', 'suggestions'];
+const SECTIONS = ['goals', 'summary', 'routine', 'abc', 'notes', 'report', 'details', 'suggestions', 'board'];
 
 const DEVICES = {
   ipad: { viewport: { width: 1376, height: 1032 }, deviceScaleFactor: 2, isMobile: false, hasTouch: true,
@@ -17,6 +17,9 @@ async function open(device, scale) {
   const opts = { ...DEVICES[device], locale: 'tr-TR', timezoneId: 'Europe/Istanbul' };
   if (scale) opts.deviceScaleFactor = scale;
   const ctx = await b.newContext(opts);
+  // SHOT_TIME (ISO) freezes "now" so the demo data and charts look the same whatever the capture day (e.g. a Monday morning:
+  // the last chart week is complete)
+  if (process.env.SHOT_TIME) await ctx.clock.setFixedTime(new Date(process.env.SHOT_TIME));
   const p = await ctx.newPage();
   p.errors = [];
   p.on('pageerror', (e) => p.errors.push(String(e)));

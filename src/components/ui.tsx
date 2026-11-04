@@ -193,7 +193,7 @@ export function Empty({ text }: { text: string }) {
 
 const styles = StyleSheet.create({
   badge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill },
-  coin: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.gold },
+  coin: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.pearl, borderWidth: 1, borderColor: colors.pearlEdge },
   iconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
   chip: {
     flexDirection: 'row', alignItems: 'center', gap: 6, height: 40, paddingHorizontal: 16,

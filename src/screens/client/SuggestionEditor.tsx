@@ -288,8 +288,8 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
               />
             </View>
             <View style={styles.coinBox}>
-              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.gold }} />
-              <TextInput value={coins} keyboardType="number-pad" maxLength={2} accessibilityLabel="Ödül (coin)"
+              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.pearl, borderWidth: 1, borderColor: colors.pearlEdge }} />
+              <TextInput value={coins} keyboardType="number-pad" maxLength={2} accessibilityLabel="Ödül (inci)"
                 onChangeText={(v) => {
                   const digits = v.replace(/[^0-9]/g, '');
                   setCoins(digits && Number(digits) > MAX_TASK_COINS ? String(MAX_TASK_COINS) : digits);
