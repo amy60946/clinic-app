@@ -113,6 +113,8 @@ async function login(b, who) {
   await step(p, 'membership', async () => { await tap(p, 'Paketleri ve fiyatları gör'); });
   await closeTop(p);
   await step(p, 'calendar', async () => { await tap(p, 'Takvim'); });
+  await step(p, 'calendar-week', async () => { await tap(p, 'Hafta'); }, 'Pzt');
+  await step(p, 'calendar-day', async () => { await tap(p, 'Gün'); });
   await step(p, 'calendar-new', async () => { await tap(p, p.getByRole('button', { name: /Yeni seans|Seans ekle|Seans planla/ }).or(p.getByText(/^\+ ?Seans|^Yeni seans|^Seans planla/)).filter({ visible: true })); });
   await closeTop(p);
   await step(p, 'calendar-settings', async () => { await tap(p, p.locator('[aria-label*="ayar" i]').or(p.getByText(/^Takvim ayarları|^Ayarlar$/)).filter({ visible: true })); });

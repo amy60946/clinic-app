@@ -209,7 +209,8 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
               <View style={{ flex: 1, minWidth: 0, width: '100%' }}>
                 {wide || view === 'week' && width >= 700
                   ? <Grid days={days} today={today} sessions={inRange} external={external} hours={myHours} nameOf={nameOf} onOpen={setDetail} onExt={setExt} onNew={newAt} />
-                  : <Agenda days={days} today={today} sessions={inRange} external={external} nameOf={nameOf} onOpen={setDetail} onExt={setExt} onNew={(d) => newAt(d, '10:00')} />}
+                  : <Agenda days={days} today={today} sessions={inRange} external={external} nameOf={nameOf} onOpen={setDetail} onExt={setExt} onNew={(d) => newAt(d, '10:00')}
+                      week={view === 'week' ? weekDays : undefined} onPick={(d) => { setAnchor(d); setView('day'); }} />}
                 {(inRange.length > 0 || external.length > 0) && <Legend grid={wide || view === 'week' && width >= 700} />}
               </View>
               {(wide || view === 'day') && side}
@@ -337,19 +338,53 @@ function Block({ x, name, onPress, style }: { x: Session; name: string; onPress:
   );
 }
 
-function Agenda({ days, today, sessions, external, nameOf, onOpen, onExt, onNew }: Omit<GridProps, 'onNew'> & { onNew: (day: string) => void }) {
+// Telefonda hafta (5 Kasım 2026, kullanıcı: "mobilde hafta görünümü çalışmıyor"; önce yalnız seansı olan günlerin listesiydi,
+// gün görünümünden ayırt edilmiyordu). Apple Takvim'in dikey düzeni gibi: üstte 7 günlük şerit (seans sayısı nokta, dokununca
+// o gün), altında şeritteki 7 günün hepsi (boş gün kısa "Seans yok · ekle" satırı; geçmiş boş gün soluk).
+const DAY_SHORT = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+function WeekStrip({ week, today, sessions, onPick }: { week: string[]; today: string; sessions: Session[]; onPick: (d: string) => void }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 4, marginBottom: 4 }} accessibilityRole="tablist">
+      {week.map((d, i) => {
+        const n = sessions.filter((x) => trDay(x.starts_at) === d && !isClosed(x.status)).length;
+        const on = d === today;
+        return (
+          <Pressable key={d} onPress={() => onPick(d)} accessibilityRole="button" accessibilityLabel={`${shortDay(d)}: ${n} seans. Günü aç`}
+            style={({ pressed }) => [{ flex: 1, alignItems: 'center', gap: 2, paddingVertical: 6, borderRadius: radius.sm, backgroundColor: on ? colors.navy : '#fff',
+              borderWidth: 1, borderColor: on ? colors.navy : colors.line }, pressed && { opacity: 0.8 }]}>
+            <Text style={{ fontSize: 11, fontWeight: '600', color: on ? '#fff' : colors.muted }}>{DAY_SHORT[i]}</Text>
+            <Text style={{ fontSize: 15, fontWeight: '700', color: on ? '#fff' : colors.navy }}>{Number(d.slice(8))}</Text>
+            <View style={{ flexDirection: 'row', gap: 2, height: 5 }}>
+              {Array.from({ length: Math.min(n, 3) }, (_, k) => <View key={k} style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: on ? '#fff' : colors.navy }} />)}
+            </View>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+function Agenda({ days, today, sessions, external, nameOf, onOpen, onExt, onNew, week, onPick }: Omit<GridProps, 'onNew'> & {
+  onNew: (day: string) => void; week?: string[]; onPick?: (d: string) => void;
+}) {
   return (
     <View style={{ gap: 12 }}>
-      {days.map((d) => {
+      {week && onPick && <WeekStrip week={week} today={today} sessions={sessions} onPick={onPick} />}
+      {(week ?? days).map((d) => {
         const list = sessions.filter((x) => trDay(x.starts_at) === d).sort((a, b) => a.starts_at.localeCompare(b.starts_at));
         const ext = external.filter((e) => trDay(e.starts_at) === d);
-        if (days.length > 1 && !list.length && !ext.length) return null;
+        const empty = list.length === 0 && ext.length === 0;
         return (
           <View key={d} style={{ gap: 6 }}>
             {days.length > 1 && <Text style={[s.label, d === today && { color: '#2C4A9A' }]}>{shortDay(d)}{d === today ? ' · bugün' : ''}</Text>}
-            {list.length === 0 && ext.length === 0 && (
+            {empty && (days.length > 1 ? (
+              <Pressable onPress={() => onNew(d)} accessibilityRole="button" style={({ pressed }) => [s.row, { paddingVertical: 4, gap: 4 }, d < today && { opacity: 0.55 }, pressed && { opacity: 0.7 }]}>
+                <Text style={s.small}>Seans yok ·</Text>
+                <Text style={[s.small, { color: colors.navy, fontWeight: '700' }]}>+ ekle</Text>
+              </Pressable>
+            ) : (
               <Pressable onPress={() => onNew(d)} style={[s.card, { borderStyle: 'dashed', alignItems: 'center' }]}><Text style={s.small}>Seans yok. Eklemek için dokun.</Text></Pressable>
-            )}
+            ))}
             {list.map((x) => (
               <Pressable key={x.id} onPress={() => onOpen(x)} style={[s.card, s.row, { borderLeftWidth: 4, borderLeftColor: STATUS_META[x.status].line, paddingVertical: 10 }]}>
                 <Text style={{ width: 54, fontWeight: '700', color: colors.navy, fontVariant: ['tabular-nums'] }}>{timeRange(x).slice(0, 5)}</Text>
@@ -370,7 +405,6 @@ function Agenda({ days, today, sessions, external, nameOf, onOpen, onExt, onNew 
           </View>
         );
       })}
-      {days.length > 1 && sessions.length === 0 && external.length === 0 && <Text style={s.small}>Bu hafta seans yok.</Text>}
     </View>
   );
 }
