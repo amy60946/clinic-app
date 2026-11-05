@@ -23,7 +23,8 @@ const ITEMS: Item[] = [
   { key: 'evaluate', q: 'Ne zaman değerlendiririm?', show: 'plan', showLabel: 'Takip Planı', a: ['Dört haftada bir "Değerlendirme zamanı" çıkar › "Değerlendir" › puan › "Kaydet". Aile görmez.'] },
   { key: 'board', q: 'Ana ekrandaki bölümler?', show: 'home', showLabel: 'Ana ekran', a: ['Senin sıran: senden bekleyen. Aileden yeni: son 7 gün. Sessiz kalanlar: 7 gündür kayıt yok.'] },
   { key: 'report', q: 'Raporu nasıl alırım?', show: 'report', showLabel: 'Rapor', a: ['Rapor › "Raporu aç" (PDF). İlerleme notu için "Notu kopyala"; yapay zekâ yok.'] },
-  { key: 'team', q: 'Ekibime uzman nasıl eklerim?', show: 'team', showLabel: 'Ayarlar', ownerOnly: true, a: ['Ayarlar › "Ekibe uzman davet et" › kodu ver (15 dk). Uzman "Kodum var" ile katılır.'] },
+  { key: 'team', q: 'Ekibime uzman nasıl eklerim?', show: 'team', showLabel: 'Ayarlar', ownerOnly: true, a: ['Uzmandan kişisel kodunu iste (onun Ayarlar sayfasında). Ayarlar › Ekip › "Uzman ekle"ye yaz; uzman onaylayınca ekibine katılır.'] },
+  { key: 'workspace', q: 'Birden çok klinikte çalışıyorum, nasıl ayırırım?', a: ['Başlıktaki adın yanındaki oka dokun: "Bireysel çalışmam" ve klinikler ayrı çalışma alanlarıdır. Danışanlar, davetler ve seanslar seçili alana aittir.'] },
 ];
 
 export default function HelpSheet({ visible, owner, onClose, onIntro, onSample, onAction }: {

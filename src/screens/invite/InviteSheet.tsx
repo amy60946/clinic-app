@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
-import { Card, Label, Input, Cta, IconButton, Segmented, InfoText } from '../../components/ui';
+import { Card, Label, Input, Cta, IconButton, Segmented, InfoText, Notice } from '../../components/ui';
 import PlanEditor from '../plan/PlanEditor';
 import { track } from '../../lib/track';
 import {
@@ -26,20 +26,21 @@ export type SheetInvite = NewInvite & {
 // sent: bu davete en az bir e-posta gitti · text: son denemenin uyarısı (ör. 60 sn dolmadı)
 type Mail = { sent: boolean; text: string };
 
-export default function InviteSheet({ visible, onClose, clinicId, clinicianName, existing }: {
+export default function InviteSheet({ visible, onClose, clinicId, clinicianName, existing, workspaceName, blocked }: {
   visible: boolean; onClose: () => void; clinicId: string; clinicianName: string; existing?: SheetInvite | null;
+  workspaceName?: string; blocked?: boolean;   // çalışma alanı (ortak akislar.md 21): davet o alana gider; sahip kapattıysa üye gönderemez
 }) {
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      {visible && <Body onClose={onClose} clinicId={clinicId} clinicianName={clinicianName} existing={existing ?? null} />}
+      {visible && <Body onClose={onClose} clinicId={clinicId} clinicianName={clinicianName} existing={existing ?? null} workspaceName={workspaceName} blocked={blocked} />}
     </Modal>
   );
 }
 
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
-function Body({ onClose, clinicId, clinicianName, existing }: {
-  onClose: () => void; clinicId: string; clinicianName: string; existing: SheetInvite | null;
+function Body({ onClose, clinicId, clinicianName, existing, workspaceName, blocked }: {
+  onClose: () => void; clinicId: string; clinicianName: string; existing: SheetInvite | null; workspaceName?: string; blocked?: boolean;
 }) {
   const [inv, setInv] = useState<SheetInvite | null>(existing);
   const [email, setEmail] = useState('');
@@ -77,7 +78,8 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
       }
       await send(r.code);
     } catch (e) {
-      Alert.alert('Davet oluşturulamadı', (e as Error).message);
+      const msg = (e as Error).message;
+      Alert.alert('Davet oluşturulamadı', msg.includes('invite_owner_only') ? 'Bu klinikte aile davetini klinik sahibi gönderir.' : msg);
     } finally {
       setBusy(false);
     }
@@ -109,6 +111,8 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60, gap: 4 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" automaticallyAdjustKeyboardInsets>
           {!inv ? (
             <>
+              {blocked && <Notice icon="lock-closed-outline" text="Bu klinikte aile davetini klinik sahibi gönderir. Bireysel çalışmandan davet edebilirsin." />}
+              {!!workspaceName && !blocked && <Text style={styles.scope}><Ionicons name="business-outline" size={13} color={colors.navy} />{`  Bu davet ${workspaceName} adına gider.`}</Text>}
               <InfoText text="Ebeveynin e-postasını yaz; davet senin adınla e-postayla gider. Davet 3 gün geçerli." detail={INVITE_HELP} />
               <Label>Ebeveynin e-postası</Label>
               <Input value={email} onChangeText={setEmail} placeholder="ornek@eposta.com" keyboardType="email-address" autoCapitalize="none"
@@ -122,7 +126,7 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
                 detail={['Çocuğun adını ve yaş grubunu yazarsan yalnız daveti kabul eden ebeveyn görür; kontrol edip onaylar, düzeltirse sana bildirim gelir. Mesajda görünmez, davet bitince silinir.']} />
               <Label>Kendi notun (isteğe bağlı, aile görmez)</Label>
               <Input value={label} onChangeText={setLabel} placeholder="Ör. dosya no, görüşme günü" maxLength={60} />
-              <View style={{ marginTop: 16 }}><Cta label="E-posta gönder" onPress={create} busy={busy} /></View>
+              <View style={{ marginTop: 16 }}><Cta label="E-posta gönder" onPress={create} busy={busy} disabled={blocked} /></View>
             </>
           ) : (
             <>
@@ -206,4 +210,5 @@ const styles = StyleSheet.create({
   statusText: { fontSize: 13, color: colors.text, lineHeight: 18 },
   planBox: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#fff', borderRadius: radius.md, padding: 14, borderWidth: 1, borderColor: colors.line },
   planTitle: { fontSize: 14, fontWeight: '700', color: colors.navy },
+  scope: { fontSize: 13, fontWeight: '600', color: colors.navy, marginBottom: 6 },
 });

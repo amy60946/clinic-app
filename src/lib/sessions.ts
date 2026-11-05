@@ -88,9 +88,20 @@ export async function saveRecord(sessionId: string, r: Pick<SessionRecord, 'atte
   const { error } = await supabase.rpc('clinic_session_record_save', { p_session: sessionId, p: r });
   check(null, error);
 }
+// Dolu saatler: seçili alandaki seanslar + ekibin başka çalışma alanlarındaki seansları (yalnız "dolu"; ortak akislar.md 21)
 export async function loadBusy(fromIso: string, toIso: string): Promise<Busy[]> {
-  const { data, error } = await supabase.rpc('clinic_busy', { p_from: fromIso, p_to: toIso });
-  return check((data ?? []) as Busy[], error);
+  const [{ data, error }, other] = await Promise.all([
+    supabase.rpc('clinic_busy', { p_from: fromIso, p_to: toIso }),
+    loadBusyElsewhere(fromIso, toIso),
+  ]);
+  return [...check((data ?? []) as Busy[], error), ...other.map((b) => ({ clinician_id: b.clinician_id, room_id: null, starts_at: b.starts_at, ends_at: b.ends_at }))];
+}
+export type BusyElsewhere = { clinician_id: string; starts_at: string; ends_at: string; clinic: string | null };
+// Sunucuda çalışma alanları yoksa boş
+export async function loadBusyElsewhere(fromIso: string, toIso: string): Promise<BusyElsewhere[]> {
+  const { data, error } = await supabase.rpc('clinic_busy_elsewhere', { p_from: fromIso, p_to: toIso });
+  if (error) return [];
+  return (data ?? []) as BusyElsewhere[];
 }
 
 /* ---------- Ayar, oda, çalışma saati ---------- */

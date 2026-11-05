@@ -9,6 +9,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SESSION_TABLES, seedSessions, sessionVisible, sessionRpc } from './demo-sessions';
+import { getWorkspace } from './workspace';
 
 type Row = Record<string, any>;
 type Err = { message: string; code?: string } | null;
@@ -23,7 +24,7 @@ const TABLES = ['profiles', 'families', 'children', 'tasks', 'task_assignments',
   'clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'abc_events',
   'clinic_task_suggestions', 'clinic_routines', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events', 'billing_plans', 'clinic_link_access',
   'care_modules', 'care_module_logs', 'clinic_link_history', 'clinician_surveys', 'legal_acceptances', 'kvkk_requests',
-  'care_module_goals', 'clinic_plan_templates', ...SESSION_TABLES];
+  'care_module_goals', 'clinic_plan_templates', 'clinic_members', 'clinician_codes', 'clinic_member_requests', ...SESSION_TABLES];
 
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -192,6 +193,37 @@ function upgrade(x: Db): Db {
     x.clinics.push({ id: 'demo-clinic-expired', name: 'Deneme Süresi Biten Klinik', plan: 'trial', seat_limit: 10,
       trial_ends_at: ago(1440), created_by: 'demo-expired', created_at: ago(8 * 1440) });
     x.clinicians.push({ id: 'demo-expired', clinic_id: 'demo-clinic-expired', name: 'Dr. Can Demir', title: 'Ergoterapist', role: 'owner', created_at: ago(8 * 1440) });
+  }
+  // Çalışma alanları (ortak proposed/20261105090000_workspaces.sql): üyelik, bireysel alan, örnek istek
+  if (!x.workspacesSeeded) {
+    x.clinicians.forEach((m: Row) => {
+      if (!x.clinic_members.some((y: Row) => y.clinic_id === m.clinic_id && y.clinician_id === m.id)) {
+        const used = x.clinic_invites.find((v: Row) => v.used_by === m.id && v.kind === 'clinician');
+        x.clinic_members.push({ clinic_id: m.clinic_id, clinician_id: m.id, role: m.role, status: 'active', invited_by: used?.clinician_id ?? null, joined_at: m.created_at, left_at: null });
+      }
+    });
+    // Ada Yıldız: bireysel uzman (ada@clinicapp.app); Mavi'nin sahibi kodu ADAKD24M ile ekleyebilir
+    if (!x.users.some((u: Row) => u.email === 'ada@clinicapp.app')) {
+      x.users.push({ id: 'demo-ada', email: 'ada@clinicapp.app', password: '12345678' });
+      x.clinics.push({ id: 'demo-ada-ws', name: 'Ada Yıldız', plan: 'trial', seat_limit: 10, personal_of: 'demo-ada', members_can_invite: true,
+        trial_ends_at: new Date(Date.now() + 6 * 864e5).toISOString(), created_by: 'demo-ada', created_at: ago(1440) });
+      x.clinicians.push({ id: 'demo-ada', clinic_id: 'demo-ada-ws', name: 'Ada Yıldız', title: 'Dil ve Konuşma Terapisti', role: 'owner', created_at: ago(1440) });
+      x.clinic_members.push({ clinic_id: 'demo-ada-ws', clinician_id: 'demo-ada', role: 'owner', status: 'active', invited_by: null, joined_at: ago(1440), left_at: null });
+      x.clinician_codes.push({ clinician_id: 'demo-ada', code: 'ADAKD24M', created_at: ago(1440) });
+    }
+    // Yeşil Gelişim Merkezi, ekip@ hesabını ekibine eklemek istiyor (bekleyen istek)
+    if (!x.clinics.some((c: Row) => c.id === 'demo-yesil')) {
+      x.clinics.push({ id: 'demo-yesil', name: 'Yeşil Gelişim Merkezi', plan: 'clinic', seat_limit: 10, members_can_invite: true,
+        trial_ends_at: ago(30 * 1440), period_end: new Date(Date.now() + 20 * 864e5).toISOString(), created_by: 'demo-yesil-owner', created_at: ago(60 * 1440) });
+      x.clinicians.push({ id: 'demo-yesil-owner', clinic_id: 'demo-yesil', name: 'Dr. Selin Aydın', title: 'Çocuk Psikiyatristi', role: 'owner', created_at: ago(60 * 1440) });
+      x.clinic_members.push({ clinic_id: 'demo-yesil', clinician_id: 'demo-yesil-owner', role: 'owner', status: 'active', invited_by: null, joined_at: ago(60 * 1440), left_at: null });
+      x.clinic_member_requests.push({ id: 'demo-req-yesil', clinic_id: 'demo-yesil', clinician_id: MEMBER, requested_by: 'demo-yesil-owner', status: 'pending',
+        created_at: ago(120), expires_at: new Date(Date.now() + 7 * 864e5 - 120 * 60e3).toISOString(), decided_at: null });
+      x.notifications.push({ id: Date.now(), user_id: MEMBER, app: 'clinic', kind: 'team_request', title: 'Yeşil Gelişim Merkezi seni ekibine eklemek istiyor',
+        body: 'Dr. Selin Aydın', data: { request_id: 'demo-req-yesil' }, created_at: ago(120), read_at: null });
+    }
+    x.clinics.forEach((c: Row) => { if (c.members_can_invite === undefined) c.members_can_invite = true; });
+    x.workspacesSeeded = true;
   }
   if (!x.clinicNotifSeeded) {
     // Örnek verinin geçmiş olayları okunmuş sayılır; yalnız en yeni davranış kaydı okunmamış (zil ve rozet görünsün)
@@ -429,7 +461,12 @@ function visible(table: string, r: Row): boolean {
   // Aile: taslak öneriyi, program ↔ hedef tablosunu ve uzman şablonlarını görmez (sunucuda RLS)
   if (!m && table === 'clinic_task_suggestions') return r.status !== 'draft';
   if (!m && ['care_module_goals', 'clinic_plan_templates'].includes(table)) return false;
+  if (!m && ['clinic_members', 'clinician_codes', 'clinic_member_requests'].includes(table)) return false;
   if (!m) return true;
+  if (table === 'clinician_codes') return false;
+  if (table === 'clinic_members') return r.clinician_id === m.id || r.clinic_id === m.clinic_id;
+  if (table === 'clinic_member_requests') return r.clinician_id === m.id || (r.clinic_id === m.clinic_id && m.role === 'owner');
+  if (table === 'clinicians') return r.id === m.id || db.clinic_members.some((y: Row) => y.clinician_id === r.id && y.clinic_id === m.clinic_id);
   if (table === 'care_module_goals') { const mod = db.care_modules.find((x: Row) => x.id === r.module_id); return r.clinic_id === m.clinic_id && !!mod && (!mod.link_id || linkVisible(m, db.clinic_links.find((l: Row) => l.id === mod.link_id))); }
   if (table === 'clinic_plan_templates') return r.clinic_id === m.clinic_id && (r.shared || r.created_by === m.id || m.role === 'owner');
   // Deneme/üyelik bitince çocuk verisi ve klinik çalışma alanı kapanır (sunucudaki clinician_access)
@@ -554,7 +591,17 @@ const listeners: Listener[] = [];
 const emit = (event: string) => listeners.forEach((l) => l(event, sess()));
 const fail = (message: string, code?: string) => ({ data: { session: null, user: null }, error: { message, code } });
 const myProfile = () => db.profiles.find((p: Row) => p.id === sess()?.user.id);
-const myClinician = () => db.clinicians.find((m: Row) => m.id === sess()?.user.id);
+const baseClinician = () => db.clinicians.find((m: Row) => m.id === sess()?.user.id);
+// Seçili çalışma alanı (x-clinic-id karşılığı): uzman satırı o alanın kimliği ve alandaki rolüyle döner; geçersizse alan yok
+const activeMember = (uid: string, cid: string) => db.clinic_members.find((y: Row) => y.clinic_id === cid && y.clinician_id === uid && y.status === 'active');
+function myClinician(): Row | undefined {
+  const base = baseClinician();
+  if (!base) return undefined;
+  const ws = getWorkspace();
+  const cid = ws || base.clinic_id;
+  const mem = activeMember(base.id, cid);
+  return mem ? { ...base, clinic_id: cid, role: mem.role } : { ...base, clinic_id: '__yok__', role: 'member', invalid: true };
+}
 
 function newFamilyFor(userId: string, name: string) {
   const fid = uuid();
@@ -594,9 +641,12 @@ const auth = {
         cid = inv.clinic_id; role = 'member';
       } else {
         cid = uuid();
-        db.clinics.push({ id: cid, name: String(meta.clinic_name || 'Kliniğim'), plan: 'trial', seat_limit: 10, trial_ends_at: new Date(Date.now() + 7 * 864e5).toISOString(), created_by: id, created_at: now() });
+        const solo = meta.practice !== 'clinic';
+        db.clinics.push({ id: cid, name: String(meta.clinic_name || meta.name || 'Kliniğim'), plan: 'trial', seat_limit: 10, trial_ends_at: new Date(Date.now() + 7 * 864e5).toISOString(),
+          created_by: id, created_at: now(), personal_of: solo ? id : null, members_can_invite: true });
       }
       db.clinicians.push({ id, clinic_id: cid, name: meta.name ?? '', title: meta.title ?? '', role, created_at: now() });
+      db.clinic_members.push({ clinic_id: cid, clinician_id: id, role, status: 'active', invited_by: null, joined_at: now(), left_at: null });
     } else {
       newFamilyFor(id, meta.name ?? '');
     }
@@ -633,12 +683,179 @@ const auth = {
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const makeCode = (n = 6) => Array.from({ length: n }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join('');
 
+// ---------- Çalışma alanları (ortak proposed/20261105090000_workspaces.sql) önizleme karşılığı
+function workspaceRpc(name: string, args: Row, uid: string): { data: any; error: Err } | null {
+  const ok = (data: unknown) => ({ data, error: null });
+  const bad = (message: string) => ({ data: null, error: { message } as Err });
+  const base = baseClinician();
+  const m = myClinician();
+  const membersOf = (cid: string) => db.clinic_members.filter((y: Row) => y.clinic_id === cid && y.status === 'active');
+  const clinicName = (cid: string) => db.clinics.find((c: Row) => c.id === cid)?.name ?? '';
+  const personName = (id: string | null) => db.clinicians.find((x: Row) => x.id === id)?.name ?? '';
+  const notifyUser = (user: string, kind: string, title: string, body = '', data: Row = {}) => {
+    if (user === uid) return;
+    db.notifications.push({ id: Date.now() + Math.floor(Math.random() * 1000), user_id: user, app: 'clinic', kind, title, body, data, created_at: now(), read_at: null });
+  };
+  const endMember = (cid: string, who: string) => {
+    const row = activeMember(who, cid);
+    if (row) { row.status = 'left'; row.left_at = now(); }
+    db.clinic_link_access = db.clinic_link_access.filter((a: Row) => !(a.clinic_id === cid && a.clinician_id === who));
+    db.clinic_links.forEach((l: Row) => { if (l.clinic_id === cid && l.clinician_id === who) l.clinician_id = null; });
+    db.clinic_invites.forEach((i: Row) => { if (i.clinic_id === cid && i.clinician_id === who && i.kind === 'family' && !i.used_at && !i.revoked_at) i.revoked_at = now(); });
+    const person = db.clinicians.find((x: Row) => x.id === who);
+    if (person && person.clinic_id === cid) { person.clinic_id = personalFor(who); person.role = 'owner'; }
+  };
+  const personalFor = (who: string): string => {
+    let c = db.clinics.find((x: Row) => x.personal_of === who);
+    if (!c) {
+      const trial = db.clinics.filter((x: Row) => x.created_by === who).map((x: Row) => x.trial_ends_at).sort().pop();
+      c = { id: uuid(), name: personName(who) || 'Bireysel çalışmam', plan: 'trial', seat_limit: 10, personal_of: who, members_can_invite: true,
+        trial_ends_at: trial ?? new Date(Date.now() + 7 * 864e5).toISOString(), created_by: who, created_at: now() };
+      db.clinics.push(c);
+    }
+    const row = db.clinic_members.find((y: Row) => y.clinic_id === c.id && y.clinician_id === who);
+    if (row) Object.assign(row, { status: 'active', role: 'owner', left_at: null });
+    else db.clinic_members.push({ clinic_id: c.id, clinician_id: who, role: 'owner', status: 'active', invited_by: null, joined_at: now(), left_at: null });
+    return c.id;
+  };
+  switch (name) {
+    case 'clinician_workspaces': {
+      if (!base) return ok([]);
+      const rows = db.clinic_members.filter((y: Row) => y.clinician_id === base.id && y.status === 'active').map((y: Row) => {
+        const c = db.clinics.find((x: Row) => x.id === y.clinic_id);
+        return { clinic_id: c.id, name: c.name, role: y.role, personal: c.personal_of === base.id, active: clinicActive(c.id),
+          access: clinicActive(c.id) && (y.role === 'owner' || c.seat_limit > 1), default: c.id === base.clinic_id,
+          members: membersOf(c.id).length, joined_at: y.joined_at };
+      });
+      return ok(rows.sort((a: Row, b: Row) => Number(b.personal) - Number(a.personal) || String(a.joined_at).localeCompare(String(b.joined_at))));
+    }
+    case 'clinician_personal_workspace': return base ? ok(personalFor(base.id)) : bad('Yalnızca uzman hesabı');
+    case 'clinic_workspace_create': {
+      if (!base) return bad('Yalnızca uzman hesabı');
+      const nm = String(args.p_name ?? '').trim().slice(0, 120);
+      if (!nm) return bad('name_required');
+      if (db.clinics.filter((x: Row) => x.created_by === base.id && !x.personal_of).length >= 3) return bad('too_many_clinics');
+      const trial = db.clinics.filter((x: Row) => x.created_by === base.id).map((x: Row) => x.trial_ends_at).sort().pop();
+      const id = uuid();
+      db.clinics.push({ id, name: nm, plan: 'trial', seat_limit: 10, members_can_invite: true, trial_ends_at: trial ?? new Date(Date.now() + 7 * 864e5).toISOString(), created_by: base.id, created_at: now() });
+      db.clinic_members.push({ clinic_id: id, clinician_id: base.id, role: 'owner', status: 'active', invited_by: null, joined_at: now(), left_at: null });
+      return ok(id);
+    }
+    case 'clinician_personal_code': {
+      if (!base) return bad('Yalnızca uzman hesabı');
+      let row = db.clinician_codes.find((x: Row) => x.clinician_id === base.id);
+      if (row && !args.p_rotate) return ok(row.code);
+      let code = makeCode(8);
+      while (db.clinician_codes.some((x: Row) => x.code === code)) code = makeCode(8);
+      if (row) Object.assign(row, { code, created_at: now() }); else db.clinician_codes.push(row = { clinician_id: base.id, code, created_at: now() });
+      return ok(code);
+    }
+    case 'clinic_member_request': {
+      if (!m || m.invalid || m.role !== 'owner') return bad('only_owner');
+      const c = db.clinics.find((x: Row) => x.id === m.clinic_id);
+      if (c.personal_of) return ok({ error: 'personal_workspace' });
+      const k = String(args.p_code ?? '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+      const target = db.clinician_codes.find((x: Row) => x.code === k);
+      if (!target) return ok({ error: 'invalid_code', hint: 'not_found', message: 'Kod bulunamadı.' });
+      const person = db.clinicians.find((x: Row) => x.id === target.clinician_id);
+      if (person.id === m.id) return ok({ error: 'self' });
+      if (activeMember(person.id, c.id)) return ok({ error: 'already_member', name: person.name });
+      const open = db.clinic_member_requests.find((q: Row) => q.clinic_id === c.id && q.clinician_id === person.id && q.status === 'pending' && q.expires_at > now());
+      if (open) return ok({ status: 'pending', id: open.id, name: person.name, title: person.title, expires_at: open.expires_at });
+      const pending = db.clinic_member_requests.filter((q: Row) => q.clinic_id === c.id && q.status === 'pending' && q.expires_at > now()).length;
+      if (membersOf(c.id).length + pending >= c.seat_limit) return ok({ error: 'seat_full' });
+      const rq = { id: uuid(), clinic_id: c.id, clinician_id: person.id, requested_by: m.id, status: 'pending', created_at: now(),
+        expires_at: new Date(Date.now() + 7 * 864e5).toISOString(), decided_at: null };
+      db.clinic_member_requests.push(rq);
+      notifyUser(person.id, 'team_request', `${c.name} seni ekibine eklemek istiyor`, m.name, { request_id: rq.id });
+      return ok({ status: 'sent', id: rq.id, name: person.name, title: person.title, expires_at: rq.expires_at });
+    }
+    case 'clinic_member_requests_mine':
+      return ok(db.clinic_member_requests.filter((q: Row) => q.clinician_id === base?.id && q.status === 'pending' && q.expires_at > now()).map((q: Row) => {
+        const by = db.clinicians.find((x: Row) => x.id === q.requested_by);
+        return { id: q.id, clinic_id: q.clinic_id, clinic: clinicName(q.clinic_id), by: by?.name ?? '', by_title: by?.title ?? '',
+          members: membersOf(q.clinic_id).length, created_at: q.created_at, expires_at: q.expires_at };
+      }));
+    case 'clinic_member_respond': {
+      const q = db.clinic_member_requests.find((x: Row) => x.id === args.p_request && x.clinician_id === base?.id);
+      if (!q || q.status !== 'pending' || q.expires_at <= now()) return ok({ error: 'closed' });
+      if (!args.p_accept) {
+        Object.assign(q, { status: 'declined', decided_at: now() });
+        if (q.requested_by) notifyUser(q.requested_by, 'team_request_declined', `${base!.name} ekibe katılma isteğini kabul etmedi`, '', { clinic_id: q.clinic_id });
+        return ok({ status: 'declined' });
+      }
+      const c = db.clinics.find((x: Row) => x.id === q.clinic_id);
+      if (membersOf(c.id).length >= c.seat_limit) return ok({ error: 'seat_full' });
+      const row = db.clinic_members.find((y: Row) => y.clinic_id === c.id && y.clinician_id === base!.id);
+      if (row) Object.assign(row, { status: 'active', left_at: null, joined_at: now(), invited_by: q.requested_by });
+      else db.clinic_members.push({ clinic_id: c.id, clinician_id: base!.id, role: 'member', status: 'active', invited_by: q.requested_by, joined_at: now(), left_at: null });
+      Object.assign(q, { status: 'accepted', decided_at: now() });
+      membersOf(c.id).filter((y: Row) => y.role === 'owner').forEach((y: Row) => notifyUser(y.clinician_id, 'team_joined', `${base!.name} ekibe katıldı`, '', { clinic_id: c.id }));
+      return ok({ status: 'accepted', clinic_id: c.id, clinic: c.name });
+    }
+    case 'clinic_member_request_cancel': {
+      if (!m || m.role !== 'owner') return bad('only_owner');
+      const q = db.clinic_member_requests.find((x: Row) => x.id === args.p_request && x.clinic_id === m.clinic_id && x.status === 'pending');
+      if (q) Object.assign(q, { status: 'cancelled', decided_at: now() });
+      return ok(null);
+    }
+    case 'clinic_team': {
+      if (!m || m.invalid) return ok(null);
+      const c = db.clinics.find((x: Row) => x.id === m.clinic_id);
+      const members = membersOf(c.id).map((y: Row) => {
+        const p = db.clinicians.find((x: Row) => x.id === y.clinician_id);
+        return { id: p.id, name: p.name, title: p.title, role: y.role, joined_at: y.joined_at, invited_by_name: personName(y.invited_by) || null };
+      }).sort((a: Row, b: Row) => Number(a.role !== 'owner') - Number(b.role !== 'owner') || String(a.joined_at).localeCompare(String(b.joined_at)));
+      const requests = m.role !== 'owner' ? [] : db.clinic_member_requests
+        .filter((q: Row) => q.clinic_id === c.id && q.status === 'pending' && q.expires_at > now())
+        .map((q: Row) => { const p = db.clinicians.find((x: Row) => x.id === q.clinician_id); return { id: q.id, name: p?.name ?? '', title: p?.title ?? '', created_at: q.created_at, expires_at: q.expires_at }; });
+      return ok({ members, requests, seat_limit: c.seat_limit, members_can_invite: c.members_can_invite !== false, personal: !!c.personal_of });
+    }
+    case 'clinic_member_remove': {
+      if (!m || m.role !== 'owner') return bad('only_owner');
+      if (args.p_clinician === m.id) return bad('owner_cannot_leave');
+      if (activeMember(args.p_clinician, m.clinic_id)?.role !== 'member') return bad('not_member');
+      endMember(m.clinic_id, args.p_clinician);
+      notifyUser(args.p_clinician, 'team_removed', `${clinicName(m.clinic_id)} ekibinden çıkarıldın`, 'Bu kliniğin danışanlarını artık görmüyorsun.');
+      return ok(null);
+    }
+    case 'clinic_leave': {
+      if (!m || m.invalid) return bad('not_member');
+      if (db.clinics.find((x: Row) => x.id === m.clinic_id)?.personal_of) return bad('personal_workspace');
+      if (m.role === 'owner') return bad('owner_cannot_leave');
+      const cid = m.clinic_id;
+      endMember(cid, m.id);
+      membersOf(cid).filter((y: Row) => y.role === 'owner').forEach((y: Row) => notifyUser(y.clinician_id, 'team_left', `${m.name} ekipten ayrıldı`, '', { clinic_id: cid }));
+      return ok(null);
+    }
+    case 'clinic_invite_policy_set': {
+      if (!m || m.role !== 'owner') return bad('only_owner');
+      const c = db.clinics.find((x: Row) => x.id === m.clinic_id);
+      c.members_can_invite = args.p_members_can_invite !== false;
+      return ok(null);
+    }
+    case 'clinic_busy_elsewhere': {
+      if (!m || m.invalid) return ok([]);
+      const from = String(args.p_from), to = String(args.p_to);
+      const team = new Set(membersOf(m.clinic_id).map((y: Row) => y.clinician_id));
+      return ok((db.clinic_sessions ?? []).filter((s: Row) => s.clinic_id !== m.clinic_id && team.has(s.clinician_id)
+          && ['planned', 'offered', 'done'].includes(s.status) && (s.clinician_id === m.id || m.role === 'owner')
+          && s.starts_at < to && new Date(Date.parse(s.starts_at) + s.duration_min * 60e3).toISOString() > from)
+        .map((s: Row) => ({ clinician_id: s.clinician_id, starts_at: s.starts_at, ends_at: new Date(Date.parse(s.starts_at) + s.duration_min * 60e3).toISOString(),
+          clinic: s.clinician_id === m.id ? clinicName(s.clinic_id) : null })));
+    }
+    default: return null;
+  }
+}
+
 async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Err }> {
   await new Promise((r) => setTimeout(r, 120));
   sync();
   const me = myProfile();
   const uid = sess()?.user.id;
   if (!uid) return { data: null, error: { message: 'Önce giriş yapmalısın' } };
+  const wsr = workspaceRpc(name, args, uid);
+  if (wsr) { save(); return wsr; }
   if (name === 'create_invite_code') {
     if (!me?.family_id) return { data: null, error: { message: 'Önce giriş yapmalısın' } };
     if (args.p_kind === 'child') db.invite_codes = db.invite_codes.filter((i: Row) => !(i.child_id === args.p_child_id && !i.used_at));
@@ -742,17 +959,24 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
   if (name === 'clinician_me') {
     const m = myClinician();
     if (!m) return { data: null, error: null };
+    if (m.invalid) return { data: { id: m.id, name: m.name, title: m.title, workspace_invalid: true, access: false }, error: null };
     const c = db.clinics.find((x: Row) => x.id === m.clinic_id);
-    const owner = db.clinicians.find((o: Row) => o.clinic_id === c.id && o.role === 'owner');
+    const ownerId = db.clinic_members.find((y: Row) => y.clinic_id === c.id && y.role === 'owner' && y.status === 'active')?.clinician_id;
+    const owner = db.clinicians.find((o: Row) => o.id === ownerId);
     const used = db.clinic_invites.filter((v: Row) => v.used_by === m.id && v.kind === 'clinician' && v.clinic_id === c.id)
       .sort((a: Row, b: Row) => String(b.used_at).localeCompare(String(a.used_at)))[0];
-    const inviter = used ? db.clinicians.find((o: Row) => o.id === used.clinician_id) : null;
+    const memRow = activeMember(m.id, c.id);
+    const inviter = db.clinicians.find((o: Row) => o.id === (memRow?.invited_by ?? used?.clinician_id));
     return { data: { id: m.id, name: m.name, title: m.title, role: m.role, clinic_id: c.id, clinic: c.name, plan: c.plan, seat_limit: c.seat_limit,
-      trial_ends_at: c.trial_ends_at, active: clinicActive(c.id), joined_at: m.created_at, owner_name: owner?.name ?? null, invited_by_name: inviter?.name ?? null,
+      trial_ends_at: c.trial_ends_at, active: clinicActive(c.id), joined_at: memRow?.joined_at ?? m.created_at, owner_name: owner?.name ?? null, invited_by_name: inviter?.name ?? null,
       access: clinicianAccess(m),
       status: c.plan === 'trial' && c.trial_ends_at > now() ? 'trial' : clinicActive(c.id) ? 'active' : 'expired',
       billing_period: c.billing_period ?? null, period_end: c.period_end ?? null, billing_source: c.billing_source ?? null,
-      auto_renew: !!c.auto_renew, member_count: db.clinicians.filter((x: Row) => x.clinic_id === c.id).length }, error: null };
+      auto_renew: !!c.auto_renew, member_count: db.clinic_members.filter((x: Row) => x.clinic_id === c.id && x.status === 'active').length,
+      personal: c.personal_of === m.id, members_can_invite: c.members_can_invite !== false, default_clinic_id: baseClinician()?.clinic_id,
+      workspace_invalid: false, workspaces: db.clinic_members.filter((x: Row) => x.clinician_id === m.id && x.status === 'active').length,
+      has_personal: db.clinics.some((x: Row) => x.personal_of === m.id),
+      requests: db.clinic_member_requests.filter((q: Row) => q.clinician_id === m.id && q.status === 'pending' && q.expires_at > now()).length }, error: null };
   }
   if (name === 'clinic_join_team') {
     const m = myClinician();
@@ -808,6 +1032,7 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     if (!m) return err('Yalnızca uzman hesabı');
     if (!clinicianAccess(m)) return err('Üyelik etkin değil');
     if (args.p_kind === 'clinician' && m.role !== 'owner') return err('Ekibe yalnızca klinik sahibi davet eder');
+    if (args.p_kind !== 'clinician' && m.role !== 'owner' && db.clinics.find((x: Row) => x.id === m.clinic_id)?.members_can_invite === false) return err('invite_owner_only');
     const team = args.p_kind === 'clinician';
     if (team && db.clinics.find((x: Row) => x.id === m.clinic_id)?.seat_limit <= 1) return err('Bireysel pakette ekip yok; Klinik paketine geçin');
     let code = makeCode(team ? 8 : 6);

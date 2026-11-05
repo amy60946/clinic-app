@@ -94,8 +94,8 @@ export function LoginScreen({ go, initialEmail = '' }: { go: Go; initialEmail?: 
       <Pressable onPress={() => go('join')} style={styles.teamBox} accessibilityRole="button">
         <Ionicons name="people-outline" size={22} color={colors.navy} />
         <View style={{ flex: 1 }}>
-          <Text style={styles.teamTitle}>Kodum var</Text>
-          <Text style={styles.small}>Bir kliniğin ekibine katılıyorsan, klinik sahibinin verdiği 8 karakterli kodla hesabını aç.</Text>
+          <Text style={styles.teamTitle}>Bir kliniğin ekibine mi katılıyorsun?</Text>
+          <Text style={styles.small}>Kendi hesabını aç, Ayarlar'daki kişisel kodunu klinik sahibine ver. Seni eklediğinde onay sana gelir.</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={colors.faint} />
       </Pressable>
@@ -109,7 +109,8 @@ type Practice = 'solo' | 'clinic';
 
 export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { go: Go; initialJoin?: boolean; noAccount?: boolean }) {
   const { signUp, resendConfirmation } = useAuth();
-  const [join, setJoin] = useState(initialJoin);
+  // Ekip koduyla kayıt kalktı (ortak akislar.md 21): uzman kendi hesabını açar, kliniğe kişisel kodunu verir
+  const join = false;
   const [name, setName] = useState('');
   const [title, setTitle] = useState('');
   const [clinicName, setClinicName] = useState('');
@@ -167,27 +168,17 @@ export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { g
 
   return (
     <Layout
-      title={join ? 'Ekibe katıl' : 'Uzman kaydı'}
-      subtitle={join
-        ? 'Klinik sahibinin verdiği kodla hesabını aç; kliniğin adı ve ekibi profiline kendiliğinden gelir. Zaten hesabın varsa giriş yap, Ekip bölümünden kodu gir.'
-        : 'Tek başına çalışan uzman da klinik de hesap açabilir. Aileler, çocuklarının verisini yalnız kendi verdikleri kodla ve istedikleri sürece seninle paylaşır.'}
+      title="Uzman kaydı"
+      subtitle="Kendi adına çalışan uzman da klinik de hesap açabilir. Aileler, çocuklarının verisini yalnız kendi verdikleri onayla ve istedikleri sürece seninle paylaşır."
       onBack={() => go('login')}
     >
       {noAccount && <Notice icon="person-add-outline" text="Bu e-postayla bir uzman hesabı bulunamadı. Aşağıdan yeni hesabını aç." />}
-      <View style={styles.seg}>
-        {[{ id: false, label: 'Yeni hesap' }, { id: true, label: 'Kodum var' }].map((o) => (
-          <Pressable key={o.label} onPress={() => setJoin(o.id)} style={[styles.segItem, join === o.id && styles.segActive]}>
-            <Text style={{ fontSize: 13, fontWeight: join === o.id ? '700' : '500', color: join === o.id ? colors.navy : colors.muted }}>
-              {o.label}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+      {initialJoin && <Notice icon="people-outline" text="Kliniğin ekibine katılmak için önce kendi hesabını aç (Bireysel uzman). Sonra Ayarlar › Kişisel kodun'u klinik sahibine ver; seni eklediğinde onay sana gelir." />}
       {!join && (
         <View style={styles.practiceRow}>
           {([
-            { id: 'solo', icon: 'person-outline', t: 'Bireysel uzman', d: 'Tek başıma çalışıyorum' },
-            { id: 'clinic', icon: 'business-outline', t: 'Klinik', d: 'Ekibimle çalışıyorum' },
+            { id: 'solo', icon: 'person-outline', t: 'Bireysel uzman', d: 'Kendi adıma ya da kliniklerde çalışıyorum' },
+            { id: 'clinic', icon: 'business-outline', t: 'Klinik', d: 'Kliniğimin sahibiyim, ekibimi kuracağım' },
           ] as const).map((o) => (
             <Pressable key={o.id} onPress={() => setPractice(o.id)} accessibilityRole="radio" accessibilityState={{ selected: practice === o.id }}
               style={[styles.practice, practice === o.id && styles.practiceOn]}>
