@@ -8,6 +8,7 @@
 // sıralama, uzman için satır düzeyi görünürlük (rıza), ebeveyn onay zamanı.
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { SESSION_TABLES, seedSessions, sessionVisible, sessionRpc } from './demo-sessions';
 
 type Row = Record<string, any>;
 type Err = { message: string; code?: string } | null;
@@ -22,7 +23,7 @@ const TABLES = ['profiles', 'families', 'children', 'tasks', 'task_assignments',
   'clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'abc_events',
   'clinic_task_suggestions', 'clinic_routines', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events', 'billing_plans', 'clinic_link_access',
   'care_modules', 'care_module_logs', 'clinic_link_history', 'clinician_surveys', 'legal_acceptances', 'kvkk_requests',
-  'care_module_goals', 'clinic_plan_templates'];
+  'care_module_goals', 'clinic_plan_templates', ...SESSION_TABLES];
 
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -212,6 +213,8 @@ function upgrade(x: Db): Db {
     x.clinic_links.filter((l: Row) => l.status === 'active').forEach((l: Row) => snapshot(x, l.id));
     x.planRedesignSeeded = true;
   }
+  // Seans planlama (ortak 20261105100000): örnek seanslar, odalar, çalışma saatleri, bekleme listesi, paket, dış takvim
+  seedSessions(x);
   // Motive etmek (ortak 20261027130000): örnek ailenin onaylı görevlerine ebeveyn gözlemi (eskiler zor, yeniler kolay; bazıları yanıtsız)
   if (!x.motivationSeeded) {
     x.completions.filter((c: Row) => c.child_id === 'c-nazli' && c.status === 'approved' && c.motivation == null).forEach((c: Row, i: number) => {
@@ -421,6 +424,8 @@ function visible(table: string, r: Row): boolean {
   if (['user_activity', 'app_events'].includes(table)) return false;
   if (table === 'billing_plans') return r.active;
   const m = myClinician();
+  const sv = sessionVisible(table, r, m ?? null, db, linkVisible);
+  if (sv !== undefined) return sv && (!m || clinicianAccess(m));
   // Aile: taslak öneriyi, program ↔ hedef tablosunu ve uzman şablonlarını görmez (sunucuda RLS)
   if (!m && table === 'clinic_task_suggestions') return r.status !== 'draft';
   if (!m && ['care_module_goals', 'clinic_plan_templates'].includes(table)) return false;
@@ -474,6 +479,8 @@ class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
   in(k: string, vals: any[]) { this.filters.push((r) => vals.includes(r[k])); return this; }
   gte(k: string, v: any) { this.filters.push((r) => String(r[k] ?? '') >= String(v)); return this; }
   lte(k: string, v: any) { this.filters.push((r) => String(r[k] ?? '') <= String(v)); return this; }
+  lt(k: string, v: any) { this.filters.push((r) => String(r[k] ?? '') < String(v)); return this; }
+  gt(k: string, v: any) { this.filters.push((r) => String(r[k] ?? '') > String(v)); return this; }
   limit() { return this; }
   not(k: string, op: string, list: any) {
     if (op === 'is') { this.filters.push((r) => (r[k] ?? null) !== list); return this; }
@@ -1139,6 +1146,17 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     Object.assign(s, p, { updated_at: now() });
     save();
     return { data: null, error: null };
+  }
+  {
+    const sr = sessionRpc(name, args, { db, me: myClinician() ?? null, uid, linkVisible, save,
+      notify: (u, app, kind, title, body, data, childId) => {
+        const nid = db.notifications.reduce((acc: number, n: Row) => Math.max(acc, Number(n.id) || 0), 0) + 1;
+        db.notifications.push({ id: nid, user_id: u, app, kind, title, body, data, family_id: null, child_id: childId ?? null, created_at: now(), read_at: null });
+      } });
+    if (sr) {
+      if (sr.error) return sr;
+      return sr;
+    }
   }
   if (name === 'family_premium') {
     const fid = args.p_family_id ?? me?.family_id;
