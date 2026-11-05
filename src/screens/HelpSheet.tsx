@@ -89,11 +89,11 @@ export default function HelpSheet({ visible, owner, onClose, onIntro, onSample, 
 const SEES: { title: string; tone: 'family' | 'private' | 'none'; icon: keyof typeof Ionicons.glyphMap; items: string[] }[] = [
   {
     title: 'Aile görür (sen gönderince)', tone: 'family', icon: 'people-outline',
-    items: ['Hedef, hedef düzeyi, süre, aileye not', 'Etkin ve tamamlanan programlar', 'Rutin ve görev önerileri', 'Değişiklik önerileri'],
+    items: ['Davranış hedefi, hedef düzeyi, süre, aileye not', 'Etkin ve tamamlanan programlar', 'Rutin ve görev önerileri', 'Değişiklik önerileri'],
   },
   {
     title: 'Yalnız sen ve yetkili ekibin', tone: 'private', icon: 'eye-off-outline',
-    items: ['Notlar', 'Değerlendirmeler (GAS)', 'Taslaklar, "Planlandı" programlar', '"Yalnız sende" hedefler', 'Klinik etiketi'],
+    items: ['Notlar', 'Değerlendirmeler (GAS)', 'Taslaklar, "Planlandı" programlar', '"Yalnız sende" davranış hedefleri', 'Klinik etiketi'],
   },
   {
     title: 'Sen de görmezsin', tone: 'none', icon: 'lock-closed-outline',

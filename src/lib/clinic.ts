@@ -381,7 +381,7 @@ export async function setSuggestionGoal(ids: string[], goalId: string | null): P
   if (!ids.length) return;
   const { error } = await supabase.rpc('clinic_set_suggestion_goal', { p_ids: ids, p_goal_id: goalId });
   if (error && (error.code === 'PGRST202' || error.code === '42883')) {
-    throw new SuggestionSchemaMissing('Hedefe bağlamak için veritabanı güncellemesi bekleniyor (ortak: 20261102100000_plan_redesign.sql).');
+    throw new SuggestionSchemaMissing('Davranış hedefine bağlamak için veritabanı güncellemesi bekleniyor (ortak: 20261102100000_plan_redesign.sql).');
   }
   check(null, error);
 }

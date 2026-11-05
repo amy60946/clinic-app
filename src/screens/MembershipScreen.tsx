@@ -180,7 +180,7 @@ function StatusCard({ me, status }: { me: ClinicianMe; status: 'trial' | 'active
   } else {
     icon = 'lock-closed-outline';
     title = me.plan === 'trial' ? 'Deneme süren bitti' : 'Üyeliğin sona erdi';
-    text = 'Danışanların, notların ve hedeflerin silinmedi. Bir paket seçince kaldığın yerden devam edersin; o zamana kadar çocuk verileri görünmez.';
+    text = 'Danışanların, notların ve davranış hedeflerin silinmedi. Bir paket seçince kaldığın yerden devam edersin; o zamana kadar çocuk verileri görünmez.';
   }
   return (
     <View style={[styles.status, status === 'expired' && { backgroundColor: '#FDE7EA' }]}>

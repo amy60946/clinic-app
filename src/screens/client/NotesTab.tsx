@@ -81,7 +81,7 @@ function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
                 {n.author_id === me.id && <SmallButton label="Sil" danger onPress={() => remove(n)} />}
               </View>
               {!!n.goal_id && (
-                <Text style={styles.goalTag} numberOfLines={1}>Hedef: {goalTitle[n.goal_id] ?? 'silinmiş hedef'}</Text>
+                <Text style={styles.goalTag} numberOfLines={1}>Davranış hedefi: {goalTitle[n.goal_id] ?? 'silinmiş davranış hedefi'}</Text>
               )}
               <Text style={styles.body}>{n.body}</Text>
             </Card>

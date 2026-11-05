@@ -55,7 +55,7 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
     // hedefe bağlama için bu danışanın etkin hedefleri
     loadPlan({ kind: 'link', linkId: client.link_id, clinicId: client.clinic_id })
       .then((p) => setGoals(p.goals.filter((g) => !g.archived && g.status !== 'achieved').map((g) => ({
-        id: g.id, title: g.title, meta: [g.domain && domainLabel(g.domain), g.target && `Hedef: ${g.target}`, g.shared ? '' : 'yalnız sende'].filter(Boolean).join(' · '),
+        id: g.id, title: g.title, meta: [g.domain && domainLabel(g.domain), g.target && `Hedef düzey: ${g.target}`, g.shared ? '' : 'yalnız sende'].filter(Boolean).join(' · '),
       }))))
       .catch(() => setGoals([]));
   }, [loadOwn, client.link_id, client.clinic_id]);
@@ -73,7 +73,7 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
     load();
     Alert.alert('Rutin önerildi', grouped
       ? `${list.length} görev tek paket olarak ebeveynin onayına gönderildi.`
-      : `${list.length} görev ebeveynin onayına gönderildi. (Paket ve hedef bağı için veritabanı güncellemesi bekleniyor; görevler ayrı öneri olarak gitti.)`);
+      : `${list.length} görev ebeveynin onayına gönderildi. (Paket ve davranış hedefi bağı için veritabanı güncellemesi bekleniyor; görevler ayrı öneri olarak gitti.)`);
   };
 
   const load = useCallback(() => {
@@ -163,7 +163,7 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
           <Text style={styles.link}>{allAges ? `Yalnız ${AGE_LABEL[band]} yaş rutinlerini göster` : 'Bütün yaş gruplarını göster'}</Text>
         </Pressable>
       )}
-      <Text style={[styles.sub, { marginTop: 14 }]}>Bir hedefe bağlı, plandaki diğer değişikliklerle birlikte göndermek için Takip Planı'nda hedefin satırındaki "+ Rutin ya da görev bağla"yı kullan.</Text>
+      <Text style={[styles.sub, { marginTop: 14 }]}>Bir davranış hedefine bağlı, plandaki diğer değişikliklerle birlikte göndermek için Takip Planı'nda davranış hedefinin satırındaki "+ Rutin ya da görev bağla"yı kullan.</Text>
       </>)}
       {schemaMissing && (
         <Notice icon="construct-outline" text="Öneri ayrıntıları (tekrar günleri, hatırlatma, ödül…) için veritabanı güncellemesi bekleniyor. Güncelleme uygulanınca bu özellik açılır." />
@@ -278,7 +278,7 @@ function RoutinePackage({ items, goals, onEdit }: { items: Suggestion[]; goals: 
         <View style={{ flex: 1, gap: 3 }}>
           <Text style={styles.cardTitle}>{r.title} · {items.length} görev</Text>
           <Text style={styles.meta}>
-            {[drafts ? `${drafts} taslak` : `${added} / ${items.length} eklendi`, waiting ? `${waiting} karar bekliyor` : '', goal ? `Hedef: ${goal}` : ''].filter(Boolean).join(' · ')}
+            {[drafts ? `${drafts} taslak` : `${added} / ${items.length} eklendi`, waiting ? `${waiting} karar bekliyor` : '', goal ? `Davranış hedefi: ${goal}` : ''].filter(Boolean).join(' · ')}
           </Text>
           <View style={styles.pkgBar}><View style={[styles.pkgFill, { width: `${Math.round((added / items.length) * 100)}%` }]} /></View>
         </View>

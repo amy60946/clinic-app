@@ -218,7 +218,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
   const act = (p: Promise<unknown>, what = 'Kaydedilemedi', planChanged = true) => p.then(() => after(planChanged)).catch(fail(what));
   const needLinks = () => {
     if (linkOK) return true;
-    Alert.alert('Veritabanı güncellemesi bekleniyor', 'Programı bir hedefe bağlamak için ortak 20261102100000_plan_redesign.sql uygulanmalı.');
+    Alert.alert('Veritabanı güncellemesi bekleniyor', 'Programı bir davranış hedefine bağlamak için ortak 20261102100000_plan_redesign.sql uygulanmalı.');
     return false;
   };
   const openHat = (gid: string) => { setOpenIds((x) => ((x ?? []).includes(gid) ? x : [...(x ?? []), gid])); setFocus(gid); };
@@ -229,7 +229,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
       track('plan.goal', { tpl: gt.key });
       await after();
       if (gid) openHat(gid);
-    } catch (e) { fail('Hedef eklenemedi')(e); }
+    } catch (e) { fail('Davranış hedefi eklenemedi')(e); }
   };
   const addPackage = async (p: PackageT, goalKeys = p.goals) => {
     const { goalIds } = await applyPackage(target, p, plan, goalKeys);
@@ -294,8 +294,8 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
     else if (type === 'libtpl') { const t = tpls?.find((x) => x.id === rest); if (t) applyTemplate(t); }
   };
   const pickGoal = (title: string, cb: (gid: string) => void, e?: GestureResponderEvent) => {
-    if (!goals.length) return Alert.alert('Önce bir hedef ekle');
-    openMenu({ title: 'Hangi hedefe bağlansın?', message: title, items: goals.map((g) => ({ label: short(g.title, 48), icon: 'flag-outline' as const, onPress: () => cb(g.id) })) }, e);
+    if (!goals.length) return Alert.alert('Önce bir davranış hedefi ekle');
+    openMenu({ title: 'Hangi davranış hedefine bağlansın?', message: title, items: goals.map((g) => ({ label: short(g.title, 48), icon: 'flag-outline' as const, onPress: () => cb(g.id) })) }, e);
   };
 
   // rutin taslağı (hedef satırından ya da kitaplıktan)
@@ -380,12 +380,12 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
   };
 
   const hatMenu = (g: PlanGoal, e?: GestureResponderEvent) => (ro ? sampleOnly() : openMenu({ title: short(g.title, 60), items: [
-    { label: 'Hedefi düzenle', icon: 'create-outline', onPress: () => setGoalSheet({ editing: g }) },
+    { label: 'Davranış hedefini düzenle', icon: 'create-outline', onPress: () => setGoalSheet({ editing: g }) },
     { label: 'Değerlendir', icon: 'clipboard-outline', onPress: () => setEvalSheet({ goal: g }) },
     // D1: "Aile görür" anahtarı satırdan menüye taşındı; kapalıysa başlıkta "Yalnız sende"
     { label: g.shared ? 'Aileden gizle' : 'Aileye göster', icon: g.shared ? 'eye-off-outline' : 'eye-outline', onPress: () => act(updateGoal(g.id, { shared: !g.shared })),
-      info: g.shared ? 'Sonraki gönderimde hedefin adı, düzeyi ve notu aileden kalkar. Bağlı program ve rutinler ailede kalır.'
-        : 'Hedef sonraki gönderimde aileye gider.' },
+      info: g.shared ? 'Sonraki gönderimde davranış hedefinin adı, düzeyi ve notu aileden kalkar. Bağlı program ve rutinler ailede kalır.'
+        : 'Davranış hedefi sonraki gönderimde aileye gider.' },
     { label: 'Şablon olarak kaydet', icon: 'bookmark-outline', onPress: () => (tpls === null
       ? Alert.alert('Veritabanı güncellemesi bekleniyor', 'Şablonlarım için ortak 20261102100000_plan_redesign.sql uygulanmalı.')
       : setTplSave(g)) },
@@ -444,7 +444,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
       track('plan.template_apply', { modules: create.length + reuse.length, routines });
       await after();
       if (gid) openHat(gid);
-      Alert.alert('Şablon uygulandı', `Hedef, ${create.length + reuse.length} program ve ${routines} rutin taslağı eklendi. Gözden geçir, sonra "Aileye gönder".`);
+      Alert.alert('Şablon uygulandı', `Davranış hedefi, ${create.length + reuse.length} program ve ${routines} rutin taslağı eklendi. Gözden geçir, sonra "Aileye gönder".`);
     } catch (e) { fail('Şablon uygulanamadı')(e); }
   };
 
@@ -505,7 +505,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
     await after(status !== g.status);
   };
   // durum menüsü: üç durum, şu anki işaretli (uygulamanın menüsü)
-  const statusMenu = (g: PlanGoal, e?: GestureResponderEvent) => (ro ? sampleOnly() : openMenu({ title: 'Hedefin durumu', message: short(g.title, 60), items: [
+  const statusMenu = (g: PlanGoal, e?: GestureResponderEvent) => (ro ? sampleOnly() : openMenu({ title: 'Davranış hedefinin durumu', message: short(g.title, 60), items: [
     { label: 'Sürüyor', icon: 'play-circle-outline', checked: g.status === 'active', onPress: () => act(updateGoal(g.id, { status: 'active' })) },
     { label: 'Ulaşıldı', hint: 'Önce değerlendirilir', icon: 'checkmark-done-outline', checked: g.status === 'achieved', onPress: () => setEvalSheet({ goal: g, status: 'achieved' }) },
     { label: 'Ara verildi', icon: 'pause-circle-outline', checked: g.status === 'paused', onPress: () => act(updateGoal(g.id, { status: 'paused' })) },
@@ -521,7 +521,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
   const attention: { icon: keyof typeof Ionicons.glyphMap; text: string; onPress?: () => void; tone?: 'warn'; coach?: string }[] = [];
   if (unsent) attention.push({ icon: 'paper-plane-outline', text: `${unsent} değişiklik aileye gönderilmedi`, onPress: openPublish, tone: 'warn' });
   const due = goals.filter((g) => reviewDue(g, today));
-  if (due.length) attention.push({ icon: 'time-outline', text: `Değerlendirme zamanı: ${due.length} hedef`, onPress: () => { openHat(due[0].id); setEvalSheet({ goal: due[0] }); }, coach: 'plan.evaluate' });
+  if (due.length) attention.push({ icon: 'time-outline', text: `Değerlendirme zamanı: ${due.length} davranış hedefi`, onPress: () => { openHat(due[0].id); setEvalSheet({ goal: due[0] }); }, coach: 'plan.evaluate' });
   const idle = plan.modules.filter((m) => m.status === 'active' && pub?.modules[m.id] && logSummary(logs, m.id, 7).practiced === 0);
   if (idle.length) attention.push({ icon: 'time-outline', text: `7 gündür uygulanmadı: ${short(idle[0].title, 26)}${idle.length > 1 ? ` +${idle.length - 1}` : ''}` });
   const low = groups.filter((r) => r.state === 'added' && r.tasks.length).map((r) => ({ r, s: taskSetRate(data.tasks, data.completions, r.tasks.map((t) => t.id), today) }))
@@ -542,7 +542,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
           {unsentMod(m) && <View style={styles.dot} accessibilityLabel="Aileye gönderilmedi" />}
           {!ro && <IconButton name="create-outline" label="Programı düzenle" size={16} onPress={() => setModuleSheet({ editing: m, goalId: gid })} />}
           {ro ? null : gid ? (
-            <IconButton name="unlink-outline" label="Bu hedeften ayır" size={16} onPress={() => act(unlinkModuleGoal(m.id, gid), 'Bağ kaldırılamadı')} />
+            <IconButton name="unlink-outline" label="Bu davranış hedefinden ayır" size={16} onPress={() => act(unlinkModuleGoal(m.id, gid), 'Bağ kaldırılamadı')} />
           ) : (
             <IconButton name="trash-outline" label="Programı sil" size={16} onPress={(e) => openMenu(confirmSpec('Program silinsin mi?',
               'Ailenin bu programdaki uygulama kayıtları da silinir.', 'Sil', () => act(deleteModule(m.id), 'Silinemedi')), e)} />
@@ -552,7 +552,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
           onPress={(e) => moduleStatusMenu(m, e)} hint="Programın durumunu değiştir" />
         <Text style={styles.tiny}>
           {m.status === 'planned' ? 'Aile görmez (planlandı)' : pub?.modules[m.id] ? `Son 7 gün: ${s.practiced} gün uyguladı (ebeveyn kaydı)` : 'Aileye gönderilmedi'}
-          {n > 1 ? ` · ${n} hedefte` : ''}
+          {n > 1 ? ` · ${n} davranış hedefinde` : ''}
         </Text>
       </DragView>
     );
@@ -576,7 +576,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
           {r.single ? <Text style={{ fontSize: 16 }}>{r.emoji}</Text>
             : <Ionicons name={(r.icon || 'repeat-outline') as keyof typeof Ionicons.glyphMap} size={16} color={colors.navy} />}
           <Text style={styles.miniTitle} numberOfLines={2}>{r.title}</Text>
-          {r.goalId && !ro && <IconButton name="unlink-outline" label="Hedeften ayır" size={16} onPress={() => setRoutineGoal(r, null).catch(fail('Bağ kaldırılamadı'))} />}
+          {r.goalId && !ro && <IconButton name="unlink-outline" label="Davranış hedefinden ayır" size={16} onPress={() => setRoutineGoal(r, null).catch(fail('Bağ kaldırılamadı'))} />}
         </View>
         <Text style={styles.tiny}>
           {[r.single ? 'Tek görev' : `${r.items.length} görev`, times.length ? (times.length > 1 && times[0] !== times[times.length - 1] ? `${times[0]}–${times[times.length - 1]}` : times[0]) : ''].filter(Boolean).join(' · ')}
@@ -667,9 +667,9 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
     const loose = unlinkedMods.slice(0, 4);
     return (
       <View style={{ gap: 8 }}>
-        {!linkOK && <Text style={styles.tiny}>Programı hedefe bağlamak için veritabanı güncellemesi bekleniyor; programlar aşağıda "Bir hedefe bağlı olmayanlar"da.</Text>}
+        {!linkOK && <Text style={styles.tiny}>Programı davranış hedefine bağlamak için veritabanı güncellemesi bekleniyor; programlar aşağıda "Bir davranış hedefine bağlı olmayanlar"da.</Text>}
         {mods.map((m) => moduleMini(m, g.id))}
-        {!mods.length && linkOK && <Text style={styles.empty}>Bu hedefe bağlı program yok.</Text>}
+        {!mods.length && linkOK && <Text style={styles.empty}>Bu davranış hedefine bağlı program yok.</Text>}
         {!ro && linkOK && want.length > 0 && (
           <View style={styles.sugg}>
             <Text style={styles.suggLead}>Öneriler</Text>
@@ -709,7 +709,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
     return (
       <View style={{ gap: 8 }}>
         {rts.map(routineMini)}
-        {!rts.length && <Text style={styles.empty}>Bu hedefe bağlı rutin yok.</Text>}
+        {!rts.length && <Text style={styles.empty}>Bu davranış hedefine bağlı rutin yok.</Text>}
         {offer.length > 0 && (
           <View style={styles.sugg}>
             <Text style={styles.suggLead}>{band ? `Öneriler · ${AGE_LABEL[band]} yaş` : 'Öneriler'}</Text>
@@ -760,16 +760,16 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
 
   // Sütun etiketleri (H1): kısa gri ad; ne anlattığı (i) içinde
   const colHeads = {
-    goal: <ColHead q="Hedef" info={[
-      'Neyi değiştiriyoruz, nasıl anlayacağız? Hedefi uzman yazar ve değerlendirir.',
-      'Aileye açık hedefin adı, hedef düzeyi, süresi ve açıklaması aileye gider; GAS değerlendirmen aileye gitmez.',
-      'Hedefe ulaşıldığına sen karar verirsin; oranlar ve davranış kayıtları yardımcıdır.',
+    goal: <ColHead q="Davranış hedefi" info={[
+      'Neyi değiştiriyoruz, nasıl anlayacağız? Davranış hedefini uzman yazar ve değerlendirir.',
+      'Aileye açık davranış hedefinin adı, hedef düzeyi, süresi ve açıklaması aileye gider; GAS değerlendirmen aileye gitmez.',
+      'Davranış hedefine ulaşıldığına sen karar verirsin; oranlar ve davranış kayıtları yardımcıdır.',
     ]} />,
     mod: <ColHead q="Aile programı" info={[
       'Ebeveyn evde nasıl destekler? Ebeveyn uygular, "Bugün uyguladım" der.',
       'Aile yalnız Etkin ve Tamamlandı programları görür; Planlandı aileye gitmez.',
-      'Bir program birden çok hedefe bağlanabilir.',
-      ...(isWeb && desktop ? ['Kitaplıktan bir programı bu hedefin üstüne sürükleyip bırakabilirsin.'] : []),
+      'Bir program birden çok davranış hedefine bağlanabilir.',
+      ...(isWeb && desktop ? ['Kitaplıktan bir programı bu davranış hedefinin üstüne sürükleyip bırakabilirsin.'] : []),
     ]} />,
     rt: <ColHead q="Rutin ve görevler" info={[
       'Her gün, hangi anda, hangi adımlarla? Çocuk yapar, ebeveyn onaylar.',
@@ -800,12 +800,12 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
         <View style={styles.titleRow}>
           {dirty && <View style={styles.dot} accessibilityLabel="Aileye gönderilmedi" />}
           <Text style={[styles.hatTitle, { flexShrink: 1, minWidth: 0 }]}>{g.title}</Text>
-          {cols3 && <StatusChip label={st?.label ?? g.status} tone={STATUS_TONE[g.status]} onPress={(e) => statusMenu(g, e)} hint="Hedefin durumunu değiştir" />}
+          {cols3 && <StatusChip label={st?.label ?? g.status} tone={STATUS_TONE[g.status]} onPress={(e) => statusMenu(g, e)} hint="Davranış hedefinin durumunu değiştir" />}
           {!g.shared && <PrivateBadge text="Yalnız sende" />}
         </View>
         {!cols3 && (
           <View style={styles.titleRow}>
-            <StatusChip label={st?.label ?? g.status} tone={STATUS_TONE[g.status]} onPress={(e) => statusMenu(g, e)} hint="Hedefin durumunu değiştir" />
+            <StatusChip label={st?.label ?? g.status} tone={STATUS_TONE[g.status]} onPress={(e) => statusMenu(g, e)} hint="Davranış hedefinin durumunu değiştir" />
             {!!meta && <Text style={[styles.small, { flexShrink: 1 }]}>{meta}</Text>}
           </View>
         )}
@@ -841,10 +841,10 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
         {open && !cols3 && (
           <View style={styles.hatBody}>
             <View style={styles.tabs} accessibilityRole="tablist">
-              {([['goal', 'Hedef', null], ['mod', 'Program', modsOf(g.id).length], ['rt', 'Rutin', rtsOf(g.id).length]] as const).map(([id, label, count]) => (
+              {([['goal', 'Davranış hedefi', null], ['mod', 'Program', modsOf(g.id).length], ['rt', 'Rutin', rtsOf(g.id).length]] as const).map(([id, label, count]) => (
                 <Pressable key={id} onPress={() => setTabOf((x) => ({ ...x, [g.id]: id }))} accessibilityRole="tab" accessibilityState={{ selected: tab === id }}
-                  style={[styles.tab, tab === id && styles.tabOn]}>
-                  <Text style={[styles.tabText, tab === id && styles.tabTextOn]}>{label}{count !== null ? <Text style={styles.tabCount}>{` ${count}`}</Text> : null}</Text>
+                  style={[styles.tab, id === 'goal' && { flex: 1.5 }, tab === id && styles.tabOn]}>
+                  <Text numberOfLines={1} style={[styles.tabText, tab === id && styles.tabTextOn]}>{label}{count !== null ? <Text style={styles.tabCount}>{` ${count}`}</Text> : null}</Text>
                 </Pressable>
               ))}
             </View>
@@ -862,7 +862,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
   const library = (
     <Library band={band} goals={goals} target={libTarget} onTarget={setFocus} tpls={tpls} ownRoutines={ownRoutines} meId={me.id} owner={me.role === 'owner'}
       onGoal={(g) => fromLib(() => addGoalFromTemplate(g))}
-      onPackage={(p) => fromLib(() => addPackage(p).then(() => Alert.alert('Paket eklendi', `${p.title}: hedefler ve programlar eklendi. Gözden geçir, sonra "Aileye gönder".`))
+      onPackage={(p) => fromLib(() => addPackage(p).then(() => Alert.alert('Paket eklendi', `${p.title}: davranış hedefleri ve programlar eklendi. Gözden geçir, sonra "Aileye gönder".`))
         .catch(fail('Paket eklenemedi')))}
       onModule={(k) => fromLib(() => addTemplateModule(k, libTarget))}
       onRoutine={(r) => fromLib(() => setRtSheet({ routine: r, goalId: libTarget }))}
@@ -882,7 +882,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
           <SmallButton label={(openIds ?? []).length >= goals.length ? 'Hepsini kapat' : 'Hepsini aç'}
             onPress={() => setOpenIds((openIds ?? []).length >= goals.length ? [] : goals.map((g) => g.id))} />
         )}
-        <CoachTarget id="plan.addGoal"><SmallButton label="+ Hedef" onPress={() => setGoalSheet({})} /></CoachTarget>
+        <CoachTarget id="plan.addGoal"><SmallButton label="+ Davranış hedefi" onPress={() => setGoalSheet({})} /></CoachTarget>
         <View style={{ flex: 1 }} />
         <CoachTarget id="plan.publish">
           <Pressable onPress={openPublish} disabled={busy} style={[styles.send, !unsent && styles.sendQuiet, busy && { opacity: 0.6 }]} accessibilityRole="button">
@@ -899,14 +899,14 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
         <View style={styles.sampleBox}>
           <Ionicons name="eye-outline" size={14} color={PRIVATE.fg} />
           <Text style={[styles.small, { color: PRIVATE.text, flex: 1 }]}>
-            Örnek aile: hedef ekle, rutin bağla, gönder, değerlendir. Kaydedilmez, aileye gitmez.
+            Örnek aile: davranış hedefi ekle, rutin bağla, gönder, değerlendir. Kaydedilmez, aileye gitmez.
           </Text>
         </View>
       )}
       {help && (
         <View style={styles.infoBox}>
           {[
-            'Her hedef bir satır: hedef · ailenin evdeki programı · çocuğun rutini ve görevleri. Satıra dokununca açılır.',
+            'Her davranış hedefi bir satır: davranış hedefi · ailenin evdeki programı · çocuğun rutini ve görevleri. Satıra dokununca açılır.',
             'Eklediklerin taslaktır; aile, sen "Aileye gönder" deyince tek bildirimle görür.',
           ].map((t) => <Text key={t} style={styles.infoLine}>• {t}</Text>)}
           <Text style={[styles.infoLine, { fontWeight: '700', color: colors.navy, marginTop: 6 }]}>Aile neyi görür?</Text>
@@ -935,11 +935,11 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
               <View style={styles.placeholder}>
                 <Text style={styles.hatTitle}>{client.child_name || 'Danışan'} için henüz takip planı yok.</Text>
                 <Text style={styles.small}>
-                  Bir paketle, hazır bir hedefle{tpls?.length ? ' ya da kendi şablonunla' : ''} başla.{isWeb && desktop ? ' Kitaplıktan buraya sürükleyip bırakabilirsin.' : ''}
+                  Bir paketle, hazır bir davranış hedefiyle{tpls?.length ? ' ya da kendi şablonunla' : ''} başla.{isWeb && desktop ? ' Kitaplıktan buraya sürükleyip bırakabilirsin.' : ''}
                 </Text>
                 <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginTop: 6 }}>
                   <SmallButton label="Hazır paketle başla" onPress={() => setPkgOpen(true)} />
-                  <SmallButton label="+ Hedef ekle" onPress={() => setGoalSheet({})} />
+                  <SmallButton label="+ Davranış hedefi ekle" onPress={() => setGoalSheet({})} />
                   {!!tpls?.length && <SmallButton label="Şablonlarım" onPress={() => setLibOpen(true)} />}
                 </View>
               </View>
@@ -948,27 +948,27 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
 
           {(unlinkedMods.length > 0 || unlinkedRts.length > 0) && (
             <DropView accept={['module', 'routine']} onDrop={onDropUnlinked} style={styles.unlinked}>
-              <ColHead q="Bir hedefe bağlı olmayanlar" info={[isWeb && desktop
-                ? 'Kartı bir hedefin üstüne sürükle; bağı kaldırmak için kartı buraya bırak.'
-                : '"Hedefe bağla" ile bir hedefin altına al.']} />
+              <ColHead q="Bir davranış hedefine bağlı olmayanlar" info={[isWeb && desktop
+                ? 'Kartı bir davranış hedefinin üstüne sürükle; bağı kaldırmak için kartı buraya bırak.'
+                : '"Davranış hedefine bağla" ile bir davranış hedefinin altına al.']} />
               <View style={styles.looseGrid}>
                 {unlinkedMods.map((m) => (
                   <View key={m.id} style={styles.looseItem}>
                     {moduleMini(m, null)}
-                    {!ro && linkOK && goals.length > 0 && <SmallButton label="Hedefe bağla" onPress={(e) => pickGoal(m.title, (gid) => act(linkModuleGoals(client.clinic_id, [[m.id, gid]]), 'Bağlanamadı'), e)} />}
+                    {!ro && linkOK && goals.length > 0 && <SmallButton label="Davranış hedefine bağla" onPress={(e) => pickGoal(m.title, (gid) => act(linkModuleGoals(client.clinic_id, [[m.id, gid]]), 'Bağlanamadı'), e)} />}
                   </View>
                 ))}
                 {unlinkedRts.map((r) => (
                   <View key={r.key} style={styles.looseItem}>
                     {routineMini(r)}
-                    {!ro && goals.length > 0 && <SmallButton label="Hedefe bağla" onPress={(e) => pickGoal(r.title, (gid) => { setRoutineGoal(r, gid).catch(fail('Bağlanamadı')); }, e)} />}
+                    {!ro && goals.length > 0 && <SmallButton label="Davranış hedefine bağla" onPress={(e) => pickGoal(r.title, (gid) => { setRoutineGoal(r, gid).catch(fail('Bağlanamadı')); }, e)} />}
                   </View>
                 ))}
               </View>
             </DropView>
           )}
           {otherSingles > 0 && (
-            <Text style={[styles.tiny, { marginTop: 8 }]}>Hedefe bağlı olmayan {otherSingles} tek görev daha ailede ekli; Ev Rutinleri'nde görünür.</Text>
+            <Text style={[styles.tiny, { marginTop: 8 }]}>Davranış hedefine bağlı olmayan {otherSingles} tek görev daha ailede ekli; Ev Rutinleri'nde görünür.</Text>
           )}
 
           {archived.length > 0 && (
@@ -1129,7 +1129,7 @@ function Library({ band, goals, target, onTarget, tpls, ownRoutines, meId, owner
   const [tab, setTab] = useState<LibTab>(tpls?.length ? 'tpl' : 'pkg');
   const [domain, setDomain] = useState('');
   const tabs: { id: LibTab; label: string }[] = [
-    { id: 'pkg', label: 'Paketler' }, { id: 'goal', label: 'Hedefler' }, { id: 'mod', label: 'Programlar' }, { id: 'rt', label: 'Rutinler' },
+    { id: 'pkg', label: 'Paketler' }, { id: 'goal', label: 'Davranış hedefleri' }, { id: 'mod', label: 'Programlar' }, { id: 'rt', label: 'Rutinler' },
     ...(tpls !== null ? [{ id: 'tpl' as const, label: `Şablonlarım${tpls.length ? ` (${tpls.length})` : ''}` }] : []),
   ];
   const needsTarget = tab === 'mod' || tab === 'rt';
@@ -1155,7 +1155,7 @@ function Library({ band, goals, target, onTarget, tpls, ownRoutines, meId, owner
       {needsTarget && (
         goals.length ? (
           <View style={{ gap: 4 }}>
-            <Text style={styles.tiny}>"Ekle" şu hedefe bağlar:</Text>
+            <Text style={styles.tiny}>"Ekle" şu davranış hedefine bağlar:</Text>
             <View style={styles.sugg}>
               {goals.map((g) => (
                 <Pressable key={g.id} onPress={() => onTarget(g.id)} style={[styles.chip, target === g.id && styles.chipOn]} accessibilityRole="radio" accessibilityState={{ selected: target === g.id }}>
@@ -1164,13 +1164,13 @@ function Library({ band, goals, target, onTarget, tpls, ownRoutines, meId, owner
               ))}
             </View>
           </View>
-        ) : <Text style={styles.tiny}>Henüz hedef yok: eklediğin bir hedefe bağlı olmaz, sonra bağlayabilirsin.</Text>
+        ) : <Text style={styles.tiny}>Henüz davranış hedefi yok: eklediğin bir davranış hedefine bağlı olmaz, sonra bağlayabilirsin.</Text>
       )}
-      {isWeb && <Text style={styles.tiny}>İpucu: bir satırı tutup hedefin üstüne sürükleyebilirsin.</Text>}
+      {isWeb && <Text style={styles.tiny}>İpucu: bir satırı tutup davranış hedefinin üstüne sürükleyebilirsin.</Text>}
       {tab === 'pkg' && (
         <View style={{ gap: 6 }}>
-          <Text style={styles.tiny}>Paket hem hedefleri hem aile programlarını ekler; programlar ilgili hedeflere bağlı gelir.</Text>
-          {PACKAGES.map((p) => row(p.key, `libpkg:${p.key}`, p.title, `${p.goals.length} hedef · ${p.modules.length} program · ${p.weeks} hafta`, () => onPackage(p)))}
+          <Text style={styles.tiny}>Paket hem davranış hedeflerini hem aile programlarını ekler; programlar ilgili davranış hedeflerine bağlı gelir.</Text>
+          {PACKAGES.map((p) => row(p.key, `libpkg:${p.key}`, p.title, `${p.goals.length} davranış hedefi · ${p.modules.length} program · ${p.weeks} hafta`, () => onPackage(p)))}
         </View>
       )}
       {tab === 'goal' && (
@@ -1202,7 +1202,7 @@ function Library({ band, goals, target, onTarget, tpls, ownRoutines, meId, owner
       )}
       {tab === 'tpl' && tpls !== null && (
         <View style={{ gap: 6 }}>
-          <Text style={styles.tiny}>Kaydettiğin hedef + programlar + rutinler. Hedef satırındaki ⋯ › "Şablon olarak kaydet" ile eklenir. Çocuğa ait kayıt (değerlendirme, onay, not) şablona girmez.</Text>
+          <Text style={styles.tiny}>Kaydettiğin davranış hedefi + programlar + rutinler. Davranış hedefi satırındaki ⋯ › "Şablon olarak kaydet" ile eklenir. Çocuğa ait kayıt (değerlendirme, onay, not) şablona girmez.</Text>
           {!tpls.length && <Text style={styles.empty}>Henüz şablonun yok.</Text>}
           {tpls.map((t) => row(t.id, `libtpl:${t.id}`, t.title,
             [`${t.content.modules.length} program`, `${t.content.routines.length} rutin`, t.shared ? (t.created_by === meId ? 'ekibine açık' : 'ekipten') : 'yalnız sende'].join(' · '),
@@ -1230,7 +1230,7 @@ function LinkPicker({ visible, band, ownRoutines, goalTitle, loose, onClose, onR
             <IconButton name="close" label="Kapat" onPress={onClose} />
             <View style={{ flex: 1 }}>
               <Text style={styles.sheetTitle}>Rutin ya da görev bağla</Text>
-              <Text style={styles.small} numberOfLines={1}>Hedef: {goalTitle}</Text>
+              <Text style={styles.small} numberOfLines={1}>Davranış hedefi: {goalTitle}</Text>
             </View>
           </View>
           <ScrollView contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 60 }}>
@@ -1268,7 +1268,7 @@ function LinkPicker({ visible, band, ownRoutines, goalTitle, loose, onClose, onR
               <Ionicons name="add-circle-outline" size={20} color={colors.navy} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.libTitle}>Tek görev öner</Text>
-                <Text style={styles.tiny}>298 görevlik katalogdan ya da kendin yaz; taslak olarak bu hedefe bağlanır</Text>
+                <Text style={styles.tiny}>298 görevlik katalogdan ya da kendin yaz; taslak olarak bu davranış hedefine bağlanır</Text>
               </View>
             </Pressable>
           </ScrollView>
@@ -1300,7 +1300,7 @@ function TemplateSaveSheet({ goal, modules, routines, onClose, onSave }: {
           </View>
           <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
             <Text style={styles.small}>
-              Hedef, bağlı {modules} program ve {routines} rutin kaydedilir. Çocuğa ait kayıtlar (değerlendirme, onay, not) şablona girmez.
+              Davranış hedefi, bağlı {modules} program ve {routines} rutin kaydedilir. Çocuğa ait kayıtlar (değerlendirme, onay, not) şablona girmez.
               Başka bir danışana Kitaplık › Şablonlarım'dan tek hamlede uygularsın; rutinler o çocuğun yaşına uyan sürümle gelir.
             </Text>
             <Text style={styles.colSub}>Şablonun adı</Text>

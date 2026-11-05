@@ -170,7 +170,7 @@ function Body({ onClose, clinicId, clinicianName, existing }: {
                 <Pressable style={styles.planBox} onPress={() => setPlan(true)} accessibilityRole="button">
                   <Ionicons name="clipboard-outline" size={20} color={colors.navy} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.planTitle}>Hedefleri ve aile programını şimdi hazırla</Text>
+                    <Text style={styles.planTitle}>Davranış hedeflerini ve aile programını şimdi hazırla</Text>
                     <Text style={styles.small}>Aile çocuğunu paylaşınca plan o çocuğa (önerdiğin çocuk varsa yalnız ona) taşınır ve ParentApp'te hazır bulunur.</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={colors.faint} />

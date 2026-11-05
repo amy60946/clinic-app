@@ -147,7 +147,7 @@ export default function ClientScreen({
   };
 
   const revoke = () => {
-    Alert.alert('Paylaşımı sonlandır', `${client.child_name} için erişimin hemen biter. Notların ve hedeflerin klinikte kalır. Yeniden görmek için ailenin yeni bir kod girmesi gerekir.`, [
+    Alert.alert('Paylaşımı sonlandır', `${client.child_name} için erişimin hemen biter. Notların ve davranış hedeflerin klinikte kalır. Yeniden görmek için ailenin yeni bir kod girmesi gerekir.`, [
       { text: 'Vazgeç', style: 'cancel' },
       {
         text: 'Sonlandır', style: 'destructive',

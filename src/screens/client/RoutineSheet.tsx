@@ -153,9 +153,9 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initi
 
           {goals.length > 0 && (
             <>
-              <Text style={styles.label}>Hangi hedef için? (isteğe bağlı)</Text>
+              <Text style={styles.label}>Hangi davranış hedefi için? (isteğe bağlı)</Text>
               <CoachTarget id="sheet.routine.goal"><View style={styles.goals}>
-                {[{ id: '', title: 'Hedefe bağlama' }, ...goals].map((g) => {
+                {[{ id: '', title: 'Davranış hedefine bağlama' }, ...goals].map((g) => {
                   const on = (goalId ?? '') === g.id;
                   return (
                     <Pressable key={g.id || 'none'} onPress={() => setGoalId(g.id || null)} accessibilityRole="radio" accessibilityState={{ selected: on }}
@@ -169,7 +169,7 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initi
                   );
                 })}
               </View></CoachTarget>
-              <Text style={styles.small}>Bağlarsan Takip Planı'nda hedefin altında rutinin evde ne kadar yapıldığı görünür (ebeveyn kaydı).</Text>
+              <Text style={styles.small}>Bağlarsan Takip Planı'nda davranış hedefinin altında rutinin evde ne kadar yapıldığı görünür (ebeveyn kaydı).</Text>
             </>
           )}
 

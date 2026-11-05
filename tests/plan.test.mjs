@@ -122,7 +122,7 @@ test('gönderim özeti: değişen hedef/program, taslak rutin ve tek görev, de�
   const by = Object.fromEntries(items.map((x) => [x.key, x]));
   assert.ok(!by['g:g1'], 'değişmeyen hedef listede yok');
   assert.ok(!by['g:g2'], 'hiç gönderilmemiş gizli hedef listede yok');
-  assert.equal(by['g:g3'].detail, 'yeni hedef');
+  assert.equal(by['g:g3'].detail, 'yeni davranış hedefi');
   assert.equal(by['m:m1'].detail, 'değişti', 'programın yeni hedef bağı değişiklik sayılır');
   assert.deepEqual(by['r:G1'].hold.sort(), ['a', 'b']);
   assert.equal(by['r:G1'].goalId, 'g3');

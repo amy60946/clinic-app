@@ -56,7 +56,7 @@ function Body({ goal, notes, canWrite, onClose, onAdd }: { goal: PlanGoal; notes
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 10 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
           {canWrite && (
             <View style={{ gap: 8 }}>
-              <Input value={body} onChangeText={setBody} placeholder="Bu hedefe not…" multiline maxLength={4000} />
+              <Input value={body} onChangeText={setBody} placeholder="Bu davranış hedefine not…" multiline maxLength={4000} />
               <Pressable onPress={save} disabled={busy || !body.trim()} style={[styles.cta, (busy || !body.trim()) && { opacity: 0.5 }]} accessibilityRole="button">
                 {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.ctaText}>Kaydet</Text>}
               </Pressable>

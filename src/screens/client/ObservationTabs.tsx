@@ -98,7 +98,7 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
         ))}
       </Card>
       <Text style={styles.note}>
-        Ustalık: tamamlanmış son {MASTERY_WEEKS} haftanın her birinde ≥ %{MASTERY_RATE}. Ödülü azaltmak ya da yeni hedef koymak için bir işaret; kalıcı değişimi garanti etmez.
+        Ustalık: tamamlanmış son {MASTERY_WEEKS} haftanın her birinde ≥ %{MASTERY_RATE}. Ödülü azaltmak ya da yeni davranış hedefi koymak için bir işaret; kalıcı değişimi garanti etmez.
       </Text>
 
       <Label>Beceri alanına göre</Label>
@@ -191,7 +191,7 @@ export function AbcTab({ client, data, today, weeks, abcGoal }: ClientCtx) {
   const all = data.abc.filter((e) => isoDate(new Date(e.occurred_at)) >= from);
   const goalIds = [...new Set(all.map((e) => e.goal_id).filter((x): x is string => !!x))];
   const list = goalF === 'all' ? all : goalF === 'none' ? all.filter((e) => !e.goal_id) : all.filter((e) => e.goal_id === goalF);
-  const goalName = (id: string) => titles[id] ?? 'Hedef';
+  const goalName = (id: string) => titles[id] ?? 'Davranış hedefi';
   const short = (t: string) => (t.length > 28 ? `${t.slice(0, 27)}…` : t);
 
   if (!s.total) return <Empty text="Bu dönemde ebeveyn davranış kaydı girmedi. Ebeveyn kaydı ParentApp › Uzmanım › (senin adın) › Davranış kaydı ekle'den girer." />;
@@ -227,7 +227,7 @@ export function AbcTab({ client, data, today, weeks, abcGoal }: ClientCtx) {
             { id: 'all', label: 'Hepsi' },
             ...goalIds.map((id) => ({ id, label: short(goalName(id)), icon: 'flag-outline' as const })),
             ...(goalF !== 'all' && goalF !== 'none' && !goalIds.includes(goalF) ? [{ id: goalF, label: short(goalName(goalF)), icon: 'flag-outline' as const }] : []),
-            { id: 'none', label: 'Hedefsiz' },
+            { id: 'none', label: 'Davranış hedefi yok' },
           ]} />
         </View>
       )}
@@ -259,7 +259,7 @@ export function AbcTab({ client, data, today, weeks, abcGoal }: ClientCtx) {
               <Text style={styles.small}>
                 {abcWhen(e)} · şiddet {e.intensity}/5
               </Text>
-              {!!e.goal_id && <Text style={styles.goalTag} numberOfLines={1}>Hedef: {goalName(e.goal_id)}</Text>}
+              {!!e.goal_id && <Text style={styles.goalTag} numberOfLines={1}>Davranış hedefi: {goalName(e.goal_id)}</Text>}
               {e.antecedent ? <Text style={styles.body}><Text style={styles.abcKey}>Öncesi: </Text>{e.antecedent}</Text> : null}
               <Text style={styles.body}><Text style={styles.abcKey}>Davranış: </Text>{e.behavior}</Text>
               {e.consequence ? <Text style={styles.body}><Text style={styles.abcKey}>Sonucu: </Text>{e.consequence}</Text> : null}

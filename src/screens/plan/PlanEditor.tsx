@@ -77,20 +77,20 @@ export default function PlanEditor({ target, today, onChanged, readOnly = false,
   return (
     <View>
       {plan.legacy && isLink && (
-        <Notice icon="construct-outline" text="Aile programı ve ayrıntılı hedef alanları için veritabanı güncellemesi bekleniyor. Şimdilik yalnız hedef ve haftalık puan." />
+        <Notice icon="construct-outline" text="Aile programı ve ayrıntılı davranış hedefi alanları için veritabanı güncellemesi bekleniyor. Şimdilik yalnız davranış hedefi ve haftalık puan." />
       )}
       {!readOnly && !plan.legacy && (
         <Pressable style={styles.pkg} onPress={() => setPkgOpen(true)} accessibilityRole="button">
           <Ionicons name="albums-outline" size={20} color={colors.navy} />
           <View style={{ flex: 1 }}>
             <Text style={styles.pkgTitle}>{empty ? 'Hazır paketle başla' : 'Paketten ekle'}</Text>
-            <Text style={styles.small}>Ör. uyku, rutin, duygu düzenleme. Hedef ve modüller gelir; hepsini düzenleyebilirsin.</Text>
+            <Text style={styles.small}>Ör. uyku, rutin, duygu düzenleme. Davranış hedefi ve modüller gelir; hepsini düzenleyebilirsin.</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.faint} />
         </Pressable>
       )}
 
-      <Label>{`Çocuğun hedefleri (${goals.length})`}</Label>
+      <Label>{`Çocuğun davranış hedefleri (${goals.length})`}</Label>
       {isLink && !readOnly && goals.some((g) => g.ratings) && weeks.length > 1 && (
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
           {(['this', 'last'] as const).map((w) => (
@@ -101,7 +101,7 @@ export default function PlanEditor({ target, today, onChanged, readOnly = false,
           <Text style={[styles.small, { alignSelf: 'center' }]}>haftalık değerlendirme (aile görmez)</Text>
         </View>
       )}
-      {goals.length === 0 && <Empty text="Henüz hedef yok." />}
+      {goals.length === 0 && <Empty text="Henüz davranış hedefi yok." />}
       <View style={{ gap: 10 }}>
         {goals.map((g) => (
           <GoalCard key={g.id} g={g} isLink={isLink} readOnly={readOnly} week={week} weeks={weeks} legacy={plan.legacy} extra={goalExtra?.(g.id)}
@@ -109,12 +109,12 @@ export default function PlanEditor({ target, today, onChanged, readOnly = false,
             onToggleShared={(v) => act(updateGoal(g.id, { shared: v }))}
             onStatus={(s) => act(updateGoal(g.id, { status: s }))}
             onArchive={() => act(updateGoal(g.id, { archived: true }))}
-            onDelete={() => Alert.alert('Hedef silinsin mi?', '', [
+            onDelete={() => Alert.alert('Davranış hedefi silinsin mi?', '', [
               { text: 'Vazgeç', style: 'cancel' }, { text: 'Sil', style: 'destructive', onPress: () => act(deleteGoal(g.id), 'Silinemedi') }])}
             onRate={(r) => target.kind === 'link' && act(rateGoal(target.clinicId, g.id, week, r), 'Puan kaydedilemedi')} />
         ))}
       </View>
-      {!readOnly && <View style={{ marginTop: 10, alignItems: 'flex-start' }}><SmallButton label="+ Hedef ekle" onPress={() => setGoalSheet({ open: true })} /></View>}
+      {!readOnly && <View style={{ marginTop: 10, alignItems: 'flex-start' }}><SmallButton label="+ Davranış hedefi ekle" onPress={() => setGoalSheet({ open: true })} /></View>}
       {archived.length > 0 && (
         <View style={{ marginTop: 12 }}>
           <SmallButton label={showArchived ? 'Arşivi gizle' : `Arşiv (${archived.length})`} onPress={() => setShowArchived((v) => !v)} />
@@ -188,7 +188,7 @@ function GoalCard({ g, isLink, readOnly, week, weeks, legacy, extra, onEdit, onT
 }) {
   const ratings = Object.fromEntries(g.ratings.map((r) => [r.week, r.rating]));
   const cur = ratings[week];
-  const meta = [g.domain && domainLabel(g.domain), g.measure !== 'level' && g.target ? `Hedef: ${g.target}` : '',
+  const meta = [g.domain && domainLabel(g.domain), g.measure !== 'level' && g.target ? `Hedef düzey: ${g.target}` : '',
     g.baseline ? `Başlangıç: ${g.baseline}` : '', g.weeks ? `${g.weeks} hafta` : ''].filter(Boolean).join(' · ');
   return (
     <Card style={{ gap: 10 }}>
@@ -199,7 +199,7 @@ function GoalCard({ g, isLink, readOnly, week, weeks, legacy, extra, onEdit, onT
           {!!g.home_support && <Text style={styles.body}>Evde: {g.home_support}</Text>}
           {!!g.description && <Text style={styles.small}>{g.description}</Text>}
         </View>
-        {!readOnly && <IconButton name="create-outline" label="Hedefi düzenle" onPress={onEdit} />}
+        {!readOnly && <IconButton name="create-outline" label="Davranış hedefini düzenle" onPress={onEdit} />}
       </View>
       {extra}
       {!legacy && (
@@ -207,7 +207,7 @@ function GoalCard({ g, isLink, readOnly, week, weeks, legacy, extra, onEdit, onT
           {!readOnly && (
             <View style={styles.inline}>
               <Switch value={g.shared} onValueChange={onToggleShared} trackColor={{ true: colors.navy }}
-                accessibilityLabel="Aile bu hedefi görür" />
+                accessibilityLabel="Aile bu davranış hedefini görür" />
               <Text style={styles.small}>{g.shared ? 'Aile görür' : 'Yalnız klinik'}</Text>
             </View>
           )}
@@ -343,7 +343,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
 
   if (step === 'pick') {
     return (
-      <Sheet title="Hedef ekle" onClose={onClose} coach="goal">
+      <Sheet title="Davranış hedefi ekle" onClose={onClose} coach="goal">
         <Chips options={[{ id: '', label: 'Tümü' } as { id: string; label: string }, ...DOMAINS.map((d) => ({ id: d.key, label: d.label }))]}
           value={domain} onChange={setDomain} />
         <View style={{ gap: 8, marginTop: 14 }}>
@@ -359,13 +359,13 @@ export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
             </CoachTarget>
           ))}
         </View>
-        <View style={{ marginTop: 16 }}><Cta label="Kendi hedefimi yazacağım" onPress={() => { set({ domain }); setStep('form'); }} /></View>
+        <View style={{ marginTop: 16 }}><Cta label="Kendi davranış hedefimi yazacağım" onPress={() => { set({ domain }); setStep('form'); }} /></View>
       </Sheet>
     );
   }
   return (
-    <Sheet title={editing ? 'Hedefi düzenle' : 'Hedef'} onClose={onClose} coach={editing ? undefined : 'goalForm'}>
-      <Text style={styles.small}>Hedefi gözlenebilir yaz: "… yapar".</Text>
+    <Sheet title={editing ? 'Davranış hedefini düzenle' : 'Davranış hedefi'} onClose={onClose} coach={editing ? undefined : 'goalForm'}>
+      <Text style={styles.small}>Davranış hedefini gözlenebilir yaz: "… yapar".</Text>
       {!legacy && (<><Label>Alan</Label>
         <Chips options={DOMAINS.map((d) => ({ id: d.key, label: d.label }))} value={f.domain} onChange={(v) => set({ domain: v })} /></>)}
       <Label>Hedef davranış</Label>
@@ -378,12 +378,12 @@ export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
           {TARGET_HINTS.map((t) => <SmallButton key={t} label={t} onPress={() => set({ target: t })} />)}
         </View>
-        <LabelInfo text="Süre" info="Süre dolunca planda &quot;Değerlendirme zamanı&quot; çıkar; hedefi sürdürür, kapatır ya da ara verirsin. Aile görür." />
+        <LabelInfo text="Süre" info="Süre dolunca planda &quot;Değerlendirme zamanı&quot; çıkar; davranış hedefini sürdürür, kapatır ya da ara verirsin. Aile görür." />
         <Chips options={[4, 6, 8, 12].map((w) => ({ id: String(w), label: `${w} hafta` }))} value={f.weeks ? String(f.weeks) : ''}
           onChange={(v) => set({ weeks: Number(v) })} />
       </>)}
       {legacy ? <Label>Açıklama</Label> : (
-        <LabelInfo text="Aileye not (isteğe bağlı)" info="Ailenin hedefin altında göreceği kısa açıklama. Evde nasıl uygulanacağını programın &quot;Evde uygulama&quot; kısmında anlatırsın." />
+        <LabelInfo text="Aileye not (isteğe bağlı)" info="Ailenin davranış hedefinin altında göreceği kısa açıklama. Evde nasıl uygulanacağını programın &quot;Evde uygulama&quot; kısmında anlatırsın." />
       )}
       <Input value={f.description} onChangeText={(v) => set({ description: v })}
         placeholder={legacy ? 'İsteğe bağlı' : 'Ör. Resimli çizelgeyi buzdolabına asın; bitince kısa bir övgü yeter.'} maxLength={600} multiline />
@@ -401,8 +401,8 @@ export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
           </View>
         </View>
       )}
-      {/* G1 (kullanıcı kararı 3 Kasım 2026): "Aile bu hedefi görür" anahtarı formdan kalktı; taslak/gönder zaten "ne zaman gider"i
-          belirliyor. Yeni hedef aileye açık; gizlemek nadir iş: hedef satırı ⋯ › "Aileden gizle". Düzenlemede mevcut değer korunur. */}
+      {/* G1 (kullanıcı kararı 3 Kasım 2026): "Aile bu davranış hedefini görür" anahtarı formdan kalktı; taslak/gönder zaten "ne zaman gider"i
+          belirliyor. Yeni davranış hedefi aileye açık; gizlemek nadir iş: davranış hedefi satırı ⋯ › "Aileden gizle". Düzenlemede mevcut değer korunur. */}
       <CoachTarget id="sheet.goal.save" style={{ marginTop: 18 }}><Cta label="Kaydet" onPress={save} busy={busy} /></CoachTarget>
     </Sheet>
   );
@@ -501,7 +501,7 @@ export function PackageSheet({ onClose, onApply }: { onClose: () => void; onAppl
             <Pressable key={p.key} style={styles.tpl} onPress={() => pick(p)}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={styles.title}>{p.title}</Text>
-                <Text style={styles.small}>{p.goals.length} hedef · {p.modules.length} modül · {p.weeks} hafta</Text>
+                <Text style={styles.small}>{p.goals.length} davranış hedefi · {p.modules.length} modül · {p.weeks} hafta</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.faint} />
             </Pressable>
@@ -512,7 +512,7 @@ export function PackageSheet({ onClose, onApply }: { onClose: () => void; onAppl
   }
   return (
     <Sheet title={sel.title} onClose={() => setSel(null)}>
-      <Label>Hedefler (seçtiklerin eklenir)</Label>
+      <Label>Davranış hedefleri (seçtiklerin eklenir)</Label>
       <View style={{ gap: 6 }}>
         {sel.goals.map((k) => {
           const g = GOAL_TEMPLATES.find((x) => x.key === k)!;

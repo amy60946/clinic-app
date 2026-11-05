@@ -19,7 +19,7 @@ const SEEN_KEY = (id: string) => `clinic.attention.seen.v1.${id}`;
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 const SECTIONS: { id: Section; title: string; info: string }[] = [
-  { id: 'mine', title: 'Senin sıran', info: 'Aileye gönderilmemiş değişikliğin, değerlendirme zamanı gelen hedefin ya da takip planı henüz olmayan danışanlar.' },
+  { id: 'mine', title: 'Senin sıran', info: 'Aileye gönderilmemiş değişikliğin, değerlendirme zamanı gelen davranış hedefinin ya da takip planı henüz olmayan danışanlar.' },
   { id: 'family', title: 'Aileden yeni', info: 'Son 7 günde ailenin girdiği davranış kayıtları ve öneri kararları. "Gördüm" dersen ya da danışanı açarsan, yeni bir şey gelene kadar bu bölümden çıkar (bu cihazda).' },
   { id: 'quiet', title: 'Sessiz kalanlar', info: 'Ailenin 7 gündür hiç kaydı yok: görev, davranış kaydı, program uygulaması, öneri kararı.' },
   { id: 'rest', title: 'Diğer danışanlar', info: 'Şu an bir şey beklemeyen danışanlar.' },
