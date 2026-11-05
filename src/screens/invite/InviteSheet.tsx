@@ -111,7 +111,7 @@ function Body({ onClose, clinicId, clinicianName, existing, workspaceName, block
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60, gap: 4 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive" automaticallyAdjustKeyboardInsets>
           {!inv ? (
             <>
-              {blocked && <Notice icon="lock-closed-outline" text="Bu klinikte aile davetini klinik sahibi gönderir. Bireysel çalışmandan davet edebilirsin." />}
+              {blocked && <Notice icon="lock-closed-outline" text="Bu klinikte aile davetini klinik sahibi gönderir. Bireysel hesabından davet edebilirsin." />}
               {!!workspaceName && !blocked && <Text style={styles.scope}><Ionicons name="business-outline" size={13} color={colors.navy} />{`  Bu davet ${workspaceName} adına gider.`}</Text>}
               <InfoText text="Ebeveynin e-postasını yaz; davet senin adınla e-postayla gider. Davet 3 gün geçerli." detail={INVITE_HELP} />
               <Label>Ebeveynin e-postası</Label>

@@ -11,7 +11,7 @@ import {
   clinicianMe, listClients, listTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Member,
 } from '../lib/clinic';
 import SettingsScreen from './SettingsScreen';
-import { WorkspaceSheet, TeamRequestsCard } from './WorkspaceSheet';
+import { WorkspaceSheet, TeamRequestsCard, PERSONAL_LABEL, TEAM_LABEL } from './WorkspaceSheet';
 import { useWorkspace } from '../lib/workspace';
 import CalendarScreen from './calendar/CalendarScreen';
 import { loadSessions } from '../lib/sessions';
@@ -338,7 +338,7 @@ export default function HomeScreen() {
     <View style={styles.accountLinks}>
       {legalOn && <Pressable onPress={() => setLegalOpen('docs')} hitSlop={8}><Text style={styles.link}>Yasal ve gizlilik</Text></Pressable>}
       {state.kind === 'ready' && (state.me.workspaces ?? 1) > 1 && (
-        <Pressable onPress={() => setWsOpen(true)} hitSlop={8}><Text style={styles.link}>Çalışma alanını değiştir</Text></Pressable>
+        <Pressable onPress={() => setWsOpen(true)} hitSlop={8}><Text style={styles.link}>Hesap değiştir</Text></Pressable>
       )}
       <Pressable onPress={logout} hitSlop={8}><Text style={styles.link}>Çıkış yap</Text></Pressable>
       <Pressable onPress={removeAccount} hitSlop={8}><Text style={[styles.link, { color: colors.danger }]}>Hesabı sil</Text></Pressable>
@@ -351,7 +351,7 @@ export default function HomeScreen() {
     if (state.kind !== 'ready') return;
     if (state.clients.length === 0) { ws.switchTo(r.clinic_id); return; }
     load();
-    Alert.alert(`${r.clinic} ekibine katıldın`, 'Kliniğin danışanları ayrı bir çalışma alanında. Şimdi oraya geçilsin mi?', [
+    Alert.alert(`${r.clinic} ekibine katıldın`, 'Kliniğin danışanları ayrı bir ekip hesabında. Şimdi o hesaba geçilsin mi?', [
       { text: 'Sonra', style: 'cancel' }, { text: 'Geç', onPress: () => ws.switchTo(r.clinic_id) },
     ]);
   };
@@ -462,16 +462,19 @@ export default function HomeScreen() {
           <View style={styles.headerWrap}>
           <View style={styles.header}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.brand}>ClinicApp</Text>
-              {canSwitch && state.kind === 'ready' ? (
-                <Pressable onPress={() => setWsOpen(true)} accessibilityRole="button" accessibilityLabel="Çalışma alanını değiştir" hitSlop={6}
-                  style={({ pressed }) => [{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', maxWidth: '100%' }, pressed && { opacity: 0.7 }]}>
-                  <Text style={[styles.title, { flexShrink: 1 }]} numberOfLines={1}>{state.me.personal ? 'Bireysel çalışmam' : state.me.clinic}</Text>
-                  <Ionicons name="chevron-down" size={18} color={colors.navy} />
-                </Pressable>
-              ) : (
-                <Text style={styles.title}>{state.kind === 'ready' ? state.me.clinic : 'Uzman paneli'}</Text>
-              )}
+              {/* hesap seçimi bir hesap ayarı: köşede küçük düğme (kullanıcı kararı 5 Kasım 2026); başlık hesabın adı, ok yok */}
+              <View style={styles.brandRow}>
+                <Text style={styles.brand}>ClinicApp</Text>
+                {canSwitch && state.kind === 'ready' && (
+                  <Pressable onPress={() => setWsOpen(true)} accessibilityRole="button" hitSlop={8}
+                    accessibilityLabel={`Hesap: ${state.me.personal ? PERSONAL_LABEL : TEAM_LABEL}. Değiştir`}
+                    style={({ pressed }) => [styles.account, pressed && { opacity: 0.7 }]}>
+                    <Text style={styles.accountText} numberOfLines={1}>{state.me.personal ? PERSONAL_LABEL : TEAM_LABEL}</Text>
+                    <Ionicons name="chevron-down" size={12} color={colors.muted} />
+                  </Pressable>
+                )}
+              </View>
+              <Text style={styles.title}>{state.kind === 'ready' ? (state.me.personal ? state.me.name : state.me.clinic) : 'Uzman paneli'}</Text>
             </View>
             {state.kind === 'ready' && <LayoutToggle />}
             {state.kind === 'ready' && <Bell count={unread} onPress={() => setBell(true)} />}
@@ -493,7 +496,7 @@ export default function HomeScreen() {
           {/* alt satır düğmelerin altında tam genişlikte: telefonda dar sütunda kırılmasın */}
           {state.kind === 'ready' && (
             <Text style={styles.subtitle}>
-              {[[(state.me.personal || state.me.name !== state.me.clinic) && state.me.name, state.me.title,
+              {[[!state.me.personal && state.me.name !== state.me.clinic && state.me.name, state.me.title,
                   !state.me.personal && state.me.workspaces !== undefined && (state.me.role === 'owner' ? 'Sahip' : 'Ekip üyesi')].filter(Boolean).join(' · '), planText(state.me)]
                 .filter(Boolean).join('\n')}
             </Text>
@@ -643,6 +646,9 @@ const styles = StyleSheet.create({
   headerWrap: { marginBottom: 8 },
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   brand: { fontSize: 13, fontWeight: '700', color: colors.muted, letterSpacing: 1 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', columnGap: 6, rowGap: 4 },
+  account: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 2, maxWidth: 200 },
+  accountText: { fontSize: 11.5, fontWeight: '600', color: colors.muted, flexShrink: 1 },
   title: { fontSize: 24, fontWeight: '700', color: colors.navy, marginTop: 6 },
   subtitle: { fontSize: 13, color: colors.muted, marginTop: 6, lineHeight: 19 },
   iconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },

@@ -123,12 +123,6 @@ export function SectionHint({ userId, section }: { userId: string; section: Tab 
   return <OnceHint userId={userId} id={section} hint={SECTION_HINTS[section]} />;
 }
 
-// Ana ekran: danışan bölümleri ilk göründüğünde bir kez (ilk kullanım "İ", 3 Kasım 2026)
-export const BOARD_HINT = {
-  title: 'Danışanlar bölümlere ayrılır',
-  text: 'Senin sıran · Aileden yeni · Sessiz kalanlar. Ayrıntı başlıktaki (i).',
-};
-
 // Bir kez gösterilen ipucu kartı ("Anladım" ile kapanır, bu cihazda hatırlanır)
 export function OnceHint({ userId, id, hint }: { userId: string; id: string; hint?: { title: string; text: string } }) {
   const section = id;

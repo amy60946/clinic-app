@@ -162,7 +162,7 @@ function ProfessionList({ q, value, onChange, wide }: { q: SurveyQuestion; value
 function Ready({ me, name, intent, onFinish }: { me: ClinicianMe; name: string; intent: Intent | null; onFinish: (a: SurveyAction) => void }) {
   const text = intent === 'trial' ? 'En hızlı başlangıç: ilk aileni davet et. Davet e-postası senin adınla gider; ebeveyn onaylayınca çocuk panelinde görünür.'
     : intent === 'family' ? 'Çalıştığın aileyi davet et. Ebeveyn e-postadaki kodla bağlanıp onay verince çocuk panelinde görünür.'
-    : intent === 'team' ? 'Aşağıdaki kişisel kodunu klinik sahibine ver. Seni ekibine eklemek istediğinde onay sana gelir; kliniğin danışanları ayrı bir çalışma alanında açılır.'
+    : intent === 'team' ? 'Aşağıdaki kişisel kodunu klinik sahibine ver. Seni ekibine eklemek istediğinde onay sana gelir; kliniğin danışanları ayrı bir ekip hesabında açılır.'
     : intent === 'org' ? 'Klinik paketinde 10 uzmana kadar ekip kurar, aile çalışmasını tek düzende yürütürsün. 7 günlük deneme sürüyor.'
     : 'Panelin hazır. Ailelerin paylaştığı çocuklar burada görünür.';
   const primary: { label: string; onPress: () => void } | null =

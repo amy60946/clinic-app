@@ -428,7 +428,8 @@ function embed(table: string, cols: string, r: Row): Row {
   const rels = EMBEDS[table];
   if (!rels) return r;
   const out = { ...r };
-  Object.entries(rels).forEach(([name, get]) => { if (cols.includes(`${name}(`)) out[name] = get(r); });
+  // `tasks(title)` ya da yol ipucuyla `tasks!task_id(title)` (iki yabancı anahtar olunca PostgREST ipucu ister)
+  Object.entries(rels).forEach(([name, get]) => { if (new RegExp(`(^|[\\s,])${name}(![a-z_]+)?\\(`).test(cols)) out[name] = get(r); });
   return out;
 }
 

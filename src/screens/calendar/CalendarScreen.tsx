@@ -52,7 +52,7 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
   const [offer, setOffer] = useState<Session | null>(null);
   const [ext, setExtRaw] = useState<ExternalEvent | null>(null);
   const setExt = (e: ExternalEvent | null) => {
-    if (e?.source_id === 'workspace') return Alert.alert(e.summary ?? 'Başka çalışma alanı', 'Bu saatte başka çalışma alanında seansın var. Ayrıntısı için o alana geç.');
+    if (e?.source_id === 'workspace') return Alert.alert(e.summary ?? 'Başka hesap', 'Bu saatte başka hesabında seansın var. Ayrıntısı için o hesaba geç.');
     setExtRaw(e);
   };
   const owner = me.role === 'owner';

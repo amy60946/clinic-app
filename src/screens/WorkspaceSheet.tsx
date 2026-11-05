@@ -1,24 +1,27 @@
-// Çalışma alanı seçici ve ekibe katılma istekleri (ortak akislar.md 21): "Bireysel çalışmam" + klinikler; bireysel alanı aç,
-// klinik aç. İstek kartı ana ekranda: klinik adı, gönderen, ekip sayısı → Kabul et / Reddet.
+// Hesap seçici ve ekibe katılma istekleri (ortak akislar.md 21). Kullanıcıya görünen ad "hesap" (kullanıcı kararı 5 Kasım 2026):
+// "Bireysel hesap" (kendi danışanları) + "Ekip hesabı" (kliniğin ekibine kabul edilince sistem açar; klinik adı klinikten gelir,
+// altında uzmanın adı). Uzman burada klinik açmaz ve ad vermez. Ana ekranda köşedeki küçük düğmeden açılır.
 import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, Modal, ScrollView, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../theme';
-import { Card, Input, SmallButton, IconButton } from '../components/ui';
+import { Card, SmallButton, IconButton, InfoText } from '../components/ui';
 import {
-  ClinicianMe, Workspace, MyRequest, listWorkspaces, openPersonalWorkspace, createClinicWorkspace, myTeamRequests, respondTeamRequest,
+  ClinicianMe, Workspace, MyRequest, listWorkspaces, openPersonalWorkspace, myTeamRequests, respondTeamRequest,
 } from '../lib/clinic';
 import { useWorkspace } from '../lib/workspace';
 import { useNotifications } from '../lib/notificationsContext';
 import { track } from '../lib/track';
 
-const roleText = (w: Workspace) => (w.personal ? 'Kendi danışanların' : w.role === 'owner' ? `Sahip · ${w.members} uzman` : `Ekip üyesi · ${w.members} uzman`);
+export const PERSONAL_LABEL = 'Bireysel hesap';
+export const TEAM_LABEL = 'Ekip hesabı';
+
+const roleText = (w: Workspace) => (w.role === 'owner' ? `Sahip · ${w.members} uzman` : `Ekip üyesi · ${w.members} uzman`);
 
 export function WorkspaceSheet({ visible, me, onClose }: { visible: boolean; me: ClinicianMe; onClose: () => void }) {
   const { switchTo } = useWorkspace();
   const [list, setList] = useState<Workspace[] | null>(null);
-  const [newName, setNewName] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   useEffect(() => { if (visible) listWorkspaces().then(setList).catch(() => setList([])); }, [visible]);
   const go = (w: Workspace) => {
@@ -36,66 +39,57 @@ export function WorkspaceSheet({ visible, me, onClose }: { visible: boolean; me:
       switchTo(id);
     } catch (e) { Alert.alert('Açılamadı', (e as Error).message); } finally { setBusy(false); }
   };
-  const createClinic = async () => {
-    if (!newName?.trim()) return Alert.alert('Kliniğin adını yaz.');
-    setBusy(true);
-    try {
-      const id = await createClinicWorkspace(newName);
-      track('workspace.create', { kind: 'clinic' });
-      setNewName(null);
-      onClose();
-      switchTo(id);
-    } catch (e) { Alert.alert('Açılamadı', (e as Error).message); } finally { setBusy(false); }
+  const personal = list?.filter((w) => w.personal) ?? [];
+  const teams = list?.filter((w) => !w.personal) ?? [];
+  const item = (w: Workspace) => {
+    const on = w.clinic_id === me.clinic_id;
+    return (
+      <Pressable key={w.clinic_id} onPress={() => go(w)} accessibilityRole="radio" accessibilityState={{ selected: on }}
+        style={({ pressed }) => [styles.item, on && styles.itemOn, pressed && { opacity: 0.85 }]}>
+        <Ionicons name={w.personal ? 'person-outline' : 'business-outline'} size={20} color={colors.navy} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.itemTitle} numberOfLines={2}>{w.personal ? PERSONAL_LABEL : w.name}</Text>
+          <Text style={styles.small}>{[me.name, w.personal ? 'kendi danışanların' : roleText(w), !w.access && 'üyelik etkin değil'].filter(Boolean).join(' · ')}</Text>
+        </View>
+        {on && <Ionicons name="checkmark-circle" size={20} color={colors.navy} />}
+      </Pressable>
+    );
   };
-  const hasPersonal = !!list?.some((w) => w.personal);
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose} transparent={false}>
       <SafeAreaView style={styles.safe}>
         <View style={[styles.head, styles.col]}>
-          <Text style={styles.title}>Çalışma alanı</Text>
+          <Text style={styles.title}>Hesap</Text>
           <IconButton name="close" onPress={onClose} label="Kapat" />
         </View>
-        <ScrollView contentContainerStyle={[{ padding: 16, gap: 10 }, styles.col]} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
-          <Text style={styles.small}>Danışanlar, davetler, notlar ve seanslar seçili alana aittir. Alanlar birbirini görmez.</Text>
-          {list === null && <ActivityIndicator color={colors.navy} />}
-          {list?.map((w) => {
-            const on = w.clinic_id === me.clinic_id;
-            return (
-              <Pressable key={w.clinic_id} onPress={() => go(w)} accessibilityRole="radio" accessibilityState={{ selected: on }}
-                style={({ pressed }) => [styles.item, on && styles.itemOn, pressed && { opacity: 0.85 }]}>
-                <Ionicons name={w.personal ? 'person-outline' : 'business-outline'} size={20} color={colors.navy} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.itemTitle} numberOfLines={1}>{w.personal ? 'Bireysel çalışmam' : w.name}</Text>
-                  <Text style={styles.small}>{roleText(w)}{!w.access ? ' · üyelik etkin değil' : ''}</Text>
+        <ScrollView contentContainerStyle={[{ padding: 16, gap: 10 }, styles.col]}>
+          <Text style={styles.small}>Danışanlar, davetler, notlar ve seanslar seçili hesaba aittir; hesaplar birbirini görmez.</Text>
+          {list === null ? <ActivityIndicator color={colors.navy} /> : (
+            <>
+              <Text style={styles.label}>{PERSONAL_LABEL}</Text>
+              {personal.map(item)}
+              {!personal.length && (
+                <Pressable onPress={openPersonal} disabled={busy} style={({ pressed }) => [styles.item, styles.dashed, pressed && { opacity: 0.85 }]}>
+                  <Ionicons name="add-circle-outline" size={20} color={colors.navy} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.itemTitle}>Bireysel hesabını aç</Text>
+                    <Text style={styles.small}>Kendi adına çalıştığın aileler için; kliniklerden ayrı.</Text>
+                  </View>
+                </Pressable>
+              )}
+              <Text style={[styles.label, { marginTop: 8 }]}>{TEAM_LABEL}</Text>
+              {teams.map(item)}
+              {!teams.length && (
+                <View style={[styles.item, styles.dashed, { backgroundColor: '#fff', alignItems: 'flex-start' }]}>
+                  <Ionicons name="business-outline" size={20} color={colors.muted} style={{ marginTop: -1 }} />
+                  <View style={{ flex: 1 }}>
+                    <InfoText small text="Henüz klinik daveti yok"
+                      detail={['Bir kliniğin davetini kabul ettiğinde hesap burada görünür; o kliniğin danışanlarıyla buradan çalışırsın. Klinik seni Ayarlar\'daki kişisel kodunla davet eder.']} />
+                  </View>
                 </View>
-                {on && <Ionicons name="checkmark-circle" size={20} color={colors.navy} />}
-              </Pressable>
-            );
-          })}
-          {list && !hasPersonal && (
-            <Pressable onPress={openPersonal} disabled={busy} style={({ pressed }) => [styles.item, styles.dashed, pressed && { opacity: 0.85 }]}>
-              <Ionicons name="add-circle-outline" size={20} color={colors.navy} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.itemTitle}>Bireysel çalışmamı aç</Text>
-                <Text style={styles.small}>Kendi adına çalıştığın aileler için; kliniklerden ayrı.</Text>
-              </View>
-            </Pressable>
+              )}
+            </>
           )}
-          {list && (newName === null ? (
-            <Pressable onPress={() => setNewName('')} hitSlop={8} style={{ alignSelf: 'flex-start', marginTop: 6 }}>
-              <Text style={styles.link}>+ Klinik aç</Text>
-            </Pressable>
-          ) : (
-            <Card style={{ gap: 8 }}>
-              <Text style={styles.itemTitle}>Yeni klinik</Text>
-              <Input value={newName} onChangeText={setNewName} placeholder="Kliniğin adı" maxLength={120} />
-              <Text style={styles.small}>Sahibi sen olursun; uzmanları kişisel kodlarıyla eklersin. Deneme süren diğer alanlarınla ortaktır.</Text>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <SmallButton label="Aç" onPress={createClinic} busy={busy} />
-                <SmallButton label="Vazgeç" onPress={() => setNewName(null)} />
-              </View>
-            </Card>
-          ))}
         </ScrollView>
       </SafeAreaView>
     </Modal>
@@ -134,7 +128,7 @@ export function TeamRequestsCard({ me, reloadKey, onAccepted }: { me: ClinicianM
               <Text style={styles.small}>{`Ekipte ${r.members} uzman`}</Text>
             </View>
           </View>
-          <Text style={styles.small}>Kabul edersen bu kliniğin danışanları ayrı bir çalışma alanında açılır; bireysel çalışman ayrı kalır.</Text>
+          <Text style={styles.small}>Kabul edersen bu kliniğin danışanları ayrı bir ekip hesabında açılır; bireysel hesabın ayrı kalır.</Text>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <Pressable onPress={() => answer(r, true)} disabled={busy === r.id} accessibilityRole="button"
               style={({ pressed }) => [styles.primary, (pressed || busy === r.id) && { opacity: 0.8 }]}>
@@ -153,11 +147,11 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12 },
   title: { fontSize: 18, fontWeight: '700', color: colors.navy },
   small: { fontSize: 12, color: colors.muted, lineHeight: 17 },
-  link: { fontSize: 14, fontWeight: '700', color: colors.navy },
   item: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#fff', borderRadius: radius.md, borderWidth: 1, borderColor: colors.line, padding: 14 },
   itemOn: { borderColor: colors.navy, borderWidth: 1.5 },
   dashed: { borderStyle: 'dashed', backgroundColor: 'transparent' },
   itemTitle: { fontSize: 15, fontWeight: '700', color: colors.navy },
+  label: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase', color: '#6B7387' },
   col: { width: '100%', maxWidth: 640, alignSelf: 'center' },
   primary: { backgroundColor: colors.navy, borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 8, minWidth: 96, alignItems: 'center', justifyContent: 'center' },
   primaryText: { color: '#fff', fontSize: 13, fontWeight: '700' },

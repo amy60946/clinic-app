@@ -159,7 +159,7 @@ export function InfoText({ text, detail, small }: { text: string; detail: string
         <View style={styles.infoBox}>
           {detail.map((d) => (
             <View key={d} style={{ flexDirection: 'row', gap: 8 }}>
-              <Text style={styles.infoDetail}>•</Text>
+              {detail.length > 1 && <Text style={styles.infoDetail}>•</Text>}
               <Text style={[styles.infoDetail, { flex: 1 }]}>{d}</Text>
             </View>
           ))}
