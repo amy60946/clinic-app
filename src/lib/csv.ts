@@ -43,7 +43,7 @@ export function abcRows(events: AbcEvent[], from: string, to: string): string[][
     ]);
 }
 
-export const ROUTINE_HEADER = ['Tarih', 'Görev', 'Beceri', 'Durum', 'Yapamam nedeni', 'Ebeveyn notu', 'Motive etmek (ebeveyn, 1 kolay – 5 zor)'];
+export const ROUTINE_HEADER = ['Tarih', 'Macera', 'Beceri', 'Durum', 'Yapamam nedeni', 'Ebeveyn notu', 'Motive etmek (ebeveyn, 1 kolay – 5 zor)'];
 
 const STATUS: Record<Completion['status'] | 'none', string> = {
   approved: 'Yaptı, ebeveyn onayladı',

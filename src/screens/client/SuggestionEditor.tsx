@@ -82,7 +82,7 @@ function TemplatePicker({ onClose, onNext, onCustom }: {
     <SafeAreaView style={styles.safe}>
       <View style={styles.top}>
         <IconButton name="chevron-back" label="Geri" onPress={onClose} />
-        <Text style={styles.topTitle}>Görev Öner</Text>
+        <Text style={styles.topTitle}>Macera Öner</Text>
         <IconButton name="close" label="Kapat" onPress={onClose} />
       </View>
 
@@ -105,7 +105,7 @@ function TemplatePicker({ onClose, onNext, onCustom }: {
         />
       </View>
 
-      <Text style={styles.hint}>Birden fazla görev seçip tek seferde önerebilirsiniz.</Text>
+      <Text style={styles.hint}>Birden fazla macera seçip tek seferde önerebilirsiniz.</Text>
 
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 220, gap: 10 }} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         {list.length === 0 && <Text style={{ color: colors.muted, textAlign: 'center', marginTop: 40 }}>Sonuç bulunamadı.</Text>}
@@ -132,13 +132,13 @@ function TemplatePicker({ onClose, onNext, onCustom }: {
       <View style={styles.bottomPick}>
         {picked.length > 0 && (
           <Pressable style={[styles.cta, { marginBottom: 12 }]} onPress={() => onNext(templates.filter((t) => picked.includes(t.id)))}>
-            <Text style={styles.ctaText}>Devam · {picked.length} görev</Text>
+            <Text style={styles.ctaText}>Devam · {picked.length} macera</Text>
           </Pressable>
         )}
         <Text style={{ fontSize: 12, color: colors.muted, textAlign: 'center', marginBottom: 8 }}>Aradığını bulamadın mı?</Text>
         <Pressable style={[styles.cta, picked.length > 0 && { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line }]} onPress={onCustom}>
           <Text style={[styles.ctaText, picked.length > 0 && { color: colors.navy }]}>
-            <Text style={{ fontSize: 22, lineHeight: 22 }}>+ </Text>Yeni bir görev oluştur
+            <Text style={{ fontSize: 22, lineHeight: 22 }}>+ </Text>Yeni bir macera oluştur
           </Text>
         </Pressable>
       </View>
@@ -185,8 +185,8 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
     setRepeatDays((p) => (p.includes(n) ? p.filter((x) => x !== n) : [...p, n].sort((a, b) => a - b)));
 
   const submit = async () => {
-    if (canTitle && !title.trim()) return Alert.alert('Görev adı gerekli');
-    if (canTitle && !category) return Alert.alert('Kategori seç', 'Görevin becerisi kategoriden gelir.');
+    if (canTitle && !title.trim()) return Alert.alert('Maceranın adı gerekli');
+    if (canTitle && !category) return Alert.alert('Kategori seç', 'Maceranın becerisi kategoriden gelir.');
     if (recurring && endDate && endDate < startDate) return Alert.alert('Son tarih başlangıçtan önce olamaz');
     if (recurring && repeatKind !== 'daily' && repeatDays.length === 0) {
       return Alert.alert(repeatKind === 'weekly' ? 'Haftanın en az bir gününü seç' : 'Ayın en az bir gününü seç');
@@ -223,14 +223,14 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
     <SafeAreaView style={styles.safe}>
       <View style={styles.top}>
         <IconButton name="chevron-back" label="Geri" onPress={onBack} />
-        <Text style={styles.topTitle}>{editing ? 'Öneriyi düzenle' : 'Görev ayrıntıları'}</Text>
+        <Text style={styles.topTitle}>{editing ? 'Öneriyi düzenle' : 'Macera ayrıntıları'}</Text>
         <IconButton name="close" label="Kapat" onPress={onClose} />
       </View>
 
       {isPast && (
         <View style={styles.banner}>
           <Ionicons name="information-circle" size={18} color={colors.medium.fg} />
-          <Text style={{ flex: 1, fontSize: 13, color: colors.medium.fg }}>Geçmiş bir gün seçtiniz; ebeveyn kabul ederse görev o gün başlar.</Text>
+          <Text style={{ flex: 1, fontSize: 13, color: colors.medium.fg }}>Geçmiş bir gün seçtiniz; ebeveyn kabul ederse macera o gün başlar.</Text>
         </View>
       )}
 
@@ -238,7 +238,7 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
         keyboardDismissMode="interactive" automaticallyAdjustKeyboardInsets>
         {canTitle ? (
           <>
-            <Label>Görev adı</Label>
+            <Label>Maceranın adı</Label>
             <TextInput value={title} onChangeText={setTitle} placeholder="Örn. Çantanı hazırla" placeholderTextColor={colors.muted}
               style={styles.input} maxLength={120} />
             <Label>Kategori</Label>
@@ -254,12 +254,12 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
               })}
             </View>
             <Text style={styles.skillHint}>
-              {category ? `Bu görev çocuğun oyundaki ${SKILL_LABEL[skillOf(category)]} becerisine yıldız kazandırır.` : 'Kategoriyi seç; görevin becerisi kategoriden gelir.'}
+              {category ? `Bu macera çocuğun oyundaki ${SKILL_LABEL[skillOf(category)]} becerisine yıldız kazandırır.` : 'Kategoriyi seç; maceranın becerisi kategoriden gelir.'}
             </Text>
           </>
         ) : (
           <>
-            <Label>Seçilen görevler</Label>
+            <Label>Seçilen maceralar</Label>
             {picked.map((t) => (
               <Text key={t.id} style={{ fontSize: 15, color: colors.navy, marginBottom: 4 }}>{t.emoji}  {t.title}</Text>
             ))}
@@ -331,7 +331,7 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
                     <DayDot key={i} label={String(i + 1)} on={repeatDays.includes(i + 1)} onPress={() => toggleDay(i + 1)} size={38} />
                   ))}
                 </View>
-                {repeatDays.some((x) => x > 28) && <Text style={styles.sub}>29, 30 ve 31 olmayan aylarda görev ayın son gününe atanır.</Text>}
+                {repeatDays.some((x) => x > 28) && <Text style={styles.sub}>29, 30 ve 31 olmayan aylarda macera ayın son gününe atanır.</Text>}
               </>
             )}
             <View style={styles.summary}>
@@ -345,7 +345,7 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
 
         <Label>Hatırlatma saati (isteğe bağlı)</Label>
         <Text style={[styles.sub, { marginTop: -2, marginBottom: 8 }]}>
-          Bir saat seçersen görev günü o saatte çocuğa hatırlatma gider. Boş bırakırsan hatırlatma gönderilmez.
+          Bir saat seçersen macera günü o saatte çocuğa hatırlatma gider. Boş bırakırsan hatırlatma gönderilmez.
         </Text>
         <DateField mode="time" value={reminder} onChange={setReminder} placeholder="Saat seç (ör. 19:00)" clearable />
 
@@ -359,7 +359,7 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
 
         <Label>Ebeveyne not (isteğe bağlı)</Label>
         <TextInput value={note} onChangeText={setNote} multiline maxLength={300}
-          placeholder="Neden bu görev, ebeveyn nasıl desteklesin?" placeholderTextColor={colors.muted}
+          placeholder="Neden bu sorumluluk, ebeveyn nasıl desteklesin?" placeholderTextColor={colors.muted}
           style={[styles.input, { minHeight: 64, textAlignVertical: 'top' }]} />
         <Text style={styles.sub}>Ebeveyn öneriyi ParentApp'te görür; ekleyip eklememek ve ayarları değiştirmek ebeveynin kararıdır.</Text>
 

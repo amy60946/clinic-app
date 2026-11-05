@@ -10,7 +10,7 @@ import type { PubItem } from '../../lib/planCore';
 // "Aileye gönder" özeti (kullanıcı kararı 2 Kasım 2026, "G1"; ortak care_plan_publish_selected): gidecekler hedef hedef listelenir,
 // hepsi işaretli gelir; işareti kaldırılan bu gönderimde bekler. Aile tek bildirim alır. GAS ve gizli hedef listede çıkmaz.
 export type PubGroup = { id: string | null; title: string; color: string; hidden: boolean };
-const KIND: Record<PubItem['kind'], string> = { goal: 'Davranış hedefi', module: 'Program', routine: 'Rutin', task: 'Görev', change: 'Değişiklik' };
+const KIND: Record<PubItem['kind'], string> = { goal: 'Davranış hedefi', module: 'Program', routine: 'Rutin', task: 'Macera', change: 'Değişiklik' };
 
 export default function PublishSheet({ items, groups, onClose, onSend }: {
   items: PubItem[] | null; groups: PubGroup[]; onClose: () => void; onSend: (hold: string[]) => Promise<void>;

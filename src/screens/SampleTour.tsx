@@ -111,7 +111,7 @@ export function SampleRow({ onOpen, onHide }: { onOpen: () => void; onHide?: () 
 // Kısa (kullanıcı isteği 3 Kasım 2026: "yazıları daha kısa tut"); dokunulacak tuş tırnak içinde
 export const SECTION_HINTS: Partial<Record<Tab, { title: string; text: string }>> = {
   summary: { title: 'Özet', text: 'Dönemin ev rutini: tamamlama, tam gün, kendiliğinden başlama.' },
-  routine: { title: 'Ev Rutinleri', text: 'Bir göreve dokun: gün gün ayrıntı. Öneri için "+ Aileye öner".' },
+  routine: { title: 'Ev Rutinleri', text: 'Bir maceraya dokun: gün gün ayrıntı. Öneri için "+ Aileye öner".' },
   abc: { title: 'Davranış Kayıtları', text: 'Ebeveynin ABC kayıtları. Tabloyu "İndir (CSV)" ile al.' },
   goals: { title: 'Takip Planı', text: 'Eklediğin her şey taslak (bej), aile görmez. Göndermek için "Aileye gönder".' },
   notes: { title: 'Notlar', text: 'Yalnız sen ve yetkili ekibin görür.' },
@@ -198,7 +198,7 @@ export const TOUR: (CoachStep & { tab: Tab })[] = [
     },
   },
   {
-    key: 'watch', tab: 'routine', target: 'routine.row', until: 'routine_row', title: 'Ailenin kaydı', text: 'Bir **göreve** dokun',
+    key: 'watch', tab: 'routine', target: 'routine.row', until: 'routine_row', title: 'Ailenin kaydı', text: 'Bir **maceraya** dokun',
     sheets: {
       taskDetail: [
         { target: 'sheet.task.body', title: 'Gün gün kayıt', info: true },

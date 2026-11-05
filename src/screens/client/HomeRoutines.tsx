@@ -109,12 +109,12 @@ function WeekGrid(ctx: ClientCtx) {
   const { dates, rows } = useMemo(() => weekGrid(data.tasks, data.completions, today), [data, today]);
   const [open, setOpen] = useState<Task | null>(null);
   const emit = useCoachEmit();
-  if (!rows.length) return <Empty text="Son 7 günde planlı görev yok. Görevler ebeveynin ParentApp'te eklediği ya da önerini onayladığı görevlerdir." />;
+  if (!rows.length) return <Empty text="Son 7 günde planlı macera yok. Maceralar ebeveynin ParentApp'te eklediği ya da önerini onayladığı sorumluluklardır." />;
   return (
     <View>
       <Card style={{ padding: 0, overflow: 'hidden', marginTop: 12 }}>
         <View style={[styles.row, styles.headRow]}>
-          <Text style={[styles.th, { flex: 1 }]}>Görev</Text>
+          <Text style={[styles.th, { flex: 1 }]}>Macera</Text>
           {wide && <Text style={[styles.th, { width: 80 }]}>Günün bölümü</Text>}
           <Text style={[styles.th, { width: wide ? 72 : 44, textAlign: 'center' }]}>{wide ? 'Yapılan / plan' : 'Son 7'}</Text>
           {dates.map((d) => (
@@ -157,7 +157,7 @@ function WeekGrid(ctx: ClientCtx) {
         ))}
         <View style={styles.legendItem}><Text style={{ color: colors.faint, fontSize: 12 }}>–</Text><Text style={styles.small}>Planlı değil</Text></View>
       </View>
-      <Text style={styles.note}>Satıra dokununca görevin gün gün geçmişi açılır. Bugün henüz bitmediği için oranlarda sayılmaz.</Text>
+      <Text style={styles.note}>Satıra dokununca maceranın gün gün geçmişi açılır. Bugün henüz bitmediği için oranlarda sayılmaz.</Text>
       <TaskDetail task={open} ctx={ctx} onClose={() => { setOpen(null); emit('routine_row'); }} />
     </View>
   );
@@ -275,7 +275,7 @@ function Trend({ data, today, weeks }: ClientCtx) {
   const color = (id: string) => SERIES_COLORS[picked.indexOf(id) % SERIES_COLORS.length];
   const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length >= SERIES_COLORS.length ? p : [...p, id]));
 
-  if (!series.length) return <Empty text="Bu dönemde planlı görev yok." />;
+  if (!series.length) return <Empty text="Bu dönemde planlı macera yok." />;
   return (
     <View>
       <Card style={{ marginTop: 12, gap: 8 }}>
@@ -284,7 +284,7 @@ function Trend({ data, today, weeks }: ClientCtx) {
           <Text style={styles.small}>Planı göster</Text>
           <Toggle value={showPlan} onChange={setShowPlan} />
         </View>
-        {plotted.length === 0 ? <Empty text="Grafikte görmek için aşağıdan görev seç." /> : (
+        {plotted.length === 0 ? <Empty text="Grafikte görmek için aşağıdan macera seç." /> : (
           <MultiLine starts={starts} series={plotted.map((s) => ({ id: s.task.id, values: s.done, color: color(s.task.id) }))}
             target={showPlan && plotted.length === 1 ? plotted[0].planned : null} />
         )}
@@ -297,7 +297,7 @@ function Trend({ data, today, weeks }: ClientCtx) {
           ))}
           {showPlan && plotted.length === 1 && <Text style={styles.small}>– – planlı gün sayısı</Text>}
         </View>
-        {showPlan && plotted.length > 1 && <Text style={styles.small}>Plan çizgisi yalnız bir görev seçiliyken görünür.</Text>}
+        {showPlan && plotted.length > 1 && <Text style={styles.small}>Plan çizgisi yalnız bir macera seçiliyken görünür.</Text>}
       </Card>
 
       <View style={{ gap: 8, marginTop: 12 }}>
@@ -312,18 +312,18 @@ function Trend({ data, today, weeks }: ClientCtx) {
         </View>
         <View style={styles.search}>
           <Ionicons name="search" size={16} color={colors.muted} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Görev ara" placeholderTextColor={colors.muted} style={{ flex: 1, fontSize: 14, color: colors.navy }} />
+          <TextInput value={q} onChangeText={setQ} placeholder="Macera ara" placeholderTextColor={colors.muted} style={{ flex: 1, fontSize: 14, color: colors.navy }} />
         </View>
       </View>
 
       <Card style={{ padding: 0, overflow: 'hidden', marginTop: 8 }}>
         <View style={[styles.row, styles.headRow]}>
           <Text style={[styles.th, { width: 30 }]}>Çiz</Text>
-          <Text style={[styles.th, { flex: 1 }]}>Görev</Text>
+          <Text style={[styles.th, { flex: 1 }]}>Macera</Text>
           <Text style={[styles.th, { width: 76 }]}>Günün bölümü</Text>
           <Text style={[styles.th, { width: 64, textAlign: 'right' }]}>Haftalık ort.</Text>
         </View>
-        {shown.length === 0 && <View style={{ padding: 16 }}><Empty text="Süzgece uyan görev yok." /></View>}
+        {shown.length === 0 && <View style={{ padding: 16 }}><Empty text="Süzgece uyan macera yok." /></View>}
         {shown.map((s, i) => {
           const on = picked.includes(s.task.id);
           return (
@@ -340,7 +340,7 @@ function Trend({ data, today, weeks }: ClientCtx) {
         })}
       </Card>
       <Text style={styles.note}>
-        Haftalık ortalama, görevin planlı olduğu haftalarda onaylanan gün sayısının ortalamasıdır. En çok {SERIES_COLORS.length} görev birlikte çizilir.
+        Haftalık ortalama, maceranın planlı olduğu haftalarda onaylanan gün sayısının ortalamasıdır. En çok {SERIES_COLORS.length} macera birlikte çizilir.
         Dönem {parseDate(starts[0]).toLocaleDateString('tr-TR')} – {parseDate(lastFullDay(today)).toLocaleDateString('tr-TR')}.
       </Text>
     </View>

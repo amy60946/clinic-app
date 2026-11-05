@@ -18,7 +18,7 @@ type Item = { key: string; q: string; a?: string[]; card?: boolean; show?: HelpA
 const ITEMS: Item[] = [
   { key: 'invite', q: 'Aileyi nasıl davet ederim?', show: 'invite', showLabel: 'Davet et', a: ['"Aileyi davet et" › ebeveynin e-postası › "E-posta gönder". Davet 3 gün geçerli; ebeveyn onaylayınca çocuk ana ekranda.'] },
   { key: 'sees', q: 'Aile neyi görür?', card: true },
-  { key: 'routine', q: 'Rutin ya da görev nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Takip Planı\'ndan eklersen taslak olur. Eklemek ebeveynin kararı.'] },
+  { key: 'routine', q: 'Rutin ya da macera nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Takip Planı\'ndan eklersen taslak olur. Eklemek ebeveynin kararı.'] },
   { key: 'publish', q: '"Aileye gönder" ne yapar?', show: 'plan', showLabel: 'Takip Planı', a: ['Taslakları (bej) aileye yollar. Önce özet açılır; işaretliler tek bildirimle gider.'] },
   { key: 'evaluate', q: 'Ne zaman değerlendiririm?', show: 'plan', showLabel: 'Takip Planı', a: ['Dört haftada bir "Değerlendirme zamanı" çıkar › "Değerlendir" › puan › "Kaydet". Aile görmez.'] },
   { key: 'board', q: 'Ana ekrandaki bölümler?', show: 'home', showLabel: 'Ana ekran', a: ['Senin sıran: senden bekleyen. Aileden yeni: son 7 gün. Sessiz kalanlar: 7 gündür kayıt yok.'] },
@@ -90,7 +90,7 @@ export default function HelpSheet({ visible, owner, onClose, onIntro, onSample, 
 const SEES: { title: string; tone: 'family' | 'private' | 'none'; icon: keyof typeof Ionicons.glyphMap; items: string[] }[] = [
   {
     title: 'Aile görür (sen gönderince)', tone: 'family', icon: 'people-outline',
-    items: ['Davranış hedefi, hedef düzeyi, süre, aileye not', 'Etkin ve tamamlanan programlar', 'Rutin ve görev önerileri', 'Değişiklik önerileri'],
+    items: ['Davranış hedefi, hedef düzeyi, süre, aileye not', 'Etkin ve tamamlanan programlar', 'Rutin ve macera önerileri', 'Değişiklik önerileri'],
   },
   {
     title: 'Yalnız sen ve yetkili ekibin', tone: 'private', icon: 'eye-off-outline',

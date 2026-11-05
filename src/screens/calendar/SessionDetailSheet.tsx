@@ -227,7 +227,7 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
                           <SmallButton label={`Aileye gönder (${hw.items.length})`} onPress={() => setPub(true)} />
                         </>
                       ) : (
-                        <Text style={s.small}>{homework.length ? 'Gönderildi.' : 'Gönderilmemiş madde yok. Takip Planı\'nda rutin, görev ya da program ekleyince burada seçebilirsin.'}</Text>
+                        <Text style={s.small}>{homework.length ? 'Gönderildi.' : 'Gönderilmemiş madde yok. Takip Planı\'nda rutin, macera ya da program ekleyince burada seçebilirsin.'}</Text>
                       )}
                     <Pressable onPress={() => onOpenClient(client, 'goals')}><Text style={s.link}>Takip Planı'nı aç</Text></Pressable>
                   </View>
