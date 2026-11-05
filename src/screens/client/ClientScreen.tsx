@@ -18,12 +18,13 @@ import PlanTab from './PlanTab';
 import NotesTab from './NotesTab';
 import ReportTab from './ReportTab';
 import DetailsTab from './DetailsTab';
+import SessionsTab from './SessionsTab';
 import { fromISO } from '../../dates';
 import { SectionHint } from '../SampleTour';
 import { useLayout, LayoutToggle } from '../../lib/layout';
 
 // 'suggestions' eski bağlantılar ve bildirimler için: Ev rutinleri'nde öneri penceresi (Gönderilenler) açılır
-export type Tab = 'summary' | 'routine' | 'abc' | 'goals' | 'notes' | 'suggestions' | 'report' | 'details';
+export type Tab = 'summary' | 'routine' | 'abc' | 'goals' | 'sessions' | 'notes' | 'suggestions' | 'report' | 'details';
 type Section = Exclude<Tab, 'suggestions'>;
 
 // Bölümler: geniş ekranda (web, iPad'de "Web görünümü") gruplu sol menü — Planla · İzle · Kayıt (kullanıcı kararı 30 Ekim 2026);
@@ -32,6 +33,7 @@ type Group = 'plan' | 'watch' | 'record';
 const GROUPS: { id: Group; label: string }[] = [{ id: 'plan', label: 'Planla' }, { id: 'watch', label: 'İzle' }, { id: 'record', label: 'Kayıt' }];
 const SECTIONS: { id: Section; label: string; icon: keyof typeof Ionicons.glyphMap; group: Group }[] = [
   { id: 'goals', label: 'Takip Planı', icon: 'flag-outline', group: 'plan' },
+  { id: 'sessions', label: 'Seanslar', icon: 'calendar-outline', group: 'plan' },
   { id: 'summary', label: 'Özet', icon: 'grid-outline', group: 'watch' },
   { id: 'routine', label: 'Ev Rutinleri', icon: 'repeat-outline', group: 'watch' },
   { id: 'abc', label: 'Davranış Kayıtları', icon: 'pulse-outline', group: 'watch' },
@@ -219,6 +221,9 @@ export default function ClientScreen({
             {tab === 'routine' && <HomeRoutines {...ctx} view={routineView} onView={setRoutineView} />}
             {tab === 'abc' && <AbcTab key={abcGoal ?? 'all'} {...ctx} />}
             {tab === 'goals' && <PlanTab {...ctx} />}
+            {tab === 'sessions' && (sample
+              ? <Notice icon="calendar-outline" text={'Seanslar gerçek danışanlarda görünür: Takvim\'den ya da burada "+ Seans" ile planlanır.'} />
+              : <SessionsTab {...ctx} team={team} clients={clients} onOpenTab={(t) => go(t === 'suggestions' ? 'routine' : t)} />)}
             {tab === 'notes' && <NotesTab {...ctx} />}
             {tab === 'report' && <ReportTab {...ctx} />}
             {tab === 'details' && (

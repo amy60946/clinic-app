@@ -11,6 +11,9 @@ import {
   clinicianMe, listClients, listTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Member,
 } from '../lib/clinic';
 import SettingsScreen from './SettingsScreen';
+import CalendarScreen from './calendar/CalendarScreen';
+import { loadSessions } from '../lib/sessions';
+import { trDay, trToIso, timeRange, isClosed, type Session } from '../lib/sessionCore';
 import { CoachProvider, CoachOverlay } from '../lib/coach';
 import { StartCard, SampleRow, TOUR, StartFlags, StartProgress, startFlags, startDone, markSampleSeen, hideStart, hideSample } from './SampleTour';
 import type { Attention } from '../lib/attention';
@@ -92,6 +95,9 @@ export default function HomeScreen() {
   const skipGuide = useRef(false);
   // Ayarlar (sağ üstteki ad), örnek aile + tur, "Başlarken" kartı
   const [settings, setSettings] = useState(false);
+  // Takvim (ortak akislar.md 20): ana ekrandan; seans bildirimi o seansı açar
+  const [calendar, setCalendar] = useState<{ sessionId?: string | null } | null>(null);
+  const [todaySessions, setTodaySessions] = useState<Session[] | null>(null);
   const [sampleOpen, setSampleOpen] = useState(false);
   const [sampleTab, setSampleTab] = useState<Tab>('summary');     // "Göster" örnek ailede bir bölümü açar (tur olmadan)
   const [tourStep, setTourStep] = useState<number | null>(null);
@@ -105,6 +111,12 @@ export default function HomeScreen() {
   const legalAt = useRef(0);
   const { unread, unreadByChild } = useNotifications();
   const pending = useRef<Pick<AppNotification, 'kind' | 'data' | 'childId'> | null>(null);
+
+  const refreshToday = useCallback(() => {
+    const d = trDay(new Date().toISOString());
+    loadSessions(trToIso(d, '00:00'), trToIso(d, '23:59')).then(setTodaySessions).catch(() => setTodaySessions(null));
+  }, []);
+  useEffect(() => { refreshToday(); }, [refreshToday]);
 
   const load = useCallback(async (): Promise<State> => {
     let next: State;
@@ -233,6 +245,7 @@ export default function HomeScreen() {
     setSampleOpen(false);
     setTourStep(null);
     if (n.kind === 'team_joined') { setSelected(null); load(); return; }
+    if (n.kind.startsWith('session_')) { setSelected(null); setCalendar({ sessionId: (n.data as { session_id?: string } | null)?.session_id ?? null }); return; }
     if (n.kind === 'kvkk_answered') { setSelected(null); setLegalOpen('kvkk'); return; }
     // bayrak sonradan kapatıldıysa eski bildirim sayfayı açmaz (kapalıyken hiçbir şey görünmez)
     if (n.kind.startsWith('verification_')) {
@@ -358,6 +371,14 @@ export default function HomeScreen() {
     );
   }
 
+  if (calendar && state.kind === 'ready') {
+    return (
+      <CalendarScreen me={state.me} team={state.team} clients={state.clients} initialSessionId={calendar.sessionId}
+        onBack={() => { setCalendar(null); refreshToday(); }}
+        onOpenClient={(c, tab) => { setCalendar(null); setSelected({ client: c, tab, key: Date.now() }); }} />
+    );
+  }
+
   if (settings && state.kind === 'ready') {
     return (
       <>
@@ -453,6 +474,7 @@ export default function HomeScreen() {
                   onPlan={() => openFirst('plan')} onPublish={() => openFirst('publish')} onReport={() => openFirst('report')}
                   onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide', { done: startDone(progressOf(start)) }); }} />
               )}
+              <CalendarRow sessions={todaySessions} clients={state.clients} onOpen={() => setCalendar({})} />
               <ClientBoard clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onAttention={setAttention}
                 onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
               {/* örnek aile listenin altında kendi satırında: ilk açılıştan sonra 30 gün ya da × ile kaldırılana dek */}
@@ -519,6 +541,27 @@ function MembershipRow({ me, onOpen }: { me: ClinicianMe; onOpen: () => void }) 
 }
 
 // Belge incelemesi (ortak akislar.md 14): rozet varsa kısa satır, yoksa ailelere görünen rozete çağrı
+// Ana ekranda takvim satırı: bugünün seansları ve sıradaki; seans tablosu yoksa da görünür (takvim kurulum notunu gösterir)
+function CalendarRow({ sessions, clients, onOpen }: { sessions: Session[] | null; clients: Client[]; onOpen: () => void }) {
+  const live = (sessions ?? []).filter((x) => !isClosed(x.status) && x.status !== 'offered');
+  const next = live.find((x) => Date.parse(x.starts_at) + x.duration_min * 60e3 > Date.now());
+  const name = next ? clients.find((c) => c.link_id === next.link_id)?.child_name ?? next.title ?? 'Blok' : '';
+  return (
+    <Pressable onPress={onOpen} accessibilityRole="button" style={({ pressed }) => [styles.member, { marginTop: 12 }, pressed && { opacity: 0.8 }]}>
+      <Ionicons name="calendar-outline" size={20} color={colors.navy} />
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontSize: 15, fontWeight: '700', color: colors.navy }}>Takvim</Text>
+        <Text style={{ fontSize: 12, color: colors.muted }}>
+          {sessions === null ? 'Seanslar, aileye randevu ve hatırlatma'
+            : live.length === 0 ? 'Bugün seans yok'
+            : `Bugün ${live.length} seans${next ? ` · sıradaki ${timeRange(next).slice(0, 5)} ${name}` : ''}`}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+    </Pressable>
+  );
+}
+
 function VerificationRow({ v, onOpen }: { v: VerificationState; onOpen: () => void }) {
   const st = v.last?.status;
   const icon = v.verified_at ? 'shield-checkmark' : st === 'pending' && v.last?.submitted ? 'hourglass-outline' : 'shield-outline';

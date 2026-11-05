@@ -13,6 +13,7 @@ rm -rf "$WORK" && mkdir -p "$WORK"
 cp -r "$ROOT/App.tsx" "$ROOT/index.ts" "$ROOT/app.json" "$ROOT/package.json" "$ROOT/tsconfig.json" "$ROOT/src" "$WORK/"
 ln -s "$ROOT/node_modules" "$WORK/node_modules"
 cp "$ROOT/preview/demo-supabase.ts" "$WORK/src/lib/supabase.ts"
+cp "$ROOT/preview/demo-sessions.ts" "$WORK/src/lib/demo-sessions.ts"
 
 python3 - "$WORK" "$DEV" <<'EOF'
 import sys
