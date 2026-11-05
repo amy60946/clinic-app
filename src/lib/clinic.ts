@@ -472,11 +472,10 @@ export async function openPersonalWorkspace(): Promise<string> {
   const { data, error } = await supabase.rpc('clinician_personal_workspace');
   return check(data as string, error);
 }
-// Arayüzde kullanılmıyor (kullanıcı kararı 5 Kasım 2026: ekip hesabı kliniğin ekibine kabulle gelir, uzman klinik açmaz);
-// "kendi kliniğini kur" kararı verilirse buradan.
+// Ayarlar › "Kendi kliniğini kur" (kullanıcı kararı 5 Kasım 2026; hesap seçicide değil). Sahibi olur, en çok 3.
 export async function createClinicWorkspace(name: string): Promise<string> {
   const { data, error } = await supabase.rpc('clinic_workspace_create', { p_name: name.trim().slice(0, 120) });
-  if (error?.message?.includes('too_many_clinics')) throw new Error('En çok 3 klinik açabilirsin.');
+  if (error?.message?.includes('too_many_clinics')) throw new Error('En çok 3 klinik kurabilirsin.');
   return check(data as string, error);
 }
 // Kalıcı kişisel kod (yoksa üretilir); rotate yeniler

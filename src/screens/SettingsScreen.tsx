@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../theme';
 import { Card, Label, Input, SmallButton } from '../components/ui';
-import { ClinicianMe, Client, Member, updateProfile, updateClinicName } from '../lib/clinic';
+import { ClinicianMe, Client, Member, updateProfile, updateClinicName, listWorkspaces, createClinicWorkspace } from '../lib/clinic';
+import { useWorkspace } from '../lib/workspace';
 import { billingStatus, daysLeft, packageName } from '../lib/billing';
 import { track } from '../lib/track';
 import TeamCard, { PersonalCodeCard } from './TeamCard';
@@ -26,6 +27,27 @@ export default function SettingsScreen({
   const [clinic, setClinic] = useState(me.clinic);
   const [busy, setBusy] = useState<string | null>(null);
   const st = billingStatus(me);
+  // Kendi kliniğini kur (kullanıcı kararı 5 Kasım 2026): hesap seçicide değil, burada; kliniğin adını yalnız sahibi yazar.
+  // Sahibi olduğu bir klinik varsa görünmez.
+  const { switchTo } = useWorkspace();
+  const [canFound, setCanFound] = useState(false);
+  const [newClinic, setNewClinic] = useState<string | null>(null);
+  useEffect(() => {
+    if (me.workspaces === undefined) return;
+    listWorkspaces().then((l) => setCanFound(!!l && !l.some((w) => !w.personal && w.role === 'owner'))).catch(() => setCanFound(false));
+  }, [me.workspaces]);
+  const foundClinic = async () => {
+    if (!newClinic?.trim()) return Alert.alert('Kliniğin adını yaz.');
+    setBusy('found');
+    try {
+      const id = await createClinicWorkspace(newClinic);
+      track('workspace.create', { kind: 'clinic' });
+      switchTo(id);   // ana ekran yeni hesapla baştan açılır
+    } catch (e) {
+      Alert.alert('Kurulamadı', (e as Error).message);
+      setBusy(null);
+    }
+  };
 
   const saveProfile = () => {
     if (!name.trim()) return Alert.alert('Adını yaz.');
@@ -94,6 +116,21 @@ export default function SettingsScreen({
             <>
               <Text style={styles.section}>Kişisel kodun</Text>
               <PersonalCodeCard />
+              {canFound && (newClinic === null ? (
+                <Pressable onPress={() => setNewClinic('')} hitSlop={8} accessibilityRole="button" style={{ alignSelf: 'flex-start', marginTop: 12 }}>
+                  <Text style={styles.link}>Kendi kliniğini kur</Text>
+                </Pressable>
+              ) : (
+                <Card style={{ gap: 8, marginTop: 12 }}>
+                  <Text style={styles.rowTitle}>Kendi kliniğini kur</Text>
+                  <Input value={newClinic} onChangeText={setNewClinic} placeholder="Kliniğin adı" maxLength={120} />
+                  <Text style={styles.small}>Sahibi sen olursun; uzmanları kişisel kodlarıyla ekibine eklersin. Klinik ayrı bir ekip hesabı olur, bireysel hesabın ayrı kalır.</Text>
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <SmallButton label="Kur" onPress={foundClinic} busy={busy === 'found'} />
+                    <SmallButton label="Vazgeç" onPress={() => setNewClinic(null)} />
+                  </View>
+                </Card>
+              ))}
             </>
           )}
 
