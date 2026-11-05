@@ -198,7 +198,8 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
   };
   const libTarget = focus && goals.some((g) => g.id === focus) ? focus : goals[0]?.id ?? null;
   const showLib = !ro && desktop && !!libOpen && width >= 980;
-  const cols3 = (showLib ? width - 316 : width) >= 760;
+  // üç sütun yalnız her sütuna ~270 px düşünce (iPad dikeyde 820'de ~230 px sıkışıyordu, 5 Kasım 2026); altında sekmeler
+  const cols3 = (showLib ? width - 316 : width) >= 880;
   const taken = [...data.tasks.map((t) => t.title), ...sugg.filter((s) => s.status === 'pending' || s.status === 'draft').map((s) => s.title)];
   const richGoals: RoutineGoal[] = goals.filter((g) => g.status !== 'achieved').map((g) => ({
     id: g.id, title: g.title,
@@ -785,7 +786,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
     // Başlık altı (kullanıcı isteği 3 Kasım 2026): alan hep görünür; hedef düzey ve hafta yalnız satır kapalıyken — açıkken hedef
     // sütununda "Hedef düzey" ve "Süre" zaten yazıyor, başlıkta tekrarı kalabalık yapıyordu.
     const meta = [g.domain && domainLabel(g.domain), ...(open ? [] : [g.target ? `hedef ${g.target}` : '',
-      g.weeks ? (g.status === 'active' ? `${Math.min(n, g.weeks)}. hafta / ${g.weeks}` : `${g.weeks} hafta`) : g.status === 'active' ? `${n}. hafta` : ''])].filter(Boolean).join(' · ');
+      g.weeks ? (g.status === 'active' ? `${Math.min(n, g.weeks)}.\u00a0hafta\u00a0/\u00a0${g.weeks}` : `${g.weeks}\u00a0hafta`) : g.status === 'active' ? `${n}.\u00a0hafta` : ''])].filter(Boolean).join(' · ');
     const dirty = hatUnsent(g);
     const st = GOAL_STATUS.find((x) => x.id === g.status);
     const tab = tabOf[g.id] ?? 'rt';
@@ -804,7 +805,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
           {!g.shared && <PrivateBadge text="Yalnız sende" />}
         </View>
         {!cols3 && (
-          <View style={styles.titleRow}>
+          <View style={[styles.titleRow, { flexWrap: 'wrap', rowGap: 4 }]}>
             <StatusChip label={st?.label ?? g.status} tone={STATUS_TONE[g.status]} onPress={(e) => statusMenu(g, e)} hint="Davranış hedefinin durumunu değiştir" />
             {!!meta && <Text style={[styles.small, { flexShrink: 1 }]}>{meta}</Text>}
           </View>
@@ -814,7 +815,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
     );
     return (
       <DropView key={g.id} accept={['module', 'routine', 'libmod', 'librt']} onDrop={onDropHat(g.id)} style={[styles.hat, { borderLeftColor: color }]}>
-        <Pressable onPress={() => toggle(g.id)} style={[styles.hatLine, open && { backgroundColor: HEAD }, !cols3 && { flexDirection: 'column', alignItems: 'stretch' }]}
+        <Pressable onPress={() => toggle(g.id)} style={[styles.hatLine, open && { backgroundColor: HEAD }, !cols3 && { flexDirection: 'column', alignItems: 'stretch', flexWrap: 'nowrap' }]}
           accessibilityRole="button" accessibilityState={{ expanded: open }}>
           <View style={{ flex: cols3 ? 1 : undefined, minWidth: cols3 ? 240 : undefined, flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
             {titleRow}
@@ -953,13 +954,13 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
                 : '"Davranış hedefine bağla" ile bir davranış hedefinin altına al.']} />
               <View style={styles.looseGrid}>
                 {unlinkedMods.map((m) => (
-                  <View key={m.id} style={styles.looseItem}>
+                  <View key={m.id} style={[styles.looseItem, !cols3 && { width: '100%' }]}>
                     {moduleMini(m, null)}
                     {!ro && linkOK && goals.length > 0 && <SmallButton label="Davranış hedefine bağla" onPress={(e) => pickGoal(m.title, (gid) => act(linkModuleGoals(client.clinic_id, [[m.id, gid]]), 'Bağlanamadı'), e)} />}
                   </View>
                 ))}
                 {unlinkedRts.map((r) => (
-                  <View key={r.key} style={styles.looseItem}>
+                  <View key={r.key} style={[styles.looseItem, !cols3 && { width: '100%' }]}>
                     {routineMini(r)}
                     {!ro && goals.length > 0 && <SmallButton label="Davranış hedefine bağla" onPress={(e) => pickGoal(r.title, (gid) => { setRoutineGoal(r, gid).catch(fail('Bağlanamadı')); }, e)} />}
                   </View>
@@ -1126,6 +1127,7 @@ function Library({ band, goals, target, onTarget, tpls, ownRoutines, meId, owner
   onGoal: (g: GoalT) => void; onPackage: (p: PackageT) => void; onModule: (key: string) => void; onRoutine: (r: Routine) => void;
   onTemplate: (t: PlanTemplate) => void; onTemplateMenu: (t: PlanTemplate, e?: GestureResponderEvent) => void;
 }) {
+  const { desktop } = useLayout();   // sürükle-bırak ipucu yalnız geniş web düzeninde
   const [tab, setTab] = useState<LibTab>(tpls?.length ? 'tpl' : 'pkg');
   const [domain, setDomain] = useState('');
   const tabs: { id: LibTab; label: string }[] = [
@@ -1166,7 +1168,7 @@ function Library({ band, goals, target, onTarget, tpls, ownRoutines, meId, owner
           </View>
         ) : <Text style={styles.tiny}>Henüz davranış hedefi yok: eklediğin bir davranış hedefine bağlı olmaz, sonra bağlayabilirsin.</Text>
       )}
-      {isWeb && <Text style={styles.tiny}>İpucu: bir satırı tutup davranış hedefinin üstüne sürükleyebilirsin.</Text>}
+      {isWeb && desktop && <Text style={styles.tiny}>İpucu: bir satırı tutup davranış hedefinin üstüne sürükleyebilirsin.</Text>}
       {tab === 'pkg' && (
         <View style={{ gap: 6 }}>
           <Text style={styles.tiny}>Paket hem davranış hedeflerini hem aile programlarını ekler; programlar ilgili davranış hedeflerine bağlı gelir.</Text>

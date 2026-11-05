@@ -117,8 +117,14 @@ export default function SettingsScreen({
               <Text style={styles.section}>Kişisel kodun</Text>
               <PersonalCodeCard />
               {canFound && (newClinic === null ? (
-                <Pressable onPress={() => setNewClinic('')} hitSlop={8} accessibilityRole="button" style={{ alignSelf: 'flex-start', marginTop: 12 }}>
-                  <Text style={styles.link}>Kendi kliniğini kur</Text>
+                <Pressable onPress={() => setNewClinic('')} accessibilityRole="button"
+                  style={({ pressed }) => [styles.foundRow, pressed && { opacity: 0.85 }]}>
+                  <Ionicons name="business-outline" size={18} color={colors.navy} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.rowTitle}>Kendi kliniğini kur</Text>
+                    <Text style={styles.small}>Sahibi sen olursun; ayrı bir ekip hesabı açılır.</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.faint} />
                 </Pressable>
               ) : (
                 <Card style={{ gap: 8, marginTop: 12 }}>
@@ -218,6 +224,7 @@ const styles = StyleSheet.create({
   link: { fontSize: 13, fontWeight: '600', color: colors.navy },
   rowCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.today, borderRadius: radius.md, padding: 14 },
   rowTitle: { fontSize: 14, fontWeight: '700', color: colors.navy },
+  foundRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#fff', borderRadius: radius.md, borderWidth: 1, borderColor: colors.line, padding: 14, marginTop: 12 },
   tr: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 12 },
   line: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },
   foot: { fontSize: 11, color: colors.faint, marginTop: 16 },

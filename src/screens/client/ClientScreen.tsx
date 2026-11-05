@@ -179,7 +179,7 @@ export default function ClientScreen({
           {sample && <Text style={styles.sampleTag}>Örnek aile</Text>}
         </View>
         <Text style={styles.subtitle}>
-          {[ageText(data?.child?.birthday ?? null), client.parents ? `Ebeveyn: ${client.parents}` : '', `Onay ${new Date(client.consent_at).toLocaleDateString('tr-TR')}`]
+          {[ageText(data?.child?.birthday ?? null), client.parents ? `Ebeveyn: ${client.parents}` : '', `Onay\u00a0${new Date(client.consent_at).toLocaleDateString('tr-TR')}`]
             .filter(Boolean).join(' · ')}
         </Text>
         {!!teamLine && <Text style={styles.subtitle}>{teamLine}</Text>}
@@ -349,7 +349,7 @@ function TabGrid({ value, onChange, dots }: { value: Section; onChange: (t: Sect
             return (
               <Pressable key={t.id} onPress={() => onChange(t.id)} accessibilityRole="tab" accessibilityState={{ selected: on }}
                 style={[styles.gridItem, on && styles.gridActive]}>
-                <Text numberOfLines={2} style={{ fontSize: width < 420 ? 12 : 13, textAlign: 'center', fontWeight: on ? '700' : '500', color: on ? colors.navy : colors.muted }}>{t.label}</Text>
+                <Text numberOfLines={2} style={{ flexShrink: 1, fontSize: width < 420 ? 12 : 13, textAlign: 'center', fontWeight: on ? '700' : '500', color: on ? colors.navy : colors.muted }}>{t.label}</Text>
                 {dots[t.id] && <View style={styles.tabDot} />}
               </Pressable>
             );
@@ -365,9 +365,9 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 40, flexGrow: 1 },
   grid: { backgroundColor: '#ECEEF3', borderRadius: 10, padding: 3, gap: 3 },
   gridRow: { flexDirection: 'row', gap: 3 },
-  gridItem: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 8, paddingHorizontal: 4, borderRadius: 8 },
+  gridItem: { flex: 1, minWidth: 0, alignItems: 'center', justifyContent: 'center', paddingVertical: 8, paddingHorizontal: 6, borderRadius: 8 },
   gridActive: { backgroundColor: '#fff' },
-  tabDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.danger },
+  tabDot: { position: 'absolute', top: 5, right: 5, width: 6, height: 6, borderRadius: 3, backgroundColor: colors.danger },
   column: { width: '100%', maxWidth: 960, alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
   iconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },

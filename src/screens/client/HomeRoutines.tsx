@@ -106,6 +106,8 @@ function WeekGrid(ctx: ClientCtx) {
   const { data, today } = ctx;
   const { width } = useWindowDimensions();
   const wide = width >= 760;
+  // telefonda 7 gün + "Son 7" sütunu maceranın adına ~40 px bırakıyordu (5 Kasım 2026): ad üstte tam genişlikte, günler altında
+  const narrow = width < 560;
   const { dates, rows } = useMemo(() => weekGrid(data.tasks, data.completions, today), [data, today]);
   const [open, setOpen] = useState<Task | null>(null);
   const emit = useCoachEmit();
@@ -113,6 +115,21 @@ function WeekGrid(ctx: ClientCtx) {
   return (
     <View>
       <Card style={{ padding: 0, overflow: 'hidden', marginTop: 12 }}>
+        {narrow ? (
+          <View style={[styles.rowNarrow, styles.headRow]}>
+            <View style={styles.narrowTop}>
+              <Text style={[styles.th, { flex: 1 }]}>Macera</Text>
+              <Text style={styles.th}>Son 7 gün</Text>
+            </View>
+            <View style={styles.days}>
+              {dates.map((d) => (
+                <View key={d} style={[styles.cellBox, d === today && styles.todayHead]}>
+                  <Text style={[styles.th, { textAlign: 'center', color: d === today ? '#fff' : colors.muted }]}>{DAY_LETTER[isoDow(d) - 1]}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : (
         <View style={[styles.row, styles.headRow]}>
           <Text style={[styles.th, { flex: 1 }]}>Macera</Text>
           {wide && <Text style={[styles.th, { width: 80 }]}>Günün bölümü</Text>}
@@ -123,8 +140,33 @@ function WeekGrid(ctx: ClientCtx) {
             </View>
           ))}
         </View>
-        {rows.map((r, i) => (
+        )}
+        {rows.map((r, i) => {
+          const count = (
+            <Text style={[styles.count, r.planned > 0 && r.done < r.planned / 2 && { backgroundColor: colors.medium.bg, color: colors.medium.fg }]}>
+              {r.done}{wide ? ` / ${r.planned}` : ''}
+            </Text>
+          );
+          const cells = r.cells.map((c) => (
+            <View key={c.date} style={[styles.cellBox, c.date === today && styles.todayCol]} accessibilityLabel={CELL[c.state].label}>
+              {CELL[c.state].icon
+                ? <Ionicons name={CELL[c.state].icon!} size={c.state === 'missed' ? 14 : 18} color={CELL[c.state].color} />
+                : <Text style={{ color: colors.faint, fontSize: 12 }}>–</Text>}
+            </View>
+          ));
+          return (
           <CoachTarget key={r.task.id} id={i === 0 ? 'routine.row' : `routine.row.${i}`}>
+          {narrow ? (
+            <Pressable onPress={() => setOpen(r.task)} accessibilityRole="button" accessibilityLabel={`${r.task.title} ayrıntısı`}
+              style={({ pressed }) => [styles.rowNarrow, i > 0 && styles.rowLine, pressed && { backgroundColor: '#F7F8FA' }]}>
+              <View style={styles.narrowTop}>
+                <Text style={{ fontSize: 15 }}>{r.task.emoji}</Text>
+                <Text style={[styles.task, { flex: 1 }]} numberOfLines={2}>{r.task.title}</Text>
+                {count}
+              </View>
+              <View style={styles.days}>{cells}</View>
+            </Pressable>
+          ) : (
           <Pressable onPress={() => setOpen(r.task)} accessibilityRole="button" accessibilityLabel={`${r.task.title} ayrıntısı`}
             style={({ pressed }) => [styles.row, i > 0 && styles.rowLine, pressed && { backgroundColor: '#F7F8FA' }]}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, minWidth: 0 }}>
@@ -132,21 +174,13 @@ function WeekGrid(ctx: ClientCtx) {
               <Text style={styles.task} numberOfLines={wide ? 1 : 2}>{r.task.title}</Text>
             </View>
             {wide && <Text style={[styles.small, { width: 80 }]}>{TIME_OF_DAY_LABEL[timeOfDay(r.task)]}</Text>}
-            <View style={{ width: wide ? 72 : 44, alignItems: 'center' }}>
-              <Text style={[styles.count, r.planned > 0 && r.done < r.planned / 2 && { backgroundColor: colors.medium.bg, color: colors.medium.fg }]}>
-                {r.done}{wide ? ` / ${r.planned}` : ''}
-              </Text>
-            </View>
-            {r.cells.map((c) => (
-              <View key={c.date} style={[styles.cellBox, c.date === today && styles.todayCol]} accessibilityLabel={CELL[c.state].label}>
-                {CELL[c.state].icon
-                  ? <Ionicons name={CELL[c.state].icon!} size={c.state === 'missed' ? 14 : 18} color={CELL[c.state].color} />
-                  : <Text style={{ color: colors.faint, fontSize: 12 }}>–</Text>}
-              </View>
-            ))}
+            <View style={{ width: wide ? 72 : 44, alignItems: 'center' }}>{count}</View>
+            {cells}
           </Pressable>
+          )}
           </CoachTarget>
-        ))}
+          );
+        })}
       </Card>
       <View style={styles.legend}>
         {(['approved', 'waiting', 'declined', 'rejected', 'retry', 'missed'] as CellState[]).map((k) => (
@@ -362,6 +396,9 @@ const styles = StyleSheet.create({
   rowLine: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },
   th: { fontSize: 11, fontWeight: '600', color: colors.muted },
   cellBox: { width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderRadius: 13 },
+  rowNarrow: { paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
+  narrowTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  days: { flexDirection: 'row', justifyContent: 'space-between' },
   todayHead: { backgroundColor: colors.navy },
   todayCol: { backgroundColor: colors.today },
   task: { fontSize: 13, fontWeight: '600', color: colors.text, flexShrink: 1 },

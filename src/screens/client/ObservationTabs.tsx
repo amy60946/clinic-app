@@ -214,7 +214,7 @@ export function AbcTab({ client, data, today, weeks, abcGoal }: ClientCtx) {
         {PARTS.map((x) => <Row key={x.id} k={x.label} v={String(s.byDayPart[x.id])} />)}
       </Card>
       <View style={styles.listHead}>
-        <Text style={[styles.listTitle, { flex: 1 }]}>{`Kayıtlar (${list.length}${goalF === 'all' ? '' : ` / ${all.length}`})`}</Text>
+        <Text style={[styles.listTitle, { flexGrow: 1, minWidth: 110 }]}>{`Kayıtlar (${list.length}${goalF === 'all' ? '' : ` / ${all.length}`})`}</Text>
         <View style={{ width: 180 }}>
           <Segmented options={[{ id: 'cards', label: 'Kartlar' }, { id: 'table', label: 'Tablo' }]} value={view} onChange={setView} />
         </View>
@@ -232,6 +232,7 @@ export function AbcTab({ client, data, today, weeks, abcGoal }: ClientCtx) {
         </View>
       )}
       {list.length === 0 && <Empty text="Bu süzgeçte kayıt yok." />}
+      {view === 'table' && width < 900 && list.length > 0 && <Text style={styles.scrollHint}>Bütün sütunlar için tabloyu yana kaydır →</Text>}
       {view === 'table' ? (
         <ScrollView horizontal={width < 900} contentContainerStyle={{ minWidth: '100%' }}>
           <Card style={{ padding: 0, overflow: 'hidden', minWidth: 820, flex: 1 }}>
@@ -296,6 +297,7 @@ const styles = StyleSheet.create({
   goalInline: { fontSize: 11.5, fontWeight: '700', color: '#2C4A9A' },
   listHead: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginTop: 20, marginBottom: 8 },
   listTitle: { fontSize: 13, fontWeight: '600', color: colors.muted },
+  scrollHint: { fontSize: 11.5, color: colors.muted, marginBottom: 6 },
   tr: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingHorizontal: 14, paddingVertical: 10 },
   thRow: { backgroundColor: '#F2F4F8', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
   th: { fontSize: 12, fontWeight: '700', color: colors.muted },

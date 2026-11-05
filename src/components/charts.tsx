@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Platform } from 'react-native';
 import Svg, { Rect, Line, Text as SvgText, Circle, Polyline } from 'react-native-svg';
 import { colors } from '../theme';
@@ -12,7 +12,7 @@ const short = (iso: string) => {
 };
 
 // Haftalık oran: hafta başına bir sütun (0–100 %), üstünde değer. Boş hafta = planlanan yok.
-export function WeeklyRateBars({ data, height = 150, width = 520 }: {
+function WeeklyRateBarsDraw({ data, height = 150, width = 520 }: {
   data: { start: string; rate: number | null }[]; height?: number; width?: number;
 }) {
   const top = 18, bottom = 22, left = 4;
@@ -44,7 +44,7 @@ export function WeeklyRateBars({ data, height = 150, width = 520 }: {
 }
 
 // Haftalık sayı (ör. davranış kaydı): hafta başına sütun, ölçek en büyük değere göre; 0 hafta ince çizgi
-export function CountBars({ data, height = 140, width = 520, color = colors.navy }: {
+function CountBarsDraw({ data, height = 140, width = 520, color = colors.navy }: {
   data: { start: string; value: number }[]; height?: number; width?: number; color?: string;
 }) {
   const top = 18, bottom = 22, left = 4;
@@ -71,7 +71,7 @@ export function CountBars({ data, height = 140, width = 520, color = colors.navy
 }
 
 // GAS çizgisi: -2 … +2, hafta başına bir nokta (puanlanmamış hafta boş geçer)
-export function GasLine({ weeks, ratings, height = 110, width = 520 }: {
+function GasLineDraw({ weeks, ratings, height = 110, width = 520 }: {
   weeks: string[]; ratings: Record<string, number>; height?: number; width?: number;
 }) {
   const top = 10, bottom = 20, left = 24;
@@ -110,7 +110,7 @@ export function GasLine({ weeks, ratings, height = 110, width = 520 }: {
 export const SERIES_COLORS = ['#2C4A9A', '#D9822B', '#2F8F6B', '#C2417A', '#7A5BC8', '#8A6D1F'];
 
 // Zaman içinde: hafta başına sayı, görev başına bir çizgi; isteğe bağlı kesikli "planlı" çizgisi (ilk seçili görev için)
-export function MultiLine({ starts, series, target, height = 200, width = 640 }: {
+function MultiLineDraw({ starts, series, target, height = 200, width = 640 }: {
   starts: string[]; series: { id: string; values: number[]; color: string }[]; target?: number[] | null; height?: number; width?: number;
 }) {
   const top = 12, bottom = 22, left = 26, right = 18; // son tarih etiketi (ortalanmış) çizim alanında kalsın
@@ -149,6 +149,22 @@ export function MultiLine({ starts, series, target, height = 200, width = 640 }:
 }
 
 // Yatay oran çubuğu (satır içinde)
+// Grafikler kapladıkları gerçek genişlikte çizilir (5 Kasım 2026): sabit 520–640 birimlik çizim telefonda bütünüyle
+// küçülüyor, 10 punto yazı 5–6 piksele iniyordu. Genişlik ölçülene kadar aynı yükseklikte boş alan.
+function Sized({ height, children }: { height: number; children: (w: number) => React.ReactNode }) {
+  const [w, setW] = useState(0);
+  return (
+    <View style={{ height, width: '100%' }} onLayout={(e) => { const v = Math.round(e.nativeEvent.layout.width); if (v && v !== w) setW(v); }}>
+      {w > 0 && children(w)}
+    </View>
+  );
+}
+type Without<T> = Omit<T, 'width'>;
+export const WeeklyRateBars = (p: Without<Parameters<typeof WeeklyRateBarsDraw>[0]>) => <Sized height={p.height ?? 150}>{(w) => <WeeklyRateBarsDraw {...p} width={w} />}</Sized>;
+export const CountBars = (p: Without<Parameters<typeof CountBarsDraw>[0]>) => <Sized height={p.height ?? 140}>{(w) => <CountBarsDraw {...p} width={w} />}</Sized>;
+export const GasLine = (p: Without<Parameters<typeof GasLineDraw>[0]>) => <Sized height={p.height ?? 110}>{(w) => <GasLineDraw {...p} width={w} />}</Sized>;
+export const MultiLine = (p: Without<Parameters<typeof MultiLineDraw>[0]>) => <Sized height={p.height ?? 200}>{(w) => <MultiLineDraw {...p} width={w} />}</Sized>;
+
 export function RateBar({ rate }: { rate: number | null }) {
   return (
     <View style={{ height: 6, borderRadius: 3, backgroundColor: colors.line, overflow: 'hidden', flex: 1 }}>
