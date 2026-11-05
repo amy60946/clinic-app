@@ -202,7 +202,7 @@ function PlanMock({ wide }: { wide: boolean }) {
       <Header title="Nazlı · Takip Planı" sub="8 yaş · Sorumlu: sen" back />
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 8, alignItems: 'center' }}>
         <View style={[styles.pillDim]}><Text style={{ fontSize: 12, fontWeight: '700', color: INK }}>Kitaplık</Text></View>
-        <View style={[styles.pillDim]}><Text style={{ fontSize: 12, fontWeight: '700', color: INK }}>+ Hedef</Text></View>
+        <View style={[styles.pillDim]}><Text style={{ fontSize: 12, fontWeight: '700', color: INK }}>+ Davranış hedefi</Text></View>
         <View>
           <View style={[styles.target, { height: 44, paddingHorizontal: 16 }]}>
             <Ionicons name="paper-plane-outline" size={16} color="#fff" />

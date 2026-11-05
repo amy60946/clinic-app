@@ -49,9 +49,9 @@ export function StartCard({ progress: p, onSample, onInvite, onPlan, onPublish, 
   progress: StartProgress; onSample: () => void; onInvite: () => void; onPlan: () => void; onPublish: () => void; onReport: () => void; onHide: () => void;
 }) {
   const items = [
-    { done: p.sampleSeen, title: 'Örnek aileyle dene', sub: 'Deniz’le hedef aç, rutin bağla, gönder', icon: 'sparkles-outline' as const, on: onSample, needs: false },
+    { done: p.sampleSeen, title: 'Örnek aileyle dene', sub: 'Deniz’le davranış hedefi aç, rutin bağla, gönder', icon: 'sparkles-outline' as const, on: onSample, needs: false },
     { done: p.invited, title: 'İlk aileni davet et', sub: p.invited && !p.hasClient ? 'Davet gitti; ebeveyn onaylayınca burada' : '"Aileyi davet et" › e-posta', icon: 'mail-outline' as const, on: onInvite, needs: false },
-    { done: p.planned, title: 'İlk hedefi ekle', sub: 'Takip Planı › "+ Hedef"', icon: 'flag-outline' as const, on: onPlan, needs: true },
+    { done: p.planned, title: 'İlk davranış hedefini ekle', sub: 'Takip Planı › "+ Davranış hedefi"', icon: 'flag-outline' as const, on: onPlan, needs: true },
     { done: p.published, title: 'Aileye gönder', sub: 'Takip Planı › "Aileye gönder"', icon: 'paper-plane-outline' as const, on: onPublish, needs: true },
     { done: p.report, title: 'İlk raporu aç', sub: 'Rapor › "Raporu aç"', icon: 'document-text-outline' as const, on: onReport, needs: true },
   ];
@@ -164,9 +164,9 @@ export function OnceHint({ userId, id, hint }: { userId: string; id: string; hin
 export const TOUR: (CoachStep & { tab: Tab })[] = [
   { key: 'intro', tab: 'goals', title: 'Deniz’le dene', text: 'Örnek aile. Kaydedilmez, aileye gitmez.' },
   {
-    key: 'goal', tab: 'goals', target: 'plan.addGoal', until: 'goal_added', title: 'Hedef ekle', text: '**+ Hedef**',
+    key: 'goal', tab: 'goals', target: 'plan.addGoal', until: 'goal_added', title: 'Davranış hedefi ekle', text: '**+ Davranış hedefi**',
     sheets: {
-      goal: [{ target: 'sheet.goal.pick', title: 'Hazır hedef seç' }],
+      goal: [{ target: 'sheet.goal.pick', title: 'Hazır davranış hedefi seç' }],
       goalForm: [{ target: 'sheet.goal.save', title: 'Kaydet', text: 'Alanlar hazır.' }],
     },
   },
@@ -174,7 +174,7 @@ export const TOUR: (CoachStep & { tab: Tab })[] = [
     key: 'routine', tab: 'goals', target: 'plan.newRoutine', until: 'routine_added', title: 'Rutin ekle', text: '**{label}**',
     sheets: {
       routine: [
-        { target: 'sheet.routine.goal', title: 'Hedefe bağlı', text: 'Rutin bu hedefin altına gelir.', info: true },
+        { target: 'sheet.routine.goal', title: 'Davranış hedefine bağlı', text: 'Rutin bu davranış hedefinin altına gelir.', info: true },
         { target: 'sheet.routine.add', title: 'Plana ekle' },
       ],
     },

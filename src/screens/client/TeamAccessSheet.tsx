@@ -63,7 +63,7 @@ export default function TeamAccessSheet({ visible, onClose, client, me, team, on
           </View>
           <ScrollView contentContainerStyle={{ padding: 16, gap: 10 }}>
             <Text style={styles.body}>
-              Bu danışanı hangi ekip üyelerinin göreceğini seç. Açtığın uzman çocuğun kayıtlarını, notlarını ve hedeflerini görür; kapatınca erişimi hemen biter.
+              Bu danışanı hangi ekip üyelerinin göreceğini seç. Açtığın uzman çocuğun kayıtlarını, notlarını ve davranış hedeflerini görür; kapatınca erişimi hemen biter.
             </Text>
             {client.clinician_id === me.id && (
               <Text style={styles.cap}>Sorumlu uzman sensin.</Text>

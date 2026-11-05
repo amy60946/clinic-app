@@ -128,7 +128,7 @@ function Body({ target, onClose, onSubmit, onWithdraw }: {
             })}
           </View>
           {target.mode === 'change' && (
-            <Text style={styles.small}>Rutine yeni görev eklemek için hedef satırındaki "+ Rutin ya da görev bağla"yı kullan; o da öneri olarak gider.</Text>
+            <Text style={styles.small}>Rutine yeni görev eklemek için davranış hedefi satırındaki "+ Rutin ya da görev bağla"yı kullan; o da öneri olarak gider.</Text>
           )}
           <Pressable onPress={save} disabled={busy} style={[styles.cta, busy && { opacity: 0.6 }]} accessibilityRole="button">
             {busy ? <ActivityIndicator color="#fff" />

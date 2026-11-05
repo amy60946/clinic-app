@@ -121,7 +121,7 @@ export function publishItems(p: {
     if (!goalUnsent(g, was)) continue;
     const gone = !g.shared || g.archived;
     out.push({ key: `g:${g.id}`, hold: [g.id], kind: 'goal', title: g.title, goalId: g.id,
-      detail: gone ? (g.archived ? 'arşivlendi · aileden kalkar' : 'aileden gizlendi · aileden kalkar') : was ? 'değişti' : 'yeni hedef' });
+      detail: gone ? (g.archived ? 'arşivlendi · aileden kalkar' : 'aileden gizlendi · aileden kalkar') : was ? 'değişti' : 'yeni davranış hedefi' });
   }
   for (const m of p.modules) {
     const was = p.pub.modules[m.id] ?? null;

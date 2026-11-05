@@ -90,7 +90,7 @@ export function progressNote(r: NoteInput): string {
   // Hedefler (GAS): dönemdeki ilk ve son değerlendirme
   const goals = r.goals.filter((g) => !g.archived);
   if (goals.length) {
-    lines.push('', 'Hedefler (GAS, −2 … +2)');
+    lines.push('', 'Davranış hedefleri (GAS, −2 … +2)');
     goals.forEach((g) => {
       const rs = g.ratings.filter((x) => x.week >= from && x.week <= r.today).sort((a, b) => a.week.localeCompare(b.week));
       if (!rs.length) lines.push(`• ${g.title}: bu dönemde değerlendirme yok.`);

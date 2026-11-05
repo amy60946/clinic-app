@@ -22,7 +22,7 @@ export function reasonsFor(a: Attention, seenAt: string | undefined, consentAt: 
   const out: Reason[] = [];
   const unsent = a.drafts + a.plan_unsent;
   if (unsent > 0) out.push({ key: 'unsent', text: `${unsent} değişiklik gönderilmedi`, icon: 'paper-plane-outline' });
-  if (a.review_due > 0) out.push({ key: 'review', text: `Değerlendirme zamanı: ${a.review_due} hedef`, icon: 'time-outline' });
+  if (a.review_due > 0) out.push({ key: 'review', text: `Değerlendirme zamanı: ${a.review_due} davranış hedefi`, icon: 'time-outline' });
   if (a.goals_active === 0 && !a.plan_published_at && unsent === 0) out.push({ key: 'noplan', text: 'Takip planı yok', icon: 'flag-outline' });
   if (a.abc_7d > 0 && after(a.abc_last_at, seenAt)) {
     out.push({ key: 'abc', text: `${a.abc_7d} davranış kaydı · ${relDay(a.abc_last_at!, now)}`, icon: 'pulse-outline', family: true });

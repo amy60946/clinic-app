@@ -48,7 +48,7 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
   const last = lastRating(goal);
 
   const save = async () => {
-    if (rating === null && status === goal.status) return Alert.alert('Bir düzey seç', 'Hedefe ulaşma düzeyini (−2 … +2) seç ya da hedefin durumunu değiştir.');
+    if (rating === null && status === goal.status) return Alert.alert('Bir düzey seç', 'Hedefe ulaşma düzeyini (−2 … +2) seç ya da davranış hedefinin durumunu değiştir.');
     setBusy(true);
     try {
       const noteChanged = note.trim() !== (goal.ratings.find((r) => r.week === week)?.note ?? '');
@@ -81,7 +81,7 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
           </Text>
           {ended && goal.status === 'active' && (
             <View style={styles.warn}><Ionicons name="time-outline" size={14} color={colors.medium.fg} />
-              <Text style={[styles.small, { color: colors.medium.fg, flex: 1 }]}>Süre doldu ({goal.weeks} hafta). Hedefi sürdürmeyi, kapatmayı ya da ara vermeyi seç.</Text></View>
+              <Text style={[styles.small, { color: colors.medium.fg, flex: 1 }]}>Süre doldu ({goal.weeks} hafta). Davranış hedefini sürdürmeyi, kapatmayı ya da ara vermeyi seç.</Text></View>
           )}
           {!!goal.target && <Text style={styles.body}>Hedef düzey: <Text style={{ fontWeight: '700' }}>{goal.target}</Text></Text>}
 
@@ -112,7 +112,7 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
             ))}
           </View>
           {status !== goal.status && (
-            <Text style={styles.small}>Durum aileye "Aileye gönder" ile gider (hedef aileye açıksa).</Text>
+            <Text style={styles.small}>Durum aileye "Aileye gönder" ile gider (davranış hedefi aileye açıksa).</Text>
           )}
 
           <CoachTarget id="sheet.eval.save" style={{ marginTop: 10 }}><Pressable onPress={save} disabled={busy} style={[styles.cta, { marginTop: 0 }, busy && { opacity: 0.6 }]} accessibilityRole="button">

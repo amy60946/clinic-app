@@ -10,7 +10,7 @@ import type { PubItem } from '../../lib/planCore';
 // "Aileye gönder" özeti (kullanıcı kararı 2 Kasım 2026, "G1"; ortak care_plan_publish_selected): gidecekler hedef hedef listelenir,
 // hepsi işaretli gelir; işareti kaldırılan bu gönderimde bekler. Aile tek bildirim alır. GAS ve gizli hedef listede çıkmaz.
 export type PubGroup = { id: string | null; title: string; color: string; hidden: boolean };
-const KIND: Record<PubItem['kind'], string> = { goal: 'Hedef', module: 'Program', routine: 'Rutin', task: 'Görev', change: 'Değişiklik' };
+const KIND: Record<PubItem['kind'], string> = { goal: 'Davranış hedefi', module: 'Program', routine: 'Rutin', task: 'Görev', change: 'Değişiklik' };
 
 export default function PublishSheet({ items, groups, onClose, onSend }: {
   items: PubItem[] | null; groups: PubGroup[]; onClose: () => void; onSend: (hold: string[]) => Promise<void>;
@@ -33,7 +33,7 @@ function Body({ items, groups, onClose, onSend }: {
     const loose = items.filter((x) => !x.goalId || !groups.some((g) => g.id === x.goalId));
     return [
       ...known.map((g) => ({ g, list: items.filter((x) => x.goalId === g.id) })),
-      ...(loose.length ? [{ g: { id: null, title: 'Hedefe bağlı olmayanlar', color: colors.faint, hidden: false }, list: loose }] : []),
+      ...(loose.length ? [{ g: { id: null, title: 'Davranış hedefine bağlı olmayanlar', color: colors.faint, hidden: false }, list: loose }] : []),
     ];
   }, [items, groups]);
   const toggle = (k: string) => setOff((x) => (x.includes(k) ? x.filter((y) => y !== k) : [...x, k]));
@@ -63,7 +63,7 @@ function Body({ items, groups, onClose, onSend }: {
               <View style={styles.group}>
                 <View style={[styles.dot, { backgroundColor: g.color }]} />
                 <Text style={styles.groupText} numberOfLines={1}>{g.title}</Text>
-                {g.hidden && <Text style={styles.hidden}>Yalnız sende · hedef gitmez</Text>}
+                {g.hidden && <Text style={styles.hidden}>Yalnız sende · davranış hedefi gitmez</Text>}
               </View>
               {list.map((x) => {
                 const on = !off.includes(x.key);
@@ -81,7 +81,7 @@ function Body({ items, groups, onClose, onSend }: {
             </View>
           ))}
           </CoachTarget>
-          <Text style={[styles.small, { marginTop: 6 }]}>GAS değerlendirmeleri ve "Yalnız sende" hedefler aileye hiç gitmez.</Text>
+          <Text style={[styles.small, { marginTop: 6 }]}>GAS değerlendirmeleri ve "Yalnız sende" davranış hedefleri aileye hiç gitmez.</Text>
           <CoachTarget id="sheet.publish.send" style={{ marginTop: 10 }}><Pressable onPress={send} disabled={busy || !picked.length} style={[styles.cta, { marginTop: 0 }, (busy || !picked.length) && { opacity: 0.5 }]} accessibilityRole="button">
             {busy ? <ActivityIndicator color="#fff" /> : (
               <Text style={styles.ctaText}>{picked.length === items.length ? `Hepsini gönder (${items.length})` : `Seçilenleri gönder (${picked.length})`}</Text>

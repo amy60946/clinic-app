@@ -12,7 +12,7 @@ test('ilerleme notu: örnek aileden bölümler, önceki dönem, GAS, sınır met
   assert.match(note, /Dönem: 5 Ekim – 27 Ekim 2026 \(4 hafta\)/);
   assert.match(note, /Ebeveyn onaylı tamamlama: \d+\/\d+ planlı görev \(%\d+\); önceki 4 haftada %\d+\./);
   assert.match(note, /Davranış kayıtları \(5 Ekim – 28 Ekim 2026\)\n• \d+ kayıt; önceki 4 haftada \d+\./);
-  assert.match(note, /Hedefler \(GAS, −2 … \+2\)\n• /);
+  assert.match(note, /Davranış hedefleri \(GAS, −2 … \+2\)\n• /);
   assert.match(note, /→/);
   assert.ok(note.endsWith(NOTE_FOOTER));
   assert.doesNotMatch(note, /Deniz/); // çocuğun adı yalnız seçilen biçimde
