@@ -138,7 +138,7 @@ export default function InvitesCard({ me, team, reloadKey, openKey, onChanged, o
       )}
 
       <InviteSheet visible={sheet.open} existing={sheet.existing} clinicId={me.clinic_id} clinicianName={[me.name, me.title].filter(Boolean).join(', ')}
-        workspaceName={(me.workspaces ?? 1) > 1 ? (me.personal ? 'bireysel çalışman' : me.clinic) : undefined}
+        workspaceName={(me.workspaces ?? 1) > 1 ? (me.personal ? 'bireysel hesabın' : me.clinic) : undefined}
         blocked={me.role === 'member' && me.members_can_invite === false}
         onClose={() => { setSheet({ open: false }); load(); onChanged(); }} />
     </>

@@ -269,11 +269,13 @@ function checkSuggestion<T>(data: T, error: { code?: string; message: string } |
   return check(data, error);
 }
 
+// Öneride iki yabancı anahtar maceraya gider (task_id, değişiklik önerisinin target_task_id'si, 2 Kasım 2026):
+// gömme hangi bağın okunacağını adıyla söyler, yoksa PostgREST "more than one relationship" (PGRST201) der.
 const SUGGESTION_COLS = 'id, title, emoji, skill, description, category, template_key, difficulty, coins, start_date, recurring, '
-  + 'repeat_kind, repeat_days, end_date, reminder, requires_review, note, status, created_at, updated_at, decided_at, task_id, tasks(title)';
+  + 'repeat_kind, repeat_days, end_date, reminder, requires_review, note, status, created_at, updated_at, decided_at, task_id, tasks!clinic_task_suggestions_task_id_fkey(title)';
 const ROUTINE_COLS = ', routine_group, routine_title, routine_icon, routine_position, routine_key, goal_id';
 const CHANGE_COLS = ', kind, target_task_id, change_remove';
-const OLD_COLS = 'id, title, emoji, skill, difficulty, recurring, note, status, created_at, decided_at, task_id, tasks(title)';
+const OLD_COLS = 'id, title, emoji, skill, difficulty, recurring, note, status, created_at, decided_at, task_id, tasks!clinic_task_suggestions_task_id_fkey(title)';
 const missingCol = (e: { code?: string } | null) => e?.code === '42703' || e?.code === 'PGRST204';
 
 type SuggestionRow = Partial<Suggestion> & { tasks: { title: string } | null; routine_group?: string | null; routine_title?: string | null;
@@ -470,6 +472,8 @@ export async function openPersonalWorkspace(): Promise<string> {
   const { data, error } = await supabase.rpc('clinician_personal_workspace');
   return check(data as string, error);
 }
+// Arayüzde kullanılmıyor (kullanıcı kararı 5 Kasım 2026: ekip hesabı kliniğin ekibine kabulle gelir, uzman klinik açmaz);
+// "kendi kliniğini kur" kararı verilirse buradan.
 export async function createClinicWorkspace(name: string): Promise<string> {
   const { data, error } = await supabase.rpc('clinic_workspace_create', { p_name: name.trim().slice(0, 120) });
   if (error?.message?.includes('too_many_clinics')) throw new Error('En çok 3 klinik açabilirsin.');
@@ -488,7 +492,7 @@ export const REQUEST_ERROR: Record<string, string> = {
   self: 'Bu senin kendi kodun.',
   already_member: 'Bu uzman zaten ekibinde.',
   seat_full: 'Koltuklar dolu. Klinik paketini yükselt ya da bekleyen bir isteği geri çek.',
-  personal_workspace: 'Bireysel çalışma alanına uzman eklenmez. Ekip için bir klinik aç.',
+  personal_workspace: 'Bireysel hesaba uzman eklenmez.',
 };
 export async function requestMember(code: string): Promise<RequestResult> {
   const { data, error } = await supabase.rpc('clinic_member_request', { p_code: code.replace(/[^A-Za-z0-9]/g, '').toUpperCase() });

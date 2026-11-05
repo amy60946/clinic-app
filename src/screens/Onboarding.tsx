@@ -182,7 +182,7 @@ function BoardMock() {
         <View style={[styles.lit, { gap: 8 }]}>
           <Text style={styles.sec}>Senin sıran</Text>
           {row('Nazlı', '2 değişiklik gönderilmedi', true)}
-          <Text style={styles.sec}>Aileden yeni</Text>
+          <Text style={styles.sec}>Ebeveynden yeni</Text>
           {row('Arda', '2 davranış kaydı', true)}
           <Text style={styles.sec}>Sessiz kalanlar</Text>
           {row('Ece', '9 gündür kayıt yok', true)}

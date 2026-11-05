@@ -7,21 +7,20 @@ import { Label, Notice } from '../components/ui';
 import Bell from '../components/Bell';
 import { Client, ClinicianMe, Member, loadAttention } from '../lib/clinic';
 import { Attention, BoardRow, Section, buildBoard } from '../lib/attention';
-import { OnceHint, BOARD_HINT } from './SampleTour';
 import { track } from '../lib/track';
 
 // Tüm danışanlar (kullanıcı kararı 2 Kasım 2026: dikkat panosu "liste + neden"; ortak clinic_attention_summary, veritabani.md 23).
-// Danışan başına tek satır; bölümler Senin sıran · Aileden yeni · Sessiz kalanlar · Diğer danışanlar. Neden çipleri yalnız olgu
+// Danışan başına tek satır; bölümler Senin sıran · Ebeveynden yeni · Sessiz kalanlar · Diğer danışanlar. Neden çipleri yalnız olgu
 // söyler, hepsi aynı nötr renkte: puan, renkli risk ve "en kötüden iyiye" sıralama yok; bölüm içinde sıra ailenin son kaydına göre.
-// "Gördüm" (ya da danışanı açmak) Aileden yeni'yi o danışan için yeni bir şey gelene kadar kapatır (bu cihazda).
+// "Gördüm" (ya da danışanı açmak) Ebeveynden yeni'yi o danışan için yeni bir şey gelene kadar kapatır (bu cihazda).
 // Sahip için uzman süzgeci (uzmanlar karşılaştırılmaz, sayı gösterilmez). Sunucuda işlev yoksa düz liste (eski davranış).
 const SEEN_KEY = (id: string) => `clinic.attention.seen.v1.${id}`;
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 const SECTIONS: { id: Section; title: string; info: string }[] = [
   { id: 'mine', title: 'Senin sıran', info: 'Aileye gönderilmemiş değişikliğin, değerlendirme zamanı gelen davranış hedefinin ya da takip planı henüz olmayan danışanlar.' },
-  { id: 'family', title: 'Aileden yeni', info: 'Son 7 günde ailenin girdiği davranış kayıtları ve öneri kararları. "Gördüm" dersen ya da danışanı açarsan, yeni bir şey gelene kadar bu bölümden çıkar (bu cihazda).' },
-  { id: 'quiet', title: 'Sessiz kalanlar', info: 'Ailenin 7 gündür hiç kaydı yok: macera, davranış kaydı, program uygulaması, öneri kararı.' },
+  { id: 'family', title: 'Ebeveynden yeni', info: 'Son 7 günde ebeveynin girdiği davranış kayıtları ve öneri kararları. "Gördüm" dersen ya da danışanı açarsan, yeni bir şey gelene kadar bu bölümden çıkar (bu cihazda).' },
+  { id: 'quiet', title: 'Sessiz kalanlar', info: 'Ebeveynin 7 gündür hiç kaydı yok: macera, davranış kaydı, program uygulaması, öneri kararı.' },
   { id: 'rest', title: 'Diğer danışanlar', info: 'Şu an bir şey beklemeyen danışanlar.' },
 ];
 
@@ -132,7 +131,12 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
             <View style={styles.list}><Text style={[styles.small, { padding: 16 }]}>{query ? 'Sonuç bulunamadı.' : 'Bu uzmana bağlı danışan yok.'}</Text></View>
           ) : board && !onlyRest ? (
             <>
-            <View style={{ marginTop: 10 }}><OnceHint userId={me.id} id="board" hint={BOARD_HINT} /></View>
+            {/* bölümlerin ne olduğu her zaman görünür (kullanıcı isteği 5 Kasım 2026); ayrıntı başlıklardaki (i) */}
+            <Text style={styles.intro}>
+              {'Danışanların üç başlık altında: '}<Text style={styles.introB}>Senin sıran</Text>{' senden bir adım bekleyenler, '}
+              <Text style={styles.introB}>Ebeveynden yeni</Text>{' son 7 günde ebeveynin girdiği kayıtlar, '}
+              <Text style={styles.introB}>Sessiz kalanlar</Text>{' 7 gündür kaydı olmayanlar. Bekleyen bir şeyi olmayanlar en altta.'}
+            </Text>
             {sections.map((s) => (
               <View key={s.id} style={{ gap: 6, marginTop: 10 }}>
                 <SectionHead title={s.title} count={board[s.id].length} info={s.info} />
@@ -177,6 +181,8 @@ const styles = StyleSheet.create({
   reason: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#F1F3F7', borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 3 },
   reasonText: { fontSize: 11.5, fontWeight: '600', color: colors.navy },
   seen: { fontSize: 12, fontWeight: '700', color: colors.navy, textDecorationLine: 'underline' },
+  intro: { fontSize: 12.5, color: colors.muted, lineHeight: 18, marginTop: 4, marginBottom: 6 },
+  introB: { fontWeight: '700', color: colors.navy },
   secTitle: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase', color: '#6B7387' },
   info: { fontSize: 12, color: colors.text, lineHeight: 17, backgroundColor: '#F3F5FA', borderRadius: radius.sm, padding: 10 },
   filter: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 4 },

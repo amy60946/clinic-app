@@ -102,7 +102,7 @@ export default function TeamCard({ me, team: initial, onChanged, onUpgrade, onLe
       } },
     ]);
   const leave = () => Alert.alert(`${me.clinic} ekibinden ayrılmak istiyor musun?`,
-    'Bu kliniğin danışanlarını artık görmezsin. Kliniğin kayıtları klinikte kalır. Bireysel çalışmana dokunulmaz.', [
+    'Bu kliniğin danışanlarını artık görmezsin. Kliniğin kayıtları klinikte kalır. Bireysel hesabına dokunulmaz.', [
       { text: 'Vazgeç', style: 'cancel' },
       { text: 'Ayrıl', style: 'destructive', onPress: async () => {
         try { await leaveClinic(); track('team.leave'); onLeft(); } catch (e) { Alert.alert('Ayrılınamadı', (e as Error).message); }
