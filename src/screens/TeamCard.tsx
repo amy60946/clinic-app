@@ -133,7 +133,7 @@ export default function TeamCard({ me, team: initial, onChanged, onUpgrade, onLe
             <Text style={[styles.badge, m.role === 'owner' && styles.badgeOwner]}>{m.role === 'owner' ? 'Sahip' : 'Ekip üyesi'}</Text>
             {owner && m.role !== 'owner' && (
               <Pressable onPress={() => remove(m)} accessibilityLabel={`${m.name} ekipten çıkar`} hitSlop={8}>
-                <Ionicons name="person-remove-outline" size={18} color={colors.muted} />
+                <Text style={[styles.link, { fontSize: 12, color: colors.danger }]}>Çıkar</Text>
               </Pressable>
             )}
           </View>
@@ -143,7 +143,7 @@ export default function TeamCard({ me, team: initial, onChanged, onUpgrade, onLe
             <Text style={[styles.body, { flex: 1, color: colors.muted }]} numberOfLines={2}>
               {r.name || 'Uzman'}{r.title ? ` · ${r.title}` : ''}
             </Text>
-            <Text style={styles.badge}>{`Onay bekliyor · ${daysTo(r.expires_at)} gün`}</Text>
+            <Text style={styles.badge}>{`Onay bekliyor · ${daysTo(r.expires_at)} gün kaldı`}</Text>
             <Pressable onPress={() => cancel(r.id)} accessibilityLabel="İsteği geri çek" hitSlop={8}>
               <Ionicons name="close-circle-outline" size={18} color={colors.muted} />
             </Pressable>
@@ -155,7 +155,7 @@ export default function TeamCard({ me, team: initial, onChanged, onUpgrade, onLe
             <Text style={styles.addTitle}>Uzman ekle</Text>
             <Text style={styles.small}>Uzmandan kişisel kodunu iste (onun Ayarlar sayfasında). Kodu yaz; uzman onaylayınca ekibine katılır.</Text>
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-              <View style={{ flex: 1 }}>
+              <View style={styles.field}>
                 <Input value={code} onChangeText={(t) => { setCode(t.toUpperCase()); setResult(null); }} placeholder="Uzmanın kodu"
                   autoCapitalize="characters" autoCorrect={false} maxLength={10} accessibilityLabel="Uzmanın kişisel kodu" />
               </View>
@@ -202,8 +202,9 @@ const styles = StyleSheet.create({
   code: { flex: 1, fontSize: 26, fontWeight: '800', letterSpacing: 4, color: colors.navy, fontVariant: ['tabular-nums'] },
   memberInfo: { gap: 4, paddingBottom: 10, marginBottom: 2, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  badge: { fontSize: 11, fontWeight: '700', color: colors.muted, backgroundColor: colors.bg, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 2, overflow: 'hidden' },
-  badgeOwner: { color: colors.navy },
+  badge: { fontSize: 11, fontWeight: '700', color: colors.text, backgroundColor: '#E9ECF3', borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 2, overflow: 'hidden' },
+  field: { flex: 1, borderWidth: 1, borderColor: colors.line, borderRadius: radius.sm, overflow: 'hidden' },
+  badgeOwner: { color: '#fff', backgroundColor: colors.navy },
   add: { gap: 6, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },
   addTitle: { fontSize: 14, fontWeight: '700', color: colors.navy },
   policy: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.line },

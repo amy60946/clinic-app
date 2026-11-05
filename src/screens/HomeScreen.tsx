@@ -464,8 +464,8 @@ export default function HomeScreen() {
               <Text style={styles.brand}>ClinicApp</Text>
               {canSwitch && state.kind === 'ready' ? (
                 <Pressable onPress={() => setWsOpen(true)} accessibilityRole="button" accessibilityLabel="Çalışma alanını değiştir" hitSlop={6}
-                  style={({ pressed }) => [{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }, pressed && { opacity: 0.7 }]}>
-                  <Text style={styles.title} numberOfLines={1}>{state.me.personal ? 'Bireysel çalışmam' : state.me.clinic}</Text>
+                  style={({ pressed }) => [{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', maxWidth: '100%' }, pressed && { opacity: 0.7 }]}>
+                  <Text style={[styles.title, { flexShrink: 1 }]} numberOfLines={1}>{state.me.personal ? 'Bireysel çalışmam' : state.me.clinic}</Text>
                   <Ionicons name="chevron-down" size={18} color={colors.navy} />
                 </Pressable>
               ) : (
@@ -532,7 +532,7 @@ export default function HomeScreen() {
                   <Ionicons name="people-outline" size={20} color={colors.navy} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.memberTitle}>{`Ekip · ${state.team.length} uzman`}</Text>
-                    <Text style={styles.small}>{state.me.role === 'owner' ? 'Uzman ekleme, koltuklar ve üyeler Ayarlar\'da' : 'Ekip üyeleri Ayarlar\'da'}</Text>
+                    <Text style={styles.small}>{state.me.role === 'owner' ? 'Uzman ekleme ve ekip üyeleri Ayarlar\'da' : 'Ekip üyeleri Ayarlar\'da'}</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={colors.faint} />
                 </Pressable>

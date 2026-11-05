@@ -10,6 +10,7 @@ import {
   ClinicianMe, Workspace, MyRequest, listWorkspaces, openPersonalWorkspace, createClinicWorkspace, myTeamRequests, respondTeamRequest,
 } from '../lib/clinic';
 import { useWorkspace } from '../lib/workspace';
+import { useNotifications } from '../lib/notificationsContext';
 import { track } from '../lib/track';
 
 const roleText = (w: Workspace) => (w.personal ? 'Kendi danışanların' : w.role === 'owner' ? `Sahip · ${w.members} uzman` : `Ekip üyesi · ${w.members} uzman`);
@@ -50,11 +51,11 @@ export function WorkspaceSheet({ visible, me, onClose }: { visible: boolean; me:
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose} transparent={false}>
       <SafeAreaView style={styles.safe}>
-        <View style={styles.head}>
+        <View style={[styles.head, styles.col]}>
           <Text style={styles.title}>Çalışma alanı</Text>
           <IconButton name="close" onPress={onClose} label="Kapat" />
         </View>
-        <ScrollView contentContainerStyle={{ padding: 16, gap: 10 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+        <ScrollView contentContainerStyle={[{ padding: 16, gap: 10 }, styles.col]} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
           <Text style={styles.small}>Danışanlar, davetler, notlar ve seanslar seçili alana aittir. Alanlar birbirini görmez.</Text>
           {list === null && <ActivityIndicator color={colors.navy} />}
           {list?.map((w) => {
@@ -105,6 +106,7 @@ export function WorkspaceSheet({ visible, me, onClose }: { visible: boolean; me:
 export function TeamRequestsCard({ me, reloadKey, onAccepted }: { me: ClinicianMe; reloadKey: number; onAccepted: (r: MyRequest) => void }) {
   const [list, setList] = useState<MyRequest[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
+  const { items, markRead } = useNotifications();
   useEffect(() => { if (me.requests) myTeamRequests().then(setList).catch(() => setList([])); else setList([]); }, [me.requests, reloadKey]);
   if (!list.length) return null;
   const answer = async (r: MyRequest, accept: boolean) => {
@@ -115,6 +117,8 @@ export function TeamRequestsCard({ me, reloadKey, onAccepted }: { me: ClinicianM
       if (out.error === 'seat_full') Alert.alert('Kliniğin koltukları dolu', 'Klinik sahibine haber ver; koltuk açılınca isteği yeniden göndersin.');
       else if (out.error) Alert.alert('İstek artık geçerli değil');
       setList((l) => l.filter((x) => x.id !== r.id));
+      const seen = items.filter((n) => n.kind === 'team_request' && !n.readAt && n.data?.request_id === r.id).map((n) => n.id);
+      if (seen.length) markRead(seen);
       if (accept && out.status === 'accepted') onAccepted(r);
     } catch (e) { Alert.alert('Yanıtlanamadı', (e as Error).message); } finally { setBusy(null); }
   };
@@ -126,12 +130,16 @@ export function TeamRequestsCard({ me, reloadKey, onAccepted }: { me: ClinicianM
             <Ionicons name="people-outline" size={20} color={colors.navy} />
             <View style={{ flex: 1 }}>
               <Text style={styles.itemTitle}>{`${r.clinic} seni ekibine eklemek istiyor`}</Text>
-              <Text style={styles.small}>{[r.by && `Gönderen: ${r.by}${r.by_title ? ` (${r.by_title})` : ''}`, `${r.members} uzman`].filter(Boolean).join(' · ')}</Text>
+              {!!r.by && <Text style={styles.small}>{`Gönderen: ${r.by}${r.by_title ? ` (${r.by_title})` : ''}`}</Text>}
+              <Text style={styles.small}>{`Ekipte ${r.members} uzman`}</Text>
             </View>
           </View>
           <Text style={styles.small}>Kabul edersen bu kliniğin danışanları ayrı bir çalışma alanında açılır; bireysel çalışman ayrı kalır.</Text>
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <SmallButton label="Kabul et" onPress={() => answer(r, true)} busy={busy === r.id} />
+            <Pressable onPress={() => answer(r, true)} disabled={busy === r.id} accessibilityRole="button"
+              style={({ pressed }) => [styles.primary, (pressed || busy === r.id) && { opacity: 0.8 }]}>
+              {busy === r.id ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.primaryText}>Kabul et</Text>}
+            </Pressable>
             <SmallButton label="Reddet" onPress={() => answer(r, false)} />
           </View>
         </Card>
@@ -150,4 +158,7 @@ const styles = StyleSheet.create({
   itemOn: { borderColor: colors.navy, borderWidth: 1.5 },
   dashed: { borderStyle: 'dashed', backgroundColor: 'transparent' },
   itemTitle: { fontSize: 15, fontWeight: '700', color: colors.navy },
+  col: { width: '100%', maxWidth: 640, alignSelf: 'center' },
+  primary: { backgroundColor: colors.navy, borderRadius: radius.pill, paddingHorizontal: 16, paddingVertical: 8, minWidth: 96, alignItems: 'center', justifyContent: 'center' },
+  primaryText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 });
