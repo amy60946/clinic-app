@@ -82,12 +82,15 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
 
           <View style={s.card}>
             <Text style={s.label}>Çalışma saatlerim</Text>
-            <Text style={s.small}>Yeni seans penceresindeki uygun saatler bu saatlerden çıkar. “Aileye açık” saatlerden ebeveyn ParentApp'te randevu alabilir (klinik açtıysa).</Text>
+            <Text style={s.small}>Yeni seans penceresindeki uygun saatler bu saatlerden çıkar. "Aileye açık" saatlerden ebeveyn ParentApp'te randevu alabilir (klinik açtıysa).</Text>
             {mine.length === 0 && <Text style={s.small}>Henüz saat eklenmedi.</Text>}
             {mine.map((a) => (
               <View key={a.id} style={[s.row, { paddingVertical: 4 }]}>
                 <Text style={[s.body, { width: 92 }]}>{WEEKDAY_LONG[a.weekday - 1]}</Text>
-                <Text style={[s.body, { flex: 1 }]}>{a.start_time}–{a.end_time}{a.room_id ? ` · ${rooms.find((r) => r.id === a.room_id)?.name ?? ''}` : ''}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.body}>{a.start_time}–{a.end_time}</Text>
+                  {!!a.room_id && <Text style={s.small}>{rooms.find((r) => r.id === a.room_id)?.name ?? ''}</Text>}
+                </View>
                 <Pressable onPress={() => run(() => updateAvailability(a.id, { bookable: !a.bookable }))} accessibilityRole="switch" accessibilityState={{ checked: a.bookable }}
                   style={[s.row, { gap: 4 }]}>
                   <Ionicons name={a.bookable ? 'people' : 'people-outline'} size={16} color={a.bookable ? colors.ok : colors.muted} />
@@ -133,7 +136,7 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
 
           <View style={s.card}>
             <Text style={s.label}>Kurallar{owner ? '' : ' (klinik sahibi değiştirir)'}</Text>
-            <FieldLabel hint={'Bu süreden kısa kala iptal edilen seans “Geç iptal” yazılır. Uzman bunu kaldırabilir.'}>Geç iptal süresi</FieldLabel>
+            <FieldLabel hint={'Bu süreden kısa kala iptal edilen seans "Geç iptal" yazılır. Uzman bunu kaldırabilir.'}>Geç iptal süresi</FieldLabel>
             <Disabled on={!owner}><Chips options={[0, 12, 24, 48].map((h) => ({ id: h, label: h ? `${h} saat` : 'Yok' }))} value={st.cancel_hours} onChange={(h) => saveSt({ cancel_hours: h })} /></Disabled>
             <FieldLabel>Paketten düşen</FieldLabel>
             <Disabled on={!owner}>
@@ -145,7 +148,7 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
               <Chips multi options={REMINDERS} value={st.reminders}
                 onChange={(m) => saveSt({ reminders: st.reminders.includes(m) ? st.reminders.filter((x) => x !== m) : [...st.reminders, m].sort((a, b) => b - a) })} />
             </Disabled>
-            <FieldLabel hint={'Ebeveyn, sorumlu uzmanın “Aileye açık” saatlerinden en çok 2 randevu alabilir.'}>Aile uygulamadan randevu alabilir</FieldLabel>
+            <FieldLabel hint={'Ebeveyn, sorumlu uzmanın "Aileye açık" saatlerinden en çok 2 randevu alabilir.'}>Aile uygulamadan randevu alabilir</FieldLabel>
             <Disabled on={!owner}>
               <View style={s.row}><Toggle value={st.booking_enabled} onChange={(v) => saveSt({ booking_enabled: v })} /><Text style={s.body}>{st.booking_enabled ? 'Açık' : 'Kapalı'}</Text></View>
               {st.booking_enabled && (

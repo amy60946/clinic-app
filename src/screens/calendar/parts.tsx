@@ -54,7 +54,7 @@ export function TimeInput({ value, onChange, label }: { value: string; onChange:
   const ok = /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
   return (
     <TextInput value={value} onChangeText={(v) => onChange(fix(v))} placeholder="09:00" accessibilityLabel={label} keyboardType="number-pad" maxLength={5}
-      style={[s.input, { width: 92, textAlign: 'center', fontVariant: ['tabular-nums'], fontSize: 16, fontWeight: '600' }, !ok && value.length >= 4 && { borderColor: colors.danger }]} />
+      style={[s.input, { width: 92, minHeight: 48, textAlign: 'center', fontVariant: ['tabular-nums'], fontSize: 16, fontWeight: '600' }, !ok && value.length >= 4 && { borderColor: colors.danger }]} />
   );
 }
 

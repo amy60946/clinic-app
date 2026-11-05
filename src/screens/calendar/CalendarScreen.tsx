@@ -202,7 +202,7 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
                 {wide || view === 'week' && width >= 700
                   ? <Grid days={days} today={today} sessions={inRange} external={external} hours={myHours} nameOf={nameOf} onOpen={setDetail} onExt={setExt} onNew={newAt} />
                   : <Agenda days={days} today={today} sessions={inRange} external={external} nameOf={nameOf} onOpen={setDetail} onExt={setExt} onNew={(d) => newAt(d, '10:00')} />}
-                {(inRange.length > 0 || external.length > 0) && <Legend />}
+                {(inRange.length > 0 || external.length > 0) && <Legend grid={wide || view === 'week' && width >= 700} />}
               </View>
               {(wide || view === 'day') && side}
             </View>
@@ -230,7 +230,7 @@ const Mini = ({ n, t }: { n: number; t: string }) => (
   <View style={{ minWidth: 112, flex: 1 }}><Text style={{ fontSize: 20, fontWeight: '700', color: colors.navy }}>{n}</Text><Text style={s.small}>{t}</Text></View>
 );
 
-function Legend() {
+function Legend({ grid }: { grid: boolean }) {
   const items: [string, string, string][] = [['planned', 'Planlandı', ''], ['done', 'Yapıldı', ''], ['no_show', 'Gelmedi', ''], ['late_cancel', 'Geç iptal', ''], ['cancelled', 'İptal / ertelendi', '']];
   return (
     <View style={[s.row, { flexWrap: 'wrap', gap: 12, marginTop: 10 }]}>
@@ -240,8 +240,8 @@ function Legend() {
       })}
       <View style={[s.row, { gap: 5 }]}><View style={{ width: 13, height: 13, borderRadius: 4, borderWidth: 1, borderColor: colors.faint, borderStyle: 'dashed' }} /><Text style={s.small}>Dış takvim</Text></View>
       <View style={[s.row, { gap: 5 }]}><Ionicons name="eye-outline" size={13} color={colors.muted} /><Text style={s.small}>Ailede görünür</Text></View>
-      <View style={[s.row, { gap: 5 }]}><View style={{ width: 13, height: 13, borderRadius: 4, backgroundColor: '#F3F5FA' }} /><Text style={s.small}>Çalışma saatim</Text></View>
-      <View style={[s.row, { gap: 5 }]}><View style={{ width: 13, height: 13, borderRadius: 4, backgroundColor: '#EEF6F0' }} /><Text style={s.small}>Aileye açık</Text></View>
+      {grid && <View style={[s.row, { gap: 5 }]}><View style={{ width: 13, height: 13, borderRadius: 4, backgroundColor: '#F3F5FA', borderWidth: 1, borderColor: '#D5DBE8' }} /><Text style={s.small}>Çalışma saatim</Text></View>}
+      {grid && <View style={[s.row, { gap: 5 }]}><View style={{ width: 13, height: 13, borderRadius: 4, backgroundColor: '#EEF6F0', borderWidth: 1, borderColor: '#BFDCC8' }} /><Text style={s.small}>Aileye açık</Text></View>}
     </View>
   );
 }

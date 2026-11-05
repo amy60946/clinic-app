@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal, Alert, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../theme';
+import { colors, radius } from '../../theme';
 import { Cta, Toggle } from '../../components/ui';
 import DateField from '../../components/DateField';
 import type { Client, ClinicianMe, Member } from '../../lib/clinic';
@@ -159,7 +159,7 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
 
           <FieldLabel>Tarih ve saat</FieldLabel>
           <View style={[s.row, { flexWrap: 'wrap' }]}>
-            <View style={{ flex: 1, minWidth: 180 }}><DateField mode="date" value={day} onChange={(v) => v && setDay(v.slice(0, 10))} placeholder="Tarih" /></View>
+            <View style={{ flex: 1, minWidth: 180, borderWidth: 1, borderColor: colors.line, borderRadius: radius.md, overflow: 'hidden' }}><DateField mode="date" value={day} onChange={(v) => v && setDay(v.slice(0, 10))} placeholder="Tarih" /></View>
             <TimeInput value={time} onChange={setTime} label="Saat" />
           </View>
           {busy === null ? <ActivityIndicator style={{ marginTop: 8, alignSelf: 'flex-start' }} color={colors.navy} />

@@ -92,7 +92,7 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
           {cells.map((c) => {
             const m = c.status ? STATUS_META[c.status] : null;
             return <View key={c.start} accessibilityLabel={`${shortDay(c.start)} haftası: ${m?.label ?? 'seans yok'}`}
-              style={{ flex: 1, height: 26, borderRadius: 5, backgroundColor: m ? m.bg : '#F5F6F8', borderWidth: 1, borderColor: m ? m.line : colors.line,
+              style={{ flex: 1, height: 26, borderRadius: 5, backgroundColor: m ? m.bg : '#F5F6F8', borderWidth: 1, borderColor: m ? m.line : colors.faint,
                 borderStyle: m ? 'solid' : 'dashed' }} />;
           })}
         </View>
@@ -101,7 +101,7 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
             <View key={k} style={[s.row, { gap: 4 }]}><View style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: STATUS_META[k].bg, borderWidth: 1, borderColor: STATUS_META[k].line }} />
               <Text style={s.small}>{k === 'cancelled' ? 'İptal / ertelendi' : STATUS_META[k].label}</Text></View>
           ))}
-          <View style={[s.row, { gap: 4 }]}><View style={{ width: 12, height: 12, borderRadius: 3, borderWidth: 1, borderColor: colors.line, borderStyle: 'dashed' }} /><Text style={s.small}>Seans yok</Text></View>
+          <View style={[s.row, { gap: 4 }]}><View style={{ width: 12, height: 12, borderRadius: 3, borderWidth: 1, borderColor: colors.faint, borderStyle: 'dashed' }} /><Text style={s.small}>Seans yok</Text></View>
         </View>
       </View>
 
@@ -153,7 +153,7 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
       </View>
 
       <View style={s.card}>
-        {rows.length === 0 && <Text style={s.small}>Henüz seans yok. “+ Seans” ile ilk seansı planla.</Text>}
+        {rows.length === 0 && <Text style={s.small}>Henüz seans yok. "+ Seans" ile ilk seansı planla.</Text>}
         {[{ key: 'up', title: 'Yaklaşan', list: rows.filter((r) => Date.parse(r.x.starts_at) > now.getTime()).reverse() },
           { key: 'past', title: 'Geçmiş', list: rows.filter((r) => Date.parse(r.x.starts_at) <= now.getTime()).slice(0, 30) }].filter((g) => g.list.length).map((g) => (
           <View key={g.key}>
@@ -168,7 +168,7 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
               <Text style={s.body} numberOfLines={1}>{KIND_LABEL[x.kind]}</Text>
               <Text style={s.small}>
                 {[x.status === 'done' && (hasNote(records[x.id]) ? 'Not yazıldı' : 'Not yok'), x.family_response && RESPONSE_LABEL[x.family_response],
-                  rate !== null && `Arada evde: rutin %${rate}`, abc !== null && `${abc} davranış kaydı`].filter(Boolean).join(', ')}
+                  rate !== null && `arada evde: rutin %${rate}`, abc !== null && `${abc} davranış kaydı`].filter(Boolean).join(', ')}
               </Text>
             </View>
             <StatusChip status={x.status} />
