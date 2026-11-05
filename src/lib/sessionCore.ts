@@ -49,7 +49,7 @@ export const KIND_LABEL: Record<SessionKind, string> = {
   individual: 'Bireysel seans', family: 'Aile görüşmesi', parent: 'Ebeveyn görüşmesi', group: 'Grup seansı', intake: 'İlk görüşme', other: 'Diğer',
 };
 export const MODE_LABEL: Record<SessionMode, string> = { in_person: 'Yüz yüze', online: 'Online', home: 'Ev ziyareti' };
-export const RESPONSE_LABEL = { ok: 'Aile: geleceğiz', unavailable: 'Aile: uygun değil' } as const;
+export const RESPONSE_LABEL = { ok: 'Aile gelecek', unavailable: 'Aile uygun değil dedi' } as const;
 export const isClosed = (s: SessionStatus) => s === 'cancelled' || s === 'late_cancel' || s === 'postponed';
 export const WEEKDAY_LONG = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
 

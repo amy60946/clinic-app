@@ -12,7 +12,7 @@ import {
   type Session, type SessionKind, type SessionMode, type Room, type Availability, type SessionSettings, type SessionPackage, type Busy,
 } from '../../lib/sessionCore';
 import { createSession, updateSession, loadBusy, type Conflict } from '../../lib/sessions';
-import { SheetHeader, Chips, FieldLabel, s } from './parts';
+import { SheetHeader, Chips, FieldLabel, TimeInput, s } from './parts';
 
 // Yeni seans / seansı düzelt (ortak akislar.md 20, 1). Tekrar: her hafta / iki haftada bir; aileye göster: tarih, saat, yer ve tür
 // ParentApp'te görünür, not ve gündem görünmez. Çakışma (oda / uzman) kaydı engellemez, sonradan uyarır.
@@ -63,8 +63,10 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
       .catch(() => { if (alive) setBusy([]); });
     return () => { alive = false; };
   }, [day, editing]);
-  const free = useMemo(() => (busy ? freeStarts(day, availability, busy, clinician ?? me.id, dur, room) : []), [busy, day, availability, clinician, dur, room, me.id]);
-  const valid = /^\d{1,2}:\d{2}$/.test(time) && (!!linkId || title.trim().length > 0);
+  // bugün için geçmiş saatler önerilmez
+  const free = useMemo(() => (busy ? freeStarts(day, availability, busy, clinician ?? me.id, dur, room).filter((t) => Date.parse(trToIso(day, t)) > Date.now()) : []),
+    [busy, day, availability, clinician, dur, room, me.id]);
+  const valid = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) && (!!linkId || title.trim().length > 0);
   const startsAt = valid ? trToIso(day, time.padStart(5, '0')) : null;
   const dates = startsAt ? seriesDates(startsAt, editing ? 'none' : repeat, count) : [];
   const shown = clients.filter((c) => !q || c.child_name.toLocaleLowerCase('tr-TR').includes(q.toLocaleLowerCase('tr-TR')) || c.label.toLocaleLowerCase('tr-TR').includes(q.toLocaleLowerCase('tr-TR')));
@@ -158,7 +160,7 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
           <FieldLabel>Tarih ve saat</FieldLabel>
           <View style={[s.row, { flexWrap: 'wrap' }]}>
             <View style={{ flex: 1, minWidth: 180 }}><DateField mode="date" value={day} onChange={(v) => v && setDay(v.slice(0, 10))} placeholder="Tarih" /></View>
-            <View style={{ width: 130 }}><DateField mode="time" value={time} onChange={(v) => v && setTime(v)} placeholder="Saat" /></View>
+            <TimeInput value={time} onChange={setTime} label="Saat" />
           </View>
           {busy === null ? <ActivityIndicator style={{ marginTop: 8, alignSelf: 'flex-start' }} color={colors.navy} />
             : free.length > 0 && (
@@ -175,7 +177,7 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
           <Chips options={(Object.keys(MODE_LABEL) as SessionMode[]).map((m) => ({ id: m, label: MODE_LABEL[m] }))} value={mode} onChange={setMode} />
           {mode === 'in_person' && activeRooms.length > 0 && (
             <View style={{ marginTop: 8 }}>
-              <Chips options={[{ id: '', label: 'Oda seçme' }, ...activeRooms.map((r) => ({ id: r.id, label: r.location ? `${r.name} · ${r.location}` : r.name }))]}
+              <Chips options={[{ id: '', label: 'Oda yok' }, ...activeRooms.map((r) => ({ id: r.id, label: r.location ? `${r.name} · ${r.location}` : r.name }))]}
                 value={room ?? ''} onChange={(v) => setRoom(v || null)} />
             </View>
           )}
@@ -205,8 +207,8 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
               </View>
               {myPackages.length > 0 && (
                 <>
-                  <FieldLabel hint="Paketten düşen: yapıldı ve ayara göre gelmedi / geç iptal">Paket</FieldLabel>
-                  <Chips options={[{ id: '', label: 'Paketsiz' }, ...myPackages.map((x) => ({ id: x.id, label: `${x.title} (${x.total})` }))]}
+                  <FieldLabel hint="Paketten düşer: yapılan seans; ayara göre gelmedi ve geç iptal de.">Paket</FieldLabel>
+                  <Chips options={[{ id: '', label: 'Paketsiz' }, ...myPackages.map((x) => ({ id: x.id, label: x.title }))]}
                     value={pkg ?? ''} onChange={(v) => setPkg(v || null)} />
                 </>
               )}

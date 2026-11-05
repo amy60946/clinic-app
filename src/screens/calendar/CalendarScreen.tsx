@@ -54,11 +54,11 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
   const owner = me.role === 'owner';
   const clientOf = useCallback((linkId: string | null) => (linkId ? clients.find((c) => c.link_id === linkId) ?? null : null), [clients]);
 
-  const days = useMemo(() => {
+  const weekDays = useMemo(() => {
     const monday = mondayOfDay(anchor);
     return view === 'week' ? Array.from({ length: 7 }, (_, i) => addDays(monday, i)) : [anchor];
   }, [anchor, view]);
-  const rangeFrom = trToIso(days[0], '00:00'), rangeTo = trToIso(addDays(days[days.length - 1], 1), '00:00');
+  const rangeFrom = trToIso(weekDays[0], '00:00'), rangeTo = trToIso(addDays(weekDays[weekDays.length - 1], 1), '00:00');
 
   const loadStatic = useCallback(async () => {
     const [st, r, a, w, p] = await Promise.all([loadSettings(), listRooms(), listAvailability(), listWaitlist(), listPackages()]);
@@ -66,8 +66,10 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
   }, []);
   const load = useCallback(async () => {
     try {
-      const from = new Date(Math.min(Date.parse(rangeFrom), Date.now() - 15 * 864e5)).toISOString();
-      const [ss, ex] = await Promise.all([loadSessions(from, rangeTo), loadExternal(rangeFrom, rangeTo).catch(() => [] as ExternalEvent[])]);
+      const wk = mondayOfDay(trDay(new Date().toISOString()));
+      const from = new Date(Math.min(Date.parse(rangeFrom), Date.now() - 15 * 864e5, Date.parse(trToIso(wk, '00:00')))).toISOString();
+      const to = new Date(Math.max(Date.parse(rangeTo), Date.parse(trToIso(addDays(wk, 7), '00:00')))).toISOString();
+      const [ss, ex] = await Promise.all([loadSessions(from, to), loadExternal(rangeFrom, rangeTo).catch(() => [] as ExternalEvent[])]);
       setSessions(ss); setExternal(ex.filter((e) => !e.session_id && !e.ignored));
       const doneIds = ss.filter((x) => x.status === 'done').map((x) => x.id);
       setRecords(await loadRecords(doneIds).catch(() => ({})));
@@ -87,18 +89,22 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
   const refresh = async () => { setRefreshing(true); await Promise.all([load(), loadStatic().catch(() => {})]); setRefreshing(false); };
   const changed = () => { load(); loadStatic().catch(() => {}); };
   const shown = useMemo(() => (sessions ?? []).filter((x) => who === 'all' || (who === 'mine' ? x.clinician_id === me.id : x.clinician_id === who)), [sessions, who, me.id]);
+  // hafta sonu sütunları yalnız o gün seans, dış etkinlik ya da çalışma saati varsa
+  const days = useMemo(() => weekDays.filter((d, i) => weekDays.length === 1 || i < 5
+    || shown.some((x) => trDay(x.starts_at) === d) || external.some((e) => trDay(e.starts_at) === d) || avail.some((a) => a.weekday === i + 1)), [weekDays, shown, external, avail]);
+  const myHours = avail.filter((a) => a.clinician_id === (who === 'all' || who === 'mine' ? me.id : who));
   const inRange = shown.filter((x) => x.starts_at >= rangeFrom && x.starts_at < rangeTo);
   const due = useMemo(() => noteDue(shown, records, new Date()), [shown, records]);
   const todayList = shown.filter((x) => trDay(x.starts_at) === today).sort((a, b) => a.starts_at.localeCompare(b.starts_at));
   const weekStats = useMemo(() => {
-    const wk = shown.filter((x) => trDay(x.starts_at) >= mondayOfDay(today) && trDay(x.starts_at) < addDays(mondayOfDay(today), 7));
+    const wk = shown.filter((x) => !!x.link_id && trDay(x.starts_at) >= mondayOfDay(today) && trDay(x.starts_at) < addDays(mondayOfDay(today), 7));
     return { planned: wk.filter((x) => !isClosed(x.status) && x.status !== 'offered').length, done: wk.filter((x) => x.status === 'done').length,
              noShow: wk.filter((x) => x.status === 'no_show').length, cancelled: wk.filter((x) => isClosed(x.status)).length };
   }, [shown, today]);
   const waiting = waitlist.filter((w) => w.status === 'waiting');
 
   const step = (n: number) => setAnchor(addDays(anchor, n * (view === 'week' ? 7 : 1)));
-  const label = view === 'week' ? `${shortDay(days[0])} – ${shortDay(days[6])}` : longDay(anchor);
+  const label = view === 'week' ? `${shortDay(weekDays[0])} – ${shortDay(weekDays[6])}` : longDay(anchor);
   const newAt = (day: string, hhmm: string) => setForm({ preset: { starts_at: trToIso(day, hhmm) } });
   const openClient = (c: Client, tab: Tab) => { setDetail(null); onOpenClient(c, tab); };
   const nameOf = (x: Session) => clientOf(x.link_id)?.child_name ?? (x.link_id ? 'Paylaşım bitti' : x.title || 'Blok');
@@ -116,7 +122,7 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
 
   const side = (
     <View style={{ gap: 12, width: wide ? 300 : '100%' }}>
-      <View style={s.card}>
+      {(wide || anchor !== today) && <View style={s.card}>
         <Text style={s.label}>Bugün · {shortDay(today)}</Text>
         {todayList.length === 0 && <Text style={s.small}>Bugün seans yok.</Text>}
         {todayList.map((x) => (
@@ -129,7 +135,7 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
             <StatusChip status={x.status} small />
           </Pressable>
         ))}
-      </View>
+      </View>}
       <View style={s.card}>
         <Text style={s.label}>Bu hafta</Text>
         <View style={[s.row, { flexWrap: 'wrap', gap: 8 }]}>
@@ -194,9 +200,9 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
             <View style={{ flexDirection: wide ? 'row' : 'column', gap: 16, alignItems: 'flex-start' }}>
               <View style={{ flex: 1, minWidth: 0, width: '100%' }}>
                 {wide || view === 'week' && width >= 700
-                  ? <Grid days={days} today={today} sessions={inRange} external={external} nameOf={nameOf} onOpen={setDetail} onExt={setExt} onNew={newAt} />
+                  ? <Grid days={days} today={today} sessions={inRange} external={external} hours={myHours} nameOf={nameOf} onOpen={setDetail} onExt={setExt} onNew={newAt} />
                   : <Agenda days={days} today={today} sessions={inRange} external={external} nameOf={nameOf} onOpen={setDetail} onExt={setExt} onNew={(d) => newAt(d, '10:00')} />}
-                <Legend />
+                {(inRange.length > 0 || external.length > 0) && <Legend />}
               </View>
               {(wide || view === 'day') && side}
             </View>
@@ -225,7 +231,7 @@ const Mini = ({ n, t }: { n: number; t: string }) => (
 );
 
 function Legend() {
-  const items: [string, string, string][] = [['planned', 'Planlandı', ''], ['done', 'Yapıldı', ''], ['no_show', 'Gelmedi', ''], ['late_cancel', 'Geç iptal', ''], ['cancelled', 'İptal', '']];
+  const items: [string, string, string][] = [['planned', 'Planlandı', ''], ['done', 'Yapıldı', ''], ['no_show', 'Gelmedi', ''], ['late_cancel', 'Geç iptal', ''], ['cancelled', 'İptal / ertelendi', '']];
   return (
     <View style={[s.row, { flexWrap: 'wrap', gap: 12, marginTop: 10 }]}>
       {items.map(([k, t]) => {
@@ -234,15 +240,17 @@ function Legend() {
       })}
       <View style={[s.row, { gap: 5 }]}><View style={{ width: 13, height: 13, borderRadius: 4, borderWidth: 1, borderColor: colors.faint, borderStyle: 'dashed' }} /><Text style={s.small}>Dış takvim</Text></View>
       <View style={[s.row, { gap: 5 }]}><Ionicons name="eye-outline" size={13} color={colors.muted} /><Text style={s.small}>Ailede görünür</Text></View>
+      <View style={[s.row, { gap: 5 }]}><View style={{ width: 13, height: 13, borderRadius: 4, backgroundColor: '#F3F5FA' }} /><Text style={s.small}>Çalışma saatim</Text></View>
+      <View style={[s.row, { gap: 5 }]}><View style={{ width: 13, height: 13, borderRadius: 4, backgroundColor: '#EEF6F0' }} /><Text style={s.small}>Aileye açık</Text></View>
     </View>
   );
 }
 
 const PX = 1.05;   // dakika başına piksel
-type GridProps = { days: string[]; today: string; sessions: Session[]; external: ExternalEvent[]; nameOf: (x: Session) => string;
+type GridProps = { days: string[]; today: string; sessions: Session[]; external: ExternalEvent[]; hours?: Availability[]; nameOf: (x: Session) => string;
   onOpen: (x: Session) => void; onExt: (e: ExternalEvent) => void; onNew: (day: string, hhmm: string) => void };
 
-function Grid({ days, today, sessions, external, nameOf, onOpen, onExt, onNew }: GridProps) {
+function Grid({ days, today, sessions, external, hours: work = [], nameOf, onOpen, onExt, onNew }: GridProps) {
   const mins = [...sessions.map((x) => trMinutes(x.starts_at)), ...external.map((e) => trMinutes(e.starts_at))];
   const ends = [...sessions.map((x) => trMinutes(x.starts_at) + x.duration_min), ...external.map((e) => trMinutes(e.ends_at))];
   const h0 = Math.min(8, ...mins.map((m) => Math.floor(m / 60))), h1 = Math.max(20, ...ends.map((m) => Math.ceil(m / 60)));
@@ -270,6 +278,11 @@ function Grid({ days, today, sessions, external, nameOf, onOpen, onExt, onNew }:
             const ext = external.filter((e) => trDay(e.starts_at) === d);
             return (
               <View key={d} style={{ flex: 1, height, borderLeftWidth: 1, borderLeftColor: colors.line, backgroundColor: d === today ? '#FAFBFE' : undefined }}>
+                {work.filter((a) => a.weekday === ((new Date(`${d}T12:00:00Z`).getUTCDay() + 6) % 7) + 1).map((a) => {
+                  const st = Number(a.start_time.slice(0, 2)) * 60 + Number(a.start_time.slice(3, 5)), en = Number(a.end_time.slice(0, 2)) * 60 + Number(a.end_time.slice(3, 5));
+                  return <View key={a.id} pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: (st - h0 * 60) * PX, height: (en - st) * PX,
+                    backgroundColor: a.bookable ? '#EEF6F0' : '#F3F5FA' }} />;
+                })}
                 {hours.map((h) => (
                   <Pressable key={h} onPress={() => onNew(d, minToHhmm(h * 60))} accessibilityLabel={`${shortDay(d)} ${h}:00 yeni seans`}
                     style={{ position: 'absolute', top: (h - h0) * 60 * PX, left: 0, right: 0, height: 60 * PX, borderTopWidth: h === h0 ? 0 : 1, borderTopColor: '#F0F2F6' }} />
@@ -327,7 +340,7 @@ function Agenda({ days, today, sessions, external, nameOf, onOpen, onExt, onNew 
           <View key={d} style={{ gap: 6 }}>
             {days.length > 1 && <Text style={[s.label, d === today && { color: '#2C4A9A' }]}>{shortDay(d)}{d === today ? ' · bugün' : ''}</Text>}
             {list.length === 0 && ext.length === 0 && (
-              <Pressable onPress={() => onNew(d)} style={[s.card, { borderStyle: 'dashed', alignItems: 'center' }]}><Text style={s.small}>Seans yok · dokun, ekle</Text></Pressable>
+              <Pressable onPress={() => onNew(d)} style={[s.card, { borderStyle: 'dashed', alignItems: 'center' }]}><Text style={s.small}>Seans yok. Eklemek için dokun.</Text></Pressable>
             )}
             {list.map((x) => (
               <Pressable key={x.id} onPress={() => onOpen(x)} style={[s.card, s.row, { borderLeftWidth: 4, borderLeftColor: STATUS_META[x.status].line, paddingVertical: 10 }]}>

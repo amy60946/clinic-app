@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../theme';
 import { SmallButton, Toggle } from '../../components/ui';
-import DateField from '../../components/DateField';
 import type { ClinicianMe, Member } from '../../lib/clinic';
 import { track } from '../../lib/track';
 import { WEEKDAY_LONG, hhmmToMin, type Availability, type Room, type SessionSettings } from '../../lib/sessionCore';
@@ -12,7 +11,8 @@ import {
   addAvailability, deleteAvailability, updateAvailability, saveRoom, saveSettings, calendarFeed, feedUrl, listSources, addSource, removeSource,
   syncSources, type Feed, type CalendarSource,
 } from '../../lib/sessions';
-import { SheetHeader, Chips, FieldLabel, s } from './parts';
+import { SheetHeader, Chips, FieldLabel, TimeInput, s } from './parts';
+import { DAY_SHORT } from '../../dates';
 
 // Takvim ayarları (ortak akislar.md 20, 6): çalışma saatlerim ve aileye açık saatler (D), odalar ve kurallar (sahip, D),
 // takvim aboneliği ve dış takvim (E).
@@ -82,7 +82,7 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
 
           <View style={s.card}>
             <Text style={s.label}>Çalışma saatlerim</Text>
-            <Text style={s.small}>Yeni seans penceresinde "uygun saatler" bu saatlerden çıkar. "Aileye açık" saatlerden ebeveyn ParentApp'te randevu alabilir (klinik açtıysa).</Text>
+            <Text style={s.small}>Yeni seans penceresindeki uygun saatler bu saatlerden çıkar. “Aileye açık” saatlerden ebeveyn ParentApp'te randevu alabilir (klinik açtıysa).</Text>
             {mine.length === 0 && <Text style={s.small}>Henüz saat eklenmedi.</Text>}
             {mine.map((a) => (
               <View key={a.id} style={[s.row, { paddingVertical: 4 }]}>
@@ -97,11 +97,11 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
               </View>
             ))}
             <FieldLabel>Saat ekle</FieldLabel>
-            <Chips options={WEEKDAY_LONG.map((d, i) => ({ id: i + 1, label: d.slice(0, 3) }))} value={wd} onChange={setWd} />
+            <Chips options={DAY_SHORT.map((d, i) => ({ id: i + 1, label: d }))} value={wd} onChange={setWd} />
             <View style={[s.row, { marginTop: 8 }]}>
-              <View style={{ width: 120 }}><DateField mode="time" value={from} onChange={(v) => v && setFrom(v)} placeholder="Başlangıç" /></View>
+              <TimeInput value={from} onChange={setFrom} label="Başlangıç" />
               <Text style={s.body}>–</Text>
-              <View style={{ width: 120 }}><DateField mode="time" value={to} onChange={(v) => v && setTo(v)} placeholder="Bitiş" /></View>
+              <TimeInput value={to} onChange={setTo} label="Bitiş" />
             </View>
             {rooms.filter((r) => r.active).length > 0 && (
               <View style={{ marginTop: 8 }}><Chips options={[{ id: '', label: 'Oda yok' }, ...rooms.filter((r) => r.active).map((r) => ({ id: r.id, label: r.name }))]}
@@ -133,7 +133,7 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
 
           <View style={s.card}>
             <Text style={s.label}>Kurallar{owner ? '' : ' (klinik sahibi değiştirir)'}</Text>
-            <FieldLabel hint="Bu süreden kısa kala iptal edilen seans &quot;Geç iptal&quot; yazılır; uzman affedebilir">Geç iptal süresi</FieldLabel>
+            <FieldLabel hint={'Bu süreden kısa kala iptal edilen seans “Geç iptal” yazılır. Uzman bunu kaldırabilir.'}>Geç iptal süresi</FieldLabel>
             <Disabled on={!owner}><Chips options={[0, 12, 24, 48].map((h) => ({ id: h, label: h ? `${h} saat` : 'Yok' }))} value={st.cancel_hours} onChange={(h) => saveSt({ cancel_hours: h })} /></Disabled>
             <FieldLabel>Paketten düşen</FieldLabel>
             <Disabled on={!owner}>
@@ -145,7 +145,7 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
               <Chips multi options={REMINDERS} value={st.reminders}
                 onChange={(m) => saveSt({ reminders: st.reminders.includes(m) ? st.reminders.filter((x) => x !== m) : [...st.reminders, m].sort((a, b) => b - a) })} />
             </Disabled>
-            <FieldLabel hint="Ebeveyn, sorumlu uzmanın &quot;Aileye açık&quot; saatlerinden en çok 2 randevu alabilir">Aile uygulamadan randevu alabilir</FieldLabel>
+            <FieldLabel hint={'Ebeveyn, sorumlu uzmanın “Aileye açık” saatlerinden en çok 2 randevu alabilir.'}>Aile uygulamadan randevu alabilir</FieldLabel>
             <Disabled on={!owner}>
               <View style={s.row}><Toggle value={st.booking_enabled} onChange={(v) => saveSt({ booking_enabled: v })} /><Text style={s.body}>{st.booking_enabled ? 'Açık' : 'Kapalı'}</Text></View>
               {st.booking_enabled && (

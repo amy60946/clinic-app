@@ -1,6 +1,6 @@
 // Takvim ekranlarının ortak küçük parçaları: pencere başlığı, durum çipi, seçim çipleri, alan etiketi.
 import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
 import { IconButton } from '../../components/ui';
@@ -42,6 +42,19 @@ export function Chips<T extends string | number>({ options, value, onChange, mul
         </Pressable>
       ))}
     </View>
+  );
+}
+
+// 24 saatlik saat alanı (tarayıcı biçimine bağlı 12 saatlik görünüm yerine): "0930" yazınca "09:30" olur
+export function TimeInput({ value, onChange, label }: { value: string; onChange: (v: string) => void; label: string }) {
+  const fix = (raw: string) => {
+    const d = raw.replace(/[^0-9]/g, '').slice(0, 4);
+    return d.length > 2 ? `${d.slice(0, 2)}:${d.slice(2)}` : d;
+  };
+  const ok = /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+  return (
+    <TextInput value={value} onChangeText={(v) => onChange(fix(v))} placeholder="09:00" accessibilityLabel={label} keyboardType="number-pad" maxLength={5}
+      style={[s.input, { width: 92, textAlign: 'center', fontVariant: ['tabular-nums'], fontSize: 16, fontWeight: '600' }, !ok && value.length >= 4 && { borderColor: colors.danger }]} />
   );
 }
 

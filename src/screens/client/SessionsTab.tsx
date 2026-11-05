@@ -74,7 +74,7 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
   if (!sessions || !att) return <ActivityIndicator color={colors.navy} style={{ marginTop: 30 }} />;
 
   return (
-    <View style={{ gap: 12 }}>
+    <View style={{ gap: 12, marginTop: 6 }}>
       <View style={[s.row, { flexWrap: 'wrap', gap: 8 }]}>
         <Tile n={String(att.done)} t="seans yapıldı" />
         <Tile n={String(att.noShow)} t="gelmedi" />
@@ -92,10 +92,17 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
           {cells.map((c) => {
             const m = c.status ? STATUS_META[c.status] : null;
             return <View key={c.start} accessibilityLabel={`${shortDay(c.start)} haftası: ${m?.label ?? 'seans yok'}`}
-              style={{ flex: 1, height: 30, borderRadius: 4, backgroundColor: m ? (c.status === 'planned' ? '#fff' : m.line) : '#ECEEF3', borderWidth: c.status === 'planned' ? 1.5 : 0, borderColor: colors.navy }} />;
+              style={{ flex: 1, height: 26, borderRadius: 5, backgroundColor: m ? m.bg : '#F5F6F8', borderWidth: 1, borderColor: m ? m.line : colors.line,
+                borderStyle: m ? 'solid' : 'dashed' }} />;
           })}
         </View>
-        <Text style={s.small}>Yeşil yapıldı · kırmızı gelmedi · sarı geç iptal · gri iptal ya da seans yok · çerçeve planlı</Text>
+        <View style={[s.row, { flexWrap: 'wrap', gap: 10 }]}>
+          {(['done', 'no_show', 'late_cancel', 'cancelled', 'planned'] as const).map((k) => (
+            <View key={k} style={[s.row, { gap: 4 }]}><View style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: STATUS_META[k].bg, borderWidth: 1, borderColor: STATUS_META[k].line }} />
+              <Text style={s.small}>{k === 'cancelled' ? 'İptal / ertelendi' : STATUS_META[k].label}</Text></View>
+          ))}
+          <View style={[s.row, { gap: 4 }]}><View style={{ width: 12, height: 12, borderRadius: 3, borderWidth: 1, borderColor: colors.line, borderStyle: 'dashed' }} /><Text style={s.small}>Seans yok</Text></View>
+        </View>
       </View>
 
       <View style={s.card}>
@@ -104,15 +111,15 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
         {packages.map((p) => {
           const u = packageUsage(p, sessions, settings, now);
           return (
-            <View key={p.id} style={[s.row, { paddingVertical: 4 }]}>
-              <View style={{ flex: 1 }}>
-                <Text style={[s.body, p.closed_at && { color: colors.muted }]}>{p.title}{p.closed_at ? ' · kapandı' : ''}</Text>
-                <Text style={[s.small, u.over && { color: colors.danger }]}>{u.used} / {p.total} kullanıldı · {u.planned} planlı · {u.left} kaldı</Text>
+            <View key={p.id} style={[s.row, { paddingVertical: 4, alignItems: 'center' }]}>
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={[s.body, p.closed_at && { color: colors.muted }]}>{p.title}{p.closed_at ? ' (kapandı)' : ''}</Text>
+                <View style={{ height: 6, borderRadius: 3, backgroundColor: '#ECEEF3', overflow: 'hidden', maxWidth: 320 }}>
+                  <View style={{ width: `${Math.min(100, (u.used / p.total) * 100)}%`, height: 6, backgroundColor: u.over ? colors.danger : colors.ok }} />
+                </View>
+                <Text style={[s.small, u.over && { color: colors.danger }]}>{u.used} / {p.total} kullanıldı, {u.planned} planlı, {u.left} kaldı</Text>
               </View>
-              <View style={{ width: 90, height: 8, borderRadius: 4, backgroundColor: '#ECEEF3', overflow: 'hidden' }}>
-                <View style={{ width: `${Math.min(100, (u.used / p.total) * 100)}%`, height: 8, backgroundColor: u.over ? colors.danger : colors.ok }} />
-              </View>
-              {!p.closed_at && <SmallButton label="Kapat" onPress={() => savePackage({ ...p, closed: true }).then(load).catch((e) => Alert.alert('Olmadı', e.message))} />}
+              {!p.closed_at && <SmallButton label="Paketi kapat" onPress={() => savePackage({ ...p, closed: true }).then(load).catch((e) => Alert.alert('Olmadı', e.message))} />}
             </View>
           );
         })}
@@ -138,7 +145,7 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
           <Text style={[s.label, { flex: 1 }]}>{wait ? (wait.status === 'offered' ? 'Bekleme listesinde · teklif gönderildi' : 'Bekleme listesinde') : 'Bekleme listesi'}</Text>
         </View>
         <Text style={s.small}>Daha erken ya da ek saat isteyen aile. Bir seans iptal olunca boşalan saati teklif edebilirsin; aile ParentApp'te kabul eder.</Text>
-        <TextInput value={waitNote} onChangeText={setWaitNote} placeholder="Uygun günler / saatler (ör. salı öğleden sonra)" placeholderTextColor={colors.muted} maxLength={300} style={s.input} />
+        <TextInput value={waitNote} onChangeText={setWaitNote} placeholder="Uygun gün ve saatler" placeholderTextColor={colors.muted} maxLength={300} style={s.input} />
         <View style={s.row}>
           <SmallButton label={wait ? 'Notu kaydet' : 'Bekleme listesine al'} onPress={() => saveWaitlist(client.link_id, waitNote).then(() => { track('waitlist.add'); load(); }).catch((e) => Alert.alert('Olmadı', e.message))} />
           {wait && <SmallButton label="Listeden çıkar" onPress={() => saveWaitlist(client.link_id, '', true).then(load).catch((e) => Alert.alert('Olmadı', e.message))} />}
@@ -146,23 +153,28 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
       </View>
 
       <View style={s.card}>
-        <Text style={s.label}>Seanslar</Text>
-        {rows.length === 0 && <Text style={s.small}>Henüz seans yok. "+ Seans" ile ilk seansı planla.</Text>}
-        {rows.slice(0, 40).map(({ x, rate, abc }) => (
-          <Pressable key={x.id} onPress={() => setDetail(x)} style={[s.row, { paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.line, flexWrap: 'wrap' }]}>
+        {rows.length === 0 && <Text style={s.small}>Henüz seans yok. “+ Seans” ile ilk seansı planla.</Text>}
+        {[{ key: 'up', title: 'Yaklaşan', list: rows.filter((r) => Date.parse(r.x.starts_at) > now.getTime()).reverse() },
+          { key: 'past', title: 'Geçmiş', list: rows.filter((r) => Date.parse(r.x.starts_at) <= now.getTime()).slice(0, 30) }].filter((g) => g.list.length).map((g) => (
+          <View key={g.key}>
+        <Text style={[s.label, { marginTop: g.key === 'past' ? 10 : 0, marginBottom: 2 }]}>{g.title}</Text>
+        {g.list.map(({ x, rate, abc }) => (
+          <Pressable key={x.id} onPress={() => setDetail(x)} style={[s.row, { paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.line, alignItems: 'center' }]}>
             <View style={{ width: 128 }}>
               <Text style={[s.body, { fontWeight: '600' }]}>{shortDay(trDay(x.starts_at))}</Text>
               <Text style={s.small}>{timeRange(x)}</Text>
             </View>
             <View style={{ flex: 1, minWidth: 140 }}>
               <Text style={s.body} numberOfLines={1}>{KIND_LABEL[x.kind]}</Text>
-              <Text style={s.small} numberOfLines={1}>
-                {[x.status === 'done' && (hasNote(records[x.id]) ? 'not var' : 'not yok'), x.family_response && RESPONSE_LABEL[x.family_response],
-                  rate !== null && `ara dönem: rutin %${rate}`, abc !== null && `${abc} davranış kaydı`].filter(Boolean).join(' · ')}
+              <Text style={s.small}>
+                {[x.status === 'done' && (hasNote(records[x.id]) ? 'Not yazıldı' : 'Not yok'), x.family_response && RESPONSE_LABEL[x.family_response],
+                  rate !== null && `Arada evde: rutin %${rate}`, abc !== null && `${abc} davranış kaydı`].filter(Boolean).join(', ')}
               </Text>
             </View>
-            <StatusChip status={x.status} small />
+            <StatusChip status={x.status} />
           </Pressable>
+        ))}
+          </View>
         ))}
       </View>
 

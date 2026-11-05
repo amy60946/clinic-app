@@ -147,7 +147,7 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
       <View style={s.column}>
         <SheetHeader title={clientName} sub={`${sessionWhen(session)} · ${KIND_LABEL[session.kind]} · ${session.mode === 'in_person' ? (room ? `${room.name}${room.location ? ` · ${room.location}` : ''}` : MODE_LABEL.in_person) : MODE_LABEL[session.mode]}${who && who.id !== me.id ? ` · ${who.name}` : ''}`}
           onClose={() => { if (dirty) Alert.alert('Kaydedilmedi', 'Kayıttaki değişiklikler kaybolsun mu?', [{ text: 'Vazgeç', style: 'cancel' }, { text: 'Kapat', style: 'destructive', onPress: onClose }]); else onClose(); }}
-          right={<StatusChip status={status} />} />
+          right={<View style={{ alignSelf: 'center' }}><StatusChip status={status} /></View>} />
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48, gap: 12 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
           <View style={[s.row, { flexWrap: 'wrap' }]}>
             {session.visible_to_family ? <Tag icon="eye-outline" text="Ailede görünür" /> : client ? <Tag icon="eye-off-outline" text="Aileye gösterilmiyor" /> : null}
@@ -200,10 +200,10 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
           {(view === 'record' || !client) && (
             <>
               <FieldLabel>Durum</FieldLabel>
-              <Chips options={[{ id: 'done', label: 'Yapıldı' }, { id: 'no_show', label: 'Gelmedi' }, { id: 'cancelled', label: 'İptal' },
-                               { id: 'postponed', label: 'Ertelendi' }, { id: 'planned', label: 'Planlandı' }]}
-                value={status === 'late_cancel' ? 'cancelled' : status} onChange={(v) => { if (v !== status) change(v as Exclude<typeof status, 'offered'>); }} />
-              {status === 'late_cancel' && <Text style={[s.small, { color: STATUS_META.late_cancel.fg }]}>Geç iptal olarak kayıtlı{settings.count_late_cancel ? ' · paketten düşer' : ''}.</Text>}
+              <Chips options={[{ id: 'planned', label: 'Planlandı' }, { id: 'done', label: 'Yapıldı' }, { id: 'no_show', label: 'Gelmedi' },
+                               { id: 'cancelled', label: 'İptal' }, { id: 'late_cancel', label: 'Geç iptal' }, { id: 'postponed', label: 'Ertelendi' }]}
+                value={status} onChange={(v) => { if (v !== status) change(v as Exclude<typeof status, 'offered'>); }} />
+              {status === 'late_cancel' && <Text style={[s.small, { color: STATUS_META.late_cancel.fg }]}>Geç iptal olarak kayıtlı{settings.count_late_cancel ? '; paketten düşer' : ''}.</Text>}
               {client && (
                 <>
                   <FieldLabel>Katılanlar</FieldLabel>
@@ -227,11 +227,12 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
                           <SmallButton label={`Aileye gönder (${hw.items.length})`} onPress={() => setPub(true)} />
                         </>
                       ) : (
-                        <Text style={s.small}>{homework.length ? 'Gönderildi.' : 'Gönderilmemiş madde yok. Takip Planı\'nda rutin, görev ya da program ekleyince burada seçilir.'}</Text>
+                        <Text style={s.small}>{homework.length ? 'Gönderildi.' : 'Gönderilmemiş madde yok. Takip Planı\'nda rutin, görev ya da program ekleyince burada seçebilirsin.'}</Text>
                       )}
                     <Pressable onPress={() => onOpenClient(client, 'goals')}><Text style={s.link}>Takip Planı'nı aç</Text></Pressable>
                   </View>
-                  <Cta label="Kaydı kaydet" onPress={save} busy={saving} disabled={!dirty} />
+                  <Cta label="Kaydet" onPress={save} busy={saving} disabled={!dirty} />
+                  {!dirty && <Text style={[s.small, { textAlign: 'center' }]}>{record ? 'Kayıt güncel.' : 'Not ya da gündem yazınca kaydedebilirsin.'}</Text>}
                 </>
               )}
             </>
@@ -301,7 +302,7 @@ function AgendaBox({ agenda, setAgenda, own, setOwn }: { agenda: AgendaItem[]; s
         </Pressable>
       ))}
       <View style={s.row}>
-        <TextInput value={own} onChangeText={setOwn} placeholder="Kendi maddem…" placeholderTextColor={colors.muted} style={[s.input, { flex: 1 }]} maxLength={160}
+        <TextInput value={own} onChangeText={setOwn} placeholder="Madde ekle…" placeholderTextColor={colors.muted} style={[s.input, { flex: 1 }]} maxLength={160}
           onSubmitEditing={() => { if (own.trim()) { setAgenda([...agenda, { text: own.trim(), done: false }]); setOwn(''); } }} />
         <SmallButton label="Ekle" onPress={() => { if (own.trim()) { setAgenda([...agenda, { text: own.trim(), done: false }]); setOwn(''); } }} />
       </View>
