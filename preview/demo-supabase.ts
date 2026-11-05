@@ -498,8 +498,13 @@ const DEFAULTS: Record<string, Row> = {
   care_modules: { link_id: null, invite_code: null, aim: '', practice: '', checklist: [], position: 0, status: 'planned', template_key: null },
 };
 
+// Denetim kaydı (tools/qa/api-check): `window.__apiLog` dizi olarak verilirse her istek (tablo, sütunlar, süzgeç ve gövde
+// anahtarları, işlev adı ve parametre adları) kaydedilir; gerçek şemayla karşılaştırmak için. Önizlemede kendiliğinden kapalı.
+const apiLog = (e: Row) => { const l = (globalThis as any).__apiLog; if (Array.isArray(l)) l.push(e); };
+
 class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
   private filters: ((r: Row) => boolean)[] = [];
+  private keys: string[] = [];
   private op: 'select' | 'insert' | 'upsert' | 'update' | 'delete' = 'select';
   private payload: any;
   private cols = '*';
@@ -511,16 +516,17 @@ class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
 
   private selected = false;
   select(cols = '*', opts?: { head?: boolean }) { this.cols = cols; this.selected = true; if (opts?.head) this.head = true; return this; }
-  eq(k: string, v: any) { this.filters.push((r) => r[k] === v); return this; }
+  eq(k: string, v: any) { this.keys.push(k); this.filters.push((r) => r[k] === v); return this; }
   match(m: Row) { Object.entries(m).forEach(([k, v]) => this.eq(k, v)); return this; }
-  neq(k: string, v: any) { this.filters.push((r) => r[k] !== v); return this; }
-  in(k: string, vals: any[]) { this.filters.push((r) => vals.includes(r[k])); return this; }
-  gte(k: string, v: any) { this.filters.push((r) => String(r[k] ?? '') >= String(v)); return this; }
-  lte(k: string, v: any) { this.filters.push((r) => String(r[k] ?? '') <= String(v)); return this; }
-  lt(k: string, v: any) { this.filters.push((r) => String(r[k] ?? '') < String(v)); return this; }
-  gt(k: string, v: any) { this.filters.push((r) => String(r[k] ?? '') > String(v)); return this; }
+  neq(k: string, v: any) { this.keys.push(k); this.filters.push((r) => r[k] !== v); return this; }
+  in(k: string, vals: any[]) { this.keys.push(k); this.filters.push((r) => vals.includes(r[k])); return this; }
+  gte(k: string, v: any) { this.keys.push(k); this.filters.push((r) => String(r[k] ?? '') >= String(v)); return this; }
+  lte(k: string, v: any) { this.keys.push(k); this.filters.push((r) => String(r[k] ?? '') <= String(v)); return this; }
+  lt(k: string, v: any) { this.keys.push(k); this.filters.push((r) => String(r[k] ?? '') < String(v)); return this; }
+  gt(k: string, v: any) { this.keys.push(k); this.filters.push((r) => String(r[k] ?? '') > String(v)); return this; }
   limit() { return this; }
   not(k: string, op: string, list: any) {
+    this.keys.push(k);
     if (op === 'is') { this.filters.push((r) => (r[k] ?? null) !== list); return this; }
     const vals = String(list).replace(/[()]/g, '').split(',');
     this.filters.push((r) => !vals.includes(String(r[k])));
@@ -535,6 +541,8 @@ class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
   delete() { this.op = 'delete'; return this; }
 
   private run() {
+    apiLog({ table: this.table, op: this.op, cols: this.selected || this.op === 'select' ? this.cols : null, keys: this.keys, order: this.sortBy?.col ?? null,
+      payload: this.payload ? Object.keys(Array.isArray(this.payload) ? (this.payload[0] ?? {}) : this.payload) : null, conflict: this.conflict ?? null });
     sync();
     const rows: Row[] = db[this.table] ?? (db[this.table] = []);
     const hit = (r: Row) => this.filters.every((f) => f(r));
@@ -850,6 +858,7 @@ function workspaceRpc(name: string, args: Row, uid: string): { data: any; error:
 }
 
 async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Err }> {
+  apiLog({ rpc: name, args: Object.keys(args) });
   await new Promise((r) => setTimeout(r, 120));
   sync();
   const me = myProfile();

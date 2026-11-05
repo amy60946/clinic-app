@@ -159,16 +159,17 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
           <View key={g.key}>
         <Text style={[s.label, { marginTop: g.key === 'past' ? 10 : 0, marginBottom: 2 }]}>{g.title}</Text>
         {g.list.map(({ x, rate, abc }) => (
-          <Pressable key={x.id} onPress={() => setDetail(x)} style={[s.row, { paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.line, alignItems: 'center' }]}>
-            <View style={{ width: 128 }}>
+          <Pressable key={x.id} onPress={() => setDetail(x)} style={[s.row, { paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.line, alignItems: 'flex-start' }]}>
+            {/* 375 px telefonda 128 + 140 + durum çipi ekrandan taşıyordu (5 Kasım 2026) */}
+            <View style={{ width: 100 }}>
               <Text style={[s.body, { fontWeight: '600' }]}>{shortDay(trDay(x.starts_at))}</Text>
               <Text style={s.small}>{timeRange(x)}</Text>
             </View>
-            <View style={{ flex: 1, minWidth: 140 }}>
+            <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={s.body} numberOfLines={1}>{KIND_LABEL[x.kind]}</Text>
               <Text style={s.small}>
                 {[x.status === 'done' && (hasNote(records[x.id]) ? 'Not yazıldı' : 'Not yok'), x.family_response && RESPONSE_LABEL[x.family_response],
-                  rate !== null && `arada evde: rutin %${rate}`, abc !== null && `${abc} davranış kaydı`].filter(Boolean).join(', ')}
+                  rate !== null && `arada evde: rutin\u00a0%${rate}`, abc !== null && `${abc}\u00a0davranış kaydı`].filter(Boolean).join(', ')}
               </Text>
             </View>
             <StatusChip status={x.status} />

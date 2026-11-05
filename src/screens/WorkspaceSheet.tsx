@@ -1,6 +1,6 @@
 // Hesap seçici ve ekibe katılma istekleri (ortak akislar.md 21). Kullanıcıya görünen ad "hesap" (kullanıcı kararı 5 Kasım 2026):
 // "Bireysel hesap" (kendi danışanları) + "Ekip hesabı" (kliniğin ekibine kabul edilince sistem açar; klinik adı klinikten gelir,
-// altında uzmanın adı). Uzman burada klinik açmaz ve ad vermez. Ana ekranda köşedeki küçük düğmeden açılır.
+// altında uzmanın adı). Burada klinik kurulmaz ve ad verilmez (kendi kliniği: Ayarlar › "Kendi kliniğini kur"). Ana ekranda köşedeki küçük düğmeden açılır.
 import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, Modal, ScrollView, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
