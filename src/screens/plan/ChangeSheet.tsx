@@ -39,11 +39,11 @@ const TEXT: Record<EditMode, { head: string; sub: string; note: string; cta: str
   },
   pending: {
     head: 'Rutini düzenle', sub: 'Gönderildi · ebeveyn kararı bekleniyor',
-    note: 'Ebeveyn henüz karar vermedi; değişiklik öneriye hemen yansır. Çıkardığın görev öneriden kalkar.', cta: 'Kaydet',
+    note: 'Ebeveyn henüz karar vermedi; değişiklik öneriye hemen yansır. Çıkardığın macera öneriden kalkar.', cta: 'Kaydet',
   },
   change: {
     head: 'Değişiklik öner', sub: 'Ailede ekli',
-    note: 'Bu görevler ailede ekli. Değişikliğin öneri olarak gider; ebeveyn "Uygula" derse görevler güncellenir. Yapılan adımlar ve kazanılan inciler korunur; çıkardığın görev silinmez, o gün biter.',
+    note: 'Bu maceralar ailede ekli. Değişikliğin öneri olarak gider; ebeveyn "Uygula" derse maceralar güncellenir. Yapılan adımlar ve kazanılan inciler korunur; çıkardığın macera silinmez, o gün biter.',
     cta: 'Değişikliği plana ekle',
   },
 };
@@ -66,10 +66,10 @@ function Body({ target, onClose, onSubmit, onWithdraw }: {
   const save = async () => {
     const bad = rows.find((r) => !r.remove && r.time.trim() && normalizeTime(r.time) === null);
     if (bad) return Alert.alert('Saat geçersiz', `${bad.item.title}: saati 07:30 biçiminde yaz.`);
-    if (!changed.length) return Alert.alert('Değişiklik yok', 'Bir saati değiştir ya da bir görevi çıkar.');
+    if (!changed.length) return Alert.alert('Değişiklik yok', 'Bir saati değiştir ya da bir macerayı çıkar.');
     if (rows.every((r) => r.remove)) {
       if (target.mode !== 'change' && onWithdraw) return onWithdraw();
-      return Alert.alert('En az bir görev kalmalı', 'Rutinin tamamını bırakmak için ebeveynle konuşun; ebeveyn görevleri ParentApp › Görevler\'den kaldırabilir.');
+      return Alert.alert('En az bir macera kalmalı', 'Rutinin tamamını bırakmak için ebeveynle konuşun; ebeveyn maceraları ParentApp › Maceralar\'dan kaldırabilir.');
     }
     setBusy(true);
     try {
@@ -88,7 +88,7 @@ function Body({ target, onClose, onSubmit, onWithdraw }: {
           <IconButton name="close" label="Kapat" onPress={onClose} />
           <View style={{ flex: 1 }}>
             <Text style={styles.title}>{t.head} · {target.title}</Text>
-            <Text style={styles.small}>{t.sub} · {target.items.length} görev</Text>
+            <Text style={styles.small}>{t.sub} · {target.items.length} macera</Text>
           </View>
         </View>
         <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 60 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
@@ -120,7 +120,7 @@ function Body({ target, onClose, onSubmit, onWithdraw }: {
                   <TextInput value={r.time} onChangeText={(x) => set(i, { time: x })} maxLength={5} editable={!r.remove}
                     placeholder="07:30" keyboardType="numbers-and-punctuation" accessibilityLabel={`${r.item.title} saati`} style={styles.time} />
                   <Pressable onPress={() => set(i, { remove: !r.remove })} hitSlop={6} accessibilityRole="button"
-                    accessibilityLabel={r.remove ? 'Çıkarmaktan vazgeç' : 'Görevi çıkar'} style={styles.remove}>
+                    accessibilityLabel={r.remove ? 'Çıkarmaktan vazgeç' : 'Macerayı çıkar'} style={styles.remove}>
                     <Ionicons name={r.remove ? 'arrow-undo-outline' : 'remove-circle-outline'} size={20} color={r.remove ? colors.navy : colors.danger} />
                   </Pressable>
                 </View>
@@ -128,11 +128,11 @@ function Body({ target, onClose, onSubmit, onWithdraw }: {
             })}
           </View>
           {target.mode === 'change' && (
-            <Text style={styles.small}>Rutine yeni görev eklemek için davranış hedefi satırındaki "+ Rutin ya da görev bağla"yı kullan; o da öneri olarak gider.</Text>
+            <Text style={styles.small}>Rutine yeni macera eklemek için davranış hedefi satırındaki "+ Rutin ya da macera bağla"yı kullan; o da öneri olarak gider.</Text>
           )}
           <Pressable onPress={save} disabled={busy} style={[styles.cta, busy && { opacity: 0.6 }]} accessibilityRole="button">
             {busy ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.ctaText}>{t.cta}{target.mode === 'change' && changed.length ? ` (${changed.length} görev)` : ''}</Text>}
+              : <Text style={styles.ctaText}>{t.cta}{target.mode === 'change' && changed.length ? ` (${changed.length} macera)` : ''}</Text>}
           </Pressable>
           {target.mode === 'change' && <Text style={[styles.small, { textAlign: 'center' }]}>Takip Planındaki "Aileye gönder" ile aileye gider.</Text>}
           {target.mode !== 'change' && onWithdraw && (

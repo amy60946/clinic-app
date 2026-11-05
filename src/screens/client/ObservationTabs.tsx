@@ -26,16 +26,16 @@ export function SummaryTab({ data, today, weeks }: ClientCtx) {
   const w = useMemo(() => weekly(data.tasks, data.completions, today, weeks), [data, today, weeks]);
 
   if (!o.planned) {
-    return <Empty text="Bu dönemde çocuğa atanmış görev yok. Ebeveyn ParentApp'te görev ekledikçe göstergeler burada oluşur." />;
+    return <Empty text="Bu dönemde çocuğa atanmış macera yok. Ebeveyn ParentApp'te sorumluluk ekledikçe göstergeler burada oluşur." />;
   }
   return (
     <View>
       <Label>{`Son ${weeks} hafta (dünkü güne kadar)`}</Label>
       <View style={styles.stats}>
-        <Stat value={p(o.rate)} label="Tamamlama" hint={`${o.approved} / ${o.planned} planlanan görev onaylandı`} />
+        <Stat value={p(o.rate)} label="Tamamlama" hint={`${o.approved} / ${o.planned} planlanan macera onaylandı`} />
         <Stat value={p(o.fullDayRate)} label="Tam gün" hint={`${o.fullDays} / ${o.plannedDays} günde planlanan her şey yapıldı`} />
         <Stat value={p(o.beforeReminderRate)} label="Hatırlatmadan önce"
-          hint={o.withReminder ? `Hatırlatmalı ${o.withReminder} görevin ${o.beforeReminder}'i saatinden önce başlandı` : 'Hatırlatma saati olan görev yok'} />
+          hint={o.withReminder ? `Hatırlatmalı ${o.withReminder} maceranın ${o.beforeReminder} tanesi saatinden önce başlandı` : 'Hatırlatma saati olan macera yok'} />
         <Stat value={p(o.declineRate)} label="Yapamam" hint={`${o.declined} kez "Yapamam" dedi`} />
       </View>
       <Label>Haftalık tamamlama</Label>
@@ -72,10 +72,10 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
   const titles = new Map(data.tasks.map((t) => [t.id, t.title]));
   const motivation = useMemo(() => motivationStats(data.completions, from, lastFullDay(today)), [data, from, today]);
 
-  if (!tasks.length) return <Empty text="Bu dönemde planlanmış görev yok." />;
+  if (!tasks.length) return <Empty text="Bu dönemde planlanmış macera yok." />;
   return (
     <View>
-      <Label>Görev başına (en zorlanandan başlayarak)</Label>
+      <Label>Macera başına (en zorlanandan başlayarak)</Label>
       <Card style={{ gap: 14 }}>
         {tasks.map((s) => (
           <View key={s.task.id} style={{ gap: 6 }}>
@@ -121,7 +121,7 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
             <Row k="Zor" v={String(motivation.hard)} />
             {motivation.trend && <Text style={styles.small}>Ebeveynin yanıtlarına göre {MOTIVATION_TREND_TEXT[motivation.trend]}.</Text>}
           </Card>
-          <Text style={styles.note}>Ebeveynin incelemede verdiği isteğe bağlı yanıt ("Motive etmek ne kadar zordu?"). Görevin çocuğa uygunluğunu konuşmak için bir ipucudur.</Text>
+          <Text style={styles.note}>Ebeveynin incelemede verdiği isteğe bağlı yanıt ("Motive etmek ne kadar zordu?"). Sorumluluğun çocuğa uygunluğunu konuşmak için bir ipucudur.</Text>
         </>
       )}
 
@@ -133,7 +133,7 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
             .map((k) => <Row key={k} k={DECLINE_LABELS[k]} v={String(o.declineReasons[k])} />)
         )}
       </Card>
-      <Text style={styles.note}>Neden, görevin çocuğa uygun olup olmadığını ve açıklamanın netliğini gösterir.</Text>
+      <Text style={styles.note}>Neden, sorumluluğun çocuğa uygun olup olmadığını ve açıklamanın netliğini gösterir.</Text>
 
       <Label>Ebeveynin ret notları</Label>
       <Card style={{ gap: 8 }}>

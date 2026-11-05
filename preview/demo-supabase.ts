@@ -558,7 +558,7 @@ class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
       }));
       if (this.table === 'clinic_task_suggestions' && list.some((r) => r.kind === 'change' && db.clinic_task_suggestions.some((x: Row) =>
         x.kind === 'change' && x.target_task_id === r.target_task_id && ['draft', 'pending'].includes(x.status)))) {
-        return { data: null, error: { message: 'Bu görev için açık bir değişiklik önerisi var', code: '23505' } };
+        return { data: null, error: { message: 'Bu macera için açık bir değişiklik önerisi var', code: '23505' } };
       }
       inserted = list;
       const key = this.conflict ?? PK[this.table] ?? ['id'];
@@ -1194,7 +1194,7 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     if (!n && !drafts.length && !changed) return err('Aileye gösterilecek bir şey yok: "Aile görür" açık bir hedef, etkin bir program ya da bir öneri ekle');
     if (drafts.length || (changed && n)) {
       const child = db.children.find((c: Row) => c.id === l.child_id)?.name ?? '';
-      const body = [changed ? 'Hedefler ve aile programı' : '', k ? `${k} görev önerisi` : '', ch ? `${ch} değişiklik önerisi` : ''].filter(Boolean).join(' · ');
+      const body = [changed ? 'Hedefler ve aile programı' : '', k ? `${k} macera önerisi` : '', ch ? `${ch} değişiklik önerisi` : ''].filter(Boolean).join(' · ');
       db.profiles.filter((p: Row) => p.family_id === l.family_id).forEach((p: Row) => {
         const nid = db.notifications.reduce((a: number, x: Row) => Math.max(a, Number(x.id) || 0), 0) + 1;
         db.notifications.push({ id: nid, user_id: p.id, app: 'parent', kind: changed ? 'care_plan_shared' : 'clinic_suggestion',
@@ -1217,7 +1217,7 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     drafts.forEach((s: Row) => { s.status = 'pending'; s.updated_at = now(); });
     if (!n && !before && !drafts.length) return err('Aileye gösterilecek bir şey yok: "Aile görür" açık bir hedef, etkin bir program ya da bir öneri ekle');
     const child = db.children.find((c: Row) => c.id === l.child_id)?.name ?? '';
-    const body = [n ? 'Hedefler ve aile programı' : '', k ? `${k} görev önerisi` : '', ch ? `${ch} değişiklik önerisi` : ''].filter(Boolean).join(' · ');
+    const body = [n ? 'Hedefler ve aile programı' : '', k ? `${k} macera önerisi` : '', ch ? `${ch} değişiklik önerisi` : ''].filter(Boolean).join(' · ');
     db.profiles.filter((p: Row) => p.family_id === l.family_id).forEach((p: Row) => {
       const nid = db.notifications.reduce((a: number, x: Row) => Math.max(a, Number(x.id) || 0), 0) + 1;
       db.notifications.push({ id: nid, user_id: p.id, app: 'parent', kind: n || !drafts.length ? 'care_plan_shared' : 'clinic_suggestion',

@@ -335,7 +335,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
   // rutini düzenle: taslak/bekleyen doğrudan; ailede ekli → değişiklik önerisi
   const openEdit = (r: RGroup) => {
     if (r.state === 'added') {
-      if (!r.tasks.length) return Alert.alert('Ailede sürmekte olan görev yok');
+      if (!r.tasks.length) return Alert.alert('Ailede sürmekte olan macera yok');
       const prefill = Object.fromEntries(r.changes.map((c) => [c.target_task_id!, { reminder: c.reminder, remove: c.change_remove }]));
       setEdit({ group: r, target: { mode: 'change', title: r.title, prefill,
         items: r.tasks.map((t) => ({ id: t.id, title: t.title, emoji: t.emoji, reminder: t.reminder })) } });
@@ -566,7 +566,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
     const pendingChange = r.changes.some((c) => c.status === 'pending');
     const pill = r.state === 'draft' ? { t: 'Taslak · gönderilmedi', fg: colors.medium.fg, bg: colors.medium.bg }
       : r.state === 'pending' ? { t: 'Ebeveyn kararı bekleniyor', fg: '#2C4A9A', bg: '#E6EAF5' }
-        : r.state === 'added' ? { t: r.single ? 'Ailede ekli' : `${r.added} / ${r.items.length} görev ailede`, fg: colors.easy.fg, bg: colors.easy.bg }
+        : r.state === 'added' ? { t: r.single ? 'Ailede ekli' : `${r.added} / ${r.items.length} macera ailede`, fg: colors.easy.fg, bg: colors.easy.bg }
           : { t: 'Aile eklemedi', fg: colors.muted, bg: '#ECEEF3' };
     return (
       <DragView key={r.key} payload={isWeb && !ro ? `routine:${r.key}` : null}
@@ -579,7 +579,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
           {r.goalId && !ro && <IconButton name="unlink-outline" label="Davranış hedefinden ayır" size={16} onPress={() => setRoutineGoal(r, null).catch(fail('Bağ kaldırılamadı'))} />}
         </View>
         <Text style={styles.tiny}>
-          {[r.single ? 'Tek görev' : `${r.items.length} görev`, times.length ? (times.length > 1 && times[0] !== times[times.length - 1] ? `${times[0]}–${times[times.length - 1]}` : times[0]) : ''].filter(Boolean).join(' · ')}
+          {[r.single ? 'Tek macera' : `${r.items.length} macera`, times.length ? (times.length > 1 && times[0] !== times[times.length - 1] ? `${times[0]}–${times[times.length - 1]}` : times[0]) : ''].filter(Boolean).join(' · ')}
         </Text>
         <View style={[styles.pill, { backgroundColor: pill.bg }]}><Text style={[styles.pillText, { color: pill.fg }]}>{pill.t}</Text></View>
         {rate && rate.planned > 0 && (
@@ -735,7 +735,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
         )}
         {!ro && (
           <Pressable onPress={() => setPick(g.id)} style={styles.add} accessibilityRole="button">
-            <Text style={styles.addText}>+ Rutin ya da görev bağla</Text>
+            <Text style={styles.addText}>+ Rutin ya da macera bağla</Text>
           </Pressable>
         )}
       </View>
@@ -771,7 +771,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
       'Bir program birden çok davranış hedefine bağlanabilir.',
       ...(isWeb && desktop ? ['Kitaplıktan bir programı bu davranış hedefinin üstüne sürükleyip bırakabilirsin.'] : []),
     ]} />,
-    rt: <ColHead q="Rutin ve görevler" info={[
+    rt: <ColHead q="Rutin ve maceralar" info={[
       'Her gün, hangi anda, hangi adımlarla? Çocuk yapar, ebeveyn onaylar.',
       'Buradan eklenenler taslaktır; "Aileye gönder" deyince aileye gider.',
       'Oranlar ebeveynin onay kaydıdır.',
@@ -906,7 +906,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
       {help && (
         <View style={styles.infoBox}>
           {[
-            'Her davranış hedefi bir satır: davranış hedefi · ailenin evdeki programı · çocuğun rutini ve görevleri. Satıra dokununca açılır.',
+            'Her davranış hedefi bir satır: davranış hedefi · ailenin evdeki programı · çocuğun rutini ve maceraları. Satıra dokununca açılır.',
             'Eklediklerin taslaktır; aile, sen "Aileye gönder" deyince tek bildirimle görür.',
           ].map((t) => <Text key={t} style={styles.infoLine}>• {t}</Text>)}
           <Text style={[styles.infoLine, { fontWeight: '700', color: colors.navy, marginTop: 6 }]}>Aile neyi görür?</Text>
@@ -968,7 +968,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
             </DropView>
           )}
           {otherSingles > 0 && (
-            <Text style={[styles.tiny, { marginTop: 8 }]}>Davranış hedefine bağlı olmayan {otherSingles} tek görev daha ailede ekli; Ev Rutinleri'nde görünür.</Text>
+            <Text style={[styles.tiny, { marginTop: 8 }]}>Davranış hedefine bağlı olmayan {otherSingles} tek macera daha ailede ekli; Ev Rutinleri'nde görünür.</Text>
           )}
 
           {archived.length > 0 && (
@@ -1195,9 +1195,9 @@ function Library({ band, goals, target, onTarget, tpls, ownRoutines, meId, owner
       {tab === 'rt' && (
         <View style={{ gap: 6 }}>
           <Text style={styles.tiny}>{band ? `${AGE_LABEL[band]} yaş rutinleri.` : 'Bütün yaş grupları.'} Rutin taslak olarak eklenir; "Aileye gönder" ile gider.</Text>
-          {routinesFor(band).map((r) => row(r.key, `librt:${r.key}`, r.title, `${r.subtitle} · ${r.tasks.length} görev · ${agesText(r.ages)}`, () => onRoutine(r)))}
+          {routinesFor(band).map((r) => row(r.key, `librt:${r.key}`, r.title, `${r.subtitle} · ${r.tasks.length} macera · ${agesText(r.ages)}`, () => onRoutine(r)))}
           {ownRoutines.length > 0 && <Text style={[styles.colSub, { marginTop: 6 }]}>Rutinlerim</Text>}
-          {ownRoutines.map((r) => row(r.key, `librt:${r.key}`, r.title, `${r.tasks.length} görev · ${agesText(r.ages)}`, () => onRoutine(r)))}
+          {ownRoutines.map((r) => row(r.key, `librt:${r.key}`, r.title, `${r.tasks.length} macera · ${agesText(r.ages)}`, () => onRoutine(r)))}
         </View>
       )}
       {tab === 'tpl' && tpls !== null && (
@@ -1229,7 +1229,7 @@ function LinkPicker({ visible, band, ownRoutines, goalTitle, loose, onClose, onR
           <View style={styles.sheetHeader}>
             <IconButton name="close" label="Kapat" onPress={onClose} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.sheetTitle}>Rutin ya da görev bağla</Text>
+              <Text style={styles.sheetTitle}>Rutin ya da macera bağla</Text>
               <Text style={styles.small} numberOfLines={1}>Davranış hedefi: {goalTitle}</Text>
             </View>
           </View>
@@ -1243,7 +1243,7 @@ function LinkPicker({ visible, band, ownRoutines, goalTitle, loose, onClose, onR
                 <View style={styles.pickIcon}><Ionicons name={r.icon as keyof typeof Ionicons.glyphMap} size={18} color={colors.navy} /></View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.libTitle}>{r.title}</Text>
-                  <Text style={styles.tiny}>{r.subtitle} · {r.tasks.length} görev · {agesText(r.ages)}</Text>
+                  <Text style={styles.tiny}>{r.subtitle} · {r.tasks.length} macera · {agesText(r.ages)}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={16} color={colors.faint} />
               </Pressable>
@@ -1259,7 +1259,7 @@ function LinkPicker({ visible, band, ownRoutines, goalTitle, loose, onClose, onR
                 <Text style={{ fontSize: 18 }}>{r.single ? r.emoji : '🔁'}</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.libTitle}>{r.title}</Text>
-                  <Text style={styles.tiny}>{r.single ? 'Tek görev' : `${r.items.length} görev`} · {r.state === 'added' ? 'ailede ekli' : r.state === 'pending' ? 'karar bekliyor' : 'taslak'}</Text>
+                  <Text style={styles.tiny}>{r.single ? 'Tek macera' : `${r.items.length} macera`} · {r.state === 'added' ? 'ailede ekli' : r.state === 'pending' ? 'karar bekliyor' : 'taslak'}</Text>
                 </View>
                 <Text style={styles.link}>Bağla</Text>
               </Pressable>
@@ -1267,8 +1267,8 @@ function LinkPicker({ visible, band, ownRoutines, goalTitle, loose, onClose, onR
             <Pressable onPress={onTask} style={[styles.pickRow, styles.pickTask]} accessibilityRole="button">
               <Ionicons name="add-circle-outline" size={20} color={colors.navy} />
               <View style={{ flex: 1 }}>
-                <Text style={styles.libTitle}>Tek görev öner</Text>
-                <Text style={styles.tiny}>298 görevlik katalogdan ya da kendin yaz; taslak olarak bu davranış hedefine bağlanır</Text>
+                <Text style={styles.libTitle}>Tek macera öner</Text>
+                <Text style={styles.tiny}>298 maceralık katalogdan ya da kendin yaz; taslak olarak bu davranış hedefine bağlanır</Text>
               </View>
             </Pressable>
           </ScrollView>

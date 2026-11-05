@@ -22,7 +22,7 @@ import { Segmented } from '../../components/ui';
 const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: string; icon: keyof typeof Ionicons.glyphMap }> = {
   draft: { label: 'Taslak · Takip Planı\'ndan "Aileye gönder" ile gider', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'document-text-outline' },
   pending: { label: 'Ebeveyn kararı bekleniyor', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'time-outline' },
-  accepted: { label: 'Ebeveyn görevlere ekledi', fg: colors.easy.fg, bg: colors.easy.bg, icon: 'checkmark-circle' },
+  accepted: { label: 'Ebeveyn maceralara ekledi', fg: colors.easy.fg, bg: colors.easy.bg, icon: 'checkmark-circle' },
   declined: { label: 'Ebeveyn eklemedi', fg: colors.muted, bg: '#ECEEF3', icon: 'close-circle-outline' },
 };
 
@@ -72,8 +72,8 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
     setRoutine(null);
     load();
     Alert.alert('Rutin önerildi', grouped
-      ? `${list.length} görev tek paket olarak ebeveynin onayına gönderildi.`
-      : `${list.length} görev ebeveynin onayına gönderildi. (Paket ve davranış hedefi bağı için veritabanı güncellemesi bekleniyor; görevler ayrı öneri olarak gitti.)`);
+      ? `${list.length} macera tek paket olarak ebeveynin onayına gönderildi.`
+      : `${list.length} macera ebeveynin onayına gönderildi. (Paket ve davranış hedefi bağı için veritabanı güncellemesi bekleniyor; maceralar ayrı öneri olarak gitti.)`);
   };
 
   const load = useCallback(() => {
@@ -115,14 +115,14 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
       {showSuggest && (<>
       <Pressable style={styles.cta} onPress={() => setEditor({ open: true, editing: null })}>
         <Ionicons name="add" size={22} color="#fff" />
-        <Text style={styles.ctaText}>Aileye görev öner</Text>
+        <Text style={styles.ctaText}>Aileye macera öner</Text>
       </Pressable>
       <Text style={styles.sub}>
-        Ebeveyn öneriyi ParentApp'te görür; eklerse görev buradaki ayarlarla çocuğun listesine düşer. Bekleyen bir öneriye dokunarak güncelleyebilirsin.
+        Ebeveyn öneriyi ParentApp'te görür; eklerse macera buradaki ayarlarla çocuğun listesine düşer. Bekleyen bir öneriye dokunarak güncelleyebilirsin.
       </Text>
       <Label>Günlük rutin önerisi</Label>
       <Text style={[styles.sub, { marginTop: 0, marginBottom: 10 }]}>
-        Bir rutini tek paket olarak öner; ebeveyn tek kartta görür, isterse görev çıkarıp ekler. Her görev ayrı onaylanır.
+        Bir rutini tek paket olarak öner; ebeveyn tek kartta görür, isterse macera çıkarıp ekler. Her macera ayrı onaylanır.
         {band ? ` ${client.child_name} için ${AGE_LABEL[band]} yaş rutinleri.` : ''}
       </Text>
       {own !== null && (
@@ -145,7 +145,7 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
               )}
             </View>
             <Text style={styles.routineTitle}>{r.title}</Text>
-            <Text style={styles.meta}>{r.subtitle} · {r.tasks.length} görev</Text>
+            <Text style={styles.meta}>{r.subtitle} · {r.tasks.length} macera</Text>
             {(!band || allAges || r.source === 'own') && <Text style={[styles.meta, !fitsAge(r, band) && { color: colors.medium.fg }]}>{agesText(r.ages)}</Text>}
           </Pressable>
         ))}
@@ -163,7 +163,7 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
           <Text style={styles.link}>{allAges ? `Yalnız ${AGE_LABEL[band]} yaş rutinlerini göster` : 'Bütün yaş gruplarını göster'}</Text>
         </Pressable>
       )}
-      <Text style={[styles.sub, { marginTop: 14 }]}>Bir davranış hedefine bağlı, plandaki diğer değişikliklerle birlikte göndermek için Takip Planı'nda davranış hedefinin satırındaki "+ Rutin ya da görev bağla"yı kullan.</Text>
+      <Text style={[styles.sub, { marginTop: 14 }]}>Bir davranış hedefine bağlı, plandaki diğer değişikliklerle birlikte göndermek için Takip Planı'nda davranış hedefinin satırındaki "+ Rutin ya da macera bağla"yı kullan.</Text>
       </>)}
       {schemaMissing && (
         <Notice icon="construct-outline" text="Öneri ayrıntıları (tekrar günleri, hatırlatma, ödül…) için veritabanı güncellemesi bekleniyor. Güncelleme uygulanınca bu özellik açılır." />
@@ -217,7 +217,7 @@ function SuggestionCard({ s, onEdit }: { s: Suggestion; onEdit: () => void }) {
                 accessibilityHint={pending ? 'Öneriyi düzenle' : undefined} style={styles.card}>
                 <Text style={{ fontSize: 22 }}>{s.emoji}</Text>
                 <View style={{ flex: 1, gap: 5 }}>
-                  {s.kind === 'change' && <Text style={[styles.meta, { fontWeight: '700', color: colors.navy }]}>{s.change_remove ? 'Değişiklik önerisi · görevi bitir' : 'Değişiklik önerisi'}</Text>}
+                  {s.kind === 'change' && <Text style={[styles.meta, { fontWeight: '700', color: colors.navy }]}>{s.change_remove ? 'Değişiklik önerisi · macerayı bitir' : 'Değişiklik önerisi'}</Text>}
                   <Text style={styles.cardTitle}>{s.title}</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <DifficultyBadge d={s.difficulty} coins={s.coins} />
@@ -234,7 +234,7 @@ function SuggestionCard({ s, onEdit }: { s: Suggestion; onEdit: () => void }) {
                   <View style={[styles.pill, { backgroundColor: st.bg }]}>
                     <Ionicons name={st.icon} size={13} color={st.fg} />
                     <Text style={{ fontSize: 12, fontWeight: '600', color: st.fg }}>
-                      {st.label}{s.task_title ? ` · görev: ${s.task_title}` : ''}
+                      {st.label}{s.task_title ? ` · macera: ${s.task_title}` : ''}
                     </Text>
                   </View>
                   <Text style={styles.date}>
@@ -276,7 +276,7 @@ function RoutinePackage({ items, goals, onEdit }: { items: Suggestion[]; goals: 
       <Pressable onPress={() => setOpen((v) => !v)} accessibilityRole="button" accessibilityState={{ expanded: open }} style={styles.pkgHead}>
         <View style={styles.routineIcon}><Ionicons name={r.icon as keyof typeof Ionicons.glyphMap} size={20} color={colors.navy} /></View>
         <View style={{ flex: 1, gap: 3 }}>
-          <Text style={styles.cardTitle}>{r.title} · {items.length} görev</Text>
+          <Text style={styles.cardTitle}>{r.title} · {items.length} macera</Text>
           <Text style={styles.meta}>
             {[drafts ? `${drafts} taslak` : `${added} / ${items.length} eklendi`, waiting ? `${waiting} karar bekliyor` : '', goal ? `Davranış hedefi: ${goal}` : ''].filter(Boolean).join(' · ')}
           </Text>

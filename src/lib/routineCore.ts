@@ -41,7 +41,7 @@ export function childBand(child: { age_band?: string | null; birthday?: string |
 export const fitsAge = (r: Pick<Routine, 'ages'>, band: AgeGroup | null) => !band || !r.ages.length || r.ages.includes(band);
 
 export const REPEAT_TEXT: Record<RoutineRepeat, string> = {
-  weekdays: 'Hafta içi her gün', daily: 'Her gün', weekly: 'Her görev haftanın kendi gününde',
+  weekdays: 'Hafta içi her gün', daily: 'Her gün', weekly: 'Her macera haftanın kendi gününde',
 };
 
 /* ---------- Düzenlenebilir taslak (saat, gün, seçim) ---------- */

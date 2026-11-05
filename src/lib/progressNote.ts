@@ -43,12 +43,12 @@ export function progressNote(r: NoteInput): string {
   // Ev rutini
   lines.push('', 'Ev rutini');
   const o = observations(r.tasks, r.completions, from, to);
-  if (!o.planned) lines.push('• Bu dönemde planlı görev yok.');
+  if (!o.planned) lines.push('• Bu dönemde planlı sorumluluk yok.');
   else {
     const prev = observations(r.tasks, r.completions, prevFrom, prevTo);
-    lines.push(`• Ebeveyn onaylı tamamlama: ${o.approved}/${o.planned} planlı görev (${pc(o.rate)})`
+    lines.push(`• Ebeveyn onaylı tamamlama: ${o.approved}/${o.planned} planlı sorumluluk (${pc(o.rate)})`
       + (prev.planned ? `; önceki ${r.weeks} haftada ${pc(prev.rate)}.` : '.'));
-    lines.push(`• Bütün görevlerin tamamlandığı gün: ${o.fullDays}/${o.plannedDays} (${pc(o.fullDayRate)}).`);
+    lines.push(`• Bütün sorumlulukların tamamlandığı gün: ${o.fullDays}/${o.plannedDays} (${pc(o.fullDayRate)}).`);
     if (o.withReminder) lines.push(`• Hatırlatmadan önce başlama: ${o.beforeReminder}/${o.withReminder} (${pc(o.beforeReminderRate)}).`);
     if (o.declined) {
       const top = (Object.keys(o.declineReasons) as (keyof typeof o.declineReasons)[])
@@ -61,7 +61,7 @@ export function progressNote(r: NoteInput): string {
       const best = stats[stats.length - 1];
       const low = stats[0];
       if ((best.rate ?? 0) > (low.rate ?? 0)) {
-        lines.push(`• En tutarlı görev: ${best.task.title} (${pc(best.rate)}). En çok desteğe ihtiyaç duyan: ${low.task.title} (${pc(low.rate)}).`);
+        lines.push(`• En tutarlı sorumluluk: ${best.task.title} (${pc(best.rate)}). En çok desteğe ihtiyaç duyan: ${low.task.title} (${pc(low.rate)}).`);
       }
     }
     const mastered = stats.filter((s) => s.mastered).map((s) => s.task.title);

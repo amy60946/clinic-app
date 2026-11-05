@@ -48,7 +48,7 @@ function Body({ me, editing, teamSize, onClose, onSaved }: {
     return last ? shiftTime(last, 10) : '07:00';
   };
   const add = (x: OwnItem) => {
-    if (items.length >= MAX) return Alert.alert(`Bir rutinde en çok ${MAX} görev olur.`);
+    if (items.length >= MAX) return Alert.alert(`Bir rutinde en çok ${MAX} macera olur.`);
     setItems((l) => [...l, { ...x, time: x.time ?? nextTime(), ...(repeat === 'weekly' ? { days: x.days ?? [1] } : {}) }]);
   };
   const results = useMemo(() => {
@@ -82,7 +82,7 @@ function Body({ me, editing, teamSize, onClose, onSaved }: {
   const save = async () => {
     if (timeEdit) saveTime();
     if (!title.trim()) return Alert.alert('Rutine bir ad ver.');
-    if (!items.length) return Alert.alert('En az bir görev ekle.');
+    if (!items.length) return Alert.alert('En az bir macera ekle.');
     setBusy(true);
     try {
       const clean = items.map((x) => ({ ...x, ...(repeat === 'weekly' ? { days: x.days?.length ? x.days : [1] } : { days: undefined }) }))
@@ -124,7 +124,7 @@ function Body({ me, editing, teamSize, onClose, onSaved }: {
             ))}
           </View>
           <Text style={styles.label}>Ne zaman?</Text>
-          <Segmented options={[{ id: 'weekdays' as const, label: 'Hafta içi' }, { id: 'daily' as const, label: 'Her gün' }, { id: 'weekly' as const, label: 'Görev günleri' }]}
+          <Segmented options={[{ id: 'weekdays' as const, label: 'Hafta içi' }, { id: 'daily' as const, label: 'Her gün' }, { id: 'weekly' as const, label: 'Macera günleri' }]}
             value={repeat} onChange={(r) => { if (mine) { setRepeat(r); if (r === 'weekly') setItems((l) => l.map((x) => ({ ...x, days: x.days ?? [1] }))); } }} />
           <Text style={styles.label}>Hangi yaş grupları için?</Text>
           <View style={styles.icons}>
@@ -138,9 +138,9 @@ function Body({ me, editing, teamSize, onClose, onSaved }: {
               );
             })}
           </View>
-          <Text style={styles.small}>Seçmezsen her yaş için sayılır. Seçersen katalogda yalnız o yaşlara uygun görevler çıkar.</Text>
+          <Text style={styles.small}>Seçmezsen her yaş için sayılır. Seçersen katalogda yalnız o yaşlara uygun maceralar çıkar.</Text>
 
-          <Text style={styles.label}>{`Görevler (${items.length} / ${MAX})`}</Text>
+          <Text style={styles.label}>{`Maceralar (${items.length} / ${MAX})`}</Text>
           {items.length > 0 && (
             <View style={styles.list}>
               {items.map((x, i) => (
@@ -187,7 +187,7 @@ function Body({ me, editing, teamSize, onClose, onSaved }: {
                 value={adding === 'own' ? 'own' : 'catalog'} onChange={setAdding} />
               {adding === 'catalog' && (
                 <>
-                  <Input value={q} onChangeText={setQ} placeholder="Görev ara (ör. diş, kitap)" />
+                  <Input value={q} onChangeText={setQ} placeholder="Macera ara (ör. diş, kitap)" />
                   <View style={styles.list}>
                     {results.map((t, i) => (
                       <Pressable key={t.id} onPress={() => add({ key: t.id, title: t.title, emoji: t.emoji, skill: t.skill, category: t.category, difficulty: t.difficulty, coins: t.coins })}
@@ -206,14 +206,14 @@ function Body({ me, editing, teamSize, onClose, onSaved }: {
                 <View style={{ gap: 8 }}>
                   <View style={{ flexDirection: 'row', gap: 8 }}>
                     <View style={{ width: 64 }}><Input value={own.emoji} onChangeText={(e) => setOwn({ ...own, emoji: e })} maxLength={4} /></View>
-                    <View style={{ flex: 1 }}><Input value={own.title} onChangeText={(t) => setOwn({ ...own, title: t })} placeholder="Görevin adı" maxLength={120} /></View>
+                    <View style={{ flex: 1 }}><Input value={own.title} onChangeText={(t) => setOwn({ ...own, title: t })} placeholder="Maceranın adı" maxLength={120} /></View>
                   </View>
                   <Segmented options={[{ id: 'easy' as const, label: 'Kolay' }, { id: 'medium' as const, label: 'Orta' }, { id: 'hard' as const, label: 'Zor' }]}
                     value={own.difficulty} onChange={(d) => setOwn({ ...own, difficulty: d })} />
                   <Pressable onPress={() => { if (!own.title.trim()) return; add({ title: own.title.trim(), emoji: own.emoji || '⭐', difficulty: own.difficulty }); setOwn({ title: '', emoji: '⭐', difficulty: 'easy' }); }}
                     style={styles.addBtn} accessibilityRole="button">
                     <Ionicons name="add" size={18} color={colors.navy} />
-                    <Text style={styles.addText}>Görevi ekle</Text>
+                    <Text style={styles.addText}>Macerayı ekle</Text>
                   </Pressable>
                 </View>
               )}
