@@ -29,6 +29,14 @@ export type ClinicianMe = {
   owner_name?: string | null;
   invited_by_name?: string | null;
   joined_at?: string | null;
+  // ortak proposed/20261105090000_workspaces.sql (çalışma alanları): yoksa eski sunucu (tek alan)
+  personal?: boolean;                // seçili alan uzmanın bireysel alanı
+  members_can_invite?: boolean;      // ekip üyeleri aile davet edebilir (sahip ayarı)
+  default_clinic_id?: string;
+  workspace_invalid?: boolean;       // seçili alan artık geçerli değil (ayrıldı / çıkarıldı)
+  workspaces?: number;               // etkin alan sayısı
+  has_personal?: boolean;
+  requests?: number;                 // bekleyen ekibe katılma isteği
 };
 
 export type Client = {
@@ -430,26 +438,89 @@ export async function deleteOwnRoutine(id: string): Promise<void> {
   check(null, error);
 }
 
-/* ---------- Ekip ---------- */
+/* ---------- Ekip ve çalışma alanları (ortak akislar.md 21, veritabani.md 30) ---------- */
 
-export type Member = { id: string; name: string; title: string; role: 'owner' | 'member' };
+export type Member = { id: string; name: string; title: string; role: 'owner' | 'member'; joined_at?: string; invited_by_name?: string | null };
+export type TeamRequest = { id: string; name: string; title: string; created_at: string; expires_at: string };
+export type Team = { members: Member[]; requests: TeamRequest[]; seat_limit: number; members_can_invite: boolean; personal: boolean };
+export type Workspace = { clinic_id: string; name: string; role: 'owner' | 'member'; personal: boolean; active: boolean; access: boolean;
+  default: boolean; members: number; joined_at: string };
+export type MyRequest = { id: string; clinic_id: string; clinic: string; by: string; by_title: string; members: number; created_at: string; expires_at: string };
+export class WorkspacesNotInstalled extends Error {}
+const missingFn = (e: { code?: string } | null) => e?.code === 'PGRST202' || e?.code === '42883';
 
+// Seçili alanın ekibi (rol alandaki üyelikten). Sunucu eskiyse uzman tablosundan (tek alan).
+export async function loadTeam(): Promise<Team | null> {
+  const { data, error } = await supabase.rpc('clinic_team');
+  if (missingFn(error)) return null;
+  return check(data as Team, error);
+}
 export async function listTeam(): Promise<Member[]> {
+  const t = await loadTeam();
+  if (t) return t.members;
   const { data, error } = await supabase.from('clinicians').select('id, name, title, role').order('created_at');
   return check((data ?? []) as Member[], error);
 }
-
-// Giriş yapmış uzman ekip koduyla kliniğe katılır (eski kliniği boşsa silinir; doluysa sunucu reddeder)
-export async function joinTeam(code: string): Promise<void> {
-  const { error } = await supabase.rpc('clinic_join_team', { p_code: code.trim().toUpperCase() });
-  if (error?.code === 'PGRST202') throw new Error('Bu özellik için veritabanı güncellemesi bekleniyor.');
+export async function listWorkspaces(): Promise<Workspace[] | null> {
+  const { data, error } = await supabase.rpc('clinician_workspaces');
+  if (missingFn(error)) return null;
+  return check((data ?? []) as Workspace[], error);
+}
+export async function openPersonalWorkspace(): Promise<string> {
+  const { data, error } = await supabase.rpc('clinician_personal_workspace');
+  return check(data as string, error);
+}
+export async function createClinicWorkspace(name: string): Promise<string> {
+  const { data, error } = await supabase.rpc('clinic_workspace_create', { p_name: name.trim().slice(0, 120) });
+  if (error?.message?.includes('too_many_clinics')) throw new Error('En çok 3 klinik açabilirsin.');
+  return check(data as string, error);
+}
+// Kalıcı kişisel kod (yoksa üretilir); rotate yeniler
+export async function personalCode(rotate = false): Promise<string | null> {
+  const { data, error } = await supabase.rpc('clinician_personal_code', { p_rotate: rotate });
+  if (missingFn(error)) return null;
+  return check(data as string, error);
+}
+export type RequestResult = { status?: 'sent' | 'pending'; id?: string; name?: string; title?: string; expires_at?: string; error?: string; hint?: string; message?: string };
+export const REQUEST_ERROR: Record<string, string> = {
+  invalid_code: 'Bu kodla bir uzman bulunamadı. Kodu uzmandan yeniden iste.',
+  too_many_attempts: 'Çok fazla hatalı deneme. 15 dakika sonra tekrar dene.',
+  self: 'Bu senin kendi kodun.',
+  already_member: 'Bu uzman zaten ekibinde.',
+  seat_full: 'Koltuklar dolu. Klinik paketini yükselt ya da bekleyen bir isteği geri çek.',
+  personal_workspace: 'Bireysel çalışma alanına uzman eklenmez. Ekip için bir klinik aç.',
+};
+export async function requestMember(code: string): Promise<RequestResult> {
+  const { data, error } = await supabase.rpc('clinic_member_request', { p_code: code.replace(/[^A-Za-z0-9]/g, '').toUpperCase() });
+  if (missingFn(error)) throw new WorkspacesNotInstalled('Bu özellik için veritabanı güncellemesi bekleniyor.');
+  if (error?.message?.includes('only_owner')) throw new Error('Uzmanı yalnız klinik sahibi ekler.');
+  return check(data as RequestResult, error);
+}
+export async function cancelTeamRequest(id: string): Promise<void> {
+  const { error } = await supabase.rpc('clinic_member_request_cancel', { p_request: id });
   check(null, error);
 }
-
-// Yalnız klinik sahibi; koltuk sınırı kayıtta denetlenir
-export async function createTeamInvite(): Promise<Invite> {
-  const { data, error } = await supabase.rpc('clinic_create_invite', { p_kind: 'clinician', p_label: '' });
-  return check(data as Invite, error);
+export async function myTeamRequests(): Promise<MyRequest[]> {
+  const { data, error } = await supabase.rpc('clinic_member_requests_mine');
+  if (missingFn(error)) return [];
+  return check((data ?? []) as MyRequest[], error);
+}
+export async function respondTeamRequest(id: string, accept: boolean): Promise<{ status?: string; clinic_id?: string; clinic?: string; error?: string }> {
+  const { data, error } = await supabase.rpc('clinic_member_respond', { p_request: id, p_accept: accept });
+  return check(data as { status?: string; clinic_id?: string; clinic?: string; error?: string }, error);
+}
+export async function removeMember(clinicianId: string): Promise<void> {
+  const { error } = await supabase.rpc('clinic_member_remove', { p_clinician: clinicianId });
+  check(null, error);
+}
+export async function leaveClinic(): Promise<void> {
+  const { error } = await supabase.rpc('clinic_leave');
+  if (error?.message?.includes('owner_cannot_leave')) throw new Error('Klinik sahibi ayrılamaz.');
+  check(null, error);
+}
+export async function setInvitePolicy(on: boolean): Promise<void> {
+  const { error } = await supabase.rpc('clinic_invite_policy_set', { p_members_can_invite: on });
+  check(null, error);
 }
 
 // Ayarlar: uzman kendi adını ve unvanını, klinik sahibi kliniğin adını değiştirir (RLS: ortak veritabani.md 4.1)

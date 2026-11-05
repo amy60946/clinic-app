@@ -14,6 +14,7 @@ import { ClientConfigProvider } from './src/lib/clientConfig';
 import ConfigGate from './src/screens/ConfigGate';
 import CookieNotice from './src/components/CookieNotice';
 import { LayoutProvider } from './src/lib/layout';
+import { WorkspaceProvider } from './src/lib/workspace';
 
 function Loading() {
   return (
@@ -52,7 +53,9 @@ function Root() {
       <ConfigGate onSignOut={signOut}>
         <NotificationsProvider key={session.user.id} userId={session.user.id}>
           <Tracking />
-          <HomeScreen />
+          <WorkspaceProvider userId={session.user.id}>
+            <HomeScreen />
+          </WorkspaceProvider>
         </NotificationsProvider>
       </ConfigGate>
     </ClientConfigProvider>

@@ -46,7 +46,7 @@ export const PACKAGES: Record<PackageId, { title: string; who: string; features:
     who: 'Ekiple çalışan klinikler için · 10 uzmana kadar',
     features: [
       'Bireysel paketteki her şey',
-      '10 uzmana kadar ekip; ekip koduyla davet',
+      '10 uzmana kadar ekip; uzmanı kişisel koduyla ekle',
       'Kliniğin bütün danışanları ortak listede',
       'Danışan başına sorumlu uzman ve ona giden bildirimler',
       'Ekip notları: herkes okur, yalnız yazarı değiştirir',

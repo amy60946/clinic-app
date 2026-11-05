@@ -8,17 +8,17 @@ import { Card, Label, Input, SmallButton } from '../components/ui';
 import { ClinicianMe, Client, Member, updateProfile, updateClinicName } from '../lib/clinic';
 import { billingStatus, daysLeft, packageName } from '../lib/billing';
 import { track } from '../lib/track';
-import TeamCard from './TeamCard';
+import TeamCard, { PersonalCodeCard } from './TeamCard';
 
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 // Ayarlar (ana ekranda sağ üstteki ad): kişisel bilgiler, klinik adı, ekip, üyelik, danışanlar, yasal ve hesap.
 export default function SettingsScreen({
-  me, team, clients, email, solo, verified, onBack, onChanged, onPlans, onOpenClient, onSample, onLegal, onGuide, onLogout, onDelete, legalOn,
+  me, team, clients, email, solo, verified, onBack, onChanged, onPlans, onOpenClient, onSample, onLegal, onGuide, onLogout, onDelete, legalOn, onLeft,
 }: {
   me: ClinicianMe; team: Member[]; clients: Client[]; email: string; solo: boolean; verified: boolean; legalOn: boolean;
   onBack: () => void; onChanged: () => void; onPlans: () => void; onOpenClient: (c: Client) => void; onSample: () => void;
-  onLegal: () => void; onGuide: () => void; onLogout: () => void; onDelete: () => void;
+  onLegal: () => void; onGuide: () => void; onLogout: () => void; onDelete: () => void; onLeft: () => void;
 }) {
   const owner = me.role === 'owner';
   const [name, setName] = useState(me.name);
@@ -90,6 +90,13 @@ export default function SettingsScreen({
             <SmallButton label="Kaydet" onPress={saveProfile} busy={busy === 'profile'} />
           </View>
 
+          {me.workspaces !== undefined && (
+            <>
+              <Text style={styles.section}>Kişisel kodun</Text>
+              <PersonalCodeCard />
+            </>
+          )}
+
           {!solo && (
             <>
               <Text style={styles.section}>Klinik</Text>
@@ -102,7 +109,7 @@ export default function SettingsScreen({
                   </View>
                 </>
               ) : <Card><Text style={styles.body}>{me.clinic}</Text></Card>}
-              <TeamCard me={me} team={team} onJoined={onChanged} onUpgrade={onPlans} />
+              <TeamCard me={me} team={team} onChanged={onChanged} onUpgrade={onPlans} onLeft={onLeft} />
             </>
           )}
 

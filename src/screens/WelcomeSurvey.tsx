@@ -5,7 +5,8 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../theme';
 import { Input } from '../components/ui';
-import { ClinicianMe, joinTeam } from '../lib/clinic';
+import { ClinicianMe } from '../lib/clinic';
+import { PersonalCodeCard } from './TeamCard';
 import { SURVEY, SurveyQuestion, Intent, saveSurvey } from '../lib/survey';
 import { track } from '../lib/track';
 
@@ -159,24 +160,9 @@ function ProfessionList({ q, value, onChange, wide }: { q: SurveyQuestion; value
 
 // Son ekran: seçilen nedene göre ilk adım
 function Ready({ me, name, intent, onFinish }: { me: ClinicianMe; name: string; intent: Intent | null; onFinish: (a: SurveyAction) => void }) {
-  const [code, setCode] = useState('');
-  const [busy, setBusy] = useState(false);
-  const join = async () => {
-    if (![6, 8].includes(code.trim().length)) return Alert.alert('Ekip kodu 8 karakterdir.');
-    setBusy(true);
-    try {
-      await joinTeam(code);
-      track('team.join');
-      onFinish('joined');
-    } catch (e) {
-      Alert.alert('Ekibe katılınamadı', (e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
   const text = intent === 'trial' ? 'En hızlı başlangıç: ilk aileni davet et. Davet e-postası senin adınla gider; ebeveyn onaylayınca çocuk panelinde görünür.'
     : intent === 'family' ? 'Çalıştığın aileyi davet et. Ebeveyn e-postadaki kodla bağlanıp onay verince çocuk panelinde görünür.'
-    : intent === 'team' ? 'Klinik sahibinden aldığın 8 karakterlik ekip kodunu yaz; kliniğin danışanları ve ekibin profiline gelir.'
+    : intent === 'team' ? 'Aşağıdaki kişisel kodunu klinik sahibine ver. Seni ekibine eklemek istediğinde onay sana gelir; kliniğin danışanları ayrı bir çalışma alanında açılır.'
     : intent === 'org' ? 'Klinik paketinde 10 uzmana kadar ekip kurar, aile çalışmasını tek düzende yürütürsün. 7 günlük deneme sürüyor.'
     : 'Panelin hazır. Ailelerin paylaştığı çocuklar burada görünür.';
   const primary: { label: string; onPress: () => void } | null =
@@ -193,10 +179,7 @@ function Ready({ me, name, intent, onFinish }: { me: ClinicianMe; name: string; 
           <Text style={[styles.lead, { textAlign: 'center' }]}>{text}</Text>
           {intent === 'team' && (
             <View style={{ alignSelf: 'stretch', gap: 10, marginTop: 6 }}>
-              <Input value={code} onChangeText={(t) => setCode(t.toUpperCase())} placeholder="Ekip kodu" autoCapitalize="characters" maxLength={8} />
-              <Pressable onPress={join} disabled={busy} style={[styles.next, styles.wide, busy && { opacity: 0.6 }]} accessibilityRole="button">
-                {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.nextText}>Ekibe katıl</Text>}
-              </Pressable>
+              <PersonalCodeCard compact />
             </View>
           )}
           {primary && (

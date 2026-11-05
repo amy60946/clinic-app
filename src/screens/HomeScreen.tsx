@@ -11,6 +11,8 @@ import {
   clinicianMe, listClients, listTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Member,
 } from '../lib/clinic';
 import SettingsScreen from './SettingsScreen';
+import { WorkspaceSheet, TeamRequestsCard } from './WorkspaceSheet';
+import { useWorkspace } from '../lib/workspace';
 import CalendarScreen from './calendar/CalendarScreen';
 import { loadSessions } from '../lib/sessions';
 import { trDay, trToIso, timeRange, isClosed, type Session } from '../lib/sessionCore';
@@ -77,6 +79,9 @@ function billingReturn(): 'ok' | 'fail' | null {
 
 export default function HomeScreen() {
   const { signOut, rejectAccount, session } = useAuth();
+  const ws = useWorkspace();
+  const [wsOpen, setWsOpen] = useState(false);          // çalışma alanı seçici (ortak akislar.md 21)
+  const [reqKey, setReqKey] = useState(0);              // ekibe katılma istekleri yenilensin
   const [state, setState] = useState<State>({ kind: 'loading' });
   const stateRef = useRef(state);
   const [refreshing, setRefreshing] = useState(false);
@@ -122,6 +127,7 @@ export default function HomeScreen() {
     let next: State;
     try {
       const me = await clinicianMe();
+      if (me?.workspace_invalid && ws.id) { ws.switchTo(null); return { kind: 'loading' }; }   // ayrıldı / çıkarıldı
       if (!me) next = { kind: 'not_clinician' };
       else {
         const [clients, team] = await Promise.all([listClients(), listTeam()]);
@@ -133,7 +139,7 @@ export default function HomeScreen() {
     setState(next);
     stateRef.current = next;
     return next;
-  }, []);
+  }, [ws]);
 
   useEffect(() => {
     load();
@@ -244,6 +250,11 @@ export default function HomeScreen() {
     setSettings(false);
     setSampleOpen(false);
     setTourStep(null);
+    const cur = stateRef.current;
+    const target = (n.data as { clinic_id?: string } | null)?.clinic_id;
+    if (target && cur.kind === 'ready' && cur.me.workspaces !== undefined && target !== cur.me.clinic_id) { ws.switchTo(target, n); return; }
+    if (n.kind === 'team_request') { setSelected(null); load(); setReqKey((k) => k + 1); return; }
+    if (n.kind === 'team_removed' || n.kind === 'team_left' || n.kind === 'team_request_declined') { setSelected(null); load(); return; }
     if (n.kind === 'team_joined') { setSelected(null); load(); return; }
     if (n.kind.startsWith('session_')) { setSelected(null); setCalendar({ sessionId: (n.data as { session_id?: string } | null)?.session_id ?? null }); return; }
     if (n.kind === 'kvkk_answered') { setSelected(null); setLegalOpen('kvkk'); return; }
@@ -272,7 +283,7 @@ export default function HomeScreen() {
       return;
     }
     setSelected({ client: c, tab: notificationTab(n.kind), key: Date.now() });
-  }, [load]);
+  }, [load, ws]);
 
   // Telefon bildirimine dokunma (uygulama kapalıyken de)
   useEffect(() => onNotificationTap((data) => {
@@ -281,12 +292,15 @@ export default function HomeScreen() {
     else pending.current = n;
   }), [openTarget]);
   useEffect(() => {
-    if (state.kind === 'ready' && pending.current) {
+    if (state.kind !== 'ready') return;
+    const moved = ws.takePending();           // alan değiştiren bildirim, yeni alanda açılır
+    if (moved) { openTarget({ kind: moved.kind, data: moved.data as AppNotification['data'], childId: moved.childId ?? undefined }); return; }
+    if (pending.current) {
       const n = pending.current;
       pending.current = null;
       openTarget(n);
     }
-  }, [state, openTarget]);
+  }, [state, openTarget, ws]);
 
   const refresh = async () => {
     setRefreshing(true);
@@ -323,10 +337,24 @@ export default function HomeScreen() {
   const accountLinks = (
     <View style={styles.accountLinks}>
       {legalOn && <Pressable onPress={() => setLegalOpen('docs')} hitSlop={8}><Text style={styles.link}>Yasal ve gizlilik</Text></Pressable>}
+      {state.kind === 'ready' && (state.me.workspaces ?? 1) > 1 && (
+        <Pressable onPress={() => setWsOpen(true)} hitSlop={8}><Text style={styles.link}>Çalışma alanını değiştir</Text></Pressable>
+      )}
       <Pressable onPress={logout} hitSlop={8}><Text style={styles.link}>Çıkış yap</Text></Pressable>
       <Pressable onPress={removeAccount} hitSlop={8}><Text style={[styles.link, { color: colors.danger }]}>Hesabı sil</Text></Pressable>
     </View>
   );
+  const wsSheet = state.kind === 'ready' && state.me.workspaces !== undefined
+    ? <WorkspaceSheet visible={wsOpen} me={state.me} onClose={() => setWsOpen(false)} /> : null;
+  // Kabul edilen istek: bireysel alanda henüz danışan yoksa doğrudan o kliniğe geçilir, varsa sorulur
+  const afterAccept = (r: { clinic_id: string; clinic: string }) => {
+    if (state.kind !== 'ready') return;
+    if (state.clients.length === 0) { ws.switchTo(r.clinic_id); return; }
+    load();
+    Alert.alert(`${r.clinic} ekibine katıldın`, 'Kliniğin danışanları ayrı bir çalışma alanında. Şimdi oraya geçilsin mi?', [
+      { text: 'Sonra', style: 'cancel' }, { text: 'Geç', onPress: () => ws.switchTo(r.clinic_id) },
+    ]);
+  };
   // Yeniden onay ve üyelik ekranlarından da açılır (hukuk/50 bölüm 2: onay beklerken yasal metinler ve KVKK başvurusu açık)
   const legalSheets = (
     <>
@@ -340,7 +368,7 @@ export default function HomeScreen() {
 
   // Deneme/üyelik bitti (ya da Bireysel pakette ekip üyesi): panel yerine üyelik ekranı
   if (state.kind === 'ready' && !hasAccess(state.me)) {
-    return <><MembershipScreen me={state.me} blocking onChanged={load} footer={accountLinks} />{legalSheets}</>;
+    return <><MembershipScreen me={state.me} blocking onChanged={load} footer={accountLinks} />{legalSheets}{wsSheet}</>;
   }
   if (state.kind === 'ready' && survey === 'show' && legal !== 'unknown') {
     return <WelcomeSurvey me={state.me} onFinish={finishSurvey} />;
@@ -384,7 +412,8 @@ export default function HomeScreen() {
       <>
         <SettingsScreen
           me={state.me} team={state.team} clients={state.clients} email={session?.user.email ?? ''}
-          solo={isSolo(state.me, state.team, session?.user.user_metadata?.practice)}
+          solo={state.me.personal ?? isSolo(state.me, state.team, session?.user.user_metadata?.practice)}
+          onLeft={() => { setSettings(false); ws.switchTo(null); }}
           verified={!!verification?.verified_at} legalOn={Array.isArray(legal)}
           onBack={() => setSettings(false)} onChanged={load} onPlans={() => setPlans(true)}
           onOpenClient={(c) => { setSettings(false); setSelected({ client: c, tab: 'summary', key: Date.now() }); }}
@@ -418,7 +447,8 @@ export default function HomeScreen() {
     );
   }
 
-  const solo = state.kind === 'ready' && isSolo(state.me, state.team, session?.user.user_metadata?.practice);
+  const solo = state.kind === 'ready' && (state.me.personal ?? isSolo(state.me, state.team, session?.user.user_metadata?.practice));
+  const canSwitch = state.kind === 'ready' && state.me.workspaces !== undefined;
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
@@ -432,10 +462,19 @@ export default function HomeScreen() {
           <View style={styles.header}>
             <View style={{ flex: 1 }}>
               <Text style={styles.brand}>ClinicApp</Text>
-              <Text style={styles.title}>{state.kind === 'ready' ? state.me.clinic : 'Uzman paneli'}</Text>
+              {canSwitch && state.kind === 'ready' ? (
+                <Pressable onPress={() => setWsOpen(true)} accessibilityRole="button" accessibilityLabel="Çalışma alanını değiştir" hitSlop={6}
+                  style={({ pressed }) => [{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', maxWidth: '100%' }, pressed && { opacity: 0.7 }]}>
+                  <Text style={[styles.title, { flexShrink: 1 }]} numberOfLines={1}>{state.me.personal ? 'Bireysel çalışmam' : state.me.clinic}</Text>
+                  <Ionicons name="chevron-down" size={18} color={colors.navy} />
+                </Pressable>
+              ) : (
+                <Text style={styles.title}>{state.kind === 'ready' ? state.me.clinic : 'Uzman paneli'}</Text>
+              )}
               {state.kind === 'ready' && (
                 <Text style={styles.subtitle}>
-                  {[[state.me.name !== state.me.clinic && state.me.name, state.me.title].filter(Boolean).join(' · '), planText(state.me)]
+                  {[[(state.me.personal || state.me.name !== state.me.clinic) && state.me.name, state.me.title,
+                      !state.me.personal && state.me.workspaces !== undefined && (state.me.role === 'owner' ? 'Sahip' : 'Ekip üyesi')].filter(Boolean).join(' · '), planText(state.me)]
                     .filter(Boolean).join('\n')}
                 </Text>
               )}
@@ -467,6 +506,7 @@ export default function HomeScreen() {
           <ConfigBanner />
           {state.kind === 'ready' && survey !== 'unknown' && legal !== 'unknown' && (
             <>
+              <TeamRequestsCard me={state.me} reloadKey={reqKey} onAccepted={afterAccept} />
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
               {!!verification?.enabled && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
               {start && !start.hidden && startDone(progressOf(start)) < 5 && (
@@ -492,7 +532,7 @@ export default function HomeScreen() {
                   <Ionicons name="people-outline" size={20} color={colors.navy} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.memberTitle}>{`Ekip · ${state.team.length} uzman`}</Text>
-                    <Text style={styles.small}>{state.me.role === 'owner' ? 'Ekip kodu, koltuklar ve üyeler Ayarlar\'da' : 'Ekip üyeleri Ayarlar\'da'}</Text>
+                    <Text style={styles.small}>{state.me.role === 'owner' ? 'Uzman ekleme ve ekip üyeleri Ayarlar\'da' : 'Ekip üyeleri Ayarlar\'da'}</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={colors.faint} />
                 </Pressable>
@@ -516,6 +556,7 @@ export default function HomeScreen() {
           onIntro={() => afterSheet(() => setGuide(true))} onSample={() => afterSheet(() => openSample())} onAction={onHelpAction} />
       )}
       {legalSheets}
+      {wsSheet}
     </SafeAreaView>
   );
 }

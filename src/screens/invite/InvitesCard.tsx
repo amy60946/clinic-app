@@ -129,7 +129,7 @@ export default function InvitesCard({ me, team, reloadKey, openKey, onChanged, o
           <Card style={{ gap: 8 }}>
             {stats.map((s) => (
               <View key={s.clinician_id} style={styles.statRow}>
-                <Text style={[styles.body, { flex: 1 }]} numberOfLines={1}>{s.clinician || 'Adsız'}</Text>
+                <Text style={[styles.body, { flexGrow: 1, minWidth: 140 }]} numberOfLines={1}>{s.clinician || 'Adsız'}</Text>
                 <Text style={styles.small}>{s.sent} davet · {s.claimed} kayıt · {s.shared} paylaşım · {s.expired} kullanılmadı</Text>
               </View>
             ))}
@@ -138,6 +138,8 @@ export default function InvitesCard({ me, team, reloadKey, openKey, onChanged, o
       )}
 
       <InviteSheet visible={sheet.open} existing={sheet.existing} clinicId={me.clinic_id} clinicianName={[me.name, me.title].filter(Boolean).join(', ')}
+        workspaceName={(me.workspaces ?? 1) > 1 ? (me.personal ? 'bireysel çalışman' : me.clinic) : undefined}
+        blocked={me.role === 'member' && me.members_can_invite === false}
         onClose={() => { setSheet({ open: false }); load(); onChanged(); }} />
     </>
   );

@@ -14,7 +14,7 @@ import {
   type Session, type SessionRecord, type Room, type Availability, type SessionSettings, type SessionPackage, type WaitItem, type ExternalEvent,
 } from '../../lib/sessionCore';
 import {
-  SessionsNotInstalled, loadSessions, loadSession, loadRecords, loadSettings, listRooms, listAvailability, listWaitlist, listPackages, loadExternal,
+  SessionsNotInstalled, loadSessions, loadSession, loadRecords, loadSettings, listRooms, listAvailability, listWaitlist, listPackages, loadExternal, loadBusyElsewhere,
 } from '../../lib/sessions';
 import type { Tab } from '../client/ClientScreen';
 import SessionSheet, { type SessionPreset } from './SessionSheet';
@@ -50,7 +50,11 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
   const [form, setForm] = useState<{ editing?: Session | null; preset?: SessionPreset | null } | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [offer, setOffer] = useState<Session | null>(null);
-  const [ext, setExt] = useState<ExternalEvent | null>(null);
+  const [ext, setExtRaw] = useState<ExternalEvent | null>(null);
+  const setExt = (e: ExternalEvent | null) => {
+    if (e?.source_id === 'workspace') return Alert.alert(e.summary ?? 'Başka çalışma alanı', 'Bu saatte başka çalışma alanında seansın var. Ayrıntısı için o alana geç.');
+    setExtRaw(e);
+  };
   const owner = me.role === 'owner';
   const clientOf = useCallback((linkId: string | null) => (linkId ? clients.find((c) => c.link_id === linkId) ?? null : null), [clients]);
 
@@ -69,8 +73,12 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
       const wk = mondayOfDay(trDay(new Date().toISOString()));
       const from = new Date(Math.min(Date.parse(rangeFrom), Date.now() - 15 * 864e5, Date.parse(trToIso(wk, '00:00')))).toISOString();
       const to = new Date(Math.max(Date.parse(rangeTo), Date.parse(trToIso(addDays(wk, 7), '00:00')))).toISOString();
-      const [ss, ex] = await Promise.all([loadSessions(from, to), loadExternal(rangeFrom, rangeTo).catch(() => [] as ExternalEvent[])]);
-      setSessions(ss); setExternal(ex.filter((e) => !e.session_id && !e.ignored));
+      const [ss, ex, other] = await Promise.all([loadSessions(from, to), loadExternal(rangeFrom, rangeTo).catch(() => [] as ExternalEvent[]),
+        loadBusyElsewhere(rangeFrom, rangeTo)]);
+      // başka çalışma alanlarındaki kendi seansların gri blok (alanın adıyla; ayrıntı o alanda)
+      const mine: ExternalEvent[] = other.filter((b) => b.clinic).map((b, i) => ({ id: `ws-${i}-${b.starts_at}`, source_id: 'workspace', uid: '',
+        starts_at: b.starts_at, ends_at: b.ends_at, summary: b.clinic, session_id: null, ignored: false }));
+      setSessions(ss); setExternal([...ex.filter((e) => !e.session_id && !e.ignored), ...mine]);
       const doneIds = ss.filter((x) => x.status === 'done').map((x) => x.id);
       setRecords(await loadRecords(doneIds).catch(() => ({})));
       setError('');
@@ -221,7 +229,7 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
       <CalendarSettingsSheet open={settingsOpen} me={me} team={team} rooms={rooms} availability={avail} settings={settings}
         onClose={() => setSettingsOpen(false)} onChanged={changed} />
       <OfferSheet slot={offer} waitlist={waitlist} clients={clients} onClose={() => setOffer(null)} onDone={() => { setOffer(null); changed(); }} />
-      <ExternalSheet event={ext} clients={clients} onClose={() => setExt(null)} onDone={() => { setExt(null); changed(); }} />
+      <ExternalSheet event={ext?.source_id === 'workspace' ? null : ext} clients={clients} onClose={() => setExt(null)} onDone={() => { setExt(null); changed(); }} />
     </SafeAreaView>
   );
 }
