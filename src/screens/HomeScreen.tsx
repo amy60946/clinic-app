@@ -459,6 +459,7 @@ export default function HomeScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.navy} />}
       >
         <View style={styles.column}>
+          <View style={styles.headerWrap}>
           <View style={styles.header}>
             <View style={{ flex: 1 }}>
               <Text style={styles.brand}>ClinicApp</Text>
@@ -470,13 +471,6 @@ export default function HomeScreen() {
                 </Pressable>
               ) : (
                 <Text style={styles.title}>{state.kind === 'ready' ? state.me.clinic : 'Uzman paneli'}</Text>
-              )}
-              {state.kind === 'ready' && (
-                <Text style={styles.subtitle}>
-                  {[[(state.me.personal || state.me.name !== state.me.clinic) && state.me.name, state.me.title,
-                      !state.me.personal && state.me.workspaces !== undefined && (state.me.role === 'owner' ? 'Sahip' : 'Ekip üyesi')].filter(Boolean).join(' · '), planText(state.me)]
-                    .filter(Boolean).join('\n')}
-                </Text>
               )}
             </View>
             {state.kind === 'ready' && <LayoutToggle />}
@@ -495,6 +489,15 @@ export default function HomeScreen() {
                 <Ionicons name="log-out-outline" size={20} color={colors.navy} />
               </Pressable>
             )}
+          </View>
+          {/* alt satır düğmelerin altında tam genişlikte: telefonda dar sütunda kırılmasın */}
+          {state.kind === 'ready' && (
+            <Text style={styles.subtitle}>
+              {[[(state.me.personal || state.me.name !== state.me.clinic) && state.me.name, state.me.title,
+                  !state.me.personal && state.me.workspaces !== undefined && (state.me.role === 'owner' ? 'Sahip' : 'Ekip üyesi')].filter(Boolean).join(' · '), planText(state.me)]
+                .filter(Boolean).join('\n')}
+            </Text>
+          )}
           </View>
 
           {(state.kind === 'loading' || state.kind === 'not_clinician' || (state.kind === 'ready' && (survey === 'unknown' || legal === 'unknown'))) && <ActivityIndicator color={colors.navy} style={{ marginTop: 40 }} />}
@@ -561,22 +564,30 @@ export default function HomeScreen() {
   );
 }
 
-// Üyelik özeti: denemede kalan gün, pakette yenileme tarihi; dokununca üyelik ekranı
+// Üyelik özeti: denemede kalan gün, pakette yenileme tarihi; sahip dokununca üyelik ekranı.
+// Ekip üyesi üyeliği yönetemez: satır yalnız bilgi (ok yok, dokunulmaz).
 function MembershipRow({ me, onOpen }: { me: ClinicianMe; onOpen: () => void }) {
   const st = billingStatus(me);
   const left = daysLeft(me.trial_ends_at);
   const urgent = st === 'trial' && left <= 2;
-  return (
-    <Pressable onPress={onOpen} accessibilityRole="button"
-      style={({ pressed }) => [styles.member, urgent && { backgroundColor: '#FFF3D6' }, pressed && { opacity: 0.8 }]}>
+  const owner = me.role === 'owner';
+  const body = (
+    <>
       <Ionicons name={st === 'trial' ? 'time-outline' : 'ribbon-outline'} size={20} color={colors.navy} />
       <View style={{ flex: 1 }}>
         <Text style={styles.memberTitle}>{st === 'trial' ? `Ücretsiz deneme: ${left} gün kaldı` : `Üyelik: ${packageName(me)}`}</Text>
-        <Text style={styles.small}>{st === 'trial'
-          ? (me.role === 'owner' ? 'Paketleri ve fiyatları gör' : 'Üyeliği klinik sahibi yönetir')
-          : planText(me)}</Text>
+        <Text style={styles.small}>{owner
+          ? (st === 'trial' ? 'Paketleri ve fiyatları gör' : planText(me))
+          : `${st === 'trial' ? '' : `${planText(me)} · `}Üyeliği klinik sahibi${me.owner_name ? ` (${me.owner_name})` : ''} yönetir`}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.faint} />
+      {owner && <Ionicons name="chevron-forward" size={18} color={colors.faint} />}
+    </>
+  );
+  if (!owner) return <View style={[styles.member, urgent && { backgroundColor: '#FFF3D6' }]}>{body}</View>;
+  return (
+    <Pressable onPress={onOpen} accessibilityRole="button"
+      style={({ pressed }) => [styles.member, urgent && { backgroundColor: '#FFF3D6' }, pressed && { opacity: 0.8 }]}>
+      {body}
     </Pressable>
   );
 }
@@ -629,7 +640,8 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: 24, paddingTop: 16, flexGrow: 1 },
   column: { width: '100%', maxWidth: 760, alignSelf: 'center' },
-  header: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 8 },
+  headerWrap: { marginBottom: 8 },
+  header: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   brand: { fontSize: 13, fontWeight: '700', color: colors.muted, letterSpacing: 1 },
   title: { fontSize: 24, fontWeight: '700', color: colors.navy, marginTop: 6 },
   subtitle: { fontSize: 13, color: colors.muted, marginTop: 6, lineHeight: 19 },
