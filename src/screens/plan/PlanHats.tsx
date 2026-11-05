@@ -843,8 +843,8 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
             <View style={styles.tabs} accessibilityRole="tablist">
               {([['goal', 'Davranış hedefi', null], ['mod', 'Program', modsOf(g.id).length], ['rt', 'Rutin', rtsOf(g.id).length]] as const).map(([id, label, count]) => (
                 <Pressable key={id} onPress={() => setTabOf((x) => ({ ...x, [g.id]: id }))} accessibilityRole="tab" accessibilityState={{ selected: tab === id }}
-                  style={[styles.tab, tab === id && styles.tabOn]}>
-                  <Text style={[styles.tabText, tab === id && styles.tabTextOn]}>{label}{count !== null ? <Text style={styles.tabCount}>{` ${count}`}</Text> : null}</Text>
+                  style={[styles.tab, id === 'goal' && { flex: 1.5 }, tab === id && styles.tabOn]}>
+                  <Text numberOfLines={1} style={[styles.tabText, tab === id && styles.tabTextOn]}>{label}{count !== null ? <Text style={styles.tabCount}>{` ${count}`}</Text> : null}</Text>
                 </Pressable>
               ))}
             </View>
