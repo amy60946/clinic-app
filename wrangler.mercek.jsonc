@@ -1,0 +1,11 @@
+// Moyo Mercek tanıtım sitesi → mercek.moyoapp.com.tr (yalnız statik dosyalar).
+// Derleme: bash site/build.sh · Yayın: npx wrangler deploy -c wrangler.mercek.jsonc
+// workers.dev ve sürüm önizleme adresleri kapalı: açık kalırsa site Cloudflare Access kilidinin dışından herkese açılır.
+// Route / özel alan adı burada yok; yönetim paneli penceresi ilk yayından sonra API ile bağlar (ortak CANLIYA_ALMA 1.2).
+{
+  "name": "moyo-mercek",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": { "directory": "./dist-mercek" }
+}
