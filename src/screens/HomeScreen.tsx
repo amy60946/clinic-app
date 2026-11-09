@@ -14,6 +14,7 @@ import SettingsScreen from './SettingsScreen';
 import { WorkspaceSheet, TeamRequestsCard, PERSONAL_LABEL, TEAM_LABEL } from './WorkspaceSheet';
 import { useWorkspace } from '../lib/workspace';
 import CalendarScreen from './calendar/CalendarScreen';
+import LibraryScreen from './training/Library';
 import { loadSessions } from '../lib/sessions';
 import { trDay, trToIso, timeRange, isClosed, type Session } from '../lib/sessionCore';
 import { CoachProvider, CoachOverlay } from '../lib/coach';
@@ -102,6 +103,8 @@ export default function HomeScreen() {
   const [settings, setSettings] = useState(false);
   // Takvim (ortak akislar.md 20): ana ekrandan; seans bildirimi o seansı açar
   const [calendar, setCalendar] = useState<{ sessionId?: string | null } | null>(null);
+  // Ebeveyn eğitimi kaynak kütüphanesi (9 Kasım 2026): ana ekrandan; atanınca danışanın Ebeveyn Eğitimi bölümü açılır
+  const [library, setLibrary] = useState(false);
   const [todaySessions, setTodaySessions] = useState<Session[] | null>(null);
   const [sampleOpen, setSampleOpen] = useState(false);
   const [sampleTab, setSampleTab] = useState<Tab>('summary');     // "Göster" örnek ailede bir bölümü açar (tur olmadan)
@@ -399,6 +402,13 @@ export default function HomeScreen() {
     );
   }
 
+  if (library && state.kind === 'ready') {
+    return (
+      <LibraryScreen me={state.me} clients={state.clients} onBack={() => setLibrary(false)}
+        onOpenTraining={(c) => { setLibrary(false); setSelected({ client: c, tab: 'training', key: Date.now() }); }} />
+    );
+  }
+
   if (calendar && state.kind === 'ready') {
     return (
       <CalendarScreen me={state.me} team={state.team} clients={state.clients} initialSessionId={calendar.sessionId}
@@ -521,6 +531,7 @@ export default function HomeScreen() {
                   onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide', { done: startDone(progressOf(start)) }); }} />
               )}
               <CalendarRow sessions={todaySessions} clients={state.clients} onOpen={() => setCalendar({})} />
+              <LibraryRow onOpen={() => setLibrary(true)} />
               <ClientBoard clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onAttention={setAttention}
                 onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
               {/* örnek aile listenin altında kendi satırında: ilk açılıştan sonra 30 gün ya da × ile kaldırılana dek */}
@@ -611,6 +622,20 @@ function CalendarRow({ sessions, clients, onOpen }: { sessions: Session[] | null
             : live.length === 0 ? 'Bugün seans yok'
             : `Bugün ${live.length} seans${next ? ` · sıradaki ${timeRange(next).slice(0, 5)} ${name}` : ''}`}
         </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={colors.muted} />
+    </Pressable>
+  );
+}
+
+// Ana ekranda kütüphane satırı (rakipteki üst menüdeki "Module library"nin karşılığı)
+function LibraryRow({ onOpen }: { onOpen: () => void }) {
+  return (
+    <Pressable onPress={onOpen} accessibilityRole="button" style={({ pressed }) => [styles.member, { marginTop: 8 }, pressed && { opacity: 0.8 }]}>
+      <Ionicons name="library-outline" size={20} color={colors.navy} />
+      <View style={{ flex: 1 }}>
+        <Text style={{ fontSize: 15, fontWeight: '700', color: colors.navy }}>Kaynak kütüphanesi</Text>
+        <Text style={{ fontSize: 12, color: colors.muted }}>Ebeveyn eğitimi: okuma, test ve açık uçlu sorular</Text>
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.muted} />
     </Pressable>

@@ -13,6 +13,7 @@ cp -r "$ROOT/App.tsx" "$ROOT/index.ts" "$ROOT/app.json" "$ROOT/package.json" "$R
 ln -s "$ROOT/node_modules" "$WORK/node_modules"
 cp "$ROOT/preview/demo-supabase.ts" "$WORK/src/lib/supabase.ts"
 cp "$ROOT/preview/demo-sessions.ts" "$WORK/src/lib/demo-sessions.ts"
+cp "$ROOT/preview/demo-training.ts" "$WORK/src/lib/demo-training.ts"
 
 echo "› Tip kontrolü"
 (cd "$WORK" && npx tsc --noEmit)

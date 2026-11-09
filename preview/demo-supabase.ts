@@ -9,6 +9,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SESSION_TABLES, seedSessions, sessionVisible, sessionRpc } from './demo-sessions';
+import { TRAINING_TABLES, TRAINING_DEFAULTS, seedTraining, trainingVisible } from './demo-training';
 import { getWorkspace } from './workspace';
 
 type Row = Record<string, any>;
@@ -24,7 +25,7 @@ const TABLES = ['profiles', 'families', 'children', 'tasks', 'task_assignments',
   'clinics', 'clinicians', 'clinic_invites', 'clinic_links', 'clinic_notes', 'clinic_goals', 'goal_ratings', 'abc_events',
   'clinic_task_suggestions', 'clinic_routines', 'family_subscriptions', 'notifications', 'push_tokens', 'user_activity', 'app_events', 'billing_plans', 'clinic_link_access',
   'care_modules', 'care_module_logs', 'clinic_link_history', 'clinician_surveys', 'legal_acceptances', 'kvkk_requests',
-  'care_module_goals', 'clinic_plan_templates', 'clinic_members', 'clinician_codes', 'clinic_member_requests', ...SESSION_TABLES];
+  'care_module_goals', 'clinic_plan_templates', 'clinic_members', 'clinician_codes', 'clinic_member_requests', ...SESSION_TABLES, ...TRAINING_TABLES];
 
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -247,6 +248,8 @@ function upgrade(x: Db): Db {
   }
   // Seans planlama (ortak 20261105100000): örnek seanslar, odalar, çalışma saatleri, bekleme listesi, paket, dış takvim
   seedSessions(x);
+  // Ebeveyn eğitimi (önizleme, 9 Kasım 2026): örnek ailede etkin / taslak / ustalaşılan eğitim
+  seedTraining(x);
   // Motive etmek (ortak 20261027130000): örnek ailenin onaylı görevlerine ebeveyn gözlemi (eskiler zor, yeniler kolay; bazıları yanıtsız)
   if (!x.motivationSeeded) {
     x.completions.filter((c: Row) => c.child_id === 'c-nazli' && c.status === 'approved' && c.motivation == null).forEach((c: Row, i: number) => {
@@ -459,6 +462,8 @@ function visible(table: string, r: Row): boolean {
   const m = myClinician();
   const sv = sessionVisible(table, r, m ?? null, db, linkVisible);
   if (sv !== undefined) return sv && (!m || clinicianAccess(m));
+  const tv = trainingVisible(table, r, m ?? null, db, linkVisible);
+  if (tv !== undefined) return tv && (!m || clinicianAccess(m));
   // Aile: taslak öneriyi, program ↔ hedef tablosunu ve uzman şablonlarını görmez (sunucuda RLS)
   if (!m && table === 'clinic_task_suggestions') return r.status !== 'draft';
   if (!m && ['care_module_goals', 'clinic_plan_templates'].includes(table)) return false;
@@ -491,6 +496,7 @@ function visible(table: string, r: Row): boolean {
 
 // Sunucudaki sütun varsayılanları (yalnız uygulamanın eklerken boş bıraktıkları)
 const DEFAULTS: Record<string, Row> = {
+  ...TRAINING_DEFAULTS,
   clinic_task_suggestions: { status: 'pending', decided_at: null, task_id: null, updated_at: null, kind: 'new', target_task_id: null, change_remove: false, goal_id: null },
   clinic_plan_templates: { archived: false, shared: false },
   clinic_goals: { link_id: null, invite_code: null, description: '', archived: false, domain: '', measure: 'level', baseline: '', target: '', weeks: null,

@@ -19,12 +19,13 @@ import NotesTab from './NotesTab';
 import ReportTab from './ReportTab';
 import DetailsTab from './DetailsTab';
 import SessionsTab from './SessionsTab';
+import TrainingTab from '../training/TrainingTab';
 import { fromISO } from '../../dates';
 import { SectionHint } from '../SampleTour';
 import { useLayout, LayoutToggle } from '../../lib/layout';
 
 // 'suggestions' eski bağlantılar ve bildirimler için: Ev rutinleri'nde öneri penceresi (Gönderilenler) açılır
-export type Tab = 'summary' | 'routine' | 'abc' | 'goals' | 'sessions' | 'notes' | 'suggestions' | 'report' | 'details';
+export type Tab = 'training' | 'summary' | 'routine' | 'abc' | 'goals' | 'sessions' | 'notes' | 'suggestions' | 'report' | 'details';
 type Section = Exclude<Tab, 'suggestions'>;
 
 // Bölümler: geniş ekranda (web, iPad'de "Web görünümü") gruplu sol menü — Planla · İzle · Kayıt (kullanıcı kararı 30 Ekim 2026);
@@ -32,6 +33,7 @@ type Section = Exclude<Tab, 'suggestions'>;
 type Group = 'plan' | 'watch' | 'record';
 const GROUPS: { id: Group; label: string }[] = [{ id: 'plan', label: 'Planla' }, { id: 'watch', label: 'İzle' }, { id: 'record', label: 'Kayıt' }];
 const SECTIONS: { id: Section; label: string; icon: keyof typeof Ionicons.glyphMap; group: Group }[] = [
+  { id: 'training', label: 'Ebeveyn Eğitimi', icon: 'school-outline', group: 'plan' },
   { id: 'goals', label: 'Takip Planı', icon: 'flag-outline', group: 'plan' },
   { id: 'sessions', label: 'Seanslar', icon: 'calendar-outline', group: 'plan' },
   { id: 'summary', label: 'Özet', icon: 'grid-outline', group: 'watch' },
@@ -220,6 +222,7 @@ export default function ClientScreen({
             {tab === 'summary' && <SummaryTab {...ctx} />}
             {tab === 'routine' && <HomeRoutines {...ctx} view={routineView} onView={setRoutineView} />}
             {tab === 'abc' && <AbcTab key={abcGoal ?? 'all'} {...ctx} />}
+            {tab === 'training' && <TrainingTab {...ctx} sample={!!sample} />}
             {tab === 'goals' && <PlanTab {...ctx} />}
             {tab === 'sessions' && (sample
               ? <Notice icon="calendar-outline" text={'Seanslar gerçek danışanlarda görünür: Takvim\'den ya da burada "+ Seans" ile planlanır.'} />
@@ -339,7 +342,8 @@ function Switcher({ visible, clients, current, onClose, onPick }: {
 function TabGrid({ value, onChange, dots }: { value: Section; onChange: (t: Section) => void; dots: Partial<Record<Section, boolean>> }) {
   const { width } = useWindowDimensions();
   const wide = width >= 1000;
-  const rows = wide ? [SECTIONS] : [SECTIONS.slice(0, 4), SECTIONS.slice(4)];
+  const half = Math.ceil(SECTIONS.length / 2);
+  const rows = wide ? [SECTIONS] : [SECTIONS.slice(0, half), SECTIONS.slice(half)];
   return (
     <View style={styles.grid} accessibilityRole="tablist">
       {rows.map((row, i) => (

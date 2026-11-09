@@ -151,7 +151,7 @@ function MultiLineDraw({ starts, series, target, height = 200, width = 640 }: {
 // Yatay oran çubuğu (satır içinde)
 // Grafikler kapladıkları gerçek genişlikte çizilir (5 Kasım 2026): sabit 520–640 birimlik çizim telefonda bütünüyle
 // küçülüyor, 10 punto yazı 5–6 piksele iniyordu. Genişlik ölçülene kadar aynı yükseklikte boş alan.
-function Sized({ height, children }: { height: number; children: (w: number) => React.ReactNode }) {
+export function Sized({ height, children }: { height: number; children: (w: number) => React.ReactNode }) {
   const [w, setW] = useState(0);
   return (
     <View style={{ height, width: '100%' }} onLayout={(e) => { const v = Math.round(e.nativeEvent.layout.width); if (v && v !== w) setW(v); }}>
