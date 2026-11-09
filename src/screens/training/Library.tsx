@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   body: { fontSize: 14, color: colors.text, lineHeight: 20 },
   fhead: { fontSize: 12, fontWeight: '700', color: colors.muted, marginTop: 10, marginBottom: 2 },
   check: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 5 },
-  radio: { width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: colors.faint, alignItems: 'center', justifyContent: 'center' },
+  radio: { width: 18, height: 18, borderRadius: 4, borderWidth: 1.5, borderColor: colors.faint, alignItems: 'center', justifyContent: 'center' },
   radioOn: { backgroundColor: colors.navy, borderColor: colors.navy },
   checkText: { fontSize: 14, color: colors.text, flexShrink: 1 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line, borderRadius: 12, padding: 12 },

@@ -52,7 +52,7 @@ export default function ParentPreview({ items: given, training, detail, onClose 
         <ScrollView contentContainerStyle={s.pad}>
           <Pressable onPress={() => setScreen({ k: 'home' })} style={s.back} accessibilityRole="button"><Ionicons name="arrow-back" size={16} color={colors.navy} /><Text style={s.backText}>Tüm dersler</Text></Pressable>
           <Text style={s.big}>{training!.title}</Text>
-          <View style={s.secRow}><Text style={[s.sec, { marginTop: 0, flex: 1 }]}>Öğrenme modülleri</Text><Text style={[s.pctText, { flexShrink: 0 }]}>%{pct}</Text></View>
+          <View style={s.secRow}><Text style={[s.sec, { marginTop: 0, flexShrink: 1 }]}>Öğrenme modülleri</Text><Text style={[s.pctText, { flexShrink: 0, minWidth: 40, textAlign: 'right' }]}>%{pct}</Text></View>
           {items.map((it, i) => (
             <Pressable key={it.key} onPress={() => setScreen({ k: 'player', i, page: 0 })} style={s.row} accessibilityRole="button">
               <View style={{ flex: 1 }}><Text style={s.tiny}>{TYPE_WORD[it.type]}</Text><Text style={s.rowText}>{it.title}</Text></View>
@@ -197,7 +197,7 @@ function Player({ pct, remaining, title, content, onPrev, onNext, nextLabel, nex
     <View style={{ flex: 1 }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 12, gap: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {onClose && <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Eğitime dön"><Ionicons name="close" size={20} color={colors.navy} /></Pressable>}
+          {onClose && <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Eğitime dön"><Ionicons name="arrow-back" size={20} color={colors.navy} /></Pressable>}
           <View style={[s.bar, { flex: 1, marginTop: 0 }]}><View style={[s.fill, { width: `${pct}%` }]} /></View>
         </View>
         <Text style={s.tiny}>{remaining ? `${remaining} öğe kaldı` : 'Hepsi bitti!'} · {title}</Text>
@@ -251,7 +251,7 @@ const s = StyleSheet.create({
   pad: { padding: 16, gap: 10 },
   big: { fontSize: 20, fontWeight: '700', color: colors.navy, flexShrink: 1 },
   sec: { fontSize: 13, fontWeight: '700', color: colors.muted, marginTop: 10 },
-  secRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  secRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 10 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: colors.line, borderRadius: 12, padding: 12 },
   rowText: { fontSize: 14, color: colors.navy, flex: 1, flexShrink: 1 },
   lesson: { borderWidth: 1, borderColor: colors.line, borderRadius: 12, padding: 12, gap: 8 },

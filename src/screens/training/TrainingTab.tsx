@@ -215,9 +215,9 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
             const status = m.completed_at ? (m.total ? `Tamamlandı (${m.correct ?? 0}/${m.total})` : 'Tamamlandı') : '';
             return (
               <View key={m.id} style={styles.mrow}>
-                <View style={{ gap: 2, width: 30 }}>
-                  {i > 0 ? <IconButton name="chevron-up" label="Yukarı taşı" size={16} onPress={() => run(() => moveModule(mods, m.id, -1))} /> : <View style={{ height: 30 }} />}
-                  {i < mods.length - 1 ? <IconButton name="chevron-down" label="Aşağı taşı" size={16} onPress={() => run(() => moveModule(mods, m.id, 1))} /> : <View style={{ height: 30 }} />}
+                <View style={{ width: 32 }}>
+                  <View style={styles.arrowSlot}>{i > 0 && <IconButton name="chevron-up" label="Yukarı taşı" size={16} onPress={() => run(() => moveModule(mods, m.id, -1))} />}</View>
+                  <View style={styles.arrowSlot}>{i < mods.length - 1 && <IconButton name="chevron-down" label="Aşağı taşı" size={16} onPress={() => run(() => moveModule(mods, m.id, 1))} />}</View>
                 </View>
                 <Pressable onPress={() => setSheet({ module: m })} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, minWidth: 0 }} accessibilityRole="button" accessibilityLabel={`${it?.title ?? m.item_key} incele`}>
                   {it && <TypeTile type={it.type} />}
@@ -515,6 +515,7 @@ const styles = StyleSheet.create({
   tabs: { borderBottomWidth: 1, borderBottomColor: colors.line, flexGrow: 0 },
   tab: { alignItems: 'center', justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 12, borderBottomWidth: 2, borderBottomColor: 'transparent' },
   tabDot: { position: 'absolute', top: -3, right: -10 },
+  arrowSlot: { height: 32, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   tabOn: { borderBottomColor: colors.navy },
   tabText: { fontSize: 13.5, color: colors.muted, fontWeight: '600', textAlign: 'center' },
   tabTextOn: { color: colors.navy, fontWeight: '700' },

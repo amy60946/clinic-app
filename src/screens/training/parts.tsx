@@ -64,7 +64,7 @@ export function PercentArea({ points, height = 170, target }: { points: { day: s
   return (
     <Sized height={height}>
       {(w) => {
-        const left = 40, right = 12, top = 10, bottom = 26;
+        const left = 40, right = 26, top = 10, bottom = 26;
         const iw = Math.max(10, w - left - right), ih = height - top - bottom;
         const n = points.length;
         const x = (i: number) => left + (n <= 1 ? iw / 2 : (i * iw) / (n - 1));
@@ -86,7 +86,7 @@ export function PercentArea({ points, height = 170, target }: { points: { day: s
             {points.map((p, i) => (
               <React.Fragment key={i}>
                 <Circle cx={x(i)} cy={y(p.value)} r={3.5} fill={colors.navy} />
-                <SvgText x={x(i)} y={height - 7} fontSize={11} fontFamily={SVG_FONT} fill="#5F6884" textAnchor="middle">{shortDate(p.day)}</SvgText>
+                <SvgText x={x(i)} y={height - 7} fontSize={11} fontFamily={SVG_FONT} fill="#5F6884" textAnchor={n > 1 && i === n - 1 ? 'end' : n > 1 && i === 0 ? 'start' : 'middle'}>{shortDate(p.day)}</SvgText>
               </React.Fragment>
             ))}
           </Svg>
