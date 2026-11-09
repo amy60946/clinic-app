@@ -3,7 +3,7 @@
 // Eğitim sayfası: durum (Taslak → Etkin onayla gönderilir → Ustalaştı), Not oluştur (tarih aralığı), ayarlar; sekmeler Özet · Öğrenme modülleri ·
 // Uygulama görevleri · Hızlı yapılacaklar. Ebeveynin tamamladığı modül ve yapılacak "incelemeye hazır"; açınca incelenmiş sayılır.
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, ActivityIndicator, Alert, useWindowDimensions, ScrollView, Platform } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ActivityIndicator, Alert, useWindowDimensions, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { colors, radius } from '../../theme';
@@ -28,7 +28,6 @@ const ORDER: TrainingStatus[] = ['draft', 'active', 'mastered'];
 const FOOT = { height: 48, marginTop: 0, paddingHorizontal: 18 };
 const year = (iso: string) => (iso.length <= 10 ? new Date(`${iso}T12:00:00`) : new Date(iso)).getFullYear();
 const longDate = (iso: string) => `${shortDate(iso)} ${year(iso)}`;
-const trDate = (iso: string) => new Date(iso).toLocaleDateString('tr-TR');
 const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 const daysAgoIso = (n: number) => { const d = new Date(Date.now() - n * 864e5); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
@@ -214,7 +213,7 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
       <View style={styles.headRow}>
         <View style={{ flexGrow: 1, flexShrink: 1, minWidth: 200, gap: 2 }}>
           <Text style={styles.title}>{t.title}</Text>
-          <Text style={styles.small}>Başlangıç {shortDate(t.started_at)} · Atanan: {t.parent_name}</Text>
+          <Text style={styles.small}>Başlangıç: {shortDate(t.started_at)}{'\u00a0'}· Atanan: {t.parent_name}</Text>
         </View>
         <StatusChip status={t.status} onPress={statusMenu} />
         <SmallButton label="Not oluştur" onPress={() => setSheet('note')} />
@@ -229,18 +228,21 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
           </Text>
         </View>
       )}
-      <ScrollView horizontal={narrow} scrollEnabled={narrow} showsHorizontalScrollIndicator={false} style={styles.tabs} contentContainerStyle={!narrow && { flex: 1 }}>
-        <View style={{ flexDirection: 'row', flex: narrow ? undefined : 1 }} accessibilityRole="tablist">
-          {TABS.map((x) => (
-            <Pressable key={x.id} onPress={() => setTab(x.id)} style={[styles.tab, !narrow && { flex: 1 }, tab === x.id && styles.tabOn]} accessibilityRole="tab" accessibilityState={{ selected: tab === x.id }}>
-              <View>
-                <Text style={[styles.tabText, tab === x.id && styles.tabTextOn]} numberOfLines={1}>{x.label}</Text>
-                {dots[x.id] && <View style={styles.tabDot}><NewDot /></View>}
-              </View>
-            </Pressable>
-          ))}
-        </View>
-      </ScrollView>
+      {/* dar ekranda 2 × 2, kaydırma yok (yan kaydırmada dördüncü sekme ekran dışında kalıyordu) */}
+      <View style={styles.tabs} accessibilityRole="tablist">
+        {(narrow ? [TABS.slice(0, 2), TABS.slice(2)] : [TABS]).map((row, ri) => (
+          <View key={ri} style={{ flexDirection: 'row' }}>
+            {row.map((x) => (
+              <Pressable key={x.id} onPress={() => setTab(x.id)} style={[styles.tab, { flex: 1 }, tab === x.id && styles.tabOn]} accessibilityRole="tab" accessibilityState={{ selected: tab === x.id }}>
+                <View>
+                  <Text style={[styles.tabText, tab === x.id && styles.tabTextOn]} numberOfLines={1}>{x.label}</Text>
+                  {dots[x.id] && <View style={styles.tabDot}><NewDot /></View>}
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        ))}
+      </View>
 
       {tab === 'summary' && (
         <View style={{ gap: 12 }}>
@@ -339,7 +341,7 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
           {todos.map((k) => (
             <Pressable key={k.id} onPress={() => { setSheet({ todoReview: k }); if (k.done_at && !k.reviewed_at) markReviewed('parent_training_todos', k.id).then(onChanged); }} style={styles.mrow} accessibilityRole="button">
               <View style={{ flex: 1, minWidth: 0, gap: 2, paddingLeft: 4 }}>
-                <Text style={[styles.small, !!k.done_at && { color: colors.ok, fontWeight: '600' }]}>{k.done_at ? `Tamamlandı · ${trDate(k.done_at)}` : 'Tamamlanmadı'}</Text>
+                <Text style={[styles.small, !!k.done_at && { color: colors.ok, fontWeight: '600' }]}>{k.done_at ? `Tamamlandı\u00a0· ${longDate(k.done_at)}` : 'Tamamlanmadı'}</Text>
                 <Text style={styles.upper}>{k.title}</Text>
               </View>
               {!!k.done_at && !k.reviewed_at && <NewDot />}
@@ -429,7 +431,7 @@ function TaskRow({ task, logs, fresh, onMenu }: { task: TTask; logs: Detail['log
         <IconButton name={open ? 'caret-down' : 'caret-forward'} label={open ? 'Kayıtları gizle' : 'Kayıtları göster'} size={16} onPress={() => setOpen((o) => !o)} />
         <Pressable onPress={() => setOpen((o) => !o)} style={{ flex: 1, minWidth: 0, gap: 2 }} accessibilityRole="button" accessibilityState={{ expanded: open }}>
           <Text style={styles.upper}>{task.title}</Text>
-          <Text style={styles.small}>Başlangıç: {longDate(task.created_at)} · {measureLabel(task.measure)}</Text>
+          <Text style={styles.small}>Başlangıç: {longDate(task.created_at)}{'\u00a0'}· {measureLabel(task.measure)}</Text>
         </Pressable>
         {fresh && <NewDot />}
         {task.measure !== 'none' && (

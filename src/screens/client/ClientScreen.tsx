@@ -184,7 +184,7 @@ export default function ClientScreen({
         </View>
         <Text style={styles.subtitle}>
           {[ageText(data?.child?.birthday ?? null), client.parents ? `Ebeveyn: ${client.parents}` : '', `Onay\u00a0${new Date(client.consent_at).toLocaleDateString('tr-TR')}`]
-            .filter(Boolean).join(' ·\u00a0')}
+            .filter(Boolean).join('\u00a0· ')}
         </Text>
         {!!teamLine && <Text style={styles.subtitle}>{teamLine}</Text>}
       </View>

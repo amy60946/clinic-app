@@ -111,7 +111,7 @@ export default function BehaviorsTab({ client, today, sample }: ClientCtx & { sa
           <Ionicons name={open.has('__other__') ? 'chevron-down' : 'chevron-forward'} size={18} color={colors.navy} />
           <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
             <Text style={styles.cardTitle}>Diğer bildirilen olaylar</Text>
-            <Text style={styles.small}>Ebeveynlerin hedef davranışlarla ilgisi olmayan bildirdiği olaylar</Text>
+            <Text style={styles.small}>Ebeveynlerin bildirdiği, hedef davranışlarla ilgisi olmayan olaylar</Text>
           </View>
           <Text style={[styles.small, { flexShrink: 0 }]}>{others.length} olay</Text>
         </Pressable>
@@ -161,9 +161,9 @@ function BehaviorCard({ behavior: b, incidents, open, onToggle, onGear }: {
       </View>
       {open && (
         <View style={{ gap: 8 }}>
-          {!!b.description && <Text style={styles.body}>{b.description}</Text>}
+          {!!b.description && <Text style={[styles.body, styles.indent]}>{b.description}</Text>}
           {b.strategies.length > 0 && (
-            <View style={{ gap: 4 }}>
+            <View style={[{ gap: 4 }, styles.indent]}>
               <Text style={styles.label}>Stratejiler</Text>
               {b.strategies.map((x, i) => <Text key={i} style={styles.body}>• {x}</Text>)}
             </View>
@@ -251,7 +251,7 @@ function BehaviorSheet({ behavior, others, childName, onClose, onSave }: {
   const draft: PreviewBehavior = { id: behavior?.id ?? '__draft__', title: title.trim() || 'Yeni hedef davranış', strategies: cleanStrategies(strategies), log_type: logType, parent_logging: logging };
   return (
     <SheetFrame title={behavior ? 'Hedef davranışı düzenle' : 'Yeni hedef davranış'} onClose={onClose}
-      footer={<><GhostButton label="Vazgeç" onPress={onClose} /><Cta label="Kaydet" onPress={save} style={FOOT} /></>}>
+      footer={<><GhostButton label="Vazgeç" onPress={onClose} /><Cta label="Kaydet" onPress={save} disabled={missingTitle} style={FOOT} /></>}>
       <Pressable onPress={() => { setPreview(true); track('behavior.preview', { from: 'form' }); }} style={styles.previewLink} accessibilityRole="button" hitSlop={6}>
         <Text style={styles.link}>Ebeveyn deneyimini önizle ↗</Text>
       </Pressable>
@@ -259,12 +259,12 @@ function BehaviorSheet({ behavior, others, childName, onClose, onSave }: {
 
       <Text style={styles.label}>Hedef davranış</Text>
       <Text style={styles.small}>Odaklandığın davranış</Text>
-      <Input value={title} onChangeText={setTitle} maxLength={80} placeholder="Ör. Ekranı kapatırken ağlama" accessibilityLabel="Hedef davranış" />
+      <Input value={title} onChangeText={setTitle} maxLength={80} placeholder="ör. Ekranı kapatırken ağlama" accessibilityLabel="Hedef davranış" />
       {tried && missingTitle && <Text style={styles.error}>⚠ Lütfen bir başlık gir</Text>}
 
       <Text style={styles.label}>Açıklama</Text>
       <Text style={styles.small}>Bu davranış aile için ne anlama geliyor, aileden ne istiyorsun?</Text>
-      <Input value={desc} onChangeText={setDesc} maxLength={1000} multiline placeholder="Açıklama" accessibilityLabel="Açıklama" />
+      <Input value={desc} onChangeText={setDesc} maxLength={1000} multiline numberOfLines={4} placeholder="Açıklama" accessibilityLabel="Açıklama" />
 
       <Text style={styles.label}>Stratejiler</Text>
       {strategies.map((v, i) => (
@@ -278,7 +278,7 @@ function BehaviorSheet({ behavior, others, childName, onClose, onSave }: {
       ))}
       {strategies.length < MAX_STRATEGIES && (
         <Pressable onPress={() => setStrategies((x) => [...x, ''])} style={styles.previewLink} accessibilityRole="button" hitSlop={6}>
-          <Text style={styles.link}>+ strateji ekle</Text>
+          <Text style={styles.link}>+ Strateji ekle</Text>
         </Pressable>
       )}
 
@@ -338,6 +338,7 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: 15, fontWeight: '700', color: colors.navy },
   card: { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line, borderRadius: 12, padding: 14, gap: 10 },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  indent: { paddingLeft: 26 },   // ok (18) + aralık (8): başlıkla aynı hiza
   cardToggle: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 8 },
   // dar ekranda ad durum çipinin altına iner (ezilmez)
   titleRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 8, rowGap: 4 },
