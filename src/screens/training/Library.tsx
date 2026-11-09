@@ -10,7 +10,7 @@ import { Input, Cta, SmallButton, IconButton, Empty } from '../../components/ui'
 import { ClinicianMe, Client } from '../../lib/clinic';
 import {
   ITEMS, TOPICS, TYPES, LibItem, ItemType, topicLabel, loadFavorites, saveFavorites, loadTrainings, createTraining, addModules,
-  loadDetail, parentsOf, Training, TrainingNotInstalled,
+  loadDetail, parentsOf, loadParents, Training, TrainingNotInstalled,
 } from '../../lib/training';
 import { TypeTile, ItemContent, SheetFrame, StatusChip, GhostButton } from './parts';
 import ParentPreview from './ParentPreview';
@@ -52,7 +52,7 @@ function FilterPanel({ f, set }: { f: Filters; set: (f: Filters) => void }) {
   );
 }
 
-function ItemCard({ it, on, fav, onPress, onFav, picked }: { it: LibItem; on: boolean; fav: boolean; onPress: () => void; onFav: () => void; picked?: boolean }) {
+function ItemCard({ it, on, fav, onPress, onFav, picked, onPick }: { it: LibItem; on: boolean; fav: boolean; onPress: () => void; onFav: () => void; picked?: boolean; onPick?: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={it.title}
       style={({ pressed }) => [styles.card, on && { borderColor: colors.navy }, pressed && { opacity: 0.85 }]}>
@@ -61,7 +61,11 @@ function ItemCard({ it, on, fav, onPress, onFav, picked }: { it: LibItem; on: bo
         <Text style={styles.cardTitle} numberOfLines={2}>{it.title}</Text>
         <Text style={styles.cardDesc} numberOfLines={1}>{it.desc}</Text>
       </View>
-      {picked !== undefined && <Ionicons name={picked ? 'checkmark-circle' : 'ellipse-outline'} size={22} color={picked ? colors.ok : colors.faint} />}
+      {picked !== undefined && (
+        <Pressable onPress={onPick} hitSlop={8} accessibilityRole="button" accessibilityLabel={`${it.title} ${picked ? 'kaldır' : 'seç'}`}>
+          <Text style={[styles.pick, picked && { color: colors.danger }]}>{picked ? 'Kaldır' : 'Seç'}</Text>
+        </Pressable>
+      )}
       <Pressable onPress={onFav} hitSlop={8} accessibilityRole="button" accessibilityLabel={fav ? 'Favorilerden çıkar' : 'Favorilere ekle'}>
         <Ionicons name={fav ? 'heart' : 'heart-outline'} size={20} color={fav ? colors.danger : colors.muted} />
       </Pressable>
@@ -130,14 +134,14 @@ export function LibraryBrowser({ me, mode, exclude, onAssign, picked, onTogglePi
       {!wide && filtersOpen && <View style={styles.filterBox}><FilterPanel f={f} set={setF} /></View>}
       {any && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Text style={styles.count}>{list.length} sonuç</Text>
+          <Text style={styles.count}>{list.length} sonuç.</Text>
           <Pressable onPress={() => setF(EMPTY)} hitSlop={6}><Text style={styles.reset}>Sıfırla</Text></Pressable>
         </View>
       )}
-      {list.length === 0 && <Empty text={f.types.some((t) => t === 'video' || t === 'pdf') ? 'Bu türde henüz kaynak yok.' : 'Aramana uyan kaynak yok.'} />}
+      {list.length === 0 && <Empty text={f.types.some((t) => t === 'video' || t === 'pdf') ? 'Bu türde henüz kaynak yok.' : 'Kaynak bulunamadı. Süzgeçleri değiştirmeyi dene.'} />}
       {list.map((x) => (
         <ItemCard key={x.key} it={x} on={x.key === sel} fav={favs.includes(x.key)} onPress={() => setSel(x.key)} onFav={() => fav(x.key)}
-          picked={mode === 'pick' ? !!picked?.includes(x.key) : undefined} />
+          picked={mode === 'pick' ? !!picked?.includes(x.key) : undefined} onPick={() => onTogglePick?.(x.key)} />
       ))}
     </View>
   );
@@ -214,7 +218,8 @@ export function AssignSheet({ me, item, clients, onClose, onDone }: {
     try {
       let id = target;
       if (target === 'new') {
-        const t = await createTraining({ clinic_id: client.clinic_id, link_id: client.link_id, parent_name: parent, title: newTitle, created_by: me.id });
+        const ps = await loadParents(client.link_id, client.parents);
+        const t = await createTraining({ clinic_id: client.clinic_id, link_id: client.link_id, parent: ps.find((x) => x.name === parent) ?? { id: null, name: parent }, goal: newTitle, created_by: me.id });
         id = t.id;
       }
       const d = await loadDetail([id]);
@@ -267,7 +272,7 @@ export function AssignSheet({ me, item, clients, onClose, onDone }: {
               <Pressable onPress={() => setTarget('new')} style={[styles.opt, target === 'new' && styles.optOn]} accessibilityRole="radio" accessibilityState={{ selected: target === 'new' }}>
                 <Text style={styles.optText}>+ Yeni eğitim oluştur</Text>
               </Pressable>
-              {target === 'new' && <Input placeholder="Eğitimin adı (boş kalırsa Adsız eğitim)" value={newTitle} onChangeText={setNewTitle} maxLength={80} />}
+              {target === 'new' && <Input placeholder="Eğitim hedefi (eğitimin adı olur)" value={newTitle} onChangeText={setNewTitle} maxLength={80} />}
             </View>
           )}
         </>
@@ -293,6 +298,7 @@ const styles = StyleSheet.create({
   tag: { backgroundColor: '#ECEEF3', borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4 },
   tagText: { fontSize: 12, color: colors.navy, fontWeight: '600' },
   count: { fontSize: 13, color: colors.text, fontWeight: '600' },
+  pick: { fontSize: 14, fontWeight: '700', color: colors.navy, textDecorationLine: 'underline' },
   reset: { fontSize: 13, color: colors.navy, textDecorationLine: 'underline' },
   filterBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', paddingVertical: 6 },
   filterBox: { backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line, borderRadius: 12, padding: 12 },

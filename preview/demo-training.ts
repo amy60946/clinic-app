@@ -9,9 +9,9 @@ export const TRAINING_TABLES = ['parent_trainings', 'parent_training_modules', '
 
 export const TRAINING_DEFAULTS: Record<string, Row> = {
   parent_trainings: { status: 'draft', criterion: null, seen_at: null },
-  parent_training_modules: { archived: false, completed_at: null, correct: null, total: null, answers: null },
+  parent_training_modules: { archived: false, completed_at: null, correct: null, total: null, answers: null, reviewed_at: null },
   parent_training_tasks: { description: '', measure: 'none', archived: false },
-  parent_training_todos: { description: '', done_at: null, archived: false },
+  parent_training_todos: { description: '', done_at: null, archived: false, rating: null, reflection: '', reviewed_at: null },
 };
 
 const uid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => { const r = (Math.random() * 16) | 0; return (c === 'x' ? r : (r & 3) | 8).toString(16); });
@@ -31,7 +31,9 @@ const item = (key: string) => (LIB as any).items.find((i: Row) => i.key === key)
 
 // Örnek aile (Nazlı): etkin bir eğitim (tamamlanan modüller, uygulama kayıtları, yapılacaklar, gözlem verisi), bir taslak, bir ustalaşılan
 export function seedTraining(x: Row) {
-  if (x.trainingSeeded) return;
+  if (x.trainingSeeded === 2) return;
+  // eski önizleme verisi: eğitim tablolarını sıfırla, yeni alanlarla yeniden kur
+  TRAINING_TABLES.forEach((t) => { x[t] = []; });
   const link = x.clinic_links.find((l: Row) => l.id === 'demo-link');
   if (!link) return;
   const parent = x.profiles.filter((p: Row) => p.family_id === link.family_id)
@@ -40,10 +42,10 @@ export function seedTraining(x: Row) {
   const base = { clinic_id: link.clinic_id, link_id: link.id, parent_name: parent, created_by: 'demo-clinician' };
   const T1 = uid(), T2 = uid(), T3 = uid();
   x.parent_trainings.push(
-    { id: T1, ...base, title: 'Davranışları ABC ile anlamak', status: 'active', created_at: ago(22 * 1440), started_at: ago(21 * 1440), updated_at: ago(2 * 1440),
+    { id: T1, ...base, title: 'Ebeveyn zorlayıcı davranışları ABC ile kaydeder ve tetikleyicileri tanır', status: 'active', created_at: ago(22 * 1440), started_at: ago(21 * 1440), updated_at: ago(2 * 1440),
       criterion: 'Ebeveyn, zorlayıcı bir davranışın öncülünü ve sonucunu fırsatların %80\'inde doğru belirler; art arda 3 seansta.', seen_at: ago(3 * 1440) },
-    { id: T2, ...base, title: 'Geçişlere hazırlık', status: 'draft', created_at: ago(1440), started_at: ago(1440), updated_at: ago(1440), criterion: null, seen_at: ago(1440) },
-    { id: T3, ...base, title: 'Sözel övgü', status: 'mastered', created_at: ago(60 * 1440), started_at: ago(58 * 1440), updated_at: ago(25 * 1440),
+    { id: T2, ...base, title: 'Ebeveyn zor geçişlerden önce iki uyarı verir', status: 'draft', created_at: ago(1440), started_at: ago(1440), updated_at: ago(1440), criterion: null, seen_at: ago(1440) },
+    { id: T3, ...base, title: 'Ebeveyn özel zamanda etiketli övgü kullanır', status: 'mastered', created_at: ago(60 * 1440), started_at: ago(58 * 1440), updated_at: ago(25 * 1440),
       criterion: 'Ebeveyn özel zamanda 5 dakikada en az 5 etiketli övgü yapar; art arda 3 gözlemde.', seen_at: ago(24 * 1440) },
   );
   // Modül tamamlama: test yanıtları içerikten (doğru sayısı içerikteki cevaba göre)
@@ -58,7 +60,8 @@ export function seedTraining(x: Row) {
     }
     if (doneMin !== null && it.type === 'short') answers = (it.prompts ?? []).map((_: string, i: number) => ({ text: texts?.[i] ?? '' }));
     x.parent_training_modules.push({ id: uid(), training_id: training, item_key: key, position, archived: false,
-      completed_at: doneMin === null ? null : ago(doneMin), correct, total, answers, created_at: ago(21 * 1440) });
+      completed_at: doneMin === null ? null : ago(doneMin), correct, total, answers, created_at: ago(21 * 1440),
+      reviewed_at: doneMin !== null && doneMin > 5 * 1440 ? ago(doneMin - 600) : null });
   };
   const abcQ = item('abc_q');
   const wrongFirst = abcQ ? abcQ.questions.map((q: Row, i: number) => (i === 0 ? (q.answer + 1) % 4 : q.answer)) : [];
@@ -93,12 +96,33 @@ export function seedTraining(x: Row) {
 
   // Hızlı yapılacaklar
   x.parent_training_todos.push(
-    { id: uid(), training_id: T1, title: 'İlk davranış kaydını gir', description: 'Uygulamada «Davranış kaydı ekle» ile bu haftaki bir davranışı kaydet.', done_at: ago(19 * 1440), archived: false, created_at: ago(20 * 1440) },
+    { id: uid(), training_id: T1, title: 'İlk davranış kaydını gir', description: 'Uygulamada «Davranış kaydı ekle» ile bu haftaki bir davranışı kaydet.', done_at: ago(1440), archived: false, created_at: ago(20 * 1440), rating: 2, reflection: 'Akşam yorgundum, ertesi gün girdim.', reviewed_at: null },
     { id: uid(), training_id: T1, title: 'Bir zamanlayıcı ya da kum saati hazırla', description: 'Geçiş uyarılarında kullanmak için çocuğun görebileceği bir zamanlayıcı.', done_at: null, archived: false, created_at: ago(12 * 1440) },
   );
 
   // Ustalık ölçütüne doğru gözlem verisi (uzman seansta girer)
   [[21, 40], [14, 55], [7, 70], [1, 80]].forEach(([d, v]) => x.parent_training_data.push({ id: uid(), training_id: T1, day: dayAgo(d), value: v, created_at: ago(d * 1440) }));
   [[56, 50], [49, 75], [42, 90], [35, 100]].forEach(([d, v]) => x.parent_training_data.push({ id: uid(), training_id: T3, day: dayAgo(d), value: v, created_at: ago(d * 1440) }));
-  x.trainingSeeded = true;
+  x.trainingSeeded = 2;
+}
+
+// Uzman işlevleri: ebeveyn listesi ve "Hatırlatma gönder" (12 saatte bir)
+export function trainingRpc(name: string, a: Row, c: { db: Row; save: () => void }): { data: any; error: { message: string } | null } | undefined {
+  const { db } = c;
+  if (name === 'clinic_link_parents') {
+    const l = db.clinic_links.find((x: Row) => x.id === a.p_link);
+    if (!l) return { data: [], error: null };
+    const rows = db.profiles.filter((p: Row) => p.family_id === l.family_id)
+      .sort((x: Row, y: Row) => String(x.created_at).localeCompare(String(y.created_at)))
+      .map((p: Row) => ({ user_id: p.id, name: String(p.name ?? '').trim() || p.nickname }));
+    return { data: rows, error: null };
+  }
+  if (name === 'clinic_training_remind') {
+    const t = db.parent_trainings.find((x: Row) => x.id === a.p_training);
+    if (!t) return { data: null, error: { message: 'training_not_found' } };
+    if (t.reminded_at && Date.now() - Date.parse(t.reminded_at) < 12 * 3600e3) return { data: false, error: null };
+    t.reminded_at = new Date().toISOString(); c.save();
+    return { data: true, error: null };
+  }
+  return undefined;
 }

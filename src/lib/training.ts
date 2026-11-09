@@ -40,11 +40,13 @@ export function itemIntro(it: LibItem): string {
 
 export type TrainingStatus = 'draft' | 'active' | 'mastered';
 // bölüm başlıkları açık tonlu (koyu çip yalnız durum seçicide)
-export const SECTION_TONE: Record<TrainingStatus, { bg: string; fg: string }> = { draft: { bg: '#F3E9D6', fg: '#7A5A22' }, active: { bg: '#E1F1E6', fg: '#2F7D4A' }, mastered: { bg: '#E3E8F4', fg: '#0F1B3D' } };
+export const SECTION_TONE: Record<TrainingStatus, { bg: string; fg: string; bar: string }> = {
+  draft: { bg: '#FFF6DD', fg: '#7A5A00', bar: '#E9B22B' }, active: { bg: '#E1F1E6', fg: '#2F7D4A', bar: '#2F7D4A' }, mastered: { bg: '#EEE8F7', fg: '#5B3F99', bar: '#7A5BC8' },
+};
 export const STATUS_META: Record<TrainingStatus, { label: string; bg: string; fg: string; section: string }> = {
-  draft: { label: 'Taslak', bg: '#F3E9D6', fg: '#7A5A22', section: 'Taslaklar' },
+  draft: { label: 'Taslak', bg: '#FFF1C9', fg: '#7A5A00', section: 'Taslaklar' },
   active: { label: 'Etkin', bg: '#E1F1E6', fg: '#2F7D4A', section: 'Etkin eğitimler' },
-  mastered: { label: 'Ustalaştı', bg: '#0F1B3D', fg: '#FFFFFF', section: 'Ustalaşılmış eğitimler' },
+  mastered: { label: 'Ustalaştı', bg: '#EEE8F7', fg: '#5B3F99', section: 'Ustalaşılmış eğitimler' },
 };
 
 export type Measure = 'frequency' | 'accuracy' | 'duration' | 'none';
@@ -64,13 +66,20 @@ export type Answer = { pick?: number; text?: string };
 export type TModule = {
   id: string; training_id: string; item_key: string; position: number; archived: boolean;
   completed_at: string | null; correct: number | null; total: number | null; answers: Answer[] | null; created_at: string;
+  reviewed_at?: string | null;   // uzman "incele" penceresini açtı
 };
 export type TTask = { id: string; training_id: string; title: string; description: string; measure: Measure; position: number; archived: boolean; created_at: string };
 export type TLog = {
   id: string; task_id: string; training_id: string; day: string; count: number | null; successes: number | null; attempts: number | null;
   minutes: number | null; reflection: string; created_at: string;
 };
-export type TTodo = { id: string; training_id: string; title: string; description: string; done_at: string | null; archived: boolean; created_at: string };
+export type TTodo = {
+  id: string; training_id: string; title: string; description: string; done_at: string | null; archived: boolean; created_at: string;
+  rating?: number | null; reflection?: string; reviewed_at?: string | null;   // ebeveynin "Nasıl geçti?" (1–5) ve düşüncesi
+};
+// "Nasıl geçti?" (ebeveyn: Çok kötü … Harika); uzmanın gördüğü etiket
+export const RATING_LABELS = ['', 'Çok kötü geçti', 'Daha iyi olabilirdi', 'Beklendiği gibi', 'Beklenenden iyi', 'Harika geçti'];
+export const RATING_COLORS = ['', '#B3263E', '#D9822B', '#8A91A3', '#2F7D4A', '#2C4A9A'];
 export type TData = { id: string; training_id: string; day: string; value: number; created_at: string };
 export type Detail = { modules: TModule[]; tasks: TTask[]; logs: TLog[]; todos: TTodo[]; data: TData[] };
 
@@ -121,13 +130,39 @@ export function activityOf(trainingId: string, d: Detail): Activity {
 }
 export const isNew = (at: string | null, seen: string | null) => !!at && (!seen || at > seen);
 
-export async function createTraining(p: { clinic_id: string; link_id: string; parent_name: string; title?: string; created_by: string }): Promise<Training> {
+// Paylaşımdaki ailenin ebeveynleri (eğitimi kime atayacağını seçmek için). İşlev yoksa (önizleme / eski sunucu) danışan satırındaki adlar.
+export type Parent = { id: string | null; name: string };
+export async function loadParents(linkId: string, fallback: string): Promise<Parent[]> {
+  const { data, error } = await supabase.rpc('clinic_link_parents', { p_link: linkId });
+  if (!error && Array.isArray(data) && data.length) return (data as { user_id: string; name: string }[]).map((x) => ({ id: x.user_id, name: x.name }));
+  return parentsOf(fallback).map((name) => ({ id: null, name }));
+}
+
+// "Yeni eğitim oluştur": ebeveyn + eğitim hedefi (hedef başlık olur), Taslak
+export async function createTraining(p: { clinic_id: string; link_id: string; parent: Parent; goal: string; created_by: string }): Promise<Training> {
   const now = new Date().toISOString();
   const { data, error } = await supabase.from('parent_trainings')
-    .insert({ ...p, title: p.title?.trim() || 'Adsız eğitim', status: 'draft', started_at: now, updated_at: now, seen_at: now }).select('*');
+    .insert({ clinic_id: p.clinic_id, link_id: p.link_id, created_by: p.created_by, ...(p.parent.id ? { parent_id: p.parent.id } : {}),
+      parent_name: p.parent.name, title: p.goal.trim().slice(0, 200) || 'Adsız eğitim', status: 'draft', started_at: now, updated_at: now, seen_at: now }).select('*');
   const row = check((data ?? []) as Training[], error)[0];
   track('training.create', {});
   return row;
+}
+
+// Uzman ebeveynin tamamladığı modülü / yapılacağı inceledi ("incelemeye hazır" sayısı ve satırdaki nokta kalkar)
+export async function markReviewed(table: 'parent_training_modules' | 'parent_training_todos', id: string) {
+  await supabase.from(table).update({ reviewed_at: new Date().toISOString() }).eq('id', id);
+}
+
+// "Hatırlatma gönder": atanan ebeveyne bildirim; eğitim başına 12 saatte bir. 'sent' | 'recent' | 'missing'
+export async function remindTraining(id: string): Promise<'sent' | 'recent' | 'missing'> {
+  const { data, error } = await supabase.rpc('clinic_training_remind', { p_training: id });
+  if (error) {
+    if (['PGRST202', '42883'].includes(error.code ?? '')) return 'missing';
+    throw new Error(error.message);
+  }
+  track('training.remind', { sent: !!data });
+  return data ? 'sent' : 'recent';
 }
 
 export async function updateTraining(id: string, patch: Partial<Pick<Training, 'title' | 'status' | 'criterion' | 'seen_at' | 'parent_name'>>) {
@@ -228,34 +263,34 @@ export function logValue(l: TLog, m: Measure): string {
   return '—';
 }
 
-// "Not oluştur": eğitimin bugünkü durumundan kopyalanabilir not (kurallı, yapay zekâ yok)
-export function trainingNote(t: Training, d: Detail, fmt: (iso: string) => string): string {
-  const mods = d.modules.filter((m) => m.training_id === t.id && !m.archived);
-  const done = mods.filter((m) => m.completed_at);
-  const tasks = d.tasks.filter((k) => k.training_id === t.id && !k.archived);
-  const todos = d.todos.filter((k) => k.training_id === t.id && !k.archived);
-  const data = d.data.filter((x) => x.training_id === t.id);
+// "Not oluştur" (rakipteki "Generate progress note"): seçilen tarih aralığında ebeveyne atananlar; kurallı, yapay zekâ yok.
+const NOTE_TYPE: Record<string, string> = { reading: 'Okuma', quiz: 'Test', short: 'Açık uçlu', video: 'Video', pdf: 'PDF' };
+export function trainingNote(t: Training, d: Detail, from: string, to: string, fmtLong: (iso: string) => string): string {
+  const inRange = (iso: string) => iso.slice(0, 10) >= from && iso.slice(0, 10) <= to;
+  const mods = d.modules.filter((m) => m.training_id === t.id && !m.archived && inRange(m.created_at));
+  const tasks = d.tasks.filter((k) => k.training_id === t.id && !k.archived && inRange(k.created_at));
+  const todos = d.todos.filter((k) => k.training_id === t.id && !k.archived && inRange(k.created_at));
   const lines: string[] = [];
-  lines.push(`Ebeveyn eğitimi: ${t.title} (${STATUS_META[t.status].label}; başlangıç ${fmt(t.started_at)}; ${t.parent_name}).`);
-  lines.push(`Öğrenme modülleri: ${mods.length} modülün ${done.length} tanesi tamamlandı.`);
-  done.forEach((m) => {
+  lines.push(`${t.title} (${fmtLong(from)} – ${fmtLong(to)})`);
+  lines.push(`Oluşturuldu: ${fmtLong(new Date().toISOString())}`);
+  lines.push('');
+  lines.push('Atananlar');
+  lines.push(`${fmtLong(from)} ile ${fmtLong(to)} arasında ebeveyne şunlar atandı:`);
+  if (!mods.length && !tasks.length && !todos.length) lines.push('Bu aralıkta atama yok.');
+  mods.forEach((m) => {
     const it = itemByKey(m.item_key);
-    const score = m.total ? ` (${m.total} sorudan ${m.correct ?? 0} doğru)` : '';
-    lines.push(`- ${it?.title ?? m.item_key}: ${fmt(m.completed_at!)} tamamlandı${score}.`);
+    lines.push(`${NOTE_TYPE[it?.type ?? 'reading']}: ${it?.title ?? m.item_key}`);
+    lines.push(`Atanma tarihi: ${m.created_at.slice(0, 10)}`);
   });
-  tasks.forEach((k) => {
-    const logs = d.logs.filter((l) => l.task_id === k.id);
-    const since = new Date(Date.now() - 14 * 864e5).toISOString().slice(0, 10);
-    const recent = logs.filter((l) => l.day >= since);
-    let sum = '';
-    if (k.measure === 'frequency') sum = `, toplam ${recent.reduce((n, l) => n + (l.count ?? 0), 0)} kez`;
-    if (k.measure === 'accuracy') { const s = recent.reduce((n, l) => n + (l.successes ?? 0), 0), a = recent.reduce((n, l) => n + (l.attempts ?? 0), 0); sum = a ? `, ${a} denemenin ${s} tanesi başarılı` : ''; }
-    if (k.measure === 'duration') sum = `, toplam ${recent.reduce((n, l) => n + (l.minutes ?? 0), 0)} dk`;
-    lines.push(`Uygulama görevi "${k.title}" (${measureLabel(k.measure)}): toplam ${logs.length} kayıt. Son 14 gün: ${recent.length} kayıt${sum}.`);
-    const refl = logs.filter((l) => l.reflection.trim()).slice(0, 2);
-    refl.forEach((l) => lines.push(`– Ebeveynin notu (${fmt(l.day)}): "${l.reflection.trim()}"`));
-  });
-  if (todos.length) lines.push(`Hızlı yapılacaklar: ${todos.length} işin ${todos.filter((x) => x.done_at).length} tanesi tamamlandı.`);
-  if (t.criterion) lines.push(`Ustalık ölçütü: ${t.criterion}${data.length ? ` Son gözlem: %${data[data.length - 1].value} (${fmt(data[data.length - 1].day)}).` : ''}`);
+  tasks.forEach((k) => { lines.push(`Uygulama görevi: ${k.title}`); lines.push(`Atanma tarihi: ${k.created_at.slice(0, 10)}`); });
+  todos.forEach((k) => { lines.push(`Yapılacak: ${k.title}`); lines.push(`Atanma tarihi: ${k.created_at.slice(0, 10)}`); });
   return lines.join('\n');
+}
+
+// CSV satırları: uygulama kayıtları ve gözlem verisi (indirme simgeleri)
+export function logRows(t: Training, d: Detail): string[][] {
+  return d.logs.filter((l) => l.training_id === t.id).map((l) => {
+    const k = d.tasks.find((x) => x.id === l.task_id);
+    return [l.day, k?.title ?? '', k ? measureLabel(k.measure) : '', k ? logValue(l, k.measure) : '', l.reflection];
+  });
 }

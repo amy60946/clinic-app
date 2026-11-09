@@ -195,3 +195,51 @@ export const styles = StyleSheet.create({
   opt: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9 },
   answer: { borderWidth: 1, borderColor: colors.line, borderRadius: 10, padding: 12, backgroundColor: '#FAFBFC', minHeight: 48 },
 });
+
+// Ortada onay penceresi (rakipteki "Mark training as Active?"): başlık, kalın ilk cümle + açıklama, Vazgeç / onay
+export function ConfirmDialog({ title, lead, body, confirm, onCancel, onConfirm }: {
+  title: string; lead?: string; body: string; confirm: string; onCancel: () => void; onConfirm: () => void;
+}) {
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={onCancel}>
+      <Pressable style={dialog.scrim} onPress={onCancel} accessibilityLabel="Kapat">
+        <Pressable style={dialog.card} onPress={() => {}} accessibilityRole="alert">
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+            <Text style={[dialog.title, { flex: 1 }]}>{title}</Text>
+            <IconButton name="close" label="Kapat" onPress={onCancel} />
+          </View>
+          <Text style={dialog.body}>{lead ? <Text style={{ fontWeight: '700' }}>{lead} </Text> : null}{body}</Text>
+          <View style={dialog.row}>
+            <GhostButton label="Vazgeç" onPress={onCancel} />
+            <Pressable onPress={onConfirm} style={dialog.primary} accessibilityRole="button"><Text style={dialog.primaryText}>{confirm}</Text></Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+// Kısa süreli bilgi şeridi ("Görev eklendi!")
+export function useToast(): [React.ReactNode, (text: string) => void] {
+  const [text, setText] = React.useState('');
+  const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const show = React.useCallback((t: string) => {
+    setText(t);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => setText(''), 2200);
+  }, []);
+  const node = text ? <View pointerEvents="none" style={dialog.toast}><Ionicons name="checkmark-circle" size={18} color="#fff" /><Text style={dialog.toastText}>{text}</Text></View> : null;
+  return [node, show];
+}
+
+const dialog = StyleSheet.create({
+  scrim: { flex: 1, backgroundColor: 'rgba(10,14,28,0.5)', alignItems: 'center', justifyContent: 'center', padding: 20 },
+  card: { width: '100%', maxWidth: 440, backgroundColor: '#fff', borderRadius: 16, padding: 20, gap: 12 },
+  title: { fontSize: 18, fontWeight: '700', color: colors.navy },
+  body: { fontSize: 14.5, lineHeight: 21, color: colors.text },
+  row: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 10, marginTop: 4 },
+  primary: { height: 48, paddingHorizontal: 18, borderRadius: radius.md, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center' },
+  primaryText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  toast: { position: 'absolute', alignSelf: 'center', bottom: 30, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.ok, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10 },
+  toastText: { color: '#fff', fontWeight: '700' },
+});

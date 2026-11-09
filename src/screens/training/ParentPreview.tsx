@@ -1,16 +1,18 @@
-// "Ebeveyn deneyimini önizle": ebeveynin aile uygulamasında göreceği ekranlar (rakipteki aile uygulamasına sadık).
-// Ben › Derslere devam et → eğitim sayfası (Öğrenme modülleri, Uygulama görevleri, Tek seferlik görevler, Başla) → oynatıcı
-// (okuma "Bu metni okudum", test "Cevabı gör" + Doğru/Yanlış + sonuç kartı, açık uçlu tek soru) → uygulama kaydı. Yerel; kaydedilmez.
-// Gerçek ekranlar ParentApp penceresinin işi; bu bileşen uzmanın önizlemesi.
+// "Ebeveyn deneyimini önizle": ebeveynin aile uygulamasında göreceği ekranlar (rakipteki aile uygulamasına sadık; 9 Kasım 2026 videoları).
+// Ben (Görevlerin · Derslere devam et) → eğitim sayfası (Öğrenme modülleri %, Uygulama görevleri, Tek seferlik görevler, Başla) → oynatıcı
+// (okuma sayfalı + "Bu metni okudum"; test giriş kartı, "Cevabı kontrol et", Doğru/Yanlış, sonuç kartı; açık uçlu) → uygulama kaydı → tek
+// seferlik görev ("Tamamlandı olarak işaretle" → "Nasıl geçti?" + düşünce → "Tamamlandı!"). Yerel; kaydedilmez. Gerçek ekranlar ParentApp penceresinin işi.
 import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal, StyleSheet, TextInput, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
-import { LibItem, itemByKey, itemIntro, Training, Detail, TTask, typeMeta } from '../../lib/training';
+import { LibItem, itemByKey, Training, Detail, TTask, TTodo, measureLabel } from '../../lib/training';
 
-type Screen = { k: 'home' } | { k: 'training' } | { k: 'player'; i: number; page: number } | { k: 'task'; task: TTask };
+type Screen = { k: 'home' } | { k: 'training' } | { k: 'player'; i: number; page: number } | { k: 'task'; task: TTask } | { k: 'todo'; todo: TTodo };
 const TYPE_WORD: Record<string, string> = { reading: 'Okuma', quiz: 'Test', short: 'Açık uçlu', video: 'Video', pdf: 'PDF' };
+const RATE = ['Çok kötü', 'Kötü', 'Fena değil', 'İyi', 'Harika'];
+const trToday = () => new Date().toLocaleDateString('tr-TR');
 
 export default function ParentPreview({ items: given, training, detail, onClose }: {
   items?: LibItem[]; training?: Training; detail?: Detail; onClose: () => void;
@@ -27,20 +29,25 @@ export default function ParentPreview({ items: given, training, detail, onClose 
   const [picks, setPicks] = useState<Record<string, number>>({});
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [texts, setTexts] = useState<Record<string, string>>({});
+  const [readOk, setReadOk] = useState<Record<string, boolean>>({});
   const [toast, setToast] = useState('');
   const pct = items.length ? Math.round((items.filter((x) => done.has(x.key)).length / items.length) * 100) : 0;
   const flash = (t: string) => { setToast(t); setTimeout(() => setToast(''), 1800); };
+  const back = () => (training ? setScreen({ k: 'training' }) : onClose());
 
   const body = (() => {
     if (screen.k === 'home') {
       return (
         <ScrollView contentContainerStyle={s.pad}>
           <Text style={s.big}>Ben</Text>
-          <Text style={s.sec}>Görevlerin</Text>
-          <View style={s.row}><Ionicons name="clipboard-outline" size={18} color={colors.navy} /><Text style={s.rowText}>Uzmanından {tasks.length + todos.length} görev</Text><Ionicons name="chevron-forward" size={16} color={colors.muted} /></View>
-          <View style={s.row}><Ionicons name="pulse-outline" size={18} color={colors.navy} /><Text style={s.rowText}>Çocuğunun davranışını kaydet</Text><Ionicons name="chevron-forward" size={16} color={colors.muted} /></View>
+          <View style={s.card}>
+            <Text style={s.cardHead}>Görevlerin</Text>
+            <Pressable onPress={() => setScreen({ k: 'training' })} style={s.row} accessibilityRole="button">
+              <Ionicons name="clipboard-outline" size={18} color={colors.navy} /><Text style={s.rowText}>Uzmanından {tasks.length + todos.filter((t) => !todoDone.has(t.id)).length} görev</Text><Ionicons name="chevron-forward" size={16} color={colors.muted} />
+            </Pressable>
+          </View>
           <Text style={s.sec}>Derslere devam et</Text>
-          <Pressable onPress={() => setScreen({ k: 'training' })} style={s.lesson} accessibilityRole="button">
+          <Pressable onPress={() => setScreen({ k: 'training' })} style={s.lesson} accessibilityRole="button" accessibilityLabel={training!.title}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><Text style={[s.rowText, { fontWeight: '700' }]}>{training!.title}</Text><Text style={[s.pctText, { flexShrink: 0 }]}>%{pct}</Text></View>
             <View style={s.bar}><View style={[s.fill, { width: `${pct}%` }]} /></View>
           </Pressable>
@@ -49,125 +56,141 @@ export default function ParentPreview({ items: given, training, detail, onClose 
     }
     if (screen.k === 'training') {
       return (
-        <ScrollView contentContainerStyle={s.pad}>
-          <Pressable onPress={() => setScreen({ k: 'home' })} style={s.back} accessibilityRole="button"><Ionicons name="arrow-back" size={16} color={colors.navy} /><Text style={s.backText}>Tüm dersler</Text></Pressable>
-          <Text style={s.big}>{training!.title}</Text>
-          <View style={s.secRow}><Text style={[s.sec, { marginTop: 0, flexShrink: 1 }]}>Öğrenme modülleri</Text><Text style={[s.pctText, { flexShrink: 0, minWidth: 40, textAlign: 'right' }]}>%{pct}</Text></View>
-          {items.map((it, i) => (
-            <Pressable key={it.key} onPress={() => setScreen({ k: 'player', i, page: 0 })} style={s.row} accessibilityRole="button">
-              <View style={{ flex: 1 }}><Text style={s.tiny}>{TYPE_WORD[it.type]}</Text><Text style={s.rowText}>{it.title}</Text></View>
-              <View style={[s.box, done.has(it.key) && s.boxOn]}>{done.has(it.key) && <Ionicons name="checkmark" size={13} color="#fff" />}</View>
-            </Pressable>
-          ))}
-          {tasks.length > 0 && <Text style={s.sec}>Uygulama görevleri</Text>}
-          {tasks.map((t) => (
-            <Pressable key={t.id} onPress={() => setScreen({ k: 'task', task: t })} style={s.row} accessibilityRole="button">
-              <Text style={s.rowText}>{t.title}</Text><Ionicons name="chevron-forward" size={16} color={colors.muted} />
-            </Pressable>
-          ))}
-          {todos.length > 0 && <Text style={s.sec}>Tek seferlik görevler</Text>}
-          {todos.map((t) => (
-            <Pressable key={t.id} onPress={() => setTodoDone((x) => { const n = new Set(x); n.has(t.id) ? n.delete(t.id) : n.add(t.id); return n; })} style={s.row} accessibilityRole="checkbox" accessibilityState={{ checked: todoDone.has(t.id) }}>
-              <View style={{ flex: 1 }}><Text style={s.tiny}>Tek seferlik görev</Text><Text style={s.rowText}>{t.title}</Text></View>
-              <View style={[s.box, todoDone.has(t.id) && s.boxOn]}>{todoDone.has(t.id) && <Ionicons name="checkmark" size={13} color="#fff" />}</View>
-            </Pressable>
-          ))}
-          {items.length > 0 && <Pressable onPress={() => setScreen({ k: 'player', i: Math.max(0, items.findIndex((x) => !done.has(x.key))), page: 0 })} style={s.primary} accessibilityRole="button"><Text style={s.primaryText}>Başla</Text></Pressable>}
-        </ScrollView>
+        <View style={{ flex: 1 }}>
+          <ScrollView contentContainerStyle={[s.pad, { paddingBottom: 90 }]}>
+            <Pressable onPress={() => setScreen({ k: 'home' })} style={s.back} accessibilityRole="button"><Ionicons name="arrow-back" size={16} color={colors.navy} /><Text style={s.backText}>Tüm dersler</Text></Pressable>
+            <View style={s.titleCard}><Text style={s.big}>{training!.title}</Text></View>
+            <View style={s.secRow}><Text style={[s.sec, { marginTop: 0, flexShrink: 1 }]}>Öğrenme modülleri</Text><Text style={[s.pctText, { flexShrink: 0, minWidth: 40, textAlign: 'right' }]}>%{pct}</Text></View>
+            <View style={s.bar}><View style={[s.fill, { width: `${pct}%` }]} /></View>
+            {items.map((it, i) => (
+              <Pressable key={it.key} onPress={() => setScreen({ k: 'player', i, page: 0 })} style={s.row} accessibilityRole="button">
+                <View style={{ flex: 1, minWidth: 0 }}><Text style={s.tiny}>{TYPE_WORD[it.type]}</Text><Text style={s.rowText}>{it.title}</Text></View>
+                <View style={[s.box, done.has(it.key) && s.boxOn]}>{done.has(it.key) && <Ionicons name="checkmark" size={13} color="#fff" />}</View>
+              </Pressable>
+            ))}
+            {tasks.length > 0 && <Text style={s.sec}>Uygulama görevleri</Text>}
+            {tasks.map((t) => (
+              <Pressable key={t.id} onPress={() => setScreen({ k: 'task', task: t })} style={s.row} accessibilityRole="button" accessibilityLabel={t.title}>
+                <Text style={[s.rowText, s.upper]}>{t.title}</Text><Ionicons name="chevron-forward" size={16} color={colors.muted} />
+              </Pressable>
+            ))}
+            {todos.length > 0 && <Text style={s.sec}>Tek seferlik görevler</Text>}
+            {todos.map((t) => (
+              <Pressable key={t.id} onPress={() => setScreen({ k: 'todo', todo: t })} style={s.row} accessibilityRole="button" accessibilityLabel={t.title}>
+                <View style={{ flex: 1, minWidth: 0 }}><Text style={s.tiny}>Tek seferlik görev</Text><Text style={[s.rowText, s.upper]}>{t.title}</Text></View>
+                <View style={[s.box, todoDone.has(t.id) && s.boxOn]}>{todoDone.has(t.id) && <Ionicons name="checkmark" size={13} color="#fff" />}</View>
+              </Pressable>
+            ))}
+          </ScrollView>
+          {items.length > 0 && (
+            <View style={s.sticky}>
+              <Pressable onPress={() => setScreen({ k: 'player', i: Math.max(0, items.findIndex((x) => !done.has(x.key))), page: 0 })} style={[s.primary, { marginTop: 0 }]} accessibilityRole="button"><Text style={s.primaryText}>Başla</Text></Pressable>
+            </View>
+          )}
+        </View>
       );
     }
     if (screen.k === 'task') {
-      const t = screen.task;
-      return <PracticeSheet task={t} trainingTitle={training?.title ?? ''} onBack={() => setScreen({ k: 'training' })} onSubmit={() => { setScreen({ k: 'training' }); flash('Gönderildi (önizleme, kaydedilmedi)'); }} />;
+      return <PracticeSheet task={screen.task} trainingTitle={training?.title ?? ''} onBack={back} onSubmit={() => { back(); flash('Gönderildi (önizleme, kaydedilmedi)'); }} />;
+    }
+    if (screen.k === 'todo') {
+      return <TodoSheet todo={screen.todo} done={todoDone.has(screen.todo.id)} onBack={back}
+        onDone={() => setTodoDone((x) => new Set(x).add(screen.todo.id))} />;
     }
     // Oynatıcı
     const { i, page } = screen;
     const it = items[i];
     if (!it) return null;
     const remaining = items.filter((x) => !done.has(x.key)).length;
-    const pages = it.type === 'reading' ? (it.sections?.length ?? 1) : it.type === 'quiz' ? (it.questions?.length ?? 0) + 1 : it.prompts?.length ?? 0;
-    // sayfa 0 = giriş kartı; okuma 1..n bölüm; test 1..n soru + sonuç; açık uçlu 1..n soru
-    const total = pages + 1;
-    const finish = () => {
-      setDone((d) => new Set(d).add(it.key));
-      if (i + 1 < items.length) setScreen({ k: 'player', i: i + 1, page: 0 });
-      else if (training) setScreen({ k: 'training' });
-      else onClose();
-    };
-    const next = () => (page + 1 < total ? setScreen({ k: 'player', i, page: page + 1 }) : finish());
-    const prev = () => (page > 0 ? setScreen({ k: 'player', i, page: page - 1 }) : i > 0 ? setScreen({ k: 'player', i: i - 1, page: 0 }) : training ? setScreen({ k: 'training' }) : onClose());
     const nextItem = items[i + 1];
+    const nextName = nextItem ? `Sonraki: ${TYPE_WORD[nextItem.type]}` : 'Bitir';
+    const finish = () => {
+      const left = new Set(done).add(it.key);
+      setDone(left);
+      if (nextItem) setScreen({ k: 'player', i: i + 1, page: 0 });
+      else back();
+    };
+    const go = (p: number) => setScreen({ k: 'player', i, page: p });
+    const prev = () => (page > 0 ? go(page - 1) : i > 0 ? setScreen({ k: 'player', i: i - 1, page: 0 }) : back());
     let content: React.ReactNode = null;
-    let nextLabel = 'Sonraki';
-    if (page === 0) {
-      content = (
-        <View style={s.intro}>
-          <Ionicons name={typeMeta(it.type).icon as any} size={28} color={colors.navy} />
-          <Text style={[s.big, { textAlign: 'center' }]}>{it.title}</Text>
-          <Text style={s.p}>{itemIntro(it)}</Text>
-        </View>
-      );
-      nextLabel = 'Başla';
-    } else if (it.type === 'reading') {
-      const sec = it.sections![page - 1];
+    let next = { label: 'İleri', onPress: () => go(page + 1), disabled: false };
+
+    if (it.type === 'reading') {
+      // giriş kartı yok; bölüm bölüm sayfa, son sayfada "Bu metni okudum" işaretlenmeden ilerlenmez
+      const secs = it.sections ?? [];
+      const sec = secs[page];
+      const last = page >= secs.length - 1;
       content = (
         <View style={{ gap: 8 }}>
-          <Text style={s.h}>{sec.heading}</Text>
-          {(sec.paragraphs ?? []).map((p, j) => <Text key={j} style={s.p}>{p}</Text>)}
-          {(sec.bullets ?? []).map((b, j) => <Text key={`b${j}`} style={s.p}>{/^\d+[.)]\s/.test(b) ? b : `• ${b}`}</Text>)}
+          {page === 0 && <Text style={s.big}>{it.title}</Text>}
+          {sec && <Text style={s.h}>{sec.heading}</Text>}
+          {(sec?.paragraphs ?? []).map((p, j) => <Text key={j} style={s.p}>{p}</Text>)}
+          {(sec?.bullets ?? []).map((b, j) => <Text key={`b${j}`} style={s.p}>{/^\d+[.)]\s/.test(b) ? b : `• ${b}`}</Text>)}
+          {last && (
+            <Pressable onPress={() => setReadOk((r) => ({ ...r, [it.key]: !r[it.key] }))} style={s.checkRow} accessibilityRole="checkbox" accessibilityState={{ checked: !!readOk[it.key] }}>
+              <View style={[s.box, readOk[it.key] && s.boxOn]}>{readOk[it.key] && <Ionicons name="checkmark" size={13} color="#fff" />}</View>
+              <Text style={s.p}>Bu metni okudum</Text>
+            </Pressable>
+          )}
         </View>
       );
-      nextLabel = page === pages ? 'Bu metni okudum' : 'Sonraki';
+      next = last ? { label: nextName, onPress: finish, disabled: !readOk[it.key] } : next;
     } else if (it.type === 'quiz') {
       const qs = it.questions ?? [];
-      if (page <= qs.length) {
+      if (page === 0) {
+        content = <Intro title={it.title} line={`${qs.length} soruluk çoktan seçmeli test`} />;
+        next = { label: 'Başla', onPress: () => go(1), disabled: false };
+      } else if (page <= qs.length) {
         const q = qs[page - 1], id = `${it.key}:${page}`, pick = picks[id], shown = !!checked[id];
         content = (
           <View style={{ gap: 8 }}>
-            <Text style={s.tiny}>Soru {page} / {qs.length}</Text>
             <Text style={s.h}>{q.q}</Text>
             {q.options.map((o, j) => {
-              const on = pick === j;
-              const st = shown && j === q.answer ? s.right : shown && on ? s.wrong : on ? s.optOn : null;
+              const on = pick === j, right = j === q.answer;
               return (
-                <Pressable key={j} disabled={shown} onPress={() => setPicks((p) => ({ ...p, [id]: j }))} style={[s.opt, st]} accessibilityRole="radio" accessibilityState={{ selected: on }}>
-                  <Text style={s.p}>{o}</Text>
+                <Pressable key={j} disabled={shown} onPress={() => setPicks((p) => ({ ...p, [id]: j }))}
+                  style={[s.opt, on && !shown && s.optOn, shown && right && s.rightOpt, shown && on && !right && s.wrongOpt]} accessibilityRole="radio" accessibilityState={{ selected: on }}>
+                  <Text style={[s.p, { flex: 1 }]}>{o}</Text>
+                  {shown && right && <Ionicons name="checkmark-circle" size={18} color="#2C4A9A" />}
+                  {shown && on && !right && <Ionicons name="close-circle" size={18} color={colors.danger} />}
                 </Pressable>
               );
             })}
-            {shown && <View style={[s.banner, pick === q.answer ? s.right : s.wrong]}><Text style={s.bannerText}>{pick === q.answer ? 'Doğru' : 'Yanlış'}</Text></View>}
+            {shown && <Text style={[s.verdict, { color: pick === q.answer ? colors.ok : colors.danger }]}>{pick === q.answer ? '✓ Doğru' : '✗ Yanlış'}</Text>}
           </View>
         );
-        if (!shown) {
-          return <Player pct={pct} remaining={remaining} title={it.title} onClose={training ? () => setScreen({ k: 'training' }) : undefined} content={content}
-            onPrev={prev} canPrev nextLabel="Cevabı gör" nextDisabled={pick === undefined} onNext={() => setChecked((c) => ({ ...c, [id]: true }))} />;
-        }
-        nextLabel = page < qs.length ? 'Sonraki soru' : 'Sonuç';
+        next = shown
+          ? { label: page < qs.length ? 'Sonraki soru' : 'Bitir', onPress: () => go(page + 1), disabled: false }
+          : { label: 'Cevabı kontrol et', onPress: () => setChecked((c) => ({ ...c, [id]: true })), disabled: pick === undefined };
       } else {
         const right = qs.filter((q, k) => picks[`${it.key}:${k + 1}`] === q.answer).length;
         content = (
           <View style={s.intro}>
-            <Ionicons name="ribbon-outline" size={30} color={colors.navy} />
+            <Text style={s.score}>%{qs.length ? Math.round((right / qs.length) * 100) : 0}</Text>
             <Text style={[s.big, { textAlign: 'center' }]}>{qs.length} sorudan {right} tanesini doğru yanıtladın!</Text>
-            <Text style={[s.p, { textAlign: 'center' }]}>Bu konuyu bir sonraki görüşmede uzmanınla birlikte gözden geçirebilirsin.</Text>
+            <Text style={[s.p, { textAlign: 'center' }]}>Bu konuyu bir sonraki seansında uzmanınla gözden geçirmeni öneririz.</Text>
           </View>
         );
-        nextLabel = nextItem ? `Sonraki: ${TYPE_WORD[nextItem.type]}` : 'Bitir';
+        next = { label: nextName, onPress: finish, disabled: false };
       }
     } else if (it.type === 'short') {
-      const q = it.prompts![page - 1], id = `${it.key}:${page}`;
-      content = (
-        <View style={{ gap: 8 }}>
-          <Text style={s.tiny}>Soru {page} / {it.prompts!.length}</Text>
-          <Text style={s.h}>{q}</Text>
-          <TextInput value={texts[id] ?? ''} onChangeText={(v) => setTexts((x) => ({ ...x, [id]: v }))} placeholder="Yanıtını yaz..." placeholderTextColor={colors.muted}
-            multiline style={s.input} accessibilityLabel={q} />
-        </View>
-      );
-      nextLabel = page < it.prompts!.length ? 'Sonraki soru' : nextItem ? `Sonraki: ${TYPE_WORD[nextItem.type]}` : 'Bitir';
+      const ps = it.prompts ?? [];
+      if (page === 0) {
+        content = <Intro title={it.title} line={`${ps.length} açık uçlu soru`} />;
+      } else {
+        const q = ps[page - 1], id = `${it.key}:${page}`;
+        content = (
+          <View style={{ gap: 8 }}>
+            <Text style={s.h}>{q}</Text>
+            <TextInput value={texts[id] ?? ''} onChangeText={(v) => setTexts((x) => ({ ...x, [id]: v }))} placeholder="Yanıtını yaz..." placeholderTextColor={colors.muted}
+              multiline style={s.input} accessibilityLabel={q} />
+          </View>
+        );
+        if (page >= ps.length) next = { label: nextName, onPress: finish, disabled: false };
+      }
     }
-    if (it.type === 'reading' && page === pages) nextLabel = 'Bu metni okudum';
-    return <Player pct={pct} remaining={remaining} title={it.title} onClose={training ? () => setScreen({ k: 'training' }) : undefined} content={content} onPrev={prev} canPrev={page > 0 || i > 0} nextLabel={nextLabel} onNext={next} />;
+    return <Player pct={pct} remaining={remaining} content={content} onPrev={prev} canPrev={page > 0 || i > 0}
+      onMenu={training ? () => setScreen({ k: 'training' }) : undefined} next={next} />;
   })();
 
   const phone = (
@@ -190,22 +213,33 @@ export default function ParentPreview({ items: given, training, detail, onClose 
   );
 }
 
-function Player({ pct, remaining, title, content, onPrev, onNext, nextLabel, nextDisabled, onClose, canPrev }: {
-  pct: number; remaining: number; title: string; content: React.ReactNode; onPrev: () => void; onNext: () => void; nextLabel: string; nextDisabled?: boolean; onClose?: () => void; canPrev?: boolean;
+function Intro({ title, line }: { title: string; line: string }) {
+  return (
+    <View style={s.intro}>
+      <Text style={[s.big, { textAlign: 'center' }]}>{title}</Text>
+      <Text style={s.p}>{line}</Text>
+    </View>
+  );
+}
+
+function Player({ pct, remaining, content, onPrev, canPrev, next, onMenu }: {
+  pct: number; remaining: number; content: React.ReactNode; onPrev: () => void; canPrev: boolean;
+  next: { label: string; onPress: () => void; disabled: boolean }; onMenu?: () => void;
 }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 12, gap: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {onClose && <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Eğitime dön"><Ionicons name="arrow-back" size={20} color={colors.navy} /></Pressable>}
+          <Text style={[s.pctText, { flexShrink: 0 }]}>%{pct}</Text>
           <View style={[s.bar, { flex: 1, marginTop: 0 }]}><View style={[s.fill, { width: `${pct}%` }]} /></View>
+          {onMenu && <Pressable onPress={onMenu} hitSlop={8} accessibilityRole="button" accessibilityLabel="Eğitime dön"><Ionicons name="ellipsis-horizontal" size={20} color={colors.navy} /></Pressable>}
         </View>
-        <Text style={s.tiny}>{remaining ? `${remaining} öğe kaldı` : 'Hepsi bitti!'} · {title}</Text>
+        <Text style={s.tiny}>{remaining ? `${remaining} öğe kaldı` : 'Hepsi bitti!'}</Text>
       </View>
       <ScrollView contentContainerStyle={[s.pad, { flexGrow: 1 }]} keyboardShouldPersistTaps="handled">{content}</ScrollView>
       <View style={s.footer}>
         {canPrev && <Pressable onPress={onPrev} style={s.ghost} accessibilityRole="button"><Text style={s.ghostText}>Önceki</Text></Pressable>}
-        <Pressable onPress={onNext} disabled={nextDisabled} style={[s.primary, { flex: 1, marginTop: 0 }, nextDisabled && { opacity: 0.4 }]} accessibilityRole="button"><Text style={s.primaryText}>{nextLabel}</Text></Pressable>
+        <Pressable onPress={next.onPress} disabled={next.disabled} style={[s.primary, { flex: 1, marginTop: 0 }, next.disabled && { opacity: 0.4 }]} accessibilityRole="button"><Text style={s.primaryText}>{next.label}</Text></Pressable>
       </View>
     </View>
   );
@@ -216,11 +250,13 @@ function PracticeSheet({ task, trainingTitle, onBack, onSubmit }: { task: TTask;
   const num = (v: string) => v.replace(/[^0-9]/g, '').slice(0, 4);
   return (
     <ScrollView contentContainerStyle={s.pad} keyboardShouldPersistTaps="handled">
-      <Pressable onPress={onBack} style={s.back} accessibilityRole="button"><Ionicons name="arrow-back" size={16} color={colors.navy} /><Text style={s.backText}>Geri</Text></Pressable>
-      <Text style={s.tiny}>Eğitim: {trainingTitle}</Text>
-      <View style={s.yellow}><Text style={[s.h, { color: '#5C4300' }]}>{task.title}</Text></View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Text style={[s.tiny, { flex: 1 }]}>Parçası: {trainingTitle}</Text>
+        <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Geri"><Ionicons name="close" size={20} color={colors.navy} /></Pressable>
+      </View>
+      <View style={s.yellow}><Text style={[s.h, s.upper, { color: '#5C4300' }]}>{task.title}</Text></View>
       {!!task.description && <Text style={s.p}>{task.description}</Text>}
-      {task.measure === 'frequency' && <Field label="Sıklık sayısı" value={a} onChange={(v) => setA(num(v))} />}
+      {task.measure === 'frequency' && <Field label={measureLabel(task.measure) + ' sayısı'} value={a} onChange={(v) => setA(num(v))} />}
       {task.measure === 'accuracy' && <><Field label="Başarılı deneme sayısı" value={a} onChange={(v) => setA(num(v))} /><Field label="Toplam deneme sayısı" value={b} onChange={(v) => setB(num(v))} /></>}
       {task.measure === 'duration' && <Field label="Süre (dakika)" value={a} onChange={(v) => setA(num(v))} />}
       <Text style={s.label}>Paylaşmak istediğin bir düşünce var mı?</Text>
@@ -231,11 +267,53 @@ function PracticeSheet({ task, trainingTitle, onBack, onSubmit }: { task: TTask;
   );
 }
 
+// Tek seferlik görev: "Tamamlandı olarak işaretle" → "Nasıl geçti?" (Çok kötü … Harika) + düşünce ≤ 140 → "Tamamlandı!"
+function TodoSheet({ todo, done, onBack, onDone }: { todo: TTodo; done: boolean; onBack: () => void; onDone: () => void }) {
+  const [step, setStep] = useState<'view' | 'rate'>('view');
+  const [rate, setRate] = useState(2);
+  const [r, setR] = useState('');
+  return (
+    <ScrollView contentContainerStyle={s.pad} keyboardShouldPersistTaps="handled">
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+        <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Geri"><Ionicons name="close" size={20} color={colors.navy} /></Pressable>
+      </View>
+      <View style={s.yellow}><Text style={s.tiny}>Atandı: Bugün</Text><Text style={[s.h, s.upper, { color: '#5C4300' }]}>{todo.title}</Text></View>
+      {!!todo.description && <Text style={s.p}>{todo.description}</Text>}
+      <Text style={s.tiny}>{trToday()} · Atanma tarihi</Text>
+      {done ? (
+        <View style={s.intro}><Text style={s.big}>🎉 Tamamlandı!</Text></View>
+      ) : step === 'view' ? (
+        <Pressable onPress={() => setStep('rate')} style={s.primary} accessibilityRole="button"><Text style={s.primaryText}>✓ Tamamlandı olarak işaretle</Text></Pressable>
+      ) : (
+        <View style={{ gap: 10 }}>
+          <Text style={s.label}>Nasıl geçti?</Text>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            {RATE.map((l, k) => (
+              <Pressable key={l} onPress={() => setRate(k)} style={[s.rate, rate === k && s.rateOn]} accessibilityRole="radio" accessibilityState={{ selected: rate === k }} accessibilityLabel={l}>
+                <Text style={[s.tiny, rate === k && { color: '#fff' }]}>{k + 1}</Text>
+              </Pressable>
+            ))}
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}><Text style={s.tiny}>Çok kötü</Text><Text style={s.tiny}>Harika</Text></View>
+          <Text style={s.label}>Paylaşmak istediğin bir düşünce var mı?</Text>
+          <Text style={s.tiny}>Bu yalnızca uzmanınla paylaşılır.</Text>
+          <TextInput value={r} onChangeText={(v) => setR(v.slice(0, 140))} multiline style={s.input} accessibilityLabel="Düşüncen" placeholderTextColor={colors.muted} />
+          <Text style={[s.tiny, { alignSelf: 'flex-end' }]}>{r.length}/140</Text>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <Pressable onPress={() => setStep('view')} style={s.ghost} accessibilityRole="button"><Text style={s.ghostText}>Vazgeç</Text></Pressable>
+            <Pressable onPress={onDone} style={[s.primary, { flex: 1, marginTop: 0 }]} accessibilityRole="button"><Text style={s.primaryText}>Gönder</Text></Pressable>
+          </View>
+        </View>
+      )}
+    </ScrollView>
+  );
+}
+
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <View style={{ gap: 4 }}>
       <Text style={s.label}>{label}</Text>
-      <TextInput value={value} onChangeText={onChange} keyboardType="number-pad" placeholder="0" placeholderTextColor={colors.muted} style={[s.input, { minHeight: 44 }]} accessibilityLabel={label} />
+      <TextInput value={value} onChangeText={onChange} keyboardType="number-pad" placeholder="#" placeholderTextColor={colors.muted} style={[s.input, { minHeight: 44 }]} accessibilityLabel={label} />
     </View>
   );
 }
@@ -250,10 +328,14 @@ const s = StyleSheet.create({
   noteText: { fontSize: 11.5, color: '#7A5A22', flexShrink: 1 },
   pad: { padding: 16, gap: 10 },
   big: { fontSize: 20, fontWeight: '700', color: colors.navy, flexShrink: 1 },
+  card: { borderWidth: 1, borderColor: colors.line, borderRadius: 14, padding: 12, gap: 8 },
+  cardHead: { fontSize: 15, fontWeight: '700', color: colors.navy },
+  titleCard: { backgroundColor: '#EEF1F8', borderRadius: 14, padding: 14 },
   sec: { fontSize: 13, fontWeight: '700', color: colors.muted, marginTop: 10 },
   secRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 10 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: colors.line, borderRadius: 12, padding: 12 },
   rowText: { fontSize: 14, color: colors.navy, flex: 1, flexShrink: 1 },
+  upper: { textTransform: 'uppercase', fontWeight: '700', letterSpacing: 0.3 },
   lesson: { borderWidth: 1, borderColor: colors.line, borderRadius: 12, padding: 12, gap: 8 },
   pctText: { fontSize: 13, fontWeight: '700', color: colors.navy },
   bar: { height: 8, borderRadius: 4, backgroundColor: '#ECEEF3', overflow: 'hidden', marginTop: 2 },
@@ -261,25 +343,29 @@ const s = StyleSheet.create({
   tiny: { fontSize: 11.5, color: colors.muted, fontWeight: '600' },
   box: { width: 20, height: 20, borderRadius: 5, borderWidth: 2, borderColor: colors.faint, alignItems: 'center', justifyContent: 'center' },
   boxOn: { backgroundColor: colors.ok, borderColor: colors.ok },
+  checkRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 },
   back: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start' },
   backText: { color: colors.navy, fontWeight: '600' },
+  sticky: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: 12, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: colors.line },
   primary: { backgroundColor: colors.navy, borderRadius: radius.pill, paddingVertical: 13, alignItems: 'center', marginTop: 12 },
   primaryText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   ghost: { borderWidth: 1, borderColor: colors.line, borderRadius: radius.pill, paddingVertical: 12, paddingHorizontal: 18, alignItems: 'center' },
   ghostText: { color: colors.navy, fontWeight: '600' },
   footer: { flexDirection: 'row', gap: 10, padding: 12, borderTopWidth: 1, borderTopColor: colors.line },
   intro: { alignItems: 'center', justifyContent: 'center', gap: 8, borderWidth: 1, borderColor: colors.line, borderRadius: 16, padding: 24, marginTop: 20 },
-  h: { fontSize: 16, fontWeight: '700', color: colors.navy },
+  score: { fontSize: 36, fontWeight: '800', color: colors.navy },
+  h: { fontSize: 16, fontWeight: '700', color: colors.navy, flexShrink: 1 },
   p: { fontSize: 14.5, lineHeight: 22, color: colors.text, flexShrink: 1 },
-  opt: { borderWidth: 1, borderColor: colors.line, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 11 },
+  opt: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, borderColor: colors.line, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 11 },
   optOn: { borderColor: colors.navy, backgroundColor: '#EEF1F8' },
-  right: { borderColor: colors.ok, backgroundColor: '#E1F1E6' },
-  wrong: { borderColor: colors.danger, backgroundColor: '#FDE7EA' },
-  banner: { borderWidth: 1, borderRadius: 10, padding: 10, alignItems: 'center' },
-  bannerText: { fontWeight: '700', color: colors.navy },
+  rightOpt: { borderColor: '#2C4A9A', backgroundColor: '#E3EBFA' },
+  wrongOpt: { borderColor: colors.danger, backgroundColor: '#FDE7EA' },
+  verdict: { fontSize: 15, fontWeight: '700', textAlign: 'center', marginTop: 4 },
   input: { borderWidth: 1, borderColor: colors.line, borderRadius: 12, padding: 12, minHeight: 90, fontSize: 14.5, color: colors.text, textAlignVertical: 'top' },
   label: { fontSize: 13, fontWeight: '600', color: colors.navy },
-  yellow: { backgroundColor: '#FFF1C9', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10 },
+  yellow: { backgroundColor: '#FFF1C9', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, gap: 2 },
+  rate: { flex: 1, height: 36, borderRadius: 10, borderWidth: 1, borderColor: colors.line, alignItems: 'center', justifyContent: 'center' },
+  rateOn: { backgroundColor: colors.navy, borderColor: colors.navy },
   toast: { position: 'absolute', left: 16, right: 16, bottom: 20, backgroundColor: colors.navy, borderRadius: 12, padding: 12, alignItems: 'center' },
   toastText: { color: '#fff', fontWeight: '600' },
 });

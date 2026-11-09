@@ -15,6 +15,7 @@ ln -s "$ROOT/node_modules" "$WORK/node_modules"
 cp "$ROOT/preview/demo-supabase.ts" "$WORK/src/lib/supabase.ts"
 cp "$ROOT/preview/demo-sessions.ts" "$WORK/src/lib/demo-sessions.ts"
 cp "$ROOT/preview/demo-training.ts" "$WORK/src/lib/demo-training.ts"
+cp "$ROOT/preview/demo-behaviors.ts" "$WORK/src/lib/demo-behaviors.ts"
 
 python3 - "$WORK" "$DEV" <<'EOF'
 import sys
