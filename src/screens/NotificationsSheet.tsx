@@ -25,9 +25,11 @@ function titleFor(n: AppNotification, childId?: string, childName?: string) {
 }
 
 // Bildirim nereye götürür (danışan sekmesi): ClientScreen'deki sekme kimlikleriyle aynı
-export function notificationTab(kind: string): 'abc' | 'suggestions' | 'summary' {
+export function notificationTab(kind: string): 'abc' | 'suggestions' | 'summary' | 'behaviors' | 'training' {
   if (kind === 'abc_event') return 'abc';
   if (kind === 'suggestion_decided') return 'suggestions';
+  if (kind === 'behavior_incident') return 'behaviors';
+  if (kind === 'training_activity') return 'training';
   return 'summary';
 }
 

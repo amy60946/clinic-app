@@ -19,12 +19,14 @@ import NotesTab from './NotesTab';
 import ReportTab from './ReportTab';
 import DetailsTab from './DetailsTab';
 import SessionsTab from './SessionsTab';
+import TrainingTab from '../training/TrainingTab';
+import BehaviorsTab from '../behaviors/BehaviorsTab';
 import { fromISO } from '../../dates';
 import { SectionHint } from '../SampleTour';
 import { useLayout, LayoutToggle } from '../../lib/layout';
 
 // 'suggestions' eski bağlantılar ve bildirimler için: Ev rutinleri'nde öneri penceresi (Gönderilenler) açılır
-export type Tab = 'summary' | 'routine' | 'abc' | 'goals' | 'sessions' | 'notes' | 'suggestions' | 'report' | 'details';
+export type Tab = 'training' | 'behaviors' | 'summary' | 'routine' | 'abc' | 'goals' | 'sessions' | 'notes' | 'suggestions' | 'report' | 'details';
 type Section = Exclude<Tab, 'suggestions'>;
 
 // Bölümler: geniş ekranda (web, iPad'de "Web görünümü") gruplu sol menü — Planla · İzle · Kayıt (kullanıcı kararı 30 Ekim 2026);
@@ -32,8 +34,10 @@ type Section = Exclude<Tab, 'suggestions'>;
 type Group = 'plan' | 'watch' | 'record';
 const GROUPS: { id: Group; label: string }[] = [{ id: 'plan', label: 'Planla' }, { id: 'watch', label: 'İzle' }, { id: 'record', label: 'Kayıt' }];
 const SECTIONS: { id: Section; label: string; icon: keyof typeof Ionicons.glyphMap; group: Group }[] = [
+  { id: 'training', label: 'Ebeveyn Eğitimi', icon: 'school-outline', group: 'plan' },
   { id: 'goals', label: 'Takip Planı', icon: 'flag-outline', group: 'plan' },
   { id: 'sessions', label: 'Seanslar', icon: 'calendar-outline', group: 'plan' },
+  { id: 'behaviors', label: 'Davranışlar ve Olaylar', icon: 'locate-outline', group: 'watch' },
   { id: 'summary', label: 'Özet', icon: 'grid-outline', group: 'watch' },
   { id: 'routine', label: 'Ev Rutinleri', icon: 'repeat-outline', group: 'watch' },
   { id: 'abc', label: 'Davranış Kayıtları', icon: 'pulse-outline', group: 'watch' },
@@ -180,7 +184,7 @@ export default function ClientScreen({
         </View>
         <Text style={styles.subtitle}>
           {[ageText(data?.child?.birthday ?? null), client.parents ? `Ebeveyn: ${client.parents}` : '', `Onay\u00a0${new Date(client.consent_at).toLocaleDateString('tr-TR')}`]
-            .filter(Boolean).join(' · ')}
+            .filter(Boolean).join(' ·\u00a0')}
         </Text>
         {!!teamLine && <Text style={styles.subtitle}>{teamLine}</Text>}
       </View>
@@ -220,6 +224,8 @@ export default function ClientScreen({
             {tab === 'summary' && <SummaryTab {...ctx} />}
             {tab === 'routine' && <HomeRoutines {...ctx} view={routineView} onView={setRoutineView} />}
             {tab === 'abc' && <AbcTab key={abcGoal ?? 'all'} {...ctx} />}
+            {tab === 'training' && <TrainingTab {...ctx} sample={!!sample} />}
+            {tab === 'behaviors' && <BehaviorsTab {...ctx} sample={!!sample} />}
             {tab === 'goals' && <PlanTab {...ctx} />}
             {tab === 'sessions' && (sample
               ? <Notice icon="calendar-outline" text={'Seanslar gerçek danışanlarda görünür: Takvim\'den ya da burada "+ Seans" ile planlanır.'} />
@@ -339,7 +345,9 @@ function Switcher({ visible, clients, current, onClose, onPick }: {
 function TabGrid({ value, onChange, dots }: { value: Section; onChange: (t: Section) => void; dots: Partial<Record<Section, boolean>> }) {
   const { width } = useWindowDimensions();
   const wide = width >= 1000;
-  const rows = wide ? [SECTIONS] : [SECTIONS.slice(0, 4), SECTIONS.slice(4)];
+  // dar ekranda 9 bölüm 3 × 3 (eşit sütun); 8 ve altı iki satır
+  const per = SECTIONS.length > 8 ? 3 : Math.ceil(SECTIONS.length / 2);
+  const rows = wide ? [SECTIONS] : Array.from({ length: Math.ceil(SECTIONS.length / per) }, (_, i) => SECTIONS.slice(i * per, i * per + per));
   return (
     <View style={styles.grid} accessibilityRole="tablist">
       {rows.map((row, i) => (
