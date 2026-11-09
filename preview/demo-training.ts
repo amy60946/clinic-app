@@ -93,7 +93,7 @@ export function seedTraining(x: Row) {
 
   // Hızlı yapılacaklar
   x.parent_training_todos.push(
-    { id: uid(), training_id: T1, title: 'İlk davranış kaydını gir', description: 'Uygulamada Davranış kaydı ekle ile bu haftaki bir davranışı kaydet.', done_at: ago(19 * 1440), archived: false, created_at: ago(20 * 1440) },
+    { id: uid(), training_id: T1, title: 'İlk davranış kaydını gir', description: 'Uygulamada «Davranış kaydı ekle» ile bu haftaki bir davranışı kaydet.', done_at: ago(19 * 1440), archived: false, created_at: ago(20 * 1440) },
     { id: uid(), training_id: T1, title: 'Bir zamanlayıcı ya da kum saati hazırla', description: 'Geçiş uyarılarında kullanmak için çocuğun görebileceği bir zamanlayıcı.', done_at: null, archived: false, created_at: ago(12 * 1440) },
   );
 

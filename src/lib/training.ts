@@ -34,15 +34,17 @@ export const typeMeta = (t: ItemType) => TYPES.find((x) => x.key === t) ?? TYPES
 export function itemIntro(it: LibItem): string {
   if (it.type === 'quiz') return `${it.questions?.length ?? 0} soruluk çoktan seçmeli test`;
   if (it.type === 'short') return `${it.prompts?.length ?? 0} açık uçlu soru`;
-  if (it.type === 'reading') return `Okuma${it.minutes ? ` · ${it.minutes} dk` : ''}`;
+  if (it.type === 'reading') return it.minutes ? `${it.minutes} dakikalık okuma` : 'Okuma';
   return typeMeta(it.type).label;
 }
 
 export type TrainingStatus = 'draft' | 'active' | 'mastered';
+// bölüm başlıkları açık tonlu (koyu çip yalnız durum seçicide)
+export const SECTION_TONE: Record<TrainingStatus, { bg: string; fg: string }> = { draft: { bg: '#F3E9D6', fg: '#7A5A22' }, active: { bg: '#E1F1E6', fg: '#2F7D4A' }, mastered: { bg: '#E3E8F4', fg: '#0F1B3D' } };
 export const STATUS_META: Record<TrainingStatus, { label: string; bg: string; fg: string; section: string }> = {
   draft: { label: 'Taslak', bg: '#F3E9D6', fg: '#7A5A22', section: 'Taslaklar' },
   active: { label: 'Etkin', bg: '#E1F1E6', fg: '#2F7D4A', section: 'Etkin eğitimler' },
-  mastered: { label: 'Ustalaştı', bg: '#0F1B3D', fg: '#FFFFFF', section: 'Ustalaşılan eğitimler' },
+  mastered: { label: 'Ustalaştı', bg: '#0F1B3D', fg: '#FFFFFF', section: 'Ustalaşılmış eğitimler' },
 };
 
 export type Measure = 'frequency' | 'accuracy' | 'duration' | 'none';
@@ -246,12 +248,12 @@ export function trainingNote(t: Training, d: Detail, fmt: (iso: string) => strin
     const since = new Date(Date.now() - 14 * 864e5).toISOString().slice(0, 10);
     const recent = logs.filter((l) => l.day >= since);
     let sum = '';
-    if (k.measure === 'frequency') sum = `; son 14 günde toplam ${recent.reduce((n, l) => n + (l.count ?? 0), 0)} kez`;
-    if (k.measure === 'accuracy') { const s = recent.reduce((n, l) => n + (l.successes ?? 0), 0), a = recent.reduce((n, l) => n + (l.attempts ?? 0), 0); sum = a ? `; son 14 günde ${a} denemenin ${s} tanesi başarılı` : ''; }
-    if (k.measure === 'duration') sum = `; son 14 günde toplam ${recent.reduce((n, l) => n + (l.minutes ?? 0), 0)} dk`;
-    lines.push(`Uygulama görevi "${k.title}" (${measureLabel(k.measure)}): ${logs.length} kayıt, son 14 günde ${recent.length}${sum}.`);
+    if (k.measure === 'frequency') sum = `, toplam ${recent.reduce((n, l) => n + (l.count ?? 0), 0)} kez`;
+    if (k.measure === 'accuracy') { const s = recent.reduce((n, l) => n + (l.successes ?? 0), 0), a = recent.reduce((n, l) => n + (l.attempts ?? 0), 0); sum = a ? `, ${a} denemenin ${s} tanesi başarılı` : ''; }
+    if (k.measure === 'duration') sum = `, toplam ${recent.reduce((n, l) => n + (l.minutes ?? 0), 0)} dk`;
+    lines.push(`Uygulama görevi "${k.title}" (${measureLabel(k.measure)}): toplam ${logs.length} kayıt. Son 14 gün: ${recent.length} kayıt${sum}.`);
     const refl = logs.filter((l) => l.reflection.trim()).slice(0, 2);
-    refl.forEach((l) => lines.push(`  Ebeveynin notu (${fmt(l.day)}): "${l.reflection.trim()}"`));
+    refl.forEach((l) => lines.push(`– Ebeveynin notu (${fmt(l.day)}): "${l.reflection.trim()}"`));
   });
   if (todos.length) lines.push(`Hızlı yapılacaklar: ${todos.length} işin ${todos.filter((x) => x.done_at).length} tanesi tamamlandı.`);
   if (t.criterion) lines.push(`Ustalık ölçütü: ${t.criterion}${data.length ? ` Son gözlem: %${data[data.length - 1].value} (${fmt(data[data.length - 1].day)}).` : ''}`);

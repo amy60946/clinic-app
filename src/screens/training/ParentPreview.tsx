@@ -10,7 +10,7 @@ import { colors, radius } from '../../theme';
 import { LibItem, itemByKey, itemIntro, Training, Detail, TTask, typeMeta } from '../../lib/training';
 
 type Screen = { k: 'home' } | { k: 'training' } | { k: 'player'; i: number; page: number } | { k: 'task'; task: TTask };
-const TYPE_WORD: Record<string, string> = { reading: 'Okuma', quiz: 'Test', short: 'Test', video: 'Video', pdf: 'PDF' };
+const TYPE_WORD: Record<string, string> = { reading: 'Okuma', quiz: 'Test', short: 'Açık uçlu', video: 'Video', pdf: 'PDF' };
 
 export default function ParentPreview({ items: given, training, detail, onClose }: {
   items?: LibItem[]; training?: Training; detail?: Detail; onClose: () => void;
@@ -41,7 +41,7 @@ export default function ParentPreview({ items: given, training, detail, onClose 
           <View style={s.row}><Ionicons name="pulse-outline" size={18} color={colors.navy} /><Text style={s.rowText}>Çocuğunun davranışını kaydet</Text><Ionicons name="chevron-forward" size={16} color={colors.muted} /></View>
           <Text style={s.sec}>Derslere devam et</Text>
           <Pressable onPress={() => setScreen({ k: 'training' })} style={s.lesson} accessibilityRole="button">
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}><Text style={[s.rowText, { fontWeight: '700' }]}>{training!.title}</Text><Text style={s.pctText}>%{pct}</Text></View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><Text style={[s.rowText, { fontWeight: '700' }]}>{training!.title}</Text><Text style={[s.pctText, { flexShrink: 0 }]}>%{pct}</Text></View>
             <View style={s.bar}><View style={[s.fill, { width: `${pct}%` }]} /></View>
           </Pressable>
         </ScrollView>
@@ -52,7 +52,7 @@ export default function ParentPreview({ items: given, training, detail, onClose 
         <ScrollView contentContainerStyle={s.pad}>
           <Pressable onPress={() => setScreen({ k: 'home' })} style={s.back} accessibilityRole="button"><Ionicons name="arrow-back" size={16} color={colors.navy} /><Text style={s.backText}>Tüm dersler</Text></Pressable>
           <Text style={s.big}>{training!.title}</Text>
-          <View style={s.secRow}><Text style={s.sec}>Öğrenme modülleri</Text><Text style={s.pctText}>%{pct}</Text></View>
+          <View style={s.secRow}><Text style={[s.sec, { marginTop: 0, flex: 1 }]}>Öğrenme modülleri</Text><Text style={[s.pctText, { flexShrink: 0 }]}>%{pct}</Text></View>
           {items.map((it, i) => (
             <Pressable key={it.key} onPress={() => setScreen({ k: 'player', i, page: 0 })} style={s.row} accessibilityRole="button">
               <View style={{ flex: 1 }}><Text style={s.tiny}>{TYPE_WORD[it.type]}</Text><Text style={s.rowText}>{it.title}</Text></View>
@@ -103,7 +103,6 @@ export default function ParentPreview({ items: given, training, detail, onClose 
       content = (
         <View style={s.intro}>
           <Ionicons name={typeMeta(it.type).icon as any} size={28} color={colors.navy} />
-          <Text style={s.tiny}>{TYPE_WORD[it.type]}</Text>
           <Text style={[s.big, { textAlign: 'center' }]}>{it.title}</Text>
           <Text style={s.p}>{itemIntro(it)}</Text>
         </View>
@@ -140,8 +139,8 @@ export default function ParentPreview({ items: given, training, detail, onClose 
           </View>
         );
         if (!shown) {
-          return <Player pct={pct} remaining={remaining} title={it.title} onClose={training ? () => setScreen({ k: 'training' }) : onClose} content={content}
-            onPrev={prev} nextLabel="Cevabı gör" nextDisabled={pick === undefined} onNext={() => setChecked((c) => ({ ...c, [id]: true }))} />;
+          return <Player pct={pct} remaining={remaining} title={it.title} onClose={training ? () => setScreen({ k: 'training' }) : undefined} content={content}
+            onPrev={prev} canPrev nextLabel="Cevabı gör" nextDisabled={pick === undefined} onNext={() => setChecked((c) => ({ ...c, [id]: true }))} />;
         }
         nextLabel = page < qs.length ? 'Sonraki soru' : 'Sonuç';
       } else {
@@ -168,7 +167,7 @@ export default function ParentPreview({ items: given, training, detail, onClose 
       nextLabel = page < it.prompts!.length ? 'Sonraki soru' : nextItem ? `Sonraki: ${TYPE_WORD[nextItem.type]}` : 'Bitir';
     }
     if (it.type === 'reading' && page === pages) nextLabel = 'Bu metni okudum';
-    return <Player pct={pct} remaining={remaining} title={it.title} onClose={training ? () => setScreen({ k: 'training' }) : onClose} content={content} onPrev={prev} nextLabel={nextLabel} onNext={next} />;
+    return <Player pct={pct} remaining={remaining} title={it.title} onClose={training ? () => setScreen({ k: 'training' }) : undefined} content={content} onPrev={prev} canPrev={page > 0 || i > 0} nextLabel={nextLabel} onNext={next} />;
   })();
 
   const phone = (
@@ -181,7 +180,7 @@ export default function ParentPreview({ items: given, training, detail, onClose 
   return (
     <Modal visible animationType="slide" presentationStyle={framed ? 'overFullScreen' : 'fullScreen'} transparent={framed} onRequestClose={onClose}>
       <SafeAreaView style={[{ flex: 1 }, framed ? s.scrim : { backgroundColor: '#fff' }]}>
-        <View style={s.topbar}>
+        <View style={[s.topbar, framed && { backgroundColor: colors.navy }]}>
           <Text style={[s.topTitle, framed && { color: '#fff' }]}>Ebeveyn deneyimi</Text>
           <Pressable onPress={onClose} hitSlop={10} accessibilityRole="button" accessibilityLabel="Önizlemeyi kapat"><Ionicons name="close" size={24} color={framed ? '#fff' : colors.navy} /></Pressable>
         </View>
@@ -191,21 +190,21 @@ export default function ParentPreview({ items: given, training, detail, onClose 
   );
 }
 
-function Player({ pct, remaining, title, content, onPrev, onNext, nextLabel, nextDisabled, onClose }: {
-  pct: number; remaining: number; title: string; content: React.ReactNode; onPrev: () => void; onNext: () => void; nextLabel: string; nextDisabled?: boolean; onClose: () => void;
+function Player({ pct, remaining, title, content, onPrev, onNext, nextLabel, nextDisabled, onClose, canPrev }: {
+  pct: number; remaining: number; title: string; content: React.ReactNode; onPrev: () => void; onNext: () => void; nextLabel: string; nextDisabled?: boolean; onClose?: () => void; canPrev?: boolean;
 }) {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 12, gap: 6 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Kapat"><Ionicons name="close" size={20} color={colors.navy} /></Pressable>
+          {onClose && <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Eğitime dön"><Ionicons name="close" size={20} color={colors.navy} /></Pressable>}
           <View style={[s.bar, { flex: 1, marginTop: 0 }]}><View style={[s.fill, { width: `${pct}%` }]} /></View>
         </View>
         <Text style={s.tiny}>{remaining ? `${remaining} öğe kaldı` : 'Hepsi bitti!'} · {title}</Text>
       </View>
       <ScrollView contentContainerStyle={[s.pad, { flexGrow: 1 }]} keyboardShouldPersistTaps="handled">{content}</ScrollView>
       <View style={s.footer}>
-        <Pressable onPress={onPrev} style={s.ghost} accessibilityRole="button"><Text style={s.ghostText}>Önceki</Text></Pressable>
+        {canPrev && <Pressable onPress={onPrev} style={s.ghost} accessibilityRole="button"><Text style={s.ghostText}>Önceki</Text></Pressable>}
         <Pressable onPress={onNext} disabled={nextDisabled} style={[s.primary, { flex: 1, marginTop: 0 }, nextDisabled && { opacity: 0.4 }]} accessibilityRole="button"><Text style={s.primaryText}>{nextLabel}</Text></Pressable>
       </View>
     </View>
@@ -218,7 +217,7 @@ function PracticeSheet({ task, trainingTitle, onBack, onSubmit }: { task: TTask;
   return (
     <ScrollView contentContainerStyle={s.pad} keyboardShouldPersistTaps="handled">
       <Pressable onPress={onBack} style={s.back} accessibilityRole="button"><Ionicons name="arrow-back" size={16} color={colors.navy} /><Text style={s.backText}>Geri</Text></Pressable>
-      <Text style={s.tiny}>Parçası: {trainingTitle}</Text>
+      <Text style={s.tiny}>Eğitim: {trainingTitle}</Text>
       <View style={s.yellow}><Text style={[s.h, { color: '#5C4300' }]}>{task.title}</Text></View>
       {!!task.description && <Text style={s.p}>{task.description}</Text>}
       {task.measure === 'frequency' && <Field label="Sıklık sayısı" value={a} onChange={(v) => setA(num(v))} />}
@@ -242,7 +241,7 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
 }
 
 const s = StyleSheet.create({
-  scrim: { backgroundColor: 'rgba(10,14,28,0.6)' },
+  scrim: { backgroundColor: 'rgba(10,14,28,0.78)' },
   topbar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 10 },
   topTitle: { fontSize: 16, fontWeight: '700', color: colors.navy },
   phoneBase: { backgroundColor: '#fff', overflow: 'hidden' },

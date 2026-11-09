@@ -342,8 +342,9 @@ function Switcher({ visible, clients, current, onClose, onPick }: {
 function TabGrid({ value, onChange, dots }: { value: Section; onChange: (t: Section) => void; dots: Partial<Record<Section, boolean>> }) {
   const { width } = useWindowDimensions();
   const wide = width >= 1000;
-  const half = Math.ceil(SECTIONS.length / 2);
-  const rows = wide ? [SECTIONS] : [SECTIONS.slice(0, half), SECTIONS.slice(half)];
+  // dar ekranda 9 bölüm 3 × 3 (eşit sütun); 8 ve altı iki satır
+  const per = SECTIONS.length > 8 ? 3 : Math.ceil(SECTIONS.length / 2);
+  const rows = wide ? [SECTIONS] : Array.from({ length: Math.ceil(SECTIONS.length / per) }, (_, i) => SECTIONS.slice(i * per, i * per + per));
   return (
     <View style={styles.grid} accessibilityRole="tablist">
       {rows.map((row, i) => (

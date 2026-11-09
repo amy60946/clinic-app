@@ -12,7 +12,7 @@ import {
   ITEMS, TOPICS, TYPES, LibItem, ItemType, topicLabel, loadFavorites, saveFavorites, loadTrainings, createTraining, addModules,
   loadDetail, parentsOf, Training, TrainingNotInstalled,
 } from '../../lib/training';
-import { TypeTile, ItemContent, SheetFrame, StatusChip } from './parts';
+import { TypeTile, ItemContent, SheetFrame, StatusChip, GhostButton } from './parts';
 import ParentPreview from './ParentPreview';
 
 type Filters = { q: string; fav: boolean; types: ItemType[]; topics: string[] };
@@ -69,13 +69,15 @@ function ItemCard({ it, on, fav, onPress, onFav, picked }: { it: LibItem; on: bo
   );
 }
 
-function Drawer({ it, fav, onFav, onClose, action }: { it: LibItem; fav: boolean; onFav: () => void; onClose: () => void; action: React.ReactNode }) {
+function Drawer({ it, fav, onFav, onClose, action, inSheet }: { it: LibItem; fav: boolean; onFav: () => void; onClose: () => void; action: React.ReactNode; inSheet?: boolean }) {
   return (
     <View style={{ gap: 12 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
-        <Text style={[styles.cardTitle, { flex: 1, fontSize: 17 }]}>{it.title}</Text>
-        <IconButton name="close" label="Kapat" onPress={onClose} />
-      </View>
+      {!inSheet && (
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+          <Text style={[styles.cardTitle, { flex: 1, fontSize: 17 }]}>{it.title}</Text>
+          <IconButton name="close" label="Kapat" onPress={onClose} />
+        </View>
+      )}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
         <View style={{ flex: 1 }}>{action}</View>
         <Pressable onPress={onFav} hitSlop={8} accessibilityRole="button" accessibilityLabel={fav ? 'Favorilerden çıkar' : 'Favorilere ekle'}>
@@ -113,7 +115,7 @@ export function LibraryBrowser({ me, mode, exclude, onAssign, picked, onTogglePi
   const action = it && (mode === 'page'
     ? <Cta label="Ebeveyn eğitimi olarak ata" onPress={() => onAssign?.(it)} />
     : <Cta label={picked?.includes(it.key) ? 'Seçildi' : 'Seç'} onPress={() => onTogglePick?.(it.key)} />);
-  const drawer = it && <Drawer it={it} fav={favs.includes(it.key)} onFav={() => fav(it.key)} onClose={() => setSel(null)} action={action} />;
+  const drawer = it && <Drawer it={it} fav={favs.includes(it.key)} onFav={() => fav(it.key)} onClose={() => setSel(null)} action={action} inSheet={!wide} />;
 
   const listCol = (
     <View style={{ flex: 1, minWidth: 0, gap: 8 }}>
@@ -225,7 +227,7 @@ export function AssignSheet({ me, item, clients, onClose, onDone }: {
   };
   return (
     <SheetFrame title="Kaynağı ata" onClose={onClose}
-      footer={<><SmallButton label="Vazgeç" onPress={onClose} /><Cta label="Eğitimi kur" onPress={setUp} busy={busy} disabled={!client || !parent || !target || (target === 'new' && false)} style={{ paddingHorizontal: 18 }} /></>}>
+      footer={<><GhostButton label="Vazgeç" onPress={onClose} /><Cta label="Eğitimi kur" onPress={setUp} busy={busy} disabled={!client || !parent || !target} style={{ height: 48, marginTop: 0, paddingHorizontal: 18 }} /></>}>
       <View style={styles.assignItem}><TypeTile type={item.type} /><Text style={[styles.cardTitle, { flex: 1 }]}>{item.title}</Text></View>
       <Pressable onPress={() => setPreview(true)} accessibilityRole="button" style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}>
         <Text style={styles.link}>Ebeveyn deneyimini önizle</Text><Ionicons name="open-outline" size={14} color={colors.navy} />
