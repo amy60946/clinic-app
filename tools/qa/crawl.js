@@ -58,7 +58,7 @@ async function tap(p, text, opt = {}) {
   if (!(await clickTop(p, l, opt.wait, opt.last))) throw new Error(`üstte değil: ${text}`);
 }
 async function closeTop(p, back) {
-  for (const lab of back ? ['Kapat', 'Geri', 'Vazgeç'] : ['Kapat', 'Vazgeç']) {
+  for (const lab of back ? ['Kapat', 'Önizlemeyi kapat', 'Geri', 'Vazgeç'] : ['Kapat', 'Önizlemeyi kapat', 'Vazgeç']) {
     if (await clickTop(p, p.locator(`[aria-label="${lab}"]`).filter({ visible: true }), 900, true)) return;
   }
   for (const t of ['Vazgeç', 'Tamam']) if (await clickTop(p, visible(p, t), 800, true)) return;
@@ -66,7 +66,7 @@ async function closeTop(p, back) {
 }
 async function ensureClosed(p) {
   for (let i = 0; i < 4; i++) {
-    const open = await p.evaluate((f) => { const fn = new Function('return ' + f)(); return [...document.querySelectorAll('[aria-label="Kapat"],[aria-label="Vazgeç"]'), ...[...document.querySelectorAll('div')].filter((d) => !d.childElementCount && ['Tamam', 'Vazgeç'].includes(d.textContent.trim()))].some((e) => e.getBoundingClientRect().width && fn(e)); }, onTop.toString());
+    const open = await p.evaluate((f) => { const fn = new Function('return ' + f)(); return [...document.querySelectorAll('[aria-label="Kapat"],[aria-label="Vazgeç"],[aria-label="Önizlemeyi kapat"]'), ...[...document.querySelectorAll('div')].filter((d) => !d.childElementCount && ['Tamam', 'Vazgeç'].includes(d.textContent.trim()))].some((e) => e.getBoundingClientRect().width && fn(e)); }, onTop.toString());
     if (!open) return; await closeTop(p);
   }
 }
@@ -101,7 +101,9 @@ async function login(b, who) {
   const b = await chromium.launch();
   // 1) klinik sahibi, dolu hesap
   let { ctx, p } = await login(b, 'uzman');
+  const ONLY = process.env.ONLY === 'training';   // ONLY=training: yalnız kütüphane, ebeveyn eğitimi, davranışlar ve olaylar
   await step(p, 'home', async () => {});
+  if (!ONLY) {
   await step(p, 'bell', async () => { await tap(p, p.getByRole('button', { name: /Bildirim/ })); });
   await closeTop(p);
   await step(p, 'invite', async () => { await tap(p, 'Aileyi davet et', { last: true }); }, 'E-posta gönder');
@@ -121,7 +123,16 @@ async function login(b, who) {
   await closeTop(p); await closeTop(p, true);
   await step(p, 'settings', async () => { await tap(p, p.getByRole('button', { name: 'Ayarlar', exact: true }), { wait: 1500 }); });
   await closeTop(p, true);
+  }
+  // Kaynak kütüphanesi (ebeveyn eğitimi, 9 Kasım 2026)
+  await step(p, 'library', async () => { await tap(p, 'Kaynak kütüphanesi', { wait: 1800 }); }, 'Ebeveyn eğitimi kaynak kütüphanesi');
+  await step(p, 'library-item', async () => { await tap(p, p.getByRole('button', { name: 'Uzmanınla eğitime başlarken', exact: true }).filter({ visible: true })); }, 'Ebeveyn eğitimi olarak ata');
+  await step(p, 'library-assign', async () => { await tap(p, 'Ebeveyn eğitimi olarak ata', { last: true }); }, 'Danışan seç');
+  await closeTop(p); await ensureClosed(p);
+  await step(p, 'library-back', async () => { await tap(p, 'Ana ekran'); });
   // danışan
+  if (ONLY) await tap(p, p.getByText(/^Nazlı/).filter({ visible: true }), { wait: 2500 });
+  else {
   await step(p, 'client-plan', async () => { await tap(p, p.getByText(/^Nazlı/).filter({ visible: true }), { wait: 2500 }); await tap(p, 'Takip Planı', { wait: 2000 }); });
   await step(p, 'plan-goal-tab', async () => { await tap(p, 'Davranış hedefi'); });
   await step(p, 'plan-program-tab', async () => { await tap(p, p.getByText(/^Program \d/).filter({ visible: true })); });
@@ -135,6 +146,57 @@ async function login(b, who) {
   await closeTop(p);
   await step(p, 'plan-library', async () => { await tap(p, p.getByText(/^Kitaplık/).filter({ visible: true })); });
   await closeTop(p);
+  }
+  // Ebeveyn eğitimi (danışan › Planla)
+  await ensureClosed(p);
+  const T = 'Ebeveyn zorlayıcı davranışları ABC ile kaydeder ve tetikleyicileri tanır';
+  const subTab = (n) => p.getByRole('tab', { name: n }).filter({ visible: true });
+  await step(p, 'training', async () => { await tap(p, 'Ebeveyn Eğitimi', { wait: 2000 }); }, 'Ebeveyn eğitimleri');
+  await step(p, 'training-create', async () => { await tap(p, '+ Eğitim ekle'); }, 'Bu eğitim kimin için?');
+  await closeTop(p); await ensureClosed(p);
+  await step(p, 'training-detail', async () => { await tap(p, p.getByRole('button', { name: T, exact: true }).filter({ visible: true }), { wait: 1500 }); }, 'Tüm eğitimler');
+  await step(p, 'training-status', async () => { await tap(p, 'Etkin', { last: true }); }, 'Ustalaştı');
+  await closeTop(p); await ensureClosed(p);
+  await step(p, 'training-modules', async () => { await tap(p, subTab('Öğrenme modülleri'), { last: true }); }, 'etkin modül');
+  await step(p, 'training-module-review', async () => { await tap(p, p.getByRole('button', { name: / incele$/ }).filter({ visible: true })); }, 'Etkileşimli modülü incele');
+  await closeTop(p); await ensureClosed(p);
+  await step(p, 'training-module-pick', async () => { await tap(p, '+ Daha fazla ekle'); }, 'Modülleri ekle');
+  await closeTop(p); await ensureClosed(p);
+  await step(p, 'training-tasks', async () => { await tap(p, subTab('Uygulama görevleri'), { last: true }); });
+  await step(p, 'training-task-add', async () => { await tap(p, '+ Görev ekle', { last: true }); }, 'Nasıl ölçülecek?');
+  await closeTop(p); await ensureClosed(p);
+  await step(p, 'training-todos', async () => { await tap(p, subTab('Hızlı yapılacaklar'), { last: true }); });
+  await step(p, 'training-summary', async () => { await tap(p, subTab('Özet'), { last: true }); }, 'Ustalık ölçütüne doğru');
+  await step(p, 'training-note', async () => { await tap(p, 'Not oluştur'); }, 'Başlangıç tarihi');
+  await closeTop(p); await ensureClosed(p);
+  await step(p, 'training-gear', async () => { await tap(p, p.locator('[aria-label="Eğitim ayarları"]').filter({ visible: true })); }, 'Ayrıntıları düzenle');
+  await step(p, 'training-preview', async () => { await tap(p, 'Ebeveyn deneyimini önizle', { last: true }); }, 'Derslere devam et');
+  await step(p, 'training-preview-page', async () => { await tap(p, p.getByRole('button', { name: T, exact: true }).filter({ visible: true }), { last: true }); }, 'Tüm dersler');
+  await step(p, 'training-preview-player', async () => { await tap(p, 'Başla', { last: true }); });
+  await closeTop(p); await ensureClosed(p);
+  await step(p, 'training-back', async () => { await tap(p, 'Tüm eğitimler'); }, 'Ebeveyn eğitimleri');
+  // Davranışlar ve Olaylar (danışan › İzle)
+  const B = 'Ekranı kapatırken ağlama';
+  await step(p, 'behaviors', async () => { await tap(p, 'Davranışlar ve Olaylar', { wait: 2000 }); }, 'Diğer bildirilen olaylar');
+  await step(p, 'behavior-abc', async () => { await tap(p, p.getByRole('button', { name: B, exact: true }).filter({ visible: true })); }, 'Öncül');
+  await step(p, 'behavior-freq', async () => { await tap(p, p.getByRole('button', { name: 'Kardeşine vurma', exact: true }).filter({ visible: true })); });
+  await step(p, 'behavior-duration', async () => { await tap(p, p.getByRole('button', { name: 'Yatma saati direnci', exact: true }).filter({ visible: true })); });
+  await step(p, 'behavior-other', async () => { await tap(p, 'Diğer bildirilen olaylar'); });
+  await step(p, 'behavior-gear', async () => { await tap(p, p.locator('[aria-label="Hedef davranış ayarları"]').filter({ visible: true })); }, 'Arşivle');
+  await step(p, 'behavior-edit', async () => { await tap(p, 'Düzenle', { last: true }); }, 'Hedef davranışı düzenle');
+  await closeTop(p); await ensureClosed(p);
+  await step(p, 'behavior-new', async () => { await tap(p, '+ Hedef davranış ekle'); }, 'Kayıt türünü seç');
+  await closeTop(p); await ensureClosed(p);
+  await step(p, 'behavior-preview', async () => { await tap(p, 'Ebeveyn deneyimini önizle'); }, 'Çocuğunun davranış olayını bildir');
+  await step(p, 'behavior-preview-pick', async () => { await tap(p, 'Çocuğunun davranış olayını bildir'); }, 'Hangi davranış oldu?');
+  await step(p, 'behavior-preview-details', async () => { await tap(p, B, { last: true }); await tap(p, 'İleri', { last: true }); }, 'Bu olaydan önce ne oldu?');
+  await step(p, 'behavior-preview-strategy', async () => {
+    for (const ph of ['ör. Televizyonu kapatması istendi', 'ör. Bağırdı, bir ayrıcalık kaldırıldı']) await p.getByPlaceholder(ph).filter({ visible: true }).last().fill('Deneme');
+    await tap(p, 'İleri', { last: true });
+  }, 'Hangi stratejiyi denedin?');
+  await step(p, 'behavior-preview-thanks', async () => { await tap(p, 'Hiçbiri', { last: true }); await tap(p, p.getByRole('radio', { name: /^4:/ }).filter({ visible: true })); await tap(p, 'Gönder', { last: true }); }, 'teşekkürler');
+  await closeTop(p); await ensureClosed(p);
+  if (!ONLY) {
   const MARK = { sessions: 'Bekleme listesi', summary: 'Dönem', routines: 'Haftalık', abc: 'Kartlar', notes: 'Not', report: 'Raporu aç', details: 'Paylaşımı sonlandır' };
   for (const [tab, name] of [['Seanslar', 'sessions'], ['Özet', 'summary'], ['Ev Rutinleri', 'routines'], ['Davranış Kayıtları', 'abc'], ['Notlar', 'notes'], ['Rapor', 'report'], ['Danışan Bilgileri', 'details']]) {
     await ensureClosed(p);
@@ -149,10 +211,11 @@ async function login(b, who) {
     }
     if (name === 'abc') await step(p, 'abc-table', async () => { await tap(p, 'Tablo'); });
   }
+  }
   fs.writeFileSync(`${OUT}/api.json`, JSON.stringify(api)); 
   await ctx.close();
   // 2) ekip üyesi, 3) bireysel boş hesap, 4) süresi biten
-  for (const who of ['ekip', 'ada', 'bitti']) {
+  for (const who of ONLY ? [] : ['ekip', 'ada', 'bitti']) {
     ({ ctx, p } = await login(b, who));
     await step(p, `${who}-home`, async () => {});
     if (who !== 'bitti') {
