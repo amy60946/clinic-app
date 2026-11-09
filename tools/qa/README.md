@@ -11,8 +11,9 @@ bash preview/build.sh                      # preview/out/clinic.html
 W=393 node tools/qa/crawl.js               # iPhone 15/16 (375: SE/mini, 820: iPad dikey; iPad için H=1180)
 ```
 
-Dört deneme hesabıyla (uzman@, ekip@, ada@, bitti@) ana ekran, pencereler, danışanın bütün bölümleri, takvim ve
-ayarlar gezilir. Her adımda `yoga-emu.js` iOS'u taklit eder:
+Dört deneme hesabıyla (uzman@, ekip@, ada@, bitti@) ana ekran, pencereler, Kaynak kütüphanesi, danışanın bütün
+bölümleri (Ebeveyn Eğitimi ve Davranışlar ve Olaylar dahil, iki "Ebeveyn deneyimini önizle" akışı uçtan uca), takvim ve
+ayarlar gezilir. Yalnız kütüphane + eğitim + davranış adımları için `ONLY=training` (masaüstü: `W=1440 H=900`). Her adımda `yoga-emu.js` iOS'u taklit eder:
 - çok satırlı flex kapsayıcıda satırlar gerilmez (Yoga `alignContent: flex-start`),
 - `flex: 1` (temel 0) öğe, satır yönündeki kapsayıcının içerik genişliğine katkı vermez,
 - metin (Text) kendiliğinden daralmaz (Yoga `flexShrink: 0`),
