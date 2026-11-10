@@ -191,7 +191,7 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
                 <View style={[s.row, { flexWrap: 'wrap' }]}>
                   <SmallButton label="Seansa başla" onPress={() => setView('record')} />
                   <SmallButton label="Ev rutinlerini aç" onPress={() => onOpenClient(client, 'routine')} />
-                  <SmallButton label="Davranış kayıtları" onPress={() => onOpenClient(client, 'abc')} />
+                  <SmallButton label="Davranışlar ve olaylar" onPress={() => onOpenClient(client, 'behaviors')} />
                 </View>
               </>
             )

@@ -12,7 +12,7 @@ import { track } from '../../lib/track';
 import { Client, ClientData, ClinicianMe, Member, loadClientData, revokeLink } from '../../lib/clinic';
 import TeamAccessSheet from './TeamAccessSheet';
 import { isoDate, windowStarts } from '../../lib/metrics';
-import { SummaryTab, AbcTab } from './ObservationTabs';
+import { SummaryTab } from './ObservationTabs';
 import HomeRoutines, { RoutineView } from './HomeRoutines';
 import PlanTab from './PlanTab';
 import NotesTab from './NotesTab';
@@ -25,8 +25,10 @@ import { fromISO } from '../../dates';
 import { SectionHint } from '../SampleTour';
 import { useLayout, LayoutToggle } from '../../lib/layout';
 
-// 'suggestions' eski bağlantılar ve bildirimler için: Ev rutinleri'nde öneri penceresi (Gönderilenler) açılır
-export type Tab = 'training' | 'behaviors' | 'summary' | 'routine' | 'abc' | 'goals' | 'sessions' | 'notes' | 'suggestions' | 'report' | 'details';
+// 'suggestions' eski bağlantılar ve bildirimler için: Ev rutinleri'nde öneri penceresi (Gönderilenler) açılır.
+// "Davranış Kayıtları" bölümü (eski 'abc' sekmesi) 10 Kasım 2026'da menüden kalktı (kullanıcı kararı: güncel özellik Davranışlar ve Olaylar);
+// ona giden yollar (abc_event bildirimi, seans hazırlığı) Davranışlar ve Olaylar'ı açar.
+export type Tab = 'training' | 'behaviors' | 'summary' | 'routine' | 'goals' | 'sessions' | 'notes' | 'suggestions' | 'report' | 'details';
 type Section = Exclude<Tab, 'suggestions'>;
 
 // Bölümler: geniş ekranda (web, iPad'de "Web görünümü") gruplu sol menü — Planla · İzle · Kayıt (kullanıcı kararı 30 Ekim 2026);
@@ -40,7 +42,6 @@ const SECTIONS: { id: Section; label: string; icon: keyof typeof Ionicons.glyphM
   { id: 'behaviors', label: 'Davranışlar ve Olaylar', icon: 'locate-outline', group: 'watch' },
   { id: 'summary', label: 'Özet', icon: 'grid-outline', group: 'watch' },
   { id: 'routine', label: 'Ev Rutinleri', icon: 'repeat-outline', group: 'watch' },
-  { id: 'abc', label: 'Davranış Kayıtları', icon: 'pulse-outline', group: 'watch' },
   { id: 'notes', label: 'Notlar', icon: 'create-outline', group: 'record' },
   { id: 'report', label: 'Rapor', icon: 'print-outline', group: 'record' },
   { id: 'details', label: 'Danışan Bilgileri', icon: 'person-circle-outline', group: 'record' },
@@ -65,9 +66,8 @@ export type ClientCtx = {
   today: string;
   weeks: number;
   reload?: () => Promise<void>;     // çocuğun görev/kayıt verisini yeniden okur (aile az önce bir öneriyi kabul ettiyse)
-  // Takip Planı'ndan bir hedefin davranış kayıtlarını aç (Davranış Kayıtları o hedefe süzülü); abcGoal: açılışta seçili hedef
+  // Davranış Kayıtları bölümü kalktı (10 Kasım 2026); Takip Planı'ndaki "Davranış kaydı · son 4 hafta" satırı yalnız bilgi (openAbc verilmez)
   openAbc?: (goalId: string) => void;
-  abcGoal?: string | null;
 };
 
 export default function ClientScreen({
@@ -84,7 +84,6 @@ export default function ClientScreen({
   focusTab?: Tab;                                  // tur adımı değişince o bölüm açılır
 }) {
   const [tab, setTab] = useState<Section>(initialTab === 'suggestions' ? 'routine' : initialTab);
-  const [abcGoal, setAbcGoal] = useState<string | null>(null);
   const [routineView, setRoutineView] = useState<RoutineView>(initialTab === 'suggestions' ? 'suggest' : 'week');
   const [bell, setBell] = useState(false);
   const [access, setAccess] = useState(false);
@@ -102,7 +101,7 @@ export default function ClientScreen({
   const current: Tab = tab === 'routine' && routineView === 'suggest' ? 'suggestions' : tab;
   const sectionOf = (t: Tab): Section => (t === 'suggestions' ? 'routine' : t);
   const { items, unreadByChild, markRead } = useNotifications();
-  // Açılan bölümün bu çocuğa ait okunmamış bildirimleri okunmuş sayılır (ör. Davranış kayıtları açılınca davranış kaydı bildirimleri).
+  // Açılan bölümün bu çocuğa ait okunmamış bildirimleri okunmuş sayılır (ör. Davranışlar ve Olaylar açılınca olay ve davranış kaydı bildirimleri).
   // Öneri kararları Ev rutinleri'nde (öneri penceresi) ve Takip planı'nda görünür.
   useEffect(() => {
     if (sample) return;
@@ -163,10 +162,9 @@ export default function ClientScreen({
   // Çocuk satırı görünmüyorsa rıza geri alınmıştır (RLS)
   const revoked = data && !data.child;
   const shown: Client = { ...client, label };
-  const go = (s: Section) => { setTab(s); if (s === 'routine') setRoutineView('week'); if (s !== 'abc') setAbcGoal(null); };
+  const go = (s: Section) => { setTab(s); if (s === 'routine') setRoutineView('week'); };
   const ctx: ClientCtx | null = data && data.child ? {
-    client: shown, me, data, today, weeks: Number(weeks), reload: load, abcGoal,
-    openAbc: (gid) => { setAbcGoal(gid); go('abc'); },
+    client: shown, me, data, today, weeks: Number(weeks), reload: load,
   } : null;
   useEffect(() => { if (focusTab) go(sectionOf(focusTab)); }, [focusTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -211,7 +209,7 @@ export default function ClientScreen({
       {ctx && (
         <>
           {!sidebar && <TabGrid value={tab} onChange={go} dots={dots} />}
-          {['summary', 'routine', 'abc', 'report'].includes(tab) && !(tab === 'routine' && routineView === 'suggest') && (
+          {['summary', 'routine', 'report'].includes(tab) && !(tab === 'routine' && routineView === 'suggest') && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10 }}>
               <Text style={styles.small}>Dönem</Text>
               <View style={{ flex: 1, maxWidth: 220 }}>
@@ -223,7 +221,6 @@ export default function ClientScreen({
             {!sample && <SectionHint userId={me.id} section={tab} />}
             {tab === 'summary' && <SummaryTab {...ctx} />}
             {tab === 'routine' && <HomeRoutines {...ctx} view={routineView} onView={setRoutineView} />}
-            {tab === 'abc' && <AbcTab key={abcGoal ?? 'all'} {...ctx} />}
             {tab === 'training' && <TrainingTab {...ctx} sample={!!sample} />}
             {tab === 'behaviors' && <BehaviorsTab {...ctx} sample={!!sample} />}
             {tab === 'goals' && <PlanTab {...ctx} />}

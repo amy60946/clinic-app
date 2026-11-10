@@ -1,18 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { colors, radius } from '../../theme';
-import { Card, Label, Empty, Segmented, ChipBar } from '../../components/ui';
-import { listGoals } from '../../lib/clinic';
-import { WeeklyRateBars, RateBar, Stat, CountBars } from '../../components/charts';
-import ExportButton from '../../components/ExportButton';
-import { abcRows, csvName, ABC_HEADER } from '../../lib/csv';
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { colors } from '../../theme';
+import { Card, Label, Empty } from '../../components/ui';
+import { WeeklyRateBars, RateBar, Stat } from '../../components/charts';
 import {
-  weekly, perTask, observations, bySkill, abcSummary, windowStarts, lastFullDay, parseDate, isoDate, DECLINE_LABELS,
+  weekly, perTask, observations, bySkill, windowStarts, lastFullDay, parseDate, DECLINE_LABELS,
   motivationStats, motivationText, MOTIVATION_TREND_TEXT, Completion,
-  MASTERY_RATE, MASTERY_WEEKS, DayPart, AbcEvent, dayPart, dec,
+  MASTERY_RATE, MASTERY_WEEKS, dec,
 } from '../../lib/metrics';
-import AbcVoice from '../../components/AbcVoice';
 import type { ClientCtx } from './ClientScreen';
 import { skillName } from '../../skills';
 
@@ -155,133 +150,8 @@ function TaskMotivation({ comps, from, to, taskId }: { comps: Completion[]; from
   return <Text style={styles.small}>Motive etmek (ebeveyn): {motivationText(m)}</Text>;
 }
 
-/* ---------- Davranış kayıtları (ABC) ---------- */
-
-const PARTS: { id: DayPart; label: string }[] = [
-  { id: 'sabah', label: 'Sabah' },
-  { id: 'öğle', label: 'Öğle' },
-  { id: 'akşam', label: 'Akşam' },
-  { id: 'gece', label: 'Gece' },
-];
-
-const PART_LABEL: Record<DayPart, string> = { sabah: 'Sabah', 'öğle': 'Öğle', 'akşam': 'Akşam', gece: 'Gece' };
-
-// Yeni kayıtlarda saat temsilîdir (ebeveyn gün bölümünü seçer): tarih + gün bölümü; eski kayıtlarda saat de
-function abcWhen(e: AbcEvent) {
-  const d = new Date(e.occurred_at);
-  const day = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'short' });
-  if (e.day_part) return `${day} · ${PART_LABEL[dayPart(e)]}`;
-  return `${day} · ${d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`;
-}
-
-// Hedef etiketi ve süzgeç (ebeveyn kaydı uzmanın hedefine bağlayabilir; ortak 20261103120000_abc_goal, 3 Kasım 2026).
-// Süzgeç yalnız dönemde hedefe bağlı kayıt varsa görünür; sayılar ve grafik süzgeçten bağımsız (bütün kayıtlar).
-type GoalFilter = 'all' | 'none' | string;
-export function AbcTab({ client, data, today, weeks, abcGoal }: ClientCtx) {
-  const s = useMemo(() => abcSummary(data.abc, today, weeks), [data, today, weeks]);
-  const [view, setView] = useState<'cards' | 'table'>('cards');
-  const [goalF, setGoalF] = useState<GoalFilter>(abcGoal ?? 'all');
-  const [titles, setTitles] = useState<Record<string, string>>({});
-  useEffect(() => {
-    if (data.sample) { setTitles(Object.fromEntries((data.samplePlan?.goals ?? []).map((g) => [g.id, g.title]))); return; }
-    listGoals(client.link_id).then((gs) => setTitles(Object.fromEntries(gs.map((g) => [g.id, g.title])))).catch(() => {});
-  }, [client.link_id, data]);
-  const { width } = useWindowDimensions();
-  const from = s.perWeek[0].start;
-  const all = data.abc.filter((e) => isoDate(new Date(e.occurred_at)) >= from);
-  const goalIds = [...new Set(all.map((e) => e.goal_id).filter((x): x is string => !!x))];
-  const list = goalF === 'all' ? all : goalF === 'none' ? all.filter((e) => !e.goal_id) : all.filter((e) => e.goal_id === goalF);
-  const goalName = (id: string) => titles[id] ?? 'Davranış hedefi';
-  const short = (t: string) => (t.length > 28 ? `${t.slice(0, 27)}…` : t);
-
-  if (!s.total) return <Empty text="Bu dönemde ebeveyn davranış kaydı girmedi. Ebeveyn kaydı ParentApp › Uzmanım › (senin adın) › Davranış kaydı ekle'den girer." />;
-  return (
-    <View>
-      <Label>Haftalık davranış kaydı sayısı</Label>
-      <Card style={{ gap: 6 }}>
-        <CountBars data={s.perWeek.map((w) => ({ start: w.start, value: w.count }))} />
-        <Text style={styles.note}>Sütun: ebeveynin o hafta girdiği davranış kaydı sayısı. Az kayıt, davranışın az görüldüğü anlamına gelmeyebilir; ebeveynin kayıt alışkanlığına bağlıdır.</Text>
-      </Card>
-      <Label>Haftalık sayı ve ortalama şiddet (1–5, ebeveyn)</Label>
-      <Card style={{ gap: 6 }}>
-        {s.perWeek.map((w) => (
-          <Row key={w.start} k={`${parseDate(w.start).toLocaleDateString('tr-TR')} haftası`}
-            v={w.count ? `${w.count} kayıt · şiddet ${w.avgIntensity === null ? '–' : dec(w.avgIntensity)}` : '–'} />
-        ))}
-      </Card>
-      <Label>Günün hangi bölümünde</Label>
-      <Card style={{ gap: 6 }}>
-        {PARTS.map((x) => <Row key={x.id} k={x.label} v={String(s.byDayPart[x.id])} />)}
-      </Card>
-      <View style={styles.listHead}>
-        <Text style={[styles.listTitle, { flexGrow: 1, minWidth: 110 }]}>{`Kayıtlar (${list.length}${goalF === 'all' ? '' : ` / ${all.length}`})`}</Text>
-        <View style={{ width: 180 }}>
-          <Segmented options={[{ id: 'cards', label: 'Kartlar' }, { id: 'table', label: 'Tablo' }]} value={view} onChange={setView} />
-        </View>
-        <ExportButton name={csvName('davranis-kayitlari', client.child_name, from, today)} header={ABC_HEADER} event="export.abc"
-          rows={() => abcRows(data.abc, from, today)} />
-      </View>
-      {(goalIds.length > 0 || goalF !== 'all') && (
-        <View style={{ marginBottom: 8 }}>
-          <ChipBar<GoalFilter> value={goalF} onChange={setGoalF} options={[
-            { id: 'all', label: 'Hepsi' },
-            ...goalIds.map((id) => ({ id, label: short(goalName(id)), icon: 'flag-outline' as const })),
-            ...(goalF !== 'all' && goalF !== 'none' && !goalIds.includes(goalF) ? [{ id: goalF, label: short(goalName(goalF)), icon: 'flag-outline' as const }] : []),
-            { id: 'none', label: 'Davranış hedefi yok' },
-          ]} />
-        </View>
-      )}
-      {list.length === 0 && <Empty text="Bu süzgeçte kayıt yok." />}
-      {view === 'table' && width < 900 && list.length > 0 && <Text style={styles.scrollHint}>Bütün sütunlar için tabloyu yana kaydır →</Text>}
-      {view === 'table' ? (
-        <ScrollView horizontal={width < 900} contentContainerStyle={{ minWidth: '100%' }}>
-          <Card style={{ padding: 0, overflow: 'hidden', minWidth: 820, flex: 1 }}>
-            <View style={[styles.tr, styles.thRow]}>
-              {ABC_COLS.map((c) => <Text key={c.k} style={[styles.th, { flex: c.flex, width: c.w }]}>{c.label}</Text>)}
-            </View>
-            {list.map((e, i) => (
-              <View key={e.id} style={[styles.tr, i % 2 === 1 && { backgroundColor: '#FAFBFC' }]}>
-                <Text style={[styles.td, { width: 150 }]}>{abcWhen(e)}</Text>
-                <Text style={[styles.td, { flex: 1 }]}>{e.antecedent || '–'}</Text>
-                <Text style={[styles.td, { flex: 1 }]}>{e.behavior}{e.goal_id ? <Text style={styles.goalInline}>{`\n${goalName(e.goal_id)}`}</Text> : null}</Text>
-                <Text style={[styles.td, { flex: 1 }]}>{e.consequence || '–'}</Text>
-                <Text style={[styles.td, { width: 60, textAlign: 'center' }]}>{`${e.intensity}/5`}</Text>
-                <View style={{ width: 44, alignItems: 'center' }}>
-                  {e.audio_path ? <Ionicons name="mic-outline" size={16} color={colors.navy} accessibilityLabel="Sesli kayıt var" /> : null}
-                </View>
-              </View>
-            ))}
-          </Card>
-        </ScrollView>
-      ) : (
-        <View style={{ gap: 8 }}>
-          {list.map((e) => (
-            <Card key={e.id} style={{ gap: 4 }}>
-              <Text style={styles.small}>
-                {abcWhen(e)} · şiddet {e.intensity}/5
-              </Text>
-              {!!e.goal_id && <Text style={styles.goalTag} numberOfLines={1}>Davranış hedefi: {goalName(e.goal_id)}</Text>}
-              {e.antecedent ? <Text style={styles.body}><Text style={styles.abcKey}>Öncesi: </Text>{e.antecedent}</Text> : null}
-              <Text style={styles.body}><Text style={styles.abcKey}>Davranış: </Text>{e.behavior}</Text>
-              {e.consequence ? <Text style={styles.body}><Text style={styles.abcKey}>Sonucu: </Text>{e.consequence}</Text> : null}
-              {e.audio_path ? <AbcVoice path={e.audio_path} durationMs={e.duration_ms} /> : null}
-            </Card>
-          ))}
-        </View>
-      )}
-      {view === 'table' && list.some((e) => e.audio_path) && <Text style={styles.note}>Sesli kayıtları dinlemek için "Kartlar" görünümüne geç.</Text>}
-    </View>
-  );
-}
-
-const ABC_COLS: { k: string; label: string; flex?: number; w?: number }[] = [
-  { k: 'when', label: 'Ne zaman', w: 150 },
-  { k: 'a', label: 'Öncesi', flex: 1 },
-  { k: 'b', label: 'Davranış', flex: 1 },
-  { k: 'c', label: 'Sonucu', flex: 1 },
-  { k: 'i', label: 'Şiddet', w: 60 },
-  { k: 'v', label: 'Ses', w: 44 },
-];
+// Davranış kayıtları (ABC) sekmesi 10 Kasım 2026'da kaldırıldı (kullanıcı kararı: güncel özellik Davranışlar ve Olaylar,
+// src/screens/behaviors). Eski kayıtların sayısı rapor, ilerleme notu ve seans hazırlığında görünmeye devam eder.
 
 const styles = StyleSheet.create({
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
@@ -292,14 +162,4 @@ const styles = StyleSheet.create({
     fontSize: 11, fontWeight: '700', color: colors.ok, backgroundColor: colors.easy.bg,
     paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden',
   },
-  abcKey: { fontWeight: '600' },
-  goalTag: { alignSelf: 'flex-start', maxWidth: '100%', fontSize: 11.5, fontWeight: '700', color: '#2C4A9A', backgroundColor: '#E6EAF5', borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2, overflow: 'hidden' },
-  goalInline: { fontSize: 11.5, fontWeight: '700', color: '#2C4A9A' },
-  listHead: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginTop: 20, marginBottom: 8 },
-  listTitle: { fontSize: 13, fontWeight: '600', color: colors.muted },
-  scrollHint: { fontSize: 11.5, color: colors.muted, marginBottom: 6 },
-  tr: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingHorizontal: 14, paddingVertical: 10 },
-  thRow: { backgroundColor: '#F2F4F8', borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line },
-  th: { fontSize: 12, fontWeight: '700', color: colors.muted },
-  td: { fontSize: 13, color: colors.text, lineHeight: 18 },
 });

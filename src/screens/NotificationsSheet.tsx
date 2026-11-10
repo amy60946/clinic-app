@@ -25,8 +25,9 @@ function titleFor(n: AppNotification, childId?: string, childName?: string) {
 }
 
 // Bildirim nereye götürür (danışan sekmesi): ClientScreen'deki sekme kimlikleriyle aynı
-export function notificationTab(kind: string): 'abc' | 'suggestions' | 'summary' | 'behaviors' | 'training' {
-  if (kind === 'abc_event') return 'abc';
+export function notificationTab(kind: string): 'suggestions' | 'summary' | 'behaviors' | 'training' {
+  // eski davranış kaydı (abc_event): Davranış Kayıtları bölümü kalktı (10 Kasım 2026), Davranışlar ve Olaylar açılır
+  if (kind === 'abc_event') return 'behaviors';
   if (kind === 'suggestion_decided') return 'suggestions';
   if (kind === 'behavior_incident') return 'behaviors';
   if (kind === 'training_activity') return 'training';
