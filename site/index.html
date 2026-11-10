@@ -178,7 +178,10 @@ section.alt { background: var(--card); border-block: 1px solid var(--line); }
 .vp p { color: var(--muted); font-size: 15.5px; }
 @media (max-width: 860px) { .vps { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; } }
 .stepn { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 800; color: var(--fam-fg); }
-.stepn b { width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 14px; letter-spacing: 0; }
+.stepn b { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 14px; letter-spacing: 0; }
+/* Adım metinleri (8 Kasım 2026, ürün sahibinin metni): adım başına alt başlık + iki-üç paragraf; uzun metin için başlık ve satır ölçüsü */
+.feat .stepn ~ h2 { font-size: clamp(26px, 2.8vw, 36px); }
+.feat .stepn ~ p { font-size: 17px; max-width: 46ch; }
 .vis-c { display: grid; place-items: center; background: var(--head); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 36px 20px; }
 .layer .front .mock { width: 100%; }
 .ui.phone { width: min(100%, 360px); max-height: 560px; border-radius: 26px; -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent); mask-image: linear-gradient(to bottom, #000 82%, transparent); box-shadow: 0 18px 44px -26px rgba(15,27,61,.45); }
@@ -275,7 +278,11 @@ section.alt { background: var(--card); border-block: 1px solid var(--line); }
 /* Kapanış */
 .closing { background: var(--ink); }
 .closing .wrap { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; padding-block: 96px; }
-.closing h2 { color: #fff; max-width: 18ch; }
+.closing h2 { color: #fff; max-width: 24ch; }
+.closing .lead { color: #C9D0E4; font-size: clamp(17px, 1.7vw, 20px); max-width: 58ch; }
+.closing .gains { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; margin-top: 4px; }
+.closing .gains li { display: inline-flex; align-items: center; gap: 9px; color: #fff; font-weight: 750; font-size: 16px; }
+.closing .gains li::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
 .closing .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 6px; }
 .closing .code { font-size: 14.5px; color: #B8C1DA; }
 .closing .code a { color: #fff; font-weight: 750; }
@@ -332,8 +339,8 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
     <div class="wrap">
       <div class="copy">
         <span class="eyebrow">Çocuk ve aile uzmanları için</span>
-        <h1 id="h-hero">Ev programını oyuna dönüştüren, evdeki kayıtları size ulaştıran uzman platformu.</h1>
-        <p class="sub">Rutin ve görev atayın, ebeveynin evde tuttuğu davranış kayıtlarını görün; çocuk görevleri oyunda görür ve işaretler. Klinik psikolog, ergoterapist, özel eğitim ve UDA uzmanları için.</p>
+        <h1 id="h-hero">ABA Ebeveyn Eğitimi ve İlerleme Takibi Platformu</h1>
+        <p class="sub">Ev programlarına uyumu artıran, ebeveyn eğitim süreçlerini kolaylaştıran ve klinik ilerlemeyi somut verilerle izlenebilir kılan ABA ebeveyn eğitim platformu. Davranış Analizi Uzmanları (BCBA) için geliştirildi.</p>
         <div class="actions">
           <a class="btn btn-primary" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">7 gün ücretsiz deneyin →</a>
           <a class="btn btn-ghost" data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş</a>
@@ -365,25 +372,22 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
 
   <section class="band" id="degerler" aria-labelledby="h-deger">
     <div class="wrap">
-      <div class="head center">
-        <span class="eyebrow">Neden ClinicApp</span>
-        <h2 id="h-deger">Seans dışı çalışmayı tek yerden yönetin.</h2>
-      </div>
+      <h2 id="h-deger" class="sr">Neden ClinicApp</h2>
       <div class="vps">
         <div class="vp">
           <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M4 10h16M10 10v9"/></svg></span>
-          <h3>Ev programını hazır şablonlarla kurun</h3>
-          <p>Rutin ve görev şablonlarını seçin, ihtiyaca göre düzenleyin.</p>
+          <h3>Ebeveyn eğitim programlarını kolayca oluşturun</h3>
+          <p>Kanıta dayalı eğitim içerikleri, çalışma dokümanları ve davranışsal müdahale kaynaklarıyla kişiselleştirilmiş ebeveyn eğitim programları hazırlayın.</p>
         </div>
         <div class="vp">
           <span class="ic"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg></span>
-          <h3>Aileyi seans dışında da sürecin içinde tutun</h3>
-          <p>Hatırlatmayı uygulama yapar; ebeveyn kaydı evde tutar, siz seanslar arasında görürsünüz.</p>
+          <h3>Ebeveynlerin seans dışındaki katılımını artırın</h3>
+          <p>Uygulama üzerinden ebeveynlerin eğitim programlarını takip etmelerini, ev uygulamalarını gerçekleştirmelerini ve ABC (Öncül-Davranış-Sonuç) verilerini kaydetmelerini sağlayın.</p>
         </div>
         <div class="vp">
           <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span>
-          <h3>Raporlamayı kolaylaştırın</h3>
-          <p>Kayıtlar grafiğe dökülür; raporunuza hazır veri gelir.</p>
+          <h3>Haftada 4–6 saatlik faturalandırılamayan iş yükünü azaltın</h3>
+          <p>Ebeveyn eğitimi ve takip süreçlerini otomatikleştirerek hazırlık ve raporlama için harcadığınız zamanı azaltın. Böylece klinik hizmetlere daha fazla zaman ayırın.</p>
         </div>
       </div>
     </div>
@@ -393,15 +397,29 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
     <div class="wrap">
       <div class="head center">
         <span class="eyebrow">Nasıl çalışır</span>
-        <h2 id="h-nasil">ClinicApp nasıl çalışır?</h2>
+        <h2 id="h-nasil">Platform Nasıl Çalışır?</h2>
       </div>
 
-      <div class="feat" id="urun">
+      <div class="feat flip" id="urun">
         <div class="txt">
-          <span class="stepn"><b>1</b>Hedefleri ailenin uygulamasına aktarın</span>
-          <h2>Aileyi kolay kullanılan bir uygulamayla sürece katın.</h2>
-          <p>Hedef, rutin ve görevler ailenin ParentApp'ine düşer; hatırlatmayı uygulama yapar, siz kayıtları görürsünüz.</p>
-          <div class="chips"><span class="chip plain">Hazır şablonlar</span><span class="chip pri">Taslak: aile görmez</span></div>
+          <span class="stepn"><b>1</b>Dakikalar içinde kişiselleştirilmiş ebeveyn eğitim programları oluşturun</span>
+          <h2>100'den fazla ebeveyn eğitimi kaynağına erişin</h2>
+          <p>Kanıta dayalı eğitim içerikleri, çalışma dokümanları ve davranışsal müdahale kaynaklarından oluşan kapsamlı kütüphanemizle her aileye ve ihtiyaca uygun ebeveyn eğitim programları oluşturun.</p>
+          <p>Eğitim modüllerini, videoları ve etkileşimli çalışma materyallerini bir araya getirerek kişiselleştirilmiş programlarınızı 5 dakikadan kısa sürede hazırlayın.</p>
+        </div>
+        <!-- TODO: ebeveyn eğitimi ekran görüntüsü -->
+        <div class="vis"><div class="ui">
+          <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>ClinicApp · Takip Planı</span></div>
+          <picture><source media="(max-width: 700px)" srcset="assets/m-plan.webp" width="1170" height="1800"><img src="assets/shot-plan.webp" width="1600" height="1000" alt="Takip Planı: hedef satırında hedef, aile programı ve bağlı rutin yan yana." loading="lazy"></picture>
+        </div></div>
+      </div>
+
+      <div class="feat">
+        <div class="txt">
+          <span class="stepn"><b>2</b>Ebeveyn hedeflerini kolay kullanımlı bir mobil uygulamaya entegre edin</span>
+          <h2>Ebeveyn dostu mobil uygulamayla ailelerin sürece aktif katılımını sağlayın</h2>
+          <p>Ebeveynler için belirlenen hedefler, uygulama görevleri ve çalışma materyalleri mobil uygulama aracılığıyla günlük rutinlere entegre edilir.</p>
+          <p>Hatırlatma ve yönlendirme süreçlerini biz üstleniyoruz. Böylece siz süreci başlatmaya ve klinik çalışmanıza odaklanabilirsiniz.</p>
         </div>
         <div class="vis">
           <div class="layer">
@@ -419,30 +437,31 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
 
       <div class="feat flip">
         <div class="txt">
-          <span class="stepn"><b>2</b>Evden ABC kaydı ve ebeveyn ilerlemesi toplayın</span>
-          <h2>Öncesi, davranış, sonrası kayıtlarındaki örüntüleri inceleyin.</h2>
-          <p>Ebeveyn evde kaydı tutar; siz seanslar arasında görür, yorumlarsınız.</p>
-          <div class="chips"><span class="chip plain">Hedefe göre süz</span><span class="chip plain">CSV</span></div>
+          <span class="stepn"><b>3</b>ABC verilerini ve ebeveynlerin ilerlemesini gerçek zamanlı olarak takip edin</span>
+          <h2>Davranışları tetikleyen unsurları ve davranış örüntülerini keşfedin</h2>
+          <p>Ebeveynler programı kullanmaya ve klinik uzmanı yanlarında olmadan evde gerçekleşen olayları kaydetmeye alıştıkça, klinik uzmanları hedef davranışları tetikleyen unsurları ve ebeveynlerin uyguladığı hangi müdahale stratejilerinin işe yaradığını gerçek zamanlı olarak takip edebilir.</p>
+          <p>Böylece davranışların öncüllerini, ortaya çıkış örüntülerini ve uygulanan müdahalelerin sonuçlarını daha yakından değerlendirebilir; ebeveynlerin ilerlemesini veriye dayalı olarak izleyebilirsiniz.</p>
         </div>
         <div class="vis vis-c"><div class="ui phone"><img src="assets/m-abc.webp" width="1170" height="1680" alt="Davranış kaydı kartları: öncesi, davranış ve sonrası." loading="lazy"></div></div>
       </div>
 
       <div class="feat">
         <div class="txt">
-          <span class="stepn"><b>3</b>Hedeflere doğru ilerlemeyi grafikte görün</span>
-          <h2>İlerlemeyi tek ekranda görün.</h2>
-          <p>Rutinler gün gün grafiğe dökülür, hedef değerlendirmeleri bir arada durur.</p>
-          <div class="chips"><span class="chip plain">Gözlem raporu (PDF)</span><span class="chip plain">İlerleme notu</span><span class="chip plain">Yapay zekâ yok</span></div>
+          <span class="stepn"><b>4</b>Ebeveyn hedeflerine yönelik ilerleme takibini otomatikleştirin</span>
+          <h2>İlerleme raporları hazırlamak için harcadığınız zamandan tasarruf edin</h2>
+          <p>Tedavi süreci ilerledikçe tüm verileri otomatik olarak kaydedip görselleştiriyoruz. Klinik uzmanlarının ebeveyn hedeflerine ve yeterlilik kriterlerine yönelik ilerlemeyi takip etmelerine yardımcı oluyoruz.</p>
+          <p>Bu veriler sayesinde ilerleme notlarını güncelleyebilir ve ihtiyaç duyulan raporları kolayca hazırlayabilirsiniz.</p>
         </div>
         <div class="vis vis-c"><div class="ui phone"><img src="assets/m-routines.webp" width="1170" height="1680" alt="Son 7 günün görev ve gün tablosu: yapıldı, onaylandı, yapılamadı." loading="lazy"></div></div>
       </div>
 
       <div class="feat flip">
         <div class="txt">
-          <span class="stepn"><b>4</b>Olumlu pekiştirme ve jeton sistemi, baştan içinde</span>
-          <h2>Görevleri çocuk için oyuna dönüştürün.</h2>
-          <p>Görevler Pofi Adası'nda görünür; ebeveyn onaylayınca çocuk oyunda İnci alır.</p>
-          <div class="chips"><span class="chip ok">Ek paket değil, sistemin parçası</span></div>
+          <span class="stepn"><b>5</b>Olumlu pekiştirme ve jeton ekonomisi sistemini devreye alın</span>
+          <h2>Çocuklar için oyunlaştırılmış bir deneyim sunun</h2>
+          <p>Ebeveynlerin sürece aktif katılımı ve hedeflere yönelik ilerleme sağlandıktan sonra deneyimi bir üst seviyeye taşıyın.</p>
+          <p>İsteğe bağlı olarak klinik uzmanları, çocukların oyun erişimini etkinleştirebilir. Böylece çocuklar, ev ortamında sergiledikleri hedef davranışlar karşılığında ödüller kazandıkları bir video oyunu deneyimine katılır.</p>
+          <p>Ebeveynlerin kolayca benimseyip uygulayabileceği bu basit pekiştirme sistemi, ailelerin sürece katılımını artırırken çocukların bağımsızlık becerilerinin gelişimini de destekler.</p>
         </div>
         <div class="vis vis-c">
           <div class="mock game" role="img" aria-label="Pofi Adası'nda bugünün görevleri: biri onaylandı, biri ebeveyn onayı bekliyor, biri yapılacak.">
@@ -603,7 +622,13 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
 
   <section class="closing" aria-labelledby="h-son">
     <div class="wrap">
-      <h2 id="h-son">Ailelerle çalışmayı seans dışına taşıyın.</h2>
+      <h2 id="h-son">Kliniğiniz için daha verimli bir çalışma modeli</h2>
+      <p class="lead">Ebeveyn eğitiminden ev uygulamalarına, davranış verilerinin takibinden ilerleme raporlamasına kadar tüm süreci tek platformda yönetin.</p>
+      <ul class="gains">
+        <li>Daha az idari iş yükü.</li>
+        <li>Daha fazla ebeveyn katılımı.</li>
+        <li>Daha ölçülebilir klinik ilerleme.</li>
+      </ul>
       <div class="actions">
         <a class="btn btn-light" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">7 gün ücretsiz deneyin</a>
         <a class="btn btn-line" data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş</a>
