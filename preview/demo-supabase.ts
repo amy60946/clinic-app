@@ -163,7 +163,7 @@ function upgrade(x: Db): Db {
     x.clinic_invites.push({ code: 'EKP4MA', clinic_id: 'demo-clinic', clinician_id: owner?.id ?? 'demo-clinician', kind: 'clinician', label: '',
       created_at: ago(4 * 1440 + 60), expires_at: ago(-3 * 1440), used_at: ago(4 * 1440), used_by: MEMBER });
   }
-  // Üyelik (ortak 20261022000000): paket kataloğu, 7 günlük deneme, süresi dolmuş örnek hesap
+  // Üyelik (ortak 20261022000000): paket kataloğu, 14 günlük deneme (20261110130000), süresi dolmuş örnek hesap
   if (!x.billing_plans.length) {
     x.billing_plans.push(
       { id: 'solo_monthly', package: 'solo', period: 'monthly', seat_limit: 1, price_try: 749.99, apple_product_id: 'com.clinicapp.uzman.solo.monthly', iyzico_plan_ref: 'demo', sort: 1, active: true },
@@ -174,7 +174,7 @@ function upgrade(x: Db): Db {
     x.clinics.forEach((c: Row) => {
       if (c.plan === 'trial') {
         c.seat_limit = 10;
-        if (c.trial_ends_at > new Date(Date.now() + 7 * 864e5).toISOString()) c.trial_ends_at = new Date(Date.now() + 5 * 864e5).toISOString();
+        if (c.trial_ends_at > new Date(Date.now() + 14 * 864e5 + 60e3).toISOString()) c.trial_ends_at = new Date(Date.now() + 5 * 864e5).toISOString();
       }
     });
   }
@@ -663,7 +663,7 @@ const auth = {
       } else {
         cid = uuid();
         const solo = meta.practice !== 'clinic';
-        db.clinics.push({ id: cid, name: String(meta.clinic_name || meta.name || 'Kliniğim'), plan: 'trial', seat_limit: 10, trial_ends_at: new Date(Date.now() + 7 * 864e5).toISOString(),
+        db.clinics.push({ id: cid, name: String(meta.clinic_name || meta.name || 'Kliniğim'), plan: 'trial', seat_limit: 10, trial_ends_at: new Date(Date.now() + 14 * 864e5).toISOString(),
           created_by: id, created_at: now(), personal_of: solo ? id : null, members_can_invite: true });
       }
       db.clinicians.push({ id, clinic_id: cid, name: meta.name ?? '', title: meta.title ?? '', role, created_at: now() });
@@ -731,7 +731,7 @@ function workspaceRpc(name: string, args: Row, uid: string): { data: any; error:
     if (!c) {
       const trial = db.clinics.filter((x: Row) => x.created_by === who).map((x: Row) => x.trial_ends_at).sort().pop();
       c = { id: uuid(), name: personName(who) || 'Bireysel çalışmam', plan: 'trial', seat_limit: 10, personal_of: who, members_can_invite: true,
-        trial_ends_at: trial ?? new Date(Date.now() + 7 * 864e5).toISOString(), created_by: who, created_at: now() };
+        trial_ends_at: trial ?? new Date(Date.now() + 14 * 864e5).toISOString(), created_by: who, created_at: now() };
       db.clinics.push(c);
     }
     const row = db.clinic_members.find((y: Row) => y.clinic_id === c.id && y.clinician_id === who);
@@ -758,7 +758,7 @@ function workspaceRpc(name: string, args: Row, uid: string): { data: any; error:
       if (db.clinics.filter((x: Row) => x.created_by === base.id && !x.personal_of).length >= 3) return bad('too_many_clinics');
       const trial = db.clinics.filter((x: Row) => x.created_by === base.id).map((x: Row) => x.trial_ends_at).sort().pop();
       const id = uuid();
-      db.clinics.push({ id, name: nm, plan: 'trial', seat_limit: 10, members_can_invite: true, trial_ends_at: trial ?? new Date(Date.now() + 7 * 864e5).toISOString(), created_by: base.id, created_at: now() });
+      db.clinics.push({ id, name: nm, plan: 'trial', seat_limit: 10, members_can_invite: true, trial_ends_at: trial ?? new Date(Date.now() + 14 * 864e5).toISOString(), created_by: base.id, created_at: now() });
       db.clinic_members.push({ clinic_id: id, clinician_id: base.id, role: 'owner', status: 'active', invited_by: null, joined_at: now(), left_at: null });
       return ok(id);
     }
