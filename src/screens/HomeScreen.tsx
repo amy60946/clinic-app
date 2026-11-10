@@ -18,7 +18,9 @@ import LibraryScreen from './training/Library';
 import { loadSessions } from '../lib/sessions';
 import { trDay, trToIso, timeRange, isClosed, type Session } from '../lib/sessionCore';
 import { CoachProvider, CoachOverlay } from '../lib/coach';
-import { StartCard, SampleRow, TOUR, StartFlags, StartProgress, startFlags, startDone, markSampleSeen, hideStart, hideSample } from './SampleTour';
+import { StartCard, SampleRow, TOUR, TRAINING_TOUR, StartFlags, StartProgress, startFlags, startDone, startTotal, markSampleSeen, hideStart, hideSample } from './SampleTour';
+import { useClientConfig, CARE_PLAN_FLAG } from '../lib/clientConfig';
+import { resetSampleTraining } from '../lib/trainingSample';
 import type { Attention } from '../lib/attention';
 import { sampleClient } from '../lib/sample';
 import { isoDate } from '../lib/metrics';
@@ -109,6 +111,11 @@ export default function HomeScreen() {
   const [sampleOpen, setSampleOpen] = useState(false);
   const [sampleTab, setSampleTab] = useState<Tab>('summary');     // "Göster" örnek ailede bir bölümü açar (tur olmadan)
   const [tourStep, setTourStep] = useState<number | null>(null);
+  // Lansman odağı "A" (11 Kasım 2026): Takip Planı uzaktan ayar bayrağı açık değilse tur, Başlarken ve danışanın açılış bölümü ebeveyn eğitimine göre
+  const planOn = useClientConfig().flag(CARE_PLAN_FLAG);
+  const tour = planOn ? TOUR : TRAINING_TOUR;
+  const homeTab: Tab = planOn ? 'summary' : 'training';
+  const [trainStat, setTrainStat] = useState<{ any: boolean; active: boolean }>({ any: false, active: false });
   const [start, setStart] = useState<StartFlags | null>(null);
   const [inviteCount, setInviteCount] = useState(0);
   const { width } = useWindowDimensions();
@@ -175,8 +182,9 @@ export default function HomeScreen() {
   const sample = useMemo(() => (sampleOpen ? sampleClient(isoDate(new Date())) : null), [sampleOpen]);
   const openSample = (tab?: Tab) => {
     setSettings(false);
+    resetSampleTraining();
     setSampleOpen(true);
-    setSampleTab(tab ?? 'summary');
+    setSampleTab(tab ?? homeTab);
     setTourStep(tab ? null : 0);
     track('sample.open');
     if (meId) markSampleSeen(meId);
@@ -187,7 +195,8 @@ export default function HomeScreen() {
   const attRows = Object.values(attention ?? {});
   const progressOf = (f: StartFlags): StartProgress => ({
     sampleSeen: f.sampleSeen, invited: inviteCount > 0 || clientList.length > 0, hasClient: clientList.length > 0,
-    planned: attRows.some((a) => a.goals_active > 0 || !!a.plan_published_at), published: attRows.some((a) => !!a.plan_published_at), report: f.report,
+    planned: planOn ? attRows.some((a) => a.goals_active > 0 || !!a.plan_published_at) : trainStat.any,
+    published: planOn ? attRows.some((a) => !!a.plan_published_at) : trainStat.active, report: f.report,
   });
   const openFirst = (step: 'plan' | 'publish' | 'report') => {
     const att = (c: Client) => attention?.[c.link_id];
@@ -196,7 +205,7 @@ export default function HomeScreen() {
     const c = pick ?? clientList[0];
     if (!c) return;
     track('start.step', { step });
-    setSelected({ client: c, tab: step === 'report' ? 'report' : 'goals', key: Date.now() });
+    setSelected({ client: c, tab: step === 'report' ? 'report' : planOn ? 'goals' : 'training', key: Date.now() });
   };
   // "Nasıl kullanılır?" › Göster: gerçek danışan varsa ilkinde, yoksa örnek ailede açar (iOS'ta pencere kapanınca)
   const afterSheet = (f: () => void) => { setHelp(false); if (Platform.OS === 'ios') setTimeout(f, 450); else f(); };
@@ -204,7 +213,7 @@ export default function HomeScreen() {
     if (a === 'home') return;
     if (a === 'invite') return inviteFirst();
     if (a === 'team') return setSettings(true);
-    const tab: Tab = a === 'routine' ? 'routine' : a === 'plan' ? 'goals' : 'report';
+    const tab: Tab = a === 'routine' ? 'routine' : a === 'plan' ? (planOn ? 'goals' : 'training') : 'report';
     const c = clientList[0];
     if (c) setSelected({ client: c, tab, key: Date.now() });
     else openSample(tab);
@@ -383,8 +392,8 @@ export default function HomeScreen() {
   if (sample && state.kind === 'ready') {
     const screen = (
       <ClientScreen
-        client={sample.client} me={state.me} sample={sample.data} initialTab={tourStep !== null ? TOUR[tourStep].tab : sampleTab}
-        focusTab={tourStep !== null ? TOUR[tourStep].tab : undefined}
+        client={sample.client} me={state.me} sample={sample.data} initialTab={tourStep !== null ? tour[tourStep].tab : sampleTab}
+        focusTab={tourStep !== null ? tour[tourStep].tab : undefined}
         onBack={() => { setSampleOpen(false); setTourStep(null); }}
         onRevoked={() => setSampleOpen(false)}
         onOpenNotification={openTarget}
@@ -393,9 +402,9 @@ export default function HomeScreen() {
     );
     // sağlayıcı tur kapalıyken de sarar: ağaç değişmez, örnekte yapılanlar tur kapanınca kaybolmaz
     return (
-      <CoachProvider steps={TOUR} index={tourStep}
-        onIndex={(i) => { if (i >= TOUR.length) setTourStep(null); else { setTourStep(i); track('sample.tour_step', { step: TOUR[i].key }); } }}
-        onClose={(i) => { setTourStep(null); track('sample.tour', { step: TOUR[i]?.key ?? i }); }}
+      <CoachProvider steps={tour} index={tourStep}
+        onIndex={(i) => { if (i >= tour.length) setTourStep(null); else { setTourStep(i); track('sample.tour_step', { step: tour[i].key }); } }}
+        onClose={(i) => { setTourStep(null); track('sample.tour', { step: tour[i]?.key ?? i }); }}
         onFinish={() => { track('sample.tour_done'); inviteFirst(); }}>
         {screen}
       </CoachProvider>
@@ -426,7 +435,7 @@ export default function HomeScreen() {
           onLeft={() => { setSettings(false); ws.switchTo(null); }}
           verified={!!verification?.verified_at} legalOn={Array.isArray(legal)}
           onBack={() => setSettings(false)} onChanged={load} onPlans={() => setPlans(true)}
-          onOpenClient={(c) => { setSettings(false); setSelected({ client: c, tab: 'summary', key: Date.now() }); }}
+          onOpenClient={(c) => { setSettings(false); setSelected({ client: c, tab: homeTab, key: Date.now() }); }}
           onSample={() => openSample()}
           onLegal={() => setLegalOpen('docs')}
           onGuide={() => { setSettings(false); setHelp(true); }}
@@ -525,15 +534,16 @@ export default function HomeScreen() {
               <TeamRequestsCard me={state.me} reloadKey={reqKey} onAccepted={afterAccept} />
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
               {!!verification?.enabled && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
-              {start && !start.hidden && startDone(progressOf(start)) < 5 && (
-                <StartCard progress={progressOf(start)} onSample={() => openSample()} onInvite={inviteFirst}
+              {start && !start.hidden && startDone(progressOf(start), planOn) < startTotal(planOn) && (
+                <StartCard progress={progressOf(start)} plan={planOn} onSample={() => openSample()} onInvite={inviteFirst}
                   onPlan={() => openFirst('plan')} onPublish={() => openFirst('publish')} onReport={() => openFirst('report')}
-                  onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide', { done: startDone(progressOf(start)) }); }} />
+                  onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide', { done: startDone(progressOf(start), planOn) }); }} />
               )}
               <CalendarRow sessions={todaySessions} clients={state.clients} onOpen={() => setCalendar({})} />
               <LibraryRow onOpen={() => setLibrary(true)} />
               <ClientBoard clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onAttention={setAttention}
-                onOpen={(c) => setSelected({ client: c, tab: 'summary', key: Date.now() })} />
+                plan={planOn} onTraining={setTrainStat}
+                onOpen={(c) => setSelected({ client: c, tab: homeTab, key: Date.now() })} />
               {/* örnek aile listenin altında kendi satırında: ilk açılıştan sonra 30 gün ya da × ile kaldırılana dek */}
               {(state.clients.length === 0 || !!start?.sampleRow) && (
                 <SampleRow onOpen={() => openSample()} onHide={state.clients.length === 0 ? undefined : () => {
@@ -567,9 +577,9 @@ export default function HomeScreen() {
       </ScrollView>
       <NotificationsSheet visible={bell} onClose={() => setBell(false)} onOpen={openTarget} />
       <VerificationSheet visible={verify} onClose={() => { setVerify(false); loadVerify(); }} />
-      <Onboarding visible={guide} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
+      <Onboarding visible={guide} plan={planOn} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
       {state.kind === 'ready' && (
-        <HelpSheet visible={help} owner={state.me.role === 'owner'} onClose={() => setHelp(false)}
+        <HelpSheet visible={help} owner={state.me.role === 'owner'} plan={planOn} onClose={() => setHelp(false)}
           onIntro={() => afterSheet(() => setGuide(true))} onSample={() => afterSheet(() => openSample())} onAction={onHelpAction} />
       )}
       {legalSheets}

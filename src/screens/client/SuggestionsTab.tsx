@@ -10,6 +10,7 @@ import {
 import { formatTR } from '../../dates';
 import SuggestionEditor, { repeatSummary } from './SuggestionEditor';
 import type { ClientCtx } from './ClientScreen';
+import { useClientConfig, CARE_PLAN_FLAG } from '../../lib/clientConfig';
 import { track } from '../../lib/track';
 import { skillName } from '../../skills';
 import { InheritedSuggestions } from './History';
@@ -38,6 +39,7 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
   const [own, setOwn] = useState<OwnRoutine[] | null>(null);       // null: sunucuda yok (Rutinlerim görünmez)
   const [ownEditor, setOwnEditor] = useState<{ open: boolean; editing: OwnRoutine | null }>({ open: false, editing: null });
   const [goals, setGoals] = useState<RoutineGoal[]>([]);
+  const planOn = useClientConfig().flag(CARE_PLAN_FLAG);
   const [teamSize, setTeamSize] = useState(1);
   const [allAges, setAllAges] = useState(false);
   const { width } = useWindowDimensions();
@@ -52,13 +54,14 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
   useEffect(() => {
     loadOwn();
     listTeam().then((t) => setTeamSize(t.length)).catch(() => {});
-    // hedefe bağlama için bu danışanın etkin hedefleri
+    // hedefe bağlama için bu danışanın etkin hedefleri (Takip Planı kapalıyken hedef seçici yok)
+    if (!planOn) { setGoals([]); return; }
     loadPlan({ kind: 'link', linkId: client.link_id, clinicId: client.clinic_id })
       .then((p) => setGoals(p.goals.filter((g) => !g.archived && g.status !== 'achieved').map((g) => ({
         id: g.id, title: g.title, meta: [g.domain && domainLabel(g.domain), g.target && `Hedef düzey: ${g.target}`, g.shared ? '' : 'yalnız sende'].filter(Boolean).join(' · '),
       }))))
       .catch(() => setGoals([]));
-  }, [loadOwn, client.link_id, client.clinic_id]);
+  }, [loadOwn, client.link_id, client.clinic_id, planOn]);
 
   const sendRoutine = async (list: SuggestionInput[]) => {
     let grouped = true;
@@ -163,7 +166,7 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
           <Text style={styles.link}>{allAges ? `Yalnız ${AGE_LABEL[band]} yaş rutinlerini göster` : 'Bütün yaş gruplarını göster'}</Text>
         </Pressable>
       )}
-      <Text style={[styles.sub, { marginTop: 14 }]}>Bir davranış hedefine bağlı, plandaki diğer değişikliklerle birlikte göndermek için Takip Planı'nda davranış hedefinin satırındaki "+ Rutin ya da macera bağla"yı kullan.</Text>
+      {planOn && <Text style={[styles.sub, { marginTop: 14 }]}>Bir davranış hedefine bağlı, plandaki diğer değişikliklerle birlikte göndermek için Takip Planı'nda davranış hedefinin satırındaki "+ Rutin ya da macera bağla"yı kullan.</Text>}
       </>)}
       {schemaMissing && (
         <Notice icon="construct-outline" text="Öneri ayrıntıları (tekrar günleri, hatırlatma, ödül…) için veritabanı güncellemesi bekleniyor. Güncelleme uygulanınca bu özellik açılır." />

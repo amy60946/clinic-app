@@ -7,7 +7,21 @@ export type Attention = {
   goals_active: number; review_due: number; plan_published_at: string | null;
 };
 export type Section = 'mine' | 'family' | 'quiet' | 'rest';
-export type Reason = { key: 'unsent' | 'review' | 'noplan' | 'abc' | 'decided' | 'quiet' | 'pending'; text: string; icon: string; family?: boolean };
+export type Reason = { key: 'unsent' | 'review' | 'noplan' | 'abc' | 'decided' | 'quiet' | 'pending' | 'tr_review' | 'tr_draft' | 'tr_none'; text: string; icon: string; family?: boolean };
+// Lansman odağı "A" (11 Kasım 2026): Takip Planı kapalıyken "Senin sıran" ebeveyn eğitimine bakar. Danışan başına eğitim özeti:
+// total = eğitim sayısı, drafts = taslak (ebeveyn görmez), review = ebeveynin bitirdiği, uzmanın henüz açmadığı modül ve yapılacak.
+export type TrainingStat = { total: number; drafts: number; review: number };
+export type BoardOptions = { plan?: boolean; training?: Record<string, TrainingStat> | null };
+const PLAN_KEYS = ['unsent', 'review', 'noplan'];
+const MINE_KEYS = [...PLAN_KEYS, 'tr_review', 'tr_draft', 'tr_none'];
+export function trainingReasons(s: TrainingStat | undefined): Reason[] {
+  if (!s) return [];
+  const out: Reason[] = [];
+  if (s.review > 0) out.push({ key: 'tr_review', text: `${s.review} yanıt incelemeni bekliyor`, icon: 'school-outline' });
+  if (s.drafts > 0) out.push({ key: 'tr_draft', text: s.drafts === 1 ? 'Taslak eğitim: ebeveyn görmüyor' : `${s.drafts} taslak eğitim: ebeveyn görmüyor`, icon: 'eye-off-outline' });
+  if (s.total === 0) out.push({ key: 'tr_none', text: 'Eğitim yok', icon: 'school-outline' });
+  return out;
+}
 export type BoardRow<C> = { client: C; reasons: Reason[]; last: string | null; section: Section; fresh: boolean };
 
 const DAY = 86400000;
@@ -40,7 +54,7 @@ export function reasonsFor(a: Attention, seenAt: string | undefined, consentAt: 
 }
 
 export function sectionOf(reasons: Reason[]): Section {
-  if (reasons.some((r) => r.key === 'unsent' || r.key === 'review' || r.key === 'noplan')) return 'mine';
+  if (reasons.some((r) => MINE_KEYS.includes(r.key))) return 'mine';
   if (reasons.some((r) => r.family)) return 'family';
   if (reasons.some((r) => r.key === 'quiet')) return 'quiet';
   return 'rest';
@@ -48,12 +62,15 @@ export function sectionOf(reasons: Reason[]): Section {
 
 // Bölümlere ayır; özetinde olmayan danışan (ör. yeni paylaşım) "rest"e düşer. Sıra: ailenin son kaydı yeniden eskiye, kaydı olmayan sonda.
 export function buildBoard<C extends { link_id: string; consent_at: string | null }>(
-  clients: C[], att: Record<string, Attention>, seen: Record<string, string>, now: Date,
+  clients: C[], att: Record<string, Attention>, seen: Record<string, string>, now: Date, opt: BoardOptions = {},
 ): Record<Section, BoardRow<C>[]> {
+  const plan = opt.plan !== false;
   const out: Record<Section, BoardRow<C>[]> = { mine: [], family: [], quiet: [], rest: [] };
   for (const c of clients) {
     const a = att[c.link_id];
-    const reasons = a ? reasonsFor(a, seen[c.link_id], c.consent_at, now) : [];
+    const base = a ? reasonsFor(a, seen[c.link_id], c.consent_at, now) : [];
+    // Takip Planı kapalı: plan nedenleri düşer, eğitim nedenleri başa gelir
+    const reasons = plan ? base : [...trainingReasons(opt.training?.[c.link_id]), ...base.filter((r) => !PLAN_KEYS.includes(r.key))];
     const section = sectionOf(reasons);
     out[section].push({ client: c, reasons, last: a?.last_family_at ?? null, section, fresh: reasons.some((r) => r.family) });
   }

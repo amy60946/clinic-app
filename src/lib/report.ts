@@ -110,9 +110,9 @@ ${motivation.answered ? `<tr><td>Motive etmek (ebeveyn gözlemi)</td><td>${esc(m
 <h2>Beceri alanına göre</h2>
 <table><tr><th>Alan</th><th>Onay/plan</th><th>Oran</th></tr>${skillRows || '<tr><td colspan="3">–</td></tr>'}</table>
 
-<h2>Hedefe ulaşma ölçeği (GAS, −2 … +2)</h2>
-${!goals.length ? '<div class="m">Etkin davranış hedefi yok.</div>' : !gasWeeks.length ? '<div class="m">Bu dönemde değerlendirme girilmedi.</div>'
-  : `<table><tr><th>Davranış hedefi</th>${gasWeeks.map((s) => `<th class="n">${d(s).slice(0, 5)}</th>`).join('')}</tr>${goalRows}</table>`}
+${!goals.length ? '' : `<h2>Hedefe ulaşma ölçeği (GAS, −2 … +2)</h2>
+${!gasWeeks.length ? '<div class="m">Bu dönemde değerlendirme girilmedi.</div>'
+  : `<table><tr><th>Davranış hedefi</th>${gasWeeks.map((s) => `<th class="n">${d(s).slice(0, 5)}</th>`).join('')}</tr>${goalRows}</table>`}`}
 
 <h2>Davranış kayıtları (ebeveyn ABC kaydı)</h2>
 <table><tr><th>Hafta</th>${abc.perWeek.map((x) => `<th class="n">${d(x.start).slice(0, 5)}</th>`).join('')}</tr><tr><td>Kayıt (ş = ort. şiddet 1–5)</td>${abcRows}</tr></table>

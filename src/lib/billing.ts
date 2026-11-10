@@ -34,7 +34,7 @@ export const PACKAGES: Record<PackageId, { title: string; who: string; features:
       'Sınırsız danışan; aileler ParentApp ile ücretsiz bağlanır',
       'Evdeki rutin verisi: maceralar, tamamlama, "Yapamam" nedenleri',
       'Hedef davranışlar ve ebeveynin bildirdiği olaylar',
-      'Davranış hedefi takibi (GAS) ve haftalık grafikler',
+      'Ebeveyn eğitimi: öğrenme modülleri, uygulama görevleri, hızlı yapılacaklar',
       'Aileye macera önerisi; karar ebeveynde',
       'Yazdırılabilir gözlem raporu (PDF)',
       'Yalnız sana görünen klinik notları (aile görmez)',

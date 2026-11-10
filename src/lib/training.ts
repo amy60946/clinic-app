@@ -83,6 +83,9 @@ export const RATING_COLORS = ['', '#B3263E', '#D9822B', '#8A91A3', '#2F7D4A', '#
 export type TData = { id: string; training_id: string; day: string; value: number; created_at: string };
 export type Detail = { modules: TModule[]; tasks: TTask[]; logs: TLog[]; todos: TTodo[]; data: TData[] };
 
+// Örnek aile (Deniz): kimlik örnek aileye aitse veri cihazdaki deneme alanından gelir, sunucuya gidilmez (trainingSample.ts)
+import * as SMP from './trainingSample';
+
 export class TrainingNotInstalled extends Error {}
 
 function check<T>(data: T, error: { code?: string; message: string } | null): T {
@@ -94,6 +97,7 @@ function check<T>(data: T, error: { code?: string; message: string } | null): T 
 }
 
 export async function loadTrainings(linkId: string): Promise<Training[]> {
+  if (SMP.isSample(linkId)) return SMP.trainings();
   const { data, error } = await supabase.from('parent_trainings').select('*').eq('link_id', linkId).order('created_at', { ascending: false });
   return check((data ?? []) as Training[], error);
 }
@@ -106,6 +110,7 @@ export async function loadTrainingsFor(linkIds: string[]): Promise<Training[]> {
 
 export async function loadDetail(trainingIds: string[]): Promise<Detail> {
   if (!trainingIds.length) return { modules: [], tasks: [], logs: [], todos: [], data: [] };
+  if (trainingIds.some(SMP.isSample)) return SMP.detail(trainingIds);
   const q = (t: string) => supabase.from(t).select('*').in('training_id', trainingIds);
   const [m, k, l, d, o] = await Promise.all([q('parent_training_modules'), q('parent_training_tasks'), q('parent_training_logs'),
     q('parent_training_todos'), q('parent_training_data')]);
@@ -133,6 +138,7 @@ export const isNew = (at: string | null, seen: string | null) => !!at && (!seen 
 // Paylaşımdaki ailenin ebeveynleri (eğitimi kime atayacağını seçmek için). İşlev yoksa (önizleme / eski sunucu) danışan satırındaki adlar.
 export type Parent = { id: string | null; name: string };
 export async function loadParents(linkId: string, fallback: string): Promise<Parent[]> {
+  if (SMP.isSample(linkId)) return SMP.parents();
   const { data, error } = await supabase.rpc('clinic_link_parents', { p_link: linkId });
   if (!error && Array.isArray(data) && data.length) return (data as { user_id: string; name: string }[]).map((x) => ({ id: x.user_id, name: x.name }));
   return parentsOf(fallback).map((name) => ({ id: null, name }));
@@ -140,6 +146,7 @@ export async function loadParents(linkId: string, fallback: string): Promise<Par
 
 // "Yeni eğitim oluştur": ebeveyn + eğitim hedefi (hedef başlık olur), Taslak
 export async function createTraining(p: { clinic_id: string; link_id: string; parent: Parent; goal: string; created_by: string }): Promise<Training> {
+  if (SMP.isSample(p.link_id)) return SMP.create(p.parent, p.goal);
   const now = new Date().toISOString();
   const { data, error } = await supabase.from('parent_trainings')
     .insert({ clinic_id: p.clinic_id, link_id: p.link_id, created_by: p.created_by, ...(p.parent.id ? { parent_id: p.parent.id } : {}),
@@ -151,11 +158,13 @@ export async function createTraining(p: { clinic_id: string; link_id: string; pa
 
 // Uzman ebeveynin tamamladığı modülü / yapılacağı inceledi ("incelemeye hazır" sayısı ve satırdaki nokta kalkar)
 export async function markReviewed(table: 'parent_training_modules' | 'parent_training_todos', id: string) {
+  if (SMP.isSample(id)) return SMP.reviewed(table, id);
   await supabase.from(table).update({ reviewed_at: new Date().toISOString() }).eq('id', id);
 }
 
 // "Hatırlatma gönder": atanan ebeveyne bildirim; eğitim başına 12 saatte bir. 'sent' | 'recent' | 'missing'
-export async function remindTraining(id: string): Promise<'sent' | 'recent' | 'missing'> {
+export async function remindTraining(id: string): Promise<'sent' | 'recent' | 'missing' | 'sample'> {
+  if (SMP.isSample(id)) return 'sample';
   const { data, error } = await supabase.rpc('clinic_training_remind', { p_training: id });
   if (error) {
     if (['PGRST202', '42883'].includes(error.code ?? '')) return 'missing';
@@ -166,12 +175,14 @@ export async function remindTraining(id: string): Promise<'sent' | 'recent' | 'm
 }
 
 export async function updateTraining(id: string, patch: Partial<Pick<Training, 'title' | 'status' | 'criterion' | 'seen_at' | 'parent_name'>>) {
+  if (SMP.isSample(id)) return SMP.update(id, patch);
   const { error } = await supabase.from('parent_trainings').update({ ...patch, updated_at: new Date().toISOString() }).eq('id', id);
   check(null, error);
   if (patch.status) track('training.status', { status: patch.status });
 }
 
 export async function deleteTraining(id: string) {
+  if (SMP.isSample(id)) return SMP.remove(id);
   const { error } = await supabase.from('parent_trainings').delete().eq('id', id);
   check(null, error);
   track('training.delete', {});
@@ -179,6 +190,7 @@ export async function deleteTraining(id: string) {
 
 // Seçilen öğeler eğitimin sonuna eklenir; eğitimde (arşivlenmemiş) olan öğe ikinci kez eklenmez
 export async function addModules(trainingId: string, keys: string[], existing: TModule[]) {
+  if (SMP.isSample(trainingId)) return SMP.addModules(trainingId, keys);
   const have = new Set(existing.filter((m) => !m.archived).map((m) => m.item_key));
   let pos = existing.reduce((n, m) => Math.max(n, m.position + 1), 0);
   const rows = keys.filter((k) => !have.has(k)).map((k) => ({ training_id: trainingId, item_key: k, position: pos++ }));
@@ -193,6 +205,7 @@ export async function moveModule(list: TModule[], id: string, dir: -1 | 1) {
   const i = list.findIndex((m) => m.id === id), j = i + dir;
   if (i < 0 || j < 0 || j >= list.length) return;
   const a = list[i], b = list[j];
+  if (SMP.isSample(a.id)) return SMP.moveModule(a.id, b.id);
   await Promise.all([
     supabase.from('parent_training_modules').update({ position: b.position }).eq('id', a.id),
     supabase.from('parent_training_modules').update({ position: a.position }).eq('id', b.id),
@@ -200,11 +213,13 @@ export async function moveModule(list: TModule[], id: string, dir: -1 | 1) {
 }
 
 export async function archiveModule(id: string) {
+  if (SMP.isSample(id)) return SMP.archive('modules', id);
   const { error } = await supabase.from('parent_training_modules').update({ archived: true }).eq('id', id);
   check(null, error);
 }
 
 export async function saveTask(t: { id?: string; training_id: string; title: string; description: string; measure: Measure; position?: number }) {
+  if (SMP.isSample(t.training_id)) return SMP.saveTask(t);
   const { id, ...rest } = t;
   const { error } = id
     ? await supabase.from('parent_training_tasks').update({ title: rest.title, description: rest.description, measure: rest.measure }).eq('id', id)
@@ -214,11 +229,13 @@ export async function saveTask(t: { id?: string; training_id: string; title: str
 }
 
 export async function archiveTask(id: string) {
+  if (SMP.isSample(id)) return SMP.archive('tasks', id);
   const { error } = await supabase.from('parent_training_tasks').update({ archived: true }).eq('id', id);
   check(null, error);
 }
 
 export async function saveTodo(t: { id?: string; training_id: string; title: string; description: string }) {
+  if (SMP.isSample(t.training_id)) return SMP.saveTodo(t);
   const { id, ...rest } = t;
   const { error } = id
     ? await supabase.from('parent_training_todos').update({ title: rest.title, description: rest.description }).eq('id', id)
@@ -228,17 +245,20 @@ export async function saveTodo(t: { id?: string; training_id: string; title: str
 }
 
 export async function archiveTodo(id: string) {
+  if (SMP.isSample(id)) return SMP.archive('todos', id);
   const { error } = await supabase.from('parent_training_todos').update({ archived: true }).eq('id', id);
   check(null, error);
 }
 
 export async function addData(trainingId: string, day: string, value: number) {
+  if (SMP.isSample(trainingId)) return SMP.addData(trainingId, day, value);
   const { error } = await supabase.from('parent_training_data').insert({ training_id: trainingId, day, value });
   check(null, error);
   track('training.data', {});
 }
 
 export async function deleteData(id: string) {
+  if (SMP.isSample(id)) return SMP.deleteData(id);
   const { error } = await supabase.from('parent_training_data').delete().eq('id', id);
   check(null, error);
 }

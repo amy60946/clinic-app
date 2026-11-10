@@ -6,7 +6,8 @@ import { colors, radius } from '../theme';
 import { Label, Notice } from '../components/ui';
 import Bell from '../components/Bell';
 import { Client, ClinicianMe, Member, loadAttention } from '../lib/clinic';
-import { Attention, BoardRow, Section, buildBoard } from '../lib/attention';
+import { Attention, BoardRow, Section, TrainingStat, buildBoard } from '../lib/attention';
+import { loadTrainingsFor, loadDetail } from '../lib/training';
 import { track } from '../lib/track';
 
 // Tüm danışanlar (kullanıcı kararı 2 Kasım 2026: dikkat panosu "liste + neden"; ortak clinic_attention_summary, veritabani.md 23).
@@ -17,6 +18,8 @@ import { track } from '../lib/track';
 const SEEN_KEY = (id: string) => `clinic.attention.seen.v1.${id}`;
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
+// Takip Planı kapalıyken (lansman odağı "A") "Senin sıran" açıklaması
+const MINE_TRAINING_INFO = 'Ebeveynin bitirdiği ve senin henüz açmadığın yanıtlar, ebeveynin göremediği taslak eğitimler ya da henüz eğitimi olmayan danışanlar.';
 const SECTIONS: { id: Section; title: string; info: string }[] = [
   { id: 'mine', title: 'Senin sıran', info: 'Aileye gönderilmemiş değişikliğin, değerlendirme zamanı gelen davranış hedefinin ya da takip planı henüz olmayan danışanlar.' },
   { id: 'family', title: 'Ebeveynden yeni', info: 'Son 7 günde ebeveynin girdiği davranış kayıtları ve öneri kararları. "Gördüm" dersen ya da danışanı açarsan, yeni bir şey gelene kadar bu bölümden çıkar (bu cihazda).' },
@@ -24,9 +27,11 @@ const SECTIONS: { id: Section; title: string; info: string }[] = [
   { id: 'rest', title: 'Diğer danışanlar', info: 'Şu an bir şey beklemeyen danışanlar.' },
 ];
 
-export default function ClientBoard({ clients, unread, me, team, onOpen, onAttention }: {
+export default function ClientBoard({ clients, unread, me, team, onOpen, onAttention, plan = true, onTraining }: {
   clients: Client[]; unread: Record<string, number>; me: ClinicianMe; team: Member[]; onOpen: (c: Client) => void;
   onAttention?: (a: Record<string, Attention> | null) => void;      // ana ekrandaki Başlarken kartı aynı özeti kullanır
+  plan?: boolean;                                                   // Takip Planı açık mı (uzaktan ayar care_plan); kapalıyken nedenler eğitimden
+  onTraining?: (s: { any: boolean; active: boolean }) => void;      // Başlarken: ilk eğitim / Etkin eğitim var mı
 }) {
   const [q, setQ] = useState('');
   const [att, setAtt] = useState<Record<string, Attention> | null>(null);
@@ -35,6 +40,28 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
   useEffect(() => {
     loadAttention().then((a) => { setAtt(a); onAttention?.(a); }).catch(() => { setAtt(null); onAttention?.(null); });
   }, [clients]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Takip Planı kapalıyken danışan başına eğitim özeti (sunucuda eğitim tabloları yoksa neden eklenmez)
+  const [training, setTraining] = useState<Record<string, TrainingStat> | null>(null);
+  useEffect(() => {
+    if (plan) { setTraining(null); return; }
+    let live = true;
+    (async () => {
+      try {
+        const ts = await loadTrainingsFor(clients.map((c) => c.link_id));
+        const d = await loadDetail(ts.map((t) => t.id));
+        const stat: Record<string, TrainingStat> = {};
+        clients.forEach((c) => { stat[c.link_id] = { total: 0, drafts: 0, review: 0 }; });
+        const linkOf: Record<string, string> = {};
+        ts.forEach((t) => { linkOf[t.id] = t.link_id; const x = stat[t.link_id]; if (x) { x.total += 1; if (t.status === 'draft') x.drafts += 1; } });
+        [...d.modules.filter((m) => !m.archived && m.completed_at && !m.reviewed_at), ...d.todos.filter((k) => !k.archived && k.done_at && !k.reviewed_at)]
+          .forEach((r) => { const x = stat[linkOf[r.training_id]]; if (x) x.review += 1; });
+        if (!live) return;
+        setTraining(stat);
+        onTraining?.({ any: ts.length > 0, active: ts.some((t) => t.status !== 'draft') });
+      } catch { if (live) setTraining(null); }
+    })();
+    return () => { live = false; };
+  }, [clients, plan]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     AsyncStorage.getItem(SEEN_KEY(me.id)).then((v) => { if (v) setSeen(JSON.parse(v)); }).catch(() => {});
   }, [me.id]);
@@ -50,8 +77,8 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
   const scoped = ownerFilter && who !== 'all' ? clients.filter((c) => mineOf(c, who)) : clients;
   const query = q.trim().toLocaleLowerCase('tr');
   const searched = query ? scoped.filter((c) => `${c.child_name} ${c.parents} ${c.label}`.toLocaleLowerCase('tr').includes(query)) : scoped;
-  const board = useMemo(() => (att && !query ? buildBoard(searched, att, seen, new Date()) : null), [att, query, searched, seen]);
-  const sections = board ? SECTIONS.filter((s) => board[s.id].length > 0) : [];
+  const board = useMemo(() => (att && !query ? buildBoard(searched, att, seen, new Date(), { plan, training }) : null), [att, query, searched, seen, plan, training]);
+  const sections = board ? SECTIONS.filter((s) => board[s.id].length > 0).map((s) => (s.id === 'mine' && !plan ? { ...s, info: MINE_TRAINING_INFO } : s)) : [];
   const onlyRest = sections.length === 1 && sections[0].id === 'rest';
 
   const row = (r: BoardRow<Client> | { client: Client; reasons: []; fresh: false }, i: number) => {

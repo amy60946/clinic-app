@@ -15,6 +15,10 @@ export type ClientConfig = {
   flags: Record<string, boolean>;
 };
 
+// Takip Planı bayrağı (lansman odağı "A", kullanıcı kararı 11 Kasım 2026): açık değilse ClinicApp'te Takip Planı menüde yok,
+// tek plan ekranı Ebeveyn Eğitimi'dir (ortak sozlesme/admin.md bayrak listesi). Verisi durur; bayrak açılınca geri gelir.
+export const CARE_PLAN_FLAG = 'care_plan';
+
 const EMPTY: ClientConfig = { minVersion: null, maintenance: false, banner: null, flags: {} };
 
 export const appVersion = Application.nativeApplicationVersion ?? Constants.expoConfig?.version ?? '0';

@@ -43,19 +43,27 @@ export const hideSample = (userId: string) => AsyncStorage.setItem(SAMPLE_HIDE_K
 // plan_published_at) · gerçek bir danışanın raporu açıldı (bu cihazda). Aile bağlanmadan son üçü soluk ve "Aile bağlanınca" der.
 // Beşi bitince ya da × ile kapanınca görünmez.
 export type StartProgress = { sampleSeen: boolean; invited: boolean; hasClient: boolean; planned: boolean; published: boolean; report: boolean };
-export const startDone = (p: StartProgress) => [p.sampleSeen, p.invited, p.planned, p.published, p.report].filter(Boolean).length;
+// plan = Takip Planı açık (uzaktan ayar `care_plan`). Kapalıyken (lansman odağı "A", 11 Kasım 2026) kart ebeveyn eğitimine göre dört adım:
+// örnek aile · davet · ilk eğitim (planned) · eğitim Etkin (published).
+export const startTotal = (plan: boolean) => (plan ? 5 : 4);
+export const startDone = (p: StartProgress, plan = true) => [p.sampleSeen, p.invited, p.planned, p.published, ...(plan ? [p.report] : [])].filter(Boolean).length;
 
-export function StartCard({ progress: p, onSample, onInvite, onPlan, onPublish, onReport, onHide }: {
-  progress: StartProgress; onSample: () => void; onInvite: () => void; onPlan: () => void; onPublish: () => void; onReport: () => void; onHide: () => void;
+export function StartCard({ progress: p, plan = true, onSample, onInvite, onPlan, onPublish, onReport, onHide }: {
+  progress: StartProgress; plan?: boolean; onSample: () => void; onInvite: () => void; onPlan: () => void; onPublish: () => void; onReport: () => void; onHide: () => void;
 }) {
-  const items = [
+  const items = !plan ? [
+    { done: p.sampleSeen, title: 'Örnek aileyle dene', sub: 'Deniz’in eğitimini aç: modüller, uygulama görevleri, yapılacaklar', icon: 'sparkles-outline' as const, on: onSample, needs: false },
+    { done: p.invited, title: 'İlk aileni davet et', sub: p.invited && !p.hasClient ? 'Davet gitti; ebeveyn onaylayınca burada' : '"Aileyi davet et" › e-posta', icon: 'mail-outline' as const, on: onInvite, needs: false },
+    { done: p.planned, title: 'İlk eğitimi oluştur', sub: 'Ebeveyn Eğitimi › "+ Eğitim ekle"', icon: 'school-outline' as const, on: onPlan, needs: true },
+    { done: p.published, title: 'Eğitimi Etkin yap', sub: 'Ebeveyn o zaman görür', icon: 'paper-plane-outline' as const, on: onPublish, needs: true },
+  ] : [
     { done: p.sampleSeen, title: 'Örnek aileyle dene', sub: 'Deniz’le davranış hedefi aç, rutin bağla, gönder', icon: 'sparkles-outline' as const, on: onSample, needs: false },
     { done: p.invited, title: 'İlk aileni davet et', sub: p.invited && !p.hasClient ? 'Davet gitti; ebeveyn onaylayınca burada' : '"Aileyi davet et" › e-posta', icon: 'mail-outline' as const, on: onInvite, needs: false },
     { done: p.planned, title: 'İlk davranış hedefini ekle', sub: 'Takip Planı › "+ Davranış hedefi"', icon: 'flag-outline' as const, on: onPlan, needs: true },
     { done: p.published, title: 'Aileye gönder', sub: 'Takip Planı › "Aileye gönder"', icon: 'paper-plane-outline' as const, on: onPublish, needs: true },
     { done: p.report, title: 'İlk raporu aç', sub: 'Rapor › "Raporu aç"', icon: 'document-text-outline' as const, on: onReport, needs: true },
   ];
-  const done = startDone(p);
+  const done = startDone(p, plan);
   return (
     <View style={styles.card}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -110,6 +118,8 @@ export function SampleRow({ onOpen, onHide }: { onOpen: () => void; onHide?: () 
 // Gerçek danışanda bölüm ilk açıldığında bir kez: kısa ipucu (örnek aile turunun bölüm metinleri, gerçek veriye göre)
 // Kısa (kullanıcı isteği 3 Kasım 2026: "yazıları daha kısa tut"); dokunulacak tuş tırnak içinde
 export const SECTION_HINTS: Partial<Record<Tab, { title: string; text: string }>> = {
+  training: { title: 'Ebeveyn Eğitimi', text: 'Bir eğitim aç: modüller, uygulama görevleri, yapılacaklar. Ebeveyn, sen "Etkin" yapınca görür.' },
+  behaviors: { title: 'Davranışlar ve Olaylar', text: 'Hedef davranışı ve stratejileri ekle; ebeveyn olayları aile uygulamasından bildirir.' },
   summary: { title: 'Özet', text: 'Dönemin ev rutini: tamamlama, tam gün, kendiliğinden başlama.' },
   routine: { title: 'Ev Rutinleri', text: 'Bir maceraya dokun: gün gün ayrıntı. Öneri için "+ Aileye öner".' },
   goals: { title: 'Takip Planı', text: 'Eklediğin her şey taslak (bej), aile görmez. Göndermek için "Aileye gönder".' },
@@ -154,6 +164,18 @@ export function OnceHint({ userId, id, hint }: { userId: string; id: string; hin
 // Olaylar: PlanHats (goal_added, routine_added, published, evaluated), HomeRoutines (routine_row), ReportTab (report_action).
 // Yazı en az, gösterim önde (kullanıcı isteği 3 Kasım 2026): kartta başlık + en çok bir kısa satır; pencerelerde de perdeyle
 // sırayla gösterilir (önce "bak" → "Tamam", sonra dokunulacak tuş).
+// Eğitim turu (lansman odağı "A", 11 Kasım 2026): Takip Planı kapalıyken örnek ailenin eğitiminde gezdirir.
+// Olaylar TrainingTab'dan: training_open, training_tab_modules / _tasks / _todos. Açıklama kartları "bak" adımıdır (İleri).
+export const TRAINING_TOUR: (CoachStep & { tab: Tab })[] = [
+  { key: 'intro', tab: 'training', title: 'Deniz’le dene', text: 'Örnek aile. Kaydedilmez, aileye gitmez.' },
+  { key: 'open', tab: 'training', target: 'training.card', until: 'training_open', title: 'Eğitimi aç', text: 'Ebeveynin evde çalışacağı konu. **Karta dokun**' },
+  { key: 'modules', tab: 'training', target: 'training.tab.modules', until: 'training_tab_modules', title: 'Öğrenme modülleri', text: 'Ebeveynin okuduğu ve yanıtladığı içerik.' },
+  { key: 'tasks', tab: 'training', target: 'training.tab.tasks', until: 'training_tab_tasks', title: 'Uygulama görevleri', text: 'Evde tekrarlanan beceri.' },
+  { key: 'tasks_look', tab: 'training', target: 'training.explain.tasks', title: 'Örnekleriyle', text: 'Ebeveyn her uyguladığında kayıt girer.' },
+  { key: 'todos', tab: 'training', target: 'training.tab.todos', until: 'training_tab_todos', title: 'Hızlı yapılacaklar', text: 'Bir kez yapılıp işaretlenen iş.' },
+  { key: 'todos_look', tab: 'training', target: 'training.explain.todos', title: 'Örnekleriyle', text: 'Bir örneğe dokun; form dolu açılır.' },
+  { key: 'done', tab: 'training', title: 'Hazırsın', text: 'Gerçek ailede aynı ekran. Önce aileni davet et.', final: true },
+];
 export const TOUR: (CoachStep & { tab: Tab })[] = [
   { key: 'intro', tab: 'goals', title: 'Deniz’le dene', text: 'Örnek aile. Kaydedilmez, aileye gitmez.' },
   {
