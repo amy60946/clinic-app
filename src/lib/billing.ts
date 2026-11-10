@@ -56,7 +56,7 @@ export const PACKAGES: Record<PackageId, { title: string; who: string; features:
 };
 
 export const COMMON_TERMS = [
-  'İlk 7 gün ücretsiz, kart gerekmez',
+  'İlk 14 gün ücretsiz, kart gerekmez',
   'Aylık ya da yıllık; yıllıkta 2 ay hediye',
   'Dilediğin an iptal; dönem sonuna kadar açık kalır',
   'Veriler yalnız ebeveyn izniyle görünür; izin geri alınınca erişim biter',
