@@ -246,7 +246,7 @@ function MenuMock() {
       <Header title="Nazlı" sub="8 yaş · Sorumlu: sen" back />
       {group('Planla', ['Takip Planı'])}
       <View>
-        {group('İzle', ['Özet', 'Ev Rutinleri', 'Davranış Kayıtları'], ['Ev Rutinleri', 'Davranış Kayıtları'])}
+        {group('İzle', ['Davranışlar ve Olaylar', 'Özet', 'Ev Rutinleri'], ['Davranışlar ve Olaylar', 'Ev Rutinleri'])}
         <Badge n={1} />
       </View>
       <View>

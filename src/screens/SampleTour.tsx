@@ -112,7 +112,6 @@ export function SampleRow({ onOpen, onHide }: { onOpen: () => void; onHide?: () 
 export const SECTION_HINTS: Partial<Record<Tab, { title: string; text: string }>> = {
   summary: { title: 'Özet', text: 'Dönemin ev rutini: tamamlama, tam gün, kendiliğinden başlama.' },
   routine: { title: 'Ev Rutinleri', text: 'Bir maceraya dokun: gün gün ayrıntı. Öneri için "+ Aileye öner".' },
-  abc: { title: 'Davranış Kayıtları', text: 'Ebeveynin ABC kayıtları. Tabloyu "İndir (CSV)" ile al.' },
   goals: { title: 'Takip Planı', text: 'Eklediğin her şey taslak (bej), aile görmez. Göndermek için "Aileye gönder".' },
   notes: { title: 'Notlar', text: 'Yalnız sen ve yetkili ekibin görür.' },
   report: { title: 'Rapor', text: 'PDF için "Raporu aç"; not için "Notu kopyala".' },

@@ -178,6 +178,7 @@ async function login(b, who) {
   // Davranışlar ve Olaylar (danışan › İzle)
   const B = 'Ekranı kapatırken ağlama';
   await step(p, 'behaviors', async () => { await tap(p, 'Davranışlar ve Olaylar', { wait: 2000 }); }, 'Diğer bildirilen olaylar');
+  await step(p, 'no-abc-menu', async () => { if (await visible(p, 'Davranış Kayıtları').count()) throw new Error('Davranış Kayıtları menüde duruyor'); });
   await step(p, 'behavior-abc', async () => { await tap(p, p.getByRole('button', { name: B, exact: true }).filter({ visible: true })); }, 'Öncül');
   await step(p, 'behavior-freq', async () => { await tap(p, p.getByRole('button', { name: 'Kardeşine vurma', exact: true }).filter({ visible: true })); });
   await step(p, 'behavior-duration', async () => { await tap(p, p.getByRole('button', { name: 'Yatma saati direnci', exact: true }).filter({ visible: true })); });
@@ -197,8 +198,8 @@ async function login(b, who) {
   await step(p, 'behavior-preview-thanks', async () => { await tap(p, 'Hiçbiri', { last: true }); await tap(p, p.getByRole('radio', { name: /^4:/ }).filter({ visible: true })); await tap(p, 'Gönder', { last: true }); }, 'teşekkürler');
   await closeTop(p); await ensureClosed(p);
   if (!ONLY) {
-  const MARK = { sessions: 'Bekleme listesi', summary: 'Dönem', routines: 'Haftalık', abc: 'Kartlar', notes: 'Not', report: 'Raporu aç', details: 'Paylaşımı sonlandır' };
-  for (const [tab, name] of [['Seanslar', 'sessions'], ['Özet', 'summary'], ['Ev Rutinleri', 'routines'], ['Davranış Kayıtları', 'abc'], ['Notlar', 'notes'], ['Rapor', 'report'], ['Danışan Bilgileri', 'details']]) {
+  const MARK = { sessions: 'Bekleme listesi', summary: 'Dönem', routines: 'Haftalık', notes: 'Not', report: 'Raporu aç', details: 'Paylaşımı sonlandır' };
+  for (const [tab, name] of [['Seanslar', 'sessions'], ['Özet', 'summary'], ['Ev Rutinleri', 'routines'], ['Notlar', 'notes'], ['Rapor', 'report'], ['Danışan Bilgileri', 'details']]) {
     await ensureClosed(p);
     await step(p, name, async () => { await tap(p, tab, { wait: 2000 }); }, MARK[name]);
     if (name === 'routines') {
@@ -209,7 +210,6 @@ async function login(b, who) {
       await step(p, 'suggestion-editor', async () => { await tap(p, 'Aileye macera öner', { wait: 1500 }); });
       await closeTop(p); await closeTop(p);
     }
-    if (name === 'abc') await step(p, 'abc-table', async () => { await tap(p, 'Tablo'); });
   }
   }
   fs.writeFileSync(`${OUT}/api.json`, JSON.stringify(api)); 
