@@ -1,0 +1,157 @@
+<title>Mercek Tanıtım Alternatifleri</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Düzen: tek ekranlık gezgin. Üstte sekmeler (Karşılaştırma · A · B · C · Şimdiki), altında seçilen sayfa gerçek hâliyle çerçevede. */
+@font-face { font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(assets/fonts/plus-jakarta-sans-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+20A0-20C0; }
+@font-face { font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 400 800; font-display: swap; src: url(assets/fonts/plus-jakarta-sans-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212; }
+:root {
+  --bg: #EEF0F5; --panel: #FFFFFF; --ink: #0F1B3D; --text: #2B3550; --muted: #5E6780; --line: #DDE2EC;
+  --accent: #2C4A9A; --accent-bg: #E6EAF5; --good: #2F7D4A; --good-bg: #E6F4EA; --warn: #8A5A10; --warn-bg: #F7F1E6; --bezel: #0F1B3D;
+  --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0B1226; --panel: #141D38; --ink: #EEF1FA; --text: #C9D1E6; --muted: #97A2C0; --line: #293556; --accent: #9DB4F5; --accent-bg: #1D2A52; --good: #7FD19B; --good-bg: #173426; --warn: #E9C377; --warn-bg: #3A2E14; --bezel: #33406A; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0B1226; --panel: #141D38; --ink: #EEF1FA; --text: #C9D1E6; --muted: #97A2C0; --line: #293556; --accent: #9DB4F5; --accent-bg: #1D2A52; --good: #7FD19B; --good-bg: #173426; --warn: #E9C377; --warn-bg: #3A2E14; --bezel: #33406A; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.5; display: flex; flex-direction: column; }
+.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { flex: none; background: var(--panel); border-bottom: 1px solid var(--line); padding-block: 10px; display: flex; flex-direction: column; gap: 8px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+h1 { font-size: 16px; font-weight: 800; color: var(--ink); margin: 0; letter-spacing: -.01em; margin-right: auto; }
+.tabs, .dev { display: flex; gap: 4px; background: var(--bg); border-radius: 12px; padding: 4px; max-width: 100%; overflow-x: auto; }
+.tabs button, .dev button { font: inherit; font-size: 13.5px; font-weight: 700; color: var(--muted); background: none; border: 0; border-radius: 9px; padding: 8px 12px; cursor: pointer; white-space: nowrap; min-height: 36px; }
+.tabs button[aria-selected="true"], .dev button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+button:focus-visible, a:focus-visible { outline: 3px solid #E9B22B; outline-offset: 2px; }
+.hint { font-size: 13px; color: var(--muted); min-height: 20px; }
+.hint b { color: var(--ink); }
+main { flex: 1; min-height: 0; display: flex; }
+.view { flex: 1; min-width: 0; min-height: 0; display: flex; justify-content: center; padding-block: 12px; }
+.frame { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #F5F6F8; }
+.view.phone .frame { flex: none; width: 390px; max-width: 100%; border: 9px solid var(--bezel); border-radius: 38px; }
+iframe { width: 100%; height: 100%; border: 0; display: block; }
+.doc { flex: 1; min-width: 0; overflow-y: auto; padding-block: 22px 40px; }
+.doc .in { max-width: 1060px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
+.doc h2 { font-size: 20px; font-weight: 800; color: var(--ink); margin: 0; letter-spacing: -.015em; text-wrap: balance; }
+.doc p { margin: 0; max-width: 70ch; }
+.lead { font-size: 16px; }
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card.pick { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink) inset; }
+.card h3 { margin: 0; font-size: 17px; font-weight: 800; color: var(--ink); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.card h3 i { font-style: normal; flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: var(--panel); display: grid; place-items: center; font-size: 14px; }
+.tag { font-size: 11.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; border-radius: 999px; padding: 3px 9px; background: var(--good-bg); color: var(--good); }
+.card dl { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.card dt { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.card dd { margin: 2px 0 0; font-size: 14px; }
+.card ul { margin: 2px 0 0; padding-left: 18px; font-size: 14px; display: flex; flex-direction: column; gap: 3px; }
+.card .open { margin-top: auto; font: inherit; font-weight: 800; font-size: 14px; border-radius: 10px; border: 1px solid var(--ink); background: var(--panel); color: var(--ink); padding: 10px 12px; cursor: pointer; }
+.card.pick .open { background: var(--ink); color: var(--panel); }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.box.note { background: var(--warn-bg); border-color: transparent; color: var(--text); }
+.box.note b { color: var(--warn); }
+.bench { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.bench h4 { margin: 0 0 6px; font-size: 13px; font-weight: 800; color: var(--ink); }
+.bench ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.bench li { font-size: 13.5px; }
+.bench a { color: var(--accent); font-weight: 800; text-decoration: none; }
+.bench a:hover { text-decoration: underline; }
+.bench small { display: block; color: var(--muted); font-size: 12.5px; }
+.src { font-size: 12.5px; color: var(--muted); }
+.src a { color: var(--accent); }
+@media (max-width: 860px) { .cards, .bench { grid-template-columns: 1fr; } .dev { display: none; } .view { padding-block: 8px; } h1 { width: 100%; } }
+</style>
+
+<header class="gut">
+  <div class="row">
+    <h1>Mercek tanıtım sayfası · üç deneyim</h1>
+    <div class="tabs" role="tablist" aria-label="Görünüm">
+      <button role="tab" data-v="ozet" aria-selected="false">Karşılaştırma</button>
+      <button role="tab" data-v="a" aria-selected="true">A · Kaydırdıkça</button>
+      <button role="tab" data-v="b" aria-selected="false">B · Tıkladıkça</button>
+      <button role="tab" data-v="c" aria-selected="false">C · Kendiliğinden</button>
+      <button role="tab" data-v="simdiki" aria-selected="false">Şimdiki</button>
+    </div>
+    <div class="dev" role="group" aria-label="Ekran boyutu">
+      <button type="button" data-d="desk" aria-pressed="true">Masaüstü</button>
+      <button type="button" data-d="phone" aria-pressed="false">Telefon</button>
+    </div>
+  </div>
+  <div class="hint" id="hint"></div>
+</header>
+
+<main class="gut">
+  <div class="view" id="view"><div class="frame"><iframe id="page" title="Seçilen tanıtım sayfası" src="a.html#nasil"></iframe></div></div>
+  <div class="doc" id="doc" hidden>
+    <div class="in">
+      <p class="lead"><b>Yazılar aynı, gezme biçimi farklı.</b> Üç seçenekte de sayfanın metni bugünkü tanıtım sayfasından alındı. Değişen tek şey "Platform Nasıl Çalışır?" bölümünün (C'de ayrıca açılışın) nasıl gezildiği.</p>
+      <div class="cards" id="cards"></div>
+      <div class="box" id="oneri"></div>
+      <div class="box note" id="notlar"></div>
+      <div>
+        <h2>Benchmark: bu üç kalıbı kullanan başarılı şirketler</h2>
+        <p class="src" style="margin-top:6px">Sayfalar tek tek açılıp kalıp doğrulandı; içerik, metin ya da görsel kopyalanmadı, yalnız işleyiş örnek alındı.</p>
+      </div>
+      <div class="bench" id="bench"></div>
+      <p class="src" id="kaynak"></p>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  var HINTS = {
+    a: '<b>Aşağı kaydır.</b> Yazı kayar, ekran yerinde kalıp her adımda değişir. Telefonda görsel üstte sabit kalır.',
+    b: '<b>Adımlara dokun</b> ya da "Sonraki adım"a bas. Yazı ve ekran yerinde değişir, sayfa uzamaz.',
+    c: '<b>Bir şey yapma, izle.</b> Açılıştaki tur beş adımı sırayla gösterir; duraklatılabilir. Aşağıda satırlar kaydırdıkça belirir.',
+    simdiki: 'Bugün yayındaki sayfa (karşılaştırma için).',
+    ozet: 'Üç seçeneğin farkı, artısı, eksisi, önerim ve benchmark kaynakları.'
+  };
+  var SRC = { a: 'a.html#nasil', b: 'b.html#nasil', c: 'c.html', simdiki: 'now.html' };
+  var DATA = /*DATA*/{}/*END*/;
+  var view = document.getElementById('view'), doc = document.getElementById('doc'), page = document.getElementById('page'), hint = document.getElementById('hint');
+  var tabs = [].slice.call(document.querySelectorAll('.tabs button')), devs = [].slice.call(document.querySelectorAll('.dev button'));
+  var cur = null;
+  function show(v) {
+    if (!HINTS[v]) v = 'a';
+    cur = v;
+    tabs.forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-v') === v)); });
+    hint.innerHTML = HINTS[v];
+    var isDoc = v === 'ozet';
+    doc.hidden = !isDoc; view.hidden = isDoc;
+    if (!isDoc && page.getAttribute('data-v') !== v) { page.setAttribute('data-v', v); page.src = SRC[v]; }
+    try { if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v); } catch (e) {}
+  }
+  tabs.forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-v')); }); });
+  devs.forEach(function (b) { b.addEventListener('click', function () {
+    var phone = b.getAttribute('data-d') === 'phone';
+    devs.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    view.classList.toggle('phone', phone);
+    if (cur && cur !== 'ozet') { page.src = SRC[cur]; }   // boyut değişince sayfa baştan yerleşsin
+  }); });
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+
+  // karşılaştırma içeriği
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var li = function (a) { return '<ul>' + a.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>'; };
+  document.getElementById('cards').innerHTML = (DATA.options || []).map(function (o) {
+    return '<div class="card' + (o.pick ? ' pick' : '') + '"><h3><i>' + o.id.toUpperCase() + '</i>' + esc(o.name) + (o.pick ? '<span class="tag">Önerim</span>' : '') + '</h3><dl>' +
+      '<div><dt>Nasıl gezilir</dt><dd>' + esc(o.how) + '</dd></div>' +
+      '<div><dt>Telefonda</dt><dd>' + esc(o.phone) + '</dd></div>' +
+      '<div><dt>Artısı</dt><dd>' + li(o.pros) + '</dd></div>' +
+      '<div><dt>Eksisi</dt><dd>' + li(o.cons) + '</dd></div></dl>' +
+      '<button type="button" class="open" data-open="' + o.id + '">' + esc(o.name) + ' önizlemesini aç</button></div>';
+  }).join('');
+  document.getElementById('cards').addEventListener('click', function (e) { var b = e.target.closest('[data-open]'); if (b) show(b.getAttribute('data-open')); });
+  document.getElementById('oneri').innerHTML = '<h2>Önerim</h2>' + (DATA.advice || []).map(function (p) { return '<p>' + p + '</p>'; }).join('');
+  document.getElementById('notlar').innerHTML = '<h2>Bilmen gerekenler</h2>' + (DATA.notes || []).map(function (p) { return '<p>' + p + '</p>'; }).join('');
+  document.getElementById('bench').innerHTML = (DATA.bench || []).map(function (g) {
+    return '<div class="box"><h4>' + esc(g.title) + '</h4><ul>' + g.items.map(function (x) {
+      return '<li><a href="' + esc(x.url) + '" target="_blank" rel="noopener">' + esc(x.name) + '</a> ' + esc(x.what) + '<small>' + esc(x.proof) + '</small></li>';
+    }).join('') + '</ul></div>';
+  }).join('');
+  document.getElementById('kaynak').innerHTML = DATA.sources || '';
+  show(location.hash.slice(1) || 'a');
+})();
+</script>
