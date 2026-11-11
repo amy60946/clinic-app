@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import * as Linking from 'expo-linking';
 import type { Session, EmailOtpType } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import { storeLogOut } from './store';
 
 // E-postadaki bağlantılar uygulamayı bu adresle açar:
 // web'de sitenin adresi, derlenmiş uygulamada clinicapp://auth
@@ -136,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (verifying.current) return;
       setSession(s);
       if (event === 'PASSWORD_RECOVERY') setRecovery(true);
-      if (event === 'SIGNED_OUT') setRecovery(false);
+      if (event === 'SIGNED_OUT') { setRecovery(false); storeLogOut(); }   // App Store (RevenueCat) kimliği de bırakılır
     });
     Linking.getInitialURL().then(handleUrl);
     const sub = Linking.addEventListener('url', ({ url }) => handleUrl(url));

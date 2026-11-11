@@ -31,6 +31,8 @@ jobs:
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      # İsteğe bağlı: RevenueCat herkese açık iOS anahtarı (appl_…; ortak CANLIYA_ALMA 1.8). Yoksa üyelik satın alınamaz.
+      REVENUECAT_IOS_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_IOS_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,6 +47,11 @@ jobs:
           done
           if [ -n "$miss" ]; then echo "::error::Eksik secret:$miss (docs/TESTFLIGHT.md)"; exit 1; fi
           case "$SUPABASE_PUBLISHABLE_KEY" in sb_secret_*) echo "::error::SUPABASE_PUBLISHABLE_KEY gizli anahtar; publishable anahtarı yaz."; exit 1;; esac
+          case "$REVENUECAT_IOS_KEY" in
+            "") echo "::warning::EXPO_PUBLIC_REVENUECAT_IOS_KEY yok: bu derlemede App Store üyeliği kapalı." ;;
+            appl_*) echo "RevenueCat iOS anahtarı var." ;;
+            *) echo "::error::EXPO_PUBLIC_REVENUECAT_IOS_KEY appl_ ile başlamalı (RevenueCat › API keys › ClinicApp herkese açık anahtarı). sk_ gizli anahtarı asla."; exit 1 ;;
+          esac
       - run: npm ci
       - name: Yerel paket sürümleri tek mi
         run: node tools/ci/check-native-dupes.js
@@ -53,8 +60,10 @@ jobs:
           npx tsc --noEmit
           npm test
       - name: Sunucu ayarı (.env)
-        run: printf 'EXPO_PUBLIC_SUPABASE_URL=https://uhelhxqgpcjemadhsifx.supabase.co\nEXPO_PUBLIC_SUPABASE_KEY=%s\n' "$SUPABASE_PUBLISHABLE_KEY" > .env
+        run: printf 'EXPO_PUBLIC_SUPABASE_URL=https://uhelhxqgpcjemadhsifx.supabase.co\nEXPO_PUBLIC_SUPABASE_KEY=%s\nEXPO_PUBLIC_REVENUECAT_IOS_KEY=%s\n' "$SUPABASE_PUBLISHABLE_KEY" "$REVENUECAT_IOS_KEY" > .env
       - name: Derle, imzala, TestFlight'a yükle
         env:
           BUILD_NUMBER: ${{ github.run_number }}
+          # .env'e ek olarak ortam değişkeni: Xcode'un JS paketleme adımı .env'i okumasa da değer pakete girer
+          EXPO_PUBLIC_REVENUECAT_IOS_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_IOS_KEY }}
         run: bash tools/ci/ios-testflight.sh

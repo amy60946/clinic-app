@@ -4,12 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../theme';
 import { Card, Label, Cta, Segmented } from '../components/ui';
-import type { ClinicianMe } from '../lib/clinic';
+import { clinicianMe, type ClinicianMe } from '../lib/clinic';
 import {
-  BillingPlan, PackageId, Period, PACKAGES, COMMON_TERMS, listPlans, tl, billingStatus, hasAccess, daysLeft,
-  packageName, verifyApple,
+  BillingPlan, Period, PACKAGES, commonTerms, yearlyGift, listPlans, tl, billingStatus, hasAccess, daysLeft, packageName,
 } from '../lib/billing';
 import * as store from '../lib/store';
+import type { StorePrices, StoreResult } from '../lib/storeTypes';
 import { track } from '../lib/track';
 import { useLegalOn, openLegal } from '../lib/legal';
 
@@ -17,8 +17,20 @@ const APPLE_EULA = 'https://www.apple.com/legal/internet-services/itunes/dev/std
 const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL;
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 const SOURCE: Record<string, string> = { app_store: 'App Store', revenuecat: 'App Store', manual: 'klinik anlaşması' };
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-// Üyelik ekranı. blocking: deneme/üyelik bitti, panel yerine bu ekran gösterilir (kapatılamaz).
+// Satın almadan sonra üyeliği sunucu yazar (RevenueCat → billing-webhook, birkaç saniye): açılana dek kısa aralıkla bakılır
+async function waitForServer(planOk: (me: ClinicianMe) => boolean): Promise<boolean> {
+  for (let i = 0; i < 10; i++) {
+    await wait(i ? 2500 : 1500);
+    const me = await clinicianMe().catch(() => null);
+    if (me && billingStatus(me) === 'active' && planOk(me)) return true;
+  }
+  return false;
+}
+
+// Üyelik ekranı (CANLIYA_ALMA 2.4). blocking: deneme/üyelik bitti, panel yerine bu ekran gösterilir (kapatılamaz).
+// Satın alma yalnız klinik sahibinde ve iOS'ta (App Store, RevenueCat); web'de satış yok. Ekip üyesine fiyat gösterilmez.
 export default function MembershipScreen({ me, blocking, onClose, onChanged, footer }: {
   me: ClinicianMe;
   blocking?: boolean;
@@ -27,27 +39,64 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
   footer?: React.ReactNode;
 }) {
   const [plans, setPlans] = useState<BillingPlan[]>([]);
-  const [prices, setPrices] = useState<Record<string, string>>({});
+  const [prices, setPrices] = useState<StorePrices | null | undefined>(undefined);   // undefined = yükleniyor
+  const [reload, setReload] = useState(0);
   const [period, setPeriod] = useState<Period>(me.billing_period ?? 'yearly');
   const [busy, setBusy] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);   // ödeme alındı, sunucunun üyeliği açması bekleniyor
   const legalOn = useLegalOn();
   const status = billingStatus(me);
   const owner = me.role === 'owner';
   const ios = store.storeKind === 'app_store';
+  const shop = ios && owner && store.storeEnabled;
 
+  useEffect(() => { track('screen.membership', { status }); }, [status]);
   useEffect(() => {
-    track('screen.membership', { status });
-    listPlans().then((ps) => {
+    let on = true;
+    setPrices(undefined);
+    listPlans().then(async (ps) => {
+      if (!on) return;
       setPlans(ps);
-      if (ios) store.storePrices(ps.map((p) => p.apple_product_id).filter(Boolean) as string[]).then(setPrices).catch(() => {});
+      if (!shop) return setPrices(null);
+      const ids = ps.map((p) => p.apple_product_id).filter(Boolean) as string[];
+      const pr = await store.storePrices(me.id, ids).catch(() => null);
+      if (on) setPrices(pr);
     });
-  }, [ios, status]);
+    return () => { on = false; };
+  }, [shop, me.id, reload]);
 
-  const priceOf = (p: BillingPlan) => (p.apple_product_id && prices[p.apple_product_id]) || tl(p.price_try);
+  // Fiyat: iOS'ta yalnız mağazadan (sabit fiyat yazılmaz), web'de sunucudaki paket tablosundan
+  const storePrice = (p: BillingPlan) => (p.apple_product_id ? prices?.[p.apple_product_id] : undefined);
+  const priceOf = (p: BillingPlan) => (ios ? storePrice(p)?.priceString ?? null : p.price_try != null ? tl(p.price_try) : null);
+  const amount = (p: BillingPlan | undefined) => (!p ? null : ios ? storePrice(p)?.price ?? null : p.price_try);
+  const perMonth = (p: BillingPlan) => (p.period !== 'yearly' ? null
+    : ios ? storePrice(p)?.perMonth ?? null : p.price_try != null ? tl(Math.round(p.price_try / 12)) : null);
+  const giftOf = (pkg: string) => yearlyGift(amount(plans.find((p) => p.package === pkg && p.period === 'monthly')),
+    amount(plans.find((p) => p.package === pkg && p.period === 'yearly')));
+  const pkgs = [...new Set(plans.map((p) => p.package))];
+  const gift = pkgs.length ? Math.min(...pkgs.map(giftOf)) : 0;   // iki pakette de doğru olan en küçük değer
   const current = (p: BillingPlan) => status === 'active' && me.plan === p.package && me.billing_period === p.period;
 
+  // Satın alma ya da geri yüklemenin sonucu
+  const after = async (r: StoreResult, planOk: (m: ClinicianMe) => boolean, okTitle: string, okText: string) => {
+    if (r.ok) {
+      setSyncing(true);
+      const done = await waitForServer(planOk);
+      setSyncing(false);
+      onChanged();
+      return done ? Alert.alert(okTitle, okText)
+        : Alert.alert('Ödeme alındı', 'Üyeliğin birkaç dakika içinde açılır. Açılmazsa bu ekranda "Satın alımları geri yükle"ye dokun.');
+    }
+    if (r.reason === 'canceled') return;
+    if (r.reason === 'pending') return Alert.alert('Ödeme onay bekliyor', 'Apple ödemeyi onaylayınca üyeliğin kendiliğinden açılır.');
+    if (r.reason === 'none') return Alert.alert('Bu Apple hesabında ClinicApp üyeliği bulunamadı.');
+    if (r.reason === 'unavailable') return Alert.alert('Bu paket şu an App Store\'da satın alınamıyor.', 'Biraz sonra yeniden dene.');
+    if (r.reason === 'not_connected') return Alert.alert('App Store bağlantısı bu sürümde kapalı.');
+    Alert.alert('İşlem tamamlanamadı', r.message || 'Biraz sonra yeniden dene.');
+  };
+
   const choose = async (p: BillingPlan) => {
-    if (!owner) return;
+    if (!shop || !p.apple_product_id) return;
     if (p.package === 'solo' && (me.member_count ?? 1) > 1) {
       const ok = await new Promise<boolean>((res) => Alert.alert('Ekibin var',
         `Klinikte ${me.member_count} uzman var. Bireysel pakette yalnız sen panele erişirsin; ekip üyelerinin erişimi kapanır.`,
@@ -55,18 +104,11 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
       if (!ok) return;
     }
     track('membership.choose', { plan: p.id });
-    if (!ios) return;   // web'de satış yok (kullanıcı kararı 22 Ekim 2026): üyelik iPhone/iPad'den alınır
-    if (!p.apple_product_id) return Alert.alert('Bu paket şu an satın alınamıyor.');
     setBusy(p.id);
     try {
-      const r = await store.buy(p.apple_product_id, me.clinic_id, verifyApple);
-      if (r === 'ok') {
-        track('membership.purchased', { plan: p.id, source: 'app_store' });
-        Alert.alert('Üyeliğin başladı', `${PACKAGES[p.package].title} paketi etkin.`);
-        onChanged();
-      }
-    } catch (e) {
-      Alert.alert('Satın alma tamamlanamadı', (e as Error).message);
+      const r = await store.storePurchase(me.id, p.apple_product_id, me.clinic_id);
+      if (r.ok) track('membership.purchased', { plan: p.id, source: 'revenuecat' });
+      await after(r, (m) => m.plan === p.package, 'Üyeliğin başladı', `${PACKAGES[p.package].title} paketi etkin.`);
     } finally {
       setBusy(null);
     }
@@ -75,16 +117,18 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
   const restore = async () => {
     setBusy('restore');
     try {
-      const n = await store.restore(verifyApple);
-      Alert.alert(n ? 'Satın alımlar geri yüklendi' : 'Bu Apple hesabında ClinicApp üyeliği bulunamadı.');
-      if (n) onChanged();
-    } catch (e) {
-      Alert.alert('Geri yüklenemedi', (e as Error).message);
+      const r = await store.storeRestore(me.id, me.clinic_id);
+      track('membership.restore', { found: r.ok });
+      await after(r, () => true, 'Satın alımlar geri yüklendi', 'Üyeliğin bu hesapta etkin.');
     } finally {
       setBusy(null);
     }
   };
 
+  const manage = () => {
+    track('membership.manage');
+    store.storeManage(me.id).catch(() => {});
+  };
 
   const shown = plans.filter((p) => p.period === period);
 
@@ -104,49 +148,65 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
             )}
           </View>
 
-          <StatusCard me={me} status={status} />
+          <StatusCard me={me} status={status} owner={owner} />
 
-          {!owner && (
+          {!owner ? (
             <Text style={[styles.body, { marginTop: 12 }]}>
-              Üyeliği klinik sahibi{me.owner_name ? ` (${me.owner_name})` : ''} yönetir. Paketler aşağıda.
+              Üyeliği klinik sahibi{me.owner_name ? ` (${me.owner_name})` : ''} yönetir.
             </Text>
+          ) : (
+            <>
+              <View style={{ marginTop: 20 }}>
+                <Segmented options={[{ id: 'monthly', label: 'Aylık' }, { id: 'yearly', label: gift ? `Yıllık · ${gift} ay hediye` : 'Yıllık' }]}
+                  value={period} onChange={setPeriod} />
+              </View>
+
+              {shop && prices === null && (
+                <View style={styles.notice}>
+                  <Text style={[styles.body, { flex: 1 }]}>Paketler App Store'dan yüklenemedi. İnternet bağlantını kontrol edip yeniden dene.</Text>
+                  <Pressable onPress={() => setReload((n) => n + 1)} hitSlop={8}><Text style={styles.link}>Yeniden dene</Text></Pressable>
+                </View>
+              )}
+              {ios && !store.storeEnabled && (
+                <Text style={[styles.small, { marginTop: 12 }]}>Bu sürümde App Store bağlantısı kapalı; üyelik bir sonraki sürümle alınabilir.</Text>
+              )}
+
+              <View style={styles.cards}>
+                {shown.map((p) => (
+                  <PlanCard key={p.id} plan={p} price={priceOf(p)} perMonth={perMonth(p)} current={current(p)}
+                    loading={shop && prices === undefined} canBuy={shop && !!storePrice(p)}
+                    busy={busy === p.id} disabled={!!busy && busy !== p.id} onChoose={() => choose(p)}
+                    highlight={p.package === 'clinic'} />
+                ))}
+              </View>
+
+              <Label>Her iki pakette</Label>
+              <Card style={{ gap: 8 }}>
+                {commonTerms(gift).map((t) => <Check key={t} text={t} />)}
+              </Card>
+
+              {status === 'active' && (me.billing_source === 'app_store' || me.billing_source === 'revenuecat') && !ios && (
+                <Text style={[styles.small, { marginTop: 12 }]}>Üyeliğin App Store üzerinden alındı; iPhone/iPad'de Ayarlar › Apple Hesabı › Abonelikler'den yönetilir.</Text>
+              )}
+
+              {shop && (
+                <View style={styles.links}>
+                  <Pressable onPress={restore} disabled={!!busy} hitSlop={8}>
+                    <Text style={styles.link}>{syncing ? 'Üyelik açılıyor…' : busy === 'restore' ? 'Geri yükleniyor…' : 'Satın alımları geri yükle'}</Text>
+                  </Pressable>
+                  <Pressable onPress={manage} hitSlop={8}><Text style={styles.link}>Aboneliği yönet</Text></Pressable>
+                </View>
+              )}
+
+              <Text style={styles.legal}>
+                {ios
+                  ? 'Ödeme, onayladığında Apple hesabından alınır. Abonelik, dönem bitmeden en az 24 saat önce kapatılmazsa aynı süre ve ücretle otomatik yenilenir; yenileme ücreti dönem bitmeden önceki 24 saat içinde alınır. Ayarlar › Apple Hesabı › Abonelikler\'den yönetebilir ya da kapatabilirsin.'
+                  : 'Üyeliği iPhone ya da iPad\'deki ClinicApp\'ten alabilirsin. Üyelik hesabına bağlıdır; web\'de de açılır.'}
+              </Text>
+            </>
           )}
-
-          <View style={{ marginTop: 20 }}>
-            <Segmented options={[{ id: 'monthly', label: 'Aylık' }, { id: 'yearly', label: 'Yıllık · 2 ay hediye' }]}
-              value={period} onChange={setPeriod} />
-          </View>
-
-          <View style={styles.cards}>
-            {shown.map((p) => (
-              <PlanCard key={p.id} plan={p} price={priceOf(p)} current={current(p)} canBuy={owner && ios}
-                busy={busy === p.id} onChoose={() => choose(p)} highlight={p.package === 'clinic'} />
-            ))}
-          </View>
-
-          <Label>Her iki pakette</Label>
-          <Card style={{ gap: 8 }}>
-            {COMMON_TERMS.map((t) => <Check key={t} text={t} />)}
-          </Card>
-
-          {status === 'active' && (me.billing_source === 'app_store' || me.billing_source === 'revenuecat') && !ios && (
-            <Text style={[styles.small, { marginTop: 12 }]}>Üyeliğin App Store üzerinden alındı; iPhone/iPad'de Ayarlar › Apple Hesabı › Abonelikler'den yönetilir.</Text>
-          )}
-
-          {ios && owner && (
-            <View style={styles.links}>
-              <Pressable onPress={restore} hitSlop={8}><Text style={styles.link}>{busy === 'restore' ? 'Geri yükleniyor…' : 'Satın alımları geri yükle'}</Text></Pressable>
-              <Pressable onPress={() => store.manage().catch(() => {})} hitSlop={8}><Text style={styles.link}>Aboneliği yönet</Text></Pressable>
-            </View>
-          )}
-
-          <Text style={styles.legal}>
-            {ios
-              ? 'Ödeme, onayladığında Apple hesabından alınır. Abonelik, dönem bitmeden en az 24 saat önce kapatılmazsa aynı süre ve ücretle otomatik yenilenir; yenileme ücreti dönem bitmeden önceki 24 saat içinde alınır. Ayarlar › Apple Hesabı › Abonelikler\'den yönetebilir ya da kapatabilirsin.'
-              : owner ? 'Üyeliği iPhone ya da iPad\'deki ClinicApp\'ten alabilirsin. Üyelik hesabına bağlıdır; web\'de de açılır.' : ''}
-          </Text>
           <View style={styles.links}>
-            {ios && <Pressable onPress={() => Linking.openURL(APPLE_EULA)} hitSlop={8}><Text style={styles.smallLink}>Kullanım Koşulları (EULA)</Text></Pressable>}
+            {ios && owner && <Pressable onPress={() => Linking.openURL(APPLE_EULA)} hitSlop={8}><Text style={styles.smallLink}>Kullanım Koşulları (EULA)</Text></Pressable>}
             {legalOn && <Pressable onPress={() => openLegal('sozlesme-uzman')} hitSlop={8}><Text style={styles.smallLink}>Uzman Hizmet Sözleşmesi</Text></Pressable>}
             {legalOn ? <Pressable onPress={() => openLegal('gizlilik')} hitSlop={8}><Text style={styles.smallLink}>Gizlilik Politikası</Text></Pressable>
               : !!PRIVACY_URL && <Pressable onPress={() => Linking.openURL(PRIVACY_URL)} hitSlop={8}><Text style={styles.smallLink}>Gizlilik Politikası</Text></Pressable>}
@@ -158,14 +218,14 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
   );
 }
 
-function StatusCard({ me, status }: { me: ClinicianMe; status: 'trial' | 'active' | 'expired' }) {
+function StatusCard({ me, status, owner }: { me: ClinicianMe; status: 'trial' | 'active' | 'expired'; owner: boolean }) {
   let icon: keyof typeof Ionicons.glyphMap = 'time-outline';
   let title = '';
   let text = '';
   if (status === 'trial') {
     const n = daysLeft(me.trial_ends_at);
     title = `Ücretsiz deneme · ${n} gün kaldı`;
-    text = `${dateText(me.trial_ends_at)} tarihine kadar her şey açık. Sonra devam etmek için bir paket seç.`;
+    text = `${dateText(me.trial_ends_at)} tarihine kadar her şey açık. ${owner ? 'Sonra devam etmek için bir paket seç.' : 'Sonrası için paketi klinik sahibi seçer.'}`;
   } else if (status === 'active' && !hasAccess(me)) {
     icon = 'lock-closed-outline';
     title = 'Ekip erişimi kapalı';
@@ -193,24 +253,28 @@ function StatusCard({ me, status }: { me: ClinicianMe; status: 'trial' | 'active
   );
 }
 
-function PlanCard({ plan, price, current, canBuy, busy, onChoose, highlight }: {
-  plan: BillingPlan; price: string; current: boolean; canBuy: boolean; busy: boolean; onChoose: () => void; highlight?: boolean;
+function PlanCard({ plan, price, perMonth, current, loading, canBuy, busy, disabled, onChoose, highlight }: {
+  plan: BillingPlan; price: string | null; perMonth: string | null; current: boolean; loading: boolean; canBuy: boolean;
+  busy: boolean; disabled: boolean; onChoose: () => void; highlight?: boolean;
 }) {
   const meta = PACKAGES[plan.package];
-  const monthly = plan.period === 'yearly' ? tl(Math.round(plan.price_try / 12)) : null;
   return (
     <View style={[styles.plan, highlight && styles.planHi]}>
       <Text style={styles.planTitle}>{meta.title}</Text>
       <Text style={styles.small}>{meta.who}</Text>
-      <Text style={styles.price}>{price}<Text style={styles.per}>{plan.period === 'yearly' ? ' / yıl' : ' / ay'}</Text></Text>
-      {monthly && <Text style={styles.small}>aylık yaklaşık {monthly}</Text>}
+      {price ? (
+        <Text style={styles.price}>{price}<Text style={styles.per}>{plan.period === 'yearly' ? ' / yıl' : ' / ay'}</Text></Text>
+      ) : (
+        <Text style={[styles.small, { marginTop: 12 }]}>{loading ? 'Fiyat yükleniyor…' : plan.period === 'yearly' ? 'Yıllık' : 'Aylık'}</Text>
+      )}
+      {price && perMonth && <Text style={styles.small}>aylık yaklaşık {perMonth}</Text>}
       <View style={{ gap: 8, marginTop: 12, flex: 1 }}>
         {meta.features.map((f) => <Check key={f} text={f} />)}
       </View>
       {current ? (
         <View style={styles.currentPill}><Text style={styles.currentText}>Mevcut paketin</Text></View>
       ) : canBuy ? (
-        <Cta label={`${meta.title} paketini seç`} onPress={onChoose} busy={busy} style={{ marginTop: 16 }} />
+        <Cta label={`${meta.title} paketini seç`} onPress={onChoose} busy={busy} disabled={disabled} style={{ marginTop: 16 }} />
       ) : null}
     </View>
   );
@@ -247,5 +311,6 @@ const styles = StyleSheet.create({
   links: { flexDirection: 'row', flexWrap: 'wrap', gap: 20, marginTop: 16 },
   link: { fontSize: 13, fontWeight: '600', color: colors.navy },
   smallLink: { fontSize: 12, color: colors.muted, textDecorationLine: 'underline' },
+  notice: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFF3D6', borderRadius: radius.md, padding: 12, marginTop: 12 },
   legal: { fontSize: 11, color: colors.muted, lineHeight: 16, marginTop: 20 },
 });
