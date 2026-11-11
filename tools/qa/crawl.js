@@ -79,13 +79,15 @@ async function step(p, name, fn, marker) {
 }
 async function login(b, who) {
   const ctx = await b.newContext({ viewport: { width: W, height: H }, isMobile: W < 700, hasTouch: true, locale: 'tr-TR', timezoneId: 'Europe/Istanbul' });
-  await ctx.addInitScript(() => { window.__apiLog = []; });
+  await ctx.addInitScript((plan) => { window.__apiLog = []; window.__plan = plan; }, !!process.env.PLAN);
   const p = await ctx.newPage(); p.errs = [];
   p.on('pageerror', (e) => p.errs.push(String(e).slice(0, 160)));
   p.on('dialog', (d) => { p.errs.push(`uyarı: ${d.message().slice(0, 160)}`); d.dismiss().catch(() => {}); });
   await p.goto(URL); await p.waitForTimeout(2500);
   await p.evaluate(() => {
     localStorage.setItem('clinicapp.cookie-notice.v1', '1');
+    if (window.__plan) localStorage.setItem('demo.client_config', JSON.stringify({ app: {}, flags: { plan_change_suggestions: true, care_plan: true } }));
+    else localStorage.removeItem('demo.client_config');
     const k = 'pofi-onizleme-v4'; const db = JSON.parse(localStorage.getItem(k)); db.sessions = {}; localStorage.setItem(k, JSON.stringify(db));
     for (const u of db.users) {
       for (const f of ['onboarding', 'start.hidden', 'sample.hidden']) localStorage.setItem(`clinic.${f}.v1.${u.id}`, '1');
@@ -102,6 +104,7 @@ async function login(b, who) {
   // 1) klinik sahibi, dolu hesap
   let { ctx, p } = await login(b, 'uzman');
   const ONLY = process.env.ONLY === 'training';   // ONLY=training: yalnız kütüphane, ebeveyn eğitimi, davranışlar ve olaylar
+  const PLAN = !!process.env.PLAN;                // PLAN=1: Takip Planı bayrağı açık (varsayılan kapalı: lansman odağı "A")
   await step(p, 'home', async () => {});
   if (!ONLY) {
   await step(p, 'bell', async () => { await tap(p, p.getByRole('button', { name: /Bildirim/ })); });
@@ -131,9 +134,12 @@ async function login(b, who) {
   await closeTop(p); await ensureClosed(p);
   await step(p, 'library-back', async () => { await tap(p, 'Ana ekran'); });
   // danışan
-  if (ONLY) await tap(p, p.getByText(/^Nazlı/).filter({ visible: true }), { wait: 2500 });
-  else {
-  await step(p, 'client-plan', async () => { await tap(p, p.getByText(/^Nazlı/).filter({ visible: true }), { wait: 2500 }); await tap(p, 'Takip Planı', { wait: 2000 }); });
+  await step(p, 'client-open', async () => { await tap(p, p.getByText(/^Nazlı/).filter({ visible: true }), { wait: 2500 }); }, PLAN ? 'Dönem' : 'Ebeveyn eğitimleri');
+  await step(p, 'plan-menu-state', async () => { const n = await visible(p, 'Takip Planı').count(); if (PLAN ? !n : n) throw new Error(PLAN ? 'Takip Planı menüde yok' : 'Takip Planı menüde duruyor'); });
+  await step(p, 'menu-closed', async () => { await tap(p, p.locator('[aria-label="Menüyü kapat"]').filter({ visible: true })); if (await visible(p, 'Danışan Bilgileri').count()) throw new Error('menü kapanmadı'); });
+  await step(p, 'menu-open', async () => { await tap(p, p.locator('[aria-label="Menüyü aç"]').filter({ visible: true }).first()); }, 'Danışan Bilgileri');
+  if (!ONLY && PLAN) {
+  await step(p, 'client-plan', async () => { await tap(p, 'Takip Planı', { wait: 2000 }); });
   await step(p, 'plan-goal-tab', async () => { await tap(p, 'Davranış hedefi'); });
   await step(p, 'plan-program-tab', async () => { await tap(p, p.getByText(/^Program \d/).filter({ visible: true })); });
   await step(p, 'plan-goal-menu', async () => { await tap(p, p.locator('[aria-label="Diğer işlemler"]').filter({ visible: true })); });
@@ -163,9 +169,18 @@ async function login(b, who) {
   await step(p, 'training-module-pick', async () => { await tap(p, '+ Daha fazla ekle'); }, 'Modülleri ekle');
   await closeTop(p); await ensureClosed(p);
   await step(p, 'training-tasks', async () => { await tap(p, subTab('Uygulama görevleri'), { last: true }); });
-  await step(p, 'training-task-add', async () => { await tap(p, '+ Görev ekle', { last: true }); }, 'Nasıl ölçülecek?');
+  await step(p, 'training-task-add', async () => { await tap(p, '+ Uygulama görevi', { last: true }); }, 'Nasıl ölçülecek?');
   await closeTop(p); await ensureClosed(p);
-  await step(p, 'training-todos', async () => { await tap(p, subTab('Hızlı yapılacaklar'), { last: true }); });
+  await step(p, 'training-task-example', async () => {
+    if (!(await visible(p, 'Uygulama görevi nedir?').count())) await tap(p, p.getByText(/^Uygulama görevi nedir\? Örnekleri gör/).filter({ visible: true }));
+    await tap(p, p.getByRole('button', { name: 'Örnek: Günde 5 kez adıyla öv' }).filter({ visible: true }));
+    const v = await p.locator('input').filter({ visible: true }).last().inputValue().catch(() => '');
+    if (!/adıyla öv/.test(v)) throw new Error(`örnek formu doldurmadı: "${v}"`);
+  }, 'Nasıl ölçülecek?');
+  await closeTop(p); await ensureClosed(p);
+  await step(p, 'training-todos', async () => { await tap(p, subTab('Hızlı yapılacaklar'), { last: true }); }, 'Hızlı yapılacak nedir?');
+  await step(p, 'training-todo-example', async () => { await tap(p, p.getByRole('button', { name: 'Örnek: Görünür bir zamanlayıcı hazırla' }).filter({ visible: true })); }, 'Yapılacağı ekle');
+  await closeTop(p); await ensureClosed(p);
   await step(p, 'training-summary', async () => { await tap(p, subTab('Özet'), { last: true }); }, 'Ustalık ölçütüne doğru');
   await step(p, 'training-note', async () => { await tap(p, 'Not oluştur'); }, 'Başlangıç tarihi');
   await closeTop(p); await ensureClosed(p);
@@ -211,6 +226,20 @@ async function login(b, who) {
       await closeTop(p); await closeTop(p);
     }
   }
+  }
+  // Örnek aile + eğitim turu (lansman odağı "A"; Takip Planı kapalıyken): Ayarlar › Örnek aileyi aç
+  if (!PLAN) {
+  await ensureClosed(p);
+  await step(p, 'home-again', async () => { if (!(await clickTop(p, p.locator('[aria-label="Danışanlar"]').filter({ visible: true }), 1500))) await tap(p, 'Tüm Danışanlar', { wait: 1500 }); }, 'Kaynak kütüphanesi');
+  await step(p, 'tour-intro', async () => { await tap(p, p.getByRole('button', { name: 'Ayarlar', exact: true }), { wait: 1500 }); await tap(p, 'Örnek aileyi aç', { wait: 2000 }); }, 'Deniz’le dene');
+  await step(p, 'tour-open', async () => { await tap(p, 'Başla', { last: true }); }, 'Eğitimi aç');
+  await step(p, 'tour-modules', async () => { await tap(p, p.getByRole('button', { name: /^Ebeveyn zor geçişlerden/ }).filter({ visible: true })); }, 'Ebeveynin okuduğu ve yanıtladığı içerik');
+  await step(p, 'tour-tasks', async () => { await tap(p, subTab('Öğrenme modülleri'), { last: true }); }, 'Evde tekrarlanan beceri');
+  await step(p, 'tour-tasks-look', async () => { await tap(p, subTab('Uygulama görevleri'), { last: true }); }, 'Ebeveyn her uyguladığında kayıt girer.');
+  await step(p, 'tour-todos', async () => { await tap(p, 'İleri', { last: true }); }, 'Bir kez yapılıp işaretlenen iş');
+  await step(p, 'tour-todos-look', async () => { await tap(p, subTab('Hızlı yapılacaklar'), { last: true }); }, 'bir örneğe dokun');
+  await step(p, 'tour-done', async () => { await tap(p, 'İleri', { last: true }); }, 'Hazırsın');
+  await step(p, 'tour-closed', async () => { await tap(p, 'Kapat', { last: true }); }, 'hızlı yapılacak');
   }
   fs.writeFileSync(`${OUT}/api.json`, JSON.stringify(api)); 
   await ctx.close();

@@ -12,26 +12,30 @@ import { track } from '../lib/track';
 // (FamilySees) Takip Planı'nın (i) kutusunda da. Metinler ekranların bugünkü adlarıyla; ekran değişince burası da güncellenir.
 
 export type HelpAction = 'invite' | 'routine' | 'plan' | 'report' | 'team' | 'home';
-type Item = { key: string; q: string; a?: string[]; card?: boolean; show?: HelpAction; showLabel?: string; ownerOnly?: boolean };
+// plan: yalnız Takip Planı açıkken (uzaktan ayar `care_plan`); noPlan: yalnız kapalıyken (lansman odağı "A", 11 Kasım 2026)
+type Item = { key: string; q: string; a?: string[]; card?: boolean; show?: HelpAction; showLabel?: string; ownerOnly?: boolean; plan?: boolean; noPlan?: boolean };
 
 // Kısa yanıt (kullanıcı isteği 3 Kasım 2026): bir iki cümle, dokunulacak tuş tırnak içinde
 const ITEMS: Item[] = [
   { key: 'invite', q: 'Aileyi nasıl davet ederim?', show: 'invite', showLabel: 'Davet et', a: ['"Aileyi davet et" › ebeveynin e-postası › "E-posta gönder". Davet 3 gün geçerli; ebeveyn onaylayınca çocuk ana ekranda.'] },
   { key: 'sees', q: 'Aile neyi görür?', card: true },
-  { key: 'routine', q: 'Rutin ya da macera nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Takip Planı\'ndan eklersen taslak olur. Eklemek ebeveynin kararı.'] },
-  { key: 'publish', q: '"Aileye gönder" ne yapar?', show: 'plan', showLabel: 'Takip Planı', a: ['Taslakları (bej) aileye yollar. Önce özet açılır; işaretliler tek bildirimle gider.'] },
-  { key: 'evaluate', q: 'Ne zaman değerlendiririm?', show: 'plan', showLabel: 'Takip Planı', a: ['Dört haftada bir "Değerlendirme zamanı" çıkar › "Değerlendir" › puan › "Kaydet". Aile görmez.'] },
+  { key: 'training', noPlan: true, q: 'Ebeveyne eğitim nasıl atarım?', show: 'plan', showLabel: 'Ebeveyn Eğitimi', a: ['Danışan › Ebeveyn Eğitimi › "+ Eğitim ekle". Modül, uygulama görevi ve yapılacak ekle. Eğitim Taslak açılır; "Etkin" yapınca ebeveyn görür.'] },
+  { key: 'tasks', noPlan: true, q: 'Uygulama görevi ile hızlı yapılacak farkı ne?', show: 'plan', showLabel: 'Ebeveyn Eğitimi', a: ['Uygulama görevi tekrarlanır; ebeveyn her uyguladığında kayıt girer (ör. "Geçişten önce iki uyarı ver"). Hızlı yapılacak bir kez yapılır ve işaretlenir (ör. "Zamanlayıcı hazırla").'] },
+  { key: 'routine', plan: true, q: 'Rutin ya da macera nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Takip Planı\'ndan eklersen taslak olur. Eklemek ebeveynin kararı.'] },
+  { key: 'routine2', noPlan: true, q: 'Rutin ya da macera nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Eklemek ebeveynin kararı.'] },
+  { key: 'publish', plan: true, q: '"Aileye gönder" ne yapar?', show: 'plan', showLabel: 'Takip Planı', a: ['Taslakları (bej) aileye yollar. Önce özet açılır; işaretliler tek bildirimle gider.'] },
+  { key: 'evaluate', plan: true, q: 'Ne zaman değerlendiririm?', show: 'plan', showLabel: 'Takip Planı', a: ['Dört haftada bir "Değerlendirme zamanı" çıkar › "Değerlendir" › puan › "Kaydet". Aile görmez.'] },
   { key: 'board', q: 'Ana ekrandaki bölümler?', show: 'home', showLabel: 'Ana ekran', a: ['Senin sıran: senden bekleyen. Ebeveynden yeni: son 7 günde ebeveynin girdikleri. Sessiz kalanlar: 7 gündür kayıt yok.'] },
   { key: 'report', q: 'Raporu nasıl alırım?', show: 'report', showLabel: 'Rapor', a: ['Rapor › "Raporu aç" (PDF). İlerleme notu için "Notu kopyala"; yapay zekâ yok.'] },
   { key: 'team', q: 'Ekibime uzman nasıl eklerim?', show: 'team', showLabel: 'Ayarlar', ownerOnly: true, a: ['Uzmandan kişisel kodunu iste (onun Ayarlar sayfasında). Ayarlar › Ekip › "Uzman ekle"ye yaz; uzman onaylayınca ekibine katılır.'] },
   { key: 'workspace', q: 'Birden çok klinikte çalışıyorum, nasıl ayırırım?', a: ['Sol üstte "ClinicApp" yanındaki küçük hesap düğmesine dokun: "Bireysel hesap" ve ekip hesapları (her klinik için bir tane) ayrıdır. Ekip hesabı, klinik seni ekibine eklediğinde ve kabul ettiğinde açılır. Danışanlar, davetler ve seanslar seçili hesaba aittir.'] },
 ];
 
-export default function HelpSheet({ visible, owner, onClose, onIntro, onSample, onAction }: {
-  visible: boolean; owner: boolean; onClose: () => void; onIntro: () => void; onSample: () => void; onAction: (a: HelpAction) => void;
+export default function HelpSheet({ visible, owner, plan = true, onClose, onIntro, onSample, onAction }: {
+  visible: boolean; owner: boolean; plan?: boolean; onClose: () => void; onIntro: () => void; onSample: () => void; onAction: (a: HelpAction) => void;
 }) {
   const [open, setOpen] = useState<string | null>(null);
-  const items = ITEMS.filter((x) => !x.ownerOnly || owner);
+  const items = ITEMS.filter((x) => (!x.ownerOnly || owner) && (plan ? !x.noPlan : !x.plan));
   const toggle = (k: string) => {
     setOpen((o) => (o === k ? null : k));
     if (open !== k) track('help.open', { q: k });
@@ -66,7 +70,7 @@ export default function HelpSheet({ visible, owner, onClose, onIntro, onSample, 
                     </Pressable>
                     {on && (
                       <View style={styles.answer}>
-                        {x.card ? <FamilySees /> : x.a?.map((t) => <Text key={t} style={styles.aText}>{t}</Text>)}
+                        {x.card ? <FamilySees plan={plan} /> : x.a?.map((t) => <Text key={t} style={styles.aText}>{t}</Text>)}
                         {x.show && (
                           <Pressable onPress={() => { track('help.show', { q: x.key }); onAction(x.show!); }} style={styles.show} accessibilityRole="button">
                             <Text style={styles.showText}>{x.showLabel ?? 'Göster'}</Text>
@@ -101,12 +105,18 @@ const SEES: { title: string; tone: 'family' | 'private' | 'none'; icon: keyof ty
     items: ['Ebeveynin e-posta ve telefonu', 'Ailenin posta kutusu, İnci defteri'],
   },
 ];
-export function FamilySees({ compact }: { compact?: boolean }) {
+// Takip Planı kapalıyken (lansman odağı "A") aile tarafı: etkin eğitimler ve macera önerileri
+const SEES_TRAINING: typeof SEES = [
+  { title: 'Aile görür', tone: 'family', icon: 'people-outline', items: ['Etkin eğitimler: modüller, uygulama görevleri, yapılacaklar', 'Hedef davranışlar ve stratejiler', 'Macera önerileri'] },
+  { title: 'Yalnız sen ve yetkili ekibin', tone: 'private', icon: 'eye-off-outline', items: ['Notlar', 'Taslak eğitimler', 'Ustalık ölçütü verisi', 'Klinik etiketi'] },
+  SEES[2],
+];
+export function FamilySees({ compact, plan = true }: { compact?: boolean; plan?: boolean }) {
   return (
     <View style={{ gap: 8 }}>
-      {!compact && <Text style={styles.aText}>Bej = aileye gitmez.</Text>}
+      {!compact && plan && <Text style={styles.aText}>Bej = aileye gitmez.</Text>}
       <View style={styles.sees}>
-        {SEES.map((c) => (
+        {(plan ? SEES : SEES_TRAINING).map((c) => (
           <View key={c.title} style={[styles.seeCol, c.tone === 'family' ? styles.seeFamily : c.tone === 'private' ? styles.seePrivate : styles.seeNone]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Ionicons name={c.icon} size={14} color={c.tone === 'private' ? '#7A5A1E' : colors.navy} />

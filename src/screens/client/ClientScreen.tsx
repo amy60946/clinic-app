@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Alert, Modal, StyleSheet, ActivityIndicator, RefreshControl, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
 import { Notice, Segmented, IconButton } from '../../components/ui';
@@ -9,6 +10,7 @@ import NotificationsSheet, { notificationTab } from '../NotificationsSheet';
 import { useNotifications } from '../../lib/notificationsContext';
 import { AppNotification, notificationChildren } from '../../lib/notifications';
 import { track } from '../../lib/track';
+import { useClientConfig, CARE_PLAN_FLAG } from '../../lib/clientConfig';
 import { Client, ClientData, ClinicianMe, Member, loadClientData, revokeLink } from '../../lib/clinic';
 import TeamAccessSheet from './TeamAccessSheet';
 import { isoDate, windowStarts } from '../../lib/metrics';
@@ -33,6 +35,9 @@ type Section = Exclude<Tab, 'suggestions'>;
 
 // Bölümler: geniş ekranda (web, iPad'de "Web görünümü") gruplu sol menü — Planla · İzle · Kayıt (kullanıcı kararı 30 Ekim 2026);
 // telefonda ve "iPad görünümü"nde gri zeminli seçici (4 + 3)
+// Lansman odağı (kullanıcı kararı 11 Kasım 2026, "A"): tek plan ekranı Ebeveyn Eğitimi. Takip Planı uzaktan ayar bayrağı
+// `care_plan` (clientConfig.tsx CARE_PLAN_FLAG) açık değilse menüde yok (verisi durur); danışan Ebeveyn Eğitimi'nde açılır.
+const MENU_KEY = 'clinic.menu.v1';   // bölüm menüsü açık mı (hamburger); cihazda hatırlanır
 type Group = 'plan' | 'watch' | 'record';
 const GROUPS: { id: Group; label: string }[] = [{ id: 'plan', label: 'Planla' }, { id: 'watch', label: 'İzle' }, { id: 'record', label: 'Kayıt' }];
 const SECTIONS: { id: Section; label: string; icon: keyof typeof Ionicons.glyphMap; group: Group }[] = [
@@ -89,7 +94,15 @@ export default function ClientScreen({
   const [access, setAccess] = useState(false);
   const [switcher, setSwitcher] = useState(false);
   const [label, setLabel] = useState(client.label);
-  const { desktop: sidebar } = useLayout();
+  const { desktop } = useLayout();
+  const planOn = useClientConfig().flag(CARE_PLAN_FLAG);
+  const sections = useMemo(() => SECTIONS.filter((x) => x.id !== 'goals' || planOn), [planOn]);
+  // Bölüm menüsü hep açık gelir; hamburger düğmesiyle kapatılıp açılır (kullanıcı kararı 11 Kasım 2026)
+  const [menuOpen, setMenuOpen] = useState(true);
+  const [trainingOpen, setTrainingOpen] = useState(false);   // eğitim sayfası açıkken bölüm ipucu gizlenir (kendi anlatım kartı var)
+  useEffect(() => { AsyncStorage.getItem(MENU_KEY).then((v) => { if (v === '0') setMenuOpen(false); }).catch(() => {}); }, []);
+  const toggleMenu = () => setMenuOpen((o) => { AsyncStorage.setItem(MENU_KEY, o ? '0' : '1').catch(() => {}); track('client.menu', { open: !o }); return !o; });
+  const sidebar = desktop && menuOpen;
   const owner = me.role === 'owner';
   const nameOf = (id: string) => team.find((m) => m.id === id)?.name || 'Adsız';
   const others = (client.assigned ?? []).filter((id) => id !== client.clinician_id).map(nameOf);
@@ -167,9 +180,14 @@ export default function ClientScreen({
     client: shown, me, data, today, weeks: Number(weeks), reload: load,
   } : null;
   useEffect(() => { if (focusTab) go(sectionOf(focusTab)); }, [focusTab]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!planOn && tab === 'goals') setTab('training'); }, [planOn, tab]);
 
   const header = (
     <View style={styles.header}>
+      <Pressable onPress={toggleMenu} accessibilityRole="button" accessibilityLabel={menuOpen ? 'Menüyü kapat' : 'Menüyü aç'}
+        accessibilityState={{ expanded: menuOpen }} hitSlop={8} style={styles.iconBtn}>
+        <Ionicons name="menu" size={20} color={colors.navy} />
+      </Pressable>
       {!sidebar && (
         <Pressable onPress={onBack} accessibilityLabel="Danışanlar" hitSlop={8} style={styles.iconBtn}>
           <Ionicons name="chevron-back" size={20} color={colors.navy} />
@@ -208,7 +226,14 @@ export default function ClientScreen({
 
       {ctx && (
         <>
-          {!sidebar && <TabGrid value={tab} onChange={go} dots={dots} />}
+          {!desktop && menuOpen && <TabGrid sections={sections} value={tab} onChange={go} dots={dots} />}
+          {!menuOpen && (
+            <Pressable onPress={toggleMenu} accessibilityRole="button" accessibilityLabel={`Bölüm: ${sections.find((x) => x.id === tab)?.label ?? ''}. Menüyü aç`} style={styles.closedMenu}>
+              <Text style={styles.closedMenuText} numberOfLines={1}>{sections.find((x) => x.id === tab)?.label ?? ''}</Text>
+              {Object.keys(dots).some((k) => k !== tab) && <View style={styles.tabDot} />}
+              <Ionicons name="chevron-down" size={16} color={colors.navy} />
+            </Pressable>
+          )}
           {['summary', 'routine', 'report'].includes(tab) && !(tab === 'routine' && routineView === 'suggest') && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10 }}>
               <Text style={styles.small}>Dönem</Text>
@@ -218,10 +243,10 @@ export default function ClientScreen({
             </View>
           )}
           <View style={{ marginTop: 8 }}>
-            {!sample && <SectionHint userId={me.id} section={tab} />}
+            {!sample && !(tab === 'training' && trainingOpen) && <SectionHint userId={me.id} section={tab} />}
             {tab === 'summary' && <SummaryTab {...ctx} />}
             {tab === 'routine' && <HomeRoutines {...ctx} view={routineView} onView={setRoutineView} />}
-            {tab === 'training' && <TrainingTab {...ctx} sample={!!sample} />}
+            {tab === 'training' && <TrainingTab {...ctx} sample={!!sample} onDetail={setTrainingOpen} />}
             {tab === 'behaviors' && <BehaviorsTab {...ctx} sample={!!sample} />}
             {tab === 'goals' && <PlanTab {...ctx} />}
             {tab === 'sessions' && (sample
@@ -257,7 +282,7 @@ export default function ClientScreen({
             {GROUPS.map((g) => (
               <View key={g.id} style={{ gap: 2 }}>
                 <Text style={styles.group}>{g.label}</Text>
-                {SECTIONS.filter((s) => s.group === g.id).map((s) => {
+                {sections.filter((s) => s.group === g.id).map((s) => {
                   const on = s.id === tab;
                   return (
                     <Pressable key={s.id} onPress={() => go(s.id)} accessibilityRole="tab" accessibilityState={{ selected: on }}
@@ -339,12 +364,12 @@ function Switcher({ visible, clients, current, onClose, onPick }: {
 
 // Dönem seçicisiyle aynı görünüm; dar ekranda 4 + 3, geniş ekranda tek satır. Adlar sol menüdekiyle aynı (gerekirse iki satır).
 // Okunmamış bildirim olan bölümde nokta.
-function TabGrid({ value, onChange, dots }: { value: Section; onChange: (t: Section) => void; dots: Partial<Record<Section, boolean>> }) {
+function TabGrid({ sections: SECS, value, onChange, dots }: { sections: typeof SECTIONS; value: Section; onChange: (t: Section) => void; dots: Partial<Record<Section, boolean>> }) {
   const { width } = useWindowDimensions();
   const wide = width >= 1000;
   // dar ekranda 9 bölüm 3 × 3 (eşit sütun); 8 ve altı iki satır
-  const per = SECTIONS.length > 8 ? 3 : Math.ceil(SECTIONS.length / 2);
-  const rows = wide ? [SECTIONS] : Array.from({ length: Math.ceil(SECTIONS.length / per) }, (_, i) => SECTIONS.slice(i * per, i * per + per));
+  const per = SECS.length > 8 ? 3 : Math.ceil(SECS.length / 2);
+  const rows = wide ? [SECS] : Array.from({ length: Math.ceil(SECS.length / per) }, (_, i) => SECS.slice(i * per, i * per + per));
   return (
     <View style={styles.grid} accessibilityRole="tablist">
       {rows.map((row, i) => (
@@ -376,6 +401,8 @@ const styles = StyleSheet.create({
   column: { width: '100%', maxWidth: 960, alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
   iconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  closedMenu: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', maxWidth: '100%', backgroundColor: '#ECEEF3', borderRadius: 10, paddingVertical: 11, paddingHorizontal: 14 },
+  closedMenuText: { fontSize: 14, fontWeight: '700', color: colors.navy, flexShrink: 1 },
   title: { fontSize: 20, fontWeight: '700', color: colors.navy },
   subtitle: { fontSize: 13, color: colors.muted, marginTop: 2 },
   small: { fontSize: 12, color: colors.muted },

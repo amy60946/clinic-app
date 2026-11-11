@@ -22,6 +22,8 @@ import {
 import { TypeTile, StatusChip, NewDot, SheetFrame, PercentArea, ItemContent, shortDate, GhostButton, ConfirmDialog, useToast } from './parts';
 import { LibraryBrowser } from './Library';
 import ParentPreview from './ParentPreview';
+import { ExplainCard, ExampleChips, TASK_EXAMPLES, TODO_EXAMPLES, TaskExample, TodoExample } from './Explain';
+import { CoachTarget, useCoachEmit } from '../../lib/coach';
 
 const EMPTY_DETAIL: Detail = { modules: [], tasks: [], logs: [], todos: [], data: [] };
 const ORDER: TrainingStatus[] = ['draft', 'active', 'mastered'];
@@ -44,15 +46,17 @@ async function download(name: string, header: string[], rows: string[][]) {
   try { await saveTextFile(name, toCsv([header, ...rows])); } catch (e) { Alert.alert('Dosya oluşturulamadı', (e as Error).message); }
 }
 
-export default function TrainingTab({ client, me, sample }: ClientCtx & { sample?: boolean }) {
+export default function TrainingTab({ client, me, sample, onDetail }: ClientCtx & { sample?: boolean; onDetail?: (open: boolean) => void }) {
   const [list, setList] = useState<Training[] | null>(null);
   const [detail, setDetail] = useState<Detail>(EMPTY_DETAIL);
   const [parents, setParents] = useState<Parent[]>([]);
   const [missing, setMissing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  useEffect(() => { onDetail?.(!!openId); }, [openId]); // eslint-disable-line react-hooks/exhaustive-deps
   const [parent, setParent] = useState<string>('');
   const [create, setCreate] = useState(false);
+  const emit = useCoachEmit();
 
   const reload = useCallback(async () => {
     try {
@@ -69,7 +73,6 @@ export default function TrainingTab({ client, me, sample }: ClientCtx & { sample
     loadParents(client.link_id, client.parents).then((ps) => { setParents(ps); setParent((p) => p || ps[0]?.name || ''); });
   }, [client.link_id, client.parents]);
 
-  if (sample) return <Notice icon="school-outline" text="Ebeveyn eğitimi gerçek danışanlarda: aileyi davet et, sonra buradan eğitim kur." />;
   if (missing) return <Notice icon="cloud-offline-outline" text="Ebeveyn eğitimi için veritabanı güncellemesi bekleniyor." />;
   if (!list) return <ActivityIndicator color={colors.navy} style={{ marginTop: 30 }} />;
 
@@ -103,17 +106,19 @@ export default function TrainingTab({ client, me, sample }: ClientCtx & { sample
             <Text style={styles.secHead}>{STATUS_META[st].section}</Text>
             {rows.map((t) => {
               const fresh = pendingOf(t, detail).any;
-              return (
-                <Pressable key={t.id} onPress={() => setOpenId(t.id)} style={({ pressed }) => [styles.tcard, { borderLeftWidth: 5, borderLeftColor: SECTION_TONE[st].bar }, pressed && { opacity: 0.85 }]}
+              const card = (
+                <Pressable key={t.id} onPress={() => { setOpenId(t.id); emit('training_open'); }} style={({ pressed }) => [styles.tcard, { borderLeftWidth: 5, borderLeftColor: SECTION_TONE[st].bar }, pressed && { opacity: 0.85 }]}
                   accessibilityRole="button" accessibilityLabel={t.title}>
                   <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-                    <Text style={styles.tTitle} numberOfLines={2}>{t.title}</Text>
+                    <Text style={styles.tTitle}>{t.title}</Text>
                     <Text style={styles.small}>Başlangıç: {shortDate(t.started_at)}</Text>
+                    {fresh && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}><NewDot /><Text style={styles.newText}>Yeni etkinlik</Text></View>}
                   </View>
-                  {fresh && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}><NewDot /><Text style={styles.newText}>Yeni etkinlik</Text></View>}
                   <Ionicons name="chevron-forward" size={18} color={colors.muted} />
                 </Pressable>
               );
+              // ilk kullanım turu: etkin ilk eğitim vurgulanır
+              return st === 'active' && rows[0].id === t.id ? <CoachTarget key={t.id} id="training.card">{card}</CoachTarget> : card;
             })}
           </View>
         );
@@ -163,12 +168,13 @@ function CreateSheet({ parents, initial, onClose, onCreate }: { parents: Parent[
 }
 
 type TabId = 'summary' | 'modules' | 'tasks' | 'todos';
-type Sheet = null | 'note' | 'edit' | 'criterion' | 'data' | 'pick' | 'preview' | 'activate' | { task: TTask | null } | { todo: TTodo | null } | { todoReview: TTodo } | { module: TModule };
+type Sheet = null | 'note' | 'edit' | 'criterion' | 'data' | 'pick' | 'preview' | 'activate' | { task: TTask | null; example?: TaskExample } | { todo: TTodo | null; example?: TodoExample } | { todoReview: TTodo } | { module: TModule };
 
 function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { training: Training; detail: Detail; me: ClientCtx['me']; onBack: () => void; onChanged: () => Promise<void> }) {
   const [tab, setTab] = useState<TabId>('summary');
   const { width } = useWindowDimensions();
   const narrow = width < 640;
+  const emit = useCoachEmit();
   const [menu, openMenu] = useActionMenu();
   const [toast, showToast] = useToast();
   const seenAt = useRef(t.seen_at).current;          // uygulama kayıtlarında "yeni": açılıştaki son bakış
@@ -198,6 +204,7 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
   const remind = async () => {
     try {
       const r = await remindTraining(t.id);
+      if (r === 'sample') { Alert.alert('Örnek ailede gönderilmez', 'Gerçek ailede ebeveyne uygulama görevleri için bildirim gider.'); return; }
       Alert.alert(r === 'sent' ? 'Hatırlatma gönderildi' : r === 'recent' ? 'Son 12 saatte hatırlatma gönderildi' : 'Hatırlatma için veritabanı güncellemesi bekleniyor',
         r === 'sent' ? `${t.parent_name} uygulama görevleri için bildirim aldı.` : '');
     } catch (e) { Alert.alert('Gönderilemedi', (e as Error).message); }
@@ -233,12 +240,14 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
         {(narrow ? [TABS.slice(0, 2), TABS.slice(2)] : [TABS]).map((row, ri) => (
           <View key={ri} style={{ flexDirection: 'row' }}>
             {row.map((x) => (
-              <Pressable key={x.id} onPress={() => setTab(x.id)} style={[styles.tab, { flex: 1 }, tab === x.id && styles.tabOn]} accessibilityRole="tab" accessibilityState={{ selected: tab === x.id }}>
-                <View>
-                  <Text style={[styles.tabText, tab === x.id && styles.tabTextOn]} numberOfLines={1}>{x.label}</Text>
-                  {dots[x.id] && <View style={styles.tabDot}><NewDot /></View>}
-                </View>
-              </Pressable>
+              <CoachTarget key={x.id} id={`training.tab.${x.id}`} style={{ flex: 1 }}>
+                <Pressable onPress={() => { setTab(x.id); emit(`training_tab_${x.id}`); }} style={[styles.tab, tab === x.id && styles.tabOn]} accessibilityRole="tab" accessibilityState={{ selected: tab === x.id }}>
+                  <View>
+                    <Text style={[styles.tabText, tab === x.id && styles.tabTextOn]} numberOfLines={1}>{x.label}</Text>
+                    {dots[x.id] && <View style={styles.tabDot}><NewDot /></View>}
+                  </View>
+                </Pressable>
+              </CoachTarget>
             ))}
           </View>
         ))}
@@ -257,7 +266,7 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
                   onAction={t.status === 'active' ? remind : () => setTab('tasks')} />
               : <AddCard title="+ Uygulama görevi ekle" text="En uygun: öğrenilenleri evde uygulamak ve yeni bir alışkanlık kurmak. Bir hedef koyup ebeveynden bu hedefe doğru ilerlemeyi kaydetmesini de isteyebilirsin." onPress={() => setSheet({ task: null })} />}
             {todos.length > 0
-              ? <SumCard title="Hızlı yapılacaklar" dot={pend.todos > 0} line={`${todos.filter((x) => !x.done_at).length} etkin görev`} action="Gör" onAction={() => setTab('todos')} />
+              ? <SumCard title="Hızlı yapılacaklar" dot={pend.todos > 0} line={`${todos.filter((x) => !x.done_at).length} bekleyen iş`} action="Gör" onAction={() => setTab('todos')} />
               : <AddCard title="+ Hızlı yapılacak ekle" text="En uygun: ebeveynin seans dışında bir kez yapmasını istediğin her iş." onPress={() => setSheet({ todo: null })} />}
           </View>
           <Card style={{ gap: 10 }}>
@@ -317,10 +326,10 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
         <View style={{ gap: 8 }}>
           <View style={styles.listHead}>
             <Text style={[styles.h, { flex: 1 }]}>{tasks.length} uygulama görevi</Text>
-            <SmallButton label="+ Görev ekle" onPress={() => setSheet({ task: null })} />
+            <SmallButton label="+ Uygulama görevi" onPress={() => setSheet({ task: null })} />
             <IconButton name="download-outline" label="Uygulama kayıtlarını indir" onPress={() => download(`uygulama-${t.id.slice(0, 6)}.csv`, ['Tarih', 'Görev', 'Ölçüm', 'Değer', 'Düşünce'], logRows(t, detail))} />
           </View>
-          {tasks.length === 0 && <AddCard title="+ Uygulama görevi ekle" text="En uygun: öğrenilenleri evde uygulamak ve yeni bir alışkanlık kurmak." onPress={() => setSheet({ task: null })} />}
+          <CoachTarget id="training.explain.tasks"><ExplainCard kind="tasks" empty={tasks.length === 0} onExample={(e) => setSheet({ task: null, example: e })} /></CoachTarget>
           {tasks.map((k) => (
             <TaskRow key={k.id} task={k} logs={detail.logs.filter((l) => l.task_id === k.id)} fresh={detail.logs.some((l) => l.task_id === k.id && isNew(l.created_at, seenAt))}
               onMenu={(e) => openMenu({ items: [
@@ -335,9 +344,9 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
         <View style={{ gap: 8 }}>
           <View style={styles.listHead}>
             <Text style={[styles.h, { flex: 1 }]}>{todos.length} hızlı yapılacak</Text>
-            <SmallButton label="+ Görev ekle" onPress={() => setSheet({ todo: null })} />
+            <SmallButton label="+ Yapılacak" onPress={() => setSheet({ todo: null })} />
           </View>
-          {todos.length === 0 && <AddCard title="+ Hızlı yapılacak ekle" text="En uygun: ebeveynin seans dışında bir kez yapmasını istediğin her iş." onPress={() => setSheet({ todo: null })} />}
+          <CoachTarget id="training.explain.todos"><ExplainCard kind="todos" empty={todos.length === 0} onExample={(e) => setSheet({ todo: null, example: e })} /></CoachTarget>
           {todos.map((k) => (
             <Pressable key={k.id} onPress={() => { setSheet({ todoReview: k }); if (k.done_at && !k.reviewed_at) markReviewed('parent_training_todos', k.id).then(onChanged); }} style={styles.mrow} accessibilityRole="button">
               <View style={{ flex: 1, minWidth: 0, gap: 2, paddingLeft: 4 }}>
@@ -365,9 +374,9 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
       {sheet === 'data' && <DataSheet onClose={() => setSheet(null)} onSave={(day, v) => run(() => addData(t.id, day, v))} />}
       {sheet === 'pick' && <PickSheet me={me} exclude={mods.map((m) => m.item_key)} onClose={() => setSheet(null)} onAdd={(keys) => run(() => addModules(t.id, keys, detail.modules.filter((m) => m.training_id === t.id)))} />}
       {sheet === 'preview' && <ParentPreview training={t} detail={detail} onClose={() => setSheet(null)} />}
-      {sheet && typeof sheet === 'object' && 'task' in sheet && <TaskSheet task={sheet.task} onClose={() => setSheet(null)}
+      {sheet && typeof sheet === 'object' && 'task' in sheet && <TaskSheet task={sheet.task} example={sheet.example} onClose={() => setSheet(null)}
         onSave={(v) => run(async () => { await saveTask({ ...v, id: sheet.task?.id, training_id: t.id, position: tasks.length }); if (!sheet.task) showToast('Görev eklendi!'); })} />}
-      {sheet && typeof sheet === 'object' && 'todo' in sheet && <TodoSheet todo={sheet.todo} onClose={() => setSheet(null)}
+      {sheet && typeof sheet === 'object' && 'todo' in sheet && <TodoSheet todo={sheet.todo} example={sheet.example} onClose={() => setSheet(null)}
         onSave={(v) => run(async () => { await saveTodo({ ...v, id: sheet.todo?.id, training_id: t.id }); if (!sheet.todo) showToast('Görev eklendi!'); })} />}
       {sheet && typeof sheet === 'object' && 'todoReview' in sheet && <TodoReview todo={sheet.todoReview} onClose={() => setSheet(null)}
         onEdit={() => setSheet({ todo: sheet.todoReview })} onArchive={() => { setSheet(null); run(() => archiveTodo(sheet.todoReview.id)); }} />}
@@ -423,6 +432,13 @@ function DataView({ data, onDelete, target }: { data: { id: string; day: string;
 function TaskRow({ task, logs, fresh, onMenu }: { task: TTask; logs: Detail['logs']; fresh: boolean; onMenu: (e: any) => void }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<'table' | 'chart'>('table');
+  const narrow = useWindowDimensions().width < 640;
+  const viewButtons = task.measure !== 'none' && (
+    <>
+      <IconButton name="list-outline" label="Tablo" size={18} onPress={() => { setView('table'); setOpen(true); }} />
+      <IconButton name="stats-chart-outline" label="Grafik" size={18} onPress={() => { setView('chart'); setOpen(true); }} />
+    </>
+  );
   const val = (l: Detail['logs'][number]) => (task.measure === 'frequency' ? l.count ?? 0 : task.measure === 'accuracy' ? (l.attempts ? Math.round(((l.successes ?? 0) / l.attempts) * 100) : 0) : task.measure === 'duration' ? l.minutes ?? 0 : 0);
   const max = Math.max(1, ...logs.map(val));
   return (
@@ -434,17 +450,13 @@ function TaskRow({ task, logs, fresh, onMenu }: { task: TTask; logs: Detail['log
           <Text style={styles.small}>Başlangıç: {longDate(task.created_at)}{'\u00a0'}· {measureLabel(task.measure)}</Text>
         </Pressable>
         {fresh && <NewDot />}
-        {task.measure !== 'none' && (
-          <>
-            <IconButton name="list-outline" label="Tablo" size={18} onPress={() => { setView('table'); setOpen(true); }} />
-            <IconButton name="stats-chart-outline" label="Grafik" size={18} onPress={() => { setView('chart'); setOpen(true); }} />
-          </>
-        )}
+        {!narrow && viewButtons}
         <IconButton name="settings-outline" label="Görev ayarları" onPress={onMenu as any} />
       </View>
       {open && (
         <View style={{ gap: 8 }}>
           {!!task.description && <Text style={styles.body}>{task.description}</Text>}
+          {narrow && logs.length > 0 && task.measure !== 'none' && <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 4 }}>{viewButtons}</View>}
           {logs.length === 0 ? <Text style={styles.small}>Henüz kayıt yok.</Text> : view === 'chart' && task.measure !== 'none' ? (
             <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 120, paddingTop: 8 }}>
               {[...logs].reverse().map((l) => (
@@ -528,21 +540,23 @@ function PickSheet({ me, exclude, onClose, onAdd }: { me: ClientCtx['me']; exclu
   );
 }
 
-function TaskSheet({ task, onClose, onSave }: { task: TTask | null; onClose: () => void; onSave: (v: { title: string; description: string; measure: Measure }) => void }) {
-  const [title, setTitle] = useState(task?.title ?? '');
-  const [desc, setDesc] = useState(task?.description ?? '');
-  const [measure, setMeasure] = useState<Measure>(task?.measure ?? 'frequency');
+function TaskSheet({ task, example, onClose, onSave }: { task: TTask | null; example?: TaskExample; onClose: () => void; onSave: (v: { title: string; description: string; measure: Measure }) => void }) {
+  const [title, setTitle] = useState(task?.title ?? example?.title ?? '');
+  const [desc, setDesc] = useState(task?.description ?? example?.description ?? '');
+  const [measure, setMeasure] = useState<Measure>(task?.measure ?? example?.measure ?? 'frequency');
+  const fill = (e: TaskExample) => { setTitle(e.title); setDesc(e.description); setMeasure(e.measure); };
   return (
     <SheetFrame title={task ? 'Uygulama görevini düzenle' : 'Uygulama görevi ekle'} onClose={onClose}
       footer={<><GhostButton label="Vazgeç" onPress={onClose} /><Cta label={task ? 'Kaydet' : 'Görevi ekle'} disabled={!title.trim()} onPress={() => { onSave({ title: title.trim(), description: desc.trim(), measure }); onClose(); }} style={FOOT} /></>}>
+      {!task && <ExampleChips items={TASK_EXAMPLES} onPick={fill} />}
       <Text style={styles.label}>Görevin adı</Text>
-      <Text style={styles.small}>Ebeveynin evde uygulamasını istediğin becerileri düşün.</Text>
+      <Text style={styles.small}>Ebeveynin evde tekrar tekrar uygulamasını istediğin beceri.</Text>
       <Input placeholder="Ad" value={title} onChangeText={setTitle} maxLength={80} />
       <Text style={styles.label}>Ebeveyne açıklama ya da yönerge</Text>
       <Text style={styles.small}>Ne zaman uygulanacağını yaz ya da adım adım yönerge ver.</Text>
-      <Input placeholder="Açıklama" value={desc} onChangeText={setDesc} multiline maxLength={600} />
+      <Input placeholder="Açıklama" value={desc} onChangeText={setDesc} multiline numberOfLines={6} maxLength={600} />
       <Text style={styles.label}>Nasıl ölçülecek?</Text>
-      <Text style={styles.small}>Bu hedefe doğru ilerlemeyi nasıl izlemek istersin?</Text>
+      <Text style={styles.small}>İlerlemeyi nasıl izlemek istersin?</Text>
       {MEASURES.map((m) => (
         <Pressable key={m.key} onPress={() => setMeasure(m.key)} style={[styles.opt, { flexDirection: 'row', alignItems: 'center', gap: 10 }, measure === m.key && styles.optOn]} accessibilityRole="radio" accessibilityState={{ selected: measure === m.key }}>
           <View style={{ flex: 1, minWidth: 0, gap: 2 }}><Text style={styles.optTitle}>{m.label}</Text><Text style={styles.small}>{m.hint}</Text></View>
@@ -553,16 +567,18 @@ function TaskSheet({ task, onClose, onSave }: { task: TTask | null; onClose: () 
   );
 }
 
-function TodoSheet({ todo, onClose, onSave }: { todo: TTodo | null; onClose: () => void; onSave: (v: { title: string; description: string }) => void }) {
-  const [title, setTitle] = useState(todo?.title ?? '');
-  const [desc, setDesc] = useState(todo?.description ?? '');
+function TodoSheet({ todo, example, onClose, onSave }: { todo: TTodo | null; example?: TodoExample; onClose: () => void; onSave: (v: { title: string; description: string }) => void }) {
+  const [title, setTitle] = useState(todo?.title ?? example?.title ?? '');
+  const [desc, setDesc] = useState(todo?.description ?? example?.description ?? '');
   return (
     <SheetFrame title={todo ? 'Yapılacağı düzenle' : 'Yapılacak ekle'} onClose={onClose}
-      footer={<><GhostButton label="Vazgeç" onPress={onClose} /><Cta label={todo ? 'Kaydet' : 'Görevi ekle'} disabled={!title.trim()} onPress={() => { onSave({ title: title.trim(), description: desc.trim() }); onClose(); }} style={FOOT} /></>}>
-      <Text style={styles.label}>Görevin adı</Text>
+      footer={<><GhostButton label="Vazgeç" onPress={onClose} /><Cta label={todo ? 'Kaydet' : 'Yapılacağı ekle'} disabled={!title.trim()} onPress={() => { onSave({ title: title.trim(), description: desc.trim() }); onClose(); }} style={FOOT} /></>}>
+      {!todo && <ExampleChips items={TODO_EXAMPLES} onPick={(e) => { setTitle(e.title); setDesc(e.description.slice(0, 255)); }} />}
+      <Text style={styles.label}>Yapılacak iş</Text>
+      <Text style={styles.small}>Ebeveynin bir kez yapıp işaretleyeceği iş.</Text>
       <Input placeholder="Ad" value={title} onChangeText={setTitle} maxLength={80} />
       <Text style={styles.label}>Ebeveyne açıklama ya da yönerge</Text>
-      <Input placeholder="Açıklama" value={desc} onChangeText={(v) => setDesc(v.slice(0, 255))} multiline />
+      <Input placeholder="Açıklama" value={desc} onChangeText={(v) => setDesc(v.slice(0, 255))} multiline numberOfLines={4} />
       <Text style={[styles.tiny, { alignSelf: 'flex-end' }]}>{desc.length} / 255</Text>
     </SheetFrame>
   );
@@ -628,7 +644,7 @@ const styles = StyleSheet.create({
   body: { fontSize: 14, color: colors.text, lineHeight: 20, flexShrink: 1 },
   small: { fontSize: 12.5, color: colors.muted, flexShrink: 1 },
   tiny: { fontSize: 11, color: colors.muted },
-  upper: { fontSize: 14, fontWeight: '700', color: colors.navy, textTransform: 'uppercase', letterSpacing: 0.3, flexShrink: 1 },
+  upper: { fontSize: 14.5, fontWeight: '700', color: colors.navy, flexShrink: 1 },
   label: { fontSize: 13, fontWeight: '700', color: colors.navy, marginTop: 6 },
   link: { color: colors.navy, fontWeight: '700', textDecorationLine: 'underline', marginTop: 4 },
   linkRow: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },

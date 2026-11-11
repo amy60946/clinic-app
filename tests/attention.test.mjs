@@ -1,7 +1,7 @@
 // Dikkat panosu (src/lib/attention.ts). Çalıştırma: npm test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { reasonsFor, sectionOf, buildBoard, relDay } from '../src/lib/attention.ts';
+import { reasonsFor, sectionOf, buildBoard, relDay, trainingReasons } from '../src/lib/attention.ts';
 
 const now = new Date('2026-11-02T12:00:00Z');
 const ago = (d, h = 0) => new Date(now.getTime() - d * 86400000 - h * 3600000).toISOString();
@@ -59,4 +59,32 @@ test('göreli gün', () => {
   assert.equal(relDay(ago(0, 1), now), 'bugün');
   assert.equal(relDay(ago(1, 1), now), 'dün');
   assert.equal(relDay(ago(4), now), '4 gün önce');
+});
+
+// Lansman odağı "A" (10 Kasım 2026): Takip Planı kapalıyken plan nedenleri düşer, "Senin sıran" ebeveyn eğitimine bakar
+test('Takip Planı kapalı: plan nedenleri yok, eğitim nedenleri var', () => {
+  const clients = ['incele', 'taslak', 'yok', 'tamam'].map((id) => ({ link_id: id, consent_at: ago(30) }));
+  const a = { incele: att({ link_id: 'incele', drafts: 2 }), taslak: att({ link_id: 'taslak', review_due: 1 }),
+    yok: att({ link_id: 'yok', goals_active: 0, plan_published_at: null }), tamam: att({ link_id: 'tamam', drafts: 1, pending: 1 }) };
+  const training = { incele: { total: 1, drafts: 0, review: 2 }, taslak: { total: 2, drafts: 1, review: 0 }, yok: { total: 0, drafts: 0, review: 0 }, tamam: { total: 1, drafts: 0, review: 0 } };
+  const board = buildBoard(clients, a, {}, now, { plan: false, training });
+  assert.deepEqual(board.mine.map((r) => r.client.link_id).sort(), ['incele', 'taslak', 'yok']);
+  const all = Object.values(board).flat();
+  assert.ok(all.every((r) => !r.reasons.some((x) => ['unsent', 'review', 'noplan'].includes(x.key))), 'plan nedeni kalmaz');
+  assert.deepEqual(keys(all.find((r) => r.client.link_id === 'incele').reasons), ['tr_review']);
+  assert.deepEqual(keys(all.find((r) => r.client.link_id === 'tamam').reasons), ['pending'], 'macera önerisi nedeni durur');
+  assert.equal(board.rest.map((r) => r.client.link_id).join(), 'tamam');
+});
+
+test('eğitim nedenleri: metinler ve boş durum', () => {
+  assert.deepEqual(trainingReasons(undefined), [], 'eğitim tabloları yoksa neden eklenmez');
+  assert.deepEqual(keys(trainingReasons({ total: 0, drafts: 0, review: 0 })), ['tr_none']);
+  assert.equal(trainingReasons({ total: 3, drafts: 2, review: 0 })[0].text, '2 taslak eğitim');
+  assert.equal(trainingReasons({ total: 1, drafts: 1, review: 1 }).map((r) => r.key).join(), 'tr_review,tr_draft');
+});
+
+test('Takip Planı açık (varsayılan): eski davranış değişmez', () => {
+  const clients = [{ link_id: 'a', consent_at: ago(30) }];
+  const board = buildBoard(clients, { a: att({ link_id: 'a', drafts: 1 }) }, {}, now);
+  assert.deepEqual(keys(board.mine[0].reasons), ['unsent']);
 });

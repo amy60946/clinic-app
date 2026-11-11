@@ -33,15 +33,18 @@ const FAINT = dim('#E9ECF1');
 const INK = colors.navy;
 const SOFT = dim('#A0A6B6');
 
-type Step = { title: string; line: string; screen: 'invite' | 'board' | 'plan' | 'watch' };
-const STEPS: Step[] = [
+type Step = { title: string; line: string; screen: 'invite' | 'board' | 'plan' | 'training' | 'watch' };
+// Takip Planı kapalıyken (lansman odağı "A", 11 Kasım 2026) üçüncü ekran ebeveyn eğitimi
+const TRAINING_STEP: Step = { title: 'Eğitimi kur, Etkin yap', line: 'Taslağı ebeveyn görmez. "Etkin" yapınca görür.', screen: 'training' };
+const ALL_STEPS: Step[] = [
   { title: 'Aileyi davet et', line: 'E-postayı yaz, "E-posta gönder".', screen: 'invite' },
   { title: 'Kimde ne var', line: 'Ana ekran üç bölüm.', screen: 'board' },
   { title: 'Taslak, sonra gönder', line: 'Bej = taslak. "Aileye gönder" ile gider.', screen: 'plan' },
   { title: 'İzle ve raporla', line: 'İzle bölümü; dönem sonunda "Rapor".', screen: 'watch' },
 ];
 
-export default function Onboarding({ visible, onClose }: { visible: boolean; onClose: (completed: boolean) => void }) {
+export default function Onboarding({ visible, plan = true, onClose }: { visible: boolean; plan?: boolean; onClose: (completed: boolean) => void }) {
+  const STEPS = plan ? ALL_STEPS : ALL_STEPS.map((x) => (x.screen === 'plan' ? TRAINING_STEP : x));
   const { width } = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const scroller = useRef<ScrollView>(null);
@@ -75,7 +78,8 @@ export default function Onboarding({ visible, onClose }: { visible: boolean; onC
                 {s.screen === 'invite' && <InviteMock />}
                 {s.screen === 'board' && <BoardMock />}
                 {s.screen === 'plan' && <PlanMock wide={wide} />}
-                {s.screen === 'watch' && <MenuMock />}
+                {s.screen === 'training' && <TrainingMock wide={wide} />}
+                {s.screen === 'watch' && <MenuMock plan={plan} />}
               </View>
             </SafeAreaView>
           ))}
@@ -232,7 +236,43 @@ function PlanMock({ wide }: { wide: boolean }) {
 }
 
 // Danışan menüsü: Planla · İzle · Kayıt; İzle ① ve Rapor ②
-function MenuMock() {
+// Ebeveyn Eğitimi: taslak eğitim (aile görmez) ① → durumu "Etkin" yap ②; altında üç bölüm
+function TrainingMock({ wide }: { wide: boolean }) {
+  return (
+    <View style={{ gap: 8 }}>
+      <Header title="Nazlı · Ebeveyn Eğitimi" sub="8 yaş · Sorumlu: sen" back />
+      <View style={[styles.block, { padding: 14, gap: 8 }]}>
+        <Text style={{ fontSize: 15, fontWeight: '800', color: INK }}>Ebeveyn zor geçişlerden önce iki uyarı verir</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <View>
+            <View style={styles.draft}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: '#7A5A1E' }}>Taslak</Text>
+              <Text style={{ fontSize: 12, color: '#7A5A1E' }}>ebeveyn görmez</Text>
+            </View>
+            <Badge n={1} />
+          </View>
+          <View>
+            <View style={[styles.target, { height: 44, paddingHorizontal: 16 }]}>
+              <Ionicons name="checkmark-circle-outline" size={16} color="#fff" />
+              <Text style={styles.ctaText}>Etkin yap</Text>
+            </View>
+            <Badge n={2} side="right" />
+          </View>
+        </View>
+        <View style={{ flexDirection: wide ? 'row' : 'column', gap: 8, marginTop: 4 }}>
+          {['Öğrenme modülleri', 'Uygulama görevleri', 'Hızlı yapılacaklar'].map((x) => (
+            <View key={x} style={[styles.block, { flex: wide ? 1 : undefined, padding: 10, backgroundColor: FAINT }]}>
+              <Text style={{ fontSize: 13, fontWeight: '700', color: INK }}>{x}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+      <Block h={64} />
+    </View>
+  );
+}
+
+function MenuMock({ plan }: { plan: boolean }) {
   const group = (head: string, items: string[], lit?: string[]) => (
     <View style={[styles.block, { padding: 12, gap: 6 }, lit && { backgroundColor: '#fff' }, lit && styles.ring]}>
       <Text style={[styles.sec, { marginTop: 0 }, lit && { color: '#6B7286' }]}>{head}</Text>
@@ -244,7 +284,7 @@ function MenuMock() {
   return (
     <View style={{ gap: 8 }}>
       <Header title="Nazlı" sub="8 yaş · Sorumlu: sen" back />
-      {group('Planla', ['Takip Planı'])}
+      {group('Planla', plan ? ['Ebeveyn Eğitimi', 'Takip Planı', 'Seanslar'] : ['Ebeveyn Eğitimi', 'Seanslar'])}
       <View>
         {group('İzle', ['Davranışlar ve Olaylar', 'Özet', 'Ev Rutinleri'], ['Davranışlar ve Olaylar', 'Ev Rutinleri'])}
         <Badge n={1} />

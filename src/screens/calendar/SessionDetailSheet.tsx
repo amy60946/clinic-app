@@ -14,6 +14,7 @@ import {
 import { loadLinkSessions, loadRecords, saveRecord, setSessionStatus, deleteSession } from '../../lib/sessions';
 import { loadHomework, sendHomework, type Homework } from '../../lib/homework';
 import PublishSheet from '../plan/PublishSheet';
+import { useClientConfig, CARE_PLAN_FLAG } from '../../lib/clientConfig';
 import type { Tab } from '../client/ClientScreen';
 import { SheetHeader, StatusChip, Chips, FieldLabel, Private, s } from './parts';
 
@@ -50,6 +51,7 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
   const [nextStep, setNextStep] = useState('');
   const [agenda, setAgenda] = useState<AgendaItem[]>([]);
   const [homework, setHomework] = useState<HomeworkItem[]>([]);
+  const planOn = useClientConfig().flag(CARE_PLAN_FLAG);   // Takip Planı kapalıyken ev çalışması Ebeveyn Eğitimi'nde
   const [own, setOwn] = useState('');
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -88,8 +90,8 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
     if (!client || !data) return null;
     const declines = observations(data.tasks, data.completions, addDays(today, -21), addDays(today, -1)).declineReasons;
     const top = (Object.entries(declines) as [keyof typeof DECLINE_LABELS, number][]).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1])[0];
-    return prepSummary(session, linkSessions, data, { pending: hw?.pending ?? [], reviewDue: hw?.reviewDue ?? [], declineTop: top ? DECLINE_LABELS[top[0]] : null }, now);
-  }, [client, data, linkSessions, hw, session]); // eslint-disable-line react-hooks/exhaustive-deps
+    return prepSummary(session, linkSessions, data, { pending: hw?.pending ?? [], reviewDue: planOn ? hw?.reviewDue ?? [] : [], declineTop: top ? DECLINE_LABELS[top[0]] : null }, now);
+  }, [client, data, linkSessions, hw, session, planOn]); // eslint-disable-line react-hooks/exhaustive-deps
   // kayıtta gündem yoksa özetin gündemiyle başlar
   useEffect(() => { if (prep && !record && !agenda.length) setAgenda(prep.agenda); }, [prep]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -215,7 +217,17 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
                   <Note label="Sonraki adım" value={nextStep} onChange={touch(setNextStep)} placeholder="Bir sonraki seansta ya da evde" />
                   <AgendaBox agenda={agenda} setAgenda={touch(setAgenda)} own={own} setOwn={setOwn} />
 
-                  <View style={s.card}>
+                  {!planOn && (
+                    <View style={s.card}>
+                      <Text style={s.label}>Ebeveynin ev çalışması</Text>
+                      {homework.map((h) => (
+                        <View key={`${h.kind}:${h.id}`} style={s.row}><Ionicons name="paper-plane-outline" size={14} color={colors.ok} /><Text style={s.body}>{h.title}</Text></View>
+                      ))}
+                      <Text style={s.small}>Uygulama görevleri ve yapılacaklar Ebeveyn Eğitimi'nde eklenir; eğitim "Etkin" olunca ebeveyn görür.</Text>
+                      <Pressable onPress={() => onOpenClient(client, 'training')}><Text style={s.link}>Ebeveyn Eğitimi'ni aç</Text></Pressable>
+                    </View>
+                  )}
+                  {planOn && <View style={s.card}>
                     <Text style={s.label}>Aileye bu haftanın ev ödevi</Text>
                     {homework.length > 0 && homework.map((h) => (
                       <View key={`${h.kind}:${h.id}`} style={s.row}><Ionicons name="paper-plane-outline" size={14} color={colors.ok} /><Text style={s.body}>{h.title}</Text></View>
@@ -230,7 +242,7 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
                         <Text style={s.small}>{homework.length ? 'Gönderildi.' : 'Gönderilmemiş madde yok. Takip Planı\'nda rutin, macera ya da program ekleyince burada seçebilirsin.'}</Text>
                       )}
                     <Pressable onPress={() => onOpenClient(client, 'goals')}><Text style={s.link}>Takip Planı'nı aç</Text></Pressable>
-                  </View>
+                  </View>}
                   <Cta label="Kaydet" onPress={save} busy={saving} disabled={!dirty} />
                   {!dirty && <Text style={[s.small, { textAlign: 'center' }]}>{record ? 'Kayıt güncel.' : 'Not ya da gündem yazınca kaydedebilirsin.'}</Text>}
                 </>

@@ -11,6 +11,7 @@ import { Goal, listGoals } from '../../lib/clinic';
 import { buildReportHtml } from '../../lib/report';
 import { ageText, type ClientCtx } from './ClientScreen';
 import { track } from '../../lib/track';
+import { useClientConfig, CARE_PLAN_FLAG } from '../../lib/clientConfig';
 
 type NameMode = 'name' | 'initials' | 'label';
 
@@ -61,6 +62,7 @@ async function printHtml(html: string) {
 }
 
 export default function ReportTab({ client, me, data, today, weeks }: ClientCtx) {
+  const planOn = useClientConfig().flag(CARE_PLAN_FLAG);   // Takip Planı kapalıyken rapor tarifinde GAS geçmez
   const [mode, setMode] = useState<NameMode>('initials');
   const [goals, setGoals] = useState<Goal[]>([]);
   const [busy, setBusy] = useState(false);
@@ -115,7 +117,7 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
       <Label>{`Ev rutini gözlem raporu (${weeks} hafta)`}</Label>
       <Card style={{ gap: 12 }}>
         <Text style={styles.body}>
-          Rapor şunları içerir: haftalık rutin kartı, yürütücü işlev gözlem özeti (başlatma, tutarlılık, "Yapamam"), macera ve beceri alanı tabloları, GAS davranış hedefi puanları ve davranış kaydı özeti. Uzman notları rapora girmez.
+          Rapor şunları içerir: haftalık rutin kartı, yürütücü işlev gözlem özeti (başlatma, tutarlılık, "Yapamam"), macera ve beceri alanı tabloları{planOn ? ', GAS davranış hedefi puanları' : ''} ve davranış kaydı özeti. Uzman notları rapora girmez.
         </Text>
         <Text style={styles.small}>Raporda çocuk nasıl görünsün?</Text>
         <Segmented<NameMode>
