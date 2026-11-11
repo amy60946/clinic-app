@@ -24,6 +24,7 @@ ClinicApp tek kod tabanıdır: aynı Expo projesi hem **web** (tarayıcı) hem *
 |---|---|
 | `SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` (asla `sb_secret_`) |
 | `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`, `APPLE_TEAM_ID` | App Store Connect API anahtarı ve takım kimliği |
+| `EXPO_PUBLIC_REVENUECAT_IOS_KEY` (isteğe bağlı) | RevenueCat › MoyoApp › API keys › ClinicApp (`com.clinicapp.uzman`) herkese açık anahtarı `appl_…` (ParentApp'inkinden **ayrı**; gizli `sk_…` asla). Yoksa derleme olur, üyelik satın alınamaz; derleme günlüğünde "RevenueCat iOS anahtarı var." yazısı denetlenir |
 
 4. **Supabase şifre/doğrulama bağlantıları:** Supabase → Authentication → **URL Configuration** → Redirect URLs → **Add URL** → `clinicapp://**`
    (ParentApp'in `parentapp://**` satırı kalır).

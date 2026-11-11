@@ -72,6 +72,12 @@ archive="$RUNNER_TEMP/ClinicApp.xcarchive"
 xcodebuild -workspace "$ws" -scheme "$scheme" -configuration Release \
   -destination 'generic/platform=iOS' -archivePath "$archive" -quiet archive
 [ -d "$archive" ] || { echo "::error::Arşiv oluşmadı"; exit 1; }
+# Ödeme anahtarı verildiyse JS paketinde olmalı; gizli RevenueCat anahtarı (sk_) asla pakette olmamalı (ParentApp'teki denetim)
+jsb=$(find "$archive/Products/Applications" -name 'main.jsbundle' | head -1)
+if [ -n "${EXPO_PUBLIC_REVENUECAT_IOS_KEY:-}" ]; then
+  grep -aqF "$EXPO_PUBLIC_REVENUECAT_IOS_KEY" "$jsb" && echo "JS paketi: RevenueCat anahtarı var" || { echo "::error::RevenueCat anahtarı JS paketinde yok"; exit 1; }
+fi
+if grep -aqE '"sk_[A-Za-z0-9]{20,}"' "$jsb"; then echo "::error::JS paketinde gizli anahtar (sk_) var"; exit 1; fi
 codesign -dvv "$(ls -d "$archive"/Products/Applications/*.app | head -1)" 2>&1 | grep -E "Authority|TeamIdentifier" || true
 
 cat > "$RUNNER_TEMP/ExportOptions.plist" <<PL

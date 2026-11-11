@@ -2,8 +2,9 @@ import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import type { ClinicianMe } from './clinic';
 
-// Üyelik: ortak/supabase/proposed/20261022000000_clinic_billing.sql + functions/clinic-billing.
-// Plan/süre yalnız sunucuda yazılır; uygulama yalnız ödemeyi başlatır ve doğrulamaya gönderir.
+// Üyelik: ortak/supabase/migrations/20261022200000_clinic_billing.sql (paketler, durum) + functions/billing-webhook.
+// Plan/süre yalnız sunucuda yazılır: App Store satın alması RevenueCat'ten webhook'la gelir (store.ios.ts),
+// uygulama yalnız satın almayı başlatır ve sonra clinician_me'yi yeniden okur. Fiyat iOS'ta mağazadan okunur.
 
 export type PackageId = 'solo' | 'clinic';
 export type Period = 'monthly' | 'yearly';
@@ -12,17 +13,17 @@ export type BillingPlan = {
   package: PackageId;
   period: Period;
   seat_limit: number;
-  price_try: number;
+  price_try: number | null;   // sunucudaki katalog fiyatı (web'de gösterilir); iOS'ta fiyat mağazadan
   apple_product_id: string | null;
   iyzico_plan_ref: string | null;
 };
 
-// Veritabanı güncellemesi henüz uygulanmadıysa gösterilecek katalog (sunucudakiyle aynı)
+// Paket tablosu okunamazsa gösterilecek katalog (fiyatsız: fiyat sabit yazılmaz, mağazadan ya da sunucudan gelir)
 const DEFAULT_PLANS: BillingPlan[] = [
-  { id: 'solo_monthly', package: 'solo', period: 'monthly', seat_limit: 1, price_try: 749.99, apple_product_id: 'com.clinicapp.uzman.solo.monthly', iyzico_plan_ref: null },
-  { id: 'solo_yearly', package: 'solo', period: 'yearly', seat_limit: 1, price_try: 7499.99, apple_product_id: 'com.clinicapp.uzman.solo.yearly', iyzico_plan_ref: null },
-  { id: 'clinic_monthly', package: 'clinic', period: 'monthly', seat_limit: 10, price_try: 2999.99, apple_product_id: 'com.clinicapp.uzman.clinic.monthly', iyzico_plan_ref: null },
-  { id: 'clinic_yearly', package: 'clinic', period: 'yearly', seat_limit: 10, price_try: 29999.99, apple_product_id: 'com.clinicapp.uzman.clinic.yearly', iyzico_plan_ref: null },
+  { id: 'solo_monthly', package: 'solo', period: 'monthly', seat_limit: 1, price_try: null, apple_product_id: 'com.clinicapp.uzman.solo.monthly', iyzico_plan_ref: null },
+  { id: 'solo_yearly', package: 'solo', period: 'yearly', seat_limit: 1, price_try: null, apple_product_id: 'com.clinicapp.uzman.solo.yearly', iyzico_plan_ref: null },
+  { id: 'clinic_monthly', package: 'clinic', period: 'monthly', seat_limit: 10, price_try: null, apple_product_id: 'com.clinicapp.uzman.clinic.monthly', iyzico_plan_ref: null },
+  { id: 'clinic_yearly', package: 'clinic', period: 'yearly', seat_limit: 10, price_try: null, apple_product_id: 'com.clinicapp.uzman.clinic.yearly', iyzico_plan_ref: null },
 ];
 
 // Paket içerikleri (üyelik ekranında sade liste); yalnız ClinicApp'te gerçekten olanlar yazılır.
@@ -55,9 +56,15 @@ export const PACKAGES: Record<PackageId, { title: string; who: string; features:
   },
 };
 
-export const COMMON_TERMS = [
+// Yıllıkta kaç ay hediye: fiyatlardan hesaplanır (fiyat değişince metin de değişir; bilinmiyorsa 0)
+export function yearlyGift(monthly: number | null | undefined, yearly: number | null | undefined): number {
+  if (!monthly || !yearly) return 0;
+  return Math.max(0, Math.floor(12 - yearly / monthly + 0.05));
+}
+
+export const commonTerms = (gift: number) => [
   'İlk 14 gün ücretsiz, kart gerekmez',
-  'Aylık ya da yıllık; yıllıkta 2 ay hediye',
+  gift ? `Aylık ya da yıllık; yıllıkta ${gift} ay hediye` : 'Aylık ya da yıllık',
   'Dilediğin an iptal; dönem sonuna kadar açık kalır',
   'Veriler yalnız ebeveyn izniyle görünür; izin geri alınınca erişim biter',
 ];
@@ -69,7 +76,7 @@ export async function listPlans(): Promise<BillingPlan[]> {
   const { data, error } = await supabase.from('billing_plans')
     .select('id, package, period, seat_limit, price_try, apple_product_id, iyzico_plan_ref').order('sort');
   if (error || !data?.length) return DEFAULT_PLANS;
-  return (data as BillingPlan[]).map((p) => ({ ...p, price_try: Number(p.price_try) }));
+  return (data as BillingPlan[]).map((p) => ({ ...p, price_try: p.price_try == null ? null : Number(p.price_try) }));
 }
 
 export type Status = 'trial' | 'active' | 'expired';
@@ -89,7 +96,7 @@ export function daysLeft(iso: string | null | undefined): number {
 export const packageName = (me: ClinicianMe) =>
   me.plan === 'solo' ? 'Bireysel' : me.plan === 'clinic' ? 'Klinik' : me.plan === 'trial' ? 'Deneme' : 'Kurumsal';
 
-// Edge Function çağrısı; hata metni gövdeden okunur
+// Edge Function çağrısı (clinic-billing; bugün kullanılmıyor: iyzico yolu ileride kendi sisteme geçiş için duruyor)
 async function call<T>(route: string, body: unknown): Promise<T> {
   const { data, error } = await supabase.functions.invoke(`clinic-billing/${route}`, { body: body as Record<string, unknown> });
   if (error) {
@@ -101,8 +108,6 @@ async function call<T>(route: string, body: unknown): Promise<T> {
   }
   return data as T;
 }
-
-export const verifyApple = (transactionId: string) => call<{ active: boolean }>('apple-verify', { transactionId });
 
 // Web ödemesi (iyzico): bugün kullanılmıyor — web'de satış yok (kullanıcı kararı 22 Ekim 2026)
 export type Buyer = { name: string; surname: string; identityNumber: string; gsmNumber: string; city: string; address: string };
