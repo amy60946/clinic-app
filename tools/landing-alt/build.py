@@ -48,10 +48,10 @@ HERO = {'kind': 'ui', 'key': 'hero', 'bar': 'ClinicApp · Ebeveyn Eğitimi', 'al
 def img(v, which):
     return v.get(which) or (f'assets/{v["key"]}-{which}.webp', *((1600, 1000) if which == 'd' else (786, 1520)))
 
-def vis(v, lazy=True, mobile=True):
+def vis(v, lazy=True, mobile=True, panel=True):
     lz = ' loading="lazy"' if lazy else ''
     if v['kind'] == 'game':
-        return GAME
+        return f'<div class="panel">{GAME}</div>' if panel else GAME
     if v['kind'] == 'phone':
         ms, mw, mh = img(v, 'm')
         return f'<div class="dev"><img src="{ms}" width="{mw}" height="{mh}" alt="{v["alt"]}"{lz}></div>'
@@ -82,7 +82,18 @@ COMMON_CSS = """
 .dev { height: min(600px, 74vh); aspect-ratio: 393 / 760; max-width: 100%; border: 9px solid var(--ink); border-radius: 36px; overflow: hidden; background: var(--card); box-shadow: var(--shadow); }
 .dev img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .st-h { font-size: clamp(26px, 2.8vw, 36px); }
+.panel { width: 100%; aspect-ratio: 16 / 10; background: var(--head); border: 1px solid var(--line); border-radius: var(--r-lg); display: grid; place-items: center; padding: 20px; }
+.panel .mock.game { width: min(100%, 400px); }
+.feat.extra { margin-top: 120px; }
+@media (max-width: 900px) { .feat.extra { margin-top: 80px; } }
 """
+
+# Tur beş numaralı adımdır; altıncı satır ("Bütün danışanlar") kaynaktaki gibi ayrı bir özellik satırı olarak altta kalır.
+TOUR = 5
+def extra_row():
+    s, v = STEPS[5], VIS[5]
+    return f'<div class="feat extra"><div class="txt">{step_txt(s)}</div><div class="vis">{vis(v)}</div></div>'
+
 
 def put(h, section_html, css, js):
     h = h.replace(NASIL, section_html)
@@ -97,11 +108,11 @@ SEC_CLOSE = '\n    </div>\n  </section>'
 def variant_a():
     steps = ''.join(
         f'<li class="pin-step{" is-on" if i == 0 else ""}" data-i="{i}"><div class="txt">{step_txt(s)}</div>'
-        f'<div class="pin-inline">{vis(VIS[i])}</div></li>' for i, s in enumerate(STEPS))
-    frames = ''.join(f'<div class="pin-frame k-{v["kind"]}{" is-on" if i == 0 else ""}" data-i="{i}">{vis(v)}</div>' for i, v in enumerate(VIS))
-    segs = ''.join(f'<i class="{"is-on" if i == 0 else ""}"></i>' for i in range(len(STEPS)))
+        f'<div class="pin-inline">{vis(VIS[i])}</div></li>' for i, s in enumerate(STEPS[:TOUR]))
+    frames = ''.join(f'<div class="pin-frame k-{v["kind"]}{" is-on" if i == 0 else ""}" data-i="{i}">{vis(v)}</div>' for i, v in enumerate(VIS[:TOUR]))
+    segs = ''.join(f'<i class="{"is-on" if i == 0 else ""}"></i>' for i in range(TOUR))
     sec = (SEC_OPEN + f'<div class="pin" id="urun"><ol class="pin-steps">{steps}</ol>'
-           f'<div class="pin-stage" aria-hidden="true"><div class="pin-segs">{segs}</div><div class="pin-frames">{frames}</div></div></div>' + SEC_CLOSE)
+           f'<div class="pin-stage" aria-hidden="true"><div class="pin-segs">{segs}</div><div class="pin-frames">{frames}</div></div></div>' + extra_row() + SEC_CLOSE)
     css = """
 /* --- A: sabit ekran, kayan anlatım. Betik yokken ya da hareket azaltmada adımlar alt alta, görseller yerinde. --- */
 .pin-steps { display: flex; flex-direction: column; gap: 96px; }
@@ -123,17 +134,20 @@ def variant_a():
 .pin-frame.is-on { opacity: 1; transform: none; }
 .pin-frame .dev { height: min(600px, calc(100vh - 190px)); }
 @media (max-width: 900px) {
-  /* telefonda: görsel üstte sabit kalır, yazı altında kayar */
+  /* telefonda: görsel üstte sabit kalır (yüksekliği sınırlı, üstten kırpılır), yazı altında kayar */
   .pin.is-live { display: flex; flex-direction: column; }
   .pin.is-live .pin-stage { order: -1; top: calc(68px + env(safe-area-inset-top, 0px)); height: auto; z-index: 5; gap: 10px; margin-inline: -20px; padding: 12px 20px 14px; background: var(--card); border-bottom: 1px solid var(--line); }
-  .pin.is-live .pin-frames { height: 34vh; height: 34svh; min-height: 220px; }
-  .pin.is-live .pin-frame { height: 100%; }
-  .pin.is-live .pin-frame .ui, .pin.is-live .pin-frame .dev { height: 100%; width: 100%; max-width: 420px; aspect-ratio: auto; border-radius: 14px; border-width: 1px; border-color: var(--line); box-shadow: none; display: flex; flex-direction: column; }
+  .pin.is-live .pin-frames { height: 34vh; height: 34svh; min-height: 210px; max-height: 320px; grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); overflow: hidden; }
+  .pin.is-live .pin-frame { display: block; height: 100%; min-height: 0; transform: none; }
+  .pin.is-live .pin-frame .ui, .pin.is-live .pin-frame .dev, .pin.is-live .pin-frame .panel { height: 100%; width: 100%; max-width: none; aspect-ratio: auto; border-radius: 14px; border: 1px solid var(--line); box-shadow: none; overflow: hidden; }
+  .pin.is-live .pin-frame .ui { display: flex; flex-direction: column; }
   .pin.is-live .pin-frame .ui picture { flex: 1; min-height: 0; display: block; }
   .pin.is-live .pin-frame img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-  .pin.is-live .pin-frame .mock.game { transform: scale(.82); }
-  .pin.is-live .pin-step { min-height: 58vh; min-height: 58svh; justify-content: flex-start; padding-top: 36px; }
-  .pin.is-live .pin-step:last-child { min-height: 46vh; }
+  .pin.is-live .pin-frame .panel { padding: 8px; }
+  .pin.is-live .pin-frame .panel .mock.game { width: min(100%, 330px); padding: 12px 14px; gap: 6px; box-shadow: none; }
+  .pin.is-live .pin-frame .panel .mock.game .row { padding: 5px 0; font-size: 13px; }
+  .pin.is-live .pin-step { min-height: 56vh; min-height: 56svh; justify-content: flex-start; padding-top: 32px; }
+  .pin.is-live .pin-step:last-child { min-height: 0; padding-bottom: 40px; }
 }
 """
     js = """
@@ -163,13 +177,13 @@ def variant_b():
         f'<b>{s["n"] or "•"}</b><span>{s["label"]}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>'
         f'<div class="tour-body" id="tp{i}" role="region" aria-labelledby="tb{i}"><div class="tour-in">'
         f'<h3 class="st-h">{s["h"]}</h3>' + ''.join(f'<p>{p}</p>' for p in s['ps']) +
-        f'<div class="tour-inline">{vis(VIS[i])}</div></div></div></li>' for i, s in enumerate(STEPS))
-    frames = ''.join(f'<div class="tour-frame k-{v["kind"]}{" is-on" if i == 0 else ""}">{vis(v, mobile=False)}</div>' for i, v in enumerate(VIS))
+        f'<div class="tour-inline">{vis(VIS[i])}</div></div></div></li>' for i, s in enumerate(STEPS[:TOUR]))
+    frames = ''.join(f'<div class="tour-frame k-{v["kind"]}{" is-on" if i == 0 else ""}">{vis(v, mobile=False)}</div>' for i, v in enumerate(VIS[:TOUR]))
     sec = (SEC_OPEN + f'<div class="tour" id="urun"><ol class="tour-list">{items}</ol>'
            f'<div class="tour-stage" aria-hidden="true">{frames}</div></div>'
            '<div class="tour-nav"><button type="button" class="btn btn-ghost" id="tour-prev">← Önceki</button>'
-           '<span id="tour-count" aria-live="polite">1 / 6</span>'
-           '<button type="button" class="btn btn-primary" id="tour-next">Sonraki adım →</button></div>' + SEC_CLOSE)
+           '<span id="tour-count" aria-live="polite">1 / 5</span>'
+           '<button type="button" class="btn btn-primary" id="tour-next">Sonraki adım →</button></div>' + extra_row() + SEC_CLOSE)
     css = """
 /* --- B: tıklanan tur. Adıma dokun, yazı ve ekran yerinde değişir; sayfa uzamaz. Betik yokken bütün adımlar açık. --- */
 .tour-list { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -195,12 +209,13 @@ def variant_b():
 .tour-nav .btn { min-height: 44px; padding: 0 18px; font-size: 15px; }
 .tour-nav .btn[disabled] { opacity: .4; cursor: default; }
 @media (min-width: 901px) {
-  .tour.is-live { display: grid; grid-template-columns: minmax(0, .86fr) minmax(0, 1.14fr); gap: 48px; align-items: center; }
+  #nasil .head { margin-bottom: 30px; }
+  .tour.is-live { display: grid; grid-template-columns: minmax(0, .86fr) minmax(0, 1.14fr); gap: 48px; align-items: start; }
   .tour.is-live .tour-inline { display: none; }
-  .tour.is-live .tour-stage { display: grid; align-items: center; justify-items: center; min-width: 0; }
+  .tour.is-live .tour-stage { display: grid; align-items: start; justify-items: center; min-width: 0; position: sticky; top: 92px; }
   .tour-frame { grid-area: 1 / 1; width: 100%; min-width: 0; display: grid; place-items: center; opacity: 0; transform: translateY(10px); transition: opacity .3s, transform .3s; pointer-events: none; }
   .tour-frame.is-on { opacity: 1; transform: none; }
-  .tour-frame .dev { height: min(560px, 70vh); }
+  .tour-frame .dev { height: min(540px, calc(100vh - 230px)); }
 }
 @media (max-width: 900px) { .tour-in { padding-left: 16px; } .tour-inline .dev { height: min(520px, 68vh); } }
 """
@@ -259,7 +274,7 @@ def variant_c():
     h = h.replace(stage, reel)
     rows = ''.join(
         f'<div class="feat{" flip" if i % 2 == 0 else ""} rv"{" id=" + chr(34) + "urun" + chr(34) if i == 0 else ""}><div class="txt">{step_txt(s)}</div>'
-        f'<div class="vis{"" if VIS[i]["kind"] == "ui" else " vis-c"}">{vis(VIS[i])}</div></div>' for i, s in enumerate(STEPS))
+        f'<div class="vis{"" if VIS[i]["kind"] == "ui" else " vis-c"}">{vis(VIS[i], panel=False)}</div></div>' for i, s in enumerate(STEPS))
     sec = SEC_OPEN + rows + SEC_CLOSE
     bars = '[' + ','.join('"' + v['bar'] + '"' for v in VIS[:5]) + ']'
     css = """
@@ -278,6 +293,7 @@ def variant_c():
 .reel-frame.is-on { opacity: 1; }
 .reel-frame picture, .reel-frame picture img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: top; }
 .reel-frame .dev { height: 90%; border-width: 7px; border-radius: 28px; }
+.reel-frame .mock.game { width: min(84%, 400px); }
 .reel-frame.is-on picture img { animation: reel-zoom 5.2s ease-out both; }
 @keyframes reel-zoom { from { transform: scale(1.035); } to { transform: scale(1); } }
 .reel-ctl { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; row-gap: 10px; align-items: center; margin-top: 16px; }
@@ -295,7 +311,7 @@ def variant_c():
 .reel-seg { display: block; width: 100%; padding: 10px 0; background: none; border: 0; cursor: pointer; }
 .reel-seg i { display: block; height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; position: relative; }
 .reel-seg i::after { content: ""; position: absolute; inset: 0; background: var(--ink); transform: scaleX(0); transform-origin: left; }
-.reel-seg.is-done i::after { transform: scaleX(1); }
+.reel-seg.is-done i::after, .reel.is-user .reel-seg.is-on i::after { transform: scaleX(1); animation: none; }
 .reel-seg.is-on i::after { animation: reel-fill var(--reel-ms, 5200ms) linear forwards; }
 .reel.is-paused .reel-seg.is-on i::after { animation-play-state: paused; }
 @keyframes reel-fill { to { transform: scaleX(1); } }
@@ -330,7 +346,7 @@ def variant_c():
   var run = function () {
     stop();
     var paused = user || hold || !seen || document.hidden;
-    reel.classList.toggle('is-paused', paused);
+    reel.classList.toggle('is-paused', paused); reel.classList.toggle('is-user', user);
     play.setAttribute('aria-label', user ? 'Turu oynat' : 'Turu duraklat');
     if (paused) return;
     at = Date.now(); t = setTimeout(function () { t = null; show(cur + 1); run(); }, left);
@@ -369,4 +385,6 @@ if __name__ == '__main__':
     for f in (HERE / 'assets').glob('*.webp'): shutil.copy(f, dst / f.name)
     icon = ROOT / 'assets' / 'icon-concepts' / 'kucak' / 'temel.png'
     if icon.exists(): shutil.copy(icon, dst / 'icon.png')
+    host = (HERE / 'host.html').read_text(encoding='utf-8').replace('/*DATA*/{}/*END*/', (HERE / 'data.json').read_text(encoding='utf-8').strip())
+    (OUT / 'index.html').write_text(host, encoding='utf-8')   # önizleme sayfası (sekmeler + karşılaştırma)
     print('Hazır:', OUT, [p.name for p in sorted(OUT.glob('*.html'))])

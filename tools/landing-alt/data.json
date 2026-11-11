@@ -1,0 +1,35 @@
+{
+  "options": [
+    {
+      "id": "a", "name": "Kaydırdıkça", "pick": true,
+      "how": "Sayfayı aşağı kaydırırsın. Yazı kayar; ekran görüntüsü yerinde kalır ve her adımda değişir. Tıklama yok.",
+      "phone": "Görsel üstte sabit kalır (ekranın üçte biri), yazı altında kayar.",
+      "pros": ["Hiçbir adım gizli değil: kaydıran beşini de görür", "Yazı ile ekran hep yan yana, göz aramaz", "Kaydırma tarayıcının kendi kaydırması; hız ve yön değişmez"],
+      "cons": ["Bölüm uzar (beş ekran boyu kaydırma)", "Telefonda sabit görsel yer kaplar, yazıya az alan kalır", "Yeni ekran görüntüsü gerektiğinde beş görsel birden yenilenir"]
+    },
+    {
+      "id": "b", "name": "Tıkladıkça", "pick": false,
+      "how": "Beş adım bir liste. Birine dokununca yazısı açılır, yandaki ekran o adıma geçer. Altta \"Sonraki adım\".",
+      "phone": "Dokunulan adımın içinde yazı ve görsel birlikte açılır.",
+      "pros": ["En kısa sayfa: bölüm tek ekrana sığar", "Ziyaretçi istediği adıma doğrudan gider", "Yapımı ve bakımı en kolay olan"],
+      "cons": ["Tıklamayan yalnız ilk adımı görür; 2–5. adımlar kapalı kalır", "Uzun paragraflar dar kutuda sıkışık okunur", "Hareket az; \"canlı\" hissi en düşük seçenek"]
+    },
+    {
+      "id": "c", "name": "Kendiliğinden", "pick": false,
+      "how": "Açılışta bir tur beş adımı sırayla gösterir (duraklat, adım seç). Aşağıda adımlar bugünkü gibi alt alta; kaydırdıkça yumuşakça belirir.",
+      "phone": "Tur açılış metninin altında oynar; satırlar alt alta.",
+      "pros": ["Ziyaretçi hiçbir şey yapmadan ürünü ilk ekranda görür", "Aşağıdaki bölüm bugünkü düzen: hiçbir yazı gizlenmez", "Bugünkü sayfaya en yakın, en az riskli değişiklik"],
+      "cons": ["Kendiliğinden değişen görsel, okuyanı bölebilir (duraklat düğmesi bu yüzden var)", "Açılışta beş küçük sahne: ekran yazıları küçük kalır", "\"Kaydırdıkça güncellenen tek ekran\" isteğini en az karşılayan"]
+    }
+  ],
+  "advice": [],
+  "notes": [
+    "<b>Yazılar aynı.</b> Başlıklar, paragraflar, fiyatlar, SSS ve kapanış bugünkü sayfadan alındı; üretici metni doğrudan <code>site/index.html</code>'den okuyor.",
+    "<b>Görseller güncellendi.</b> Takip Planı bu sabah gizlendiği için adımlarda güncel ekranlar var: Kaynak kütüphanesi, ebeveynin telefonundaki eğitim sayfası, Davranışlar ve Olaylar, eğitim özeti ve gözlem grafiği. Açılıştaki üç işaret etiketi eski görsele göre konmuştu, kaldırıldı.",
+    "<b>\"7 gün\" düğmeleri \"14 gün\" oldu.</b> Deneme süresi kararından sonra düğmelerde ve fiyat başlığında 7 gün kalmıştı; hem önizlemelerde hem yayındaki sayfanın kaynağında düzeltildi.",
+    "<b>Metindeki iddialar aynen duruyor</b> (4–6 saat, 100'den fazla kaynak, 5 dakika, kanıta dayalı, tedavi). Bunların pazarlama kurallarına uygunluğu Marketing kontrolünde; bu çalışma yalnız gezme biçimini değiştiriyor.",
+    "<b>Erişilebilirlik.</b> Üçünde de betik çalışmasa bütün içerik okunur; \"hareketi azalt\" ayarı açıksa geçiş ve kendiliğinden oynatma olmaz; her şey klavyeyle gezilir."
+  ],
+  "bench": [],
+  "sources": ""
+}

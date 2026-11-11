@@ -22,7 +22,7 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.webp': 'image/webp', '.pn
       p.on('console', (m) => { if (m.type() === 'error') errs.push(m.text().slice(0, 140)); });
       p.on('requestfailed', (r) => errs.push('yüklenemedi: ' + r.url().slice(-40)));
       await p.goto(base + v + '.html'); await p.waitForTimeout(700);
-      const shot = async (tag) => { await p.waitForTimeout(450); await p.screenshot({ path: `${OUT}/${name}-${v}-${tag}.png` }); };
+      const shot = async (tag) => { await p.waitForTimeout(1100); await p.screenshot({ path: `${OUT}/${name}-${v}-${tag}.png` }); };
       const over = async () => p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       const note = { v, vp: name, errs, over: await over() };
       await shot('0-hero');
@@ -32,15 +32,16 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.webp': 'image/webp', '.pn
         for (let i = 0; i < tops.length; i++) {
           await p.evaluate((y) => scrollTo(0, y), tops[i]); await p.waitForTimeout(500);
           seen.push(await p.evaluate(() => [...document.querySelectorAll('.pin-frame')].findIndex((e) => e.classList.contains('is-on'))));
-          if (i === 0 || i === 1 || i === 2 || i === 4 || i === 5) await shot('step' + (i + 1));
+          if (i === 0 || i === 1 || i === 2 || i === 4) await shot('step' + (i + 1));
         }
         note.frames = seen.join(','); note.live = await p.evaluate(() => document.querySelector('.pin').classList.contains('is-live'));
+        await p.evaluate(() => document.querySelector('.feat.extra').scrollIntoView({ block: 'center' })); await shot('extra');
         note.sticky = await p.evaluate(() => { const s = document.querySelector('.pin-stage').getBoundingClientRect(); return Math.round(s.top) + '..' + Math.round(s.bottom); });
       }
       if (v === 'b') {
         await p.evaluate(() => document.getElementById('nasil').scrollIntoView()); await shot('step1');
         const seen = [];
-        for (let i = 1; i < 6; i++) {
+        for (let i = 1; i < 5; i++) {
           await p.locator('.tour-btn').nth(i).click(); await p.waitForTimeout(650);
           seen.push(await p.evaluate(() => [...document.querySelectorAll('.tour-item')].findIndex((e) => e.classList.contains('is-on'))));
           if (i === 1 || i === 2 || i === 4) await shot('step' + (i + 1));
