@@ -40,7 +40,7 @@ VIS = [
     {'kind': 'ui', 'key': 's4', 'bar': 'ClinicApp · Ebeveyn Eğitimi', 'alt': 'Gözlem verisi grafiği: haftalar içinde ölçüte doğru yükselen çizgi, üstte üç özet kartı.'},
     {'kind': 'game', 'key': 's5', 'bar': 'Çocuğun oyunu', 'alt': ''},
     # pano: çok danışanlı uydurma veriyle güncel etiketler (board-shot.js)
-    {'kind': 'ui', 'key': 'board', 'bar': 'ClinicApp · Danışanlar', 'alt': 'Danışan panosu: Senin sıran, Ebeveynden yeni ve Sessiz kalanlar bölümleri.'},
+    {'kind': 'ui', 'key': 'board', 'bar': 'ClinicApp · Danışanlar', 'alt': 'Danışan panosu: Senin sıran bölümünde danışanlar ve her birinde bekleyen iş.'},
 ]
 HERO = {'kind': 'ui', 'key': 'hero', 'bar': 'ClinicApp · Ebeveyn Eğitimi', 'alt': 'Bir danışanın Ebeveyn Eğitimi özeti: Öğrenme modülleri, Uygulama görevleri, Hızlı yapılacaklar kartları ve gözlem grafiği.'}
 

@@ -12,7 +12,7 @@ const { open } = require('../store-shots/lib');
       const el = [...document.querySelectorAll('div')].filter((d) => !d.childElementCount && /^Senin sıran/.test(d.textContent.trim()))[0];
       let c = el.parentElement;
       while (c) { const st = getComputedStyle(c); if ((st.overflowY === 'auto' || st.overflowY === 'scroll') && c.scrollHeight > c.clientHeight) break; c = c.parentElement; }
-      if (c) c.scrollTop += el.getBoundingClientRect().top - c.getBoundingClientRect().top - 30;
+      if (c) c.scrollTop += el.getBoundingClientRect().top - c.getBoundingClientRect().top - 16;
     });
     await p.waitForTimeout(700);
     const box = await p.evaluate(() => {
@@ -21,7 +21,7 @@ const { open } = require('../store-shots/lib');
       const r = c.getBoundingClientRect(), t = el.getBoundingClientRect();
       return { x: r.left, w: r.width, y: t.top, vw: innerWidth, vh: innerHeight };
     });
-    const w = Math.min(box.w + 32, box.vw), x = Math.max(0, box.x - 16), y = Math.max(0, box.y - 22), h = Math.min(w / ratio, box.vh - y);
+    const w = Math.min(box.w + 32, box.vw), x = Math.max(0, box.x - 16), y = Math.max(0, box.y - 8), h = Math.min(w / ratio, box.vh - y);
     await p.screenshot({ path: path.join(__dirname, 'assets', `board-${name}.png`), clip: { x, y, width: w, height: h } });
     console.log(dev, JSON.stringify({ x, y, w, h: Math.round(h) }), 'hata:', p.errors.length);
     await b.close();
