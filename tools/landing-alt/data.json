@@ -1,0 +1,171 @@
+{
+ "options": [
+  {
+   "id": "a",
+   "name": "Kaydırdıkça",
+   "pick": false,
+   "how": "Sayfayı aşağı kaydırırsın. Yazı kayar; ekran görüntüsü yerinde kalır ve her adımda değişir. Tıklama yok.",
+   "phone": "Görsel üstte sabit kalır (ekranın üçte biri), yazı altında kayar.",
+   "pros": [
+    "Hiçbir adım gizli değil: kaydıran beşini de görür",
+    "Yazı ile ekran hep yan yana, göz aramaz",
+    "Kaydırma tarayıcının kendi kaydırması; hız ve yön değişmez"
+   ],
+   "cons": [
+    "Bugün baktığım başarılı şirket sayfalarında büyük ölçekli örneği yok; kanıtı en zayıf seçenek",
+    "Telefonda sabit görsel yer kaplar, yazıya az alan kalır",
+    "Bölüm uzar (beş ekran boyu kaydırma); yeni ekran görüntüsünde beş görsel birden yenilenir"
+   ]
+  },
+  {
+   "id": "b",
+   "name": "Tıkladıkça",
+   "pick": false,
+   "how": "Beş adım bir liste. Birine dokununca yazısı açılır, yandaki ekran o adıma geçer. Altta \"Sonraki adım\".",
+   "phone": "Dokunulan adımın içinde yazı ve görsel birlikte açılır.",
+   "pros": [
+    "En kısa sayfa: bölüm tek ekrana sığar",
+    "Ziyaretçi istediği adıma doğrudan gider",
+    "Calendly, Shopify ve Apple'ın bugün kullandığı kalıp; yapımı ve bakımı en kolay"
+   ],
+   "cons": [
+    "Tıklamayan yalnız ilk adımı görür; 2–5. adımlar kapalı kalır",
+    "Uzun paragraflar dar kutuda sıkışık okunur",
+    "Hareket az; \"canlı\" hissi en düşük seçenek"
+   ]
+  },
+  {
+   "id": "c",
+   "name": "Kendiliğinden",
+   "pick": true,
+   "how": "Açılışta bir tur beş adımı sırayla gösterir (duraklat, adım seç). Aşağıda adımlar bugünkü gibi alt alta; kaydırdıkça yumuşakça belirir.",
+   "phone": "Tur açılış metninin altında oynar; satırlar alt alta.",
+   "pros": [
+    "Ziyaretçi hiçbir şey yapmadan ürünü ilk ekranda görür",
+    "Aşağıdaki bölüm bugünkü düzen: hiçbir yazı gizlenmez",
+    "Baktığım şirketlerde en yaygın kalıp (Notion, Loom, Slack, Airtable, Apple)"
+   ],
+   "cons": [
+    "Kendiliğinden değişen görsel, okuyanı bölebilir (duraklat düğmesi bu yüzden var)",
+    "Açılışta beş küçük sahne: ekran yazıları küçük kalır",
+    "\"Kaydırdıkça güncellenen tek ekran\" isteğini en az karşılayan"
+   ]
+  }
+ ],
+ "advice": [
+  "<b>Önerim C (Kendiliğinden).</b> Bugün baktığım başarılı şirketlerin çoğu ürünü böyle gösteriyor: açılışta ürün kendiliğinden oynar, yanında duraklat düğmesi olur (Notion, Loom, Slack, Airtable, Apple; sektörden SimplePractice). Sayfanın geri kalanı bugünkü gibi alt alta kaldığı için hiçbir yazı gizlenmez; bir şey bozulsa bile sayfa eksiksiz okunur. \"Karışık olmasın, işlev önde olsun\" isteğine en yakın olan bu.",
+  "<b>İkinci tercih B (Tıkladıkça).</b> Calendly kendi dört adımlı akışını, Shopify ve Apple öne çıkan özelliklerini tam böyle sekmeyle gösteriyor. En derli toplu olan bu. Bedeli: tıklamayan ziyaretçi 2–5. adımların ayrıntısını görmez.",
+  "<b>A (Kaydırdıkça)</b> senin tarif ettiğin \"tek ekranda, kaydırdıkça güncellenen yazı ve ekran\" fikrinin kendisi; önizlemede sorunsuz çalışıyor. Ama kanıtı en zayıf olan bu: stil dosyaları açılabilen dokuz sayfada (Apple'ın dört ürün sayfası dahil) büyük bir sabitlenen bölüm bulamadım. NN/g'nin kullanıcı testlerinde kaydırmaya müdahale eden sayfalar iş odaklı kullanıcıları belirgin biçimde rahatsız etmiş, telefonda bu etkiyi kaldıran siteler daha iyi sonuç almış. Bizim A kaydırmanın hızını ve yönünü değiştirmediği için bu eleştirinin hafif hâli; yine de üçü arasında riski en yüksek olan.",
+  "Karar senin. Üstteki sekmelerden üçünü de dene; bilgisayarda sağ üstteki Masaüstü / Telefon düğmesiyle iki görünüme de bak. Seçtiğini tanıtım sayfasına ben işlerim; yayına alma yine senin onayınla olur."
+ ],
+ "notes": [
+  "<b>Yazılar aynı.</b> Başlıklar, paragraflar, fiyatlar, SSS ve kapanış bugünkü sayfadan alındı; üretici metni doğrudan <code>site/index.html</code>'den okuyor.",
+  "<b>Görseller güncellendi.</b> Takip Planı bu sabah gizlendiği için adımlarda güncel ekranlar var: Kaynak kütüphanesi, ebeveynin telefonundaki eğitim sayfası, Davranışlar ve Olaylar, eğitim özeti ve gözlem grafiği. Açılıştaki üç işaret etiketi eski görsele göre konmuştu, kaldırıldı.",
+  "<b>\"7 gün\" düğmeleri \"14 gün\" oldu.</b> Deneme süresi kararından sonra düğmelerde ve fiyat başlığında 7 gün kalmıştı; hem önizlemelerde hem yayındaki sayfanın kaynağında düzeltildi.",
+  "<b>Metindeki iddialar aynen duruyor</b> (4–6 saat, 100'den fazla kaynak, 5 dakika, kanıta dayalı, tedavi). Bunların pazarlama kurallarına uygunluğu Marketing kontrolünde; bu çalışma yalnız gezme biçimini değiştiriyor.",
+  "<b>Erişilebilirlik.</b> Üçünde de betik çalışmasa bütün içerik okunur; \"hareketi azalt\" ayarı açıksa geçiş ve kendiliğinden oynatma olmaz; her şey klavyeyle gezilir.",
+  "NN/g, kendiliğinden dönen içeriğin okuyanı bölebildiğini yazıyor. Bu yüzden C'de duraklat düğmesi var, tur üstüne gelince ve sekme arka plandayken durur, \"hareketi azalt\" ayarı açık cihazda hiç oynamaz. B'de adımlar kendiliğinden ilerlemez; baktığım sekmeli örneklerin (Apple, Jane, Shopify, Calendly) hiçbiri de 9 saniye içinde kendiliğinden ilerlemedi."
+ ],
+ "bench": [
+  {
+   "title": "A · Kaydırdıkça (görsel sabit, yazı kayar)",
+   "items": [
+    {
+     "name": "Apple (NN/g incelemesi, 2023)",
+     "url": "https://www.nngroup.com/articles/scrolljacking-101/",
+     "what": "NN/g bu ailenin örneği olarak Apple Watch Ultra sayfasını gösteriyor: kaydırdıkça özellikler cihazın üstünde sırayla anlatılıyor.",
+     "proof": "Halka açık şirket. Bugün baktığım dört Apple sayfasında (AirPods Pro, iPhone 18 Pro, Vision Pro, Watch) büyük sabit bölüm bulamadım."
+    },
+    {
+     "name": "Calendly",
+     "url": "https://calendly.com/",
+     "what": "hafif hâli: bir bölüm başlığı yerinde kalır, kartlar yanından kayar. Görsel değişmez.",
+     "proof": "50 milyondan fazla kişi, 240+ ülke (calendly.com/about)"
+    },
+    {
+     "name": "Joon (uzman sayfası)",
+     "url": "https://www.joonhealth.co/for-providers",
+     "what": "örnek aldığımız rakip bu kalıbı kullanmıyor: düz, alt alta bir sayfa; sabit bölüm, sekme ya da kendiliğinden oynayan video yok.",
+     "proof": "Karşılaştırma için; başarı kanıtı ayrıca toplanmadı."
+    }
+   ]
+  },
+  {
+   "title": "B · Tıkladıkça (sekmeli tur)",
+   "items": [
+    {
+     "name": "Calendly",
+     "url": "https://calendly.com/",
+     "what": "dört adımlı akışını sekmeyle anlatıyor: Book · Prep · Capture · Follow up.",
+     "proof": "50 milyondan fazla kişi, 240+ ülke (calendly.com/about)"
+    },
+    {
+     "name": "Shopify",
+     "url": "https://www.shopify.com/",
+     "what": "açılışın hemen altında dört sekme; her sekme tek cümlelik bir başlık.",
+     "proof": "\"Millions trust Shopify\" (shopify.com/about); halka açık şirket"
+    },
+    {
+     "name": "Apple · AirPods Pro",
+     "url": "https://www.apple.com/airpods-pro/",
+     "what": "öne çıkan altı özellik sekmeli bir galeride.",
+     "proof": "Halka açık şirket"
+    },
+    {
+     "name": "monday.com",
+     "url": "https://monday.com/",
+     "what": "ekiplere göre sekmeler (Marketing, Operations, IT, Product, Sales, HR).",
+     "proof": "Nasdaq'ta halka açık (monday.com/p/about)"
+    },
+    {
+     "name": "Jane",
+     "url": "https://jane.app/",
+     "what": "sektörden (klinik yazılımı): beş özellik sekmesi (Scheduling, Charting & Care …).",
+     "proof": "Ölçek bilgisini kendi sitesinde bulamadım; yalnız sektör örneği olarak."
+    }
+   ]
+  },
+  {
+   "title": "C · Kendiliğinden (oynayan ürün gösterimi)",
+   "items": [
+    {
+     "name": "Notion",
+     "url": "https://www.notion.com/",
+     "what": "açılışta ürün videosu kendiliğinden oynuyor; duraklat düğmesi var.",
+     "proof": "100 milyon kullanıcı, 50'den fazla ülke (kendi sitesi)"
+    },
+    {
+     "name": "Loom",
+     "url": "https://www.loom.com/",
+     "what": "dört kısa ürün videosu kendiliğinden oynuyor; duraklat düğmesi var.",
+     "proof": "400.000 şirkette milyonlarca kişi (kendi sitesi)"
+    },
+    {
+     "name": "Slack",
+     "url": "https://slack.com/",
+     "what": "sayfa boyunca 20 kısa ürün videosu kendiliğinden oynayacak biçimde; duraklat düğmeleri var.",
+     "proof": "2021'de Salesforce satın aldı (slack.com/about)"
+    },
+    {
+     "name": "Airtable",
+     "url": "https://www.airtable.com/",
+     "what": "açılışta ve aşağıda kendiliğinden oynayan videolar; duraklat düğmesi var.",
+     "proof": "500.000 ekip (kendi sitesi)"
+    },
+    {
+     "name": "Apple · AirPods Pro",
+     "url": "https://www.apple.com/airpods-pro/",
+     "what": "açılış videosu kendiliğinden oynuyor; duraklat düğmesi var.",
+     "proof": "Halka açık şirket"
+    },
+    {
+     "name": "SimplePractice",
+     "url": "https://www.simplepractice.com/",
+     "what": "sektörden (uzman yazılımı): açılışta kendiliğinden oynayan ürün videosu.",
+     "proof": "250.000'den fazla uzman (kendi sitesi)"
+    }
+   ]
+  }
+ ],
+ "sources": "<b>Yöntem.</b> Sayfalar 11 Kasım 2026'da 1440 piksel genişlikte tarayıcıda açıldı; sekme grupları, kendiliğinden oynayan videolar ve kaydırırken yerinde kalan bölümler sayfanın yapısından sayıldı. Stripe, Linear, Slack, Shopify ve monday.com'un stil dosyaları bu oturumdan açılamadığı için bu sitelerde \"sabitlenen bölüm\" denetlenemedi; A için kanıtın zayıf olmasının bir nedeni de bu. <b>Başarı ölçütü.</b> Şirketin kendi sitesinde yazdığı kullanıcı / müşteri sayısı ya da halka açık olması; rakamlar şirketlerin kendi beyanıdır. <b>Kullanılabilirlik kaynakları (Nielsen Norman Group).</b> <a href=\"https://www.nngroup.com/articles/scrolljacking-101/\" target=\"_blank\" rel=\"noopener\">Scrolljacking 101</a> (2023): kaydırmanın hızını ya da yönünü değiştiren sayfalar kullanıcı denetimini, dikkati ve işi bitirmeyi zorlaştırıyor; iş odaklı kullanıcılar çok rahatsız oluyor; etkiyi telefona taşımayan siteler daha iyi sonuç alıyor; kullanılacaksa yalnız önemli bilgi için ve ilk ekranın altında. <a href=\"https://www.nngroup.com/articles/auto-forwarding/\" target=\"_blank\" rel=\"noopener\">Auto-Forwarding Carousels, Accordions Annoy Users &amp; Reduce Visibility</a> (2013): kendiliğinden dönen paneller rahatsız ediyor ve aranan şeyin görülme olasılığını düşürüyor. <a href=\"https://www.nngroup.com/articles/animation-purpose-ux/\" target=\"_blank\" rel=\"noopener\">The Role of Animation and Motion in UX</a> (2020): hareket göze batmayan, kısa ve ince olmalı."
+}

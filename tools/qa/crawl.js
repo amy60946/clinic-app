@@ -78,7 +78,7 @@ async function step(p, name, fn, marker) {
   } catch (e) { const text = await p.evaluate(() => { const t = document.body.innerText.replace(/\n+/g, ' | '); const i = t.indexOf('Danışan Bilgileri'); return t.slice(i, i + 160) + ' ... ' + t.slice(-200); }).catch(() => ''); report.push({ name, text, fail: String(e.message || e).split('\n')[0] }); }
 }
 async function login(b, who) {
-  const ctx = await b.newContext({ viewport: { width: W, height: H }, isMobile: W < 700, hasTouch: true, locale: 'tr-TR', timezoneId: 'Europe/Istanbul' });
+  const ctx = await b.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: +process.env.DSF || 1, isMobile: W < 700, hasTouch: true, locale: 'tr-TR', timezoneId: 'Europe/Istanbul' });
   await ctx.addInitScript((plan) => { window.__apiLog = []; window.__plan = plan; }, !!process.env.PLAN);
   const p = await ctx.newPage(); p.errs = [];
   p.on('pageerror', (e) => p.errs.push(String(e).slice(0, 160)));
