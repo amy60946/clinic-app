@@ -39,9 +39,8 @@ VIS = [
     {'kind': 'ui', 'key': 's3', 'bar': 'ClinicApp · Davranışlar ve Olaylar', 'alt': 'Bir hedef davranış: stratejiler ve öncül, sonuç, uygulanan strateji, çocuğun tepkisi sütunlu olay tablosu.'},
     {'kind': 'ui', 'key': 's4', 'bar': 'ClinicApp · Ebeveyn Eğitimi', 'alt': 'Gözlem verisi grafiği: haftalar içinde ölçüte doğru yükselen çizgi, üstte üç özet kartı.'},
     {'kind': 'game', 'key': 's5', 'bar': 'Çocuğun oyunu', 'alt': ''},
-    # pano: sitedeki görsel aynen (uydurma verili çok danışanlı ekran)
-    {'kind': 'ui', 'key': 'board', 'bar': 'ClinicApp · Danışanlar', 'alt': 'Danışan panosu: Senin sıran ve Aileden yeni bölümleri.',
-     'd': ('assets/ui-board.webp', 1584, 916), 'm': ('assets/m-board.webp', 1170, 1680)},
+    # pano: çok danışanlı uydurma veriyle güncel etiketler (board-shot.js)
+    {'kind': 'ui', 'key': 'board', 'bar': 'ClinicApp · Danışanlar', 'alt': 'Danışan panosu: Senin sıran, Ebeveynden yeni ve Sessiz kalanlar bölümleri.'},
 ]
 HERO = {'kind': 'ui', 'key': 'hero', 'bar': 'ClinicApp · Ebeveyn Eğitimi', 'alt': 'Bir danışanın Ebeveyn Eğitimi özeti: Öğrenme modülleri, Uygulama görevleri, Hızlı yapılacaklar kartları ve gözlem grafiği.'}
 
@@ -111,8 +110,9 @@ def variant_a():
         f'<div class="pin-inline">{vis(VIS[i])}</div></li>' for i, s in enumerate(STEPS[:TOUR]))
     frames = ''.join(f'<div class="pin-frame k-{v["kind"]}{" is-on" if i == 0 else ""}" data-i="{i}">{vis(v)}</div>' for i, v in enumerate(VIS[:TOUR]))
     segs = ''.join(f'<i class="{"is-on" if i == 0 else ""}"></i>' for i in range(TOUR))
+    caps = ''.join(f'<p class="pin-cap{" is-on" if i == 0 else ""}"><b>{s["n"]}</b><span>{s["label"]}</span></p>' for i, s in enumerate(STEPS[:TOUR]))
     sec = (SEC_OPEN + f'<div class="pin" id="urun"><ol class="pin-steps">{steps}</ol>'
-           f'<div class="pin-stage" aria-hidden="true"><div class="pin-segs">{segs}</div><div class="pin-frames">{frames}</div></div></div>' + extra_row() + SEC_CLOSE)
+           f'<div class="pin-stage" aria-hidden="true"><div class="pin-segs">{segs}</div><div class="pin-caps">{caps}</div><div class="pin-frames">{frames}</div></div></div>' + extra_row() + SEC_CLOSE)
     css = """
 /* --- A: sabit ekran, kayan anlatım. Betik yokken ya da hareket azaltmada adımlar alt alta, görseller yerinde. --- */
 .pin-steps { display: flex; flex-direction: column; gap: 96px; }
@@ -129,7 +129,8 @@ def variant_a():
 .pin-segs { display: flex; gap: 6px; }
 .pin-segs i { flex: 1; height: 4px; border-radius: 4px; background: var(--line); transition: background .3s; }
 .pin-segs i.is-on { background: var(--ink); }
-.pin-frames { display: grid; align-items: center; justify-items: center; min-width: 0; }
+.pin-frames { display: grid; align-items: start; justify-items: center; min-width: 0; }
+.pin-caps { display: none; }
 .pin-frame { grid-area: 1 / 1; width: 100%; min-width: 0; display: grid; place-items: center; opacity: 0; transform: translateY(14px) scale(.985); transition: opacity .35s, transform .35s; pointer-events: none; }
 .pin-frame.is-on { opacity: 1; transform: none; }
 .pin-frame .dev { height: min(600px, calc(100vh - 190px)); }
@@ -146,6 +147,12 @@ def variant_a():
   .pin.is-live .pin-frame .panel { padding: 8px; }
   .pin.is-live .pin-frame .panel .mock.game { width: min(100%, 330px); padding: 12px 14px; gap: 6px; box-shadow: none; }
   .pin.is-live .pin-frame .panel .mock.game .row { padding: 5px 0; font-size: 13px; }
+  .pin.is-live .pin-caps { display: grid; min-width: 0; }
+  .pin-cap { grid-area: 1 / 1; display: flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 800; color: var(--ink); line-height: 1.25; opacity: 0; transition: opacity .25s; min-width: 0; }
+  .pin-cap.is-on { opacity: 1; }
+  .pin-cap b { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 13px; }
+  .pin-cap span { min-width: 0; }
+  .pin.is-live .pin-step .stepn { display: none; }
   .pin.is-live .pin-step { min-height: 56vh; min-height: 56svh; justify-content: flex-start; padding-top: 32px; }
   .pin.is-live .pin-step:last-child { min-height: 0; padding-bottom: 40px; }
 }
@@ -154,16 +161,17 @@ def variant_a():
 (function () {
   // A: adım ekranın ortasına gelince sağdaki (telefonda üstteki) sabit görsel o adıma geçer. Kaydırma tarayıcınındır; hız ya da yön değiştirilmez.
   var pin = document.querySelector('.pin'); if (!pin || !('IntersectionObserver' in window)) return;
-  var steps = [].slice.call(pin.querySelectorAll('.pin-step')), frames = [].slice.call(pin.querySelectorAll('.pin-frame')), segs = [].slice.call(pin.querySelectorAll('.pin-segs i'));
+  var steps = [].slice.call(pin.querySelectorAll('.pin-step')), frames = [].slice.call(pin.querySelectorAll('.pin-frame')), segs = [].slice.call(pin.querySelectorAll('.pin-segs i')), caps = [].slice.call(pin.querySelectorAll('.pin-cap'));
   pin.classList.add('is-live');
   var set = function (n) {
     steps.forEach(function (el, i) { el.classList.toggle('is-on', i === n); });
     frames.forEach(function (el, i) { el.classList.toggle('is-on', i === n); });
+    caps.forEach(function (el, i) { el.classList.toggle('is-on', i === n); });
     segs.forEach(function (el, i) { el.classList.toggle('is-on', i <= n); });
   };
   var io = new IntersectionObserver(function (es) {
     es.forEach(function (e) { if (e.isIntersecting) set(+e.target.getAttribute('data-i')); });
-  }, { rootMargin: '-52% 0px -47% 0px' });
+  }, { rootMargin: window.matchMedia('(max-width: 900px)').matches ? '-68% 0px -31% 0px' : '-52% 0px -47% 0px' });   // telefonda okuma alanı sabit görselin altında
   steps.forEach(function (el) { io.observe(el); });
 })();
 """
@@ -180,16 +188,16 @@ def variant_b():
         f'<div class="tour-inline">{vis(VIS[i])}</div></div></div></li>' for i, s in enumerate(STEPS[:TOUR]))
     frames = ''.join(f'<div class="tour-frame k-{v["kind"]}{" is-on" if i == 0 else ""}">{vis(v, mobile=False)}</div>' for i, v in enumerate(VIS[:TOUR]))
     sec = (SEC_OPEN + f'<div class="tour" id="urun"><ol class="tour-list">{items}</ol>'
-           f'<div class="tour-stage" aria-hidden="true">{frames}</div></div>'
+           f'<div class="tour-side"><div class="tour-stage" aria-hidden="true">{frames}</div>'
            '<div class="tour-nav"><button type="button" class="btn btn-ghost" id="tour-prev">← Önceki</button>'
            '<span id="tour-count" aria-live="polite">1 / 5</span>'
-           '<button type="button" class="btn btn-primary" id="tour-next">Sonraki adım →</button></div>' + extra_row() + SEC_CLOSE)
+           '<button type="button" class="btn btn-primary" id="tour-next">Sonraki adım →</button></div></div></div>' + extra_row() + SEC_CLOSE)
     css = """
 /* --- B: tıklanan tur. Adıma dokun, yazı ve ekran yerinde değişir; sayfa uzamaz. Betik yokken bütün adımlar açık. --- */
 .tour-list { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .tour-item { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--paper); overflow: hidden; }
 .tour-item.is-on { background: var(--card); border-color: var(--ink); box-shadow: 0 12px 30px -22px rgba(15,27,61,.5); }
-.tour-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: none; border: 0; font: inherit; font-size: 15.5px; font-weight: 800; color: var(--ink); text-align: left; cursor: pointer; }
+.tour-btn { width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: none; border: 0; font: inherit; font-size: 15.5px; font-weight: 800; color: var(--ink); text-align: left; cursor: pointer; }
 .tour-btn b { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--off-bg); color: var(--off-fg); display: grid; place-items: center; font-size: 14px; }
 .tour-item.is-on .tour-btn b { background: var(--ink); color: #fff; }
 .tour-btn span { flex: 1; min-width: 0; }
@@ -205,17 +213,19 @@ def variant_b():
 .tour.is-live .tour-item.is-on .tour-body { grid-template-rows: 1fr; }
 .tour.is-live .tour-item.is-on .tour-in { padding-block: 2px 18px; }
 .tour.is-live .tour-item:not(.is-on) .tour-in { visibility: hidden; }
-.tour.is-live ~ .tour-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 28px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
+.tour-side { min-width: 0; }
+.tour.is-live .tour-nav { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 22px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
 .tour-nav .btn { min-height: 44px; padding: 0 18px; font-size: 15px; }
 .tour-nav .btn[disabled] { opacity: .4; cursor: default; }
 @media (min-width: 901px) {
   #nasil .head { margin-bottom: 30px; }
   .tour.is-live { display: grid; grid-template-columns: minmax(0, .86fr) minmax(0, 1.14fr); gap: 48px; align-items: start; }
   .tour.is-live .tour-inline { display: none; }
-  .tour.is-live .tour-stage { display: grid; align-items: start; justify-items: center; min-width: 0; position: sticky; top: 92px; }
+  .tour.is-live .tour-side { position: sticky; top: 92px; }
+  .tour.is-live .tour-stage { display: grid; align-items: start; justify-items: center; min-width: 0; }
   .tour-frame { grid-area: 1 / 1; width: 100%; min-width: 0; display: grid; place-items: center; opacity: 0; transform: translateY(10px); transition: opacity .3s, transform .3s; pointer-events: none; }
   .tour-frame.is-on { opacity: 1; transform: none; }
-  .tour-frame .dev { height: min(540px, calc(100vh - 230px)); }
+  .tour-frame .dev { height: min(520px, calc(100vh - 270px)); }
 }
 @media (max-width: 900px) { .tour-in { padding-left: 16px; } .tour-inline .dev { height: min(520px, 68vh); } }
 """
@@ -293,6 +303,8 @@ def variant_c():
 .reel-frame.is-on { opacity: 1; }
 .reel-frame picture, .reel-frame picture img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: top; }
 .reel-frame .dev { height: 90%; border-width: 7px; border-radius: 28px; }
+.reel-frame.k-phone { align-items: start; }
+.reel-frame.k-phone .dev { height: 150%; margin-top: 4%; }
 .reel-frame .mock.game { width: min(84%, 400px); }
 .reel-frame.is-on picture img { animation: reel-zoom 5.2s ease-out both; }
 @keyframes reel-zoom { from { transform: scale(1.035); } to { transform: scale(1); } }
@@ -315,7 +327,7 @@ def variant_c():
 .reel-seg.is-on i::after { animation: reel-fill var(--reel-ms, 5200ms) linear forwards; }
 .reel.is-paused .reel-seg.is-on i::after { animation-play-state: paused; }
 @keyframes reel-fill { to { transform: scaleX(1); } }
-@media (max-width: 700px) { .reel-frames { aspect-ratio: 4 / 5; } .reel-frame .dev { height: 94%; } .reel-cap { font-size: 14px; } }
+@media (max-width: 700px) { .reel-frames { aspect-ratio: 4 / 5; } .reel-frame.k-phone .dev { height: 118%; } .reel-cap { font-size: 14px; } }
 @media (prefers-reduced-motion: reduce) { .reel-seg.is-on i::after { transform: scaleX(1); } }
 /* kaydırınca belirme: görünür durumdan başlar (betik çalışmasa da okunur) */
 .rv.rv-wait { opacity: .5; transform: translateY(18px); }

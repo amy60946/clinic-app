@@ -28,7 +28,7 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.webp': 'image/webp', '.pn
       await shot('0-hero');
       if (v === 'a') {
         const seen = [];
-        const tops = await p.evaluate(() => [...document.querySelectorAll('.pin-step')].map((e) => e.getBoundingClientRect().top + scrollY + e.offsetHeight / 2 - innerHeight * .52));
+        const tops = await p.evaluate(() => [...document.querySelectorAll('.pin-step')].map((e) => e.getBoundingClientRect().top + scrollY + Math.min(e.offsetHeight / 2, 150) - innerHeight * (innerWidth <= 900 ? .68 : .52)));
         for (let i = 0; i < tops.length; i++) {
           await p.evaluate((y) => scrollTo(0, y), tops[i]); await p.waitForTimeout(500);
           seen.push(await p.evaluate(() => [...document.querySelectorAll('.pin-frame')].findIndex((e) => e.classList.contains('is-on'))));
