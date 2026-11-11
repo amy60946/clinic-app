@@ -15,7 +15,7 @@
 :root[data-theme="dark"] { --bg: #0B1226; --panel: #141D38; --ink: #EEF1FA; --text: #C9D1E6; --muted: #97A2C0; --line: #293556; --accent: #9DB4F5; --accent-bg: #1D2A52; --good: #7FD19B; --good-bg: #173426; --warn: #E9C377; --warn-bg: #3A2E14; --bezel: #33406A; color-scheme: dark; }
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.5; display: flex; flex-direction: column; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.5; display: flex; flex-direction: column; }
 .gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 header { flex: none; background: var(--panel); border-bottom: 1px solid var(--line); padding-block: 10px; display: flex; flex-direction: column; gap: 8px; }
 .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
@@ -26,6 +26,7 @@ h1 { font-size: 16px; font-weight: 800; color: var(--ink); margin: 0; letter-spa
 button:focus-visible, a:focus-visible { outline: 3px solid #E9B22B; outline-offset: 2px; }
 .hint { font-size: 13px; color: var(--muted); min-height: 20px; }
 .hint b { color: var(--ink); }
+[hidden] { display: none !important; }
 main { flex: 1; min-height: 0; display: flex; }
 .view { flex: 1; min-width: 0; min-height: 0; display: flex; justify-content: center; padding-block: 12px; }
 .frame { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #F5F6F8; }
@@ -60,7 +61,7 @@ iframe { width: 100%; height: 100%; border: 0; display: block; }
 .bench small { display: block; color: var(--muted); font-size: 12.5px; }
 .src { font-size: 12.5px; color: var(--muted); }
 .src a { color: var(--accent); }
-@media (max-width: 860px) { .cards, .bench { grid-template-columns: 1fr; } .dev { display: none; } .view { padding-block: 8px; } h1 { width: 100%; } }
+@media (max-width: 860px) { .tabs { flex-wrap: wrap; } .cards, .bench { grid-template-columns: 1fr; } .dev { display: none; } .view { padding-block: 8px; } h1 { width: 100%; } }
 </style>
 
 <header class="gut">
@@ -90,8 +91,8 @@ iframe { width: 100%; height: 100%; border: 0; display: block; }
       <div class="box" id="oneri"></div>
       <div class="box note" id="notlar"></div>
       <div>
-        <h2>Benchmark: bu üç kalıbı kullanan başarılı şirketler</h2>
-        <p class="src" style="margin-top:6px">Sayfalar tek tek açılıp kalıp doğrulandı; içerik, metin ya da görsel kopyalanmadı, yalnız işleyiş örnek alındı.</p>
+        <h2>Benchmark: başarılı şirketler bu üç kalıbı nasıl kullanıyor?</h2>
+        <p class="src" style="margin-top:6px">Sayfalar 11 Kasım 2026'da tek tek tarayıcıda açılıp kalıp sayfa yapısından doğrulandı. İçerik, metin ya da görsel kopyalanmadı; yalnız işleyiş örnek alındı.</p>
       </div>
       <div class="bench" id="bench"></div>
       <p class="src" id="kaynak"></p>
