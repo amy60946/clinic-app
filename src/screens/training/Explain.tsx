@@ -3,7 +3,7 @@
 // "Anladım" ile tek satıra iner (bu cihazda hatırlanır); satıra dokununca yeniden açılır. Liste boşken hep açıktır.
 // Örnekler özgün; tanı, tedavi iddiası ya da ceza içermez.
 import React, { useEffect, useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, useWindowDimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../theme';
@@ -21,7 +21,7 @@ export const TASK_EXAMPLES: TaskExample[] = [
 export type TodoExample = { title: string; description: string };
 export const TODO_EXAMPLES: TodoExample[] = [
   { title: 'Görünür bir zamanlayıcı hazırla', description: 'Geçiş uyarılarında kullanmak için çocuğunun görebileceği bir kum saati ya da zamanlayıcı.' },
-  { title: 'Ödül listesini birlikte yazın', description: 'Çocuğunun isteyeceği beş küçük ödülü birlikte belirleyin ve görünür bir yere asın.' },
+  { title: 'Ödül listesini çocuğunla yaz', description: 'Çocuğunun isteyeceği beş küçük ödülü onunla birlikte belirle ve görünür bir yere as.' },
   { title: 'Akşam rutinini buzdolabına as', description: 'Akşam yemeğinden yatağa kadarki adımları resimli bir listeye dök.' },
 ];
 
@@ -30,13 +30,13 @@ const COPY = {
   tasks: {
     title: 'Uygulama görevi nedir?',
     lead: 'Ebeveynin evde tekrar tekrar uyguladığı beceri. Her uyguladığında kısa bir kayıt girer.',
-    steps: ['Sen görevi ve ölçümü yazarsın', 'Ebeveyn evde uygular, kayıt girer', 'Kayıtlar burada tablo ve grafik olur'],
+    steps: ['Sen görevi yazarsın', 'Ebeveyn evde uygular, kayıt girer', 'Kayıtları burada görürsün'],
     other: 'Bir kez yapılacak iş mi? Onu Hızlı yapılacaklar\'a ekle.',
   },
   todos: {
     title: 'Hızlı yapılacak nedir?',
     lead: 'Ebeveynin bir kez yapıp işaretlediği küçük iş. Tekrarlanmaz, ölçüm yoktur.',
-    steps: ['Sen işi yazarsın', 'Ebeveyn yapınca işaretler', 'Nasıl geçtiğini 1–5 ile söyler; burada görürsün'],
+    steps: ['Sen işi yazarsın', 'Ebeveyn yapınca işaretler', 'Nasıl geçtiğini burada görürsün'],
     other: 'Tekrarlanan bir beceri mi? Onu Uygulama görevleri\'ne ekle.',
   },
 } as const;
@@ -45,6 +45,7 @@ export function ExplainCard<K extends 'tasks' | 'todos'>({ kind, empty, onExampl
   kind: K; empty: boolean; onExample: (e: K extends 'tasks' ? TaskExample : TodoExample) => void;
 }) {
   const c = COPY[kind];
+  const narrow = useWindowDimensions().width < 640;   // dar ekranda üç adım yan yana küçük kutular (kart kısa kalsın)
   const [seen, setSeen] = useState(false);
   const [open, setOpen] = useState(true);
   useEffect(() => { AsyncStorage.getItem(KEY(kind)).then((v) => { if (v === '1') { setSeen(true); setOpen(false); } }).catch(() => {}); }, [kind]);
@@ -72,13 +73,16 @@ export function ExplainCard<K extends 'tasks' | 'todos'>({ kind, empty, onExampl
       <Text style={s.lead}>{c.lead}</Text>
       <View style={s.steps}>
         {c.steps.map((t, i) => (
-          <View key={t} style={s.step}>
+          <View key={t} style={[s.step, narrow && s.stepNarrow]}>
             <View style={s.num}><Text style={s.numText}>{i + 1}</Text></View>
-            <Text style={s.stepText}>{t}</Text>
+            <Text style={[s.stepText, narrow && s.stepTextNarrow]}>{t}</Text>
           </View>
         ))}
       </View>
-      <Text style={s.sec}>Örnekler · dokun, form dolu açılsın</Text>
+      <View style={s.secRow}>
+        <Text style={s.sec}>Örnekler</Text>
+        <Text style={s.secHint}>Dokun, form dolu açılır</Text>
+      </View>
       {examples.map((e) => (
         <Pressable key={e.title} onPress={() => onExample(e as any)} accessibilityRole="button" accessibilityLabel={`Örnek: ${e.title}`}
           style={({ pressed }) => [s.ex, pressed && { opacity: 0.8 }]}>
@@ -87,7 +91,7 @@ export function ExplainCard<K extends 'tasks' | 'todos'>({ kind, empty, onExampl
               <Text style={s.exTitle}>{e.title}</Text>
               {'measure' in e && <Text style={s.chip}>{measureLabel(e.measure)}</Text>}
             </View>
-            <Text style={s.exSub}>{'entry' in e ? `Ebeveyn şunu girer: ${e.entry}` : e.description}</Text>
+            {'entry' in e && <Text style={s.exSub}>Ebeveyn girer: {e.entry}</Text>}
           </View>
           <Ionicons name="add-circle-outline" size={20} color={colors.navy} />
         </Pressable>
@@ -120,11 +124,15 @@ const s = StyleSheet.create({
   gotIt: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line },
   gotItText: { fontSize: 12.5, fontWeight: '700', color: colors.navy },
   lead: { fontSize: 14, color: colors.text, lineHeight: 20 },
-  steps: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  steps: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'stretch' },
   step: { flexDirection: 'row', alignItems: 'center', gap: 8, flexGrow: 1, flexBasis: 190, minWidth: 0, backgroundColor: '#fff', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 10 },
+  stepNarrow: { flexDirection: 'column', alignItems: 'flex-start', gap: 5, flexBasis: 0, paddingHorizontal: 8 },
   num: { width: 22, height: 22, borderRadius: 11, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center' },
   numText: { color: '#fff', fontSize: 12, fontWeight: '700' },
   stepText: { fontSize: 13, color: colors.text, flexShrink: 1, lineHeight: 18 },
+  stepTextNarrow: { fontSize: 12, lineHeight: 16, alignSelf: 'stretch' },
+  secRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
+  secHint: { fontSize: 12, color: colors.muted, flexShrink: 1 },
   sec: { fontSize: 11.5, fontWeight: '700', color: colors.muted, letterSpacing: 0.4, textTransform: 'uppercase' },
   ex: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.line, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12 },
   exTop: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 8, rowGap: 4 },

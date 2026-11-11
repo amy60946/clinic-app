@@ -169,11 +169,11 @@ export function OnceHint({ userId, id, hint }: { userId: string; id: string; hin
 export const TRAINING_TOUR: (CoachStep & { tab: Tab })[] = [
   { key: 'intro', tab: 'training', title: 'Deniz’le dene', text: 'Örnek aile. Kaydedilmez, aileye gitmez.' },
   { key: 'open', tab: 'training', target: 'training.card', until: 'training_open', title: 'Eğitimi aç', text: 'Ebeveynin evde çalışacağı konu. **Karta dokun**' },
-  { key: 'modules', tab: 'training', target: 'training.tab.modules', until: 'training_tab_modules', title: 'Öğrenme modülleri', text: 'Ebeveynin okuduğu ve yanıtladığı içerik.' },
-  { key: 'tasks', tab: 'training', target: 'training.tab.tasks', until: 'training_tab_tasks', title: 'Uygulama görevleri', text: 'Evde tekrarlanan beceri.' },
-  { key: 'tasks_look', tab: 'training', target: 'training.explain.tasks', title: 'Örnekleriyle', text: 'Ebeveyn her uyguladığında kayıt girer.' },
-  { key: 'todos', tab: 'training', target: 'training.tab.todos', until: 'training_tab_todos', title: 'Hızlı yapılacaklar', text: 'Bir kez yapılıp işaretlenen iş.' },
-  { key: 'todos_look', tab: 'training', target: 'training.explain.todos', title: 'Örnekleriyle', text: 'Bir örneğe dokun; form dolu açılır.' },
+  { key: 'modules', tab: 'training', target: 'training.tab.modules', until: 'training_tab_modules', title: 'Öğrenme modülleri', text: 'Ebeveynin okuduğu ve yanıtladığı içerik. **Sekmeye dokun**' },
+  { key: 'tasks', tab: 'training', target: 'training.tab.tasks', until: 'training_tab_tasks', title: 'Uygulama görevleri', text: 'Evde tekrarlanan beceri. **Sekmeye dokun**' },
+  { key: 'tasks_look', tab: 'training', target: 'training.explain.tasks', title: 'Üç adım, üç örnek', text: 'Ebeveyn her uyguladığında kayıt girer.' },
+  { key: 'todos', tab: 'training', target: 'training.tab.todos', until: 'training_tab_todos', title: 'Hızlı yapılacaklar', text: 'Bir kez yapılıp işaretlenen iş. **Sekmeye dokun**' },
+  { key: 'todos_look', tab: 'training', target: 'training.explain.todos', title: 'Örnekler hazır', text: 'Sonra bir örneğe dokun; form dolu açılır.' },
   { key: 'done', tab: 'training', title: 'Hazırsın', text: 'Gerçek ailede aynı ekran. Önce aileni davet et.', final: true },
 ];
 export const TOUR: (CoachStep & { tab: Tab })[] = [

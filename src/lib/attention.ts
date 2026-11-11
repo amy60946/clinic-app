@@ -18,7 +18,7 @@ export function trainingReasons(s: TrainingStat | undefined): Reason[] {
   if (!s) return [];
   const out: Reason[] = [];
   if (s.review > 0) out.push({ key: 'tr_review', text: `${s.review} yanıt incelemeni bekliyor`, icon: 'school-outline' });
-  if (s.drafts > 0) out.push({ key: 'tr_draft', text: s.drafts === 1 ? 'Taslak eğitim: ebeveyn görmüyor' : `${s.drafts} taslak eğitim: ebeveyn görmüyor`, icon: 'eye-off-outline' });
+  if (s.drafts > 0) out.push({ key: 'tr_draft', text: s.drafts === 1 ? 'Taslak eğitim' : `${s.drafts} taslak eğitim`, icon: 'eye-off-outline' });
   if (s.total === 0) out.push({ key: 'tr_none', text: 'Eğitim yok', icon: 'school-outline' });
   return out;
 }

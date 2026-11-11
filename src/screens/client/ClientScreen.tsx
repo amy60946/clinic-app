@@ -99,6 +99,7 @@ export default function ClientScreen({
   const sections = useMemo(() => SECTIONS.filter((x) => x.id !== 'goals' || planOn), [planOn]);
   // Bölüm menüsü hep açık gelir; hamburger düğmesiyle kapatılıp açılır (kullanıcı kararı 11 Kasım 2026)
   const [menuOpen, setMenuOpen] = useState(true);
+  const [trainingOpen, setTrainingOpen] = useState(false);   // eğitim sayfası açıkken bölüm ipucu gizlenir (kendi anlatım kartı var)
   useEffect(() => { AsyncStorage.getItem(MENU_KEY).then((v) => { if (v === '0') setMenuOpen(false); }).catch(() => {}); }, []);
   const toggleMenu = () => setMenuOpen((o) => { AsyncStorage.setItem(MENU_KEY, o ? '0' : '1').catch(() => {}); track('client.menu', { open: !o }); return !o; });
   const sidebar = desktop && menuOpen;
@@ -242,10 +243,10 @@ export default function ClientScreen({
             </View>
           )}
           <View style={{ marginTop: 8 }}>
-            {!sample && <SectionHint userId={me.id} section={tab} />}
+            {!sample && !(tab === 'training' && trainingOpen) && <SectionHint userId={me.id} section={tab} />}
             {tab === 'summary' && <SummaryTab {...ctx} />}
             {tab === 'routine' && <HomeRoutines {...ctx} view={routineView} onView={setRoutineView} />}
-            {tab === 'training' && <TrainingTab {...ctx} sample={!!sample} />}
+            {tab === 'training' && <TrainingTab {...ctx} sample={!!sample} onDetail={setTrainingOpen} />}
             {tab === 'behaviors' && <BehaviorsTab {...ctx} sample={!!sample} />}
             {tab === 'goals' && <PlanTab {...ctx} />}
             {tab === 'sessions' && (sample
@@ -400,7 +401,7 @@ const styles = StyleSheet.create({
   column: { width: '100%', maxWidth: 960, alignSelf: 'center' },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
   iconBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
-  closedMenu: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', maxWidth: '100%', backgroundColor: '#ECEEF3', borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12 },
+  closedMenu: { flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', maxWidth: '100%', backgroundColor: '#ECEEF3', borderRadius: 10, paddingVertical: 11, paddingHorizontal: 14 },
   closedMenuText: { fontSize: 14, fontWeight: '700', color: colors.navy, flexShrink: 1 },
   title: { fontSize: 20, fontWeight: '700', color: colors.navy },
   subtitle: { fontSize: 13, color: colors.muted, marginTop: 2 },

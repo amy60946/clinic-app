@@ -237,7 +237,7 @@ async function login(b, who) {
   await step(p, 'tour-tasks', async () => { await tap(p, subTab('Öğrenme modülleri'), { last: true }); }, 'Evde tekrarlanan beceri');
   await step(p, 'tour-tasks-look', async () => { await tap(p, subTab('Uygulama görevleri'), { last: true }); }, 'Ebeveyn her uyguladığında kayıt girer.');
   await step(p, 'tour-todos', async () => { await tap(p, 'İleri', { last: true }); }, 'Bir kez yapılıp işaretlenen iş');
-  await step(p, 'tour-todos-look', async () => { await tap(p, subTab('Hızlı yapılacaklar'), { last: true }); }, 'Bir örneğe dokun');
+  await step(p, 'tour-todos-look', async () => { await tap(p, subTab('Hızlı yapılacaklar'), { last: true }); }, 'bir örneğe dokun');
   await step(p, 'tour-done', async () => { await tap(p, 'İleri', { last: true }); }, 'Hazırsın');
   await step(p, 'tour-closed', async () => { await tap(p, 'Kapat', { last: true }); }, 'hızlı yapılacak');
   }

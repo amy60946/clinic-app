@@ -79,7 +79,7 @@ test('Takip Planı kapalı: plan nedenleri yok, eğitim nedenleri var', () => {
 test('eğitim nedenleri: metinler ve boş durum', () => {
   assert.deepEqual(trainingReasons(undefined), [], 'eğitim tabloları yoksa neden eklenmez');
   assert.deepEqual(keys(trainingReasons({ total: 0, drafts: 0, review: 0 })), ['tr_none']);
-  assert.equal(trainingReasons({ total: 3, drafts: 2, review: 0 })[0].text, '2 taslak eğitim: ebeveyn görmüyor');
+  assert.equal(trainingReasons({ total: 3, drafts: 2, review: 0 })[0].text, '2 taslak eğitim');
   assert.equal(trainingReasons({ total: 1, drafts: 1, review: 1 }).map((r) => r.key).join(), 'tr_review,tr_draft');
 });
 
