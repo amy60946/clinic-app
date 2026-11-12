@@ -26,7 +26,7 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 - Önizleme yalnızca kullanıcı isteyince ya da büyük bir aşama bitince yayınlanır.
 - Push yalnız oturumun belirlenen `claude/...` dalına yapılır. **PR'lar (kullanıcı kararı 4 Kasım 2026: "süreçler için önemliyse sen hallet"):** iş ana dala alınacak noktaya gelince Claude kendi dalının PR'ını açar, denetim yeşilse birleştirir, dalı ana daldan yeniden kurar; başka pencerenin PR'ına dokunulmaz.
 - Adlandırma: "Fidan" ve eski oyun adı hiçbir yerde kullanılmaz. Ürün adları: GameApp, ParentApp, ClinicApp.
-- **Benchmark alışkanlığı (kullanıcı kararı 2 Kasım 2026, bütün pencereler; ortak CLAUDE.md kural 7):** her yeni özellik, özellik çıkarma ve iyileştirmede (akış, tasarım, metin, arayüz, iş kuralı) önce aynı işi yapan başarılı global uygulamalar araştırılır, artı/eksileriyle değerlendirilir, ürüne (uzman, Türkiye) uyanlar kullanıcıya seçenek ve öneri olarak sunulur; kaynaklar yazılır, içerik/metin/ekran kopyalanmaz.
+- **Benchmark alışkanlığı (kullanıcı kararı 2 Kasım 2026, bütün pencereler; ortak CLAUDE.md kural 7):** her yeni özellik, özellik çıkarma ve iyileştirmede (akış, tasarım, metin, arayüz, iş kuralı) önce aynı işi yapan başarılı global uygulamalar araştırılır, artı/eksileriyle değerlendirilir, ürüne (uzman, Türkiye) uyanlar kullanıcıya seçenek ve öneri olarak sunulur; kaynaklar yazılır. Kopyalama yasağı kalktı (kullanıcı kararı 12 Kasım 2026): başka ürünün metni bire bir ya da uyarlanarak kullanılabilir; bize ait olmayan rakam, araştırma sonucu, yorum ve iddia kullanılmaz (`ortak/hukuk/45`).
 - **Canlıya alma elle (kullanıcı kararı 2 Kasım 2026):** App Store Connect'te "Manually release this version"; Apple onayından sonra sürüm kullanıcı onayıyla yayına alınır. ClinicApp web'inin canlıya geçişi de kullanıcı onayıyla. Adımlar `ortak/CANLIYA_ALMA.md`.
 
 ## Ürün kararları (kullanıcı onaylı)
@@ -167,7 +167,7 @@ ClinicApp, uzman (klinik psikolog, ergoterapist, ABA/BCBA, çocuk terapisti) iç
 - Joon iş modeli kanvası: https://claude.ai/code/artifact/df7eafa7-1e1e-4014-8a5f-7d88cb985485
 - GameApp oyun omurgası analizi (bölüm 6: ebeveyn/uzman raporları, bölüm 7: müşteri takip): https://claude.ai/code/artifact/3c82704c-e120-4d73-ba9f-a7ffdc75eeac
 - Kullanıcının "Clinic-app" projesindeki araştırma sohbetleri bu oturumdan görünmez. Bir sonuca bakman gerekiyorsa kullanıcıdan o sonucu bir doküman olarak ürettirmesini ve bağlantısını iletmesini iste.
-- Joon yalnız iş modeli/rakip referansıdır. İçerik, karakter, metin ve ekran düzeni kopyalanmaz.
+- Joon iş modeli ve rakip referansıdır. Kopyalama yasağı 12 Kasım 2026'da kalktı (ortak CLAUDE.md kural 7): metni ve düzeni kullanılabilir, rakamları, araştırma sonuçları, yorumları ve bizde olmayan hizmetleri kullanılmaz.
 
 ## Açık sorular (kullanıcıyla karara bağlanacak)
 
