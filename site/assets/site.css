@@ -46,6 +46,9 @@
   --font-display: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-body: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --logo-size: 25px;
+  --logo-h: 27px;                 /* çizgi logonun yüksekliği (x yüksekliği ~13,5 px) */
+  --logo-shift: 21%;
+  --logo-dot: #0FD354;            /* y'nin topu: marka yeşili */
   --logo-bold: 800;
   --logo-light: 300;
 
@@ -153,6 +156,12 @@ header.top.scrolled { border-bottom-color: var(--c-line-dark); }
   color: inherit; text-decoration: none; padding: 10px 0; }
 .logo b { font-weight: var(--logo-bold); letter-spacing: -0.03em; }
 .logo span { font-weight: var(--logo-light); letter-spacing: -0.01em; }
+/* Logo (12 Kasım 2026, kullanıcı seçimi "Moyo c top adjusted", logo atölyesi): çizgiye çevrilmiş "moyo" + ince "Mercek".
+   Harfler currentColor, top --logo-dot. x yüksekliği menünün ortasına gelsin diye aşağı kaydırılır (kuyruk ve top aşağı taşar). */
+.logo:has(.logo-svg) { align-items: center; padding: 6px 0; }
+.logo-svg { display: block; height: var(--logo-h); width: auto; overflow: visible; transform: translateY(var(--logo-shift)); }
+.logo-dot { fill: var(--logo-dot); }
+footer .logo-svg { height: calc(var(--logo-h) * 1.1); transform: none; }
 .menu { display: flex; align-items: center; flex: 1; min-width: 0; gap: 24px; }
 .menu nav { margin-left: 44px; }
 .menu nav ul { display: flex; align-items: center; gap: 28px; }
@@ -444,3 +453,18 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-dark); p
 
 .trial { margin-top: 0; }
 .trial .actions { margin-top: 8px; }
+
+/* ---------- Renk yönleri (önizleme, karar bekliyor; 12 Kasım 2026): <html data-tema="yesil|acik">. Yoksa lacivert. ---------- */
+html[data-tema="yesil"] { --c-hero: #51E56A; --c-nav: #51E56A; }
+html[data-tema="yesil"] header.top, html[data-tema="yesil"] .hero, html[data-tema="yesil"] .ph {
+  --c-on-dark: #16113A; --c-on-dark-2: rgba(22, 17, 58, .8); --c-line-dark: rgba(22, 17, 58, .18); --c-eyebrow-dark: #16113A;
+  --c-cta: #16113A; --c-cta-text: #FFFFFF; --c-cta-hover: #2D294E; --c-focus-dark: #16113A; --logo-dot: #FFFFFF; }
+html[data-tema="yesil"] .pill-line { border-color: rgba(22, 17, 58, .45); }
+html[data-tema="yesil"] .hero-media .clip { box-shadow: 0 30px 80px -28px rgba(22, 17, 58, .45); }
+html[data-tema="acik"] { --c-hero: #F4F3F8; --c-nav: #FFFFFF; }
+html[data-tema="acik"] header.top, html[data-tema="acik"] .hero, html[data-tema="acik"] .ph {
+  --c-on-dark: #16113A; --c-on-dark-2: #5C5875; --c-line-dark: #E3E1EA; --c-eyebrow-dark: #5C5875; --c-focus-dark: #4C7CF0; --logo-dot: #0FD354; }
+html[data-tema="acik"] header.top { border-bottom-color: #E8E7EB; }
+html[data-tema="acik"] .pill-line { border-color: rgba(22, 17, 58, .3); }
+html[data-tema="acik"] .hero .btn-line, html[data-tema="acik"] .ph .btn-line { border-color: #16113A; }
+html[data-tema="acik"] .hero-media .clip { box-shadow: 0 24px 60px -24px rgba(22, 17, 58, .28); }
