@@ -38,8 +38,8 @@ Ortam değişkenleri: `SHOT_TIME` ("şimdi"; varsayılan `2026-11-09T09:40:00+03
 - **Saat:** `Date` yalnız kaydırılır (donmaz), geçişler gerçek hızında oynar.
 - **Veri:** hepsi uydurma (Elif Örnek, Nazlı, Ege, Defne, Kerem; pano için Duru, Poyraz). Takip Planı kapalı
   (`care_plan` yok); davranış hedefi ve GAS kaydı çekim verisinden çıkarılır, raporda GAS bölümü görünmez.
-- **Ad:** ekranda "ClinicApp" geçen yerler çekim sırasında "Moyo Mercek" olur (`kit.js` `open`). "ParentApp" olduğu gibi
-  kalır (ilerleme notunda geçer); aile uygulamasının adı belli olunca aynı yere bir satır eklenir.
+- **Ad:** ekranda "ClinicApp" geçen yerler çekim sırasında "Moyo Mercek", "ParentApp" geçenler "Moyo" olur (`kit.js` `open`;
+  uygulamanın kendisi henüz değişmedi).
 
 ## Sahneyi değiştirmek
 

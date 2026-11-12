@@ -52,6 +52,7 @@ async function open(device = 'desktop', opt = {}) {
   await ctx.addInitScript(inject.shiftDate, Date.parse(SHOT_TIME));
   await ctx.addInitScript(inject.cursor, d.cursor);
   await ctx.addInitScript(inject.brand, { from: 'ClinicApp', to: 'Moyo Mercek' });
+  await ctx.addInitScript(inject.brand, { from: 'ParentApp', to: 'Moyo' });   // aile uygulamasının yeni adı (11 Kasım 2026)
   await ctx.addInitScript(inject.clipboard);
   const page = await ctx.newPage();
   page.errors = [];
