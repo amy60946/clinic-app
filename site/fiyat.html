@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Moyo Mercek · Fiyat</title><!-- YENİ METİN (başlık) -->
+<!-- YENİ METİN (meta description) -->
+<meta name="description" content="Moyo Mercek paketleri ve fiyatları: Bireysel ve Klinik, aylık ya da yıllık.">
+<meta name="theme-color" content="#2D294E">
+<link rel="icon" href="assets/icon.png">
+<link rel="stylesheet" href="assets/site.css">
+<script>document.documentElement.classList.add('js');</script>
+<!-- Fiyatlar assets/site.js içindeki window.MERCEK_PRICES'tan yazılır (YER TUTUCU, ürün sahibinin kararı bekleniyor).
+     Aşağıdaki sabit değerler betiksiz okuyucu içindir ve oradakilerle aynı tutulur. Özellik listeleri src/lib/billing.ts PACKAGES'tan
+     ("sen" → "siz", ParentApp → Moyo). Müşteri logosu, yorum, hesaplayıcı, fotoğraf, "en çok tercih edilen" rozeti yok. -->
+</head>
+<body>
+<a class="skip" href="#main">Ana içeriğe geç</a><!-- YENİ METİN -->
+
+<header class="top" id="top">
+  <div class="wrap nav">
+    <a class="logo" href="index.html"><b>moyo</b> <span>Mercek</span></a>
+    <div class="menu" id="menu">
+      <nav aria-label="Ana menü"><!-- YENİ METİN (aria-label) -->
+        <ul>
+          <li><a href="index.html#nasil">Nasıl çalışır</a></li>
+          <li><a href="index.html#gizlilik">Gizlilik</a></li>
+          <li><a href="fiyat.html" aria-current="page">Fiyat</a></li>
+          <li><a href="index.html#sss">SSS</a></li>
+          <li><a href="index.html#ebeveyn">Ebeveyn misiniz?</a></li>
+        </ul>
+      </nav>
+      <div class="acts">
+        <a class="pill pill-line" data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş</a>
+        <a class="pill pill-cta" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">14 gün ücretsiz deneyin</a>
+      </div>
+    </div>
+    <a class="pill pill-cta nav-cta" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">14 gün ücretsiz deneyin</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menü"><!-- YENİ METİN (aria-label "Menü" / "Menüyü kapat") -->
+      <svg class="bars" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg class="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <section class="ph" aria-labelledby="h-fiyat">
+    <div class="wrap">
+      <p class="eyebrow">Fiyatlar</p>
+      <h1 id="h-fiyat">İki paket. 14&nbsp;gün ücretsiz.</h1>
+      <!-- YENİ METİN -->
+      <p class="sub">Kart gerekmez. Deneme bitince hiçbir şey silinmez; devam etmek için bir paket seçersiniz.</p>
+    </div>
+  </section>
+
+  <section class="sec sec-soft" aria-label="Paketler"><!-- YENİ METİN (aria-label) -->
+    <div class="wrap">
+      <div class="period" role="group" aria-label="Ödeme dönemi">
+        <button type="button" data-period="m" aria-pressed="false">Aylık</button>
+        <button type="button" data-period="y" aria-pressed="true">Yıllık <span class="save" data-gift>2 ay sizden</span></button>
+      </div>
+
+      <div class="plans">
+        <article class="plan" aria-labelledby="h-solo">
+          <h2 id="h-solo">Bireysel</h2>
+          <p class="who">Tek uzman</p>
+          <p class="price"><span class="amount" data-price="solo">₺11.999,99</span> <span class="unit" data-unit>/ yıl</span> <span class="draft" data-draft>Taslak fiyat</span><!-- YENİ METİN (etiket) --></p>
+          <p class="per" data-per="solo">Aylık yaklaşık ₺1.000</p>
+          <a class="btn btn-cta block" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Bireysel ile başlayın</a>
+          <ul>
+            <li>Sınırsız danışan; aileler Moyo ile ücretsiz bağlanır</li>
+            <li>Evdeki rutin verisi: maceralar, tamamlama, "Yapamam" nedenleri</li>
+            <li>Hedef davranışlar ve ebeveynin bildirdiği olaylar</li>
+            <li>Ebeveyn eğitimi: öğrenme modülleri, uygulama görevleri, hızlı yapılacaklar</li>
+            <li>Aileye macera önerisi; karar ebeveynde</li>
+            <li>Yazdırılabilir gözlem raporu (PDF)</li>
+            <li>Yalnız size görünen klinik notları (aile görmez)</li>
+            <li>Yeni kayıt ve davranış kaydında anlık bildirim</li>
+          </ul>
+        </article>
+
+        <article class="plan plus" aria-labelledby="h-clinic">
+          <h2 id="h-clinic">Klinik</h2>
+          <p class="who">10 uzmana kadar · Ekipler için</p>
+          <p class="price"><span class="amount" data-price="clinic">₺39.999,99</span> <span class="unit" data-unit>/ yıl</span> <span class="draft" data-draft>Taslak fiyat</span></p>
+          <p class="per" data-per="clinic">Aylık yaklaşık ₺3.333</p>
+          <a class="btn btn-cta block" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Klinik ile başlayın</a>
+          <ul>
+            <li>Bireysel paketteki her şey</li>
+            <li>10 uzmana kadar ekip; uzmanı kişisel koduyla ekleyin</li>
+            <li>Kliniğin bütün danışanları ortak listede</li>
+            <li>Danışan başına sorumlu uzman ve ona giden bildirimler</li>
+            <li>Ekip notları: herkes okur, yalnız yazarı değiştirir</li>
+            <li>Tek üyelik, klinik sahibi yönetir</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="both">
+        <h2>Her iki pakette</h2><!-- YENİ METİN -->
+        <ul><li>Kart gerekmez</li><li>KDV dahil</li><li>App Store'dan alınır, web'de de açılır</li><li>Dönem sonunda kendiliğinden yenilenir</li><li>Apple hesabından iptal</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-white" aria-labelledby="h-cmp">
+    <div class="wrap">
+      <div class="cmp">
+        <!-- YENİ METİN (başlık, grup adları, "Özellik", "Uzman sayısı", "10'a kadar", "Var"/"Yok") -->
+        <table role="table">
+          <caption><h2 id="h-cmp">Paketleri karşılaştırın</h2></caption>
+          <thead role="rowgroup">
+            <tr role="row">
+              <th scope="col" role="columnheader">Özellik</th>
+              <th scope="col" role="columnheader"><b>Bireysel</b><span><span data-price="solo">₺11.999,99</span> <span data-unit>/ yıl</span></span></th>
+              <th scope="col" role="columnheader"><b>Klinik</b><span><span data-price="clinic">₺39.999,99</span> <span data-unit>/ yıl</span></span></th>
+            </tr>
+          </thead>
+          <tbody role="rowgroup">
+            <tr class="grp" role="row"><th scope="rowgroup" colspan="3" role="rowheader">Danışan ve aile</th></tr>
+            <tr role="row"><th scope="row" role="rowheader">Sınırsız danışan; aileler Moyo ile ücretsiz bağlanır</th><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Aileye macera önerisi; karar ebeveynde</th><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+          </tbody>
+          <tbody role="rowgroup">
+            <tr class="grp" role="row"><th scope="rowgroup" colspan="3" role="rowheader">Ebeveyn eğitimi ve izleme</th></tr>
+            <tr role="row"><th scope="row" role="rowheader">Ebeveyn eğitimi: öğrenme modülleri, uygulama görevleri, hızlı yapılacaklar</th><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Evdeki rutin verisi: maceralar, tamamlama, "Yapamam" nedenleri</th><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Hedef davranışlar ve ebeveynin bildirdiği olaylar</th><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Yeni kayıt ve davranış kaydında anlık bildirim</th><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+          </tbody>
+          <tbody role="rowgroup">
+            <tr class="grp" role="row"><th scope="rowgroup" colspan="3" role="rowheader">Kayıt ve rapor</th></tr>
+            <tr role="row"><th scope="row" role="rowheader">Yazdırılabilir gözlem raporu (PDF)</th><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Yalnız size görünen klinik notları (aile görmez)</th><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+          </tbody>
+          <tbody role="rowgroup">
+            <tr class="grp" role="row"><th scope="rowgroup" colspan="3" role="rowheader">Ekip</th></tr>
+            <tr role="row"><th scope="row" role="rowheader">Uzman sayısı</th><td role="cell">1</td><td role="cell">10'a kadar</td></tr>
+            <tr role="row"><th scope="row" role="rowheader">10 uzmana kadar ekip; uzmanı kişisel koduyla ekleyin</th><td role="cell" class="no"><span aria-hidden="true">—</span><span class="sr">Yok</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Kliniğin bütün danışanları ortak listede</th><td role="cell" class="no"><span aria-hidden="true">—</span><span class="sr">Yok</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Danışan başına sorumlu uzman ve ona giden bildirimler</th><td role="cell" class="no"><span aria-hidden="true">—</span><span class="sr">Yok</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Ekip notları: herkes okur, yalnız yazarı değiştirir</th><td role="cell" class="no"><span aria-hidden="true">—</span><span class="sr">Yok</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+            <tr role="row"><th scope="row" role="rowheader">Tek üyelik, klinik sahibi yönetir</th><td role="cell" class="no"><span aria-hidden="true">—</span><span class="sr">Yok</span></td><td role="cell" class="yes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="sr">Var</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-soft" aria-labelledby="h-sss">
+    <div class="wrap">
+      <div class="head"><p class="eyebrow">Sık sorulanlar</p><h2 id="h-sss">Kısaca</h2></div>
+      <div class="faq">
+        <details><summary>Ödeme nereden yapılır?</summary><p>iPhone ya da iPad'deki Moyo Mercek'ten, App Store ile. Üyelik web'de de açılır. Deneme bitince hiçbir şey silinmez.</p></details>
+        <!-- YENİ METİN (soru ve yanıt) -->
+        <details><summary>Deneme bitince ne olur?</summary><p>Hiçbir şey silinmez. Devam etmek için bir paket seçersiniz; seçene kadar danışan verileri görünmez.</p></details>
+        <details><summary>Bireysel çalışıyorum, klinik açmam gerekir mi?</summary><p>Hayır. Kayıtta "Bireysel uzman"ı seçin. Ekip istediğinizde Klinik paketine geçin.</p></details>
+        <!-- YENİ METİN (soru ve yanıt) -->
+        <details><summary>Ekip üyeleri ayrıca öder mi?</summary><p>Hayır. Tek üyelik vardır; klinik sahibi yönetir.</p></details>
+        <!-- YENİ METİN (soru ve yanıt) -->
+        <details><summary>Aileler ücret öder mi?</summary><p>Aileler Moyo ile uzmanına ücretsiz bağlanır.</p></details>
+        <!-- YENİ METİN (soru ve yanıt) -->
+        <details><summary>Nasıl iptal ederim?</summary><p>Apple hesabınızdaki Abonelikler bölümünden. Dönem sonuna kadar erişiminiz sürer.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-white trial" aria-labelledby="h-dene">
+    <div class="wrap">
+      <div class="closing">
+        <h2 id="h-dene">14 gün ücretsiz deneyin</h2>
+        <div class="actions">
+          <a class="btn btn-line" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Bireysel ile başlayın</a>
+          <a class="btn btn-line" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Klinik ile başlayın</a>
+          <a class="btn btn-quiet" data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş</a>
+        </div>
+        <!-- YENİ METİN -->
+        <p class="fine">14 gün ücretsiz, kart gerekmez; sonra seçtiğiniz paketin ücreti App Store üzerinden alınır ve dönem sonunda kendiliğinden yenilenir.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="about">
+      <a class="logo" href="index.html"><b>moyo</b> <span>Mercek</span></a>
+      <p>Çocuk ve aile uzmanları için ev rutini takip paneli.</p>
+    </div>
+    <div>
+      <h2 class="fh">Ürün</h2>
+      <ul>
+        <li><a href="index.html#nasil">Nasıl çalışır</a></li>
+        <li><a href="index.html#urun">Ürün</a></li>
+        <li><a href="fiyat.html" aria-current="page">Fiyatlar</a></li>
+        <li><a href="index.html#sss">Sık sorulanlar</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="fh">Hesap</h2>
+      <ul>
+        <li><a data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş yap</a></li>
+        <li><a data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Ücretsiz deneyin</a></li>
+        <li><a href="index.html#ebeveyn">Ebeveynler için</a></li>
+      </ul>
+    </div>
+    <div class="legalcol">
+      <h2 class="fh">Yasal</h2>
+      <ul>
+        <li><a data-legal="gizlilik" href="https://moyoapp.com.tr/yasal/gizlilik" target="_blank" rel="noopener">Gizlilik Politikası</a></li>
+        <li><a data-legal="sozlesme-uzman" href="https://moyoapp.com.tr/yasal/sozlesme-uzman" target="_blank" rel="noopener">Uzman Hizmet Sözleşmesi</a></li>
+        <li><a data-legal="aydinlatma-uzman" href="https://moyoapp.com.tr/yasal/aydinlatma-uzman" target="_blank" rel="noopener">Uzman Aydınlatma Metni</a></li>
+        <li><a data-legal="cerez-clinicapp-web" href="https://moyoapp.com.tr/yasal/cerez-clinicapp-web" target="_blank" rel="noopener">Çerez Politikası</a></li>
+        <li><a data-legal="kvkk-basvuru" href="https://moyoapp.com.tr/yasal/kvkk-basvuru" target="_blank" rel="noopener">KVKK başvurusu</a></li>
+        <li><a href="https://moyoapp.com.tr/destek" target="_blank" rel="noopener">Destek</a></li>
+      </ul>
+    </div>
+    <!-- Yayından önce: şirket unvanı, adresi ve iletişim adresi buraya (ortak hukuk/22 künyesi; alan adı gelince destek@...). -->
+    <div class="legal"><span>© 2026 Moyo Mercek</span><span>Bu sayfa çerez, reklam pikseli ya da analiz aracı kullanmaz.</span></div>
+  </div>
+</footer>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

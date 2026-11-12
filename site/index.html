@@ -3,389 +3,90 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ClinicApp · Uzman paneli</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="ClinicApp: ev programını oyuna dönüştüren, evdeki kayıtları uzmana ulaştıran platform. Veri yalnız ebeveynin izniyle paylaşılır.">
+<title>Moyo Mercek · Uzman platformu</title>
+<!-- YENİ METİN (meta description) -->
+<meta name="description" content="Moyo Mercek: çocuk ve aile uzmanları için ebeveyn eğitimi ve ev programı takip platformu. Veri yalnız ebeveynin izniyle paylaşılır.">
+<meta name="theme-color" content="#2D294E">
 <link rel="icon" href="assets/icon.png">
-<style>
-/* Yazı tipi sitenin kendi dosyasından (SIL Open Font License): Google Fonts'a istek gitmez, ziyaretçinin IP adresi
-   üçüncü tarafa aktarılmaz (ortak hukuk/40-cerez-politikasi.md). Bu sayfa çerez, piksel ya da analiz betiği kullanmaz. */
-@font-face { font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 400 800; font-display: swap;
-  src: url(assets/fonts/plus-jakarta-sans-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
-@font-face { font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 400 800; font-display: swap;
-  src: url(assets/fonts/plus-jakarta-sans-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-
-/* Düzen: ürün ekranıyla anlatım (kullanıcı isteği 4 Kasım 2026: "yazılar az, manşet gibi; anlatım ürün UI'larıyla").
-   Her bölüm = kısa manşet + en çok bir satır + okunur bir arayüz parçası. Lacivert tek vurgu; uygulamanın renk anlamı
-   sayfada da geçerli: bej = yalnız uzman görür, mavi = aile görür, gri = uzmana kapalı. Bilinçli tek (açık) tema. */
-:root {
-  --ink: #0F1B3D; --ink-2: #1B2A55; --text: #2B3550; --muted: #5E6780; --faint: #8A92A8;
-  --paper: #F5F6F8; --card: #FFFFFF; --line: #E3E7EF; --head: #F1F4FA; --gold: #E9B22B;
-  --fam-bg: #E6EAF5; --fam-fg: #2C4A9A;
-  --pri-bg: #F7F1E6; --pri-line: #E7D9BD; --pri-fg: #7A5A1E; --pri-text: #5A4A2A; --pri-card: #FBF8F1;
-  --off-bg: #ECEEF3; --off-fg: #5D6680; --ok: #2F7D4A; --ok-bg: #E6F4EA;
-  --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --r-sm: 10px; --r-md: 14px; --r-lg: 20px;
-  --shadow: 0 1px 2px rgba(15,27,61,.05), 0 28px 64px -30px rgba(15,27,61,.36);
-  color-scheme: light;
-}
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 84px; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition: none !important; animation: none !important; } }
-body { margin: 0; background: var(--paper); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
-a { color: inherit; }
-img { max-width: 100%; height: auto; display: block; }
-p { margin: 0; text-wrap: pretty; }
-ul, ol { margin: 0; padding: 0; list-style: none; }
-h1, h2, h3 { color: var(--ink); margin: 0; text-wrap: balance; letter-spacing: -0.025em; line-height: 1.08; }
-h1 { font-size: clamp(40px, 6vw, 72px); font-weight: 800; }
-h2 { font-size: clamp(30px, 3.6vw, 46px); font-weight: 800; }
-h3 { font-size: 19px; font-weight: 800; letter-spacing: -0.012em; line-height: 1.25; }
-.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
-.eyebrow { font-size: 12.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--fam-fg); }
-.sub { font-size: clamp(17px, 1.7vw, 20px); color: var(--muted); max-width: 58ch; }
-
-/* Düğmeler */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 24px; border-radius: 12px; font: inherit; font-weight: 750; font-size: 16px; text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: background .15s, border-color .15s, transform .15s; white-space: nowrap; }
-.btn:focus-visible, a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; border-radius: 8px; }
-.btn-primary { background: var(--ink); color: #fff; }
-.btn-primary:hover { background: var(--ink-2); transform: translateY(-1px); }
-.btn-ghost { background: var(--card); color: var(--ink); border-color: var(--line); }
-.btn-ghost:hover { border-color: var(--ink); }
-.btn-light { background: #fff; color: var(--ink); }
-.btn-light:hover { background: var(--head); }
-.btn-line { background: transparent; color: #fff; border-color: rgba(255,255,255,.35); }
-.btn-line:hover { border-color: #fff; }
-
-/* Çip */
-.chip { white-space: nowrap; display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 750; border-radius: 999px; padding: 6px 12px; border: 1px solid transparent; }
-.chip.pri { background: var(--pri-bg); color: var(--pri-fg); border-color: var(--pri-line); }
-.chip.fam { background: var(--fam-bg); color: var(--fam-fg); }
-.chip.plain { background: var(--card); color: var(--muted); border-color: var(--line); }
-.chip.ok { background: var(--ok-bg); color: var(--ok); }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-
-/* Üst çubuk */
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 31; background: var(--paper); }
-header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: rgba(245,246,248,.88); backdrop-filter: saturate(1.4) blur(12px); -webkit-backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid transparent; transition: border-color .2s; }
-header.top.scrolled { border-bottom-color: var(--line); }
-.nav { display: flex; align-items: center; gap: 28px; height: 68px; }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; color: var(--ink); text-decoration: none; letter-spacing: -0.015em; flex: none; }
-.brand svg { width: 32px; height: 32px; border-radius: 9px; }
-.nav nav ul { display: flex; gap: 22px; font-size: 14.5px; font-weight: 650; color: var(--muted); }
-.nav nav a { text-decoration: none; }
-.nav nav a:hover { color: var(--ink); }
-.nav .acts { margin-left: auto; display: flex; align-items: center; gap: 14px; }
-.nav .acts .parent { font-size: 13.5px; font-weight: 650; color: var(--muted); text-decoration: none; white-space: nowrap; }
-.nav .acts .parent:hover { color: var(--ink); }
-.nav .acts .signin { font-size: 14.5px; font-weight: 750; color: var(--ink); text-decoration: none; padding: 8px 4px; white-space: nowrap; }
-.nav .acts .btn { min-height: 40px; padding: 0 16px; font-size: 14.5px; }
-@media (max-width: 1040px) { .nav nav { display: none; } }
-@media (max-width: 640px) { .nav .acts .parent { display: none; } .nav { gap: 12px; } }
-@media (max-width: 420px) { .nav .acts .signin { display: none; } }
-
-/* Arayüz parçası çerçevesi */
-.ui { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; box-shadow: var(--shadow); }
-.ui img { width: 100%; }
-.ui .bar { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-bottom: 1px solid var(--line); background: #FBFCFE; }
-.ui .bar i { width: 10px; height: 10px; border-radius: 50%; background: #DCE1EA; }
-.ui .bar span { margin-left: 10px; font-size: 12px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* Açılış: ortada manşet, altında büyük ürün ekranı + üstünde işaretler */
-.hero { overflow: clip; }
-.hero .copy { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; padding-block: 72px 44px; }
-.hero h1 { max-width: 22ch; font-size: clamp(36px, 5vw, 60px); }
-.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 6px; }
-.hero .meta { font-size: 13.5px; color: var(--muted); }
-.stage { position: relative; max-width: 1120px; margin: 0 auto; }
-.mark { position: absolute; display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 800; padding: 8px 13px; border-radius: 999px; box-shadow: 0 10px 26px -12px rgba(15,27,61,.45); white-space: nowrap; }
-.mark::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
-.mark.m1 { right: 3%; top: -16px; background: var(--ink); color: #fff; }
-.mark.m1::before { background: var(--gold); }
-.mark.m2 { left: 4%; top: 70%; background: var(--pri-bg); color: var(--pri-fg); border: 1px solid var(--pri-line); }
-.mark.m3 { right: -22px; top: 27%; background: var(--ok-bg); color: var(--ok); border: 1px solid #CFE6D6; }
-.marks-legend { display: none; justify-content: center; margin-top: 16px; }
-
-@media (max-width: 900px) { .mark { display: none; } .marks-legend { display: flex; } .hero .copy { padding-top: 44px; } }
-@media (max-width: 420px) { .hero h1 { font-size: 36px; max-width: none; } }
-
-/* Güven şeridi */
-.facts { margin-top: 56px; border-block: 1px solid var(--line); background: var(--card); }
-.facts ul { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.facts li { display: flex; gap: 12px; align-items: center; justify-content: center; padding: 22px 16px; font-size: 15px; font-weight: 750; color: var(--ink); min-width: 0; text-align: center; }
-.facts li + li { border-left: 1px solid var(--line); }
-.facts svg { width: 20px; height: 20px; flex: none; stroke: var(--fam-fg); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-@media (max-width: 900px) { .facts ul { grid-template-columns: 1fr 1fr; } .facts li:nth-child(3) { border-left: 0; } .facts li:nth-child(n+3) { border-top: 1px solid var(--line); } .facts li { justify-content: flex-start; text-align: left; } }
-
-/* Bölüm başlığı */
-section.band { padding-block: 104px; }
-section.alt { background: var(--card); border-block: 1px solid var(--line); }
-.head { display: flex; flex-direction: column; gap: 12px; margin-bottom: 48px; }
-.head.center { text-align: center; align-items: center; }
-@media (max-width: 640px) { section.band { padding-block: 68px; } .head { margin-bottom: 32px; } }
-
-/* Çizim kartları: uygulama ekranlarının sadeleştirilmiş hâli (uydurma adlar); telefonda da okunur */
-.mock { width: min(100%, 300px); background: var(--card); border-radius: 18px; border: 1px solid var(--line); padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 16px 40px -24px rgba(15,27,61,.45); text-align: left; }
-.mock .ttl { font-size: 15px; font-weight: 800; color: var(--ink); }
-.mock .fld { border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; font-size: 13px; color: var(--text); background: var(--paper); }
-.mock .fld em { display: block; font-style: normal; font-size: 10.5px; font-weight: 750; letter-spacing: .05em; text-transform: uppercase; color: var(--faint); }
-.mock .row { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 650; color: var(--ink); padding: 7px 0; border-top: 1px solid var(--line); }
-.mock .row:first-of-type { border-top: 0; }
-.mock .row i { flex: none; width: 17px; height: 17px; border-radius: 5px; background: var(--fam-fg); position: relative; }
-.mock .row i::after { content: ""; position: absolute; left: 5px; top: 3px; width: 4px; height: 8px; border-right: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(45deg); }
-.mock .row small { margin-left: auto; font-size: 11px; font-weight: 750; color: var(--muted); }
-.mock .go { background: var(--ink); color: #fff; border-radius: 11px; text-align: center; font-weight: 800; font-size: 13.5px; padding: 10px; }
-.consent { width: min(100%, 290px); align-self: center; background: var(--card); border-radius: 22px; border: 1px solid var(--line); padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 16px 40px -24px rgba(15,27,61,.45); }
-.consent .who { display: flex; align-items: center; gap: 10px; }
-.consent .av { width: 34px; height: 34px; border-radius: 50%; background: var(--fam-bg); color: var(--fam-fg); display: grid; place-items: center; font-weight: 800; font-size: 13px; }
-.consent .who b { display: block; font-size: 14px; color: var(--ink); line-height: 1.2; }
-.consent .who span { font-size: 12px; color: var(--muted); }
-.consent .kid { display: flex; align-items: center; justify-content: space-between; border: 1.5px solid var(--fam-fg); border-radius: 12px; padding: 10px 12px; font-size: 14px; font-weight: 750; color: var(--ink); }
-.consent .kid i { width: 18px; height: 18px; border-radius: 6px; background: var(--fam-fg); display: grid; place-items: center; }
-.consent .kid i::after { content: ""; width: 8px; height: 4px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translate(1px, -1px); }
-.consent .kid.off { border-color: var(--line); color: var(--muted); font-weight: 650; }
-.consent .kid.off i { background: transparent; border: 1.5px solid var(--line); }
-.consent .kid.off i::after { display: none; }
-.consent .go { background: var(--ink); color: #fff; border-radius: 12px; text-align: center; font-weight: 800; font-size: 14px; padding: 11px; }
-.consent small { font-size: 11.5px; color: var(--muted); text-align: center; }
-
-/* Özellik satırları: manşet + bir satır + büyük arayüz */
-.feat { display: grid; grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr); gap: 64px; align-items: center; }
-.feat + .feat { margin-top: 120px; }
-.feat.flip { grid-template-columns: minmax(0, 1.28fr) minmax(0, 0.72fr); }
-.feat.flip .txt { order: 2; }
-.feat .txt { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.feat .txt p { font-size: 18px; color: var(--muted); max-width: 30ch; }
-.feat .vis { min-width: 0; position: relative; }
-.layer { position: relative; padding-bottom: 14%; }
-.layer .back { width: 62%; }
-.layer .front { position: absolute; right: 0; bottom: 0; width: 56%; }
-@media (max-width: 700px) { .layer { padding-bottom: 0; display: flex; flex-direction: column; gap: 14px; } .layer .back, .layer .front { position: static; width: 100%; } }
-.feat .vis .ui.narrow { max-width: 640px; margin-inline: auto; }
-@media (max-width: 700px) { .feat .vis .ui { max-width: 420px; margin-inline: auto; } }
-@media (max-width: 900px) {
-  .feat, .feat.flip { grid-template-columns: 1fr; gap: 28px; }
-  .feat.flip .txt { order: 0; }
-  .feat + .feat { margin-top: 80px; }
-}
-
-/* Değer önerileri (Joon /for-providers yapısı: açılış → üç değer → adımlar; metin bizim) */
-.vps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-.vp { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 26px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.vp .ic { width: 42px; height: 42px; border-radius: 12px; background: var(--fam-bg); display: grid; place-items: center; }
-.vp .ic svg { width: 21px; height: 21px; stroke: var(--fam-fg); fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.vp p { color: var(--muted); font-size: 15.5px; }
-@media (max-width: 860px) { .vps { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; } }
-.stepn { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 800; color: var(--fam-fg); }
-.stepn b { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 14px; letter-spacing: 0; }
-/* Adım metinleri (8 Kasım 2026, ürün sahibinin metni): adım başına alt başlık + iki-üç paragraf; uzun metin için başlık ve satır ölçüsü */
-.feat .stepn ~ h2 { font-size: clamp(26px, 2.8vw, 36px); }
-.feat .stepn ~ p { font-size: 17px; max-width: 46ch; }
-.vis-c { display: grid; place-items: center; background: var(--head); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 36px 20px; }
-.layer .front .mock { width: 100%; }
-.ui.phone { width: min(100%, 360px); max-height: 560px; border-radius: 26px; -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent); mask-image: linear-gradient(to bottom, #000 82%, transparent); box-shadow: 0 18px 44px -26px rgba(15,27,61,.45); }
-@media (max-width: 700px) { .layer .back { display: none; } .layer .front { position: static; width: 100%; display: grid; place-items: center; } .layer .front .mock { width: min(100%, 340px); } }
-.mock.game { width: min(100%, 360px); padding: 20px; gap: 12px; }
-.mock.game .ttl { font-size: 16px; }
-.mock.game .row { font-size: 14px; padding: 9px 0; }
-.mock .gtop { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.mock .coin { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800; color: var(--fam-fg); background: var(--fam-bg); border-radius: 999px; padding: 3px 10px 3px 6px; white-space: nowrap; }
-.mock .coin i { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FFFFFF 0 22%, #E7E3F2 45%, #C9C6DD 100%); box-shadow: 0 0 0 1px rgba(44,74,154,.18); }
-.mock .row.wait i { background: var(--gold); }
-.mock .row.todo i { background: transparent; border: 1.5px solid var(--line); }
-.mock .row.todo i::after { display: none; }
-.mock .bar3 { height: 8px; border-radius: 999px; background: var(--off-bg); overflow: hidden; }
-.mock .bar3 span { display: block; height: 100%; background: var(--ok); border-radius: 999px; }
-.consentrow { margin-top: 48px; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 32px; }
-.consentrow figure { margin: 0; width: min(100%, 320px); display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
-.consentrow figure > div { width: 100%; }
-.consentrow figcaption { text-align: center; }
-.consentrow figcaption { font-size: 14px; font-weight: 800; color: var(--ink); }
-
-/* Kim neyi görür */
-.sees { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-.col { border-radius: var(--r-lg); padding: 26px; display: flex; flex-direction: column; gap: 16px; border: 1px solid var(--line); min-width: 0; }
-.col.fam { background: var(--card); }
-.col.pri { background: var(--pri-card); border-color: var(--pri-line); }
-.col.off { background: var(--paper); }
-.col h3 { display: flex; align-items: center; gap: 12px; font-size: 20px; }
-.col h3 .dot { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex: none; }
-.col h3 .dot svg { width: 18px; height: 18px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.col.fam .dot { background: var(--fam-bg); } .col.fam .dot svg { stroke: var(--fam-fg); }
-.col.pri .dot { background: var(--pri-bg); } .col.pri .dot svg { stroke: var(--pri-fg); }
-.col.off .dot { background: var(--off-bg); } .col.off .dot svg { stroke: var(--off-fg); }
-.col ul { display: flex; flex-wrap: wrap; gap: 8px; }
-.col li { font-size: 14px; font-weight: 700; border-radius: 999px; padding: 7px 12px; }
-.col.fam li { background: var(--fam-bg); color: var(--fam-fg); }
-.col.pri li { background: var(--pri-bg); color: var(--pri-fg); border: 1px solid var(--pri-line); }
-.col.off li { background: var(--off-bg); color: var(--off-fg); }
-.flow { margin-top: 26px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 8px; }
-.flow span { font-size: 14.5px; font-weight: 800; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; }
-.flow span.end { background: var(--fam-fg); border-color: var(--fam-fg); color: #fff; }
-.flow b { color: var(--faint); font-weight: 600; }
-@media (max-width: 900px) { .sees { grid-template-columns: 1fr; } }
-@media (max-width: 560px) { .flow { display: grid; grid-template-columns: 1fr 1fr; } .flow b { display: none; } .flow span { text-align: center; } }
-
-/* Kimler için */
-.roles { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-.roles span { font-size: 16px; font-weight: 750; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 12px 20px; }
-
-/* Fiyatlar */
-.period { display: inline-flex; background: var(--head); border-radius: 999px; padding: 4px; gap: 4px; }
-.period button { all: unset; cursor: pointer; font-size: 14px; font-weight: 750; color: var(--muted); padding: 8px 16px; border-radius: 999px; }
-.period button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(15,27,61,.12); }
-.period button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
-.plans { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; max-width: 860px; margin: 0 auto; }
-.plan { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 30px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-.plan.featured { border-color: var(--ink); box-shadow: 0 24px 60px -34px rgba(15,27,61,.5); }
-.plan .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
-.plan .who { font-size: 14px; color: var(--muted); margin-top: 2px; }
-.plan .price { font-size: 40px; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; line-height: 1; }
-.plan .price small { font-size: 15px; font-weight: 650; color: var(--muted); letter-spacing: 0; }
-.plan .per { font-size: 13.5px; color: var(--muted); margin-top: 8px; font-variant-numeric: tabular-nums; }
-.plan ul li { font-size: 15px; font-weight: 600; padding: 9px 0 9px 26px; position: relative; border-top: 1px solid var(--line); }
-.plan ul li::before { content: ""; position: absolute; left: 2px; top: 15px; width: 12px; height: 7px; border-left: 2px solid var(--ok); border-bottom: 2px solid var(--ok); transform: rotate(-45deg); }
-.plan .btn { margin-top: auto; }
-.terms { margin-top: 22px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-@media (max-width: 760px) { .plans { grid-template-columns: 1fr; } }
-
-/* Güvenlik: simge + kısa ad */
-.sec { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.sec div { display: flex; align-items: center; gap: 14px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-md); padding: 18px 20px; font-size: 15.5px; font-weight: 750; color: var(--ink); min-width: 0; }
-.sec svg { width: 22px; height: 22px; flex: none; stroke: var(--fam-fg); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.docs { margin-top: 26px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-.docs a { font-size: 13.5px; font-weight: 700; color: var(--ink); text-decoration: none; border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 7px 13px; }
-.docs a:hover { border-color: var(--ink); }
-@media (max-width: 900px) { .sec { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 560px) { .sec { grid-template-columns: 1fr; } }
-
-/* Ebeveyn */
-.parentbox { max-width: 860px; margin: 0 auto; display: flex; gap: 8px 24px; align-items: center; justify-content: center; flex-wrap: wrap; background: var(--fam-bg); border-radius: var(--r-lg); padding: 22px 28px; text-align: center; }
-.parentbox b { color: var(--ink); font-size: 18px; }
-.parentbox span { color: var(--text); font-size: 15.5px; }
-.parentbox .path { font-weight: 800; color: var(--fam-fg); white-space: nowrap; }
-
-/* SSS */
-.faq { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
-.faq details { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-sm); }
-.faq summary { cursor: pointer; list-style: none; padding: 18px 22px; font-weight: 750; color: var(--ink); display: flex; justify-content: space-between; gap: 16px; }
-.faq summary::-webkit-details-marker { display: none; }
-.faq summary::after { content: "+"; font-weight: 600; font-size: 22px; line-height: 1; color: var(--faint); flex: none; }
-.faq details[open] summary::after { content: "−"; }
-.faq details p { padding: 0 22px 20px; color: var(--muted); font-size: 15px; }
-
-/* Kapanış */
-.closing { background: var(--ink); }
-.closing .wrap { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; padding-block: 96px; }
-.closing h2 { color: #fff; max-width: 24ch; }
-.closing .lead { color: #C9D0E4; font-size: clamp(17px, 1.7vw, 20px); max-width: 58ch; }
-.closing .gains { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 26px; margin-top: 4px; }
-.closing .gains li { display: inline-flex; align-items: center; gap: 9px; color: #fff; font-weight: 750; font-size: 16px; }
-.closing .gains li::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
-.closing .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 6px; }
-.closing .code { font-size: 14.5px; color: #B8C1DA; }
-.closing .code a { color: #fff; font-weight: 750; }
-
-/* Alt bilgi */
-footer { background: var(--card); border-top: 1px solid var(--line); }
-footer .wrap { padding-block: 48px 36px; display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 32px; }
-footer .about { display: flex; flex-direction: column; gap: 12px; }
-footer .about p { font-size: 14px; color: var(--muted); max-width: 36ch; }
-footer h4 { margin: 0 0 10px; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
-footer ul li { padding: 4px 0; }
-footer ul a { font-size: 14px; color: var(--muted); text-decoration: none; }
-footer ul a:hover { color: var(--ink); }
-footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-top: 20px; font-size: 13px; color: var(--faint); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; }
-@media (max-width: 860px) { footer .wrap { grid-template-columns: 1fr 1fr; } footer .about, footer .legalcol { grid-column: 1 / -1; } footer .legalcol ul { columns: 2; column-gap: 24px; } }
-@media (max-width: 480px) { footer .legalcol ul { columns: 1; } }
-
-/* Telefonda kaydırınca alttan sabit çağrı */
-.dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; display: none; gap: 10px; background: rgba(255,255,255,.96); border-top: 1px solid var(--line);
-  padding-top: 10px; padding-bottom: max(10px, env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  transform: translateY(110%); transition: transform .25s ease; }
-.dock .btn { flex: 1; min-height: 46px; }
-.dock.on { transform: none; }
-@media (max-width: 700px) { .dock { display: flex; } footer { padding-bottom: 72px; } }
-</style>
+<link rel="stylesheet" href="assets/site.css">
+<script>document.documentElement.classList.add('js');</script>
+<!-- Düzen (12 Kasım 2026, ürün sahibinin isteği: clickup.com ve geckoboard.com ölçüleri; yalnız işleyiş ve oran, metin/görsel değil):
+     gerçek ürün kayıtları sakin ve akıcı, ferah bölümler, gerçek üst menü, fiyat ayrı sayfada (fiyat.html). Metinler önceki sayfadan aynen. -->
 </head>
 <body>
+<a class="skip" href="#main">Ana içeriğe geç</a><!-- YENİ METİN -->
 
 <header class="top" id="top">
   <div class="wrap nav">
-    <a class="brand" href="#" aria-label="ClinicApp ana sayfa">
-      <svg viewBox="0 0 1024 1024" aria-hidden="true"><rect width="1024" height="1024" fill="#0F1B3D"/><path d="M771.1,274.2 A320.0,320.0 0 1 0 771.1,749.8 A48.0,48.0 0 0 0 706.9,678.5 A224.0,224.0 0 1 1 706.9,345.5 A48.0,48.0 0 0 0 771.1,274.2 Z" fill="#FFFFFF"/><circle cx="485.0" cy="512" r="122" fill="#F2B53A"/></svg>
-      <span>ClinicApp</span>
-    </a>
-    <nav aria-label="Sayfa bölümleri">
-      <ul>
-        <li><a href="#nasil">Nasıl çalışır</a></li>
-        <li><a href="#degerler">Neden ClinicApp</a></li>
-        <li><a href="#gizlilik">Gizlilik</a></li>
-        <li><a href="#fiyatlar">Fiyatlar</a></li>
-        <li><a href="#sss">SSS</a></li>
-      </ul>
-    </nav>
-    <div class="acts">
-      <a class="parent" href="#ebeveyn">Ebeveyn misiniz?</a>
-      <a class="signin" data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş</a>
-      <a class="btn btn-primary" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">14 gün ücretsiz deneyin</a>
+    <a class="logo" href="index.html"><b>moyo</b> <span>Mercek</span></a>
+    <div class="menu" id="menu">
+      <nav aria-label="Ana menü"><!-- YENİ METİN (aria-label) -->
+        <ul>
+          <li><a href="#nasil">Nasıl çalışır</a></li>
+          <li><a href="#gizlilik">Gizlilik</a></li>
+          <li><a href="fiyat.html">Fiyat</a></li>
+          <li><a href="#sss">SSS</a></li>
+          <li><a href="#ebeveyn">Ebeveyn misiniz?</a></li>
+        </ul>
+      </nav>
+      <div class="acts">
+        <a class="pill pill-line" data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş</a>
+        <a class="pill pill-cta" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">14 gün ücretsiz deneyin</a>
+      </div>
     </div>
+    <a class="pill pill-cta nav-cta" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">14 gün ücretsiz deneyin</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menü"><!-- YENİ METİN (aria-label "Menü" / "Menüyü kapat") -->
+      <svg class="bars" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <svg class="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
   </div>
 </header>
 
-<main>
+<main id="main">
   <section class="hero" aria-labelledby="h-hero">
     <div class="wrap">
-      <div class="copy">
-        <span class="eyebrow">Çocuk ve aile uzmanları için</span>
-        <h1 id="h-hero">ABA Ebeveyn Eğitimi ve İlerleme Takibi Platformu</h1>
-        <p class="sub">Ev programlarına uyumu artıran, ebeveyn eğitim süreçlerini kolaylaştıran ve klinik ilerlemeyi somut verilerle izlenebilir kılan ABA ebeveyn eğitim platformu. Davranış Analizi Uzmanları (BCBA) için geliştirildi.</p>
-        <div class="actions">
-          <a class="btn btn-primary" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">14 gün ücretsiz deneyin →</a>
-          <a class="btn btn-ghost" data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş</a>
-        </div>
-        <p class="meta">Veri yalnız ebeveynin izniyle sizinle paylaşılır. Web, iPad ve iPhone'da çalışır.<br>14 gün ücretsiz, kart gerekmez; sonra aylık ₺749,99'dan başlayan abonelik, dönem sonunda kendiliğinden yenilenir.</p>
+      <p class="eyebrow">Çocuk ve aile uzmanları için</p>
+      <h1 id="h-hero">ABA Ebeveyn Eğitimi ve İlerleme Takibi Platformu</h1>
+      <p class="sub">Ev programlarına uyumu artıran, ebeveyn eğitim süreçlerini kolaylaştıran ve klinik ilerlemeyi somut verilerle izlenebilir kılan ABA ebeveyn eğitim platformu. Davranış Analizi Uzmanları (BCBA) için geliştirildi.</p>
+      <div class="actions">
+        <a class="btn btn-cta" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">14 gün ücretsiz deneyin</a>
+        <a class="btn btn-line" data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş</a>
       </div>
-      <div class="stage">
-        <div class="ui">
-          <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>ClinicApp · Takip Planı</span></div>
-          <picture><source media="(max-width: 700px)" srcset="assets/m-plan.webp" width="1170" height="1800"><img src="assets/shot-plan.webp" width="1600" height="1000" alt="Takip Planı: hedef satırında hedef, aile programı ve bağlı rutin yan yana; sağ üstte Aileye gönder."></picture>
-        </div>
-        <span class="mark m1" aria-hidden="true">Tek tıkla aileye</span>
-        <span class="mark m3" aria-hidden="true">Evde %93</span>
-        <span class="mark m2" aria-hidden="true">Yalnız siz görürsünüz</span>
-        <div class="marks-legend chips" aria-hidden="true">
-          <span class="chip fam">Tek tıkla aileye</span><span class="chip pri">Bej: yalnız siz</span><span class="chip plain">Örnek veri</span>
-        </div>
+      <p class="fine">Veri yalnız ebeveynin izniyle sizinle paylaşılır. Web, iPad ve iPhone'da çalışır.<br>14 gün ücretsiz, kart gerekmez; sonra aylık <span data-from>₺1.199,99'dan</span> başlayan abonelik, dönem sonunda kendiliğinden yenilenir.</p>
+    </div>
+    <div class="wrap wide">
+      <div class="hero-media">
+        <!-- YENİ METİN (alt) -->
+        <figure class="clip" data-clip="hero" data-hero><img class="clip-poster" src="assets/motion/hero.webp" alt="Danışan panosundan bir danışan açılıyor; ebeveyn eğitiminin özeti, öğrenme modülleri ve uygulama görevleri sekmeleri sırayla gösteriliyor." width="1440" height="900"><figcaption>Örnek veri</figcaption></figure>
       </div>
     </div>
-    <div class="facts" aria-label="Temel ilkeler">
-      <ul class="wrap">
-        <li><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.4-3 8-7 9-4-1-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Ebeveyn onayıyla</li>
-        <li><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>İzin her an geri alınır</li>
-        <li><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Notlarınız size özel</li>
-        <li><svg viewBox="0 0 24 24"><path d="M4 4l16 16"/><path d="M20 12a8 8 0 0 1-11.3 7.3M4 12a8 8 0 0 1 11.3-7.3"/></svg>Reklam ve izleme yok</li>
+    <div class="wrap">
+      <ul class="trust" aria-label="Temel ilkeler">
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v6c0 4.4-3 8-7 9-4-1-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Ebeveyn onayıyla</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>İzin her an geri alınır</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Notlarınız size özel</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16"/><path d="M20 12a8 8 0 0 1-11.3 7.3M4 12a8 8 0 0 1 11.3-7.3"/></svg>Reklam ve izleme yok</li>
       </ul>
     </div>
   </section>
 
-  <section class="band" id="degerler" aria-labelledby="h-deger">
+  <section class="sec sec-white" id="degerler" aria-labelledby="h-deger">
     <div class="wrap">
-      <h2 id="h-deger" class="sr">Neden ClinicApp</h2>
-      <div class="vps">
-        <div class="vp">
-          <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4z"/><path d="M4 10h16M10 10v9"/></svg></span>
+      <div class="head"><h2 id="h-deger">Neden Moyo Mercek</h2></div>
+      <div class="cards3">
+        <div class="vcard">
+          <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 10h16M10 10v9"/></svg></span>
           <h3>Ebeveyn eğitim programlarını kolayca oluşturun</h3>
           <p>Kanıta dayalı eğitim içerikleri, çalışma dokümanları ve davranışsal müdahale kaynaklarıyla kişiselleştirilmiş ebeveyn eğitim programları hazırlayın.</p>
         </div>
-        <div class="vp">
-          <span class="ic"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg></span>
+        <div class="vcard">
+          <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg></span>
           <h3>Ebeveynlerin seans dışındaki katılımını artırın</h3>
           <p>Uygulama üzerinden ebeveynlerin eğitim programlarını takip etmelerini, ev uygulamalarını gerçekleştirmelerini ve ABC (Öncül-Davranış-Sonuç) verilerini kaydetmelerini sağlayın.</p>
         </div>
-        <div class="vp">
-          <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span>
+        <div class="vcard">
+          <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span>
           <h3>Haftada 4–6 saatlik faturalandırılamayan iş yükünü azaltın</h3>
           <p>Ebeveyn eğitimi ve takip süreçlerini otomatikleştirerek hazırlık ve raporlama için harcadığınız zamanı azaltın. Böylece klinik hizmetlere daha fazla zaman ayırın.</p>
         </div>
@@ -393,115 +94,122 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
     </div>
   </section>
 
-  <section class="band alt" id="nasil" aria-labelledby="h-nasil">
+  <section class="sec sec-soft" id="nasil" aria-labelledby="h-nasil">
     <div class="wrap">
-      <div class="head center">
-        <span class="eyebrow">Nasıl çalışır</span>
+      <div class="head">
+        <p class="eyebrow">Nasıl çalışır</p>
         <h2 id="h-nasil">Platform Nasıl Çalışır?</h2>
       </div>
-
-      <div class="feat flip" id="urun">
-        <div class="txt">
-          <span class="stepn"><b>1</b>Dakikalar içinde kişiselleştirilmiş ebeveyn eğitim programları oluşturun</span>
-          <h2>100'den fazla ebeveyn eğitimi kaynağına erişin</h2>
-          <p>Kanıta dayalı eğitim içerikleri, çalışma dokümanları ve davranışsal müdahale kaynaklarından oluşan kapsamlı kütüphanemizle her aileye ve ihtiyaca uygun ebeveyn eğitim programları oluşturun.</p>
-          <p>Eğitim modüllerini, videoları ve etkileşimli çalışma materyallerini bir araya getirerek kişiselleştirilmiş programlarınızı 5 dakikadan kısa sürede hazırlayın.</p>
-        </div>
-        <!-- TODO: ebeveyn eğitimi ekran görüntüsü -->
-        <div class="vis"><div class="ui">
-          <div class="bar" aria-hidden="true"><i></i><i></i><i></i><span>ClinicApp · Takip Planı</span></div>
-          <picture><source media="(max-width: 700px)" srcset="assets/m-plan.webp" width="1170" height="1800"><img src="assets/shot-plan.webp" width="1600" height="1000" alt="Takip Planı: hedef satırında hedef, aile programı ve bağlı rutin yan yana." loading="lazy"></picture>
-        </div></div>
-      </div>
-
-      <div class="feat">
-        <div class="txt">
-          <span class="stepn"><b>2</b>Ebeveyn hedeflerini kolay kullanımlı bir mobil uygulamaya entegre edin</span>
-          <h2>Ebeveyn dostu mobil uygulamayla ailelerin sürece aktif katılımını sağlayın</h2>
-          <p>Ebeveynler için belirlenen hedefler, uygulama görevleri ve çalışma materyalleri mobil uygulama aracılığıyla günlük rutinlere entegre edilir.</p>
-          <p>Hatırlatma ve yönlendirme süreçlerini biz üstleniyoruz. Böylece siz süreci başlatmaya ve klinik çalışmanıza odaklanabilirsiniz.</p>
-        </div>
-        <div class="vis">
-          <div class="layer">
-            <div class="ui back"><img src="assets/ui-goalcol.webp" width="810" height="660" alt="Takip Planı'nda hedef sütunu: hedef düzeyi, aileye not ve yalnız uzmanın gördüğü değerlendirme." loading="lazy"></div>
-            <div class="front"><div class="mock" role="img" aria-label="Aileye gönder özeti: gidecek hedef, rutin ve program.">
-                <div class="ttl">Aileye gönder</div>
-                <div class="row"><i></i>Sabah rutinini hatırlatmasız başlatır<small>Hedef</small></div>
-                <div class="row"><i></i>Sakin akşam · 3 görev<small>Rutin</small></div>
-                <div class="row"><i></i>Övgü ve olumlu pekiştirme<small>Program</small></div>
-                <div class="go">Hepsini gönder (3)</div>
-              </div></div>
+      <div class="steps">
+        <article class="step" id="urun" aria-labelledby="h-s1">
+          <div class="step-text">
+            <p class="step-k"><b>1</b>Dakikalar içinde kişiselleştirilmiş ebeveyn eğitim programları oluşturun</p>
+            <h3 id="h-s1">100'den fazla ebeveyn eğitimi kaynağına erişin</h3>
+            <p>Kanıta dayalı eğitim içerikleri, çalışma dokümanları ve davranışsal müdahale kaynaklarından oluşan kapsamlı kütüphanemizle her aileye ve ihtiyaca uygun ebeveyn eğitim programları oluşturun.</p>
+            <p>Eğitim modüllerini, videoları ve etkileşimli çalışma materyallerini bir araya getirerek kişiselleştirilmiş programlarınızı 5 dakikadan kısa sürede hazırlayın.</p>
           </div>
-        </div>
-      </div>
-
-      <div class="feat flip">
-        <div class="txt">
-          <span class="stepn"><b>3</b>ABC verilerini ve ebeveynlerin ilerlemesini gerçek zamanlı olarak takip edin</span>
-          <h2>Davranışları tetikleyen unsurları ve davranış örüntülerini keşfedin</h2>
-          <p>Ebeveynler programı kullanmaya ve klinik uzmanı yanlarında olmadan evde gerçekleşen olayları kaydetmeye alıştıkça, klinik uzmanları hedef davranışları tetikleyen unsurları ve ebeveynlerin uyguladığı hangi müdahale stratejilerinin işe yaradığını gerçek zamanlı olarak takip edebilir.</p>
-          <p>Böylece davranışların öncüllerini, ortaya çıkış örüntülerini ve uygulanan müdahalelerin sonuçlarını daha yakından değerlendirebilir; ebeveynlerin ilerlemesini veriye dayalı olarak izleyebilirsiniz.</p>
-        </div>
-        <div class="vis vis-c"><div class="ui phone"><img src="assets/m-abc.webp" width="1170" height="1680" alt="Davranış kaydı kartları: öncesi, davranış ve sonrası." loading="lazy"></div></div>
-      </div>
-
-      <div class="feat">
-        <div class="txt">
-          <span class="stepn"><b>4</b>Ebeveyn hedeflerine yönelik ilerleme takibini otomatikleştirin</span>
-          <h2>İlerleme raporları hazırlamak için harcadığınız zamandan tasarruf edin</h2>
-          <p>Tedavi süreci ilerledikçe tüm verileri otomatik olarak kaydedip görselleştiriyoruz. Klinik uzmanlarının ebeveyn hedeflerine ve yeterlilik kriterlerine yönelik ilerlemeyi takip etmelerine yardımcı oluyoruz.</p>
-          <p>Bu veriler sayesinde ilerleme notlarını güncelleyebilir ve ihtiyaç duyulan raporları kolayca hazırlayabilirsiniz.</p>
-        </div>
-        <div class="vis vis-c"><div class="ui phone"><img src="assets/m-routines.webp" width="1170" height="1680" alt="Son 7 günün görev ve gün tablosu: yapıldı, onaylandı, yapılamadı." loading="lazy"></div></div>
-      </div>
-
-      <div class="feat flip">
-        <div class="txt">
-          <span class="stepn"><b>5</b>Olumlu pekiştirme ve jeton ekonomisi sistemini devreye alın</span>
-          <h2>Çocuklar için oyunlaştırılmış bir deneyim sunun</h2>
-          <p>Ebeveynlerin sürece aktif katılımı ve hedeflere yönelik ilerleme sağlandıktan sonra deneyimi bir üst seviyeye taşıyın.</p>
-          <p>İsteğe bağlı olarak klinik uzmanları, çocukların oyun erişimini etkinleştirebilir. Böylece çocuklar, ev ortamında sergiledikleri hedef davranışlar karşılığında ödüller kazandıkları bir video oyunu deneyimine katılır.</p>
-          <p>Ebeveynlerin kolayca benimseyip uygulayabileceği bu basit pekiştirme sistemi, ailelerin sürece katılımını artırırken çocukların bağımsızlık becerilerinin gelişimini de destekler.</p>
-        </div>
-        <div class="vis vis-c">
-          <div class="mock game" role="img" aria-label="Pofi Adası'nda bugünün görevleri: biri onaylandı, biri ebeveyn onayı bekliyor, biri yapılacak.">
-            <div class="gtop"><span class="ttl">Pofi Adası · Bugün</span><span class="coin"><i></i>42 tane inci</span></div>
-            <div class="row"><i></i>Dişlerini fırçala<small>Onaylandı</small></div>
-            <div class="row wait"><i></i>Çantanı hazırla<small>Onay bekliyor</small></div>
-            <div class="row todo"><i></i>20 dakika kitap oku<small>Sırada</small></div>
-            <div class="bar3"><span style="width:66%"></span></div>
+          <div class="step-media plate">
+            <!-- YENİ METİN (alt) -->
+            <figure class="clip" data-clip="kutuphane"><img class="clip-poster" src="assets/motion/kutuphane.webp" alt="Kaynak kütüphanesinde arama yapılıyor, bir okuma önizleniyor ve bir danışanın ebeveynine eğitim olarak atanıyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure>
           </div>
-        </div>
-      </div>
+        </article>
 
-      <div class="feat">
-        <div class="txt">
-          <span class="eyebrow">Bütün danışanlar</span>
-          <h2>Kimin sırası, bir bakışta.</h2>
-          <p>Sizden bekleyen, aileden yeni, sessiz kalan.</p>
-        </div>
-        <div class="vis"><div class="ui"><picture><source media="(max-width: 700px)" srcset="assets/m-board.webp" width="1170" height="1680"><img src="assets/ui-board.webp" width="1584" height="916" alt="Danışan panosu: Senin sıran ve Aileden yeni bölümleri." loading="lazy"></picture></div></div>
+        <article class="step flip" aria-labelledby="h-s2">
+          <div class="step-text">
+            <p class="step-k"><b>2</b>Ebeveyn hedeflerini kolay kullanımlı bir mobil uygulamaya entegre edin</p>
+            <h3 id="h-s2">Ebeveyn dostu mobil uygulamayla ailelerin sürece aktif katılımını sağlayın</h3>
+            <p>Ebeveynler için belirlenen hedefler, uygulama görevleri ve çalışma materyalleri mobil uygulama aracılığıyla günlük rutinlere entegre edilir.</p>
+            <p>Hatırlatma ve yönlendirme süreçlerini biz üstleniyoruz. Böylece siz süreci başlatmaya ve klinik çalışmanıza odaklanabilirsiniz.</p>
+          </div>
+          <div class="step-media plate">
+            <!-- YENİ METİN (alt) -->
+            <figure class="clip" data-clip="aile"><img class="clip-poster" src="assets/motion/aile.webp" alt="Ebeveyn deneyimi önizlemesi: telefonda eğitimin modül listesi açılıyor ve çoktan seçmeli bir test sorusu yanıtlanıyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure>
+          </div>
+        </article>
+
+        <article class="step" aria-labelledby="h-s3">
+          <div class="step-text">
+            <p class="step-k"><b>3</b>ABC verilerini ve ebeveynlerin ilerlemesini gerçek zamanlı olarak takip edin</p>
+            <h3 id="h-s3">Davranışları tetikleyen unsurları ve davranış örüntülerini keşfedin</h3>
+            <p>Ebeveynler programı kullanmaya ve klinik uzmanı yanlarında olmadan evde gerçekleşen olayları kaydetmeye alıştıkça, klinik uzmanları hedef davranışları tetikleyen unsurları ve ebeveynlerin uyguladığı hangi müdahale stratejilerinin işe yaradığını gerçek zamanlı olarak takip edebilir.</p>
+            <p>Böylece davranışların öncüllerini, ortaya çıkış örüntülerini ve uygulanan müdahalelerin sonuçlarını daha yakından değerlendirebilir; ebeveynlerin ilerlemesini veriye dayalı olarak izleyebilirsiniz.</p>
+          </div>
+          <div class="step-media plate">
+            <!-- YENİ METİN (alt) -->
+            <figure class="clip" data-clip="davranis"><img class="clip-poster" src="assets/motion/davranis.webp" alt="Hedef davranışlar ve bildirilen olaylar: bir davranış açılınca stratejiler ve öncül, sonuç, uygulanan strateji sütunlu olay tablosu görünüyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure>
+          </div>
+        </article>
+
+        <article class="step flip" aria-labelledby="h-s4">
+          <div class="step-text">
+            <p class="step-k"><b>4</b>Ebeveyn hedeflerine yönelik ilerleme takibini otomatikleştirin</p>
+            <h3 id="h-s4">İlerleme raporları hazırlamak için harcadığınız zamandan tasarruf edin</h3>
+            <p>Tedavi süreci ilerledikçe tüm verileri otomatik olarak kaydedip görselleştiriyoruz. Klinik uzmanlarının ebeveyn hedeflerine ve yeterlilik kriterlerine yönelik ilerlemeyi takip etmelerine yardımcı oluyoruz.</p>
+            <p>Bu veriler sayesinde ilerleme notlarını güncelleyebilir ve ihtiyaç duyulan raporları kolayca hazırlayabilirsiniz.</p>
+          </div>
+          <div class="step-media plate">
+            <!-- YENİ METİN (alt) -->
+            <figure class="clip" data-clip="rapor"><img class="clip-poster" src="assets/motion/rapor.webp" alt="Ev rutini gözlem raporu açılıp kaydırılıyor; ardından dönemin ilerleme notu kopyalanıyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure>
+          </div>
+        </article>
+
+        <article class="step" aria-labelledby="h-s5">
+          <div class="step-text">
+            <p class="step-k"><b>5</b>Olumlu pekiştirme ve jeton ekonomisi sistemini devreye alın</p>
+            <h3 id="h-s5">Çocuklar için oyunlaştırılmış bir deneyim sunun</h3>
+            <p>Ebeveynlerin sürece aktif katılımı ve hedeflere yönelik ilerleme sağlandıktan sonra deneyimi bir üst seviyeye taşıyın.</p>
+            <p>İsteğe bağlı olarak klinik uzmanları, çocukların oyun erişimini etkinleştirebilir. Böylece çocuklar, ev ortamında sergiledikleri hedef davranışlar karşılığında ödüller kazandıkları bir video oyunu deneyimine katılır.</p>
+            <p>Ebeveynlerin kolayca benimseyip uygulayabileceği bu basit pekiştirme sistemi, ailelerin sürece katılımını artırırken çocukların bağımsızlık becerilerinin gelişimini de destekler.</p>
+          </div>
+          <div class="step-media plate">
+            <div class="mock-stage">
+              <div class="mock game" role="img" aria-label="Moyo Oyun'da bugünün görevleri: biri onaylandı, biri ebeveyn onayı bekliyor, biri yapılacak.">
+                <div class="gtop"><span class="ttl">Moyo Oyun · Bugün</span><span class="coin"><i></i>42 tane inci</span></div>
+                <div class="row"><i></i>Dişlerini fırçala<small>Onaylandı</small></div>
+                <div class="row wait"><i></i>Çantanı hazırla<small>Onay bekliyor</small></div>
+                <div class="row todo"><i></i>20 dakika kitap oku<small>Sırada</small></div>
+                <div class="bar3"><span style="width:66%"></span></div>
+              </div>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
   </section>
 
-  <section class="band" id="gizlilik" aria-labelledby="h-gizlilik">
+  <section class="sec sec-dark" aria-labelledby="h-pano">
     <div class="wrap">
-      <div class="head center">
-        <span class="eyebrow">Gizlilik</span>
+      <div class="head">
+        <p class="eyebrow">Bütün danışanlar</p>
+        <h2 id="h-pano">Kimin sırası, bir bakışta.</h2>
+        <p class="intro">Sizden bekleyen, aileden yeni, sessiz kalan.</p>
+      </div>
+      <div class="plate">
+        <!-- YENİ METİN (alt) -->
+        <figure class="clip" data-clip="pano"><img class="clip-poster" src="assets/motion/pano.webp" alt="Danışan panosu: Senin sıran, Ebeveynden yeni ve Sessiz kalanlar bölümleri; süzgeç değiştiriliyor ve yeni bir kayıt Gördüm ile kapatılıyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-white" id="gizlilik" aria-labelledby="h-gizlilik">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Gizlilik</p>
         <h2 id="h-gizlilik">Kim neyi görür, baştan belli.</h2>
       </div>
       <div class="sees">
         <div class="col fam">
-          <h3><span class="dot"><svg viewBox="0 0 24 24"><path d="M2 12c1.5-3.5 5.5-7 10-7s8.5 3.5 10 7c-1.5 3.5-5.5 7-10 7S3.5 15.5 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span>Aile görür</h3>
-          <ul><li>Gönderilen hedefler</li><li>Aile programı</li><li>Rutin önerileri</li></ul>
+          <h3><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12c1.5-3.5 5.5-7 10-7s8.5 3.5 10 7c-1.5 3.5-5.5 7-10 7S3.5 15.5 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span>Aile görür</h3>
+          <!-- YENİ METİN (bugünkü ürüne göre liste) -->
+          <ul><li>Atadığınız eğitim ve modüller</li><li>Uygulama görevleri ve yapılacaklar</li><li>Macera önerileri</li></ul>
         </div>
         <div class="col pri">
-          <h3><span class="dot"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>Yalnız siz</h3>
-          <ul><li>Notlar</li><li>Değerlendirmeler</li><li>Taslaklar</li></ul>
+          <h3><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>Yalnız siz</h3>
+          <!-- YENİ METİN (bugünkü ürüne göre liste) -->
+          <ul><li>Notlar</li><li>İncelemeleriniz</li><li>Taslak eğitimler</li></ul>
         </div>
         <div class="col off">
-          <h3><span class="dot"><svg viewBox="0 0 24 24"><path d="M4 4l16 16"/><path d="M2 12c1.1-2.6 3.5-5.2 6.6-6.4M21.9 12a12.6 12.6 0 0 1-3.6 4.6M14.1 18.7A9.5 9.5 0 0 1 12 19c-4.5 0-8.5-3.5-10-7"/></svg></span>Size kapalı</h3>
+          <h3><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16"/><path d="M2 12c1.1-2.6 3.5-5.2 6.6-6.4M21.9 12a12.6 12.6 0 0 1-3.6 4.6M14.1 18.7A9.5 9.5 0 0 1 12 19c-4.5 0-8.5-3.5-10-7"/></svg></span>Size kapalı</h3>
           <ul><li>Aile mesajları</li><li>İnci defteri</li><li>Paylaşılmayan kardeşler</li></ul>
         </div>
       </div>
@@ -516,7 +224,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
           <figcaption>Siz davet edersiniz</figcaption>
         </figure>
         <figure>
-          <div class="consent" role="img" aria-label="ParentApp'te onay: ebeveyn paylaşacağı çocuğu seçer ve onaylar.">
+          <div class="consent" role="img" aria-label="Moyo'da onay: ebeveyn paylaşacağı çocuğu seçer ve onaylar.">
             <div class="who"><span class="av">EÖ</span><div><b>Elif Örnek</b><span>Uzm. Klinik Psikolog</span></div></div>
             <div class="kid">Nazlı · 8 yaş<i></i></div>
             <div class="kid off">Arven · 6 yaş<i></i></div>
@@ -526,93 +234,54 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
           <figcaption>Ebeveyn seçer ve onaylar</figcaption>
         </figure>
       </div>
-      <div class="flow" aria-label="Rızanın yaşam döngüsü">
+      <div class="flow" role="group" aria-label="Rızanın yaşam döngüsü">
         <span>Davet</span><b aria-hidden="true">→</b><span>Ebeveyn onayı</span><b aria-hidden="true">→</b><span>Paylaşım</span><b aria-hidden="true">→</b><span class="end">Her an durdurulur</span>
       </div>
     </div>
   </section>
 
-  <section class="band alt" id="kimler" aria-labelledby="h-kimler" style="padding-block: 72px">
+  <section class="sec sec-soft" id="kimler" aria-labelledby="h-kimler">
     <div class="wrap">
-      <div class="head center" style="margin-bottom: 28px"><span class="eyebrow">Kimler için</span><h2 id="h-kimler">Ev rutiniyle çalışan her uzman.</h2></div>
-      <div class="roles"><span>Klinik psikolog</span><span>Ergoterapist</span><span>UDA (ABA) / BCBA</span><span>Özel eğitim uzmanı</span><span>Çocuk ve ergen terapisti</span><span>Aile danışmanı</span></div>
+      <div class="head"><p class="eyebrow">Kimler için</p><h2 id="h-kimler">Ev rutiniyle çalışan her uzman.</h2></div>
+      <ul class="roles"><li>Klinik psikolog</li><li>Ergoterapist</li><li>UDA (ABA) / BCBA</li><li>Özel eğitim uzmanı</li><li>Çocuk ve ergen terapisti</li><li>Aile danışmanı</li></ul>
     </div>
   </section>
 
-  <section class="band" id="fiyatlar" aria-labelledby="h-fiyat">
+  <section class="sec sec-white" id="guvenlik" aria-labelledby="h-guv">
     <div class="wrap">
-      <div class="head center">
-        <span class="eyebrow">Fiyatlar</span>
-        <h2 id="h-fiyat">İki paket. 14 gün ücretsiz.</h2>
-        <div class="period" role="group" aria-label="Ödeme dönemi">
-          <button type="button" id="p-month" aria-pressed="false">Aylık</button>
-          <button type="button" id="p-year" aria-pressed="true">Yıllık · 2 ay sizden</button>
-        </div>
-      </div>
-      <div class="plans">
-        <div class="plan">
-          <div><h3>Bireysel</h3><p class="who">Tek uzman</p></div>
-          <div>
-            <div class="price" data-m="₺749,99" data-y="₺7.499,99"><span>₺7.499,99</span> <small data-m="/ ay" data-y="/ yıl">/ yıl</small></div>
-            <p class="per" data-m="Aylık ödeme" data-y="Aylık yaklaşık ₺625">Aylık yaklaşık ₺625</p>
-          </div>
-          <ul><li>Sınırsız danışan</li><li>Takip planı ve şablonlar</li><li>Rapor ve ilerleme notu</li></ul>
-          <a class="btn btn-ghost" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Bireysel ile başlayın</a>
-        </div>
-        <div class="plan featured">
-          <div class="top"><div><h3>Klinik</h3><p class="who">10 uzmana kadar</p></div><span class="chip fam">Ekipler için</span></div>
-          <div>
-            <div class="price" data-m="₺2.999,99" data-y="₺29.999,99"><span>₺29.999,99</span> <small data-m="/ ay" data-y="/ yıl">/ yıl</small></div>
-            <p class="per" data-m="Aylık ödeme" data-y="Aylık yaklaşık ₺2.500">Aylık yaklaşık ₺2.500</p>
-          </div>
-          <ul><li>Bireysel paketteki her şey</li><li>Ekip ve danışan atama</li><li>Ekiple ortak şablonlar</li></ul>
-          <a class="btn btn-primary" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Klinik ile başlayın</a>
-        </div>
-      </div>
-      <div class="terms"><span class="chip plain">Kart gerekmez</span><span class="chip plain">KDV dahil</span><span class="chip plain">App Store'dan alınır, web'de de açılır</span><span class="chip plain">Dönem sonunda kendiliğinden yenilenir</span><span class="chip plain">Apple hesabından iptal</span></div>
-    </div>
-  </section>
-
-  <section class="band alt" id="guvenlik" aria-labelledby="h-guv">
-    <div class="wrap">
-      <div class="head center">
-        <span class="eyebrow">Güvenlik ve KVKK</span>
+      <div class="head">
+        <p class="eyebrow">Güvenlik ve KVKK</p>
         <h2 id="h-guv">Çocuğun verisi ailenindir.</h2>
       </div>
-      <div class="sec">
-        <div><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>Yetki sunucuda denetlenir</div>
-        <div><svg viewBox="0 0 24 24"><path d="M2 12c1.5-3.5 5.5-7 10-7s8.5 3.5 10 7c-1.5 3.5-5.5 7-10 7S3.5 15.5 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Uzman yalnız okur, önerir</div>
-        <div><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M3 3l18 18"/></svg>Önceki uzman adsız</div>
-        <div><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>Tek kullanımlık giriş bağlantısı</div>
-        <div><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Hesap silme sizde</div>
-        <div><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M9 12l2 2 4-4"/></svg>KVKK başvurusu uygulamada</div>
-      </div>
-      <div class="docs" aria-label="Yasal metinler">
+      <ul class="tiles">
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg>Yetki sunucuda denetlenir</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12c1.5-3.5 5.5-7 10-7s8.5 3.5 10 7c-1.5 3.5-5.5 7-10 7S3.5 15.5 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Uzman yalnız okur, önerir</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/><path d="M3 3l18 18"/></svg>Önceki uzman adsız</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>Tek kullanımlık giriş bağlantısı</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Hesap silme sizde</li>
+        <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M9 12l2 2 4-4"/></svg>KVKK başvurusu uygulamada</li>
+      </ul>
+      <nav class="docs" aria-label="Yasal metinler">
         <a data-legal="gizlilik" href="https://moyoapp.com.tr/yasal/gizlilik" target="_blank" rel="noopener">Gizlilik Politikası</a>
         <a data-legal="sozlesme-uzman" href="https://moyoapp.com.tr/yasal/sozlesme-uzman" target="_blank" rel="noopener">Uzman Hizmet Sözleşmesi</a>
         <a data-legal="aydinlatma-uzman" href="https://moyoapp.com.tr/yasal/aydinlatma-uzman" target="_blank" rel="noopener">Uzman Aydınlatma Metni</a>
         <a data-legal="alt-isleyenler" href="https://moyoapp.com.tr/yasal/alt-isleyenler" target="_blank" rel="noopener">Hizmet sağlayıcılar</a>
         <a data-legal="kvkk-basvuru" href="https://moyoapp.com.tr/yasal/kvkk-basvuru" target="_blank" rel="noopener">KVKK başvurusu</a>
+      </nav>
+      <div class="parentbox" id="ebeveyn">
+        <h2>Ebeveyn misiniz?</h2>
+        <p>Hesap açmanız gerekmez. Daveti Moyo'da açın: <span class="path">Aile › Hesap › Kod gir</span></p>
       </div>
     </div>
   </section>
 
-  <section class="band" id="ebeveyn" aria-labelledby="h-ebeveyn" style="padding-block: 56px 0">
+  <section class="sec sec-soft" id="sss" aria-labelledby="h-sss">
     <div class="wrap">
-      <div class="parentbox">
-        <b id="h-ebeveyn">Ebeveyn misiniz?</b>
-        <span>Hesap açmanız gerekmez. Daveti ParentApp'te açın: <span class="path">Aile › Hesap › Kod gir</span></span>
-      </div>
-    </div>
-  </section>
-
-  <section class="band" id="sss" aria-labelledby="h-sss">
-    <div class="wrap">
-      <div class="head center"><span class="eyebrow">Sık sorulanlar</span><h2 id="h-sss">Kısaca</h2></div>
+      <div class="head"><p class="eyebrow">Sık sorulanlar</p><h2 id="h-sss">Kısaca</h2></div>
       <div class="faq">
-        <details><summary>Aile ParentApp kullanmıyorsa?</summary><p>Davet e-postası kurulumu anlatır. Ebeveyn çocuğunu ekler ve paylaşımı onaylar.</p></details>
+        <details><summary>Aile Moyo kullanmıyorsa?</summary><p>Davet e-postası kurulumu anlatır. Ebeveyn çocuğunu ekler ve paylaşımı onaylar.</p></details>
         <details><summary>Ebeveyn paylaşımı durdurursa?</summary><p>Çocuğun verisine erişiminiz o an biter. Kendi notlarınız klinikte kalır.</p></details>
-        <details><summary>Ödeme nereden yapılır?</summary><p>iPhone ya da iPad'deki ClinicApp'ten, App Store ile. Üyelik web'de de açılır. Deneme bitince hiçbir şey silinmez.</p></details>
+        <details><summary>Ödeme nereden yapılır?</summary><p>iPhone ya da iPad'deki Moyo Mercek'ten, App Store ile. Üyelik web'de de açılır. Deneme bitince hiçbir şey silinmez. <a href="fiyat.html">Paketler ve fiyat</a><!-- YENİ METİN (bağlantı adı) --></p></details>
         <details><summary>Bireysel çalışıyorum, klinik açmam gerekir mi?</summary><p>Hayır. Kayıtta "Bireysel uzman"ı seçin. Ekip istediğinizde Klinik paketine geçin.</p></details>
         <details><summary>Ekipte kim neyi görür?</summary><p>Uzman kendi davet ettiği ve kendisine atanan danışanları görür. Klinik sahibi hepsini görür.</p></details>
         <details><summary>Tanı koyar ya da puan verir mi?</summary><p>Hayır. Göstergeler ev rutininin gözlem özetidir; karar uzmanındır.</p></details>
@@ -620,20 +289,23 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
     </div>
   </section>
 
-  <section class="closing" aria-labelledby="h-son">
+  <section class="sec sec-white" aria-labelledby="h-son">
     <div class="wrap">
-      <h2 id="h-son">Kliniğiniz için daha verimli bir çalışma modeli</h2>
-      <p class="lead">Ebeveyn eğitiminden ev uygulamalarına, davranış verilerinin takibinden ilerleme raporlamasına kadar tüm süreci tek platformda yönetin.</p>
-      <ul class="gains">
-        <li>Daha az idari iş yükü.</li>
-        <li>Daha fazla ebeveyn katılımı.</li>
-        <li>Daha ölçülebilir klinik ilerleme.</li>
-      </ul>
-      <div class="actions">
-        <a class="btn btn-light" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">14 gün ücretsiz deneyin</a>
-        <a class="btn btn-line" data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş</a>
+      <div class="closing">
+        <h2 id="h-son">Kliniğiniz için daha verimli bir çalışma modeli</h2>
+        <p class="lead">Ebeveyn eğitiminden ev uygulamalarına, davranış verilerinin takibinden ilerleme raporlamasına kadar tüm süreci tek platformda yönetin.</p>
+        <ul class="gains">
+          <li>Daha az idari iş yükü.</li>
+          <li>Daha fazla ebeveyn katılımı.</li>
+          <li>Daha ölçülebilir klinik ilerleme.</li>
+        </ul>
+        <div class="actions">
+          <a class="btn btn-cta" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">14 gün ücretsiz deneyin</a>
+          <a class="btn btn-line" href="fiyat.html">Fiyatı görün</a><!-- YENİ METİN -->
+          <a class="btn btn-quiet" data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş</a>
+        </div>
+        <p class="fine">14 gün ücretsiz, kart gerekmez; sonra aylık <span data-from>₺1.199,99'dan</span> başlayan abonelik, dönem sonunda kendiliğinden yenilenir.</p>
       </div>
-      <p class="code">Ekip kodunuz mu var? <a data-app="join" href="https://uzman.moyoapp.com.tr/?kod">Kodla katılın</a></p>
     </div>
   </section>
 </main>
@@ -641,32 +313,28 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
 <footer>
   <div class="wrap">
     <div class="about">
-      <a class="brand" href="#" aria-label="ClinicApp ana sayfa">
-        <svg viewBox="0 0 1024 1024" aria-hidden="true"><rect width="1024" height="1024" fill="#0F1B3D"/><path d="M771.1,274.2 A320.0,320.0 0 1 0 771.1,749.8 A48.0,48.0 0 0 0 706.9,678.5 A224.0,224.0 0 1 1 706.9,345.5 A48.0,48.0 0 0 0 771.1,274.2 Z" fill="#FFFFFF"/><circle cx="485.0" cy="512" r="122" fill="#F2B53A"/></svg>
-        <span>ClinicApp</span>
-      </a>
+      <a class="logo" href="index.html"><b>moyo</b> <span>Mercek</span></a>
       <p>Çocuk ve aile uzmanları için ev rutini takip paneli.</p>
     </div>
     <div>
-      <h4>Ürün</h4>
+      <h2 class="fh">Ürün</h2>
       <ul>
         <li><a href="#nasil">Nasıl çalışır</a></li>
         <li><a href="#urun">Ürün</a></li>
-        <li><a href="#fiyatlar">Fiyatlar</a></li>
+        <li><a href="fiyat.html">Fiyatlar</a></li>
         <li><a href="#sss">Sık sorulanlar</a></li>
       </ul>
     </div>
     <div>
-      <h4>Hesap</h4>
+      <h2 class="fh">Hesap</h2>
       <ul>
         <li><a data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş yap</a></li>
         <li><a data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Ücretsiz deneyin</a></li>
-        <li><a data-app="join" href="https://uzman.moyoapp.com.tr/?kod">Ekip koduyla katıl</a></li>
         <li><a href="#ebeveyn">Ebeveynler için</a></li>
       </ul>
     </div>
     <div class="legalcol">
-      <h4>Yasal</h4>
+      <h2 class="fh">Yasal</h2>
       <ul>
         <li><a data-legal="gizlilik" href="https://moyoapp.com.tr/yasal/gizlilik" target="_blank" rel="noopener">Gizlilik Politikası</a></li>
         <li><a data-legal="sozlesme-uzman" href="https://moyoapp.com.tr/yasal/sozlesme-uzman" target="_blank" rel="noopener">Uzman Hizmet Sözleşmesi</a></li>
@@ -677,47 +345,15 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--line); padding-
       </ul>
     </div>
     <!-- Yayından önce: şirket unvanı, adresi ve iletişim adresi buraya (ortak hukuk/22 künyesi; alan adı gelince destek@...). -->
-    <div class="legal"><span>© 2026 ClinicApp</span><span>Bu sayfa çerez, reklam pikseli ya da analiz aracı kullanmaz.</span></div>
+    <div class="legal"><span>© 2026 Moyo Mercek</span><span>Bu sayfa çerez, reklam pikseli ya da analiz aracı kullanmaz.</span></div>
   </div>
 </footer>
 
 <div class="dock" id="dock" aria-hidden="true">
-  <a class="btn btn-ghost" data-app="login" href="https://uzman.moyoapp.com.tr/" tabindex="-1">Giriş</a>
-  <a class="btn btn-primary" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit" tabindex="-1">14 gün ücretsiz deneyin</a>
+  <a class="btn btn-ink" data-app="login" href="https://uzman.moyoapp.com.tr/" tabindex="-1">Giriş</a>
+  <a class="btn btn-cta" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit" tabindex="-1">14 gün ücretsiz deneyin</a>
 </div>
 
-<script>
-(function () {
-  // Adresler (6 Kasım 2026, ortak DURUM "Alan adı ve adresler"): uygulama https://uzman.moyoapp.com.tr (?kayit kayıt, ?kod kod),
-  // yasal metinler https://moyoapp.com.tr/yasal/<anahtar>, destek https://moyoapp.com.tr/destek — bağlantılarda sabit yazılı.
-  // Önizlemede window.CLINICAPP_URL / window.CLINICAPP_LEGAL (legal işlevinin adresi) ile değiştirilir.
-  var app = window.CLINICAPP_URL;
-  if (app) document.querySelectorAll('[data-app]').forEach(function (a) { a.href = app; a.target = '_blank'; a.rel = 'noopener'; });
-  var LEGAL = window.CLINICAPP_LEGAL;
-  if (LEGAL) document.querySelectorAll('[data-legal]').forEach(function (a) { a.href = LEGAL + '?doc=' + a.getAttribute('data-legal'); });
-
-  var head = document.getElementById('top'), dock = document.getElementById('dock'), hero = document.querySelector('.hero');
-  var onScroll = function () {
-    head.classList.toggle('scrolled', window.scrollY > 4);
-    var on = window.scrollY > hero.offsetHeight - 120 && (window.innerHeight + window.scrollY) < document.body.scrollHeight - 220;
-    dock.classList.toggle('on', on);
-    dock.setAttribute('aria-hidden', String(!on));
-    dock.querySelectorAll('a').forEach(function (a) { a.tabIndex = on ? 0 : -1; });
-  };
-  window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
-
-  var setPeriod = function (y) {
-    document.getElementById('p-year').setAttribute('aria-pressed', String(y));
-    document.getElementById('p-month').setAttribute('aria-pressed', String(!y));
-    document.querySelectorAll('[data-m]').forEach(function (el) {
-      var v = el.getAttribute(y ? 'data-y' : 'data-m');
-      var t = el.classList.contains('price') ? el.querySelector('span') : el;
-      t.textContent = v;
-    });
-  };
-  document.getElementById('p-year').addEventListener('click', function () { setPeriod(true); });
-  document.getElementById('p-month').addEventListener('click', function () { setPeriod(false); });
-})();
-</script>
+<script src="assets/site.js"></script>
 </body>
 </html>

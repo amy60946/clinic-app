@@ -6,6 +6,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/dist-mercek"
 rm -rf "$OUT" && mkdir -p "$OUT"
 cp "$ROOT/site/index.html" "$OUT/index.html"
+cp "$ROOT/site/fiyat.html" "$OUT/fiyat.html"
 cp -r "$ROOT/site/assets" "$OUT/assets"
 cp "$ROOT/assets/icon-concepts/kucak/temel.png" "$OUT/assets/icon.png" 2>/dev/null || true
 echo "Hazır: $OUT"
