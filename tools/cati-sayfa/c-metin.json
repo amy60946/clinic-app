@@ -1,0 +1,206 @@
+{
+ "h1": "DEHB, otizm ve davranışsal zorluklar yaşayan çocuklar için gelişim ve alışkanlık geliştirme platformu",
+ "alt_basliklar": [
+  "Çocuk büyütmek imece işidir. Moyo; evde sizi, oyunda çocuğunuzu, seansta uzmanınızı aynı rutinde buluşturur.",
+  "Evde, oyunda ve seansta el birliği. Siz rutini kurarsınız, çocuğunuz oyunda yapar, uzmanınız izninizle seanslar arasını görür.",
+  "Bir elin nesi var, iki elin sesi var. Evdeki emeğiniz ile uzmanınızın seanstaki emeği artık aynı yöne bakar."
+ ],
+ "fiyat_not": "Moyo Oyun ücretsiz. Moyo Ebeveyn 7 gün ücretsiz, sonra aylık — TL; dönem sonunda kendiliğinden yenilenir.",
+ "giris_etiket": "Nasıl çalışır",
+ "giris_baslik": "Bugün evde başlayın, istediğinizde uzmanınızı katın",
+ "giris_metin": "Moyo; çocuğu, sizi ve zaten çalıştığınız uzmanı aynı planda buluşturur.",
+ "basamak": [
+  [
+   "Evde başlayın",
+   "Rutini siz kurarsınız, çocuğunuz oyunda adım adım yapar."
+  ],
+  [
+   "Bilgiyle destekleyin",
+   "Uzmanınızın gönderdiği kısa eğitimlerle davranışları anlamayı ve evde neler yapabileceğinizi öğrenirsiniz."
+  ],
+  [
+   "Uzmanınızı dahil edin",
+   "İzninizle, zaten çalıştığınız uzman seanslar arasındaki günleri de görür."
+  ]
+ ],
+ "adimlar": [
+  {
+   "rol": "Moyo Ebeveyn · telefonunuzda",
+   "kisa": "Moyo Ebeveyn",
+   "baslik": "Her gün aynı saatte, aynı sırayla.",
+   "metin": "Sabah, akşam ve okul hazırlığı rutinini yaşa uygun hazır listelerden bir kez kurarsınız; her gün çocuğunuzun oyununa gelir. Gün içinde ona destek olur, zorlandığı anları kısa bir davranış kaydıyla not eder, günü, haftayı ve ayı tek yerden görürsünüz.",
+   "gorsel": "ebeveyn-rutin",
+   "alt": "Moyo Ebeveyn: yaşa uygun hazır rutinler",
+   "etiket": "Moyo Ebeveyn · gerçek ekran, örnek veri"
+  },
+  {
+   "rol": "Moyo Oyun · çocuğunuzun tabletinde",
+   "kisa": "Moyo Oyun",
+   "baslik": "Hatırlatma oyundan gelir, onay sizden.",
+   "metin": "Çocuğunuz bugünkü rutinini oyunda adım adım görür; dostu Okti ona eşlik eder. Reklam, satın alma ve çocuk hesabı yok.",
+   "liste": [
+    [
+     "1.",
+     "Çocuğunuz işi bitirince oyunda \"Yaptım\"a dokunur."
+    ],
+    [
+     "2.",
+     "Telefonunuza bildirim gelir; tek dokunuşla onaylarsınız."
+    ],
+    [
+     "3.",
+     "Onayınızla çocuğunuz ödülünü oyunda alır, dostu Okti büyür."
+    ]
+   ],
+   "gorsel": "ikili",
+   "alt": "",
+   "etiket": ""
+  },
+  {
+   "rol": "Moyo Mercek · uzmanınızın panelinde",
+   "kisa": "Moyo Mercek",
+   "baslik": "Zaten çalıştığınız uzman, seanslar arasını da görsün.",
+   "metin": "Uzmanınız davet gönderir, siz onaylarsınız; o andan sonra evdeki rutinleri, davranış kayıtlarını ve eğitimdeki ilerlemeyi görür, bir sonraki seansa bu kayıtlarla hazırlanır. Paylaşımı istediğiniz an durdurursunuz; Moyo size uzman önermez.",
+   "gorsel": "mercek-veri",
+   "alt": "Moyo Mercek: uzmanın gördüğü evdeki kayıtlar",
+   "etiket": "Uzmanınız \"Bu hafta evde nasıl geçti?\" diye sorduğunda cevap hazır."
+  }
+ ],
+ "ikili_alt": "Solda çocuğun oyununda rutin onay penceresi, sağda ebeveynin telefonunda onay ekranı",
+ "oyun_onay_alt": "Moyo Oyun: \"Yaptım\" denen rutin \"Ailen bakıyor\" diye onayı bekliyor",
+ "ebeveyn_onay_alt": "Moyo Ebeveyn: çocuğun tamamladığı rutini onaylama ekranı",
+ "balon_git": "Yaptım!",
+ "balon_don": "Onaylandı ✓",
+ "dongu_etiket": "Hepsi birlikte",
+ "dongu_baslik": "Uzmanın önerisi, yarının rutini",
+ "dongu": [
+  {
+   "kim": "Uzmanınız",
+   "kisa": "Önerir",
+   "baslik": "Eğitim gönderir, rutin önerir.",
+   "metin": "Seansta konuşulanı eve taşımak için.",
+   "gorsel": "mercek-egitim",
+   "alt": "Moyo Mercek: ebeveyn eğitimi"
+  },
+  {
+   "kim": "Siz",
+   "kisa": "Öğrenirsiniz",
+   "baslik": "Eğitimi okur, rutini eklersiniz.",
+   "metin": "Kısa dersler; eklemek ya da eklememek sizin kararınız.",
+   "gorsel": "ebeveyn-uzman",
+   "alt": "Moyo Ebeveyn: uzmandan gelenler"
+  },
+  {
+   "kim": "Çocuğunuz",
+   "kisa": "Oynar",
+   "baslik": "Oyunda yapar, \"Yaptım\"a dokunur.",
+   "metin": "Hatırlatmayı oyun yapar.",
+   "gorsel": "oyun-onay",
+   "alt": "Moyo Oyun: \"Yaptım\" denen rutin, ailenin onayını bekliyor"
+  },
+  {
+   "kim": "Siz",
+   "kisa": "Onaylarsınız",
+   "baslik": "Onaylar, zorlanılan anı kaydedersiniz.",
+   "metin": "Bir dokunuşla onay; gerekirse kısa bir davranış kaydı.",
+   "gorsel": "ebeveyn-onay",
+   "alt": "Moyo Ebeveyn: onay ekranı"
+  },
+  {
+   "kim": "Uzmanınız",
+   "kisa": "Görür",
+   "baslik": "Evdeki haftayı görür, seansa hazırlanır.",
+   "metin": "Rutinler, kayıtlar ve eğitimdeki ilerleme tek ekranda.",
+   "gorsel": "mercek-veri",
+   "alt": "Moyo Mercek: evdeki kayıtlar"
+  },
+  {
+   "kim": "Hepsi birlikte",
+   "kisa": "Sürer",
+   "baslik": "Eklediğiniz yeni öneri ertesi gün oyunda.",
+   "metin": "Döngü her hafta yeniden başlar.",
+   "gorsel": "oyun-liste",
+   "alt": "Moyo Oyun: bugünün rutinleri, \"Ailenden\" etiketiyle"
+  }
+ ],
+ "dongu_kapanis": "Böylece seansta konuşulan seansta kalmaz; eklediğiniz her öneri ertesi gün evde, oyunda devam eder.",
+ "urunler_baslik": "Üç uygulama, tek plan",
+ "urunler_metin": "Her biri bir kişinin işini kolaylaştırır; birlikte çalışınca döngü kapanır.",
+ "urunler": [
+  {
+   "ikon": "img/ikon-oyun.png",
+   "kim": "Çocuk için",
+   "ad": "moyo Oyun",
+   "ozet": "Rutini oyuna çevirir; ödül oyunun içinde.",
+   "metin": "Çocuk hesabı gerekmez; cihaz kısa süreli bir kodla bağlanır. Reklam ve satın alma yok.",
+   "link": "a.html",
+   "link_ad": "Nasıl oynanır →"
+  },
+  {
+   "ikon": "img/ikon-moyo.svg",
+   "kim": "Aile için",
+   "ad": "moyo Ebeveyn",
+   "ozet": "Hatırlatmayı uygulamaya bırakır, ilerlemeyi gösterir.",
+   "metin": "Rutinleri kurar, tamamlananları onaylar, uzmanınızla neyi paylaşacağınızı siz seçersiniz.",
+   "link": "a.html",
+   "link_ad": "Ebeveyn sayfası →"
+  },
+  {
+   "ikon": "img/ikon-mercek.svg",
+   "kim": "Uzman için",
+   "ad": "moyo Mercek",
+   "ozet": "Seans dışındaki haftayı görünür kılar.",
+   "metin": "Ailenin izniyle evdeki kayıtları görür, ebeveyn eğitimi atar, rapor ve ilerleme notunu kayıtlardan hazırlar.",
+   "link": "{MERCEK}",
+   "link_ad": "Uzman sayfası ↗"
+  }
+ ],
+ "guven": [
+  [
+   "Reklam yok",
+   "Oyunda reklam ve satın alma yoktur."
+  ],
+  [
+   "Yabancılarla iletişim yok",
+   "Çocuğunuz yalnızca ailesine mesaj gönderebilir."
+  ],
+  [
+   "Çocuk hesabı gerekmez",
+   "Çocuğunuzun e-postası ve şifresi olmaz. Cihaz kısa süreli bir kodla bağlanır."
+  ],
+  [
+   "Veriler sizin kontrolünüzde",
+   "Uzmanla paylaşım yalnızca sizin onayınızla açılır. Hesabınızı istediğiniz zaman silebilirsiniz."
+  ]
+ ],
+ "sss": [
+  [
+   "Hesap açmam gerekiyor mu?",
+   "İlerlemeyi takip etmek ve çocuğunuzun oyununu hesabınıza bağlamak için bir ebeveyn hesabı açmanız gerekir. Çocuğunuzun hesabı olmaz; cihaz kısa süreli bir kodla bağlanır."
+  ],
+  [
+   "Uzmanımı nasıl dahil ederim?",
+   "Çalıştığınız uzman Moyo Mercek'ten size davet gönderir ya da siz onun kodunu girersiniz. Neyi paylaşacağınızı siz seçersiniz; paylaşımı istediğiniz an durdurursunuz."
+  ],
+  [
+   "Uzmanım yoksa kullanabilir miyim?",
+   "Evet. Moyo Oyun ve Moyo Ebeveyn tek başına çalışır; uzmanınızı istediğiniz zaman eklersiniz."
+  ],
+  [
+   "Kendi rutinlerimi oluşturabilir miyim?",
+   "Evet. Hazır rutinlerin yanında kendi rutininizi de yazabilirsiniz."
+  ],
+  [
+   "Oyun çocuklar için güvenli mi?",
+   "Oyunda reklam ve satın alma yoktur. Çocuğunuz yalnızca ailesine mesaj gönderebilir; e-postası ve şifresi olmaz."
+  ],
+  [
+   "Moyo tanı koyar mı?",
+   "Hayır. Moyo rutinleri ve kayıtları bir arada tutar; tanı koymaz, tedavi yerine geçmez."
+  ],
+  [
+   "Ücreti nedir?",
+   "Moyo Oyun ücretsizdir. Moyo Ebeveyn'i 7 gün ücretsiz deneyebilirsiniz; sonra aylık — TL ya da yıllık — TL, dönem sonunda kendiliğinden yenilenir. Uzmanlar Moyo Mercek'i ayrı paketlerle kullanır."
+  ]
+ ]
+}
