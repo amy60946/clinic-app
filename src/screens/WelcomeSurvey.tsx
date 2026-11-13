@@ -61,13 +61,13 @@ export default function WelcomeSurvey({ me, onFinish }: { me: ClinicianMe; onFin
       <StatusBar style="dark" />
       <View style={styles.column}>
         <View style={styles.top}>
-          <Text style={styles.brand}>ClinicApp</Text>
+          <Text style={styles.brand}>Moyo Mercek</Text>
         </View>
         <ScrollView contentContainerStyle={styles.scroll}>
           {i === 0 && (
             <View style={{ marginBottom: 18 }}>
               <Text style={styles.hello}>{name ? `Hoş geldin, ${name}` : 'Hoş geldin'}</Text>
-              <Text style={styles.lead}>{steps.length} kısa soruyla ClinicApp'i sana göre hazırlayalım. Cevapların ailelere görünmez.</Text>
+              <Text style={styles.lead}>{steps.length} kısa soruyla Moyo Mercek'i sana göre hazırlayalım. Cevapların ailelere görünmez.</Text>
             </View>
           )}
           <View style={styles.progressRow} accessibilityLabel={`Soru ${i + 1} / ${steps.length}`}>

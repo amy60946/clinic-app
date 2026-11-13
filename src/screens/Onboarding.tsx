@@ -136,7 +136,7 @@ function Header({ title, sub, back }: { title: string; sub: string; back?: boole
     <View style={styles.header}>
       {back && <View style={styles.round}><Ionicons name="chevron-back" size={18} color={INK} /></View>}
       <View style={{ flex: 1, gap: 2 }}>
-        {!back && <Text style={{ fontSize: 12, fontWeight: '700', color: SOFT }}>ClinicApp</Text>}
+        {!back && <Text style={{ fontSize: 12, fontWeight: '700', color: SOFT }}>Moyo Mercek</Text>}
         <Text style={{ fontSize: back ? 19 : 22, fontWeight: '800', color: INK }}>{title}</Text>
         <Text style={{ fontSize: 12, color: SOFT }}>{sub}</Text>
       </View>

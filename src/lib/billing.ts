@@ -32,7 +32,7 @@ export const PACKAGES: Record<PackageId, { title: string; who: string; features:
     title: 'Bireysel',
     who: 'Tek başına çalışan uzman için',
     features: [
-      'Sınırsız danışan; aileler ParentApp ile ücretsiz bağlanır',
+      'Sınırsız danışan; aileler Moyo ile ücretsiz bağlanır',
       'Evdeki rutin verisi: maceralar, tamamlama, "Yapamam" nedenleri',
       'Hedef davranışlar ve ebeveynin bildirdiği olaylar',
       'Ebeveyn eğitimi: öğrenme modülleri, uygulama görevleri, hızlı yapılacaklar',

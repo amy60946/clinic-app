@@ -25,7 +25,7 @@ export function PersonalCodeCard({ compact }: { compact?: boolean }) {
     if (!code) return;
     track('team.code_copy', { share: true });
     if (Platform.OS === 'web') return copy();
-    await Share.share({ message: `ClinicApp kişisel uzman kodum: ${code}\nKlinik sahibi Ayarlar › Ekip › "Uzman ekle"ye yazınca ben onaylarım.` }).catch(() => {});
+    await Share.share({ message: `Moyo Mercek kişisel uzman kodum: ${code}\nKlinik sahibi Ayarlar › Ekip › "Uzman ekle"ye yazınca ben onaylarım.` }).catch(() => {});
   };
   const rotate = () => Alert.alert('Kod yenilensin mi?', 'Eski kod çalışmaz. Gönderilmiş istekler geçerli kalır.', [
     { text: 'Vazgeç', style: 'cancel' },

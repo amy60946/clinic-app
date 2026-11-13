@@ -329,7 +329,7 @@ export default function HomeScreen() {
   // Metinler hukuk/50-uygulama-ici-metinler.md 5.2 (tek kişilik klinik · ekipte sahip · ekip üyesi)
   const removeAccount = () => Alert.alert('Hesabın silinsin mi?',
     state.kind === 'ready' && state.team.length <= 1
-      ? 'Kliniğin ve içindeki her şey silinir: danışan paylaşımları, notlar, davranış hedefleri, haftalık değerlendirmeler, macera önerileri, takip planları, davetler ve üyelik kaydı. Ailelerin ParentApp\'teki kendi verileri silinmez; yalnız seninle paylaşımları biter. Saklaman gereken kayıtları önce yazdır. App Store üyeliğin varsa Apple Ayarlar\'dan ayrıca kapat. Bu işlem geri alınamaz.'
+      ? 'Kliniğin ve içindeki her şey silinir: danışan paylaşımları, notlar, davranış hedefleri, haftalık değerlendirmeler, macera önerileri, takip planları, davetler ve üyelik kaydı. Ailelerin Moyo\'daki kendi verileri silinmez; yalnız seninle paylaşımları biter. Saklaman gereken kayıtları önce yazdır. App Store üyeliğin varsa Apple Ayarlar\'dan ayrıca kapat. Bu işlem geri alınamaz.'
       : state.kind === 'ready' && state.me.role === 'owner'
         ? 'Klinik kalır; sahiplik ekibin en eski üyesine geçer. Kliniğe ait kayıtlar klinikte kalır. Yalnız senin hesabın silinir. Bu işlem geri alınamaz.'
         : 'Yalnız senin hesabın silinir. Kliniğe ait kayıtlar klinikte kalır. Bu işlem geri alınamaz.',
@@ -483,7 +483,7 @@ export default function HomeScreen() {
             <View style={{ flex: 1 }}>
               {/* hesap seçimi bir hesap ayarı: köşede küçük düğme (kullanıcı kararı 5 Kasım 2026); başlık hesabın adı, ok yok */}
               <View style={styles.brandRow}>
-                <Text style={styles.brand}>ClinicApp</Text>
+                <Text style={styles.brand}>Moyo Mercek</Text>
                 {canSwitch && state.kind === 'ready' && (
                   <Pressable onPress={() => setWsOpen(true)} accessibilityRole="button" hitSlop={8}
                     accessibilityLabel={`Hesap: ${state.me.personal ? PERSONAL_LABEL : TEAM_LABEL}. Değiştir`}

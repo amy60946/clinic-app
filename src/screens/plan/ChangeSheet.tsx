@@ -69,7 +69,7 @@ function Body({ target, onClose, onSubmit, onWithdraw }: {
     if (!changed.length) return Alert.alert('Değişiklik yok', 'Bir saati değiştir ya da bir macerayı çıkar.');
     if (rows.every((r) => r.remove)) {
       if (target.mode !== 'change' && onWithdraw) return onWithdraw();
-      return Alert.alert('En az bir macera kalmalı', 'Rutinin tamamını bırakmak için ebeveynle konuşun; ebeveyn maceraları ParentApp › Maceralar\'dan kaldırabilir.');
+      return Alert.alert('En az bir macera kalmalı', 'Rutinin tamamını bırakmak için ebeveynle konuşun; ebeveyn maceraları Moyo › Maceralar\'dan kaldırabilir.');
     }
     setBusy(true);
     try {

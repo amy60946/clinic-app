@@ -89,7 +89,7 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
     }
     if (r.reason === 'canceled') return;
     if (r.reason === 'pending') return Alert.alert('Ödeme onay bekliyor', 'Apple ödemeyi onaylayınca üyeliğin kendiliğinden açılır.');
-    if (r.reason === 'none') return Alert.alert('Bu Apple hesabında ClinicApp üyeliği bulunamadı.');
+    if (r.reason === 'none') return Alert.alert('Bu Apple hesabında Moyo Mercek üyeliği bulunamadı.');
     if (r.reason === 'unavailable') return Alert.alert('Bu paket şu an App Store\'da satın alınamıyor.', 'Biraz sonra yeniden dene.');
     if (r.reason === 'not_connected') return Alert.alert('App Store bağlantısı bu sürümde kapalı.');
     Alert.alert('İşlem tamamlanamadı', r.message || 'Biraz sonra yeniden dene.');
@@ -138,7 +138,7 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
         <View style={styles.column}>
           <View style={styles.header}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.brand}>ClinicApp</Text>
+              <Text style={styles.brand}>Moyo Mercek</Text>
               <Text style={styles.title}>Üyelik</Text>
             </View>
             {!blocking && onClose && (
@@ -201,7 +201,7 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
               <Text style={styles.legal}>
                 {ios
                   ? 'Ödeme, onayladığında Apple hesabından alınır. Abonelik, dönem bitmeden en az 24 saat önce kapatılmazsa aynı süre ve ücretle otomatik yenilenir; yenileme ücreti dönem bitmeden önceki 24 saat içinde alınır. Ayarlar › Apple Hesabı › Abonelikler\'den yönetebilir ya da kapatabilirsin.'
-                  : 'Üyeliği iPhone ya da iPad\'deki ClinicApp\'ten alabilirsin. Üyelik hesabına bağlıdır; web\'de de açılır.'}
+                  : 'Üyeliği iPhone ya da iPad\'deki Moyo Mercek\'ten alabilirsin. Üyelik hesabına bağlıdır; web\'de de açılır.'}
               </Text>
             </>
           )}

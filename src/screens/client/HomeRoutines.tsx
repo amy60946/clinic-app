@@ -111,7 +111,7 @@ function WeekGrid(ctx: ClientCtx) {
   const { dates, rows } = useMemo(() => weekGrid(data.tasks, data.completions, today), [data, today]);
   const [open, setOpen] = useState<Task | null>(null);
   const emit = useCoachEmit();
-  if (!rows.length) return <Empty text="Son 7 günde planlı macera yok. Maceralar ebeveynin ParentApp'te eklediği ya da önerini onayladığı sorumluluklardır." />;
+  if (!rows.length) return <Empty text="Son 7 günde planlı macera yok. Maceralar ebeveynin Moyo'da eklediği ya da önerini onayladığı sorumluluklardır." />;
   return (
     <View>
       <Card style={{ padding: 0, overflow: 'hidden', marginTop: 12 }}>

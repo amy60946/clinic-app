@@ -235,7 +235,7 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
                     {hw === null ? <Text style={s.small}>Takip Planı okunuyor…</Text>
                       : hw.items && hw.items.length > 0 ? (
                         <>
-                          <Text style={s.small}>Takip Planı'nda aileye gönderilmemiş {hw.items.length} madde var. Seçtiklerin tek bildirimle ParentApp › Uzmanım'a gider.</Text>
+                          <Text style={s.small}>Takip Planı'nda aileye gönderilmemiş {hw.items.length} madde var. Seçtiklerin tek bildirimle Moyo › Uzmanım'a gider.</Text>
                           <SmallButton label={`Aileye gönder (${hw.items.length})`} onPress={() => setPub(true)} />
                         </>
                       ) : (

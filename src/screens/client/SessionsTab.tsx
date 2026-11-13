@@ -144,7 +144,7 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
           <Ionicons name={wait ? 'hourglass' : 'hourglass-outline'} size={16} color={colors.navy} />
           <Text style={[s.label, { flex: 1 }]}>{wait ? (wait.status === 'offered' ? 'Bekleme listesinde · teklif gönderildi' : 'Bekleme listesinde') : 'Bekleme listesi'}</Text>
         </View>
-        <Text style={s.small}>Daha erken ya da ek saat isteyen aile. Bir seans iptal olunca boşalan saati teklif edebilirsin; aile ParentApp'te kabul eder.</Text>
+        <Text style={s.small}>Daha erken ya da ek saat isteyen aile. Bir seans iptal olunca boşalan saati teklif edebilirsin; aile Moyo'da kabul eder.</Text>
         <TextInput value={waitNote} onChangeText={setWaitNote} placeholder="Uygun gün ve saatler" placeholderTextColor={colors.muted} maxLength={300} style={s.input} />
         <View style={s.row}>
           <SmallButton label={wait ? 'Notu kaydet' : 'Bekleme listesine al'} onPress={() => saveWaitlist(client.link_id, waitNote).then(() => { track('waitlist.add'); load(); }).catch((e) => Alert.alert('Olmadı', e.message))} />

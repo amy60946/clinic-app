@@ -121,7 +121,7 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
         <Text style={styles.ctaText}>Aileye macera öner</Text>
       </Pressable>
       <Text style={styles.sub}>
-        Ebeveyn öneriyi ParentApp'te görür; eklerse macera buradaki ayarlarla çocuğun listesine düşer. Bekleyen bir öneriye dokunarak güncelleyebilirsin.
+        Ebeveyn öneriyi Moyo'da görür; eklerse macera buradaki ayarlarla çocuğun listesine düşer. Bekleyen bir öneriye dokunarak güncelleyebilirsin.
       </Text>
       <Label>Günlük rutin önerisi</Label>
       <Text style={[styles.sub, { marginTop: 0, marginBottom: 10 }]}>

@@ -35,8 +35,8 @@ export type Channel = 'whatsapp' | 'email' | 'sms' | 'copy' | 'other';
 export const INVITE_HELP = [
   'Davet e-postası senin adınla ebeveynin e-postasına gider; yanıtlarsa yanıtı sana gelir.',
   HAS_BASE
-    ? 'Ebeveyn e-postadaki bağlantıdan ParentApp\'i yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin.'
-    : 'Ebeveyn ParentApp\'i açınca davet kodu sorulduğunda e-postadaki 6 karakterlik kodu yazar; sen kendiliğinden tanımlı gelirsin.',
+    ? 'Ebeveyn e-postadaki bağlantıdan Moyo\'yu yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin.'
+    : 'Ebeveyn Moyo\'yu açınca davet kodu sorulduğunda e-postadaki 6 karakterlik kodu yazar; sen kendiliğinden tanımlı gelirsin.',
   'Hangi çocuğu paylaşacağına ebeveyn karar verir; paylaşımı istediği an durdurabilir.',
   'Çocuğun adını ve yaş grubunu yazarsan yalnız daveti kabul eden ebeveyn görür; kontrol edip onaylar, düzeltirse sana bildirim gelir. E-postada görünmez, davet bitince silinir.',
   'Davet 3 gün geçerli. Davetlerim\'den e-postayı yeniden gönderebilir ya da daveti iptal edebilirsin. E-posta gönderilemezse yedek kod görünür.',
@@ -112,16 +112,16 @@ export function inviteMessage(inv: { code: string; token: string | null; expires
   const until = new Date(inv.expires_at).toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
   const lines = [
     `Merhaba${parentName ? ' ' + parentName : ''},`,
-    `${clinician || 'Uzmanınız'} sizi ParentApp'te çocuğunuzun takibine davet ediyor. Hangi çocuğunuzu paylaşacağınıza siz karar verirsiniz; istediğiniz an durdurabilirsiniz.`,
+    `${clinician || 'Uzmanınız'} sizi Moyo'da çocuğunuzun takibine davet ediyor. Hangi çocuğunuzu paylaşacağınıza siz karar verirsiniz; istediğiniz an durdurabilirsiniz.`,
     '',
-    link ? `Daveti açın: ${link}` : `1) ParentApp'i yükleyin${PARENTAPP_STORE_URL ? `: ${PARENTAPP_STORE_URL}` : ' (App Store)'}`,
+    link ? `Daveti açın: ${link}` : `1) Moyo'yu yükleyin${PARENTAPP_STORE_URL ? `: ${PARENTAPP_STORE_URL}` : ' (App Store)'}`,
     link ? `Uygulama kod sorarsa: ${inv.code}` : `2) Uygulamayı açın; davet kodu sorulduğunda bu kodu yazın (hesabınız varsa Aile › Hesap › Kod gir): ${inv.code}`,
     `Davet ${until} tarihine kadar geçerli.`,
   ];
   return lines.join('\n');
 }
 
-const SUBJECT = 'ParentApp daveti';
+const SUBJECT = 'Moyo daveti';
 
 // Sistem e-postası (Edge Function invite-email). İşlev yayında değilse ya da e-posta ayarı yoksa gönderilmez; uzman kodu kopyalar.
 export type EmailResult = { sent: boolean; reason?: string; detail?: string };

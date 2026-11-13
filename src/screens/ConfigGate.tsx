@@ -18,7 +18,7 @@ export default function ConfigGate({ children, onSignOut }: { children: React.Re
   if (maintenance) {
     return (
       <Blocker icon="construct-outline" title="Kısa bir bakım yapıyoruz"
-        text="ClinicApp birazdan yeniden açılacak. Danışanlarının verisi güvende; ailelerin kayıtları bu sırada da toplanmaya devam eder.">
+        text="Moyo Mercek birazdan yeniden açılacak. Danışanlarının verisi güvende; ailelerin kayıtları bu sırada da toplanmaya devam eder.">
         <Cta label="Tekrar dene" onPress={retry} busy={busy} />
         <LinkText onPress={onSignOut}>Çıkış yap</LinkText>
       </Blocker>
@@ -29,7 +29,7 @@ export default function ConfigGate({ children, onSignOut }: { children: React.Re
     return (
       <Blocker icon="arrow-up-circle-outline" title="Güncelleme gerekli"
         text={web
-          ? 'ClinicApp\'in yeni bir sürümü var. Devam etmek için sayfayı yenile.'
+          ? 'Moyo Mercek\'in yeni bir sürümü var. Devam etmek için sayfayı yenile.'
           : `Bu sürüm (${appVersion}) artık desteklenmiyor; en az ${minVersion} gerekli. ${STORE_URL ? 'App Store\'dan güncelle.' : 'App Store ya da TestFlight\'tan güncelle.'}`}>
         {web ? (
           <Cta label="Sayfayı yenile" onPress={() => window.location.reload()} />
@@ -49,7 +49,7 @@ function Blocker({ icon, title, text, children }: {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.column}>
-        <Text style={styles.brand}>ClinicApp</Text>
+        <Text style={styles.brand}>Moyo Mercek</Text>
         <View style={styles.icon}><Ionicons name={icon} size={30} color={colors.navy} /></View>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.text}>{text}</Text>

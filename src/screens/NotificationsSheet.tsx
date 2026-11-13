@@ -65,7 +65,7 @@ export default function NotificationsSheet({ visible, onClose, onOpen, childId, 
     const r = await setPushEnabled(on);
     if (on && r === 'denied') {
       setPush(false);
-      Alert.alert('İzin gerekli', 'Cihazın Ayarlar › ClinicApp › Bildirimler bölümünden izin ver, sonra tekrar aç.');
+      Alert.alert('İzin gerekli', 'Cihazın Ayarlar › Moyo Mercek › Bildirimler bölümünden izin ver, sonra tekrar aç.');
     }
   };
 
