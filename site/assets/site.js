@@ -186,4 +186,50 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
     clips.forEach(function (c) { c.v.loop = !reduce.matches; if (reduce.matches && !c.v.paused) c.v.pause(); });
   };
   if (reduce.addEventListener) reduce.addEventListener('change', onReduce); else if (reduce.addListener) reduce.addListener(onReduce);
+  /* 5. Açılış turu (14 Kasım 2026): kayıt ilerledikçe 1-2-3 çipi yanar; çipe dokununca kayıt o adıma gider. */
+  each('.clip[data-tur]', function (fig) {
+    var v = fig.querySelector('video'), btns = fig.parentNode.querySelectorAll('.tur [data-t]');
+    if (!btns.length) return;
+    var mark = function () {
+      var t = v ? v.currentTime : 0, cur = 0;
+      Array.prototype.forEach.call(btns, function (b, k) { if (t + 0.05 >= parseFloat(b.getAttribute('data-t'))) cur = k; });
+      Array.prototype.forEach.call(btns, function (b, k) { if (k === cur) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+    };
+    Array.prototype.forEach.call(btns, function (b) {
+      b.addEventListener('click', function () {
+        if (!v || !fig.contains(v)) return;
+        try { v.currentTime = parseFloat(b.getAttribute('data-t')); } catch (e) { /* yok say */ }
+        if (fig.__clip) fig.__clip.userPaused = false;
+        var p = v.play(); if (p && p.catch) p.catch(function () {});
+        mark();
+      });
+    });
+    if (v) { v.addEventListener('timeupdate', mark); v.addEventListener('seeked', mark); }
+    mark();
+  });
+
+  /* 6. Sekmeli "Nasıl çalışır": tıklayınca değişir, kendiliğinden ilerlemez (Atlassian'ın sekme düzeni gibi). */
+  each('[data-nc]', function (box) {
+    var tabs = box.querySelectorAll('[role=tab]'), panels = box.querySelectorAll('[role=tabpanel]');
+    var sel = function (k, focus) {
+      Array.prototype.forEach.call(tabs, function (t, j) { var on = j === k; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
+      Array.prototype.forEach.call(panels, function (p, j) { p.hidden = j !== k; });
+      if (focus) tabs[k].focus();
+      if (tabs[k].scrollIntoView && box.querySelector('.nc-tabs').scrollWidth > box.querySelector('.nc-tabs').clientWidth) tabs[k].scrollIntoView({ block: 'nearest', inline: 'center', behavior: reduce.matches ? 'auto' : 'smooth' });
+    };
+    Array.prototype.forEach.call(tabs, function (t, k) {
+      t.addEventListener('click', function () { sel(k); });
+      t.addEventListener('keydown', function (e) {
+        var n = tabs.length, j = k;
+        if (e.key === 'ArrowRight') j = (k + 1) % n; else if (e.key === 'ArrowLeft') j = (k - 1 + n) % n; else if (e.key === 'Home') j = 0; else if (e.key === 'End') j = n - 1; else return;
+        e.preventDefault(); sel(j, true);
+      });
+    });
+  });
+
+  /* 7. Önizleme: "Neden" bölümünün düzeni adresten (?neden=1|2|3); yayında varsayılan kalır. */
+  try {
+    var nd = new URLSearchParams(location.search).get('neden'), dg = d.getElementById('degerler');
+    if (dg && /^[123]$/.test(nd || '')) dg.setAttribute('data-neden', nd);
+  } catch (e) { /* yok say */ }
 })();

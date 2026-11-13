@@ -10,6 +10,9 @@ Henüz hiçbir siteye girmedi; karar kullanıcıda. Moyo tanıtım sayfası ve �
 | `host.html` | Önizleme kabuğu: sekmeler Analiz ve öneri · A · B · C · Metinler · Logo ve ikon · Benchmark; A/B/C iframe'de, Masaüstü/Telefon düğmesi |
 | `yap.py` | A (ebeveyn sayfası) ve B (tek sayfa, iki kitle) → `a.html`, `b.html` (`ortak.css`, `hikaye.js`) |
 | `yap_c.py` + `c-metin.json` | **C (çatı sayfa, üçüncü sürüm)** → `c.html` (`ortak.css` + `c.css`, `hikaye.js` + `dongu.js`). Metinler yalnız `c-metin.json`'da |
+| `yap_e.py` + `e-metin.json` + `e.css` | **Moyo Ebeveyn sayfası (yeni, 14 Kasım 2026)** → `ebeveyn.html`: C'nin parçaları (`yap_c.py`'den içe aktarılır, aynı `c-metin.json`) + ebeveyne özel açılış, fiyat, sorular. Onaydan sonra parent-app `site/`'ye taşınır |
+| `kompakt.js` | Telefon ve iPad (≤ 1024 px ya da dokunmatik) "Nasıl çalışır": Sekmeler · Kartlar · Liste; varsayılan telefonda Sekmeler, iPad'de Liste (önizlemede seçici, seçim tarayıcıda) |
+| `ikon/oyun-*.webp` | Moyo Oyun ikonu, sağ altta küçük Moyo logosu: A rozet · B beyaz etiket · C koyu köşe · D yalın; üreteç `../logo/oyun_rozet.js` (oyunun 1024 ikonu game-app `Assets/_Pofi/Art/AppIcon.png`, salt okunur) |
 | `hikaye.js` | Kaydırdıkça dönen anlatım (masaüstünde yapışkan sahne); `data-mobil="liste"` ise telefonda alt alta + bir kez dönerek giriş |
 | `dongu.js` | "Hepsi birlikte": masaüstünde 6 adımlık dönen halka, telefonda yana kaydırılan kartlar + İleri/Geri; alt başlık seçici |
 | `arastirma.md` | Ebeveyn metinleri için benchmark (12 ürün) ve nöropazarlama ilkeleri, kaynaklı; C'nin metinleri buradan |
@@ -20,7 +23,7 @@ Henüz hiçbir siteye girmedi; karar kullanıcıda. Moyo tanıtım sayfası ve �
 Derleme ve yerel kontrol:
 
 ```bash
-cd tools/cati-sayfa && python3 yap.py && python3 yap_c.py
+cd tools/cati-sayfa && python3 yap.py && python3 yap_c.py && python3 yap_e.py
 ```
 
 Ekran kaynakları:

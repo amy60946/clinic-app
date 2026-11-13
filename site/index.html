@@ -57,8 +57,12 @@
     </div>
     <div class="wrap wide">
       <div class="hero-media">
-        <!-- YENİ METİN (alt) -->
-        <figure class="clip" data-clip="hero" data-hero><img class="clip-poster" src="assets/motion/hero.webp" alt="Danışan panosundan bir danışan açılıyor; ebeveyn eğitiminin özeti, öğrenme modülleri ve uygulama görevleri sekmeleri sırayla gösteriliyor." width="1440" height="900"><figcaption>Örnek veri</figcaption></figure>
+        <figure class="clip" data-clip="akis" data-hero data-tur><img class="clip-poster" src="assets/motion/akis.webp" alt="Uzman bir ebeveyn eğitimi oluşturur: hedefi yazar, kütüphaneden modül ekler ve eğitimi Etkin yapar; sonra çocuğun haftalık ev rutinleri tablosuna, en sonda ebeveynin bildirdiği ABC olaylarına bakar." width="1440" height="900"><figcaption>Örnek veri</figcaption></figure>
+        <ol class="tur" aria-label="Kayıtta">
+          <li><button type="button" data-t="0"><b>1</b>Eğitimi kurun</button></li>
+          <li><button type="button" data-t="33.9"><b>2</b>Rutinleri görün</button></li>
+          <li><button type="button" data-t="41.4"><b>3</b>Olaylara bakın</button></li>
+        </ol>
       </div>
     </div>
     <div class="wrap">
@@ -71,24 +75,40 @@
     </div>
   </section>
 
-  <section class="sec sec-white" id="degerler" aria-labelledby="h-deger">
+  <section class="sec sec-white" id="degerler" aria-labelledby="h-deger" data-neden="3">
     <div class="wrap">
-      <div class="head"><h2 id="h-deger">Neden Moyo Mercek</h2></div>
-      <div class="cards3">
-        <div class="vcard">
-          <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M4 10h16M10 10v9"/></svg></span>
-          <h3>Ebeveyn eğitim programlarını kolayca oluşturun</h3>
-          <p>Kanıta dayalı eğitim içerikleri, çalışma dokümanları ve davranışsal müdahale kaynaklarıyla kişiselleştirilmiş ebeveyn eğitim programları hazırlayın.</p>
-        </div>
-        <div class="vcard">
-          <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg></span>
-          <h3>Ebeveynlerin seans dışındaki katılımını artırın</h3>
-          <p>Uygulama üzerinden ebeveynlerin eğitim programlarını takip etmelerini, ev uygulamalarını gerçekleştirmelerini ve ABC (Öncül-Davranış-Sonuç) verilerini kaydetmelerini sağlayın.</p>
-        </div>
-        <div class="vcard">
-          <span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span>
-          <h3>Haftada 4–6 saatlik faturalandırılamayan iş yükünü azaltın</h3>
-          <p>Ebeveyn eğitimi ve takip süreçlerini otomatikleştirerek hazırlık ve raporlama için harcadığınız zamanı azaltın. Böylece klinik hizmetlere daha fazla zaman ayırın.</p>
+      <div class="head"><p class="eyebrow">Neden Moyo Mercek</p><h2 id="h-deger">Seans biter, takip sürer.</h2></div>
+
+      <!-- 1 · Akış: üç düğüm, aralarında çizgi -->
+      <ol class="nv nv-akis" data-v="1">
+        <li><span class="nv-app"><img src="assets/logo/ikon-mercek.svg" alt="" width="28" height="28">Moyo Mercek</span><h3>Eğitimi kurarsınız</h3><p>Hazır kütüphaneden modül ve uygulama görevi seçip aileye atarsınız.</p><span class="nv-chip"><i class="ok"></i>3 modül · Etkin</span></li>
+        <li><span class="nv-app"><img src="assets/logo/ikon-moyo.svg" alt="" width="28" height="28">Moyo</span><h3>Aile evde uygular</h3><p>Ebeveyn modülleri okur, rutinleri onaylar, olayları kaydeder.</p><span class="nv-chip"><i class="ok"></i>Bugün 4 / 5 rutin · <i class="ev"></i>1 olay</span></li>
+        <li><span class="nv-app"><img src="assets/logo/ikon-mercek.svg" alt="" width="28" height="28">Moyo Mercek</span><h3>Hafta önünüze gelir</h3><p>Rutinler, eğitim ilerlemesi ve ABC olayları tek panelde; ilerleme notu hazır.</p><span class="nv-chip"><i class="not"></i>İlerleme notu hazır</span></li>
+      </ol>
+
+      <!-- 2 · Bento: üç kutu, içinde küçük arayüz parçaları -->
+      <div class="nv nv-bento" data-v="2">
+        <div class="bt bt-a"><div class="bt-ui" aria-hidden="true"><div class="bt-row"><span class="bt-tag">Okuma</span>Davranışın işlevi<span class="bt-st ok">Okundu</span></div><div class="bt-row"><span class="bt-tag">Test</span>ABC'yi tanıma<span class="bt-st ok">4 / 5</span></div><div class="bt-row"><span class="bt-tag">Açık uçlu</span>Bu hafta ne denediniz?<span class="bt-st wait">İnceleme</span></div><div class="bt-row"><span class="bt-tag">Görev</span>Görsel çizelgeyi kullan<span class="bt-st">Sıklık</span></div></div><h3>Ebeveyn eğitimini hazır kütüphaneden kurun</h3><p>Okuma, test ve uygulama görevlerini seçin, eğitimi aileye atayın.</p></div>
+        <div class="bt bt-b"><div class="bt-ui" aria-hidden="true"><div class="bt-grid"><span>Yatağını topla</span><i class="y"></i><i class="y"></i><i class="y"></i><i></i><i class="y"></i><i class="y"></i><i class="y"></i><span>Dişlerini fırçala</span><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="y"></i><span>Çantanı hazırla</span><i class="y"></i><i></i><i class="y"></i><i class="y"></i><i class="y"></i><i class="b"></i><i class="b"></i></div></div><h3>Seans dışındaki haftayı görün</h3><p>Rutinler ve ABC olayları ebeveynden panelinize gelir.</p></div>
+        <div class="bt bt-c"><div class="bt-ui" aria-hidden="true"><div class="bt-note"><b>İlerleme notu · 4 hafta</b><span></span><span></span><span class="k"></span></div></div><h3>Notunuzu kayıtlardan hazırlayın</h3><p>Dönemin özeti hazır; kopyalayıp kendi kaydınıza ekleyin.</p></div>
+      </div>
+
+      <!-- 3 · Hafta: seans bir gün, takip yedi gün -->
+      <div class="nv nv-hafta" data-v="3">
+        <ol class="hf" aria-label="Bir haftanın örneği">
+          <li class="seans"><b>Çar</b><span class="hf-k">Seans</span><span class="hf-i">Eğitim atandı</span></li>
+          <li><b>Per</b><span class="hf-d"><i class="y"></i><i class="y"></i><i class="y"></i></span><span class="hf-i">Modül okundu</span></li>
+          <li><b>Cum</b><span class="hf-d"><i class="y"></i><i class="y"></i><i></i></span><span class="hf-i">Olay: ABC</span></li>
+          <li><b>Cmt</b><span class="hf-d"><i class="y"></i><i class="y"></i><i class="y"></i></span></li>
+          <li><b>Paz</b><span class="hf-d"><i class="y"></i><i></i><i class="y"></i></span><span class="hf-i">Görev kaydı</span></li>
+          <li><b>Pzt</b><span class="hf-d"><i class="y"></i><i class="y"></i><i class="y"></i></span></li>
+          <li><b>Sal</b><span class="hf-d"><i class="y"></i><i class="y"></i><i class="y"></i></span><span class="hf-i">Not hazır</span></li>
+          <li class="seans"><b>Çar</b><span class="hf-k">Seans</span><span class="hf-i">Hafta önünüzde</span></li>
+        </ol>
+        <div class="hf-alt">
+          <div><h3>Seansta</h3><p>Ebeveyn eğitimini hazır kütüphaneden kurar, aileye atarsınız.</p></div>
+          <div><h3>Seanslar arasında</h3><p>Aile modülleri okur, rutinleri onaylar, olayları ABC ile kaydeder.</p></div>
+          <div><h3>Bir sonraki seansa</h3><p>Hafta panelinizde, ilerleme notu kayıtlardan hazır.</p></div>
         </div>
       </div>
     </div>
@@ -100,79 +120,28 @@
         <p class="eyebrow">Nasıl çalışır</p>
         <h2 id="h-nasil">Platform Nasıl Çalışır?</h2>
       </div>
-      <div class="steps">
-        <article class="step" id="urun" aria-labelledby="h-s1">
-          <div class="step-text">
-            <p class="step-k"><b>1</b>Dakikalar içinde kişiselleştirilmiş ebeveyn eğitim programları oluşturun</p>
-            <h3 id="h-s1">100'den fazla ebeveyn eğitimi kaynağına erişin</h3>
-            <p>Kanıta dayalı eğitim içerikleri, çalışma dokümanları ve davranışsal müdahale kaynaklarından oluşan kapsamlı kütüphanemizle her aileye ve ihtiyaca uygun ebeveyn eğitim programları oluşturun.</p>
-            <p>Eğitim modüllerini, videoları ve etkileşimli çalışma materyallerini bir araya getirerek kişiselleştirilmiş programlarınızı 5 dakikadan kısa sürede hazırlayın.</p>
-          </div>
-          <div class="step-media plate">
-            <!-- YENİ METİN (alt) -->
-            <figure class="clip" data-clip="kutuphane"><img class="clip-poster" src="assets/motion/kutuphane.webp" alt="Kaynak kütüphanesinde arama yapılıyor, bir okuma önizleniyor ve bir danışanın ebeveynine eğitim olarak atanıyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure>
-          </div>
-        </article>
-
-        <article class="step flip" aria-labelledby="h-s2">
-          <div class="step-text">
-            <p class="step-k"><b>2</b>Ebeveyn hedeflerini kolay kullanımlı bir mobil uygulamaya entegre edin</p>
-            <h3 id="h-s2">Ebeveyn dostu mobil uygulamayla ailelerin sürece aktif katılımını sağlayın</h3>
-            <p>Ebeveynler için belirlenen hedefler, uygulama görevleri ve çalışma materyalleri mobil uygulama aracılığıyla günlük rutinlere entegre edilir.</p>
-            <p>Hatırlatma ve yönlendirme süreçlerini biz üstleniyoruz. Böylece siz süreci başlatmaya ve klinik çalışmanıza odaklanabilirsiniz.</p>
-          </div>
-          <div class="step-media plate">
-            <!-- YENİ METİN (alt) -->
-            <figure class="clip" data-clip="aile"><img class="clip-poster" src="assets/motion/aile.webp" alt="Ebeveyn deneyimi önizlemesi: telefonda eğitimin modül listesi açılıyor ve çoktan seçmeli bir test sorusu yanıtlanıyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure>
-          </div>
-        </article>
-
-        <article class="step" aria-labelledby="h-s3">
-          <div class="step-text">
-            <p class="step-k"><b>3</b>ABC verilerini ve ebeveynlerin ilerlemesini gerçek zamanlı olarak takip edin</p>
-            <h3 id="h-s3">Davranışları tetikleyen unsurları ve davranış örüntülerini keşfedin</h3>
-            <p>Ebeveynler programı kullanmaya ve klinik uzmanı yanlarında olmadan evde gerçekleşen olayları kaydetmeye alıştıkça, klinik uzmanları hedef davranışları tetikleyen unsurları ve ebeveynlerin uyguladığı hangi müdahale stratejilerinin işe yaradığını gerçek zamanlı olarak takip edebilir.</p>
-            <p>Böylece davranışların öncüllerini, ortaya çıkış örüntülerini ve uygulanan müdahalelerin sonuçlarını daha yakından değerlendirebilir; ebeveynlerin ilerlemesini veriye dayalı olarak izleyebilirsiniz.</p>
-          </div>
-          <div class="step-media plate">
-            <!-- YENİ METİN (alt) -->
-            <figure class="clip" data-clip="davranis"><img class="clip-poster" src="assets/motion/davranis.webp" alt="Hedef davranışlar ve bildirilen olaylar: bir davranış açılınca stratejiler ve öncül, sonuç, uygulanan strateji sütunlu olay tablosu görünüyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure>
-          </div>
-        </article>
-
-        <article class="step flip" aria-labelledby="h-s4">
-          <div class="step-text">
-            <p class="step-k"><b>4</b>Ebeveyn hedeflerine yönelik ilerleme takibini otomatikleştirin</p>
-            <h3 id="h-s4">İlerleme raporları hazırlamak için harcadığınız zamandan tasarruf edin</h3>
-            <p>Tedavi süreci ilerledikçe tüm verileri otomatik olarak kaydedip görselleştiriyoruz. Klinik uzmanlarının ebeveyn hedeflerine ve yeterlilik kriterlerine yönelik ilerlemeyi takip etmelerine yardımcı oluyoruz.</p>
-            <p>Bu veriler sayesinde ilerleme notlarını güncelleyebilir ve ihtiyaç duyulan raporları kolayca hazırlayabilirsiniz.</p>
-          </div>
-          <div class="step-media plate">
-            <!-- YENİ METİN (alt) -->
-            <figure class="clip" data-clip="rapor"><img class="clip-poster" src="assets/motion/rapor.webp" alt="Ev rutini gözlem raporu açılıp kaydırılıyor; ardından dönemin ilerleme notu kopyalanıyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure>
-          </div>
-        </article>
-
-        <article class="step" aria-labelledby="h-s5">
-          <div class="step-text">
-            <p class="step-k"><b>5</b>Olumlu pekiştirme ve jeton ekonomisi sistemini devreye alın</p>
-            <h3 id="h-s5">Çocuklar için oyunlaştırılmış bir deneyim sunun</h3>
-            <p>Ebeveynlerin sürece aktif katılımı ve hedeflere yönelik ilerleme sağlandıktan sonra deneyimi bir üst seviyeye taşıyın.</p>
-            <p>İsteğe bağlı olarak klinik uzmanları, çocukların oyun erişimini etkinleştirebilir. Böylece çocuklar, ev ortamında sergiledikleri hedef davranışlar karşılığında ödüller kazandıkları bir video oyunu deneyimine katılır.</p>
-            <p>Ebeveynlerin kolayca benimseyip uygulayabileceği bu basit pekiştirme sistemi, ailelerin sürece katılımını artırırken çocukların bağımsızlık becerilerinin gelişimini de destekler.</p>
-          </div>
-          <div class="step-media plate">
-            <div class="mock-stage">
-              <div class="mock game" role="img" aria-label="Moyo Oyun'da bugünün görevleri: biri onaylandı, biri ebeveyn onayı bekliyor, biri yapılacak.">
-                <div class="gtop"><span class="ttl">Moyo Oyun · Bugün</span><span class="coin"><i></i>42 tane inci</span></div>
-                <div class="row"><i></i>Dişlerini fırçala<small>Onaylandı</small></div>
-                <div class="row wait"><i></i>Çantanı hazırla<small>Onay bekliyor</small></div>
-                <div class="row todo"><i></i>20 dakika kitap oku<small>Sırada</small></div>
-                <div class="bar3"><span style="width:66%"></span></div>
-              </div>
-            </div>
-          </div>
-        </article>
+      <div class="nc" data-nc>
+        <div class="nc-tabs" role="tablist" aria-label="Platformun adımları"><button type="button" role="tab" id="nc-t0" aria-controls="nc-p0" aria-selected="true"><b>1</b>Eğitim</button><button type="button" role="tab" id="nc-t1" aria-controls="nc-p1" aria-selected="false" tabindex="-1"><b>2</b>Aile uygulaması</button><button type="button" role="tab" id="nc-t2" aria-controls="nc-p2" aria-selected="false" tabindex="-1"><b>3</b>ABC verisi</button><button type="button" role="tab" id="nc-t3" aria-controls="nc-p3" aria-selected="false" tabindex="-1"><b>4</b>İlerleme</button><button type="button" role="tab" id="nc-t4" aria-controls="nc-p4" aria-selected="false" tabindex="-1"><b>5</b>Oyun</button></div>
+        <div class="nc-p" role="tabpanel" id="nc-p0" aria-labelledby="nc-t0">
+          <div class="nc-text"><p class="step-k"><b>1</b>Eğitim</p><h3>Ebeveyn eğitimini hazır kütüphaneden kurun</h3><p>Okuma, test ve açık uçlu modülleri seçin, uygulama görevi ve hızlı yapılacak ekleyin, eğitimi ebeveyne atayın. Kütüphanede 100'den fazla Türkçe kaynak var.</p><p class="nc-apps"><span><img src="assets/logo/ikon-mercek.svg" alt="" width="22" height="22">Moyo Mercek</span></p></div>
+          <div class="nc-media plate"><figure class="clip" data-clip="kutuphane"><img class="clip-poster" src="assets/motion/kutuphane.webp" alt="Kaynak kütüphanesinde arama yapılıyor, bir okuma önizleniyor ve bir danışanın ebeveynine eğitim olarak atanıyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure></div>
+        </div>
+        <div class="nc-p" role="tabpanel" id="nc-p1" aria-labelledby="nc-t1" hidden>
+          <div class="nc-text"><p class="step-k"><b>2</b>Aile uygulaması</p><h3>Program ebeveynin telefonuna gider</h3><p>Ebeveyn modülleri Moyo'da okur, testleri yanıtlar, uygulama kaydını girer. Hatırlatmayı uygulama yapar; siz başlatır ve izlersiniz.</p><p class="nc-apps"><span><img src="assets/logo/ikon-mercek.svg" alt="" width="22" height="22">Moyo Mercek</span><span><img src="assets/logo/ikon-moyo.svg" alt="" width="22" height="22">Moyo</span></p></div>
+          <div class="nc-media plate"><figure class="clip" data-clip="aile"><img class="clip-poster" src="assets/motion/aile.webp" alt="Ebeveyn deneyimi önizlemesi: telefonda eğitimin modül listesi açılıyor ve çoktan seçmeli bir test sorusu yanıtlanıyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure></div>
+        </div>
+        <div class="nc-p" role="tabpanel" id="nc-p2" aria-labelledby="nc-t2" hidden>
+          <div class="nc-text"><p class="step-k"><b>3</b>ABC verisi</p><h3>Evde olanı ABC kaydıyla görün</h3><p>Ebeveynin bildirdiği olaylar öncül, davranış, sonuç, uygulanan strateji ve çocuğun tepkisiyle panelinize gelir; hedef davranış başına bir tabloda toplanır.</p><p class="nc-apps"><span><img src="assets/logo/ikon-moyo.svg" alt="" width="22" height="22">Moyo</span><span><img src="assets/logo/ikon-mercek.svg" alt="" width="22" height="22">Moyo Mercek</span></p></div>
+          <div class="nc-media plate"><figure class="clip" data-clip="davranis"><img class="clip-poster" src="assets/motion/davranis.webp" alt="Hedef davranışlar ve bildirilen olaylar: bir davranış açılınca stratejiler ve öncül, sonuç, uygulanan strateji sütunlu olay tablosu görünüyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure></div>
+        </div>
+        <div class="nc-p" role="tabpanel" id="nc-p3" aria-labelledby="nc-t3" hidden>
+          <div class="nc-text"><p class="step-k"><b>4</b>İlerleme</p><h3>İlerleme notu kayıtlardan hazır gelir</h3><p>Rutin tamamlama, eğitim ilerlemesi ve olay sayıları dönemin raporunda; ilerleme notunu kopyalayıp kendi kaydınıza ekleyin.</p><p class="nc-apps"><span><img src="assets/logo/ikon-mercek.svg" alt="" width="22" height="22">Moyo Mercek</span></p></div>
+          <div class="nc-media plate"><figure class="clip" data-clip="rapor"><img class="clip-poster" src="assets/motion/rapor.webp" alt="Ev rutini gözlem raporu açılıp kaydırılıyor; ardından dönemin ilerleme notu kopyalanıyor." width="1440" height="900" loading="lazy"><figcaption>Örnek veri</figcaption></figure></div>
+        </div>
+        <div class="nc-p" role="tabpanel" id="nc-p4" aria-labelledby="nc-t4" hidden>
+          <div class="nc-text"><p class="step-k"><b>5</b>Oyun</p><h3>Çocuk rutinini oyunda macera olarak yapar</h3><p>Aile rutini Moyo'da kurar ya da sizin önerinizi ekler; çocuk oyunda "Yaptım"a dokunur, ebeveyn onaylar, ödülünü oyunda toplar. Oyunu aile yönetir.</p><p class="nc-apps"><span><img src="assets/logo/ikon-moyo.svg" alt="" width="22" height="22">Moyo</span><span><img src="assets/logo/ikon-oyun.webp" alt="" width="22" height="22">Moyo Oyun</span></p></div>
+          <div class="nc-media plate"><figure class="shot"><img src="assets/oyun-liste.webp" alt="Moyo Oyun: çocuğun bugünkü rutinleri oyunda macera olarak; ailenden gelenler etiketli." width="1200" height="554" loading="lazy"><figcaption>Örnek veri</figcaption></figure></div>
+        </div>
       </div>
     </div>
   </section>
@@ -201,7 +170,7 @@
         <div class="col fam">
           <h3><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12c1.5-3.5 5.5-7 10-7s8.5 3.5 10 7c-1.5 3.5-5.5 7-10 7S3.5 15.5 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span>Aile görür</h3>
           <!-- YENİ METİN (bugünkü ürüne göre liste) -->
-          <ul><li>Atadığınız eğitim ve modüller</li><li>Uygulama görevleri ve yapılacaklar</li><li>Macera önerileri</li></ul>
+          <ul><li>Atadığınız eğitim ve modüller</li><li>Uygulama görevleri ve yapılacaklar</li><li>Rutin önerileri (çocuk oyunda macera olarak görür)</li></ul>
         </div>
         <div class="col pri">
           <h3><span class="dot"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>Yalnız siz</h3>

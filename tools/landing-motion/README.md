@@ -7,7 +7,7 @@ sessiz ve döngüye uygun klipler üretir: imleç yumuşakça kayar, bekler, bas
 
 ```bash
 bash preview/build.sh                      # önizleme derlemesi yoksa
-node tools/landing-motion/record.js hero   # tek sahne: hero · kutuphane · aile · davranis · rapor · pano
+node tools/landing-motion/record.js akis   # tek sahne: akis · hero · kutuphane · aile · davranis · rapor · pano
 node tools/landing-motion/record.js all    # altı masaüstü sahnesi
 node tools/landing-motion/record.js mobile # telefon sahneleri: hero-m · davranis-m · rapor-m
 ```
@@ -44,5 +44,8 @@ Ortam değişkenleri: `SHOT_TIME` ("şimdi"; varsayılan `2026-11-09T09:40:00+03
 ## Sahneyi değiştirmek
 
 `scenes/` altındaki dosyada adımlar sırayla yazılıdır: `h.click(hedef, { beat, after })`, `h.type('…')`,
-`h.scroll(piksel)`, `h.hover(hedef)`. Hedef tam metin, RegExp ya da Playwright locator olur; üstte ve görünür olan seçilir.
+`h.scroll(piksel)`, `h.hover(hedef)`, `h.zoom(hedef, ölçek)` / `h.unzoom()` (kamera: uygulamanın kökü hedefin çevresinde yavaşça
+büyür, imleç ölçeklenmez; Atlassian ana sayfasındaki ürün turu gibi, 14 Kasım 2026). **`akis`** (ana sayfa açılışı, ~54 sn):
+uzman eğitim oluşturur → çocuğun ev rutinlerini görür → ABC olaylarına bakar; `beat`'ler sayfadaki 1-2-3 çipinin saniyeleri.
+Uzun sahnede kayıt + kodlama 10 dakikayı aşabilir: arka planda çalıştır, `MOTION_FORMAT=jpeg` ile kareler küçük. Hedef tam metin, RegExp ya da Playwright locator olur; üstte ve görünür olan seçilir.
 Çekimden sonra kareleri gözle kontrol et: `ffmpeg -i out/<sahne>.mp4 -vf fps=4/3 kare-%03d.png`.

@@ -20,3 +20,4 @@ dist-uzman/
 
 # Tanıtım sayfası ürün kayıtları: üretilen dosyalar (tools/landing-motion/record.js); yayına girenler site/assets/motion altında
 tools/landing-motion/out/
+__pycache__/

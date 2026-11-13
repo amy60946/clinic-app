@@ -77,6 +77,7 @@ td:first-child { font-weight: 700; color: var(--ink); }
       <button role="tab" id="t-a" data-v="a" aria-selected="false">A · Ebeveyn sayfası</button>
       <button role="tab" id="t-b" data-v="b" aria-selected="false">B · Tek sayfa, iki kitle</button>
       <button role="tab" id="t-c" data-v="c" aria-selected="false">C · Çatı sayfa</button>
+      <button role="tab" id="t-e" data-v="e" aria-selected="false">Yeni · Moyo Ebeveyn sayfası</button>
       <button role="tab" id="t-metin" data-v="metin" aria-selected="false">Metinler</button>
       <button role="tab" id="t-logo" data-v="logo" aria-selected="false">Logo ve ikon</button>
       <button role="tab" id="t-bench" data-v="bench" aria-selected="false">Benchmark</button>
@@ -110,6 +111,7 @@ td:first-child { font-weight: 700; color: var(--ink); }
           <li><b>Sistemin parçaları → Ekosistemin Uygulamaları.</b> Mercek kartında "Uzman için · isteğe bağlı".</li>
           <li><b>Güven:</b> ikonlu dört kart: reklam ve satın alma yok · tek oyunculu, yabancı yok · ayrı çocuk hesabı gerekmez, oyun Moyo Ebeveyn'de oluşturduğunuz tek kullanımlık kodla bağlanır · uzman bağlantısını sonlandırabilir, hesabınızı ve verilerinizi silebilirsiniz.</li>
           <li><b>Rutin / macera:</b> sayfada her yerde "rutin"; oyun adımında ve Sorular'da kısa not: "Eklediğiniz her rutin oyunda çocuğunuz için bir macera olur."</li>
+          <li><b>Moyo Ebeveyn sayfası (yeni sekme):</b> çatı sayfanın "Nasıl çalışır", gerçek ekranları ve "Moyo Ekosistemi" aynen; üstte ebeveyne özel açılış (solda ürün cümlesi ve üç güvence, sağda oyun + ebeveyn telefonu "Yaptım → Onaylandı"), sonra Ekosistemin Uygulamaları (Moyo Mercek kartında "Uzmanınız için ↗"), Güven, Fiyat (Oyun ücretsiz, Ebeveyn 7 gün ücretsiz, fiyatlar — TL), ebeveyn soruları. Bugünkü sayfadaki Joon'dan gelen "%90", "birkaç hafta içinde", "bilimsel araştırmalara dayanan", "dikkatini toplamasına" ve eski adlar (Pofi Adası, ClinicApp) yok. Çatı sayfadaki "Ebeveynler için" bağlantıları buraya gidiyor. Yayındaki moyoapp.com.tr değişmedi; onaydan sonra parent-app <code>site/</code>'ye taşınır.</li>
           <li><b>Moyo Oyun ikonu:</b> sağ altta küçük Moyo logosu, dört alternatif "Logo ve ikon" sekmesinde (önerim C, koyu köşe).</li>
         </ul>
       </div>
@@ -526,12 +528,13 @@ td:first-child { font-weight: 700; color: var(--ink); }
 
 <script>
 (function () {
-  var SRC = { a: 'a.html', b: 'b.html', c: 'c.html' };
+  var SRC = { a: 'a.html', b: 'b.html', c: 'c.html', e: 'ebeveyn.html' };
   var HINTS = {
     analiz: 'Durum, üç seçenek, önerim ve dönen görsellerin kuralları.',
     a: '<b>Aşağı kaydır:</b> görsel sabit kalır, kartlar dönerek büyür. moyoapp.com.tr ebeveynin sayfası olarak kalır.',
     b: '<b>Aşağı kaydır:</b> ekosistem rol rol; altta "Ebeveynseniz / Uzmansanız" seçicisi.',
-    c: '<b>Aşağı kaydır:</b> çatı sayfa; "Ebeveynim" ebeveyn sayfasını (A) açar, "Uzmanım" Moyo Mercek önizlemesini.',
+    c: '<b>Aşağı kaydır:</b> çatı sayfa. Telefonda "Nasıl çalışır" düzenini sayfadaki "Önizleme · telefon/iPad düzeni" ile değiştir.',
+    e: '<b>Moyo Ebeveyn sayfası (yeni):</b> çatı sayfanın Nasıl çalışır ve Moyo Ekosistemi diliyle; açılış, fiyat ve sorular ebeveyne özel.',
     metin: 'Taslakların, değerlendirmem ve alternatifler.',
     logo: 'Paylaştığın iki satırlı tasarım, seçilen harflerle ve üç renkte.',
     bench: 'Joon, Grow Therapy, ClickUp, NN/g.'
@@ -553,7 +556,7 @@ td:first-child { font-weight: 700; color: var(--ink); }
   }
   page.addEventListener('load', function () {
     try {
-      var w = page.contentWindow, p = w.location.pathname, v = /\/a\.html$/.test(p) ? 'a' : /\/b\.html$/.test(p) ? 'b' : /\/c\.html$/.test(p) ? 'c' : null;
+      var w = page.contentWindow, p = w.location.pathname, v = /\/a\.html$/.test(p) ? 'a' : /\/b\.html$/.test(p) ? 'b' : /\/c\.html$/.test(p) ? 'c' : /\/ebeveyn\.html$/.test(p) ? 'e' : null;
       if (v && v !== cur) { cur = v; page.setAttribute('data-v', v); tabs.forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-v') === v)); }); hint.innerHTML = HINTS[v]; }
     } catch (e) {}
   });

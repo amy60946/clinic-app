@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="tr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moyo Mercek Yeni Site</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Düzen: tek ekranlık gezgin. Üstte sekmeler (Ana sayfa · Fiyat · Benchmark notu) ve ekran boyutu; altında sayfa gerçek hâliyle çerçevede. */
+@font-face { font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 200 800; font-display: swap; src: url(site/assets/fonts/plus-jakarta-sans-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+20A0-20C0; }
+@font-face { font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 200 800; font-display: swap; src: url(site/assets/fonts/plus-jakarta-sans-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212; }
+:root {
+  --bg: #EEEDF3; --panel: #FFFFFF; --ink: #16113A; --text: #2E2A4A; --muted: #5C5875; --line: #DEDCE6;
+  --accent: #2D294E; --chip: #E6E4EF; --good: #1F6B3A; --good-bg: #E3F5E8; --warn: #7A5410; --warn-bg: #FBF1DC; --bezel: #16113A;
+  --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0E0B26; --panel: #1A1640; --ink: #F2F1F8; --text: #D3D1E3; --muted: #A2A0B8; --line: #2F2A5A; --accent: #C9C5F2; --chip: #272356; --good: #8FE0A6; --good-bg: #183324; --warn: #F0CB7C; --warn-bg: #3A2E14; --bezel: #3A3570; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0E0B26; --panel: #1A1640; --ink: #F2F1F8; --text: #D3D1E3; --muted: #A2A0B8; --line: #2F2A5A; --accent: #C9C5F2; --chip: #272356; --good: #8FE0A6; --good-bg: #183324; --warn: #F0CB7C; --warn-bg: #3A2E14; --bezel: #3A3570; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.55; display: flex; flex-direction: column; }
+.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { flex: none; background: var(--panel); border-bottom: 1px solid var(--line); padding-block: 10px; display: flex; flex-direction: column; gap: 6px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+h1 { font-size: 16px; font-weight: 800; color: var(--ink); margin: 0 auto 0 0; letter-spacing: -.01em; }
+h1 b { font-weight: 800; letter-spacing: -.03em; } h1 span { font-weight: 300; }
+.tabs, .dev { display: flex; gap: 4px; background: var(--bg); border-radius: 12px; padding: 4px; max-width: 100%; overflow-x: auto; }
+.tabs button, .dev button { font: inherit; font-size: 13.5px; font-weight: 700; color: var(--muted); background: none; border: 0; border-radius: 9px; padding: 8px 12px; cursor: pointer; white-space: nowrap; min-height: 36px; }
+.tabs button[aria-selected="true"], .dev button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+button:focus-visible, a:focus-visible { outline: 3px solid #51E56A; outline-offset: 2px; }
+.hint { font-size: 13px; color: var(--muted); min-height: 20px; }
+.hint b { color: var(--ink); }
+main { flex: 1; min-height: 0; display: flex; }
+.view { flex: 1; min-width: 0; min-height: 0; display: flex; justify-content: center; padding-block: 12px; }
+.frame { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #FFFFFF; }
+.view.phone .frame { flex: none; width: 390px; max-width: 100%; border: 9px solid var(--bezel); border-radius: 38px; }
+iframe { width: 100%; height: 100%; border: 0; display: block; }
+.doc { flex: 1; min-width: 0; overflow-y: auto; padding-block: 24px 48px; }
+.doc .in { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+.doc h2 { font-size: 20px; font-weight: 800; color: var(--ink); margin: 0 0 10px; letter-spacing: -.015em; text-wrap: balance; }
+.doc p { margin: 0; max-width: 72ch; }
+.lead { font-size: 16.5px; color: var(--ink); }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.box.note { background: var(--warn-bg); border-color: transparent; }
+.box.note h2 { color: var(--warn); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.box ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 800; }
+td:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; border-radius: 999px; padding: 2px 9px; background: var(--good-bg); color: var(--good); vertical-align: 2px; }
+.src { font-size: 13px; color: var(--muted); }
+.src a, .box a { color: var(--accent); font-weight: 700; }
+@media (max-width: 860px) { .tabs { flex-wrap: wrap; } .grid2 { grid-template-columns: 1fr; } .dev { display: none; } h1 { width: 100%; } }
+</style>
+
+<header class="gut">
+  <div class="row">
+    <h1><b>moyo</b> <span>Mercek</span> · yeni tanıtım sitesi (önizleme)</h1>
+    <div class="tabs" role="tablist" aria-label="Sayfa">
+      <button role="tab" id="t-home" data-v="home" aria-selected="true">Ana sayfa</button>
+      <button role="tab" id="t-fiyat" data-v="fiyat" aria-selected="false">Fiyat sayfası</button>
+      <button role="tab" id="t-not" data-v="not" aria-selected="false">14 Kasım notu ve benchmark</button>
+    </div>
+    <div class="dev" role="group" aria-label="Ekran boyutu">
+      <button type="button" id="d-desk" data-d="desk" aria-pressed="true">Masaüstü</button>
+      <button type="button" id="d-phone" data-d="phone" aria-pressed="false">Telefon</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="dev" id="neden" role="group" aria-label="Neden bölümü düzeni">
+      <button type="button" data-n="1" aria-pressed="false">Neden · 1 Akış</button>
+      <button type="button" data-n="2" aria-pressed="false">2 Bento</button>
+      <button type="button" data-n="3" aria-pressed="true">3 Hafta</button>
+    </div>
+    <div class="hint" id="hint"></div>
+  </div>
+</header>
+
+<main class="gut">
+  <div class="view" id="view"><div class="frame"><iframe id="page" title="Seçilen sayfa" src="site/index.html"></iframe></div></div>
+  <div class="doc" id="doc" hidden>
+    <div class="in">
+      <p class="lead"><b>Ne değişti:</b> ürün kendi gerçek ekranlarıyla, biri kullanıyormuş gibi yavaş hareketle anlatılıyor; bölümler ferah, üstte gerçek bir menü var, fiyat kendi sayfasında. Metinler bugünkü sayfadan aynen alındı; yalnız ad değişti (Moyo Mercek, Moyo, Moyo Oyun).</p>
+
+      <div class="box" style="border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset">
+        <h2>14 Kasım: Atlassian referansıyla üç değişiklik</h2>
+        <p>Referans: senin Atlassian ana sayfası ekran kaydın (84 sn) ve atlassian.com/ecosystem. Rakam, müşteri logosu ve iddia alınmadı (44% / 48%, logo şeridi, "secure, compliant").</p>
+        <ul>
+          <li><b>Açılışta yavaş ürün turu:</b> Atlassian'daki gibi tek çerçevede, kendi oynayan gerçek arayüz; önemli anlarda "kamera" yavaşça yakınlaşıp geri çıkıyor. Sıra senin istediğin gibi: <b>1 uzman ebeveyn eğitimi oluşturur</b> (hedef yazar, kütüphaneden modül ekler, Etkin yapar) → <b>2 çocuğun ev rutinlerini görür</b> (haftalık tablo) → <b>3 ebeveynin bildirdiği ABC olaylarına bakar</b>. Atlassian'da yazı yok; bizde kaydın altında 1-2-3 çipi kayıtla birlikte yanıyor, dokununca o adıma gidiyor. Duraklat düğmesi ve "hareketi azalt" desteği var.</li>
+          <li><b>"Nasıl çalışır" sekmeli:</b> Atlassian'ın "Teamwork · Strategy · Service · Software · Product" bölümü gibi: üstte hap biçiminde beş sekme (Eğitim · Aile uygulaması · ABC verisi · İlerleme · Oyun), altında solda kısa yazı ve hangi uygulamaların işin içinde olduğu (uygulama çipleri), sağda o adımın kaydı. Tıklayınca değişir, kendiliğinden ilerlemez (Atlassian'da da öyle); beş adım tek ekrana sığıyor. Telefonda sekmeler yana kayar, görsel üstte.</li>
+          <li><b>"Neden Moyo Mercek" için üç görsel düzen</b> (üstteki düğmelerle değiştir): <b>1 Akış</b> (üç düğüm ve aralarında çizgi: kurarsınız → aile uygular → hafta önünüze gelir) · <b>2 Bento</b> (üç kutu, içlerinde küçük arayüz parçaları: modül listesi, haftalık tablo, ilerleme notu) · <b>3 Hafta</b> (bir haftanın şeridi: Çarşamba seans, aradaki günlerde rutin işaretleri ve olaylar; "seans bir gün, takip yedi gün"). <b>Önerim 3:</b> tek bakışta "seans dışı takip" fikrini gösteriyor, metne ihtiyaç az.</li>
+          <li><b>Metin:</b> kısaltılan bölümlerde bizim için doğrulanamayan ifadeler çıktı: "haftada 4–6 saat", "5 dakikadan kısa sürede", "kanıta dayalı", "tedavi süreci", "uyumu artırır" ve bizde olmayan "uzman oyun erişimini etkinleştirebilir" (oyunu aile yönetir). "100'den fazla Türkçe kaynak" kalıyor (kütüphanede 131 öğe var). Açılıştaki başlık ve alt yazıya dokunmadım.</li>
+          <li><b>Rutin / macera:</b> uzman ve aile metinlerinde "rutin"; oyun adımında ve "Kim neyi görür"de kısa not: çocuk oyunda macera olarak görür. Fiyat sayfasında "macera" geçen iki satır "rutin" oldu.</li>
+          <li><b>Yayındaki önizleme eskiydi:</b> 12 Kasım'dan sonraki logo ve renk değişiklikleri bu önizlemeye hiç girmemişti; şimdi depodaki son hâliyle birlikte geliyor.</li>
+        </ul>
+      </div>
+
+      <div class="box">
+        <h2>İki sitede ölçtüğümüz ve aldığımız (12 Kasım 2026)</h2>
+        <p>Sayfalar tarayıcıda açıldı, ölçüler sayfanın kendisinden okundu. İçerik, metin ve görsel kopyalanmadı; yalnız işleyiş ve oran örnek alındı.</p>
+        <div class="tbl"><table>
+          <thead><tr><th scope="col">Konu</th><th scope="col">ClickUp</th><th scope="col">Geckoboard</th><th scope="col">Bizde</th></tr></thead>
+          <tbody>
+            <tr><td>Ürün gösterimi</td><td>Uygulamanın canlandırılmış kopyası, 35 sn'lik döngü, imleçler, yazı yazılıyor</td><td>Canlı pano, "kamera" yakınlaşıp gezer (~15 sn), sonra yerinde canlı kalır</td><td>Gerçek ekran kayıtları, 9–20 sn, imleç sakin hareket eder; ekrana gelince oynar, çıkınca durur, duraklat düğmesi var</td></tr>
+            <tr><td>Bölüm aralığı</td><td>80 px, hepsi beyaz</td><td>120 px, koyu / beyaz / gri sırayla</td><td>120 px (telefonda 60), koyu / beyaz / gri sırayla</td></tr>
+            <tr><td>Başlıklar</td><td>H1 60, H2 48</td><td>H1 58 (en çok 2 satır), H2 50</td><td>H1 58, H2 48, gövde 18</td></tr>
+            <tr><td>Yazı sütunu</td><td>~450–600 px</td><td>~550 px (satırda ~50 harf)</td><td>450–540 px</td></tr>
+            <tr><td>Açılış görseli</td><td>Sayfa genişliğinin %75'i, ince çerçeve</td><td>%80'i, koyu zeminde gölgeli</td><td>%80'e kadar, 16:10, gölgeli</td></tr>
+            <tr><td>Üst menü</td><td>60 px, 6 başlık, büyük açılır menüler</td><td>70 px, 6 başlık, küçük açılır menüler</td><td>68 px, 5 başlık, açılır menü yok (bizde o kadar içerik yok)</td></tr>
+            <tr><td>Fiyat</td><td>Ana sayfada yok, menüde ayrı sayfa</td><td>Ana sayfada yok, menüde ayrı sayfa</td><td>Ana sayfadan çıktı, menüde "Fiyat"</td></tr>
+            <tr><td>Fiyat sayfası</td><td>Aylık/yıllık (yıllık seçili), 4 kart, "en popüler" etiketi, 175 satırlık karşılaştırma, SSS</td><td>Aylık/yıllık (yıllık seçili, "%20" etiketi), 3 kart, ortadaki renkli, 57 satırlık tablo, 10 SSS</td><td>Aylık/yıllık (yıllık seçili, "n ay sizden"), 2 kart, Klinik yalnız renkle ayrılır (etiket yok), kısa karşılaştırma, 6 SSS</td></tr>
+          </tbody>
+        </table></div>
+        <p class="src">Kaynaklar: <a href="https://clickup.com/" target="_blank" rel="noopener">ClickUp ana sayfa</a> · <a href="https://clickup.com/pricing" target="_blank" rel="noopener">ClickUp fiyat</a> · <a href="https://www.geckoboard.com/" target="_blank" rel="noopener">Geckoboard ana sayfa</a> · <a href="https://www.geckoboard.com/pricing/" target="_blank" rel="noopener">Geckoboard fiyat</a></p>
+      </div>
+
+      <div class="grid2">
+        <div class="box">
+          <h2>Gezinme seçimi (A / B / C) nereye düştü</h2>
+          <p>Yeni sayfa <b>C'ye (Kendiliğinden)</b> en yakın: her adımın kaydı ekrana gelince kendi oynar ve duraklatılabilir. Farkı, açılışta beş adımlık tek bir tur yerine her adımın kendi kaydının olması. A (kaydırınca sabitlenen bölüm) ve B (tıklayınca açılan adımlar) kullanılmadı.</p>
+          <p>Bu yön seçilirse eski A / B / C kararı da kapanır.</p>
+        </div>
+        <div class="box">
+          <h2>Şimdilik yer tutucu olanlar</h2>
+          <ul>
+            <li><b>Logo, renk ve yazı tipi:</b> "moyo" kalın, "Mercek" ince olarak yazıyla duruyor; renkler Geckoboard paletinden. Moyo penceresinin hazırladığı marka kiti seçilince tek yerden değişir.</li>
+            <li><b>Fiyatlar:</b> 1.199,99 / 11.999,99 (Bireysel) ve 3.999,99 / 39.999,99 (Klinik) koordinatörün önerisi, karar değil; fiyat sayfasında "Taslak fiyat" yazar.</li>
+            <li><b>Telefon kayıtları:</b> telefonda da aynı geniş kayıtlar oynuyor; telefona özel dikey kayıt sonraki adım.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="box note">
+        <h2>Karar ya da kontrol bekleyenler</h2>
+        <ul>
+          <li>Eski metindeki riskli ifadeler ("haftada 4–6 saat", "kanıta dayalı", "tedavi", "5 dakika") ve bizde henüz olmayan "uzman oyun erişimini etkinleştirebilir" cümlesi yerinde duruyor; yeni düzende çoğaltılmadı. Tanıtım metni kararı (avukat dosyası, karar 2) ve Marketing kontrolü bekleniyor.</li>
+          <li>Menüdeki ve alt çubuktaki "14 gün ücretsiz deneyin" düğmesinin yanında fiyat yok (eski sayfada da yoktu); ücretsiz ifadesinin yanına fiyat, dönem ve yenilenme yazılması gerekiyor (pazarlama kuralları). Açılışta, kapanışta ve fiyat sayfasında yazıyor.</li>
+          <li>Kayıtlarda: kütüphane kaydının sonunda "Eğitimi kur" düğmesi kısa bir an küçülüp dönen simgeye dönüşüyor (uygulamadaki gerçek yükleme hâli); Davranışlar ve Olaylar kaydındaki "Çocuğun tepkisi 1–5" sütunu puan gibi okunabilir. İstersen bu iki sahneyi değiştiririm.</li>
+          <li>"Ekip kodunuz mu var? Kodla katılın" satırı kaldırıldı: uygulama artık ekip koduyla değil, kişisel kodla çalışıyor.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  var HINTS = {
+    home: '<b>Yeni:</b> açılışta ürün turu (eğitim → rutinler → olaylar; altındaki 1-2-3 ile atla), "Neden" için üç görsel düzen (soldaki düğmeler), "Nasıl çalışır" sekmeli. Veriler uydurma.',
+    fiyat: '<b>Aylık / Yıllık</b>\'ı dene. Fiyatlar taslak; karşılaştırma tablosu kaydırırken başlığını üstte tutar.',
+    not: 'İki sitede ölçtüklerimiz, nereye uyguladığımız ve karar bekleyenler.'
+  };
+  var SRC = { home: 'site/index.html', fiyat: 'site/fiyat.html' };
+  var view = document.getElementById('view'), doc = document.getElementById('doc'), page = document.getElementById('page'), hint = document.getElementById('hint');
+  var tabs = [].slice.call(document.querySelectorAll('.tabs button')), devs = [].slice.call(document.querySelectorAll('.dev button'));
+  var cur = null, neden = '3', nb = [].slice.call(document.querySelectorAll('#neden button'));
+  nb.forEach(function (b) { b.addEventListener('click', function () {
+    neden = b.getAttribute('data-n'); nb.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    if (cur === 'home') { page.src = SRC.home + '?neden=' + neden + '#degerler'; }
+  }); });
+  function show(v, force) {
+    if (!HINTS[v]) v = 'home';
+    cur = v;
+    tabs.forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-v') === v)); });
+    hint.innerHTML = HINTS[v];
+    var isDoc = v === 'not';
+    doc.hidden = !isDoc; view.hidden = isDoc;
+    document.getElementById('neden').hidden = v !== 'home';
+    if (!isDoc && (force || page.getAttribute('data-v') !== v)) { page.setAttribute('data-v', v); page.src = SRC[v] + (v === 'home' ? '?neden=' + neden : ''); }
+    try { if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v); } catch (e) {}
+  }
+  tabs.forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-v')); }); });
+  devs.forEach(function (b) { b.addEventListener('click', function () {
+    devs.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    view.classList.toggle('phone', b.getAttribute('data-d') === 'phone');
+    if (cur && cur !== 'not') show(cur, true);   // boyut değişince sayfa baştan yerleşsin
+  }); });
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+  // Önizlemede sitenin kendi sayfaları (ana sayfa ↔ fiyat) çerçevede açılır, sekme de buna uyar; dış bağlantılar yeni sekmede.
+  page.addEventListener('load', function () {
+    var w, d;
+    try { w = page.contentWindow; d = w.document; } catch (e) { return; }
+    var p = w.location.pathname;
+    var v = /fiyat\.html$/.test(p) ? 'fiyat' : /index\.html$/.test(p) ? 'home' : null;
+    if (v && v !== cur) { cur = v; page.setAttribute('data-v', v); tabs.forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-v') === v)); }); hint.innerHTML = HINTS[v]; try { history.replaceState(null, '', '#' + v); } catch (e) {} }
+    [].forEach.call(d.querySelectorAll('a[href^="http"]'), function (a) { a.target = '_blank'; a.rel = 'noopener'; });
+  });
+  show(location.hash.slice(1) || 'home');
+})();
+</script>

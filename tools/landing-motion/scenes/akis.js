@@ -33,8 +33,8 @@ module.exports = {
     await h.click('Durumu güncelle', { after: 1700, poster: true });
 
     h.beat('2 · Çocuğun rutinlerini gör');
-    await h.click(p.getByText('Ev Rutinleri', { exact: true }).filter({ visible: true }).first(), { after: 1500 });
-    await h.zoom(p.getByText('Haftalık', { exact: true }).filter({ visible: true }).first(), 1.3, { fy: 6, after: 1800 });
+    await h.click(p.getByText('Ev Rutinleri', { exact: true }).filter({ visible: true }).first(), { after: 2200 });
+    await h.zoom(p.getByText('Okul için giyin', { exact: true }).filter({ visible: true }).first(), 1.3, { fx: 1.6, after: 1800 });
     await h.unzoom({ after: 500 });
 
     h.beat('3 · ABC olaylarına bak');
