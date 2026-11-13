@@ -136,7 +136,7 @@
   {
    "ikon": "img/ikon-oyun.png",
    "kim": "Çocuk için",
-   "ad": "moyo Oyun",
+   "ad": "Moyo Oyun",
    "ozet": "Rutinleri oyunda maceraya çevirir; ödül oyunun içinde.",
    "metin": "Tek oyunculu; ayrı çocuk hesabı gerekmez, Moyo Ebeveyn'de oluşturduğunuz kodla bağlanır. Reklam ve satın alma yok.",
    "link": "ebeveyn.html",
@@ -145,7 +145,7 @@
   {
    "ikon": "img/ikon-moyo.svg",
    "kim": "Aile için",
-   "ad": "moyo Ebeveyn",
+   "ad": "Moyo Ebeveyn",
    "ozet": "Hatırlatmayı uygulamaya bırakır, ilerlemeyi gösterir.",
    "metin": "Rutinleri kurar, tamamlananları onaylar, uzmanınızla neyi paylaşacağınızı siz seçersiniz.",
    "link": "ebeveyn.html",
@@ -154,7 +154,7 @@
   {
    "ikon": "img/ikon-mercek.svg",
    "kim": "Uzman için · isteğe bağlı",
-   "ad": "moyo Mercek",
+   "ad": "Moyo Mercek",
    "ozet": "Seans dışındaki haftayı görünür kılar.",
    "metin": "Ailenin daveti ve onayıyla evdeki rutinleri ve davranış kayıtlarını görür, ebeveyn eğitimi gönderir, rapor ve ilerleme notunu kayıtlardan hazırlar.",
    "link": "{MERCEK}",

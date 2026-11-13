@@ -253,11 +253,11 @@ class Human {
     const ms = o.ms ?? 750;
     await this.p.evaluate(([x, y, s, ms]) => {
       const r = document.getElementById('root') || document.body.firstElementChild;
-      const ox = x + window.scrollX, oy = y + window.scrollY;
+      const ox = x + window.scrollX, oy = y + window.scrollY;   // kök sayfayla birlikte kaymaz; görünüm koordinatı yeter
       r.style.transition = `transform ${ms}ms cubic-bezier(.45,0,.2,1)`;
       r.style.transformOrigin = `${ox}px ${oy}px`;
       r.style.transform = `scale(${s})`;
-    }, [pt.x, pt.y, scale, ms]);
+    }, [o.ox ?? pt.x, o.oy ?? pt.y, scale, ms]);
     await sleep(ms + (o.after ?? this.between(1300, 1700)));
   }
   async unzoom(o = {}) {

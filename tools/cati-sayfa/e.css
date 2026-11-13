@@ -1,8 +1,8 @@
 /* Moyo Ebeveyn sayfası (14 Kasım 2026): çatı sayfa C'nin üstüne yalnız açılış, fiyat ve kapanış. */
 .e-acilis { background: var(--lacivert); color: var(--beyaz); padding-block: clamp(36px, 6vw, 72px) clamp(28px, 5vw, 56px); }
-.e-acilis .ic { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(28px, 4vw, 56px); align-items: center; }
+.e-acilis .ic { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.2fr); gap: clamp(28px, 4vw, 56px); align-items: center; }
 .e-ust { font-size: 15px; font-weight: 800; color: var(--yesil); letter-spacing: .02em; }
-.e-acilis h1 { font-size: clamp(28px, 3.3vw, 42px); line-height: 1.12; font-weight: 800; letter-spacing: -.02em; margin-top: 10px; text-wrap: balance; }
+.e-acilis h1 { font-size: clamp(26px, 2.8vw, 38px); line-height: 1.12; font-weight: 800; letter-spacing: -.02em; margin-top: 10px; text-wrap: balance; }
 .e-acilis .alt { font-size: clamp(17px, 1.6vw, 20px); line-height: 1.5; color: var(--koyu-yazi-2); margin-top: 16px; max-width: 560px; }
 .e-acilis .dugmeler { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
 .e-isaret { list-style: none; margin: 22px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 15px; font-weight: 600; color: var(--koyu-yazi-2); }
@@ -21,8 +21,11 @@
 }
 .kartlar2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
 @media (max-width: 760px) { .kartlar2 { grid-template-columns: 1fr; } }
-.f-kart h3 { font-size: 28px; } .f-kart h3 small { font-size: 14px; }
+.f-kart h3 { font-size: 28px; } .f-kart h3 small { display: block; font-size: 14px; font-weight: 700; color: var(--yazi-2, #5C5875); margin-bottom: 2px; }
 .kapanis { background: var(--lacivert); color: var(--beyaz); text-align: center; }
 .kapanis h2 { font-size: clamp(26px, 3vw, 38px); line-height: 1.15; font-weight: 800; text-wrap: balance; }
 .kapanis .dugmeler { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 24px; }
 .kapanis .ince { color: var(--koyu-yazi-2); margin-top: 14px; font-size: 14px; }
+/* Ebeveyn sayfasında düzen seçici yok: telefonda Sekmeler, iPad'de Liste (çatı sayfadaki karar buraya da geçer) */
+.sayfa-e .nk-secici { display: none; }
+.e-gorsel .ikili .i-akis .cizgi { opacity: .5; }

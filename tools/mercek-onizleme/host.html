@@ -72,9 +72,9 @@ td:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
   </div>
   <div class="row">
     <div class="dev" id="neden" role="group" aria-label="Neden bölümü düzeni">
-      <button type="button" data-n="1" aria-pressed="false">Neden · 1 Akış</button>
+      <button type="button" data-n="1" aria-pressed="true">Neden · 1 Akış</button>
       <button type="button" data-n="2" aria-pressed="false">2 Bento</button>
-      <button type="button" data-n="3" aria-pressed="true">3 Hafta</button>
+      <button type="button" data-n="3" aria-pressed="false">3 Hafta</button>
     </div>
     <div class="hint" id="hint"></div>
   </div>
@@ -91,8 +91,8 @@ td:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
         <p>Referans: senin Atlassian ana sayfası ekran kaydın (84 sn) ve atlassian.com/ecosystem. Rakam, müşteri logosu ve iddia alınmadı (44% / 48%, logo şeridi, "secure, compliant").</p>
         <ul>
           <li><b>Açılışta yavaş ürün turu:</b> Atlassian'daki gibi tek çerçevede, kendi oynayan gerçek arayüz; önemli anlarda "kamera" yavaşça yakınlaşıp geri çıkıyor. Sıra senin istediğin gibi: <b>1 uzman ebeveyn eğitimi oluşturur</b> (hedef yazar, kütüphaneden modül ekler, Etkin yapar) → <b>2 çocuğun ev rutinlerini görür</b> (haftalık tablo) → <b>3 ebeveynin bildirdiği ABC olaylarına bakar</b>. Atlassian'da yazı yok; bizde kaydın altında 1-2-3 çipi kayıtla birlikte yanıyor, dokununca o adıma gidiyor. Duraklat düğmesi ve "hareketi azalt" desteği var.</li>
-          <li><b>"Nasıl çalışır" sekmeli:</b> Atlassian'ın "Teamwork · Strategy · Service · Software · Product" bölümü gibi: üstte hap biçiminde beş sekme (Eğitim · Aile uygulaması · ABC verisi · İlerleme · Oyun), altında solda kısa yazı ve hangi uygulamaların işin içinde olduğu (uygulama çipleri), sağda o adımın kaydı. Tıklayınca değişir, kendiliğinden ilerlemez (Atlassian'da da öyle); beş adım tek ekrana sığıyor. Telefonda sekmeler yana kayar, görsel üstte.</li>
-          <li><b>"Neden Moyo Mercek" için üç görsel düzen</b> (üstteki düğmelerle değiştir): <b>1 Akış</b> (üç düğüm ve aralarında çizgi: kurarsınız → aile uygular → hafta önünüze gelir) · <b>2 Bento</b> (üç kutu, içlerinde küçük arayüz parçaları: modül listesi, haftalık tablo, ilerleme notu) · <b>3 Hafta</b> (bir haftanın şeridi: Çarşamba seans, aradaki günlerde rutin işaretleri ve olaylar; "seans bir gün, takip yedi gün"). <b>Önerim 3:</b> tek bakışta "seans dışı takip" fikrini gösteriyor, metne ihtiyaç az.</li>
+          <li><b>"Nasıl çalışır" sekmeli:</b> Atlassian'ın "Teamwork · Strategy · Service · Software · Product" bölümü gibi: üstte hap biçiminde beş sekme (Eğitim · Aile uygulaması · ABC verisi · İlerleme · Oyun), altında solda kısa yazı ve hangi uygulamaların işin içinde olduğu (uygulama çipleri), sağda o adımın kaydı. Tıklayınca değişir, kendiliğinden ilerlemez (Atlassian'da da öyle); beş adım tek ekrana sığıyor ve sekme değişince sayfa zıplamıyor. Telefonda sekmeler hap içinde yana kayar, görsel üstte.</li>
+          <li><b>"Neden Moyo Mercek" için üç görsel düzen</b> (üstteki düğmelerle değiştir): <b>1 Akış</b> (üç düğüm ve aralarında çizgi: kurarsınız → aile uygular → hafta önünüze gelir) · <b>2 Bento</b> (üç kutu, içlerinde küçük arayüz parçaları: modül listesi, haftalık tablo, ilerleme notu) · <b>3 Hafta</b> (bir haftanın şeridi: Çarşamba seans, aradaki günlerde rutin işaretleri ve olaylar; "seans bir gün, takip yedi gün"). <b>Önerim 1 Akış:</b> bağımsız incelemede en hızlı okunan ve telefonda en kısa olan bu çıktı. 3 Hafta "seans bir gün, takip yedi gün" mesajına en uygun olanı; ikinci seçenek. Bento en kalabalığı.</li>
           <li><b>Metin:</b> kısaltılan bölümlerde bizim için doğrulanamayan ifadeler çıktı: "haftada 4–6 saat", "5 dakikadan kısa sürede", "kanıta dayalı", "tedavi süreci", "uyumu artırır" ve bizde olmayan "uzman oyun erişimini etkinleştirebilir" (oyunu aile yönetir). "100'den fazla Türkçe kaynak" kalıyor (kütüphanede 131 öğe var). Açılıştaki başlık ve alt yazıya dokunmadım.</li>
           <li><b>Rutin / macera:</b> uzman ve aile metinlerinde "rutin"; oyun adımında ve "Kim neyi görür"de kısa not: çocuk oyunda macera olarak görür. Fiyat sayfasında "macera" geçen iki satır "rutin" oldu.</li>
           <li><b>Yayındaki önizleme eskiydi:</b> 12 Kasım'dan sonraki logo ve renk değişiklikleri bu önizlemeye hiç girmemişti; şimdi depodaki son hâliyle birlikte geliyor.</li>
@@ -157,7 +157,7 @@ td:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
   var SRC = { home: 'site/index.html', fiyat: 'site/fiyat.html' };
   var view = document.getElementById('view'), doc = document.getElementById('doc'), page = document.getElementById('page'), hint = document.getElementById('hint');
   var tabs = [].slice.call(document.querySelectorAll('.tabs button')), devs = [].slice.call(document.querySelectorAll('.dev button'));
-  var cur = null, neden = '3', nb = [].slice.call(document.querySelectorAll('#neden button'));
+  var cur = null, neden = '1', nb = [].slice.call(document.querySelectorAll('#neden button'));
   nb.forEach(function (b) { b.addEventListener('click', function () {
     neden = b.getAttribute('data-n'); nb.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
     if (cur === 'home') { page.src = SRC.home + '?neden=' + neden + '#degerler'; }

@@ -206,3 +206,9 @@
 .d-mobil { --kw: min(calc(100vw - 104px), 420px); }
 .d-serit { margin-inline: calc(50% - 50vw); padding-inline: calc(50vw - var(--kw) / 2); }
 .nk-sekmeler .ad { white-space: nowrap; }
+.giris-bant h2 { text-wrap: balance; }
+/* Sorular: tarayıcının ▶ işareti yerine sade artı */
+.sss details > summary { list-style: none; cursor: pointer; position: relative; padding-right: 36px; }
+.sss details > summary::-webkit-details-marker { display: none; }
+.sss details > summary::after { content: "+"; position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 24px; font-weight: 400; line-height: 1; color: var(--yesil-marka, #0FD354); }
+.sss details[open] > summary::after { content: "–"; }

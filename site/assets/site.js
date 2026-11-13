@@ -217,6 +217,16 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
       if (focus) tabs[k].focus();
       if (tabs[k].scrollIntoView && box.querySelector('.nc-tabs').scrollWidth > box.querySelector('.nc-tabs').clientWidth) tabs[k].scrollIntoView({ block: 'nearest', inline: 'center', behavior: reduce.matches ? 'auto' : 'smooth' });
     };
+    // Yükseklik sabit: en uzun panel kadar yer ayrılır, sekme değişince altındaki bölümler zıplamaz
+    var wrapH = function () {
+      var max = 0, cur = -1;
+      Array.prototype.forEach.call(panels, function (p, j) { if (!p.hidden) cur = j; });
+      Array.prototype.forEach.call(panels, function (p) { var was = p.hidden; p.hidden = false; p.style.animation = 'none'; max = Math.max(max, p.offsetHeight); p.hidden = was; p.style.animation = ''; });
+      Array.prototype.forEach.call(panels, function (p) { p.style.minHeight = max + 'px'; });
+    };
+    wrapH(); window.addEventListener('resize', wrapH); window.addEventListener('load', wrapH);
+    var track = box.querySelector('.nc-tabs');
+    track.addEventListener('scroll', function () { track.classList.toggle('son', track.scrollLeft + track.clientWidth >= track.scrollWidth - 4); }, { passive: true });
     Array.prototype.forEach.call(tabs, function (t, k) {
       t.addEventListener('click', function () { sel(k); });
       t.addEventListener('keydown', function (e) {

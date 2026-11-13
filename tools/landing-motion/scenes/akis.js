@@ -16,6 +16,13 @@ module.exports = {
   },
   async run(h, s) {
     const p = s.page;
+    // Kamera sağ üst köşeye sabitlenir: sol menü kadrajdan tam çıkar, sağdaki sütunlar ve düğmeler kesilmez (14 Kasım incelemesi)
+    const cam = async (target, o = {}) => {
+      const side = await p.getByText('Danışan Bilgileri', { exact: true }).filter({ visible: true }).first().boundingBox();
+      const edge = side ? side.x + side.width + 28 : 280;
+      const s = Math.min(1.3, 1440 / (1440 - edge));
+      await h.zoom(target, s, { ox: 1440, oy: o.oy ?? 70, after: o.after ?? 1700 });
+    };
     await h.sleep(700);
     h.beat('1 · Ebeveyn eğitimi oluştur');
     await h.click('+ Eğitim ekle', { after: 1000 });
@@ -27,21 +34,22 @@ module.exports = {
     await h.click(p.getByText('Seç', { exact: true }).filter({ visible: true }).first(), { after: 650 });
     await h.click(p.getByText('Seç', { exact: true }).filter({ visible: true }).first(), { after: 650 });
     await h.click('Modülleri ekle', { after: 1300 });
-    await h.zoom(p.getByText(/etkin modül$/).filter({ visible: true }).first(), 1.35, { fy: 0.5, after: 1500 });
+    await cam(p.getByText(/etkin modül$/).filter({ visible: true }).first(), { after: 1600 });
     await h.unzoom();
     await h.click('durumu Etkin yap', { after: 1100 });
     await h.click('Durumu güncelle', { after: 1700, poster: true });
 
     h.beat('2 · Çocuğun rutinlerini gör');
     await h.click(p.getByText('Ev Rutinleri', { exact: true }).filter({ visible: true }).first(), { after: 2200 });
-    await h.zoom(p.getByText('Okul için giyin', { exact: true }).filter({ visible: true }).first(), 1.3, { fx: 1.6, after: 1800 });
+    await cam(p.getByText('Okul için giyin', { exact: true }).filter({ visible: true }).first(), { after: 1900 });
     await h.unzoom({ after: 500 });
 
     h.beat('3 · ABC olaylarına bak');
     await h.click(p.getByText('Davranışlar ve Olaylar', { exact: true }).filter({ visible: true }).first(), { after: 1300 });
     await h.click(card(p, 'Ekranı kapatırken ağlama'), { fx: 0.2, after: 1500 });
-    await h.scroll(220, { ms: 800, after: 700 });
-    await h.zoom(p.getByText('Öncül', { exact: true }).filter({ visible: true }).first(), 1.3, { after: 2000 });
-    await h.unzoom({ after: 900 });
+    await h.scrollTo(p.getByText('Öncül', { exact: true }).filter({ visible: true }).first(), 190, { ms: 800, after: 700 });
+    await cam(p.getByText('Öncül', { exact: true }).filter({ visible: true }).first(), { oy: 120, after: 2300 });
+    await h.unzoom({ after: 700 });
+    await h.scroll(-400, { ms: 700, after: 900 });
   },
 };
