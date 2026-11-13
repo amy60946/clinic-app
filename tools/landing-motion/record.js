@@ -4,7 +4,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const kit = require('./kit');
 
-const ORDER = ['hero', 'kutuphane', 'aile', 'davranis', 'rapor', 'pano', 'hero-m', 'davranis-m', 'rapor-m'];
+const ORDER = ['akis', 'hero', 'kutuphane', 'aile', 'davranis', 'rapor', 'pano', 'hero-m', 'davranis-m', 'rapor-m'];
 const load = (id) => require(path.join(__dirname, 'scenes', `${id}.js`));
 
 function probe(file) {

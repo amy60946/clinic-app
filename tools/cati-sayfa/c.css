@@ -112,3 +112,97 @@
 /* Gerçek telefon ekranları: ince koyu çerçeve, alttan soldurma yok */
 .hk-kart.telefon img, .l-gorsel.telefon > img, .ikili .i-telefon img, .d-slot.t-ebeveyn > img, .d-kart.t-ebeveyn .d-gorsel > img { -webkit-mask-image: none; mask-image: none; border: 7px solid #0B0920; border-radius: 30px; }
 .hk-kart.panel img, .l-gorsel.panel > img { -webkit-mask-image: none; mask-image: none; border: 8px solid #0B0920; border-radius: 18px; }
+
+/* --- 14 Kasım 2026 düzeltmeleri --- */
+.sayfa-c .acilis.c h1 { font-size: clamp(28px, 3.5vw, 44px); line-height: 1.1; max-width: 900px; }
+/* Basamaklar: isteğe bağlı rozeti kenarlığın üstünde (başlığın yerini almaz) */
+.basamak { max-width: none; }
+.basamak li { position: relative; }
+.basamak .b-rozet { position: absolute; top: -11px; left: 16px; font-size: 11.5px; font-weight: 800; letter-spacing: .02em; line-height: 1; color: var(--lacivert); background: var(--yesil); border-radius: 999px; padding: 5px 9px; white-space: nowrap; }
+.basamak li.istege { border: 1.5px dashed rgba(15, 211, 84, .75); }
+/* Ekosistem halkası: ekran, kendi satırından taşmaz (kısa ekranda başlığın ve alt yazının üstüne binmiyordu) */
+.d-halka-kap { min-height: 0; }
+.d-slot { top: 10px; bottom: 10px; height: auto; margin: 0 0 0 calc(var(--w) / -2); }
+@media (max-height: 720px) {
+  .dongu-b h2 { font-size: clamp(22px, 2.6vw, 30px); }
+  .d-sahne { padding-top: 14px; padding-bottom: 10px; }
+  .d-yazilar { min-height: 92px; margin-top: 4px; }
+  .d-yazi-m h3 { font-size: 21px; } .d-yazi-m p { font-size: 15px; margin-top: 4px; }
+  .d-nokta { margin-top: 4px; }
+}
+
+/* Telefon ve iPad: kaydırma anlatımı yerine kompakt "Nasıl çalışır" (Sekmeler · Kartlar · Liste) */
+.nk { display: none; background: var(--lacivert); color: var(--beyaz); padding-block: 10px 52px; }
+@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+  .hikaye { display: none !important; }
+  .nk { display: block; }
+}
+.nk-secici { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; width: fit-content; margin: 0 auto 18px; padding: 5px 6px 5px 12px; border: 1px dashed rgba(255, 255, 255, .3); border-radius: 999px; font-size: 12.5px; color: rgba(255, 255, 255, .65); }
+.nk-secici button { border-radius: 999px; border: 1px solid rgba(255, 255, 255, .3); background: transparent; color: #fff; font: inherit; font-weight: 700; padding: 5px 11px; cursor: pointer; }
+.nk-secici button[aria-pressed="true"] { background: var(--yesil); border-color: var(--yesil); color: var(--lacivert); }
+.nk-sekmeler { display: flex; gap: 4px; padding: 4px; margin: 0 auto 16px; max-width: 560px; background: rgba(255, 255, 255, .08); border: 1px solid var(--koyu-cizgi); border-radius: 999px; }
+.nk-sekmeler button { flex: 1 1 0; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 6px 8px; border: 0; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, .72); font: inherit; font-size: 14px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: background .2s ease, color .2s ease; }
+.nk-sekmeler .n { display: inline-grid; place-items: center; width: 20px; height: 20px; flex: none; border-radius: 50%; border: 1px solid currentColor; font-size: 11px; }
+.nk-sekmeler button[aria-selected="true"] { background: var(--yesil); color: var(--lacivert); }
+.nk-adim { --gh: clamp(230px, 44svh, 400px); }
+.nk-gorsel { height: var(--gh); display: flex; align-items: center; justify-content: center; min-width: 0; }
+.nk-gorsel > img { max-width: 100%; max-height: 100%; display: block; }
+.nk-gorsel > img.telefon { border: 6px solid #0B0920; border-radius: 26px; }
+.nk-gorsel > img.panel { border: 6px solid #0B0920; border-radius: 14px; }
+.nk-yazi .rol { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--yesil); font-weight: 700; font-size: 13.5px; }
+.nk-rozet { font-size: 11px; font-weight: 700; color: var(--yesil); border: 1px solid rgba(15, 211, 84, .55); border-radius: 999px; padding: 1px 7px; }
+.nk-yazi h3 { font-size: 21px; line-height: 1.2; font-weight: 800; margin-top: 6px; text-wrap: balance; }
+.nk-yazi p { color: var(--koyu-yazi-2); font-size: 15.5px; line-height: 1.5; margin-top: 6px; }
+/* Oyun + ebeveyn ekranı üst üste: oyunun görev listesi solda kalır, telefon sağ altta */
+.ust-uste { position: relative; width: min(100%, calc(var(--gh) * 1.8)); aspect-ratio: 1.8; max-height: 100%; }
+.ust-uste .uu-oyun { position: absolute; left: 0; top: 0; width: 84%; border-radius: 12px; box-shadow: 0 24px 50px -24px rgba(0, 0, 0, .8); }
+.ust-uste .uu-tel { position: absolute; right: 0; bottom: 0; height: 78%; border: 5px solid #0B0920; border-radius: 20px; box-shadow: 0 24px 50px -20px rgba(0, 0, 0, .8); }
+.nk-kontrol { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px; }
+.nk-kontrol button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--koyu-cizgi); background: var(--lacivert-2); color: #fff; font-size: 24px; line-height: 1; cursor: pointer; }
+.nk-kontrol button:disabled { opacity: .35; cursor: default; }
+.nk-sayac { font-weight: 700; font-size: 14px; min-width: 48px; text-align: center; }
+/* 1) Sekmeler: tek ekran, bir adım görünür */
+/* adımlar aynı hücrede üst üste: yükseklik sabit, ‹ › zıplamaz */
+.nk[data-duzen="sekme"] .nk-paneller { display: grid; }
+.nk[data-duzen="sekme"] .nk-adim { grid-area: 1 / 1; display: grid; gap: 16px; align-content: start; visibility: hidden; }
+.nk[data-duzen="sekme"] .nk-adim.on { visibility: visible; animation: nk-gir .28s ease; }
+@keyframes nk-gir { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .nk[data-duzen="sekme"] .nk-adim.on { animation: none; } }
+/* 2) Kartlar: yana kaydırılan kartlar (Moyo Ekosistemi ile aynı dil) */
+.nk[data-duzen="kart"] { --kw: min(calc(100vw - 104px), 440px); }
+.nk[data-duzen="kart"] .nk-sekmeler { display: none; }
+.nk[data-duzen="kart"] .nk-paneller { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(50% - 50vw); padding: 2px calc(50vw - var(--kw) / 2) 10px; }
+.nk[data-duzen="kart"] .nk-paneller::-webkit-scrollbar { display: none; }
+.nk[data-duzen="kart"] .nk-adim { flex: 0 0 var(--kw); scroll-snap-align: center; display: grid; gap: 14px; align-content: start; background: var(--lacivert-2); border: 1px solid var(--koyu-cizgi); border-radius: 22px; padding: 14px; --gh: 260px; }
+/* 3) Liste: üçü birden, görsel solda küçük */
+.nk[data-duzen="liste"] .nk-sekmeler, .nk[data-duzen="liste"] .nk-kontrol { display: none; }
+.nk[data-duzen="liste"] .nk-paneller { display: grid; gap: 12px; }
+.nk[data-duzen="liste"] .nk-adim { display: grid; grid-template-columns: minmax(0, 42%) minmax(0, 1fr); gap: 14px; align-items: center; background: var(--lacivert-2); border: 1px solid var(--koyu-cizgi); border-radius: 18px; padding: 12px; --gh: 190px; }
+.nk[data-duzen="liste"] .nk-yazi h3 { font-size: 17px; }
+.nk[data-duzen="liste"] .nk-yazi p { font-size: 14px; line-height: 1.45; }
+@media (min-width: 700px) {
+  .nk[data-duzen="sekme"] .nk-adim.on { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; gap: 32px; }
+  .nk[data-duzen="sekme"] .nk-adim { --gh: clamp(300px, 46svh, 460px); }
+  .nk[data-duzen="sekme"] .nk-yazi h3 { font-size: 26px; }
+  .nk[data-duzen="sekme"] .nk-yazi p { font-size: 17px; }
+  .nk[data-duzen="liste"] .nk-adim { --gh: 240px; grid-template-columns: minmax(0, 46%) minmax(0, 1fr); gap: 22px; padding: 16px; }
+  .nk[data-duzen="liste"] .nk-yazi h3 { font-size: 20px; } .nk[data-duzen="liste"] .nk-yazi p { font-size: 15.5px; }
+}
+@media (max-width: 480px) {
+  .nk-sekmeler .uzun { display: none; }
+  .nk-sekmeler button { font-size: 14px; padding-inline: 10px; }
+  .nk[data-duzen="liste"] .nk-adim { --gh: 150px; grid-template-columns: minmax(0, 36%) minmax(0, 1fr); gap: 12px; }
+  .nk[data-duzen="liste"] .nk-yazi p { font-size: 13.5px; }
+}
+
+/* Güven kartları: basit ikonlar */
+.g-kart { flex-direction: row; align-items: flex-start; gap: 16px; }
+.g-ikon { flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; background: rgba(15, 211, 84, .14); color: #0A8F3A; }
+.g-kart h3 { font-size: 19px; }
+.g-kart p { margin-top: 6px; }
+@media (max-width: 600px) { .g-kart { flex-direction: column; gap: 12px; } .g-ikon { width: 42px; height: 42px; } }
+.sayfa-c .menu a.kitle { color: inherit; }
+/* Ekosistem kartları da ekran kenarına kadar; bir sonraki kart görünür */
+.d-mobil { --kw: min(calc(100vw - 104px), 420px); }
+.d-serit { margin-inline: calc(50% - 50vw); padding-inline: calc(50vw - var(--kw) / 2); }
+.nk-sekmeler .ad { white-space: nowrap; }

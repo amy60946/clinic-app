@@ -1,8 +1,8 @@
 // "Hepsi birlikte": masaüstünde kaydırdıkça 60° dönen halka (sayfanın kendi kaydırması; hız ve durma noktası değişmez).
-// Telefonda (≤ 820 px), hareket azaltmada ya da betik yokken: yana kaydırılan kartlar + İleri / Geri.
+// Telefonda ve iPad'de (≤ 1024 px ya da dokunmatik), hareket azaltmada ya da betik yokken: yana kaydırılan kartlar + İleri / Geri.
 (function () {
   var sec = document.querySelector('.dongu-b'); if (!sec) return;
-  var genis = matchMedia('(min-width: 821px)'), az = matchMedia('(prefers-reduced-motion: reduce)');
+  var kmp = matchMedia('(max-width: 1024px), (hover: none) and (pointer: coarse)'), az = matchMedia('(prefers-reduced-motion: reduce)');
   var kayit = sec.querySelector('.d-kayit'), halka = sec.querySelector('.d-halka'), slot = [].slice.call(sec.querySelectorAll('.d-slot')), yazi = [].slice.call(sec.querySelectorAll('.d-yazi-m')),
       nokta = [].slice.call(sec.querySelectorAll('.d-nokta a')), n = slot.length, aktif = -1, tick = false;
   var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
@@ -24,7 +24,7 @@
   }
   function req() { if (!tick) { tick = true; requestAnimationFrame(frame); } }
   function mod() {
-    var halkaOl = genis.matches && !az.matches;
+    var halkaOl = !kmp.matches && !az.matches;   // telefon ve iPad: yana kaydırılan kartlar
     sec.classList.toggle('statik', !halkaOl);
     aktif = -1; if (halkaOl) frame();
   }
@@ -36,7 +36,7 @@
     });
   });
   addEventListener('scroll', req, { passive: true }); addEventListener('resize', req);
-  genis.addEventListener('change', mod); az.addEventListener('change', mod); mod();
+  kmp.addEventListener('change', mod); az.addEventListener('change', mod); mod();
 
   // Yana kaydırılan kartlar
   var serit = sec.querySelector('.d-serit'), kart = [].slice.call(sec.querySelectorAll('.d-kart')), geri = sec.querySelector('.d-geri'), ileri = sec.querySelector('.d-ileri'), sayac = sec.querySelector('.d-sayac');

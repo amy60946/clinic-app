@@ -245,6 +245,26 @@ class Human {
     }
     await sleep(o.after ?? this.between(700, 1100));
   }
+  // Kamera: uygulamanın kökünü hedefin çevresinde yavaşça büyütür / geri alır (imleç kökün dışında, ölçeklenmez).
+  // Atlassian ana sayfasındaki ürün turu gibi (14 Kasım 2026): ~0,7 sn yakınlaş, işi göster, geri çık.
+  async zoom(target, scale = 1.3, o = {}) {
+    const pt = await this.point(target, o);
+    if (o.beat) this.beat(o.beat);
+    const ms = o.ms ?? 750;
+    await this.p.evaluate(([x, y, s, ms]) => {
+      const r = document.getElementById('root') || document.body.firstElementChild;
+      const ox = x + window.scrollX, oy = y + window.scrollY;
+      r.style.transition = `transform ${ms}ms cubic-bezier(.45,0,.2,1)`;
+      r.style.transformOrigin = `${ox}px ${oy}px`;
+      r.style.transform = `scale(${s})`;
+    }, [pt.x, pt.y, scale, ms]);
+    await sleep(ms + (o.after ?? this.between(1300, 1700)));
+  }
+  async unzoom(o = {}) {
+    const ms = o.ms ?? 650;
+    await this.p.evaluate((ms) => { const r = document.getElementById('root') || document.body.firstElementChild; r.style.transition = `transform ${ms}ms cubic-bezier(.45,0,.2,1)`; r.style.transform = 'none'; }, ms);
+    await sleep(ms + (o.after ?? 350));
+  }
   async _drag(dy, n, o) {
     const x = this.x, y0 = this.y;
     await this.cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: y0 }] });
