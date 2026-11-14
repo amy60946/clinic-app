@@ -1,0 +1,91 @@
+/* 60 / 30 / 10 renk alternatifleri (kullanıcı isteği 14 Kasım 2026: "%60 beyaz, %30 siyah, %10 yeşil").
+   YALNIZ ÖNİZLEME: canlı sayfalara eklenmez. yap.py sayfalara bu dosyayı ve <html data-alt="a|b"> ekler.
+   a "Beyaz": bütün bölümler beyaz / çok açık gri, yazı siyah, yeşil yalnız düğme ve küçük vurgu.
+   b "Beyaz + siyah bant": a + bir ürün bandı, kapanış ve alt bilgi siyah (siyah alan büyür, %30'a yaklaşır). */
+
+/* ================= Moyo Mercek ve Moyo Ebeveyn (site.css) ================= */
+html[data-alt] {
+  --c-ink: #111111; --c-hero: #FFFFFF; --c-nav: #FFFFFF; --c-panel: #1C1C1C; --c-deep: #0B0B0B;
+  --c-bg: #FFFFFF; --c-soft: #F5F5F5; --c-mute: #C9C9C9; --c-line: #E6E6E6;
+  --c-text: #111111; --c-text-2: #555555; --c-text-3: #6B6B6B;
+  --c-cta: #51E56A; --c-cta-hover: #0FD354; --c-cta-text: #111111;
+  --c-acc-1: #0FD354; --c-acc-2: #111111; --c-acc-3: #111111; --c-acc-4: #111111;
+  --c-eyebrow: #555555; --c-focus: #111111; --c-plan-band: #51E56A; --c-plan-line: #111111;
+  --c-fam-bg: #EFEFEF; --c-fam-fg: #111111; --c-pri-bg: #F5F5F5; --c-pri-line: #E0E0E0; --c-pri-fg: #333333; --c-pri-card: #FAFAFA;
+  --c-off-bg: #F0F0F0; --c-off-fg: #555555; --c-ok: #0A8F3A; --c-ok-bg: #EAF9EF; --c-wait: #111111;
+  --logo-ink: #111111; --logo-dot: #0FD354;
+}
+html[data-alt] header.top, html[data-alt] .hero, html[data-alt] .ph {
+  --c-on-dark: #111111; --c-on-dark-2: #555555; --c-line-dark: #E6E6E6; --c-eyebrow-dark: #555555; --c-focus-dark: #111111; }
+html[data-alt] header.top { border-bottom: 1px solid #E6E6E6; }
+html[data-alt] .hero .btn-line, html[data-alt] .ph .btn-line { border-color: #111111; }
+html[data-alt] .hero-media .clip, html[data-alt] .mh-oyun { box-shadow: 0 24px 60px -28px rgba(0, 0, 0, .35); }
+html[data-alt] .pill-line { border-color: rgba(0, 0, 0, .25); }
+html[data-alt] .tur { background: #F5F5F5; }
+html[data-alt] .tur button { color: #111111; }
+html[data-alt] .flow span.end { background: #111111; border-color: #111111; color: #FFFFFF; }
+/* Klinik kartı: siyah çerçeve, yeşil şerit */
+html[data-alt] .plan { --c-ink: #111111; }
+
+/* a: koyu bölümler açık */
+html[data-alt="a"] .sec-dark, html[data-alt="a"] .closing, html[data-alt="a"] footer {
+  --c-on-dark: #111111; --c-on-dark-2: #555555; --c-line-dark: #E6E6E6; --c-eyebrow-dark: #555555; --c-focus-dark: #111111; --logo-ink: #111111; }
+html[data-alt="a"] .sec-dark { background: #F5F5F5; color: #111111; --plate: #FFFFFF; --c-panel: #FFFFFF; }
+html[data-alt="a"] .sec-dark .eko { border-color: #E6E6E6; }
+html[data-alt="a"] .closing { background: #F5F5F5; }
+html[data-alt="a"] .closing .btn-line { border-color: #111111; }
+html[data-alt="a"] footer { background: #F5F5F5; border-top: 1px solid #E6E6E6; }
+
+/* b: ürün bandı, kapanış ve alt bilgi siyah */
+html[data-alt="b"] .sec-dark { background: #111111; --c-eyebrow-dark: #51E56A; }
+html[data-alt="b"] .closing { background: #111111; --c-ink: #111111; --c-on-dark: #FFFFFF; --c-on-dark-2: rgba(255, 255, 255, .78); --c-line-dark: rgba(255, 255, 255, .16); }
+html[data-alt="b"] footer { background: #0B0B0B; --logo-ink: #FFFFFF; }
+
+/* ================= Çatı sayfa (ortak.css + c.css + beyaz.css) ================= */
+html[data-alt] .sayfa-c, html[data-alt] body.beyaz {
+  --lacivert: #111111; --lacivert-2: #1C1C1C; --gece: #0B0B0B; --sis: #F5F5F5; --cizgi: #E6E6E6; --yazi-2: #555555; --camgobegi: #0FD354; }
+html[data-alt] .beyaz .ust { background: rgba(255, 255, 255, .97); color: #111111; }
+html[data-alt] .beyaz .ust-etiket, html[data-alt] .beyaz .bas .ust-etiket, html[data-alt] .beyaz .hk-yazi .rol, html[data-alt] .beyaz .nk-yazi .rol,
+html[data-alt] .beyaz .d-yazi-m .rol, html[data-alt] .beyaz .d-kart .rol, html[data-alt] .beyaz .hk-liste .l-yazi .rol { color: #555555; }
+html[data-alt] .beyaz .nk-rozet { color: #111111; border-color: #111111; }
+html[data-alt] .beyaz .balon.don { background: #111111; }
+html[data-alt] .beyaz .basamak li.istege { border-color: #111111; }
+html[data-alt] .beyaz .hk-kart img, html[data-alt] .beyaz .ikili img, html[data-alt] .beyaz .d-slot > img, html[data-alt] .beyaz .d-gorsel > img,
+html[data-alt] .beyaz .ust-uste .uu-oyun, html[data-alt] .beyaz .ust-uste .uu-tel { box-shadow: 0 24px 60px -28px rgba(0, 0, 0, .35); }
+html[data-alt="a"] .beyaz .alt-bilgi { background: #F5F5F5; color: #555555; }
+
+/* b: giriş bandı (1-2-3) ve alt bilgi siyah */
+html[data-alt="b"] .beyaz .giris-bant { background: #111111; color: #FFFFFF; }
+html[data-alt="b"] .beyaz .giris-bant p { color: rgba(255, 255, 255, .78); }
+html[data-alt="b"] .beyaz .giris-bant .ust-etiket { color: #51E56A; }
+html[data-alt="b"] .beyaz .giris-bant .basamak li { background: #1C1C1C; border-color: rgba(255, 255, 255, .14); color: rgba(255, 255, 255, .78); }
+html[data-alt="b"] .beyaz .giris-bant .basamak li b { color: #FFFFFF; }
+html[data-alt="b"] .beyaz .giris-bant .basamak li.istege { border-color: rgba(81, 229, 106, .7); }
+html[data-alt="b"] .beyaz .alt-bilgi { background: #0B0B0B; color: rgba(255, 255, 255, .72); border-top: 0; }
+html[data-alt="b"] .beyaz .alt-bilgi a { color: #FFFFFF; }
+
+/* ---- 14 Kasım incelemesi ---- */
+/* çatı: lacivert izi kalan yazılar ve düğme yazıları */
+html[data-alt] body.beyaz { --koyu-yazi-2: #555555; --koyu-cizgi: #E6E6E6; }
+html[data-alt] .beyaz .hap.dolu, html[data-alt] .beyaz .basamak .bn, html[data-alt] .beyaz .basamak .b-rozet, html[data-alt] .beyaz .balon.git,
+html[data-alt] .beyaz .nk-sekmeler button[aria-selected="true"], html[data-alt] .beyaz .d-nokta a[aria-current="step"], html[data-alt] .beyaz .hk-nokta a[aria-current="step"] { color: #111111; }
+html[data-alt] .beyaz .menu a { color: #555555; } html[data-alt] .beyaz .menu a.kitle, html[data-alt] .beyaz .menu a:hover { color: #111111; }
+/* cihaz çerçeveleri siyah */
+html[data-alt] .beyaz img[class], html[data-alt] .nc-media figure.tel img, html[data-alt] .mh-tel { border-color: #111111; }
+/* Mercek / Ebeveyn: kayıt üstündeki "Örnek veri" ve duraklat düğmesi */
+html[data-alt] .clip figcaption, html[data-alt] .shot figcaption { background: rgba(17, 17, 17, .8); }
+html[data-alt] .clip-btn { background: rgba(17, 17, 17, .82); }
+/* küçük gri yazılar */
+html[data-alt] .plan .per { color: #555555; }
+html[data-alt] .consent small { color: #555555; }
+html[data-alt="a"] footer ul a, html[data-alt="a"] footer .legal { color: #555555; }
+html[data-alt] { --c-off-bg: #E8E8E8; }
+/* a: yeşil bağlantı açık zeminde okunmuyordu */
+html[data-alt="a"] .eko-link a { color: #111111; text-decoration: underline; text-underline-offset: 4px; }
+
+/* b çatı: "Ekosistemin uygulamaları" da siyah bant (siyah payı artsın) */
+html[data-alt="b"] .beyaz #sonraki { background: #111111; color: #FFFFFF; }
+html[data-alt="b"] .beyaz #sonraki .bas .ust-etiket { color: #51E56A; }
+html[data-alt="b"] .beyaz #sonraki .bas p, html[data-alt="b"] .beyaz #sonraki .kart p, html[data-alt="b"] .beyaz #sonraki .urun h3 small { color: rgba(255, 255, 255, .75); }
+html[data-alt="b"] .beyaz #sonraki .kart { background: #1C1C1C; border-color: rgba(255, 255, 255, .14); }
+html[data-alt="b"] .beyaz #sonraki .kart a { color: #51E56A; }

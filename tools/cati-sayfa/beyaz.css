@@ -60,3 +60,6 @@
   .sayfa-c .nk .t-mercek .nk-gorsel { height: auto; }
   .sayfa-c .nk .t-mercek .nk-gorsel > img.panel { width: 100%; max-height: none; }
 }
+/* Logo beyaz zeminde: harf lacivert, top yeşil (koyu temadaki yeşil harf + beyaz top beyazda okunmuyordu) */
+.beyaz .logo, .beyaz .logo .ek { color: var(--lacivert); }
+.beyaz .logo .logo-dot { fill: var(--yesil-marka); }
