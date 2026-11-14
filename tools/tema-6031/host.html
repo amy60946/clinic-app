@@ -77,8 +77,8 @@ iframe { width: 100%; height: 100%; border: 0; display: block; }
     <div class="grp" role="group" aria-label="Renk" id="renk">
       <span class="lbl">Renk</span>
       <button type="button" data-a="" aria-pressed="false">Canlıdaki</button>
-      <button type="button" data-a="a" aria-pressed="true">A · Beyaz</button>
-      <button type="button" data-a="b" aria-pressed="false">B · Beyaz + siyah bant</button>
+      <button type="button" data-a="a" aria-pressed="false">A · Beyaz</button>
+      <button type="button" data-a="b" aria-pressed="true">B · Beyaz + siyah bant (önerim)</button>
     </div>
     <div class="grp" role="group" aria-label="Ekran" id="cihaz">
       <button type="button" data-d="desk" aria-pressed="true">Masaüstü</button>
@@ -89,7 +89,7 @@ iframe { width: 100%; height: 100%; border: 0; display: block; }
 </header>
 
 <main class="gut">
-  <div class="view" id="view"><div class="frame"><iframe id="page" title="Seçilen sayfa" src="cati/index.html?alt=a"></iframe></div></div>
+  <div class="view" id="view"><div class="frame"><iframe id="page" title="Seçilen sayfa" src="cati/index.html?alt=b"></iframe></div></div>
 
   <div class="doc" id="d-ikon" hidden>
     <div class="in">
@@ -139,10 +139,15 @@ iframe { width: 100%; height: 100%; border: 0; display: block; }
         <div class="box">
           <h2>B · Beyaz + siyah bant</h2>
           <ul>
-            <li>A'nın üstüne birkaç siyah bant: Mercek'te "Kimin sırası" ve kapanış kutusu, Moyo Ebeveyn'de ekosistem bandı ve kapanış, çatı sayfada giriş bandı (1-2-3); üçünde de alt bilgi.</li>
+            <li>A'nın üstüne birkaç siyah bant: Mercek'te "Kimin sırası" ve kapanış kutusu, Moyo Ebeveyn'de ekosistem bandı ve kapanış, çatı sayfada giriş bandı (1-2-3) ve "Ekosistemin Uygulamaları"; üçünde de alt bilgi.</li>
             <li>Siyah alan büyür, oran %30'a yaklaşır; sayfa daha kontrastlı ve "marka" hissi daha güçlü.</li>
           </ul>
         </div>
+      </div>
+      <div class="box rec">
+        <h2>Önerim: B</h2>
+        <p>Ölçünce A sayfanın %90'dan fazlası beyaz ve açık gri çıkıyor; siyah yalnız yazıda kalıyor, yani 60/30/10 yerine "beyaz + yeşil" okunuyor. B'de siyah bantlarla masaüstünde siyah alan %14–19'a çıkıyor, yazının siyahıyla birlikte 30'a en yakın olan bu. Çatı sayfada B'ye "Ekosistemin Uygulamaları" bandını da siyah ekledim; yoksa siyah alan %5'te kalıyordu.</p>
+        <p>Not: sayfalardaki Moyo uygulama ikonu bugünkü lacivert ikon; ikon kararı değişirse ikon da 60/30/10'a döner (İkonlar sekmesi).</p>
       </div>
       <div class="box">
         <h2>Ne değişmedi</h2>
@@ -169,7 +174,7 @@ iframe { width: 100%; height: 100%; border: 0; display: block; }
   };
   var tabs = [].slice.call(document.querySelectorAll('#sayfa button')), alts = [].slice.call(document.querySelectorAll('#renk button')), devs = [].slice.call(document.querySelectorAll('#cihaz button'));
   var view = document.getElementById('view'), page = document.getElementById('page'), hint = document.getElementById('hint'), ayar = document.getElementById('ayar');
-  var cur = 'cati', alt = 'a';
+  var cur = 'cati', alt = 'b';
   // ikon tablosu
   var P = [['moyo', 'Moyo'], ['mercek', 'Moyo Mercek'], ['oyun', 'Moyo Oyun']], C = ['1-beyaz', '1-siyah', '1-yesil', '3-beyaz', '3-siyah', '3-yesil'];
   document.getElementById('ikon-satir').innerHTML = P.map(function (p) {
