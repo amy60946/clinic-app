@@ -1,0 +1,212 @@
+<title>Moyo 60/30/10 Alternatifleri</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Düzen: tek ekranlık gezgin. Üstte sayfa sekmeleri, renk seçeneği (Canlıdaki · A · B) ve ekran boyutu; altında sayfa gerçek hâliyle çerçevede.
+   Kabuğun kendisi de 60/30/10: beyaz zemin, siyah yazı ve seçili düğme, yeşil yalnız odak ve küçük işaret. */
+@font-face { font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 200 800; font-display: swap; src: url(mercek/assets/fonts/plus-jakarta-sans-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+20A0-20C0; }
+@font-face { font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 200 800; font-display: swap; src: url(mercek/assets/fonts/plus-jakarta-sans-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212; }
+:root {
+  --bg: #F4F4F4; --panel: #FFFFFF; --ink: #111111; --text: #2A2A2A; --muted: #5E5E5E; --line: #E3E3E3; --chip: #EDEDED;
+  --green: #0FD354; --green-soft: #E6F9EC; --green-ink: #0A7A33; --bezel: #111111; --home: #ECECEC;
+  --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0C0C0C; --panel: #171717; --ink: #F5F5F5; --text: #D6D6D6; --muted: #A3A3A3; --line: #2C2C2C; --chip: #222222; --green-soft: #12301C; --green-ink: #7EE3A0; --bezel: #3A3A3A; --home: #1E1E1E; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0C0C0C; --panel: #171717; --ink: #F5F5F5; --text: #D6D6D6; --muted: #A3A3A3; --line: #2C2C2C; --chip: #222222; --green-soft: #12301C; --green-ink: #7EE3A0; --bezel: #3A3A3A; --home: #1E1E1E; color-scheme: dark; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.55; display: flex; flex-direction: column; }
+.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { flex: none; background: var(--panel); border-bottom: 1px solid var(--line); padding-block: 10px; display: flex; flex-direction: column; gap: 8px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+h1 { font-size: 16px; font-weight: 800; color: var(--ink); margin: 0 auto 0 0; letter-spacing: -.01em; display: flex; align-items: center; gap: 8px; }
+.sw { display: inline-flex; height: 14px; width: 50px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
+.sw i { display: block; height: 100%; } .sw i:nth-child(1) { width: 60%; background: #FFFFFF; } .sw i:nth-child(2) { width: 30%; background: #111111; } .sw i:nth-child(3) { width: 10%; background: #0FD354; }
+.grp { display: flex; gap: 4px; background: var(--bg); border-radius: 12px; padding: 4px; max-width: 100%; overflow-x: auto; }
+.grp button { font: inherit; font-size: 13.5px; font-weight: 700; color: var(--muted); background: none; border: 0; border-radius: 9px; padding: 8px 12px; cursor: pointer; white-space: nowrap; min-height: 36px; }
+.grp button[aria-selected="true"], .grp button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.grp .lbl { align-self: center; font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding: 0 6px 0 8px; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+.hint { font-size: 13px; color: var(--muted); min-height: 20px; }
+.hint b { color: var(--ink); }
+main { flex: 1; min-height: 0; display: flex; }
+.view { flex: 1; min-width: 0; min-height: 0; display: flex; justify-content: center; padding-block: 12px; }
+.frame { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #FFFFFF; }
+.view.phone .frame { flex: none; width: 390px; max-width: 100%; border: 9px solid var(--bezel); border-radius: 38px; }
+iframe { width: 100%; height: 100%; border: 0; display: block; }
+.doc { flex: 1; min-width: 0; overflow-y: auto; padding-block: 24px 48px; }
+.doc .in { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+.doc h2 { font-size: 20px; font-weight: 800; color: var(--ink); margin: 0; letter-spacing: -.015em; text-wrap: balance; }
+.doc h3 { font-size: 15px; font-weight: 800; color: var(--ink); margin: 0; }
+.doc p { margin: 0; max-width: 72ch; }
+.lead { font-size: 16.5px; color: var(--ink); }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.box.rec { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.box ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.tag { display: inline-block; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; border-radius: 999px; padding: 2px 9px; background: var(--green-soft); color: var(--green-ink); vertical-align: 2px; }
+/* ikon tablosu */
+.it { overflow-x: auto; }
+.it table { border-collapse: collapse; min-width: 760px; width: 100%; }
+.it th, .it td { padding: 10px 8px; text-align: center; vertical-align: middle; border-bottom: 1px solid var(--line); }
+.it th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 800; }
+.it th[scope="row"] { text-align: left; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--ink); white-space: nowrap; }
+.ic { display: block; margin: 0 auto; width: 88px; height: 88px; border-radius: 22.4%; box-shadow: 0 0 0 1px rgba(0, 0, 0, .08); }
+.home { display: flex; flex-wrap: wrap; gap: 18px 28px; background: var(--home); border-radius: 22px; padding: 22px; width: fit-content; max-width: 100%; }
+.app { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 76px; font-size: 12px; color: var(--text); text-align: center; line-height: 1.25; }
+.app img { width: 64px; height: 64px; border-radius: 22.4%; box-shadow: 0 0 0 1px rgba(0, 0, 0, .08); }
+.app.sm img { width: 40px; height: 40px; }
+@media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } #cihaz { display: none; } h1 { width: 100%; } }
+</style>
+
+<header class="gut">
+  <div class="row">
+    <h1><span class="sw" aria-hidden="true"><i></i><i></i><i></i></span>Moyo · 60 / 30 / 10 alternatifleri (önizleme)</h1>
+    <div class="grp" role="tablist" aria-label="Sayfa" id="sayfa">
+      <button role="tab" data-v="cati" aria-selected="true">Çatı sayfa</button>
+      <button role="tab" data-v="ebeveyn" aria-selected="false">Moyo Ebeveyn</button>
+      <button role="tab" data-v="mercek" aria-selected="false">Moyo Mercek</button>
+      <button role="tab" data-v="fiyat" aria-selected="false">Mercek fiyat</button>
+      <button role="tab" data-v="ikon" aria-selected="false">İkonlar</button>
+      <button role="tab" data-v="not" aria-selected="false">Not</button>
+    </div>
+  </div>
+  <div class="row" id="ayar">
+    <div class="grp" role="group" aria-label="Renk" id="renk">
+      <span class="lbl">Renk</span>
+      <button type="button" data-a="" aria-pressed="false">Canlıdaki</button>
+      <button type="button" data-a="a" aria-pressed="true">A · Beyaz</button>
+      <button type="button" data-a="b" aria-pressed="false">B · Beyaz + siyah bant</button>
+    </div>
+    <div class="grp" role="group" aria-label="Ekran" id="cihaz">
+      <button type="button" data-d="desk" aria-pressed="true">Masaüstü</button>
+      <button type="button" data-d="phone" aria-pressed="false">Telefon</button>
+    </div>
+    <div class="hint" id="hint"></div>
+  </div>
+</header>
+
+<main class="gut">
+  <div class="view" id="view"><div class="frame"><iframe id="page" title="Seçilen sayfa" src="cati/index.html?alt=a"></iframe></div></div>
+
+  <div class="doc" id="d-ikon" hidden>
+    <div class="in">
+      <p class="lead">Bugünkü harf çizimi (Moyo kiti, "C Top, ayarlı") aynen; yalnız renk ve dizilim değişiyor. <b>Düz</b> = tek satırda "moyo", <b>İki satır</b> = bugünkü "mo / yo". Moyo Mercek düz yazıda son "o"ya küçük mercek sapı alır; iki satırda sap yok, ürünü renk ayırır.</p>
+      <div class="box rec">
+        <h2>Önerim: her ürüne üç renkten biri</h2>
+        <p>60/30/10'un üç rengi üç ürüne denk geliyor: <b>Moyo siyah</b>, <b>Moyo Mercek beyaz</b>, <b>Moyo Oyun yeşil</b>. Telefonda yan yana dururken hangisinin hangisi olduğu renkten anlaşılır; yeşil top üçünde de ortak işaret. Ana ekran boyunda (aşağıda) iki satırlı harfler daha büyük kalıyor; düz yazı daha sakin ama küçükte harfler incelir.</p>
+        <h3>Düz yazı</h3>
+        <div class="home" aria-label="Ana ekranda düz yazılı ikonlar">
+          <div class="app"><img src="ikon/moyo-1-siyah.svg" alt="">Moyo</div>
+          <div class="app"><img src="ikon/mercek-1-beyaz.svg" alt="">Moyo Mercek</div>
+          <div class="app"><img src="ikon/oyun-1-yesil.svg" alt="">Moyo Oyun</div>
+          <div class="app sm"><img src="ikon/moyo-1-siyah.svg" alt="">küçük</div>
+        </div>
+        <h3>İki satır</h3>
+        <div class="home" aria-label="Ana ekranda iki satırlı ikonlar">
+          <div class="app"><img src="ikon/moyo-3-siyah.svg" alt="">Moyo</div>
+          <div class="app"><img src="ikon/mercek-3-beyaz.svg" alt="">Moyo Mercek</div>
+          <div class="app"><img src="ikon/oyun-3-yesil.svg" alt="">Moyo Oyun</div>
+          <div class="app sm"><img src="ikon/moyo-3-siyah.svg" alt="">küçük</div>
+        </div>
+      </div>
+      <div class="box">
+        <h2>Bütün seçenekler</h2>
+        <div class="it"><table>
+          <thead><tr><th scope="col"></th><th scope="col">Bugün (13 Kas)</th><th scope="col">Düz · beyaz</th><th scope="col">Düz · siyah</th><th scope="col">Düz · yeşil</th><th scope="col">İki satır · beyaz</th><th scope="col">İki satır · siyah</th><th scope="col">İki satır · yeşil</th></tr></thead>
+          <tbody id="ikon-satir"></tbody>
+        </table></div>
+        <p class="hint">Beyaz zemin: siyah harf, yeşil top. Siyah zemin: beyaz harf, yeşil top. Yeşil zemin: siyah harf, beyaz top. Siyah olarak #111111 kullandım; markadaki koyu lacivertle (#16113A) de denenebilir.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc" id="d-not" hidden>
+    <div class="in">
+      <p class="lead">Canlıdaki üç sayfanın aynısı; yalnız renkler değişti. Metin, düzen ve görseller aynı. Sayfaların içindeki uygulama ekran görüntüleri kendi renklerini korur.</p>
+      <div class="grid2">
+        <div class="box">
+          <h2>A · Beyaz</h2>
+          <ul>
+            <li>Bütün bölümler beyaz ya da çok açık gri; yazı siyah.</li>
+            <li>Yeşil yalnız düğmede (üstünde siyah yazı), logonun topunda ve küçük işaretlerde.</li>
+            <li>Lacivert, camgöbeği, sarı, kırmızı ve mavi vurgular siyaha ya da yeşile döndü.</li>
+            <li>En sakin seçenek; siyahın payı daha çok yazıdan gelir.</li>
+          </ul>
+        </div>
+        <div class="box">
+          <h2>B · Beyaz + siyah bant</h2>
+          <ul>
+            <li>A'nın üstüne birkaç siyah bant: Mercek'te "Kimin sırası" ve kapanış kutusu, Moyo Ebeveyn'de ekosistem bandı ve kapanış, çatı sayfada giriş bandı (1-2-3); üçünde de alt bilgi.</li>
+            <li>Siyah alan büyür, oran %30'a yaklaşır; sayfa daha kontrastlı ve "marka" hissi daha güçlü.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="box">
+        <h2>Ne değişmedi</h2>
+        <ul>
+          <li>Canlıdaki sayfalar: bu önizleme ayrı bir kopya; seçtiğin seçenek sonra canlıya işlenir.</li>
+          <li>Uygulamaların kendi ekranları ve renkleri (uygulama içi renk ayrı iş).</li>
+          <li>Logo çizimi: aynı "moyo", yalnız rengi siyah.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  var SRC = { cati: 'cati/index.html', ebeveyn: 'cati/ebeveyn.html', mercek: 'mercek/index.html', fiyat: 'mercek/fiyat.html' };
+  var HINT = {
+    cati: 'moyoapp.com.tr · çatı sayfa',
+    ebeveyn: 'moyoapp.com.tr/ebeveyn · Moyo Ebeveyn sayfası',
+    mercek: 'mercek.moyoapp.com.tr · Moyo Mercek ana sayfa',
+    fiyat: 'mercek.moyoapp.com.tr/fiyat · paketler',
+    ikon: 'Uygulama ikonları: düz yazı ve iki satır, üç renk',
+    not: 'A ve B neyi değiştiriyor'
+  };
+  var tabs = [].slice.call(document.querySelectorAll('#sayfa button')), alts = [].slice.call(document.querySelectorAll('#renk button')), devs = [].slice.call(document.querySelectorAll('#cihaz button'));
+  var view = document.getElementById('view'), page = document.getElementById('page'), hint = document.getElementById('hint'), ayar = document.getElementById('ayar');
+  var cur = 'cati', alt = 'a';
+  // ikon tablosu
+  var P = [['moyo', 'Moyo'], ['mercek', 'Moyo Mercek'], ['oyun', 'Moyo Oyun']], C = ['1-beyaz', '1-siyah', '1-yesil', '3-beyaz', '3-siyah', '3-yesil'];
+  document.getElementById('ikon-satir').innerHTML = P.map(function (p) {
+    var bugun = p[0] === 'oyun' ? '<td><span class="hint">karar yok</span></td>' : '<td><img class="ic" src="ikon/' + p[0] + '-3-bugun.svg" alt="' + p[1] + ', bugünkü ikon"></td>';
+    return '<tr><th scope="row">' + p[1] + '</th>' + bugun + C.map(function (c) { return '<td><img class="ic" src="ikon/' + p[0] + '-' + c + '.svg" alt="' + p[1] + ', ' + c.replace('1-', 'düz ').replace('3-', 'iki satır ') + '"></td>'; }).join('') + '</tr>';
+  }).join('');
+  function load() {
+    if (!SRC[cur]) return;
+    page.src = SRC[cur] + (alt ? '?alt=' + alt : '');
+  }
+  function show(v) {
+    if (!HINT[v]) v = 'cati';
+    cur = v;
+    tabs.forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-v') === v)); });
+    var isPage = !!SRC[v];
+    view.hidden = !isPage; document.getElementById('d-ikon').hidden = v !== 'ikon'; document.getElementById('d-not').hidden = v !== 'not';
+    document.getElementById('renk').hidden = !isPage; document.getElementById('cihaz').hidden = !isPage;
+    hint.innerHTML = HINT[v];
+    if (isPage) load();
+    try { if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v); } catch (e) {}
+  }
+  tabs.forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-v')); }); });
+  alts.forEach(function (b) { b.addEventListener('click', function () {
+    alt = b.getAttribute('data-a'); alts.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); }); load();
+  }); });
+  devs.forEach(function (b) { b.addEventListener('click', function () {
+    devs.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    view.classList.toggle('phone', b.getAttribute('data-d') === 'phone'); load();
+  }); });
+  // Sayfa içinden öteki sayfaya geçilirse sekme uyar; dış bağlantılar yeni sekmede
+  page.addEventListener('load', function () {
+    var w, d; try { w = page.contentWindow; d = w.document; } catch (e) { return; }
+    var p = w.location.pathname, v = /ebeveyn\.html$/.test(p) ? 'ebeveyn' : /cati\/index\.html$/.test(p) ? 'cati' : /fiyat\.html$/.test(p) ? 'fiyat' : /mercek\/index\.html$/.test(p) ? 'mercek' : null;
+    if (v && v !== cur) { cur = v; tabs.forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-v') === v)); }); hint.innerHTML = HINT[v]; try { history.replaceState(null, '', '#' + v); } catch (e) {} }
+    [].forEach.call(d.querySelectorAll('a[href^="http"]'), function (a) { a.target = '_blank'; a.rel = 'noopener'; });
+  });
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+  show(location.hash.slice(1) || 'cati');
+})();
+</script>
