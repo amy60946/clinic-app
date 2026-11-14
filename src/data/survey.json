@@ -9,6 +9,10 @@
     "label": "Ruh sağlığı"
    },
    {
+    "key": "medical",
+    "label": "Hekim ve hemşire"
+   },
+   {
     "key": "rehab",
     "label": "Gelişim ve rehabilitasyon"
    },
@@ -42,24 +46,45 @@
     "label": "Psikolojik danışman (PDR)"
    },
    {
-    "key": "ergoterapist",
-    "group": "rehab",
-    "label": "Ergoterapist"
+    "key": "cocuk_terapisti",
+    "group": "mental",
+    "label": "Çocuk ve ergen terapisti",
+    "survey_only": true
    },
    {
-    "key": "dil_konusma",
-    "group": "rehab",
-    "label": "Dil ve konuşma terapisti"
+    "key": "aile_danismani",
+    "group": "mental",
+    "label": "Aile ve çift terapisti (aile danışmanı)",
+    "survey_only": true
    },
    {
-    "key": "ozel_egitim",
-    "group": "edu",
-    "label": "Özel eğitim öğretmeni"
+    "key": "sosyal_hizmet",
+    "group": "mental",
+    "label": "Sosyal hizmet uzmanı",
+    "survey_only": true
    },
    {
-    "key": "cocuk_gelisimi",
-    "group": "rehab",
-    "label": "Çocuk gelişimci"
+    "key": "hekim",
+    "group": "medical",
+    "label": "Çocuk ve ergen psikiyatristi"
+   },
+   {
+    "key": "gelisimsel_pediatri",
+    "group": "medical",
+    "label": "Gelişimsel pediatri uzmanı",
+    "survey_only": true
+   },
+   {
+    "key": "pediatri",
+    "group": "medical",
+    "label": "Çocuk doktoru (pediatri)",
+    "survey_only": true
+   },
+   {
+    "key": "psikiyatri_hemsiresi",
+    "group": "medical",
+    "label": "Psikiyatri hemşiresi",
+    "survey_only": true
    },
    {
     "key": "bcba",
@@ -67,9 +92,54 @@
     "label": "Davranış analisti (BCBA)"
    },
    {
-    "key": "hekim",
-    "group": "mental",
-    "label": "Çocuk ve ergen psikiyatristi"
+    "key": "davranis_teknisyeni",
+    "group": "rehab",
+    "label": "Davranış teknisyeni (RBT, ABA uygulayıcısı)",
+    "survey_only": true
+   },
+   {
+    "key": "ergoterapist",
+    "group": "rehab",
+    "label": "Ergoterapist"
+   },
+   {
+    "key": "ergoterapi_teknikeri",
+    "group": "rehab",
+    "label": "Ergoterapi teknikeri",
+    "survey_only": true
+   },
+   {
+    "key": "dil_konusma",
+    "group": "rehab",
+    "label": "Dil ve konuşma terapisti"
+   },
+   {
+    "key": "cocuk_gelisimi",
+    "group": "rehab",
+    "label": "Çocuk gelişimci"
+   },
+   {
+    "key": "ozel_egitim",
+    "group": "edu",
+    "label": "Özel eğitim öğretmeni"
+   },
+   {
+    "key": "ogretmen",
+    "group": "edu",
+    "label": "Öğretmen (sınıf ya da branş)",
+    "survey_only": true
+   },
+   {
+    "key": "okul_rehber",
+    "group": "edu",
+    "label": "Okul rehber öğretmeni",
+    "survey_only": true
+   },
+   {
+    "key": "okul_psikologu",
+    "group": "edu",
+    "label": "Okul psikoloğu",
+    "survey_only": true
    },
    {
     "key": "oyun_terapisti",
@@ -80,31 +150,37 @@
    {
     "key": "sanat_terapisti",
     "group": "expressive",
-    "label": "Sanat, müzik ya da drama terapisti",
+    "label": "Sanat terapisti",
     "survey_only": true
    },
    {
-    "key": "aile_danismani",
-    "group": "mental",
-    "label": "Aile danışmanı",
+    "key": "muzik_terapisti",
+    "group": "expressive",
+    "label": "Müzik terapisti",
     "survey_only": true
    },
    {
-    "key": "cocuk_terapisti",
-    "group": "mental",
-    "label": "Çocuk ve ergen terapisti",
+    "key": "drama_terapisti",
+    "group": "expressive",
+    "label": "Drama terapisti (psikodrama)",
     "survey_only": true
    },
    {
-    "key": "okul_rehber",
-    "group": "edu",
-    "label": "Okul rehber öğretmeni",
+    "key": "koc",
+    "group": "other",
+    "label": "Koç (ebeveyn koçu)",
     "survey_only": true
    },
    {
     "key": "ogrenci",
     "group": "other",
-    "label": "Öğrenci ya da stajyer",
+    "label": "Yüksek lisans öğrencisi ya da stajyer",
+    "survey_only": true
+   },
+   {
+    "key": "doktora_ogrencisi",
+    "group": "other",
+    "label": "Doktora öğrencisi",
     "survey_only": true
    },
    {
