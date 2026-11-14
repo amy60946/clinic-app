@@ -63,3 +63,29 @@ html[data-alt="b"] .beyaz .giris-bant .basamak li b { color: #FFFFFF; }
 html[data-alt="b"] .beyaz .giris-bant .basamak li.istege { border-color: rgba(81, 229, 106, .7); }
 html[data-alt="b"] .beyaz .alt-bilgi { background: #0B0B0B; color: rgba(255, 255, 255, .72); border-top: 0; }
 html[data-alt="b"] .beyaz .alt-bilgi a { color: #FFFFFF; }
+
+/* ---- 14 Kasım incelemesi ---- */
+/* çatı: lacivert izi kalan yazılar ve düğme yazıları */
+html[data-alt] body.beyaz { --koyu-yazi-2: #555555; --koyu-cizgi: #E6E6E6; }
+html[data-alt] .beyaz .hap.dolu, html[data-alt] .beyaz .basamak .bn, html[data-alt] .beyaz .basamak .b-rozet, html[data-alt] .beyaz .balon.git,
+html[data-alt] .beyaz .nk-sekmeler button[aria-selected="true"], html[data-alt] .beyaz .d-nokta a[aria-current="step"], html[data-alt] .beyaz .hk-nokta a[aria-current="step"] { color: #111111; }
+html[data-alt] .beyaz .menu a { color: #555555; } html[data-alt] .beyaz .menu a.kitle, html[data-alt] .beyaz .menu a:hover { color: #111111; }
+/* cihaz çerçeveleri siyah */
+html[data-alt] .beyaz img[class], html[data-alt] .nc-media figure.tel img, html[data-alt] .mh-tel { border-color: #111111; }
+/* Mercek / Ebeveyn: kayıt üstündeki "Örnek veri" ve duraklat düğmesi */
+html[data-alt] .clip figcaption, html[data-alt] .shot figcaption { background: rgba(17, 17, 17, .8); }
+html[data-alt] .clip-btn { background: rgba(17, 17, 17, .82); }
+/* küçük gri yazılar */
+html[data-alt] .plan .per { color: #555555; }
+html[data-alt] .consent small { color: #555555; }
+html[data-alt="a"] footer ul a, html[data-alt="a"] footer .legal { color: #555555; }
+html[data-alt] { --c-off-bg: #E8E8E8; }
+/* a: yeşil bağlantı açık zeminde okunmuyordu */
+html[data-alt="a"] .eko-link a { color: #111111; text-decoration: underline; text-underline-offset: 4px; }
+
+/* b çatı: "Ekosistemin uygulamaları" da siyah bant (siyah payı artsın) */
+html[data-alt="b"] .beyaz #sonraki { background: #111111; color: #FFFFFF; }
+html[data-alt="b"] .beyaz #sonraki .bas .ust-etiket { color: #51E56A; }
+html[data-alt="b"] .beyaz #sonraki .bas p, html[data-alt="b"] .beyaz #sonraki .kart p, html[data-alt="b"] .beyaz #sonraki .urun h3 small { color: rgba(255, 255, 255, .75); }
+html[data-alt="b"] .beyaz #sonraki .kart { background: #1C1C1C; border-color: rgba(255, 255, 255, .14); }
+html[data-alt="b"] .beyaz #sonraki .kart a { color: #51E56A; }
