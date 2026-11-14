@@ -71,11 +71,6 @@ td:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
     </div>
   </div>
   <div class="row">
-    <div class="dev" id="neden" role="group" aria-label="Neden bölümü düzeni">
-      <button type="button" data-n="1" aria-pressed="true">Neden · 1 Akış</button>
-      <button type="button" data-n="2" aria-pressed="false">2 Bento</button>
-      <button type="button" data-n="3" aria-pressed="false">3 Hafta</button>
-    </div>
     <div class="hint" id="hint"></div>
   </div>
 </header>
@@ -150,18 +145,14 @@ td:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
 <script>
 (function () {
   var HINTS = {
-    home: '<b>Yeni:</b> açılışta ürün turu (eğitim → rutinler → olaylar; altındaki 1-2-3 ile atla), "Neden" için üç görsel düzen (soldaki düğmeler), "Nasıl çalışır" sekmeli. Veriler uydurma.',
+    home: '<b>Canlıdaki sürüm (14 Kasım):</b> açılışta ürün turu (eğitim → rutinler → davranış kayıtları), "Neden" 1 Akış, "Nasıl çalışır" sekmeli. Veriler uydurma.',
     fiyat: '<b>Aylık / Yıllık</b>\'ı dene. Fiyatlar taslak; karşılaştırma tablosu kaydırırken başlığını üstte tutar.',
     not: 'İki sitede ölçtüklerimiz, nereye uyguladığımız ve karar bekleyenler.'
   };
   var SRC = { home: 'site/index.html', fiyat: 'site/fiyat.html' };
   var view = document.getElementById('view'), doc = document.getElementById('doc'), page = document.getElementById('page'), hint = document.getElementById('hint');
   var tabs = [].slice.call(document.querySelectorAll('.tabs button')), devs = [].slice.call(document.querySelectorAll('.dev button'));
-  var cur = null, neden = '1', nb = [].slice.call(document.querySelectorAll('#neden button'));
-  nb.forEach(function (b) { b.addEventListener('click', function () {
-    neden = b.getAttribute('data-n'); nb.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
-    if (cur === 'home') { page.src = SRC.home + '?neden=' + neden + '#degerler'; }
-  }); });
+  var cur = null;
   function show(v, force) {
     if (!HINTS[v]) v = 'home';
     cur = v;
@@ -169,8 +160,7 @@ td:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
     hint.innerHTML = HINTS[v];
     var isDoc = v === 'not';
     doc.hidden = !isDoc; view.hidden = isDoc;
-    document.getElementById('neden').hidden = v !== 'home';
-    if (!isDoc && (force || page.getAttribute('data-v') !== v)) { page.setAttribute('data-v', v); page.src = SRC[v] + (v === 'home' ? '?neden=' + neden : ''); }
+    if (!isDoc && (force || page.getAttribute('data-v') !== v)) { page.setAttribute('data-v', v); page.src = SRC[v]; }
     try { if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v); } catch (e) {}
   }
   tabs.forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-v')); }); });

@@ -6,7 +6,7 @@ LOGO = open('inline-moyo.svg').read().strip()
 LOGO = re.sub(r' role="img" aria-label="[^"]*"', ' aria-hidden="true" focusable="false"', LOGO).replace(' xmlns="http://www.w3.org/2000/svg"', '')
 MERCEK = 'https://claude.ai/artifact/H2hwv9mqx9CDtjjEsYP6UE#mercek'
 K = json.load(open('c-metin.json'))            # metinler ayrı dosyada (araştırmadan sonra değişir)
-IMG = {k: 'img/c-%s.webp' % k for k in ['ebeveyn-rutin', 'ebeveyn-onay', 'ebeveyn-uzman', 'oyun-onay', 'oyun-liste', 'mercek-veri', 'mercek-egitim']}
+IMG = {k: 'img/c-%s.webp' % k for k in ['ebeveyn-rutin', 'ebeveyn-onay', 'ebeveyn-uzman', 'oyun-onay', 'oyun-liste', 'mercek-veri', 'mercek-veri-dar', 'mercek-egitim']}
 e = H.escape
 
 def resim(key, alt, cls=''):
@@ -20,7 +20,7 @@ def ikili(buyuk=True):
             f'<figure class="i-telefon">{resim("ebeveyn-onay", K["ebeveyn_onay_alt"], "telefon")}<figcaption>Moyo Ebeveyn · siz</figcaption></figure></div></div>')
 
 def adim_gorsel(a):
-    if a['gorsel'] == 'ikili': return ikili()
+    if a['gorsel'] == 'ikili': return mini_ikili()
     cls = 'telefon' if a['gorsel'].startswith('ebeveyn') else ('panel' if a['gorsel'].startswith('mercek') else '')
     return resim(a['gorsel'], a['alt'], cls)
 
@@ -49,7 +49,7 @@ def kompakt(adimlar):
     # Telefon ve iPad için "Nasıl çalışır": üç düzen (önizlemede seçilir). Aynı içerik: görsel + kısa yazı yan yana ya da üst üste.
     pills, paneller = [], []
     for i, a in enumerate(adimlar):
-        g = mini_ikili() if a['gorsel'] == 'ikili' else resim(a['gorsel'], a['alt'], 'telefon' if a['gorsel'].startswith('ebeveyn') else 'panel')
+        g = mini_ikili() if a['gorsel'] == 'ikili' else resim(a['gorsel'] + ('-dar' if a['gorsel'] == 'mercek-veri' else ''), a['alt'], 'telefon' if a['gorsel'].startswith('ebeveyn') else 'panel')
         tur = 'ikili' if a['gorsel'] == 'ikili' else a['gorsel'].split('-')[0]
         rozet = '<span class="nk-rozet">İsteğe bağlı</span>' if 'isteğe bağlı' in a['rol'] else ''
         pills.append(f'<button type="button" role="tab" id="nk-t{i}" aria-controls="nk-p{i}" aria-selected="{"true" if i == 0 else "false"}" data-i="{i}"><span class="n">{i + 1}</span><span class="ad">{a["kisa"].replace("Moyo ", "<span class=\"uzun\">Moyo </span>")}</span></button>')
@@ -100,7 +100,7 @@ guven = ''.join(f'<div class="kart g-kart">{ikon(g[2])}<div><h3>{g[0]}</h3><p>{g
 sss = ''.join(f'<details><summary>{q[0]}</summary><p>{q[1]}</p></details>' for q in K['sss'])
 
 html = f'''<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Moyo · Çatı sayfa</title><link rel="icon" href="img/ikon-moyo.svg" type="image/svg+xml"><link rel="stylesheet" href="ortak.css"><link rel="stylesheet" href="c.css"></head><body class="sayfa-c">
+<title>Moyo · Çatı sayfa</title><link rel="icon" href="img/ikon-moyo.svg" type="image/svg+xml"><link rel="stylesheet" href="ortak.css"><link rel="stylesheet" href="c.css"><link rel="stylesheet" href="beyaz.css"></head><body class="sayfa-c beyaz">
 <header class="ust"><div class="ic"><a class="logo" href="#" aria-label="Moyo">{LOGO}</a><nav class="menu" aria-label="Ana menü"><a href="#nasil">Nasıl çalışır</a><a class="kitle" href="ebeveyn.html">Ebeveynler için</a><a class="kitle" href="{MERCEK}" target="_blank" rel="noopener">Uzmanlar için ↗</a><a href="#guven">Güvenlik</a><a href="#sss">Sorular</a></nav><div class="sag"><a class="hap cizgi k" href="#">Giriş yap</a><a class="hap dolu k" href="#">Ücretsiz deneyin</a></div></div></header>
 <main>
 <section class="acilis c"><div class="ic"><h1>{K["h1"]}</h1><p class="alt">{alts}</p>

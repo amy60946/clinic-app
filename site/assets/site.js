@@ -52,7 +52,7 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
     var low = Math.min(P.solo.m, P.clinic.m);
     each('[data-from]', function (el) { el.textContent = tl(low) + fromSuffix(low); });
     var g = Math.min(gift(P.solo), gift(P.clinic));
-    each('[data-gift]', function (el) { el.textContent = g + ' ay sizden'; el.hidden = !g; });
+    each('[data-gift]', function (el) { el.textContent = g + ' ay ücretsiz'; el.hidden = !g; });
     each('[data-draft]', function (el) { el.hidden = !P.draft; });
   };
   each('[data-period]', function (b) {
@@ -217,14 +217,24 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
       if (focus) tabs[k].focus();
       if (tabs[k].scrollIntoView && box.querySelector('.nc-tabs').scrollWidth > box.querySelector('.nc-tabs').clientWidth) tabs[k].scrollIntoView({ block: 'nearest', inline: 'center', behavior: reduce.matches ? 'auto' : 'smooth' });
     };
-    // Yükseklik sabit: en uzun panel kadar yer ayrılır, sekme değişince altındaki bölümler zıplamaz
-    var wrapH = function () {
-      var max = 0, cur = -1;
-      Array.prototype.forEach.call(panels, function (p, j) { if (!p.hidden) cur = j; });
-      Array.prototype.forEach.call(panels, function (p) { var was = p.hidden; p.hidden = false; p.style.animation = 'none'; max = Math.max(max, p.offsetHeight); p.hidden = was; p.style.animation = ''; });
+    // Yükseklik sabit: en uzun panel kadar yer ayrılır, sekme değişince altındaki bölümler zıplamaz.
+    // Yalnız genişlik değişince yeniden ölçülür (iPhone'da adres çubuğu küçülünce panel yeniden belirip kaybolmasın); görünen panelin girişi yeniden oynatılmaz.
+    var lastW = -1;
+    var wrapH = function (force) {
+      var w = box.clientWidth;
+      if (force !== true && w === lastW) return;
+      lastW = w;
+      Array.prototype.forEach.call(panels, function (p) { p.style.minHeight = ''; });
+      var max = 0;
+      Array.prototype.forEach.call(panels, function (p) {
+        var was = p.hidden;
+        if (was) { p.style.animation = 'none'; p.hidden = false; }
+        max = Math.max(max, p.offsetHeight);
+        if (was) { p.hidden = true; p.style.animation = ''; }
+      });
       Array.prototype.forEach.call(panels, function (p) { p.style.minHeight = max + 'px'; });
     };
-    wrapH(); window.addEventListener('resize', wrapH); window.addEventListener('load', wrapH);
+    wrapH(true); window.addEventListener('resize', wrapH); window.addEventListener('load', function () { wrapH(true); });
     var track = box.querySelector('.nc-tabs');
     track.addEventListener('scroll', function () { track.classList.toggle('son', track.scrollLeft + track.clientWidth >= track.scrollWidth - 4); }, { passive: true });
     Array.prototype.forEach.call(tabs, function (t, k) {
@@ -237,9 +247,4 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
     });
   });
 
-  /* 7. Önizleme: "Neden" bölümünün düzeni adresten (?neden=1|2|3); yayında varsayılan kalır. */
-  try {
-    var nd = new URLSearchParams(location.search).get('neden'), dg = d.getElementById('degerler');
-    if (dg && /^[123]$/.test(nd || '')) dg.setAttribute('data-neden', nd);
-  } catch (e) { /* yok say */ }
 })();

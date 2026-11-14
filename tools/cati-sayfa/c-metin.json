@@ -1,18 +1,18 @@
 {
  "h1": "DEHB, otizm ve davranışsal zorluklar yaşayan çocuklar için gelişim ve alışkanlık geliştirme platformu",
  "alt_basliklar": [
-  "Bu yolu birlikte yürüyelim. Moyo; evde sizi, oyunda çocuğunuzu, seansta uzmanınızı aynı rutinde buluşturur.",
+  "Bu yolu birlikte yürümenize yardımcı olalım. Moyo; evde sizi, oyunda çocuğunuzu, seansta uzmanınızı aynı rutinde buluşturur.",
   "Her çocuk, etrafındaki sevgi ve sabırla büyür. Moyo; evde sizi, oyunda çocuğunuzu, seansta uzmanınızı aynı rutinde buluşturur.",
   "Küçük adımlar, el ele atılınca güzelleşir. Moyo; evde sizi, oyunda çocuğunuzu, seansta uzmanınızı aynı rutinde buluşturur."
  ],
- "fiyat_not": "Moyo Oyun ücretsiz. Moyo Ebeveyn 7 gün ücretsiz, sonra aylık — TL; dönem sonunda kendiliğinden yenilenir.",
+ "fiyat_not": "Moyo Oyun ücretsiz. Moyo Ebeveyn 7 gün ücretsiz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak.",
  "giris_etiket": "Nasıl çalışır",
  "giris_baslik": "Bugün evde başlayın, istediğinizde uzmanınızı katın",
  "giris_metin": "Moyo çocuğunuzu ve sizi aynı rutinde buluşturur. Dilerseniz çalıştığınız uzmanı da dahil edin; hepiniz aynı platformda buluşun.",
  "basamak": [
   [
    "Evde başlayın",
-   "Rutini siz kurarsınız, çocuğunuz oyunda adım adım yapar. Moyo uzman olmadan da tam çalışır.",
+   "Rutini siz kurarsınız, çocuğunuz oyunda adım adım yapar. Bir uzmanla çalışmasanız da her şeyi kullanırsınız.",
    ""
   ],
   [
@@ -41,7 +41,7 @@
    "rol": "Moyo Oyun · çocuğunuzun tabletinde",
    "kisa": "Moyo Oyun",
    "baslik": "Hatırlatma oyundan gelir, onay sizden.",
-   "metin": "Çocuğunuz bugünkü rutinini oyunda adım adım görür; eklediğiniz her rutin oyunda onun için bir macera olur. Dostu Okti ona eşlik eder. Reklam, satın alma ve ayrı çocuk hesabı yok.",
+   "metin": "Çocuğunuz bugünkü rutinini oyunda adım adım görür; rutindeki her adım oyunda onun için bir macera olur. Dostu Okti ona eşlik eder. Reklam, satın alma ve ayrı çocuk hesabı yok.",
    "liste": [
     [
      "1.",
@@ -59,13 +59,13 @@
    "gorsel": "ikili",
    "alt": "Moyo Oyun: \"Yaptım\" denen rutin, ebeveynin onayını bekliyor; yanında Moyo Ebeveyn'de onay ekranı",
    "etiket": "",
-   "ozet": "Çocuğunuz işini bitirince oyunda \"Yaptım\"a dokunur, size bildirim gelir, tek dokunuşla onaylarsınız. Eklediğiniz her rutin oyunda bir macera olur."
+   "ozet": "Çocuğunuz işini bitirince oyunda \"Yaptım\"a dokunur, size bildirim gelir, tek dokunuşla onaylarsınız. Rutindeki her adım oyunda bir macera olur."
   },
   {
    "rol": "Moyo Mercek · uzmanınızın panelinde · isteğe bağlı",
    "kisa": "Moyo Mercek",
    "baslik": "Dilerseniz uzmanınız da seanslar arasını görsün.",
-   "metin": "Çalıştığınız uzmanı siz dahil edersiniz: uzmanınız Moyo Mercek'ten davet gönderir, siz onaylarsınız. O andan sonra evdeki rutinleri ve davranış kayıtlarınızı görür, size kısa ebeveyn eğitimleri gönderir, yeni rutin önerir; seans dışındaki takip böyle sürer. Paylaşımı istediğiniz an durdurursunuz; Moyo size uzman önermez.",
+   "metin": "Çalıştığınız uzmanı siz dahil edersiniz: uzmanınız Moyo Mercek'ten davet gönderir, siz onaylarsınız. O andan sonra evdeki rutinleri ve davranış kayıtlarınızı görür, size kısa ebeveyn eğitimleri gönderir, yeni rutin önerir; seans dışındaki takip böyle sürer. Paylaşımı istediğiniz an durdurursunuz.",
    "gorsel": "mercek-veri",
    "alt": "Moyo Mercek: uzmanın gördüğü evdeki kayıtlar",
    "etiket": "Uzmanınız \"Bu hafta evde nasıl geçti?\" diye sorduğunda cevap hazır.",
@@ -202,7 +202,7 @@
   ],
   [
    "Rutin ile macera aynı şey mi?",
-   "Evet. Moyo Ebeveyn'de ve uzmanınızın panelinde \"rutin\" diye gördüğünüz her iş, çocuğunuzun oyununda \"macera\" olarak görünür."
+   "Moyo Ebeveyn'de kurduğunuz rutinin her adımı (ör. \"Sabah rutini · 6 adım\"), çocuğunuzun oyununda bir macera olarak görünür."
   ],
   [
    "Oyun çocuklar için güvenli mi?",
@@ -214,7 +214,7 @@
   ],
   [
    "Ücreti nedir?",
-   "Moyo Oyun ücretsizdir. Moyo Ebeveyn'i 7 gün ücretsiz deneyebilirsiniz; sonra aylık — TL ya da yıllık — TL, dönem sonunda kendiliğinden yenilenir. Uzmanlar Moyo Mercek'i ayrı paketlerle kullanır."
+   "Moyo Oyun ücretsizdir. Moyo Ebeveyn'i 7 gün ücretsiz deneyebilirsiniz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak. Uzmanlar Moyo Mercek'i ayrı paketlerle kullanır."
   ]
  ],
  "alt_etiketler": [

@@ -1,0 +1,62 @@
+/* Beyaz zemin ağırlıklı tema (kullanıcı isteği 14 Kasım 2026: "Landing'i beyaz renk fonu ağırlıklıya çevir").
+   Koyu bölümler beyaz / açık griye döner; yazı lacivert; yeşil vurgu aynı. body.beyaz ile açılır. */
+.beyaz { --koyu-yazi-2: #5C5875; --koyu-cizgi: #E8E7EB; }
+.beyaz::before { background: #FFFFFF; }
+.beyaz .ust { background: rgba(255, 255, 255, .96); color: var(--lacivert); border-bottom: 1px solid var(--cizgi); backdrop-filter: saturate(1.4) blur(8px); }
+.beyaz .acilis, .beyaz .giris-bant { background: #FFFFFF; color: var(--lacivert); }
+.beyaz .hikaye, .beyaz .nk { background: var(--sis); color: var(--lacivert); }
+.beyaz .dongu-b { background: #FFFFFF; color: var(--lacivert); border-top: 1px solid var(--cizgi); }
+.beyaz #sonraki { background: var(--sis); }
+.beyaz #guven { background: #FFFFFF; border-top: 1px solid var(--cizgi); }
+.beyaz #sss { background: var(--sis); }
+/* yeşil üstünde lacivert yazı (değişken yerine açık renk, karışmasın) */
+.beyaz .hap.dolu, .beyaz .basamak .bn, .beyaz .basamak .b-rozet, .beyaz .balon.git, .beyaz .nk-sekmeler button[aria-selected="true"],
+.beyaz .d-nokta a[aria-current="step"], .beyaz .hk-nokta a[aria-current="step"] { color: #16113A; }
+.beyaz .balon.don { background: #16113A; color: #FFFFFF; }
+/* koyu zemin için yazılmış beyaz saydam yazılar */
+.beyaz .hk-kart figcaption, .beyaz .hk-nokta a, .beyaz .hk-atla, .beyaz .ikili figcaption, .beyaz .d-nokta a, .beyaz .nk-sekmeler button, .beyaz .hk-yazi .sorun { color: var(--yazi-2); }
+.beyaz .hk-nokta a, .beyaz .d-nokta a { border-color: var(--cizgi); background: #FFFFFF; }
+.beyaz .i-akis .cizgi { border-top-color: rgba(22, 17, 58, .25); }
+.beyaz .adim-liste b { color: var(--lacivert); }
+.beyaz .hk-yazi .rol, .beyaz .hk-liste .l-yazi .rol, .beyaz .nk-yazi .rol, .beyaz .d-yazi-m .rol, .beyaz .d-kart .rol, .beyaz .dongu-b .ust-etiket, .beyaz .giris-bant .ust-etiket { color: #0A8F3A; }
+.beyaz .nk-rozet { color: #0A8F3A; border-color: rgba(10, 143, 58, .45); }
+/* kartlar: beyaz kart, ince çizgi */
+.beyaz .basamak li { background: var(--sis); border-color: var(--cizgi); }
+.beyaz .basamak li b { color: var(--lacivert); }
+.beyaz .nk-sekmeler { background: #FFFFFF; border-color: var(--cizgi); }
+.beyaz .d-kart, .beyaz .nk[data-duzen="kart"] .nk-adim, .beyaz .nk[data-duzen="liste"] .nk-adim { background: #FFFFFF; border-color: var(--cizgi); }
+.beyaz .d-kontrol button, .beyaz .nk-kontrol button { background: #FFFFFF; border-color: var(--cizgi); color: var(--lacivert); }
+/* gölgeler beyazda yumuşar */
+.beyaz .hk-kart img, .beyaz .ikili img, .beyaz .d-slot > img, .beyaz .d-gorsel > img, .beyaz .ust-uste .uu-oyun, .beyaz .ust-uste .uu-tel { box-shadow: 0 24px 60px -28px rgba(22, 17, 58, .35); }
+.beyaz .d-slot { opacity: .35; } .beyaz .d-slot.on { opacity: 1; }
+
+/* Okunurluk (14 Kasım 2026: "1-2-3 ürün görselleri içeriği net okutmuyor"): görsel sütunu geniş, görseller büyük */
+@media (min-width: 821px) {
+  .sayfa-c .hk-sahne { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); }
+  .sayfa-c .hk-kartlar { height: min(72svh, 660px); }
+  .sayfa-c .hk-kart.genis .ust-uste { width: 100%; max-height: 100%; aspect-ratio: 1.8; }
+}
+@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ebeveyn { --gh: clamp(360px, 58svh, 560px); }
+  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-mercek { --gh: clamp(300px, 46svh, 460px); }
+}
+.alt-bilgi .ab-yasal { display: inline-flex; flex-wrap: wrap; gap: 6px 16px; }
+.alt-bilgi .ab-yasal a { color: inherit; }
+.beyaz .alt-bilgi { background: var(--sis); color: var(--yazi-2); border-top: 1px solid var(--cizgi); }
+
+/* Canlı öncesi inceleme (14 Kasım 2026) */
+.beyaz .menu a:hover, .beyaz .menu a[aria-current="page"] { color: var(--lacivert); }
+.beyaz .ust-etiket, .beyaz .bas .ust-etiket { color: #0A8F3A; }   /* bölüm etiketleri tek renk */
+@media (max-width: 920px) {                                        /* telefonda da Giriş */
+  .beyaz .ust .sag .cizgi { display: inline-flex; border-color: transparent; padding-inline: 8px; }
+}
+@media (max-width: 560px) {                                        /* Oyun adımı: oyun ekranı üstte, ebeveynin onayı altında, okunur büyüklükte */
+  .sayfa-c .nk .t-ikili { --gh: auto; }
+  .sayfa-c .nk .t-ikili .nk-gorsel { height: auto; }
+  .sayfa-c .nk .t-ikili .ust-uste { aspect-ratio: auto; width: 100%; max-height: none; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .sayfa-c .nk .t-ikili .uu-oyun { position: static; width: 100%; }
+  .sayfa-c .nk .t-ikili .uu-tel { position: static; height: auto; width: min(78%, 300px); }
+  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-mercek { --gh: auto; }
+  .sayfa-c .nk .t-mercek .nk-gorsel { height: auto; }
+  .sayfa-c .nk .t-mercek .nk-gorsel > img.panel { width: 100%; max-height: none; }
+}
