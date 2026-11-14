@@ -33,7 +33,7 @@ function Layout({ title, subtitle, onBack, children }: {
                 </Pressable>
               )}
             </View>
-            <Text style={styles.brand}>ClinicApp</Text>
+            <Text style={styles.brand}>Moyo Mercek</Text>
             <Text style={styles.title}>{title}</Text>
             {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
             <View style={{ gap: 12, marginTop: 24 }}>{children}</View>

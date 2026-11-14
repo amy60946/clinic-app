@@ -82,7 +82,7 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
 
           <View style={s.card}>
             <Text style={s.label}>Çalışma saatlerim</Text>
-            <Text style={s.small}>Yeni seans penceresindeki uygun saatler bu saatlerden çıkar. "Aileye açık" saatlerden ebeveyn ParentApp'te randevu alabilir (klinik açtıysa).</Text>
+            <Text style={s.small}>Yeni seans penceresindeki uygun saatler bu saatlerden çıkar. "Aileye açık" saatlerden ebeveyn Moyo'da randevu alabilir (klinik açtıysa).</Text>
             {mine.length === 0 && <Text style={s.small}>Henüz saat eklenmedi.</Text>}
             {mine.map((a) => (
               <View key={a.id} style={[s.row, { paddingVertical: 4 }]}>
@@ -143,7 +143,7 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
               <View style={s.row}><Toggle value={st.count_no_show} onChange={(v) => saveSt({ count_no_show: v })} /><Text style={s.body}>Gelmedi</Text></View>
               <View style={[s.row, { marginTop: 6 }]}><Toggle value={st.count_late_cancel} onChange={(v) => saveSt({ count_late_cancel: v })} /><Text style={s.body}>Geç iptal</Text></View>
             </Disabled>
-            <FieldLabel hint="ParentApp, aileye görünür her seans için cihazda bildirim kurar">Aileye hatırlatma</FieldLabel>
+            <FieldLabel hint="Moyo, aileye görünür her seans için cihazda bildirim kurar">Aileye hatırlatma</FieldLabel>
             <Disabled on={!owner}>
               <Chips multi options={REMINDERS} value={st.reminders}
                 onChange={(m) => saveSt({ reminders: st.reminders.includes(m) ? st.reminders.filter((x) => x !== m) : [...st.reminders, m].sort((a, b) => b - a) })} />

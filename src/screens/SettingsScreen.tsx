@@ -107,7 +107,7 @@ export default function SettingsScreen({
           <Input value={name} onChangeText={setName} placeholder="Adın soyadın" maxLength={80} autoComplete="name" />
           <Label>Unvanın</Label>
           <Input value={title} onChangeText={setTitle} placeholder="Ör. Klinik Psikolog" maxLength={80} />
-          <Text style={[styles.small, { marginTop: 8 }]}>Aileler bu ad ve unvanı davet e-postasında ve ParentApp › Uzmanım'da görür.</Text>
+          <Text style={[styles.small, { marginTop: 8 }]}>Aileler bu ad ve unvanı davet e-postasında ve Moyo › Uzmanım'da görür.</Text>
           <View style={{ alignItems: 'flex-start', marginTop: 10 }}>
             <SmallButton label="Kaydet" onPress={saveProfile} busy={busy === 'profile'} />
           </View>

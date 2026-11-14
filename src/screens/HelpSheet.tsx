@@ -28,7 +28,7 @@ const ITEMS: Item[] = [
   { key: 'board', q: 'Ana ekrandaki bölümler?', show: 'home', showLabel: 'Ana ekran', a: ['Senin sıran: senden bekleyen. Ebeveynden yeni: son 7 günde ebeveynin girdikleri. Sessiz kalanlar: 7 gündür kayıt yok.'] },
   { key: 'report', q: 'Raporu nasıl alırım?', show: 'report', showLabel: 'Rapor', a: ['Rapor › "Raporu aç" (PDF). İlerleme notu için "Notu kopyala"; yapay zekâ yok.'] },
   { key: 'team', q: 'Ekibime uzman nasıl eklerim?', show: 'team', showLabel: 'Ayarlar', ownerOnly: true, a: ['Uzmandan kişisel kodunu iste (onun Ayarlar sayfasında). Ayarlar › Ekip › "Uzman ekle"ye yaz; uzman onaylayınca ekibine katılır.'] },
-  { key: 'workspace', q: 'Birden çok klinikte çalışıyorum, nasıl ayırırım?', a: ['Sol üstte "ClinicApp" yanındaki küçük hesap düğmesine dokun: "Bireysel hesap" ve ekip hesapları (her klinik için bir tane) ayrıdır. Ekip hesabı, klinik seni ekibine eklediğinde ve kabul ettiğinde açılır. Danışanlar, davetler ve seanslar seçili hesaba aittir.'] },
+  { key: 'workspace', q: 'Birden çok klinikte çalışıyorum, nasıl ayırırım?', a: ['Sol üstte "Moyo Mercek" yanındaki küçük hesap düğmesine dokun: "Bireysel hesap" ve ekip hesapları (her klinik için bir tane) ayrıdır. Ekip hesabı, klinik seni ekibine eklediğinde ve kabul ettiğinde açılır. Danışanlar, davetler ve seanslar seçili hesaba aittir.'] },
 ];
 
 export default function HelpSheet({ visible, owner, plan = true, onClose, onIntro, onSample, onAction }: {

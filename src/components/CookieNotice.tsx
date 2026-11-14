@@ -28,7 +28,7 @@ export default function CookieNotice() {
     <View style={styles.bar} accessibilityRole="summary">
       <View style={styles.inner}>
         <Text style={styles.text}>
-          ClinicApp web yalnız oturumunu açık tutmak ve seçimlerini hatırlamak için zorunlu tarayıcı depolaması kullanır. Analiz ya da reklam çerezi yok.{' '}
+          Moyo Mercek web yalnız oturumunu açık tutmak ve seçimlerini hatırlamak için zorunlu tarayıcı depolaması kullanır. Analiz ya da reklam çerezi yok.{' '}
           <InlineLink onPress={() => openLegal('cerez-clinicapp-web')}>Çerez Politikası</InlineLink>
         </Text>
         <SmallButton label="Anladım" onPress={ok} />

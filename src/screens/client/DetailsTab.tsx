@@ -59,13 +59,13 @@ export default function DetailsTab({ client, me, data, team, onTeamAccess, onRev
       <Label>Ebeveyn ve bakım verenler</Label>
       <Card style={{ gap: 6 }}>
         <Text style={styles.body}>{client.parents || 'Ad paylaşılmadı'}</Text>
-        <Text style={styles.small}>İletişim bilgileri (e-posta, telefon) ailede kalır, uzmana açılmaz. Aileye ParentApp üzerinden ulaşırsın: önerilerin ve atadığın eğitim orada görünür.</Text>
+        <Text style={styles.small}>İletişim bilgileri (e-posta, telefon) ailede kalır, uzmana açılmaz. Aileye Moyo üzerinden ulaşırsın: önerilerin ve atadığın eğitim orada görünür.</Text>
       </Card>
 
       <Label>Paylaşım</Label>
       <Card style={{ gap: 8 }}>
         <Row k="Ebeveyn onayı" v={dateText(client.consent_at)} />
-        <Text style={styles.small}>Ebeveyn paylaşımı ParentApp'ten istediği an durdurabilir; o an erişimin biter.</Text>
+        <Text style={styles.small}>Ebeveyn paylaşımı Moyo'dan istediği an durdurabilir; o an erişimin biter.</Text>
       </Card>
 
       {(team.length > 1 || !!responsible) && (

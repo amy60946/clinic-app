@@ -90,6 +90,12 @@
     "survey_only": true
    },
    {
+    "key": "cocuk_terapisti",
+    "group": "mental",
+    "label": "Çocuk ve ergen terapisti",
+    "survey_only": true
+   },
+   {
     "key": "okul_rehber",
     "group": "edu",
     "label": "Okul rehber öğretmeni",

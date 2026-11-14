@@ -201,7 +201,7 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
               <View style={[s.card, s.row, { marginTop: 14 }]}>
                 <View style={{ flex: 1 }}>
                   <Text style={s.label}>Aile uygulamasında göster</Text>
-                  <Text style={s.small}>Tarih, saat, yer ve tür ParentApp › Uzmanım'da görünür; ebeveyn hatırlatma alır. Not ve gündem görünmez.</Text>
+                  <Text style={s.small}>Tarih, saat, yer ve tür Moyo › Uzmanım'da görünür; ebeveyn hatırlatma alır. Not ve gündem görünmez.</Text>
                 </View>
                 <Toggle value={visible} onChange={setVisible} />
               </View>

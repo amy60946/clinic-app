@@ -49,7 +49,7 @@ function showWebReport(html: string): Promise<void> {
       frame.contentWindow?.focus();
       frame.contentWindow?.print();
     } catch {
-      Alert.alert('Yazdırılamadı', 'Bu sayfada yazdırma kapalı. Raporu tarayıcıda ClinicApp\'in kendi adresinden aç.');
+      Alert.alert('Yazdırılamadı', 'Bu sayfada yazdırma kapalı. Raporu tarayıcıda Moyo Mercek\'in kendi adresinden aç.');
     }
   };
   return closed;

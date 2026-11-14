@@ -361,7 +361,7 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
         <TextInput value={note} onChangeText={setNote} multiline maxLength={300}
           placeholder="Neden bu sorumluluk, ebeveyn nasıl desteklesin?" placeholderTextColor={colors.muted}
           style={[styles.input, { minHeight: 64, textAlignVertical: 'top' }]} />
-        <Text style={styles.sub}>Ebeveyn öneriyi ParentApp'te görür; ekleyip eklememek ve ayarları değiştirmek ebeveynin kararıdır.</Text>
+        <Text style={styles.sub}>Ebeveyn öneriyi Moyo'da görür; ekleyip eklememek ve ayarları değiştirmek ebeveynin kararıdır.</Text>
 
         {editing && onWithdraw && (
           <Pressable onPress={onWithdraw} style={{ marginTop: 32, alignItems: 'center', padding: 12 }}>

@@ -44,7 +44,7 @@ export default function LegalUpdateScreen({ docs, onDone, footer }: {
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.card}>
-          <Text style={styles.brand}>ClinicApp</Text>
+          <Text style={styles.brand}>Moyo Mercek</Text>
           <Text style={styles.title}>{changes.length ? 'Metinlerimiz güncellendi' : 'Devam etmeden önce'}</Text>
           {!!changes.length && <InfoText small text="Kısaca neler değişti?" detail={changes} />}
           {contracts.length > 0 ? (

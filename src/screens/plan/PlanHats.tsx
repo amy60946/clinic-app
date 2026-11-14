@@ -482,7 +482,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
       setPubItems(null);
       await load();
       Alert.alert(hold.length ? 'Seçilenler aileye gönderildi' : 'Aileye gönderildi',
-        `Ebeveyn tek bildirim alır; plan ve öneriler ParentApp › Uzmanım › (senin adın) bölümünde.${hold.length ? ' Beklettiklerin planda "gönderilmedi" olarak kalır.' : ''}`);
+        `Ebeveyn tek bildirim alır; plan ve öneriler Moyo › Uzmanım › (senin adın) bölümünde.${hold.length ? ' Beklettiklerin planda "gönderilmedi" olarak kalır.' : ''}`);
     } catch (e) {
       Alert.alert('Gönderilemedi', (e as Error).message);
     } finally {

@@ -38,7 +38,7 @@ export function progressNote(r: NoteInput): string {
   const lines: string[] = [];
 
   lines.push(`İlerleme notu: ${r.childLabel}`);
-  lines.push(`Dönem: ${day(from)} – ${day(to, true)} (${r.weeks} hafta). Kaynak: ebeveynin ParentApp kayıtları.`);
+  lines.push(`Dönem: ${day(from)} – ${day(to, true)} (${r.weeks} hafta). Kaynak: ebeveynin Moyo kayıtları.`);
 
   // Ev rutini
   lines.push('', 'Ev rutini');

@@ -24,7 +24,7 @@ export function OfferSheet({ slot, waitlist, clients, onClose, onDone }: {
     try {
       await offerSlot(pick, slot.starts_at, slot.duration_min, slot.room_id, hours);
       track('waitlist.offer', { hours });
-      Alert.alert('Teklif gönderildi', 'Aile ParentApp\'te kabul ederse randevu takvimine düşer; sana bildirim gelir.');
+      Alert.alert('Teklif gönderildi', 'Aile Moyo\'da kabul ederse randevu takvimine düşer; sana bildirim gelir.');
       onDone();
     } catch (e) { Alert.alert('Gönderilemedi', (e as Error).message); } finally { setBusy(false); }
   };

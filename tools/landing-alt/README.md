@@ -43,3 +43,5 @@ ile 1440 px'te toplandı: `node tools/landing-alt/bench/probe.js <adres> …`. B
   Animation and Motion in UX (2020).
 
 Öneri: C, ikinci B; A kanıtı en zayıf olan. Karar kullanıcıda; seçilen `site/index.html`'e işlenir, yayın kullanıcı onayıyla.
+
+> 12 Kasım 2026: `site/index.html` yeni düzene geçti (önizleme https://claude.ai/artifact/4g3viopCTWujHervSVzpWt; gerçek ürün kayıtları `site/assets/motion`, `tools/landing-motion`). `build.py` eski sayfa yapısını okur; yeni sayfa seçilirse bu klasör tarihçedir.

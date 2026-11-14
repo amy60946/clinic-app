@@ -21,7 +21,7 @@ export function SummaryTab({ data, today, weeks }: ClientCtx) {
   const w = useMemo(() => weekly(data.tasks, data.completions, today, weeks), [data, today, weeks]);
 
   if (!o.planned) {
-    return <Empty text="Bu dönemde çocuğa atanmış macera yok. Ebeveyn ParentApp'te sorumluluk ekledikçe göstergeler burada oluşur." />;
+    return <Empty text="Bu dönemde çocuğa atanmış macera yok. Ebeveyn Moyo'da sorumluluk ekledikçe göstergeler burada oluşur." />;
   }
   return (
     <View>
