@@ -1,7 +1,7 @@
 // Tablo dışa aktarma (CSV): davranış kayıtları ve ev rutini geçmişi. Türkçe Excel noktalı virgül ayırıcı ve UTF-8 BOM bekler.
 // Dosyada çocuğun adı yok (dosya adında yalnız baş harf); saf fonksiyonlar, testleri tests/csv.test.mjs.
 import type { AbcEvent, Task, Completion } from './metrics.ts';
-import { instances, isoDate, dayPart, DECLINE_LABELS } from './metrics.ts';
+import { instances, isoDate, dayPart, DECLINE_LABELS, EXPORT_FOOTER } from './metrics.ts';
 import { skillName } from '../skills.ts';
 
 type Cell = string | number | null | undefined;
@@ -13,8 +13,9 @@ const cell = (v: Cell) => {
   return /[";\r\n]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 };
 
+// Verinin altında bir boş satır, sonra dışa aktarılan her belgedeki tek satır (kullanıcı kararı 14 Kasım 2026)
 export function toCsv(rows: Cell[][]): string {
-  return '﻿' + rows.map((r) => r.map(cell).join(';')).join('\r\n') + '\r\n';
+  return '﻿' + rows.map((r) => r.map(cell).join(';')).join('\r\n') + '\r\n\r\n' + cell(EXPORT_FOOTER) + '\r\n';
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');

@@ -655,12 +655,12 @@ function LibraryRow({ onOpen }: { onOpen: () => void }) {
 function VerificationRow({ v, onOpen }: { v: VerificationState; onOpen: () => void }) {
   const st = v.last?.status;
   const icon = v.verified_at ? 'shield-checkmark' : st === 'pending' && v.last?.submitted ? 'hourglass-outline' : 'shield-outline';
-  const title = v.verified_at ? `Belgesi incelendi: ${v.verified_label}`
+  const title = v.verified_at ? `Belge yüklendi: ${v.verified_label}`
     : st === 'pending' && v.last?.submitted ? 'Belgen incelemede'
     : st && ['rejected', 'auto_rejected', 'suspended'].includes(st) ? 'Belgeni yeniden yükle' : 'Belgeni yükle';
   const sub = v.verified_at ? 'Ailelerin davet ekranında görünür'
     : st === 'pending' && v.last?.submitted ? 'Ekibimiz inceleyince bildirim gelir'
-    : 'Ailelere "Belgesi incelendi" rozeti görünsün';
+    : 'Ailelere "Uzman diploma belgesini yükledi" yazısı görünsün';
   return (
     <Pressable onPress={onOpen} accessibilityRole="button"
       style={({ pressed }) => [styles.member, v.verified_at && { backgroundColor: '#E6F4EA' }, pressed && { opacity: 0.8 }]}>

@@ -3,13 +3,11 @@
 import {
   Task, Completion, AbcEvent, weekly, perTask, observations, bySkill, abcSummary, windowStarts, weekStarts, addDays, parseDate, lastFullDay,
   motivationStats, motivationText,
-  DECLINE_LABELS, LIMITS_TEXT, MASTERY_RATE, MASTERY_WEEKS, dec,
+  DECLINE_LABELS, EXPORT_FOOTER, MASTERY_RATE, MASTERY_WEEKS, dec,
 } from './metrics';
 import type { Goal } from './clinic';
 import { skillName } from '../skills';
 
-// Yazdırma/PDF alt bilgisi (ortak hukuk/50-uygulama-ici-metinler.md 13)
-const REPORT_NOTE = 'Bu çıktı ailenin uygulama kayıtlarından ve uzmanın gözlemlerinden oluşur. Tanı değildir; tek başına klinik karar için kullanılmaz.';
 
 export type ReportInput = {
   clinic: string;
@@ -118,7 +116,6 @@ ${!gasWeeks.length ? '<div class="m">Bu dönemde değerlendirme girilmedi.</div>
 <table><tr><th>Hafta</th>${abc.perWeek.map((x) => `<th class="n">${d(x.start).slice(0, 5)}</th>`).join('')}</tr><tr><td>Kayıt (ş = ort. şiddet 1–5)</td>${abcRows}</tr></table>
 <div class="m">Günün bölümü: sabah ${abc.byDayPart.sabah} · öğle ${abc.byDayPart['öğle']} · akşam ${abc.byDayPart['akşam']} · gece ${abc.byDayPart.gece}</div>
 
-<div class="limits"><b>Sınırlar.</b> ${esc(LIMITS_TEXT)}</div>
-<div class="limits">${esc(REPORT_NOTE)}</div>
+<div class="limits">${esc(EXPORT_FOOTER)}</div>
 </body></html>`;
 }

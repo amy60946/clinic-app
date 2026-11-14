@@ -67,7 +67,7 @@ export default function SettingsScreen({
       }
     };
     if (verified && name.trim() !== me.name.trim()) {
-      return Alert.alert('Adın değişsin mi?', 'Belge incelemesi adına göre yapıldı; ad değişince "Belgesi incelendi" rozeti kalkar, yeniden belge yüklemen gerekir.',
+      return Alert.alert('Adın değişsin mi?', 'Belge incelemesi adına göre yapıldı; ad değişince "Belge yüklendi" rozeti kalkar, yeniden belge yüklemen gerekir.',
         [{ text: 'Vazgeç', style: 'cancel' }, { text: 'Değiştir', onPress: go }]);
     }
     go();

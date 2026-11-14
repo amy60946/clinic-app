@@ -4,7 +4,7 @@
 import type { Task, Completion, AbcEvent, DayPart } from './metrics.ts';
 import {
   observations, perTask, motivationStats, motivationText, windowStarts, weekStarts, lastFullDay, addDays, isoDate, dayPart, parseDate,
-  DECLINE_LABELS, MASTERY_WEEKS, MASTERY_RATE, dec,
+  DECLINE_LABELS, MASTERY_WEEKS, MASTERY_RATE, dec, EXPORT_FOOTER,
 } from './metrics.ts';
 
 export type NoteGoal = { title: string; archived: boolean; ratings: { week: string; rating: number }[] };
@@ -28,7 +28,8 @@ const pc = (v: number | null) => (v === null ? '–' : `%${v}`);
 const gas = (v: number) => (v > 0 ? `+${v}` : String(v).replace('-', '−'));
 const PART: Record<DayPart, string> = { sabah: 'sabah', 'öğle': 'öğle', 'akşam': 'akşam', gece: 'gece' };
 
-export const NOTE_FOOTER = 'Bu metin ebeveynin ev rutini ve davranış kayıtlarından kuralla derlenmiş bir gözlem özetidir; tanı, zekâ ya da dikkat puanı değildir ve tek başına klinik karar için kullanılmaz.';
+// Alt satır: dışa aktarılan bütün belgelerle aynı (metrics.ts EXPORT_FOOTER, kullanıcı kararı 14 Kasım 2026)
+export const NOTE_FOOTER = EXPORT_FOOTER;
 
 export function progressNote(r: NoteInput): string {
   const from = windowStarts(r.today, r.weeks)[0];

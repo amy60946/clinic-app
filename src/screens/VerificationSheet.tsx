@@ -12,7 +12,7 @@ import {
 } from '../lib/verification';
 
 // Belge incelemesi (ortak akislar.md 14): meslek + e-Devlet mezun belgesi (BCBA: sicil no) → ön kontrol → ekip inceler.
-// Onayda ailelere "Belgesi incelendi: <meslek>" rozeti görünür. Belge karar sonrası silinir.
+// Onayda ailelere "Uzman diploma belgesini yükledi" + meslek görünür (kullanıcı kararı 14 Kasım 2026, ortak hukuk_notlari M.3; eski "Belgesi incelendi"). Belge karar sonrası silinir.
 export default function VerificationSheet({ visible, onClose }: { visible: boolean; onClose: (changed: boolean) => void }) {
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => onClose(false)}>
@@ -91,11 +91,11 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
           {!!state && state.enabled !== false && (
             <>
               <Text style={styles.body}>
-                Mezuniyet belgeni yükle; ekibimiz inceleyince ailelerin davet ekranında "Belgesi incelendi" rozeti görünür. Rozet, belgenin incelendiğini gösterir; aileler seni gerçek hayatta tanıdıklarını yine kendileri onaylar.
+                Mezuniyet belgeni yükle; ekibimiz inceledikten sonra ailelerin davet ekranında "Uzman diploma belgesini yükledi" yazısı görünür. Bu bir doğrulama değildir; aileler seni gerçek hayatta tanıdıklarını yine kendileri onaylar.
               </Text>
               {/* ortak hukuk/50-uygulama-ici-metinler.md 12 */}
               <Text style={styles.small}>
-                Belgen yalnız inceleme için okunur, karar verilince silinir; kimlik numaran saklanmaz. Ailelere yalnız "Belgesi incelendi" ve meslek adın görünür; bu bir yetki onayı değildir.
+                Belgen yalnız inceleme için okunur, karar verilince silinir; kimlik numaran saklanmaz. Ailelere yalnız "Uzman diploma belgesini yükledi" ve meslek adın görünür; bu bir yetki onayı değildir.
                 {legalOn && <>{' '}<InlineLink onPress={() => openLegal('aydinlatma-uzman')}>Uzman Aydınlatma Metni</InlineLink></>}
               </Text>
 
@@ -103,7 +103,7 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
                 <Card style={{ ...styles.status, backgroundColor: '#E6F4EA' }}>
                   <Ionicons name="shield-checkmark" size={22} color={colors.ok} />
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.statusTitle}>Belgesi incelendi: {state.verified_label}</Text>
+                    <Text style={styles.statusTitle}>Belge yüklendi: {state.verified_label}</Text>
                     <Text style={styles.small}>{new Date(state.verified_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })} · ailelere görünür</Text>
                   </View>
                 </Card>

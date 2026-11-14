@@ -1,5 +1,5 @@
 {
- "h1": "DEHB, otizm ve davranışsal zorluklar yaşayan çocuklar için gelişim ve alışkanlık geliştirme platformu",
+ "h1": "Rutin, sorumluluk ve davranışta desteğe ihtiyaç duyan çocuklar ve aileleri için alışkanlık geliştirme platformu",
  "alt_basliklar": [
   "Bu yolu birlikte yürümenize yardımcı olalım. Moyo; evde sizi, oyunda çocuğunuzu, seansta uzmanınızı aynı rutinde buluşturur.",
   "Her çocuk, etrafındaki sevgi ve sabırla büyür. Moyo; evde sizi, oyunda çocuğunuzu, seansta uzmanınızı aynı rutinde buluşturur.",
@@ -211,6 +211,10 @@
   [
    "Moyo tanı koyar mı?",
    "Hayır. Moyo rutinleri ve kayıtları bir arada tutar; tanı koymaz, tedavi yerine geçmez."
+  ],
+  [
+   "DEHB ya da otizm tanısı olan çocuklar kullanabilir mi?",
+   "Evet. Moyo tanıdan bağımsız, her çocuğun günlük rutiniyle çalışır; tanı koymaz."
   ],
   [
    "Ücreti nedir?",

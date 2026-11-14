@@ -185,6 +185,8 @@ export default function LibraryScreen({ me, clients, onBack, onOpenTraining }: {
             <Text style={styles.body}>Ebeveynlere okuma, test ve açık uçlu sorular gönderin; tamamlama ve ilerlemeyi izleyin.</Text>
           </View>
           <LibraryBrowser me={me} mode="page" onAssign={setAssign} />
+          {/* Kütüphane ekranında bir kez, göze batmadan (kullanıcı kararı 14 Kasım 2026, ortak hukuk_notlari M.5) */}
+          <Text style={styles.footNote}>Genel bilgilendirmedir, mesleki değerlendirmenin yerini tutmaz.</Text>
         </View>
       </ScrollView>
       {assign && <AssignSheet me={me} item={assign} clients={clients} onClose={() => setAssign(null)}
@@ -286,6 +288,7 @@ const styles = StyleSheet.create({
   pageTitle: { fontSize: 24, fontWeight: '700', color: colors.navy },
   body: { fontSize: 14, color: colors.text, lineHeight: 20 },
   fhead: { fontSize: 12, fontWeight: '700', color: colors.muted, marginTop: 10, marginBottom: 2 },
+  footNote: { fontSize: 12, color: colors.muted, textAlign: 'center', marginTop: 8 },
   check: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 5 },
   radio: { width: 18, height: 18, borderRadius: 4, borderWidth: 1.5, borderColor: colors.faint, alignItems: 'center', justifyContent: 'center' },
   radioOn: { backgroundColor: colors.navy, borderColor: colors.navy },

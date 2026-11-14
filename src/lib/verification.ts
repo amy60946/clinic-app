@@ -3,7 +3,7 @@ import data from '../data/professions.json';
 
 // Uzman belge incelemesi (ortak/sozlesme/akislar.md 14, proposed/20261026050000_clinician_verification.sql):
 // meslek seç → e-Devlet mezun belgesini (PDF) yükle → ön kontrol (Edge Function clinician-verify) → yönetici inceler.
-// Onayda ailelere "Belgesi incelendi: <meslek>" rozeti görünür.
+// Onayda ailelere "Uzman diploma belgesini yükledi" + meslek görünür (14 Kasım 2026; eski "Belgesi incelendi").
 export type Profession = { key: string; label: string; programs: string[]; degree: string | null; bacb?: boolean; manual?: string };
 export const PROFESSIONS = data.professions as Profession[];
 export const REASONS = data.reasons as Record<string, string>;
