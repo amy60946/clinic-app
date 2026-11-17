@@ -16,7 +16,7 @@ module.exports = {
     await h.click('Rapor', { beat: 'Rapor', dwell: 380, after: 1100 });
     await h.click('Raporu aç', { beat: 'Ev rutini gözlem raporunu aç', dwell: 400, after: 1250 });
     h.poster();
-    await h.scroll(470, { ms: 900, after: 800, beat: 'Rapor: haftalık rutin kartı, macera tabloları' });
+    await h.scroll(470, { ms: 900, after: 800, beat: 'Rapor: haftalık rutin kartı, adım tabloları' });
     await h.click('Kapat', { last: true, beat: 'Raporu kapat', dwell: 380, after: 700 });
     await h.moveTo(830, 560, { ms: 700 });
     await h.scrollTo('Notu kopyala', 720, { ms: 850, after: 450, beat: 'İlerleme notu' });

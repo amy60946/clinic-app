@@ -21,16 +21,16 @@ export function SummaryTab({ data, today, weeks }: ClientCtx) {
   const w = useMemo(() => weekly(data.tasks, data.completions, today, weeks), [data, today, weeks]);
 
   if (!o.planned) {
-    return <Empty text="Bu dönemde çocuğa atanmış macera yok. Ebeveyn Moyo'da sorumluluk ekledikçe göstergeler burada oluşur." />;
+    return <Empty text="Bu dönemde çocuğa atanmış adım yok. Ebeveyn Moyo'da rutin ekledikçe göstergeler burada oluşur." />;
   }
   return (
     <View>
       <Label>{`Son ${weeks} hafta (dünkü güne kadar)`}</Label>
       <View style={styles.stats}>
-        <Stat value={p(o.rate)} label="Tamamlama" hint={`${o.approved} / ${o.planned} planlanan macera onaylandı`} />
+        <Stat value={p(o.rate)} label="Tamamlama" hint={`${o.approved} / ${o.planned} planlanan adım onaylandı`} />
         <Stat value={p(o.fullDayRate)} label="Tam gün" hint={`${o.fullDays} / ${o.plannedDays} günde planlanan her şey yapıldı`} />
         <Stat value={p(o.beforeReminderRate)} label="Hatırlatmadan önce"
-          hint={o.withReminder ? `Hatırlatmalı ${o.withReminder} maceranın ${o.beforeReminder} tanesi saatinden önce başlandı` : 'Hatırlatma saati olan macera yok'} />
+          hint={o.withReminder ? `Hatırlatmalı ${o.withReminder} adımın ${o.beforeReminder} tanesi saatinden önce başlandı` : 'Hatırlatma saati olan adım yok'} />
         <Stat value={p(o.declineRate)} label="Yapamam" hint={`${o.declined} kez "Yapamam" dedi`} />
       </View>
       <Label>Haftalık tamamlama</Label>
@@ -67,10 +67,10 @@ export function RoutineTab({ data, today, weeks }: ClientCtx) {
   const titles = new Map(data.tasks.map((t) => [t.id, t.title]));
   const motivation = useMemo(() => motivationStats(data.completions, from, lastFullDay(today)), [data, from, today]);
 
-  if (!tasks.length) return <Empty text="Bu dönemde planlanmış macera yok." />;
+  if (!tasks.length) return <Empty text="Bu dönemde planlanmış adım yok." />;
   return (
     <View>
-      <Label>Macera başına (en zorlanandan başlayarak)</Label>
+      <Label>Adım başına (en zorlanandan başlayarak)</Label>
       <Card style={{ gap: 14 }}>
         {tasks.map((s) => (
           <View key={s.task.id} style={{ gap: 6 }}>

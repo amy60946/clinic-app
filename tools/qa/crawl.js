@@ -222,7 +222,7 @@ async function login(b, who) {
       await step(p, 'routines-stats', async () => { await tap(p, 'Oranlar'); });
       await step(p, 'routines-sent', async () => { await tap(p, p.getByText(/^Gönderilenler/).filter({ visible: true })); });
       await step(p, 'routines-suggest', async () => { await tap(p, 'Öner', { last: true }); });
-      await step(p, 'suggestion-editor', async () => { await tap(p, 'Aileye macera öner', { wait: 1500 }); });
+      await step(p, 'suggestion-editor', async () => { await tap(p, 'Aileye adım öner', { wait: 1500 }); });
       await closeTop(p); await closeTop(p);
     }
   }

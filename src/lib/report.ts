@@ -83,9 +83,9 @@ export function buildReportHtml(r: ReportInput): string {
 
 <h2>Özet</h2>
 <div class="stats">
-  <div class="stat"><b>${p(o.rate)}</b>Tamamlama<div class="m">${o.approved}/${o.planned} planlanan macera onaylandı</div></div>
+  <div class="stat"><b>${p(o.rate)}</b>Tamamlama<div class="m">${o.approved}/${o.planned} planlanan adım onaylandı</div></div>
   <div class="stat"><b>${p(o.fullDayRate)}</b>Tam gün<div class="m">${o.fullDays}/${o.plannedDays} gün</div></div>
-  <div class="stat"><b>${p(o.beforeReminderRate)}</b>Hatırlatmadan önce başlama<div class="m">${o.beforeReminder}/${o.withReminder} hatırlatmalı macera</div></div>
+  <div class="stat"><b>${p(o.beforeReminderRate)}</b>Hatırlatmadan önce başlama<div class="m">${o.beforeReminder}/${o.withReminder} hatırlatmalı adım</div></div>
   <div class="stat"><b>${p(o.declineRate)}</b>"Yapamam"<div class="m">${o.declined} kez · ${esc(reasons)}</div></div>
 </div>
 
@@ -101,8 +101,8 @@ export function buildReportHtml(r: ReportInput): string {
 ${motivation.answered ? `<tr><td>Motive etmek (ebeveyn gözlemi)</td><td>${esc(motivationText(motivation))} — ${motivation.answered} incelemede ebeveynin yanıtı; puan değildir</td></tr>` : ''}
 </table>
 
-<h2>Macera başına</h2>
-<table><tr><th>Macera</th><th>Beceri</th><th>Onay/plan</th><th>Oran</th><th>Haftalık %</th></tr>${taskRows || '<tr><td colspan="5">Planlanmış macera yok</td></tr>'}</table>
+<h2>Adım başına</h2>
+<table><tr><th>Adım</th><th>Beceri</th><th>Onay/plan</th><th>Oran</th><th>Haftalık %</th></tr>${taskRows || '<tr><td colspan="5">Planlanmış adım yok</td></tr>'}</table>
 <div class="m">Ustalık: tamamlanmış son ${MASTERY_WEEKS} haftanın her birinde ≥ %${MASTERY_RATE}.</div>
 
 <h2>Beceri alanına göre</h2>

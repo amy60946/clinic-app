@@ -23,7 +23,7 @@ const MINE_TRAINING_INFO = 'Ebeveynin bitirdiği ve senin henüz açmadığın y
 const SECTIONS: { id: Section; title: string; info: string }[] = [
   { id: 'mine', title: 'Senin sıran', info: 'Aileye gönderilmemiş değişikliğin, değerlendirme zamanı gelen davranış hedefinin ya da takip planı henüz olmayan danışanlar.' },
   { id: 'family', title: 'Ebeveynden yeni', info: 'Son 7 günde ebeveynin girdiği davranış kayıtları ve öneri kararları. "Gördüm" dersen ya da danışanı açarsan, yeni bir şey gelene kadar bu bölümden çıkar (bu cihazda).' },
-  { id: 'quiet', title: 'Sessiz kalanlar', info: 'Ebeveynin 7 gündür hiç kaydı yok: macera, davranış kaydı, program uygulaması, öneri kararı.' },
+  { id: 'quiet', title: 'Sessiz kalanlar', info: 'Ebeveynin 7 gündür hiç kaydı yok: adım onayı, davranış kaydı, program uygulaması, öneri kararı.' },
   { id: 'rest', title: 'Diğer danışanlar', info: 'Şu an bir şey beklemeyen danışanlar.' },
 ];
 

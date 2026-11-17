@@ -33,10 +33,10 @@ export const PACKAGES: Record<PackageId, { title: string; who: string; features:
     who: 'Tek başına çalışan uzman için',
     features: [
       'Sınırsız danışan; aileler Moyo ile ücretsiz bağlanır',
-      'Evdeki rutin verisi: maceralar, tamamlama, "Yapamam" nedenleri',
+      'Evdeki rutin verisi: adımlar, tamamlama, "Yapamam" nedenleri',
       'Hedef davranışlar ve ebeveynin bildirdiği olaylar',
       'Ebeveyn eğitimi: öğrenme modülleri, uygulama görevleri, hızlı yapılacaklar',
-      'Aileye macera önerisi; karar ebeveynde',
+      'Aileye rutin önerisi; karar ebeveynde',
       'Yazdırılabilir gözlem raporu (PDF)',
       'Yalnız sana görünen klinik notları (aile görmez)',
       'Yeni kayıt ve davranış kaydında anlık bildirim',

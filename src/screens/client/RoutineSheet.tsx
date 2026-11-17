@@ -52,13 +52,13 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initi
     setEditing(null);
   };
   const repeats: { id: DraftRepeat; label: string }[] = [
-    ...(routine.repeat === 'weekly' ? [{ id: 'own' as const, label: 'Macera günleri' }] : []),
+    ...(routine.repeat === 'weekly' ? [{ id: 'own' as const, label: 'Adım günleri' }] : []),
     { id: 'weekdays', label: 'Hafta içi' }, { id: 'daily', label: 'Her gün' }, { id: 'days', label: 'Günleri seç' },
   ];
 
   const send = async () => {
     if (editing) saveTime();
-    if (!picked) return Alert.alert('En az bir macera seç');
+    if (!picked) return Alert.alert('En az bir adım seç');
     if (draft.repeat === 'days' && !draft.days.length) return Alert.alert('En az bir gün seç');
     const list = routineSuggestions(routine, draft, todayISO(), note, { group: newGroupId(), goalId });
     setBusy(true);
@@ -118,7 +118,7 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initi
           </View>
 
           <Text style={styles.small}>
-            Çıkarmak istediğin maceraya dokun; saati değiştirmek için saate dokun. Ebeveyn rutini tek kartta görür, isterse macera çıkarıp ekler. Her macera ayrı onaylanır, oyunda ayrı görev olarak çıkar.
+            Çıkarmak istediğin adıma dokun; saati değiştirmek için saate dokun. Ebeveyn rutini tek kartta görür, isterse adım çıkarıp ekler. Her adım ayrı onaylanır; çocuk oyunda her birini ayrı macera olarak görür.
           </Text>
           <View style={styles.list}>
             {draft.tasks.map((t, i) => (
@@ -176,7 +176,7 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initi
           <Text style={styles.label}>Aileye notun (isteğe bağlı)</Text>
           <Input value={note} onChangeText={setNote} placeholder="Ör. İlk hafta yalnız sabah sorumluluklarına odaklanın" maxLength={140} />
           <CoachTarget id="sheet.routine.add" style={{ marginTop: 8 }}><Pressable onPress={send} disabled={busy || !picked} style={[styles.cta, { marginTop: 0 }, (busy || !picked) && { opacity: 0.5 }]} accessibilityRole="button">
-            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.ctaText}>{asDraft ? `Plana ekle (${picked} macera)` : `Rutini öner (${picked} macera)`}</Text>}
+            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.ctaText}>{asDraft ? `Plana ekle (${picked} adım)` : `Rutini öner (${picked} adım)`}</Text>}
           </Pressable></CoachTarget>
         </ScrollView>
       </View>
