@@ -36,3 +36,21 @@ Ekran kaynakları:
 Kurallar: `ortak/hukuk/45` (sağlık ve sonuç iddiası yok, belgesiz rakam yok, "ücretsiz"in yanında fiyat + dönem + yenilenme),
 kopyalama yasağı 12 Kasım'da kalktı ama rakip rakamları, yorumları ve bizde olmayan hizmetler kullanılmaz (ortak CLAUDE.md kural 7).
 Görsel inceleme alt ajanda (kural 8).
+
+## 17 Kasım 2026 sürümü (kullanıcı isteği; önizlemede, canlıya alınmadı)
+
+- **Çatı sayfa (`yap_c.py` → `c.html`, stil katmanı `v4.css`):** yeni açılış metni (`c-metin.json` `h1`, `alt_etiket`, `alt`, `ince`), hemen altında Moyo Ekosistemi
+  (`eko.js`: ortadaki ekran net; yandakiler bulanık, küçülmüş, geride; aralık görsellerin gerçek genişliğinden), hap biçiminde adım sayaçları
+  (`.sayac`: etkin adım yeşil dolu, geçilen adımın numarası yeşil; Atlassian'ın sekme çubuğu örnek), üst menüde yalnız üç başlık
+  (Güvenlik ve Sorular alt bilgide), açık zeminli kutuda sütunlu alt bilgi (`.altb`), dar ekranda menü düğmesi (`menu.js`).
+- **Ürün adı kilitleri:** `inline-moyo-ebeveyn.svg`, `-oyun.svg`, `-uzman.svg` (`tools/logo/gen.py` üretir; Mercek logosuyla aynı kural: kalın "moyo" + ince ad).
+  Aileye dönük sayfalarda uzman ürününün adı **Moyo Uzman**; "Moyo Mercek" yalnız uzman platformunda (kullanıcı kararı 17 Kasım 2026).
+- **Gerçek ekranlar:** `img/moyo-*.webp` (Moyo Ebeveyn, 600×1298), `img/mercek-*.webp` (Mercek paneli 1440×900, `-tel` telefon); çekim betikleri `cek/` (README orada).
+- **Moyo Ebeveyn sayfası (`yap_m.py`):** üstte kilit logo "moyo Ebeveyn", açılış iki sütun (solda başlık, sağda oyun + onay telefonu; telefon oyun
+  ekranının sağ panelini örter), açılıştan sonra Nasıl çalışır, ardından Neden Moyo.
+- **Düzen ayarı (`duzen/`):** çatı sayfanın yazı ve görsellerini sürükleyerek aralarını açma aracı. `python3 yap_c.py && (cd duzen && python3 yap_duzen.py)`;
+  Artifact'in ana sayfası `duzen/duzen.html`, dosya eşlemesi `duzen/dosyalar.json`, yetenek `db` + `user`. Kullanıcının ayarı Artifact veritabanında
+  `duzen/cati-masa`, `cati-tablet`, `cati-tel` belgelerinde (öğe başına `ust_bosluk`, `yatay`, `dikey` piksel); buradan okunup `v4.css`'e işlenir.
+  Önizleme: https://claude.ai/artifact/2MWBbCkhaTyY7RaGDdJx3N
+- **Önizleme kabuğu `host.html`** sadeleşti: iki sekme (Moyo Ekosistem · Moyo Ebeveyn) + Masaüstü / Tablet / Telefon. Eski sekmeler (analiz, A, B, benchmark) depoda duruyor (`a.html`, `b.html`, `arastirma.md`).
+- **Canlıya:** `disa_aktar.py` yeni dosyaları (`v4.css`, `eko.js`, `menu.js`) ve yeni alt bilgiyi taşır; çalıştırmak ve parent-app'e göndermek kullanıcı onayıyla.

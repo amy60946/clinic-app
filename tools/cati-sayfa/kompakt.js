@@ -8,7 +8,7 @@
   function duzen() { return sec.getAttribute('data-duzen'); }
   function isaretle(i) {
     aktif = i;
-    tabs.forEach(function (t, k) { t.setAttribute('aria-selected', String(k === i)); t.tabIndex = k === i ? 0 : -1; });
+    tabs.forEach(function (t, k) { t.setAttribute('aria-selected', String(k === i)); t.tabIndex = k === i ? 0 : -1; t.classList.toggle('gecti', k < i); });
     panel.forEach(function (p, k) { p.classList.toggle('on', k === i); });
     sayac.textContent = (i + 1) + ' / ' + n; geri.disabled = i === 0; ileri.disabled = i === n - 1;
   }

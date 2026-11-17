@@ -1,10 +1,5 @@
 {
- "h1": "Rutin, sorumluluk ve davranışta desteğe ihtiyaç duyan çocuklar ve aileleri için alışkanlık geliştirme platformu",
- "alt_basliklar": [
-  "Bu yolu birlikte yürümenize yardımcı olalım. Moyo; evde sizi, oyunda çocuğunuzu, seansta uzmanınızı aynı rutinde buluşturur.",
-  "Her çocuk, etrafındaki sevgi ve sabırla büyür. Moyo; evde sizi, oyunda çocuğunuzu, seansta uzmanınızı aynı rutinde buluşturur.",
-  "Küçük adımlar, el ele atılınca güzelleşir. Moyo; evde sizi, oyunda çocuğunuzu, seansta uzmanınızı aynı rutinde buluşturur."
- ],
+ "h1": "Çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform",
  "fiyat_not": "Moyo Oyun ücretsiz. Moyo Ebeveyn 7 gün ücretsiz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak.",
  "giris_etiket": "Nasıl çalışır",
  "giris_baslik": "Bugün evde başlayın, istediğinizde uzmanınızı katın",
@@ -17,7 +12,7 @@
   ],
   [
    "Dilerseniz uzmanınızı dahil edin",
-   "Çalıştığınız uzman, sizin onayınızla Moyo Mercek'ten bağlanır ve seanslar arasındaki günleri görür.",
+   "Çalıştığınız uzman, sizin onayınızla Moyo Uzman'dan bağlanır ve seanslar arasındaki günleri görür.",
    "İsteğe bağlı"
   ],
   [
@@ -58,17 +53,17 @@
    ],
    "gorsel": "ikili",
    "alt": "Moyo Oyun: \"Yaptım\" denen rutin, ebeveynin onayını bekliyor; yanında Moyo Ebeveyn'de onay ekranı",
-   "etiket": "",
+   "etiket": "Moyo Oyun ve Moyo Ebeveyn · gerçek ekranlar, örnek veri",
    "ozet": "Çocuğunuz işini bitirince oyunda \"Yaptım\"a dokunur, size bildirim gelir, tek dokunuşla onaylarsınız. Rutindeki her adım oyunda bir macera olur."
   },
   {
-   "rol": "Moyo Mercek · uzmanınızın panelinde · isteğe bağlı",
-   "kisa": "Moyo Mercek",
-   "baslik": "Dilerseniz uzmanınız da seanslar arasını görsün.",
-   "metin": "Çalıştığınız uzmanı siz dahil edersiniz: uzmanınız Moyo Mercek'ten davet gönderir, siz onaylarsınız. O andan sonra evdeki rutinleri ve davranış kayıtlarınızı görür, size kısa ebeveyn eğitimleri gönderir, yeni rutin önerir; seans dışındaki takip böyle sürer. Paylaşımı istediğiniz an durdurursunuz.",
+   "rol": "Moyo Uzman · uzmanınızın panelinde · isteğe bağlı",
+   "kisa": "Moyo Uzman",
+   "baslik": "Dilerseniz uzmanınız da seanslar arasını görsün.",
+   "metin": "Çalıştığınız uzmanı siz dahil edersiniz: uzmanınız Moyo Uzman'dan davet gönderir, siz onaylarsınız. O andan sonra evdeki rutinleri ve davranış kayıtlarınızı görür, size kısa ebeveyn eğitimleri gönderir, yeni rutin önerir; seans dışındaki takip böyle sürer. Paylaşımı istediğiniz an durdurursunuz.",
    "gorsel": "mercek-veri",
-   "alt": "Moyo Mercek: uzmanın gördüğü evdeki kayıtlar",
-   "etiket": "Uzmanınız \"Bu hafta evde nasıl geçti?\" diye sorduğunda cevap hazır.",
+   "alt": "Moyo Uzman: uzmanın gördüğü evdeki kayıtlar",
+   "etiket": "Moyo Uzman · gerçek ekran, örnek veri",
    "ozet": "Dahil ettiğiniz uzman evdeki rutinleri ve davranış kayıtlarını görür, size ebeveyn eğitimi gönderir, yeni rutin önerir."
   }
  ],
@@ -86,7 +81,7 @@
    "baslik": "Eğitim gönderir, rutin önerir.",
    "metin": "Seansta konuşulanı eve taşımak için.",
    "gorsel": "mercek-egitim",
-   "alt": "Moyo Mercek: ebeveyn eğitimi"
+   "alt": "Moyo Uzman: ebeveyn eğitimi"
   },
   {
    "kim": "Siz",
@@ -118,7 +113,7 @@
    "baslik": "Evdeki haftayı görür, seansa hazırlanır.",
    "metin": "Rutinler, kayıtlar ve eğitimdeki ilerleme tek ekranda.",
    "gorsel": "mercek-veri",
-   "alt": "Moyo Mercek: evdeki kayıtlar"
+   "alt": "Moyo Uzman: evdeki kayıtlar"
   },
   {
    "kim": "Hepsi birlikte",
@@ -154,11 +149,11 @@
   {
    "ikon": "img/ikon-mercek.svg",
    "kim": "Uzman için · isteğe bağlı",
-   "ad": "Moyo Mercek",
+   "ad": "Moyo Uzman",
    "ozet": "Seans dışındaki haftayı görünür kılar.",
    "metin": "Ailenin daveti ve onayıyla evdeki rutinleri ve davranış kayıtlarını görür, ebeveyn eğitimi gönderir, rapor ve ilerleme notunu kayıtlardan hazırlar.",
    "link": "{MERCEK}",
-   "link_ad": "Uzman sayfası ↗"
+   "link_ad": "Uzman sayfası →"
   }
  ],
  "guven": [
@@ -190,7 +185,7 @@
   ],
   [
    "Uzmanımı nasıl dahil ederim?",
-   "Çalıştığınız uzman Moyo Mercek'ten size davet gönderir ya da siz onun kodunu girersiniz. Neyi paylaşacağınızı siz seçersiniz; paylaşımı istediğiniz an durdurursunuz."
+   "Çalıştığınız uzman Moyo Uzman'dan size davet gönderir ya da siz onun kodunu girersiniz. Neyi paylaşacağınızı siz seçersiniz; paylaşımı istediğiniz an durdurursunuz."
   ],
   [
    "Uzmanım yoksa kullanabilir miyim?",
@@ -218,13 +213,11 @@
   ],
   [
    "Ücreti nedir?",
-   "Moyo Oyun ücretsizdir. Moyo Ebeveyn'i 7 gün ücretsiz deneyebilirsiniz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak. Uzmanlar Moyo Mercek'i ayrı paketlerle kullanır."
+   "Moyo Oyun ücretsizdir. Moyo Ebeveyn'i 7 gün ücretsiz deneyebilirsiniz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak. Uzmanlar Moyo Uzman'ı ayrı paketlerle kullanır."
   ]
  ],
- "alt_etiketler": [
-  "A",
-  "B",
-  "C"
- ],
- "urunler_etiket": "Ekosistemin Uygulamaları"
+ "urunler_etiket": "Ekosistemin Uygulamaları",
+ "alt_etiket": "Moyo Ekosistemi",
+ "alt": "Evde ebeveyni, oyunda çocuğu, seansta uzmanı aynı rutinde buluşturur.",
+ "ince": "14 gün ücretsiz deneyin, kart bilgisi gerekmez."
 }

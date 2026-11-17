@@ -1,0 +1,44 @@
+/* Düzen ayarı aracının kendi stilleri (sayfanın tasarımına dokunmaz). */
+:root { --dz-koyu: #16113A; --dz-acik: #FFFFFF; --dz-cizgi: #6C55F0; --dz-degisti: #E8730C; --dz-secili: #0A8F3A; --dz-soluk: #B9B6CC; }
+body { padding-bottom: 96px; }
+.dz-acik [data-dz] { outline: 1.5px dashed color-mix(in srgb, var(--dz-cizgi) 55%, transparent); outline-offset: 4px; cursor: grab; -webkit-user-select: none; user-select: none; }
+.dz-acik [data-dz] img { -webkit-user-drag: none; }
+.dz-acik [data-dz]:hover { outline-color: var(--dz-cizgi); outline-style: solid; }
+.dz-acik [data-dz].dz-degisti { outline-color: var(--dz-degisti); }
+.dz-acik [data-dz].dz-secili { outline: 2.5px solid var(--dz-secili); touch-action: none; }
+.dz-surukle, .dz-surukle * { cursor: grabbing !important; }
+.dz-bolumlu { position: relative; }
+.dz-bolum { display: none; }
+.dz-acik .dz-bolum { display: inline-flex; align-items: center; gap: 6px; position: absolute; top: 0; left: max(8px, env(safe-area-inset-left, 0px)); z-index: 15; transform: translateY(-50%); min-height: 30px; padding: 4px 12px; border: 0; border-radius: 999px;
+  background: var(--dz-cizgi); color: #FFFFFF; font: 700 12.5px/1.2 system-ui, sans-serif; cursor: ns-resize; touch-action: none; box-shadow: 0 6px 16px -8px rgba(22, 17, 58, .6); }
+.dz-bolum i { font-style: normal; font-weight: 500; opacity: .85; }
+.dz-bolum.dz-degisti { background: var(--dz-degisti); }
+.dz-bolum.dz-secili { background: var(--dz-secili); }
+.dz-acik .dz-bolumlu::before { content: ""; position: absolute; left: 0; right: 0; top: 0; border-top: 1.5px dashed color-mix(in srgb, var(--dz-cizgi) 45%, transparent); z-index: 14; pointer-events: none; }
+.dz-rozet { position: fixed; z-index: 60; padding: 6px 10px; border-radius: 8px; background: var(--dz-koyu); color: #FFFFFF; font: 700 13px/1.2 system-ui, sans-serif; pointer-events: none; white-space: nowrap; }
+
+.dz-arac { position: fixed; z-index: 50; right: max(14px, env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); width: min(330px, calc(100vw - 28px)); background: var(--dz-koyu); color: #FFFFFF; border-radius: 16px;
+  box-shadow: 0 24px 60px -20px rgba(11, 9, 32, .7); font: 500 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.dz-ust { display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 16px; }
+.dz-ust strong { font-size: 15px; font-weight: 800; }
+.dz-kayit { margin-left: auto; font-size: 12.5px; color: #B8F5CC; text-align: right; }
+.dz-kayit.hata { color: #FFC9A8; }
+.dz-arac button { font: inherit; color: inherit; cursor: pointer; }
+.dz-arac button:focus-visible { outline: 2px solid #FFFFFF; outline-offset: 2px; }
+#dz-kucult { flex: none; width: 32px; height: 32px; border: 0; border-radius: 9px; background: rgba(255, 255, 255, .12); font-size: 18px; line-height: 1; }
+.dz-govde { padding: 0 14px 14px; display: grid; gap: 10px; }
+.dz-arac.kucuk .dz-govde { display: none; }
+.dz-mod { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: rgba(255, 255, 255, .1); }
+.dz-mod button { min-height: 38px; border: 0; border-radius: 9px; background: transparent; font-weight: 700; }
+.dz-mod button[aria-pressed="true"] { background: #0FD354; color: var(--dz-koyu); }
+.dz-ipucu, .dz-not { margin: 0; font-size: 13px; color: #D5D2EA; }
+.dz-secim { padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, .1); display: grid; gap: 8px; }
+.dz-secim p { margin: 0; font-size: 13.5px; }
+.dz-ok { display: flex; flex-wrap: wrap; gap: 6px; }
+.dz-ok button, .dz-alt button { min-height: 36px; padding: 0 12px; border: 1px solid rgba(255, 255, 255, .28); border-radius: 9px; background: transparent; font-weight: 600; font-size: 13px; }
+.dz-ok button[data-ok] { width: 40px; padding: 0; font-size: 16px; }
+.dz-alt { display: flex; flex-wrap: wrap; gap: 6px; }
+.dz-arac button:disabled { opacity: .4; cursor: default; }
+.dz-alt button[aria-pressed="true"], .dz-alt button[data-onay="1"] { background: #FFFFFF; color: var(--dz-koyu); border-color: #FFFFFF; }
+.dz-metin { width: 100%; height: 110px; border-radius: 9px; border: 0; padding: 8px; font: 12px/1.4 ui-monospace, monospace; background: #FFFFFF; color: var(--dz-koyu); }
+@media (max-width: 700px) { .dz-arac { left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); width: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); } .dz-ipucu { display: none; } }

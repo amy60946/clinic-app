@@ -42,3 +42,32 @@
 @media (max-width: 560px) {
   .nc-media figure.tel img { height: auto; width: min(84vw, 320px); }
 }
+
+/* Açılış iki sütun (kullanıcı isteği 17 Kasım 2026): solda başlık, sağda oyun + onay ekranı yan yana; kilit logo "moyo Ebeveyn".
+   Telefon, oyun ekranının sağdaki "Oyun görevleri" panelinin tam üstüne gelir: yazı ortasından kesilen bir şey kalmaz. */
+.sayfa-moyo .logo .logo-svg { height: 30px; }
+.sayfa-moyo .hero { overflow: clip; }
+.mhero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); align-items: center; gap: clamp(28px, 4vw, 64px); text-align: left; }
+.sayfa-moyo .mhero h1 { margin: 14px 0 0; max-width: 620px; font-size: clamp(30px, 14px + 2.3vw, 50px); line-height: 1.1; }
+.sayfa-moyo .mhero .sub { margin: 22px 0 0; max-width: 560px; }
+.sayfa-moyo .mhero .actions { justify-content: flex-start; margin-top: 30px; }
+.sayfa-moyo .mhero .fine { margin-top: 16px; }
+.sayfa-moyo .mhero .trust { justify-content: flex-start; margin-top: 24px; gap: 8px 20px; }
+.sayfa-moyo .mhero .trust li { padding: 0; border: 0; background: none; font-size: 15px; gap: 8px; }
+.sayfa-moyo .mhero .hero-media { margin: 0; width: 100%; }
+.mhero .mh { aspect-ratio: 620 / 430; max-width: none; }
+.mhero .mh-oyun { left: 0; top: 17%; width: 98.4%; }
+.mhero .mh-tel { right: 0; top: 0; bottom: auto; height: 100%; }
+@media (max-width: 1000px) {
+  .mhero { grid-template-columns: 1fr; text-align: center; gap: 36px; }
+  .sayfa-moyo .mhero h1, .sayfa-moyo .mhero .sub { margin-inline: auto; }
+  .sayfa-moyo .mhero .actions, .sayfa-moyo .mhero .trust { justify-content: center; }
+  .sayfa-moyo .mhero .hero-media { max-width: 720px; margin-inline: auto; }
+  .sayfa-moyo .nc-tabs button { font-size: 14px; padding: 5px 12px 5px 6px; gap: 6px; }
+  .sayfa-moyo .nc-tabs b { width: 24px; height: 24px; font-size: 12px; }
+}
+@media (max-width: 700px) {
+  .mhero .mh { aspect-ratio: auto; }
+  .mhero .mh-oyun { width: 100%; }
+  .mhero .mh-tel { height: auto; }
+}

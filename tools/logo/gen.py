@@ -50,6 +50,11 @@ def inline(shapes, title, cls):
             % (cls, num(x0 - p), num(y0 - p), num(x1 - x0 + 2 * p), num(y1 - y0 + 2 * p), title, ''.join(path_d(s) for s in shapes), path_d(ball)))
 open(OUT + '/inline-moyo-mercek.svg', 'w').write(inline([ink, thin], 'Moyo Mercek', 'logo-svg'))
 open(OUT + '/inline-moyo.svg', 'w').write(inline([ink], 'Moyo', 'logo-svg'))
+# Ürün kilitleri (kullanıcı isteği 17 Kasım 2026): tanıtım sayfalarında "moyo Ebeveyn / Oyun / Uzman", Mercek kilidiyle aynı kural.
+# Aileye dönük yerlerde uzman ürününün adı "Moyo Uzman"; "Mercek" adı yalnız uzman platformunda (ortak durumlar.md 5B).
+for ek in ('Ebeveyn', 'Oyun', 'Uzman'):
+    t, _ = LIGHT.text(ek, tracking=A['mer']['track'] * LIGHT.upm); t = move(t, word_right + A['mer']['gap'] * X - bounds(t)[0])
+    open(OUT + '/inline-moyo-%s.svg' % ek.lower(), 'w').write(inline([ink, t], 'Moyo ' + ek, 'logo-svg'))
 # baseline oranı: viewBox içinde taban çizgisinin yeri (x yüksekliği ortalamak için)
 x0, y0, x1, y1 = bounds(ink, ball)
 print(json.dumps({'X': X, 'S': S, 'stem_xh': S / X, 'word_w_xh': (word_right) / X, 'top': y0 / X, 'bottom': y1 / X, 'ball_bottom': (bounds(ball)[3]) / X}))
