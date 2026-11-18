@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
 import { Input, Cta, SmallButton, IconButton, Empty } from '../../components/ui';
 import { ClinicianMe, Client } from '../../lib/clinic';
+import { useTabBarScroll } from '../../lib/tabBar';
 import {
   ITEMS, TOPICS, TYPES, LibItem, ItemType, topicLabel, loadFavorites, saveFavorites, loadTrainings, createTraining, addModules,
   loadDetail, parentsOf, loadParents, Training, TrainingNotInstalled,
@@ -172,9 +173,10 @@ export default function LibraryScreen({ me, clients, onBack, onOpenTraining }: {
   me: ClinicianMe; clients: Client[]; onBack: () => void; onOpenTraining: (c: Client) => void;
 }) {
   const [assign, setAssign] = useState<LibItem | null>(null);
+  const { scrollProps, bottomPad } = useTabBarScroll();     // alt ana menü
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 + bottomPad }} keyboardShouldPersistTaps="handled" {...scrollProps}>
         <View style={{ width: '100%', maxWidth: 1240, alignSelf: 'center', gap: 14 }}>
           <Pressable onPress={onBack} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start' }} accessibilityRole="button">
             <Ionicons name="chevron-back" size={16} color={colors.navy} />

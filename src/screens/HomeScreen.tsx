@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator, RefreshControl, Platform, AppState, useWindowDimensions } from 'react-native';
+import { View, Text, TextInput, Pressable, Alert, StyleSheet, ActivityIndicator, RefreshControl, Platform, AppState, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import { LayoutToggle } from '../lib/layout';
+import { LayoutToggle, useLayout } from '../lib/layout';
+import { TabBarProvider, TabBarScrollView, type TabId } from '../lib/tabBar';
+import LiquidTabBar from '../components/LiquidTabBar';
 import { colors, radius } from '../theme';
 import { Label, Notice } from '../components/ui';
 import { useAuth } from '../lib/auth';
@@ -119,6 +121,7 @@ export default function HomeScreen() {
   const [start, setStart] = useState<StartFlags | null>(null);
   const [inviteCount, setInviteCount] = useState(0);
   const { width } = useWindowDimensions();
+  const { desktop } = useLayout();
   // Yasal metinler (ortak akislar.md 17): onay bekleyen varsa panel yerine yeniden onay ekranı. null: sunucuda yok
   const [legal, setLegal] = useState<'unknown' | LegalDoc[] | null>('unknown');
   // Yasal ve gizlilik (tek sayfa; KVKK başvurusu içinde): false ya da açılacak görünüm
@@ -374,6 +377,11 @@ export default function HomeScreen() {
     </>
   );
 
+  // Alt ana menü (kullanıcı isteği 17 Kasım 2026): dört ana ekranda (Danışanlar, Takvim, Kütüphane, Ayarlar) ve yalnız dar
+  // düzende. Ekran seçimi bir işlevde toplandı: çubuk hepsinin üstünde, ağaçta aynı yerde durur; sekme değişince yeniden
+  // kurulmaz, kapsül kayar. `tab` çizilen ekranın sekmesi (danışan, üyelik, yasal onay, anket ve yüklemede null: çubuk yok).
+  let tab = null as TabId | null;
+  const renderScreen = () => {
   if (state.kind === 'ready' && Array.isArray(legal) && legal.length > 0) {
     return <><LegalUpdateScreen docs={legal} onDone={setLegal} footer={accountLinks} />{legalSheets}</>;
   }
@@ -412,6 +420,7 @@ export default function HomeScreen() {
   }
 
   if (library && state.kind === 'ready') {
+    tab = 'library';
     return (
       <LibraryScreen me={state.me} clients={state.clients} onBack={() => setLibrary(false)}
         onOpenTraining={(c) => { setLibrary(false); setSelected({ client: c, tab: 'training', key: Date.now() }); }} />
@@ -419,6 +428,7 @@ export default function HomeScreen() {
   }
 
   if (calendar && state.kind === 'ready') {
+    tab = 'calendar';
     return (
       <CalendarScreen me={state.me} team={state.team} clients={state.clients} initialSessionId={calendar.sessionId}
         onBack={() => { setCalendar(null); refreshToday(); }}
@@ -427,6 +437,7 @@ export default function HomeScreen() {
   }
 
   if (settings && state.kind === 'ready') {
+    tab = 'settings';
     return (
       <>
         <SettingsScreen
@@ -468,10 +479,11 @@ export default function HomeScreen() {
 
   const solo = state.kind === 'ready' && (state.me.personal ?? isSolo(state.me, state.team, session?.user.user_metadata?.practice));
   const canSwitch = state.kind === 'ready' && state.me.workspaces !== undefined;
+  if (state.kind === 'ready' && survey !== 'unknown' && legal !== 'unknown') tab = 'clients';
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
-      <ScrollView
+      <TabBarScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
@@ -540,7 +552,8 @@ export default function HomeScreen() {
                   onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide', { done: startDone(progressOf(start), planOn) }); }} />
               )}
               <CalendarRow sessions={todaySessions} clients={state.clients} onOpen={() => setCalendar({})} />
-              <LibraryRow onOpen={() => setLibrary(true)} />
+              {/* dar düzende kütüphane alt menüde; satır yalnız geniş (sol menülü) düzende */}
+              {desktop && <LibraryRow onOpen={() => setLibrary(true)} />}
               <ClientBoard clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onAttention={setAttention}
                 plan={planOn} onTraining={setTrainStat}
                 onOpen={(c) => setSelected({ client: c, tab: homeTab, key: Date.now() })} />
@@ -574,7 +587,7 @@ export default function HomeScreen() {
             </>
           )}
         </View>
-      </ScrollView>
+      </TabBarScrollView>
       <NotificationsSheet visible={bell} onClose={() => setBell(false)} onOpen={openTarget} />
       <VerificationSheet visible={verify} onClose={() => { setVerify(false); loadVerify(); }} />
       <Onboarding visible={guide} plan={planOn} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
@@ -585,6 +598,26 @@ export default function HomeScreen() {
       {legalSheets}
       {wsSheet}
     </SafeAreaView>
+  );
+  };
+  const screen = renderScreen();
+  const barOn = !desktop && tab !== null;
+  const selectTab = (to: TabId) => {
+    if (to === tab) return;
+    track('tabbar.switch', { to });
+    if (calendar) refreshToday();      // takvimden çıkarken ana ekrandaki "bugün" satırı yenilenir (Geri düğmesi gibi)
+    setSelected(null);
+    setLibrary(to === 'library');
+    setCalendar(to === 'calendar' ? {} : null);
+    setSettings(to === 'settings');
+  };
+  return (
+    <TabBarProvider visible={barOn}>
+      <View style={styles.root}>
+        {screen}
+        {barOn && tab !== null && <LiquidTabBar active={tab} onSelect={selectTab} />}
+      </View>
+    </TabBarProvider>
   );
 }
 
@@ -675,6 +708,7 @@ function VerificationRow({ v, onOpen }: { v: VerificationState; onOpen: () => vo
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: 24, paddingTop: 16, flexGrow: 1 },
   column: { width: '100%', maxWidth: 760, alignSelf: 'center' },

@@ -9,6 +9,7 @@ import { ClinicianMe, Client, Member, updateProfile, updateClinicName, listWorks
 import { useWorkspace } from '../lib/workspace';
 import { billingStatus, daysLeft, packageName } from '../lib/billing';
 import { track } from '../lib/track';
+import { useTabBarScroll } from '../lib/tabBar';
 import TeamCard, { PersonalCodeCard } from './TeamCard';
 
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -27,6 +28,7 @@ export default function SettingsScreen({
   const [clinic, setClinic] = useState(me.clinic);
   const [busy, setBusy] = useState<string | null>(null);
   const st = billingStatus(me);
+  const { scrollProps, bottomPad } = useTabBarScroll();     // alt ana menü
   // Kendi kliniğini kur (kullanıcı kararı 5 Kasım 2026): hesap seçicide değil, burada; kliniğin adını yalnız sahibi yazar.
   // Sahibi olduğu bir klinik varsa görünmez.
   const { switchTo } = useWorkspace();
@@ -93,7 +95,8 @@ export default function SettingsScreen({
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+      <ScrollView contentContainerStyle={[styles.scroll, bottomPad > 0 && { paddingBottom: 48 + bottomPad }]} keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets {...scrollProps}>
         <View style={styles.column}>
           <View style={styles.header}>
             <Pressable onPress={onBack} accessibilityLabel="Geri" hitSlop={8} style={styles.iconBtn}>
