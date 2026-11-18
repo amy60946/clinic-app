@@ -4,7 +4,7 @@
 import json, re, html as H
 E = json.load(open('e-metin.json'))
 e = H.escape
-LOGO = open('inline-moyo-ebeveyn.svg').read().strip()   # kilit: kalın "moyo" + ince "Ebeveyn" (tools/logo/gen.py)
+LOGO = open('inline-moyo-ebeveyn.svg').read().strip()   # kilit: "moyo" yazısı + ince "Ebeveyn" (tools/logo/gen.py; yazı 18 Kasım 2026 seçenek 6)
 LOGO = re.sub(r' role="img" aria-label="[^"]*"', ' aria-hidden="true" focusable="false"', LOGO).replace(' xmlns="http://www.w3.org/2000/svg"', '')
 APP = 'https://ebeveyn.moyoapp.com.tr/'
 MERCEK = 'https://mercek.moyoapp.com.tr/'
@@ -65,7 +65,7 @@ html = f'''<!doctype html>
 <title>Moyo · Rutinler oyunda, onay sizde</title>
 <meta name="description" content="Moyo: çocuğunuzun günlük rutinleri oyunda maceraya dönüşür; siz kurar, onaylar, ilerlemeyi görürsünüz. Dilerseniz çalıştığınız uzmanı da dahil edersiniz.">
 <meta name="theme-color" content="#2D294E">
-<link rel="icon" href="img/ikon-moyo.svg" type="image/svg+xml">
+<link rel="icon" href="img/favicon-moyo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="m/site.css">
 <link rel="stylesheet" href="m/moyo.css">
 <script>document.documentElement.classList.add('js');</script>

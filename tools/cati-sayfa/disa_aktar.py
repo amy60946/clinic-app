@@ -19,6 +19,10 @@ def cut(s, start, end_tag):
     j = s.index(end_tag, i) + len(end_tag)
     return s[:i] + s[j:]
 
+# Sekme simgesi (kullanıcı kararı 18 Kasım 2026; dosyalar Marketing setinden parent-app site/public/img'de → /img/…)
+FAV_ONIZLEME = '<link rel="icon" href="img/favicon-moyo.svg" type="image/svg+xml">'
+FAV = ('<link rel="icon" href="/img/favicon.svg" type="image/svg+xml"><link rel="icon" href="/img/favicon.ico" sizes="any">'
+       '<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">')
 VARLIK = ('ortak.css', 'c.css', 'beyaz.css', 'v4.css', 'hikaye.js', 'eko.js', 'kompakt.js', 'menu.js')
 c = open('c.html').read()
 c = cut(c, '<div class="alt-secici"', '</div>')                       # önizleme: alt başlık seçici
@@ -32,13 +36,16 @@ c = c.replace('<title>Moyo · Çatı sayfa</title>', '<title>Moyo · Çocuk, ail
               '<meta name="description" content="Moyo; evde sizi, oyunda çocuğunuzu ve dilerseniz çalıştığınız uzmanı aynı rutinde buluşturur. Moyo Ebeveyn, Moyo Oyun ve Moyo Uzman.">')
 for a in VARLIK:
     c = c.replace(f'"{a}"', f'"/c/{a}"')
+c = c.replace(FAV_ONIZLEME, FAV)
 c = c.replace('src="img/', 'src="/c/img/').replace('href="img/', 'href="/c/img/')
 assert 'href="#"' not in c, 'boş bağlantı kaldı'
 assert 'claude.ai' not in c and 'Önizleme' not in c, 'önizleme izi kaldı'
 
 m = open('ebeveyn.html').read()
+m = m.replace(FAV_ONIZLEME, FAV)
 m = m.replace('"m/', '"/c/m/').replace('src="img/', 'src="/c/img/').replace('href="img/', 'href="/c/img/')
 assert 'claude.ai' not in m
+assert FAV in c and FAV in m, 'sekme simgesi bağlantısı yok'
 
 os.makedirs(os.path.join(OUT, 'ebeveyn'), exist_ok=True)
 for d in ('c',):

@@ -1,60 +1,51 @@
-import os
-# "Moyo c top adjusted" (logo atölyesi kaydı vn366exngfj72tiesjn7, 12 Kasım 2026) → çizgi SVG'ler.
-# Moyo kitinin (parent-app brand/geom.py, kit.py; salt okunur kopya) yazı tipi okuyucusu ve şerit hesabıyla; aralıklar atölyedeki gibi
-# mürekkep aralığı = x yüksekliğinin yüzdesi (x yüksekliği = "x" glifinin mürekkep yüksekliği).
-import sys, json, math, os
-BRAND = os.environ.get('MOYO_BRAND', os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../amy60946/parent-app/brand'))   # parent-app brand/ (salt okunur)
+# "moyo" yazısı (kullanıcı kararı 18 Kasım 2026, logo seçeneği 6: her yerde yalnız yazı; m ve y köşeleri yuvarlak, y'nin topu yok)
+# → çizgi SVG'ler ve ürün kilitleri. Yazının çizimi Marketing setinden gelir (amy60946/marketing marka/moyo-set-2026-11-18,
+# kopyası kaynak/moyo-yazi.svg; burada yeniden çizilmez). Harf yerleri ve genişlik 12 Kasım yazısıyla aynı (2853,1 birim).
+# Kilit kuralı değişmedi: ince ek (Mercek / Ebeveyn / Oyun / Uzman) Poppins 300, harf aralığı −0,03 em, son "o"dan 0,5 x yüksekliği
+# uzakta, "o"nun taban çizgisinde. Renk kuralı: açık zeminde lacivert, koyu zeminde beyaz; yazıda yeşil yok.
+# İşaret (1E) yalnız uygulama simgesinde ve profil resminde kullanılır, yazıyla yan yana konmaz (simge.py).
+# Yazı tipi okuyucusu Moyo kitinden (parent-app brand/geom.py, salt okunur).
+import sys, json, os, re
+H = os.path.dirname(os.path.abspath(__file__))
+BRAND = os.environ.get('MOYO_BRAND', os.path.join(H, '../../../amy60946/parent-app/brand'))   # parent-app brand/ (salt okunur)
 sys.path.insert(0, BRAND)
-from geom import Face, move, bounds, num, path_d, circle, turtle, ribbon
+from geom import Face, move, bounds, num, path_d
 B = os.path.join(BRAND, 'fonts') + '/'
 HEAVY = Face(B + 'poppins-latin-800-normal.woff2'); LIGHT = Face(B + 'poppins-latin-300-normal.woff2')
-A = {"gaps": [7.9, 8.1, 8.8], "tp": {"L1": 0.34, "a1": 118, "a2": 0, "bg": 1, "br": 0.205, "end": "round", "er": 0.84, "r1": 0.36, "r2": 0.3, "sep": True, "tf": 0.55, "tw": 1},
-     "mer": {"gap": 0.5, "track": -0.03, "size": 100}}
-g = lambda ch: HEAVY.glyph(HEAVY.name(ch))
-X = -bounds(g('x'))[1]                          # mürekkep x yüksekliği
-a, b = HEAVY.stem_right('u'); S = float(b - a); XC0 = (a + b) / 2.0
-def tail(dx):
-    tp = A['tp']
-    pts = turtle((dx + XC0, -0.45 * X), 90, [('L', 0.45 * X + tp['L1'] * X), ('A', tp['r1'] * X, tp['a1'])] + ([('A', tp['r2'] * X, tp['a2'])] if tp['a2'] else []))
-    rb = ribbon(pts, S * tp['tw'], taper_from=tp['tf'], end_ratio=tp['er'])
-    x, y, h, _ = pts[-1]; r = tp['br'] * X; gap = (0.42 * S + 0.13 * X) * tp['bg'] + r
-    return rb, circle(x + gap * math.cos(math.radians(h)), y + gap * math.sin(math.radians(h)), r)
-ink, x = [], 0.0
-ball = None
-for i, ch in enumerate('mouo'):
-    sh = g(ch); bx = bounds(sh)
-    left = 0.0 if i == 0 else x + A['gaps'][i - 1] / 100 * X
-    dx = left - bx[0]
-    ink += move(sh, dx)
-    if i == 2:
-        t, ball = tail(dx); ink += t
-    x = left + (bx[2] - bx[0])
-word_right = x
-thin, _ = LIGHT.text('Mercek', tracking=A['mer']['track'] * LIGHT.upm)
-tb = bounds(thin); thin = move(thin, word_right + A['mer']['gap'] * X - tb[0])
-def doc(shapes_fg, fg, acc, title, pad=0.14):
-    x0, y0, x1, y1 = bounds(*([s for s in shapes_fg] + [ball]))
-    p = pad * X
-    body = ''.join('<path fill="%s" d="%s"/>' % (fg, path_d(s)) for s in shapes_fg) + '<path fill="%s" d="%s"/>' % (acc, path_d(ball))
-    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="%s %s %s %s" role="img" aria-label="%s"><title>%s</title>%s</svg>\n' % (num(x0 - p), num(y0 - p), num(x1 - x0 + 2 * p), num(y1 - y0 + 2 * p), title, title, body)
-INKS = {'lacivert': ('#16113A', '#0FD354'), 'beyaz': ('#FFFFFF', '#51E56A'), 'yesil': ('#0FD354', '#FFFFFF'), 'yesil-zemin': ('#16113A', '#FFFFFF')}
+X = -bounds(HEAVY.glyph(HEAVY.name('x')))[1]                     # mürekkep x yüksekliği (561)
+MER = {"gap": 0.5, "track": -0.03}
+src = open(os.path.join(H, 'kaynak', 'moyo-yazi.svg')).read()
+VX, VY, VW, VH = [float(v) for v in re.search(r'viewBox="([^"]+)"', src).group(1).split()]
+YAZI = ''.join(re.findall(r'<path d="([^"]+)"', src))             # taban çizgisi y = 0, sol kenar x = 0
+WB = (VX, VY, VX + VW, VY + VH)                                   # yazının sıkı kutusu
+word_right = VX + VW
+def ince(ek):
+    t, _ = LIGHT.text(ek, tracking=MER['track'] * LIGHT.upm)
+    return move(t, word_right + MER['gap'] * X - bounds(t)[0])
+def kutu(shapes):
+    bs = [WB] + [bounds(s) for s in shapes]
+    return min(b[0] for b in bs), min(b[1] for b in bs), max(b[2] for b in bs), max(b[3] for b in bs)
+def govde(shapes): return YAZI + ''.join(path_d(s) for s in shapes)
+def doc(shapes, fg, title, pad=0.14):
+    x0, y0, x1, y1 = kutu(shapes); p = pad * X
+    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="%s %s %s %s" role="img" aria-label="%s"><title>%s</title><path fill="%s" d="%s"/></svg>\n'
+            % (num(x0 - p), num(y0 - p), num(x1 - x0 + 2 * p), num(y1 - y0 + 2 * p), title, title, fg, govde(shapes)))
+# temaya uyan satır içi sürüm: harf currentColor (rengi sayfanın CSS'i verir: açıkta lacivert, koyuda beyaz)
+def inline(shapes, title, cls='logo-svg'):
+    x0, y0, x1, y1 = kutu(shapes); p = 0.06 * X
+    return ('<svg class="%s" xmlns="http://www.w3.org/2000/svg" viewBox="%s %s %s %s" role="img" aria-label="%s"><path fill="currentColor" d="%s"/></svg>'
+            % (cls, num(x0 - p), num(y0 - p), num(x1 - x0 + 2 * p), num(y1 - y0 + 2 * p), title, govde(shapes)))
+INKS = {'lacivert': '#16113A', 'beyaz': '#FFFFFF'}
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'out'
 os.makedirs(OUT, exist_ok=True)
-for k, (fg, acc) in INKS.items():
-    open(OUT + '/moyo-%s.svg' % k, 'w').write(doc([ink], fg, acc, 'moyo'))
-    open(OUT + '/moyo-mercek-%s.svg' % k, 'w').write(doc([ink, thin], fg, acc, 'moyo Mercek'))
-# temaya uyan satır içi sürüm: harf currentColor, top --logo-dot
-def inline(shapes, title, cls):
-    x0, y0, x1, y1 = bounds(*(shapes + [ball])); p = 0.06 * X
-    return ('<svg class="%s" xmlns="http://www.w3.org/2000/svg" viewBox="%s %s %s %s" role="img" aria-label="%s"><path fill="currentColor" d="%s"/><path class="logo-dot" d="%s"/></svg>'
-            % (cls, num(x0 - p), num(y0 - p), num(x1 - x0 + 2 * p), num(y1 - y0 + 2 * p), title, ''.join(path_d(s) for s in shapes), path_d(ball)))
-open(OUT + '/inline-moyo-mercek.svg', 'w').write(inline([ink, thin], 'Moyo Mercek', 'logo-svg'))
-open(OUT + '/inline-moyo.svg', 'w').write(inline([ink], 'Moyo', 'logo-svg'))
+mercek = ince('Mercek')
+for k, fg in INKS.items():
+    open(OUT + '/moyo-%s.svg' % k, 'w').write(doc([], fg, 'moyo'))
+    open(OUT + '/moyo-mercek-%s.svg' % k, 'w').write(doc([mercek], fg, 'moyo Mercek'))
+open(OUT + '/inline-moyo-mercek.svg', 'w').write(inline([mercek], 'Moyo Mercek'))
+open(OUT + '/inline-moyo.svg', 'w').write(inline([], 'Moyo'))
 # Ürün kilitleri (kullanıcı isteği 17 Kasım 2026): tanıtım sayfalarında "moyo Ebeveyn / Oyun / Uzman", Mercek kilidiyle aynı kural.
 # Aileye dönük yerlerde uzman ürününün adı "Moyo Uzman"; "Mercek" adı yalnız uzman platformunda (ortak durumlar.md 5B).
 for ek in ('Ebeveyn', 'Oyun', 'Uzman'):
-    t, _ = LIGHT.text(ek, tracking=A['mer']['track'] * LIGHT.upm); t = move(t, word_right + A['mer']['gap'] * X - bounds(t)[0])
-    open(OUT + '/inline-moyo-%s.svg' % ek.lower(), 'w').write(inline([ink, t], 'Moyo ' + ek, 'logo-svg'))
-# baseline oranı: viewBox içinde taban çizgisinin yeri (x yüksekliği ortalamak için)
-x0, y0, x1, y1 = bounds(ink, ball)
-print(json.dumps({'X': X, 'S': S, 'stem_xh': S / X, 'word_w_xh': (word_right) / X, 'top': y0 / X, 'bottom': y1 / X, 'ball_bottom': (bounds(ball)[3]) / X}))
+    open(OUT + '/inline-moyo-%s.svg' % ek.lower(), 'w').write(inline([ince(ek)], 'Moyo ' + ek))
+print(json.dumps({'X': X, 'word_w_xh': word_right / X, 'top': WB[1] / X, 'bottom': WB[3] / X}))

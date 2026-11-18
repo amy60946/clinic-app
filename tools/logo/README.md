@@ -1,23 +1,32 @@
-# Moyo logosu (seçilen sürüm, çizgiye çevrilmiş)
+# Moyo logosu (çizgiye çevrilmiş yazı ve ürün kilitleri)
 
-Kullanıcı seçimi (12 Kasım 2026): logo atölyesinde kaydedilen "Moyo c top adjusted"
-(https://claude.ai/artifact/NNHLAXqojHPiPTgHN4pZ88).
+**Kullanıcı kararı 18 Kasım 2026 (Marketing penceresinde; logo seçeneği 6):** her yerde yalnız "moyo" yazısı. Yeni çizim Poppins
+800'den, m ve y köşeleri yuvarlak, y'nin topu yok. İşaret (1E: üç bacaklı kubbe) yalnız uygulama simgesinde ve profil resminde;
+yazıyla yan yana kullanılmaz. Renk: açık zeminde lacivert `#16113A`, koyu zeminde beyaz; yazıda yeşil yok. Ana dosyalar ve PNG'ler
+Marketing setinde (`amy60946/marketing`, `marka/moyo-set-2026-11-18/`, BENIOKU.md; önizleme
+https://claude.ai/artifact/UwCiTLv19kbjeMpd9bQm3e). Buradaki kopyalar: `kaynak/moyo-yazi.svg`, `kaynak/moyo-isaret.svg`.
+12 Kasım'daki "Moyo c top adjusted" (toplu y) yazısının yerine geçti; harf yerleri ve genişlik aynı kaldığı için sayfalardaki ölçüler değişmedi.
 
-- Harfler: Poppins 800; harf aralıkları x yüksekliğinin %7,9 / %8,1 / %8,8'i; kuyruk C Top.
-- Uzman platformunda yanında ince "Mercek": Poppins 300, harf aralığı −0,03 em, moyo'ya uzaklığı 0,5 x.
-- Ebeveyn ürününde yalnız "moyo".
+- Uzman platformunda yanında ince "Mercek": Poppins 300, harf aralığı −0,03 em, son "o"dan 0,5 x yüksekliği uzakta, "o"nun taban çizgisinde.
+- Tanıtım sayfalarında aynı kuralla "moyo Ebeveyn / Oyun / Uzman" (aileye dönük sayfalarda uzman ürünü "Moyo Uzman").
 
 ```bash
-MOYO_BRAND=<parent-app>/brand python3 tools/logo/gen.py site/assets/logo
+MOYO_BRAND=<parent-app>/brand python3 tools/logo/gen.py <çıktı>   # moyo-{lacivert,beyaz}.svg, moyo-mercek-{lacivert,beyaz}.svg, inline-moyo*.svg
+python3 tools/logo/simge.py <çıktı>                                # ikon-moyo.svg (işaret %60), favicon-moyo.svg (%68, köşe 22)
 ```
 
-Moyo kitinin yazı tipi okuyucusu ve kuyruk hesabı (parent-app `brand/geom.py`) salt okunur kullanılır. Kitin sahibi Moyo
-penceresidir; son dosyalar oradan gelince bunların yerine geçer. `inline-*.svg` sayfalara satır içi gömülür: harfler
-`currentColor`, top `--logo-dot`. Bu dosyalar depoya eklenmez.
+Çıktının gittiği yerler: `site/assets/logo/` (dosyalar), `site/index.html` + `site/fiyat.html` (satır içi `logo-svg`, elle değil betikle
+değiştirilir), `tools/cati-sayfa/inline-moyo*.svg` + `img/ikon-moyo.svg` + `img/favicon-moyo.svg`. Yazı tipi okuyucusu Moyo kitinden
+(parent-app `brand/geom.py`, salt okunur; kitin sahibi Moyo penceresi). `inline-*.svg` sayfalara satır içi gömülür: harfler `currentColor`.
+`site/assets/logo/moyo-yesil*.svg` ve `moyo-mercek-yesil*.svg` eski çizimdir; yalnız `oyun_rozet.js` (Moyo Oyun simgesi alternatifleri,
+ayrı karar) okur, sayfalarda kullanılmaz.
 
-## Uygulama ikonları (kullanıcı kararı 13 Kasım 2026)
+**Moyo Mercek simgesi karar bekliyor (18 Kasım 2026):** `mercek-simge/onizleme.py` → önizleme (A bugünkü iki satır · B beyaz zemin +
+lacivert işaret, öneri · C büyüteçli işaret). Karar gelene kadar `assets/icon.png` ve `ikon-mercek.svg` eski çizimle durur.
 
-İki satırlı, sağa hizalı "mo / yo". **Moyo:** koyu zemin `#16113A`, harf marka yeşili `#0FD354`, top beyaz.
+## Uygulama ikonları (kullanıcı kararı 13 Kasım 2026; Moyo'nunki 18 Kasım 2026'da değişti: lacivert zemin + yeşil işaret, `simge.py`)
+
+İki satırlı, sağa hizalı "mo / yo" (artık yalnız Moyo Mercek'te, karar gelene kadar). **Moyo:** koyu zemin `#16113A`, harf marka yeşili `#0FD354`, top beyaz.
 **Moyo Mercek:** açık zemin `#FFFFFF`, harf lacivert `#16113A`, top `#0FD354`.
 
 ```bash
