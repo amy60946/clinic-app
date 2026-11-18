@@ -2,6 +2,16 @@
 
 Prepared 18 November 2026. Scope: evidence on how trial length affects trial starts, trial-to-paid conversion, retention and revenue in subscription apps, read for a parent-facing family app whose trial is **cardless, starts at sign-up, never auto-charges, and falls back to a limited free plan** (a "reverse trial"), launching in Turkey, with one neutral reminder 3 days before the trial ends.
 
+## Verification note (18 Nov 2026, after the report was written)
+
+Five hosts were then allowed in the session's network settings and the pages opened directly:
+
+- **[11] RevenueCat, free-trial length analysis:** confirmed. Monthly plans 39.6% / 45.9% / 46.6% / 43.7% (≤4 / 5–9 / 10–16 / 17–32 days); annual plans 24% (≤4 days) and 44.6% (17–32 days); Middle East & Africa monthly 38.3% (5–9) vs 27.4% (17–32). First renewal among payers: monthly 62.8% (5–9) vs 72.0% (10–16) vs 77.5% (17–32); annual 25.3% vs 36.4% vs 47.5%. The annual conversion figures of 33% (5–9) and 43% (10–16) quoted below were NOT found in the article text and stay unverified.
+- **[29] Yoganarasimhan et al., arXiv working paper 2006.13420:** confirmed 337,724 users in six markets, random assignment to 7 / 14 / 30 days, subscription rates 15.36% / 14.96% / 14.67%, 7 days the best uniform policy (+5.59% subscriptions). The "idle stretches" mechanism was not found in the pages read of this version.
+- **[35] First Page Sage:** confirmed 86 SaaS companies (71% B2B, 29% B2C); opt-in trial to paid 18.2%, opt-out 48.8%; visitor to trial 8.5% vs 2.5%; freemium to paid 2.6%.
+- **[43] Growth.Design, Blinkist:** confirmed "trial conversions +23%", push opt-in 6% → 74%, complaints −55%.
+- **[53] ticaret.gov.tr:** allowed, but the connection was reset twice; still unverified.
+
 ## How to read this report (important limits)
 
 **Most sources could not be opened.** This session's network allow-list blocked almost every research host (RevenueCat, Adapty, Superwall, SaaStr, arXiv, INFORMS, SSRN, Growth.Design, support.apple.com, support.google.com, ticaret.gov.tr and Turkish law-firm sites). What that means for each claim:
