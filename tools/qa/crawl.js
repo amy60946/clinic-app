@@ -128,7 +128,8 @@ async function login(b, who) {
   await closeTop(p, true);
   }
   // Kaynak kütüphanesi (ebeveyn eğitimi, 9 Kasım 2026)
-  await step(p, 'library', async () => { await tap(p, 'Kaynak kütüphanesi', { wait: 1800 }); }, 'Ebeveyn eğitimi kaynak kütüphanesi');
+  // dar düzende kütüphane alt ana menüde (17 Kasım 2026); geniş düzende ana ekrandaki satır
+  await step(p, 'library', async () => { await tap(p, (await visible(p, 'Kaynak kütüphanesi').count()) ? 'Kaynak kütüphanesi' : p.locator('[role="tab"][aria-label="Kütüphane"]'), { wait: 1800 }); }, 'Ebeveyn eğitimi kaynak kütüphanesi');
   await step(p, 'library-item', async () => { await tap(p, p.getByRole('button', { name: 'Uzmanınla eğitime başlarken', exact: true }).filter({ visible: true })); }, 'Ebeveyn eğitimi olarak ata');
   await step(p, 'library-assign', async () => { await tap(p, 'Ebeveyn eğitimi olarak ata', { last: true }); }, 'Danışan seç');
   await closeTop(p); await ensureClosed(p);
@@ -230,7 +231,7 @@ async function login(b, who) {
   // Örnek aile + eğitim turu (lansman odağı "A"; Takip Planı kapalıyken): Ayarlar › Örnek aileyi aç
   if (!PLAN) {
   await ensureClosed(p);
-  await step(p, 'home-again', async () => { if (!(await clickTop(p, p.locator('[aria-label="Danışanlar"]').filter({ visible: true }), 1500))) await tap(p, 'Tüm Danışanlar', { wait: 1500 }); }, 'Kaynak kütüphanesi');
+  await step(p, 'home-again', async () => { if (!(await clickTop(p, p.locator('[aria-label="Danışanlar"]').filter({ visible: true }), 1500))) await tap(p, 'Tüm Danışanlar', { wait: 1500 }); }, 'Aileyi davet et');
   await step(p, 'tour-intro', async () => { await tap(p, p.getByRole('button', { name: 'Ayarlar', exact: true }), { wait: 1500 }); await tap(p, 'Örnek aileyi aç', { wait: 2000 }); }, 'Deniz’le dene');
   await step(p, 'tour-open', async () => { await tap(p, 'Başla', { last: true }); }, 'Eğitimi aç');
   await step(p, 'tour-modules', async () => { await tap(p, p.getByRole('button', { name: /^Ebeveyn zor geçişlerden/ }).filter({ visible: true })); }, 'Ebeveynin okuduğu ve yanıtladığı içerik');
