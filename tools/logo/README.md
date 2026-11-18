@@ -21,17 +21,9 @@ değiştirilir), `tools/cati-sayfa/inline-moyo*.svg` + `img/ikon-moyo.svg` + `im
 `site/assets/logo/moyo-yesil*.svg` ve `moyo-mercek-yesil*.svg` eski çizimdir; yalnız `oyun_rozet.js` (Moyo Oyun simgesi alternatifleri,
 ayrı karar) okur, sayfalarda kullanılmaz.
 
-**Moyo Mercek simgesi karar bekliyor (18 Kasım 2026):** `mercek-simge/onizleme.py` → önizleme (A bugünkü iki satır · B beyaz zemin +
-lacivert işaret, öneri · C yeşil zemin + lacivert işaret; büyüteçli işaret görsel denetimde "gözlü yüz" gibi okunduğu için çıkarıldı). Karar gelene kadar `assets/icon.png` ve `ikon-mercek.svg` eski çizimle durur.
-
-## Uygulama ikonları (kullanıcı kararı 13 Kasım 2026; Moyo'nunki 18 Kasım 2026'da değişti: lacivert zemin + yeşil işaret, `simge.py`)
-
-İki satırlı, sağa hizalı "mo / yo" (artık yalnız Moyo Mercek'te, karar gelene kadar). **Moyo:** koyu zemin `#16113A`, harf marka yeşili `#0FD354`, top beyaz.
-**Moyo Mercek:** açık zemin `#FFFFFF`, harf lacivert `#16113A`, top `#0FD354`.
-
-```bash
-MOYO_BRAND=<parent-app>/brand python3 tools/logo/ikon.py site/assets/logo   # ikon-moyo.svg, ikon-mercek.svg
-```
-
-Moyo Mercek'in `assets/icon.png` (1024, saydamlıksız), `favicon.png` ve `splash-icon.png` dosyaları `ikon-mercek.svg`'den.
-Moyo'nun ve oyunun ikonları kendi pencerelerinde atanır.
+**Moyo Mercek simgesi (kullanıcı seçimi 18 Kasım 2026, "B"):** beyaz zemin + lacivert işaret, karenin %60'ı (karar önizlemesi
+`mercek-simge/onizleme.py`, https://claude.ai/artifact/M1cvYU5CbTYZaECvV9fZrY: A eski iki satır · B seçilen · C yeşil zemin).
+`python3 tools/logo/simge.py <çıktı> png` uygulamanın `assets/icon.png` (1024, saydamlıksız), `assets/favicon.png` (48, köşesi yuvarlak,
+%68) ve `assets/splash-icon.png` (koyu açılış zemininde beyaz "moyo Mercek" kilidi; `app.json` `imageWidth` 300) dosyalarını da yazar;
+`ikon-mercek.svg` (tanıtım sayfalarındaki küçük simge) ve `favicon-mercek.svg` (Mercek sitesinin sekme simgesi) aynı betikten.
+İki satırlı "mo / yo" simgesi ve üreticisi (`ikon.py`) kalktı.

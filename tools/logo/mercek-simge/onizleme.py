@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Moyo Mercek uygulama simgesi: karar önizlemesi (18 Kasım 2026). Moyo'nun simgesi kararlaştı (lacivert zemin + yeşil işaret, %60);
+# Moyo Mercek uygulama simgesi: karar önizlemesi (18 Kasım 2026). KARAR: B (kullanıcı, 18 Kasım 2026); sayfa kayıt olarak durur. Moyo'nun simgesi kararlaştı (lacivert zemin + yeşil işaret, %60);
 # Mercek'inki için kullanıcı kararı yok. Üç seçenek yan yana: A bugünkü (iki satır "mo / yo", eski yazı) · B aynı işaret, Mercek
 # renkleriyle (Marketing önerisi; 13 Kasım aile kuralı: Mercek açık zemin + lacivert) · C aynı işaret, yeşil zemin (ana ekranda en ayırt
 # edilen). Büyüteçli işaret (17 Kasım taslağı 1C) denendi, çıkarıldı: görsel denetimde "gözlü yüz" gibi okundu, 29 pikselde seçilmiyor.
@@ -8,7 +8,7 @@ import os, re
 H = os.path.dirname(os.path.abspath(__file__)); L = os.path.dirname(H)
 LAC, YES, BEY = '#16113A', '#0FD354', '#FFFFFF'
 isaret = ''.join(re.findall(r'<path[^>]*/>', open(os.path.join(L, 'kaynak', 'moyo-isaret.svg')).read()))
-eski = open(os.path.join(L, '..', '..', 'site', 'assets', 'logo', 'ikon-mercek.svg')).read()
+eski = open(os.path.join(H, 'eski-iki-satir.svg')).read()   # 13 Kasım simgesi (iki satır "mo / yo"); 18 Kasım'da B seçildi
 eski_ic = eski[eski.index('<g '):eski.rindex('</svg>')]
 
 def kare(ic, zemin, ad):
@@ -23,13 +23,13 @@ SIMGE = {
     'c': kare(ortala('<g fill="%s">%s</g>' % (LAC, isaret)), YES, 'Moyo Mercek simgesi, seçenek C'),
 }
 SEC = [
-    ('a', 'A', 'Bugünkü', 'İki satırlı “mo / yo”, eski yazıyla.', ['Eski yazı çizimi: y harfinin topu duruyor, yeni “moyo” yazısıyla uyuşmuyor.', 'Moyo simgesi artık işaretli; ikisi yan yana aynı aileden görünmüyor.']),
+    ('a', 'A', 'Önceki simge', 'İki satırlı “mo / yo”, eski yazıyla.', ['Eski yazı çizimi: y harfinin topu duruyor, yeni “moyo” yazısıyla uyuşmuyor.', 'Moyo simgesi artık işaretli; ikisi yan yana aynı aileden görünmüyor.']),
     ('b', 'B', 'Aynı işaret, Mercek renkleri', 'Beyaz zemin, lacivert işaret, karenin %60’ı.', ['Moyo ile aynı işaret: iki uygulama tek aile olarak okunur.', 'Ayrım yalnız renkte: koyu kare Moyo, açık kare Mercek.']),
     ('c', 'C', 'Aynı işaret, yeşil zemin', 'Yeşil zemin, lacivert işaret, karenin %60’ı.', ['Her duvar kâğıdında en kolay seçilen; Moyo’dan ilk bakışta ayrılır.', '13 Kasım’daki “Mercek açık zemin” kuralını değiştirir; tanıtım sitesindeki küçük simgeler de yeşile döner.']),
 ]
 AC = lambda k: ' acik' if k in ('a', 'b') else ''
 def kart(k, harf, ad, alt, madde):
-    oneri = '<span class="rozet">Önerim</span>' if k == 'b' else ''
+    oneri = '<span class="rozet">Seçildi</span>' if k == 'b' else ''
     return ('<article class="kart"><header><span class="harf">%s</span><div><h3>%s</h3><p class="alt">%s</p></div>%s</header>'
             '<div class="buyuk simge%s">%s</div>'
             '<div class="boylar" aria-label="Küçük boylarda">%s</div><ul>%s</ul></article>'
@@ -91,8 +91,8 @@ figcaption { font-size: 12px; color: var(--soluk); font-variant-numeric: tabular
 </style>
 <div class="sayfa">
   <div class="giris">
-    <h1>Moyo Mercek simgesi hangisi olsun?</h1>
-    <p>Moyo’nun simgesi kararlaştırıldı: lacivert kare, yeşil işaret. Mercek’in simgesi hâlâ eski yazıyla duruyor. Aşağıda bugünkü simge ve iki öneri var; rakamlar simgenin ekrandaki boyudur (60 ana ekran, 40 arama, 29 ayarlar).</p>
+    <h1>Moyo Mercek simgesi: B seçildi</h1>
+    <p>Moyo’nun simgesi kararlaştırıldı: lacivert kare, yeşil işaret. 18 Kasım’da Mercek için B’yi seçtiniz. Aşağıda önceki simge ve iki seçenek duruyor; rakamlar simgenin ekrandaki boyudur (60 ana ekran, 40 arama, 29 ayarlar).</p>
   </div>
   <section class="kartlar" aria-label="Seçenekler">@@KART@@</section>
   <section style="display:grid;gap:14px">
@@ -100,8 +100,7 @@ figcaption { font-size: 12px; color: var(--soluk); font-variant-numeric: tabular
     <div class="ekranlar">@@EKRAN@@</div>
   </section>
   <div class="not">
-    <p><b>Önerim B.</b> İki uygulama aynı işareti taşır, koyu kare Moyo, açık kare Mercek olur; 13 Kasım’daki “Mercek açık zemin, lacivert” kuralına da uyar. Mercek ana ekranda daha da ayrışsın isterseniz C.</p>
-    <p>Seçtiğinizde uygulama simgesi, açılış ekranı, sekme simgesi ve Mercek sitesindeki küçük simgeler buna göre üretilir; iPhone ve iPad’de görmek için yeni bir TestFlight derlemesi gerekir.</p>
+    <p><b>Seçim B.</b> İki uygulama aynı işareti taşır; koyu kare Moyo, açık kare Mercek. Uygulama simgesi, açılış görseli, sekme simgesi ve tanıtım sayfalarındaki küçük simgeler buna göre üretildi. iPhone ve iPad’de görmek için yeni bir TestFlight derlemesi gerekir.</p>
   </div>
 </div>
 '''.replace('@@KART@@', ''.join(kart(*s) for s in SEC)).replace('@@EKRAN@@', ekran('gunduz', 'Açık duvar kâğıdı') + ekran('gece', 'Koyu duvar kâğıdı'))
