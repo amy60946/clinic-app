@@ -54,3 +54,5 @@ Görsel inceleme alt ajanda (kural 8).
   Önizleme: https://claude.ai/artifact/2MWBbCkhaTyY7RaGDdJx3N
 - **Önizleme kabuğu `host.html`** sadeleşti: iki sekme (Moyo Ekosistem · Moyo Ebeveyn) + Masaüstü / Tablet / Telefon. Eski sekmeler (analiz, A, B, benchmark) depoda duruyor (`a.html`, `b.html`, `arastirma.md`).
 - **Canlıya:** `disa_aktar.py` yeni dosyaları (`v4.css`, `eko.js`, `menu.js`) ve yeni alt bilgiyi taşır; çalıştırmak ve parent-app'e göndermek kullanıcı onayıyla.
+
+**Düzen aracı kaydı işlendi (18 Kasım 2026):** kullanıcının geniş ekran ayarı (`duzen/cati-masa`, 17 Kasım 21:31 UTC: giriş bandı başlık +16, metin +16, basamaklar +8; "Nasıl çalışır" +4 px) `v4.css` sonundaki `@media (min-width: 1025px)` bloğuna yazıldı; veritabanı kaydı boşaltıldı (işlenen değerler `islenen` alanında), araç yeni düzenden sıfırdan başlar. Tablet ve telefon için kayıt yoktu. Yeni kayıt gelince aynı yol: taban değer + fark → `v4.css`, iki önizlemeye `v4.css` yayınlanır, kayıt boşaltılır.

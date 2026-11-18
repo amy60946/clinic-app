@@ -135,3 +135,12 @@
 @media (max-width: 760px) { .sayfa-c .nk .t-ikili .uu-tel { width: min(60%, 230px); } }
 /* alt bilgide logo satırı sütun başlığıyla aynı yükseklikte */
 .altb .altb-marka .logo { height: 23px; min-height: 0; padding: 0; }
+
+/* Düzen aracı ayarı (kullanıcı, 17 Kasım 2026; geniş ekran > 1024 px; kaynak: Artifact veritabanı duzen/cati-masa sürüm 18).
+   Giriş bandı: başlık +16, metin +16, basamaklar +8; "Nasıl çalışır" bölümü +4. Taban değerler ortak.css'te (10 / 12 / 30 px, -12svh). */
+@media (min-width: 1025px) {
+  .sayfa-c #giris h2 { margin-top: 26px; }
+  .sayfa-c #giris .ic > p:not(.ust-etiket) { margin-top: 28px; }
+  .sayfa-c #giris .basamak { margin-top: 38px; }
+  .sayfa-c .giris-bant + #nasil { margin-top: calc(-12svh + 4px); }
+}
