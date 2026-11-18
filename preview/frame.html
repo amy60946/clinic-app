@@ -47,6 +47,10 @@
   button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
   button.confirm { color: var(--danger); border-color: var(--danger); }
   .noparent .parent { display: none; }
+  .grp { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+  .hat-liste { font-size: 12px; color: var(--muted); background: var(--chip); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; display: grid; gap: 6px; }
+  .hat-liste[hidden] { display: none; }
+  .hat-liste b { color: var(--ink); font-weight: 600; }
   .stage.dar .clinic { align-items: center; }
   .stage.dar .clinic .window { flex: none; width: 393px; max-width: 100%; height: min(852px, calc(100vh - 150px)); min-height: 560px; border: 10px solid var(--bezel); border-radius: 46px; box-sizing: content-box; }
 
@@ -82,9 +86,19 @@
   </div>
   <div class="bar">
     <span>Uzman (klinik sahibi): <b>uzman@clinicapp.app</b> · Ekip üyesi: <b>ekip@clinicapp.app</b> · Denemesi bitmiş: <b>bitti@clinicapp.app</b> · Ebeveyn: <b>demo@parentapp.app</b> · şifre <b>12345678</b></span>
-    <span>Yeni (18 Kasım): <b>telefonda yüzen alt menü</b> (Danışanlar · Takvim · Kütüphane · Ayarlar). Listeyi aşağı kaydırınca küçülür, durunca ya da yukarı kaydırınca büyür. Geniş ekranda görmek için sağ üstteki <b>Telefon boyu</b> düğmesine basın.</span>
+    <span>Yeni (18 Kasım): <b>telefonda yüzen alt menü</b> (sağ üstte <b>Telefon boyu</b>) · <b>Aboneliği yönet</b> penceresi (Ayarlar › Üyelik › Aboneliği yönet) · <b>hatırlatmalar</b> (bir aile davet edin, izin açıklaması çıkar; Ayarlar › Bildirimler).</span>
     <button id="reset" type="button">Baştan başlat</button>
   </div>
+  <div class="bar">
+    <span>Üyelik durumunu dene:</span>
+    <span class="grp" role="group" aria-label="Üyelik durumu">
+      <button type="button" data-uye="" aria-pressed="true">Etkin</button>
+      <button type="button" data-uye="cancelled" aria-pressed="false">İptal edilmiş</button>
+      <button type="button" data-uye="billing" aria-pressed="false">Ödeme sorunu</button>
+    </span>
+    <button type="button" id="hat" aria-pressed="false">Planlı hatırlatmaları göster</button>
+  </div>
+  <div class="hat-liste" id="hat-liste" hidden></div>
 </div>
 
 <script>
@@ -107,6 +121,45 @@
   const boy = document.getElementById('boy');
   boy.addEventListener('click', () => { const on = stage.classList.toggle('dar'); boy.setAttribute('aria-pressed', String(on)); });
 
+  // Üyelik durumu taklidi (preview/demo-store.ts `demo.membership`): seçilince uzman paneli yeniden yüklenir
+  const UYE = 'demo.membership';
+  const uyeBtns = Array.from(document.querySelectorAll('[data-uye]'));
+  const uyeNow = () => { try { const s = JSON.parse(localStorage.getItem(UYE) || '{}').state; return s && s !== 'active' ? s : ''; } catch (e) { return ''; } };
+  const uyeMark = () => { const s = uyeNow(); uyeBtns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.uye === s))); };
+  uyeBtns.forEach((b) => b.addEventListener('click', () => {
+    try {
+      if (b.dataset.uye) localStorage.setItem(UYE, JSON.stringify({ plan: 'clinic', period: 'monthly', state: b.dataset.uye }));
+      else localStorage.removeItem(UYE);
+    } catch (e) { /* depolama kapalı */ }
+    uyeMark();
+    document.getElementById('clinic').src = 'clinic.html?' + Date.now();
+  }));
+  uyeMark();
+
+  // Cihazda planlanan hatırlatmalar (preview/demo-nudge-device.ts `demo.nudges`): önizlemede bildirim gitmez, plan burada okunur
+  const hat = document.getElementById('hat'), hatListe = document.getElementById('hat-liste');
+  const hatCiz = () => {
+    let l = [];
+    try { l = JSON.parse(localStorage.getItem('demo.nudges') || '[]'); } catch (e) { /* boş say */ }
+    hatListe.textContent = '';
+    if (!l.length) {
+      hatListe.textContent = 'Şu an planlı hatırlatma yok. Uzman panelinde bir aile davet edip çıkan pencerede "Bildirimleri aç" deyin (ya da Ayarlar › Bildirimler); birkaç saniye sonra bu düğmeye yeniden basın.';
+      return;
+    }
+    l.sort((a, b) => String(a.fireAt).localeCompare(String(b.fireAt))).forEach((n) => {
+      const d = document.createElement('div'), b = document.createElement('b');
+      b.textContent = new Date(n.fireAt).toLocaleString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+      d.append(b, ' · ' + (n.body || ''));
+      hatListe.append(d);
+    });
+  };
+  hat.addEventListener('click', () => {
+    const ac = hatListe.hidden;
+    if (ac) hatCiz();
+    hatListe.hidden = !ac;
+    hat.setAttribute('aria-pressed', String(ac));
+  });
+
   const btn = document.getElementById('reset');
   let armed = false, timer;
   btn.addEventListener('click', () => {
@@ -119,7 +172,12 @@
     }
     clearTimeout(timer);
     // Deneme verisinin tarayıcı deposu anahtarı (iki önizlemede aynı)
-    try { localStorage.removeItem('pofi-onizleme-v4'); } catch (e) { /* depolama kapalı */ }
+    try {
+      localStorage.removeItem('pofi-onizleme-v4');
+      ['demo.membership', 'demo.nudges', 'demo.nudge_permission'].forEach((k) => localStorage.removeItem(k));
+      Object.keys(localStorage).filter((k) => k.startsWith('clinic.nudge.')).forEach((k) => localStorage.removeItem(k));
+    } catch (e) { /* depolama kapalı */ }
+    uyeMark(); hatListe.hidden = true; hat.setAttribute('aria-pressed', 'false');
     document.getElementById('clinic').src = 'clinic.html?' + Date.now();
     if (parent.src) parent.src = 'app.html?' + Date.now();
     armed = false; btn.textContent = 'Baştan başlat'; btn.classList.remove('confirm');
