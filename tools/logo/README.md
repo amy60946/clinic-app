@@ -22,7 +22,7 @@ değiştirilir), `tools/cati-sayfa/inline-moyo*.svg` + `img/ikon-moyo.svg` + `im
 ayrı karar) okur, sayfalarda kullanılmaz.
 
 **Moyo Mercek simgesi karar bekliyor (18 Kasım 2026):** `mercek-simge/onizleme.py` → önizleme (A bugünkü iki satır · B beyaz zemin +
-lacivert işaret, öneri · C büyüteçli işaret). Karar gelene kadar `assets/icon.png` ve `ikon-mercek.svg` eski çizimle durur.
+lacivert işaret, öneri · C yeşil zemin + lacivert işaret; büyüteçli işaret görsel denetimde "gözlü yüz" gibi okunduğu için çıkarıldı). Karar gelene kadar `assets/icon.png` ve `ikon-mercek.svg` eski çizimle durur.
 
 ## Uygulama ikonları (kullanıcı kararı 13 Kasım 2026; Moyo'nunki 18 Kasım 2026'da değişti: lacivert zemin + yeşil işaret, `simge.py`)
 

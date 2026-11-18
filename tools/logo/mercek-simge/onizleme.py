@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # Moyo Mercek uygulama simgesi: karar önizlemesi (18 Kasım 2026). Moyo'nun simgesi kararlaştı (lacivert zemin + yeşil işaret, %60);
 # Mercek'inki için kullanıcı kararı yok. Üç seçenek yan yana: A bugünkü (iki satır "mo / yo", eski yazı) · B aynı işaret, Mercek
-# renkleriyle (Marketing önerisi; 13 Kasım aile kuralı: Mercek açık zemin + lacivert) · C büyüteçli işaret (17 Kasım taslağı 1C).
+# renkleriyle (Marketing önerisi; 13 Kasım aile kuralı: Mercek açık zemin + lacivert) · C aynı işaret, yeşil zemin (ana ekranda en ayırt
+# edilen). Büyüteçli işaret (17 Kasım taslağı 1C) denendi, çıkarıldı: görsel denetimde "gözlü yüz" gibi okundu, 29 pikselde seçilmiyor.
 #   python3 tools/logo/mercek-simge/onizleme.py  →  onizleme.html (Artifact olarak yayınlanır; karar gelince simge üretilir)
-import json, os, re
+import os, re
 H = os.path.dirname(os.path.abspath(__file__)); L = os.path.dirname(H)
 LAC, YES, BEY = '#16113A', '#0FD354', '#FFFFFF'
 isaret = ''.join(re.findall(r'<path[^>]*/>', open(os.path.join(L, 'kaynak', 'moyo-isaret.svg')).read()))
-s1c = json.load(open(os.path.join(L, 'taslak', 'sekil.json')))['1c']
 eski = open(os.path.join(L, '..', '..', 'site', 'assets', 'logo', 'ikon-mercek.svg')).read()
 eski_ic = eski[eski.index('<g '):eski.rindex('</svg>')]
 
@@ -20,24 +20,25 @@ SIMGE = {
     'moyo': kare(ortala('<g fill="%s">%s</g>' % (YES, isaret)), LAC, 'Moyo simgesi'),
     'a': kare(eski_ic, BEY, 'Moyo Mercek simgesi, bugünkü'),
     'b': kare(ortala('<g fill="%s">%s</g>' % (LAC, isaret)), BEY, 'Moyo Mercek simgesi, seçenek B'),
-    'c': kare(ortala('<path fill="%s" d="%s"/><path fill="%s" d="%s"/>' % (LAC, s1c['d'], YES, s1c['v']), s1c['w'], s1c['h']), BEY, 'Moyo Mercek simgesi, seçenek C'),
+    'c': kare(ortala('<g fill="%s">%s</g>' % (LAC, isaret)), YES, 'Moyo Mercek simgesi, seçenek C'),
 }
 SEC = [
     ('a', 'A', 'Bugünkü', 'İki satırlı “mo / yo”, eski yazıyla.', ['Eski yazı çizimi: y harfinin topu duruyor, yeni “moyo” yazısıyla uyuşmuyor.', 'Moyo simgesi artık işaretli; ikisi yan yana aynı aileden görünmüyor.']),
     ('b', 'B', 'Aynı işaret, Mercek renkleri', 'Beyaz zemin, lacivert işaret, karenin %60’ı.', ['Moyo ile aynı işaret: iki uygulama tek aile olarak okunur.', 'Ayrım yalnız renkte: koyu kare Moyo, açık kare Mercek.']),
-    ('c', 'C', 'Büyüteçli işaret', 'Beyaz zemin, lacivert işaret, iki yeşil mercek.', ['Mercek adını simgede taşır; Moyo’dan biçimle de ayrılır.', 'Küçük boyda ayrıntı incelir; ikinci bir işaret çizimi demektir.']),
+    ('c', 'C', 'Aynı işaret, yeşil zemin', 'Yeşil zemin, lacivert işaret, karenin %60’ı.', ['Her duvar kâğıdında en kolay seçilen; Moyo’dan ilk bakışta ayrılır.', '13 Kasım’daki “Mercek açık zemin” kuralını değiştirir; tanıtım sitesindeki küçük simgeler de yeşile döner.']),
 ]
+AC = lambda k: ' acik' if k in ('a', 'b') else ''
 def kart(k, harf, ad, alt, madde):
     oneri = '<span class="rozet">Önerim</span>' if k == 'b' else ''
     return ('<article class="kart"><header><span class="harf">%s</span><div><h3>%s</h3><p class="alt">%s</p></div>%s</header>'
-            '<div class="buyuk simge acik">%s</div>'
+            '<div class="buyuk simge%s">%s</div>'
             '<div class="boylar" aria-label="Küçük boylarda">%s</div><ul>%s</ul></article>'
-            % (harf, ad, alt, oneri, SIMGE[k],
-               ''.join('<figure><div class="simge acik" style="width:%dpx">%s</div><figcaption>%d</figcaption></figure>' % (b, SIMGE[k], b) for b in (60, 40, 29)),
+            % (harf, ad, alt, oneri, AC(k), SIMGE[k],
+               ''.join('<figure><div class="simge%s" style="width:%dpx">%s</div><figcaption>%d</figcaption></figure>' % (AC(k), b, SIMGE[k], b) for b in (60, 40, 29)),
                ''.join('<li>%s</li>' % m for m in madde)))
 def ekran(sinif, baslik):
     sat = ''.join('<div class="sira"><span class="etiket">%s</span><figure><div class="simge">%s</div><figcaption>Moyo</figcaption></figure>'
-                  '<figure><div class="simge acik">%s</div><figcaption>Moyo Mercek</figcaption></figure></div>' % (h, SIMGE['moyo'], SIMGE[k]) for k, h, *_ in SEC)
+                  '<figure><div class="simge%s">%s</div><figcaption>Moyo Mercek</figcaption></figure></div>' % (h, SIMGE['moyo'], AC(k), SIMGE[k]) for k, h, *_ in SEC)
     return '<div class="ekran %s"><p class="ekran-ad">%s</p>%s</div>' % (sinif, baslik, sat)
 
 html = '''<title>Mercek Simge Seçenekleri</title>
@@ -58,7 +59,8 @@ p { margin: 0; }
 .giris { display: grid; gap: 10px; max-width: 68ch; }
 .giris p { color: var(--soluk); }
 .kartlar { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-.kart { background: var(--kart); border: 1px solid var(--cizgi); border-radius: 18px; padding: 18px; display: grid; gap: 16px; align-content: start; min-width: 0; }
+.kartlar { grid-template-rows: auto auto auto auto; }
+.kart { background: var(--kart); border: 1px solid var(--cizgi); border-radius: 18px; padding: 18px; display: grid; grid-row: span 4; grid-template-rows: subgrid; gap: 16px; min-width: 0; }
 .kart header { display: flex; align-items: flex-start; gap: 12px; }
 .kart header > div { flex: 1; min-width: 0; }
 .harf { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--yazi); color: var(--kart); }
@@ -76,9 +78,9 @@ figcaption { font-size: 12px; color: var(--soluk); font-variant-numeric: tabular
 /* Telefon ana ekranı taklidi: duvar kâğıdı sabit renk (iki örnek), yazı rengi her birinde ayrıca verilir */
 .ekran { border-radius: 22px; padding: 18px 18px 20px; display: grid; gap: 16px; }
 .ekran.gunduz { background: linear-gradient(160deg, #DCE6F5, #F3E9F2); color: #16113A; }
-.ekran.gece { background: linear-gradient(160deg, #0E1230, #2A1B45); color: #FFFFFF; }
+.ekran.gece { background: linear-gradient(160deg, #26303A, #45323F); color: #FFFFFF; }
 .ekran-ad { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; opacity: .7; }
-.sira { display: flex; align-items: flex-start; gap: 22px; }
+.sira { display: flex; align-items: flex-start; justify-content: center; gap: 22px; }
 .sira .etiket { width: 22px; font-weight: 800; padding-top: 18px; }
 .sira .simge { width: 60px; }
 .ekran figcaption { color: inherit; font-size: 11.5px; }
@@ -90,7 +92,7 @@ figcaption { font-size: 12px; color: var(--soluk); font-variant-numeric: tabular
 <div class="sayfa">
   <div class="giris">
     <h1>Moyo Mercek simgesi hangisi olsun?</h1>
-    <p>Moyo’nun simgesi kararlaştı: lacivert kare, yeşil işaret. Mercek’in simgesi hâlâ eski yazıyla duruyor. Aşağıda bugünkü simge ve iki öneri var; rakamlar simgenin ekrandaki boyudur (60 ana ekran, 40 arama, 29 ayarlar).</p>
+    <p>Moyo’nun simgesi kararlaştırıldı: lacivert kare, yeşil işaret. Mercek’in simgesi hâlâ eski yazıyla duruyor. Aşağıda bugünkü simge ve iki öneri var; rakamlar simgenin ekrandaki boyudur (60 ana ekran, 40 arama, 29 ayarlar).</p>
   </div>
   <section class="kartlar" aria-label="Seçenekler">@@KART@@</section>
   <section style="display:grid;gap:14px">
@@ -98,7 +100,7 @@ figcaption { font-size: 12px; color: var(--soluk); font-variant-numeric: tabular
     <div class="ekranlar">@@EKRAN@@</div>
   </section>
   <div class="not">
-    <p><b>Önerim B.</b> İki uygulama aynı işareti taşır, koyu kare Moyo, açık kare Mercek olur; 13 Kasım’daki “Mercek açık zemin, lacivert” kuralına da uyar. Mercek’in simgede kendi izini taşımasını isterseniz C.</p>
+    <p><b>Önerim B.</b> İki uygulama aynı işareti taşır, koyu kare Moyo, açık kare Mercek olur; 13 Kasım’daki “Mercek açık zemin, lacivert” kuralına da uyar. Mercek ana ekranda daha da ayrışsın isterseniz C.</p>
     <p>Seçtiğinizde uygulama simgesi, açılış ekranı, sekme simgesi ve Mercek sitesindeki küçük simgeler buna göre üretilir; iPhone ve iPad’de görmek için yeni bir TestFlight derlemesi gerekir.</p>
   </div>
 </div>
