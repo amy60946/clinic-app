@@ -7,7 +7,7 @@
   "Ayrı çocuk hesabı gerekmez",
   "Uzmanla paylaşım yalnız onayınızla"
  ],
- "fiyat_not": "Moyo Oyun ücretsiz. Moyo Ebeveyn 7 gün ücretsiz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir.",
+ "fiyat_not": "Moyo Oyun ücretsiz. Moyo Ebeveyn 14 gün ücretsiz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir.",
  "fiyat": [
   [
    "Moyo Oyun",
@@ -16,7 +16,7 @@
   ],
   [
    "Moyo Ebeveyn",
-   "7 gün ücretsiz",
+   "14 gün ücretsiz",
    "Sonrasında aylık ya da yıllık abonelik; dönem sonunda kendiliğinden yenilenir, App Store'dan istediğiniz an iptal edilir. Tek abonelik bütün aileyi kapsar. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak."
   ]
  ],
@@ -59,7 +59,7 @@
   ],
   [
    "Ücreti nedir?",
-   "Moyo Oyun ücretsizdir. Moyo Ebeveyn'i 7 gün ücretsiz deneyebilirsiniz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak."
+   "Moyo Oyun ücretsizdir. Moyo Ebeveyn'i 14 gün ücretsiz deneyebilirsiniz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak."
   ]
  ]
 }

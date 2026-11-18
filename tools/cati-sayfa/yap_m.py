@@ -141,7 +141,7 @@ html = f'''<!doctype html>
 
   <section class="sec sec-soft" id="fiyat" aria-labelledby="h-fiyat">
     <div class="wrap">
-      <div class="head"><p class="eyebrow">Fiyat</p><h2 id="h-fiyat">Oyun ücretsiz, Moyo Ebeveyn 7 gün ücretsiz.</h2></div>
+      <div class="head"><p class="eyebrow">Fiyat</p><h2 id="h-fiyat">Oyun ücretsiz, Moyo Ebeveyn 14 gün ücretsiz.</h2></div>
       <div class="fks">{fiyat}</div>
     </div>
   </section>
