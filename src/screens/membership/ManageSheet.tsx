@@ -31,6 +31,7 @@ const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { da
 const PERIOD = { monthly: 'Aylık', yearly: 'Yıllık' } as const;
 export const CANCEL_LABEL = 'Aboneliği iptal et';
 export const SKIP_LABEL = 'Yanıtlamadan iptale git';
+export const RESUME_LABEL = 'Aboneliği sürdür';
 export const WEB_CANCEL_TEXT = 'Aboneliği iPhone ya da iPad\'de App Store aboneliklerinden iptal edebilirsin.';
 
 type Props = {
@@ -43,6 +44,7 @@ type Props = {
   onRestore?: () => void;                      // "Satın alımları geri yükle" (mağaza olan yerde)
   onHelp?: () => void;                         // "Nasıl kullanılır?" (bu ekrandan açılabiliyorsa)
   onExit: () => void;                          // Apple'ın abonelik sayfası
+  onResume?: () => void;                       // yenileme kapatılmışsa: Apple'ın abonelik sayfası (sürdürmek için)
 };
 
 export default function ManageSheet(p: Props) {
@@ -64,7 +66,7 @@ export default function ManageSheet(p: Props) {
   );
 }
 
-function Body({ summary, plan, web, onClose, onPackages, onRestore, onHelp, onExit, closeThen }: Props & { closeThen: (f: () => void) => void }) {
+function Body({ summary, plan, web, onClose, onPackages, onRestore, onHelp, onExit, onResume, closeThen }: Props & { closeThen: (f: () => void) => void }) {
   const [step, setStep] = useState<Step>('summary');
   const [reason, setReason] = useState<CancelReason | null>(null);
   const altSeen = useRef(false);
@@ -117,7 +119,10 @@ function Body({ summary, plan, web, onClose, onPackages, onRestore, onHelp, onEx
               <View style={styles.actions}>
                 <Second label="Planı değiştir" onPress={() => closeThen(() => onPackages())} />
                 {onRestore && <Second label="Satın alımları geri yükle" onPress={() => closeThen(onRestore)} />}
-                <Second label={CANCEL_LABEL} onPress={() => setStep('reason')} />
+                {/* Yenileme zaten kapatılmış (iptal edilmiş, dönem sonuna kadar açık): iptal edilecek bir şey yok, yerine sürdürme */}
+                {summary.willRenew === false && onResume
+                  ? <Second label={RESUME_LABEL} onPress={() => closeThen(onResume)} />
+                  : <Second label={CANCEL_LABEL} onPress={() => setStep('reason')} />}
               </View>
             </>
           )}

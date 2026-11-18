@@ -189,7 +189,8 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, onH
           {cancelFlow && owner && !!sub && !sub.billingIssueAt && !sub.willRenew && !!sub.expiresAt && (
             <CancelledCard until={sub.expiresAt} onResume={() => { track('membership.resume'); openApple(); }} />
           )}
-          <StatusCard me={me} status={status} owner={owner} />
+          <StatusCard me={me} status={status} owner={owner}
+            store={cancelFlow && owner && sub ? { billing: !!sub.billingIssueAt, willRenew: sub.willRenew, until: sub.expiresAt } : null} />
 
           {!owner ? (
             <Text style={[styles.body, { marginTop: 12 }]}>
@@ -270,13 +271,19 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, onH
           onRestore={shop || store.storePreview ? restore : undefined}
           onHelp={onHelp}
           onExit={openApple}
+          onResume={() => { track('membership.resume'); openApple(); }}
         />
       )}
     </SafeAreaView>
   );
 }
 
-function StatusCard({ me, status, owner }: { me: ClinicianMe; status: 'trial' | 'active' | 'expired'; owner: boolean }) {
+// store: App Store'daki güncel durum (bayrak `cancel_flow`, yalnız sahip). Sunucu kaydı gecikebilir; kart üstteki
+// iptal / ödeme bildirimiyle çelişmesin diye yenileme satırı mağazadaki duruma göre yazılır.
+function StatusCard({ me, status, owner, store: st }: {
+  me: ClinicianMe; status: 'trial' | 'active' | 'expired'; owner: boolean;
+  store?: { billing: boolean; willRenew: boolean; until: string | null } | null;
+}) {
   let icon: keyof typeof Ionicons.glyphMap = 'time-outline';
   let title = '';
   let text = '';
@@ -291,10 +298,13 @@ function StatusCard({ me, status, owner }: { me: ClinicianMe; status: 'trial' | 
   } else if (status === 'active') {
     icon = 'checkmark-circle-outline';
     title = `${packageName(me)}${me.billing_period ? ` · ${me.billing_period === 'yearly' ? 'Yıllık' : 'Aylık'}` : ''}`;
-    text = me.period_end
-      ? (me.auto_renew ? `${dateText(me.period_end)} tarihinde yenilenir` : `${dateText(me.period_end)} tarihine kadar açık; yenilenmeyecek`)
+    const until = st?.until ?? me.period_end;
+    const renews = st ? st.willRenew : me.auto_renew;
+    text = st?.billing ? 'Ödeme bekleniyor'
+      : until ? (renews ? `${dateText(until)} tarihinde yenilenir` : `${dateText(until)} tarihine kadar açık; yenilenmeyecek`)
       : 'Etkin';
-    if (me.billing_source) text += ` · ${SOURCE[me.billing_source] ?? me.billing_source}`;
+    // kaynak adı satır sonunda bölünmez ("App / Store"), satır "·" ile başlamaz
+    if (me.billing_source) text += `\u00a0· ${(SOURCE[me.billing_source] ?? me.billing_source).replace(/ /g, '\u00a0')}`;
   } else {
     icon = 'lock-closed-outline';
     title = me.plan === 'trial' ? 'Deneme süren bitti' : 'Üyeliğin sona erdi';

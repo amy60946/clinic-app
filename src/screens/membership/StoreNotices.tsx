@@ -9,7 +9,7 @@ import { colors, radius } from '../../theme';
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 export const BILLING_TEXT = (solo: boolean) =>
-  `Ödeme alınamadı. Ödeme yöntemini güncellersen kesinti olmaz.${solo ? '' : ' Ekip üyelerinin erişimi de etkilenir.'}`;
+  `Ödeme alınamadı. Ödeme yöntemini güncellersen ${solo ? 'üyeliğin' : 'üyeliğin ve ekibinin erişimi'} kesintisiz sürer.`;
 
 export function CancelledCard({ until, onResume }: { until: string; onResume: () => void }) {
   return (

@@ -70,7 +70,7 @@ export function NudgeSettings({ userId }: { userId: string }) {
         <Text style={styles.small}>{QUIET_TEXT}</Text>
         {perm !== null && perm !== 'granted' && (
           <View style={styles.perm}>
-            <Text style={[styles.small, { flexShrink: 1 }]}>Bu cihazda bildirim izni yok; hatırlatmalar gelmez.</Text>
+            <Text style={[styles.small, { flex: 1 }]}>Bu cihazda bildirim izni yok; hatırlatmalar gelmez.</Text>
             <SmallButton label="Bildirimleri aç" onPress={allow} />
           </View>
         )}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,10 +31,12 @@ const ITEMS: Item[] = [
   { key: 'workspace', q: 'Birden çok klinikte çalışıyorum, nasıl ayırırım?', a: ['Sol üstte "Moyo Mercek" yanındaki küçük hesap düğmesine dokun: "Bireysel hesap" ve ekip hesapları (her klinik için bir tane) ayrıdır. Ekip hesabı, klinik seni ekibine eklediğinde ve kabul ettiğinde açılır. Danışanlar, davetler ve seanslar seçili hesaba aittir.'] },
 ];
 
-export default function HelpSheet({ visible, owner, plan = true, onClose, onIntro, onSample, onAction }: {
-  visible: boolean; owner: boolean; plan?: boolean; onClose: () => void; onIntro: () => void; onSample: () => void; onAction: (a: HelpAction) => void;
+export default function HelpSheet({ visible, owner, plan = true, focus, onClose, onIntro, onSample, onAction }: {
+  visible: boolean; owner: boolean; plan?: boolean; focus?: string | null; onClose: () => void; onIntro: () => void; onSample: () => void; onAction: (a: HelpAction) => void;
 }) {
   const [open, setOpen] = useState<string | null>(null);
+  // focus: açılırken açık gelecek soru (ör. iptal öncesi pencereden "İpuçlarına bak" → 'invite')
+  useEffect(() => { if (visible && focus) setOpen(focus); }, [visible, focus]);
   const items = ITEMS.filter((x) => (!x.ownerOnly || owner) && (plan ? !x.noPlan : !x.plan));
   const toggle = (k: string) => {
     setOpen((o) => (o === k ? null : k));

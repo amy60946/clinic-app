@@ -103,6 +103,7 @@ export default function HomeScreen() {
   const [plans, setPlans] = useState(false);
   const [guide, setGuide] = useState(false);
   const [help, setHelp] = useState(false);          // "Nasıl kullanılır?" (kısa tanıtım + kısa yanıtlar)
+  const [helpFocus, setHelpFocus] = useState<string | null>(null);   // açılırken açık gelecek soru
   const [invitesKey, setInvitesKey] = useState(0);
   const [verify, setVerify] = useState(false);
   const [verification, setVerification] = useState<VerificationState | null>(null);
@@ -237,7 +238,7 @@ export default function HomeScreen() {
     setSelected({ client: c, tab: step === 'report' ? 'report' : planOn ? 'goals' : 'training', key: Date.now() });
   };
   // "Nasıl kullanılır?" › Göster: gerçek danışan varsa ilkinde, yoksa örnek ailede açar (iOS'ta pencere kapanınca)
-  const afterSheet = (f: () => void) => { setHelp(false); if (Platform.OS === 'ios') setTimeout(f, 450); else f(); };
+  const afterSheet = (f: () => void) => { setHelp(false); setHelpFocus(null); if (Platform.OS === 'ios') setTimeout(f, 450); else f(); };
   const onHelpAction = (a: HelpAction) => afterSheet(() => {
     if (a === 'home') return;
     if (a === 'invite') return inviteFirst();
@@ -453,7 +454,7 @@ export default function HomeScreen() {
     return (
       <>
         <MembershipScreen me={state.me} onClose={() => { setPlans(false); load(); }} onChanged={load} footer={accountLinks}
-          onHelp={() => { setPlans(false); load(); setHelp(true); }} />
+          onHelp={() => { setPlans(false); load(); setHelpFocus('invite'); setHelp(true); }} />
         {legalSheets}
       </>
     );
@@ -660,7 +661,7 @@ export default function HomeScreen() {
       <VerificationSheet visible={verify} onClose={() => { setVerify(false); loadVerify(); }} />
       <Onboarding visible={guide} plan={planOn} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
       {state.kind === 'ready' && (
-        <HelpSheet visible={help} owner={state.me.role === 'owner'} plan={planOn} onClose={() => setHelp(false)}
+        <HelpSheet visible={help} owner={state.me.role === 'owner'} plan={planOn} focus={helpFocus} onClose={() => { setHelp(false); setHelpFocus(null); }}
           onIntro={() => afterSheet(() => setGuide(true))} onSample={() => afterSheet(() => openSample())} onAction={onHelpAction} />
       )}
       {legalSheets}

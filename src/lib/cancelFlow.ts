@@ -61,8 +61,9 @@ export function alternativeFor(reason: CancelReason, p: CancelPlan): Alternative
   }
   if (reason === 'families') {
     return {
-      title: 'Aileler kullanmıyorsa', lines: [],
-      actions: [...(p.help ? [{ id: 'help' as const, label: 'Davet ve ilk hafta için kısa ipuçlarına bak' }] : []), SUPPORT],
+      title: 'Aileler kullanmıyorsa',
+      lines: [p.help ? 'Davet ve ilk hafta için kısa ipuçları var. İstersen bize de yazabilirsin.' : 'Destek sayfasından bize yazabilirsin.'],
+      actions: [...(p.help ? [{ id: 'help' as const, label: 'İpuçlarına bak' }] : []), SUPPORT],
     };
   }
   if (reason === 'pause') {
