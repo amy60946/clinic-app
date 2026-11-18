@@ -47,6 +47,8 @@
   button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
   button.confirm { color: var(--danger); border-color: var(--danger); }
   .noparent .parent { display: none; }
+  .stage.dar .clinic { align-items: center; }
+  .stage.dar .clinic .window { flex: none; width: 393px; max-width: 100%; height: min(852px, calc(100vh - 150px)); min-height: 560px; border: 10px solid var(--bezel); border-radius: 46px; box-sizing: content-box; }
 
   @media (max-width: 1080px) {
     .tabs { display: flex; }
@@ -62,6 +64,7 @@
 <div class="stage" id="stage" data-show="clinic">
   <div class="top">
     <h1>ClinicApp + ParentApp · ortak deneme veritabanı</h1>
+    <button type="button" id="boy" aria-pressed="false">Telefon boyu</button>
     <div class="tabs" role="group" aria-label="Uygulama seç">
       <button type="button" id="t-clinic" aria-pressed="true">Uzman (ClinicApp)</button>
       <button type="button" id="t-parent" aria-pressed="false">Ebeveyn (ParentApp)</button>
@@ -79,7 +82,7 @@
   </div>
   <div class="bar">
     <span>Uzman (klinik sahibi): <b>uzman@clinicapp.app</b> · Ekip üyesi: <b>ekip@clinicapp.app</b> · Denemesi bitmiş: <b>bitti@clinicapp.app</b> · Ebeveyn: <b>demo@parentapp.app</b> · şifre <b>12345678</b></span>
-    <span>Yeni (11 Kasım): <b>tek odak Ebeveyn Eğitimi</b>. Takip Planı gizli; danışan (ör. Nazlı) Ebeveyn Eğitimi'yle açılır, sol üstteki ☰ menüyü kapatıp açar. Eğitimde <b>Uygulama görevleri</b> ve <b>Hızlı yapılacaklar</b> sekmelerinde örnekli anlatım kartı (örneğe dokun, form dolu açılır). İlk kullanıcı deneyimi: Ayarlar › "Örnek aileyi aç" (Deniz) › tur.</span>
+    <span>Yeni (18 Kasım): <b>telefonda yüzen alt menü</b> (Danışanlar · Takvim · Kütüphane · Ayarlar). Listeyi aşağı kaydırınca küçülür, durunca ya da yukarı kaydırınca büyür. Geniş ekranda görmek için sağ üstteki <b>Telefon boyu</b> düğmesine basın.</span>
     <button id="reset" type="button">Baştan başlat</button>
   </div>
 </div>
@@ -100,6 +103,9 @@
     const f = document.getElementById(k);
     if (f.src) f.src = f.src.split('?')[0] + '?' + Date.now();
   }));
+
+  const boy = document.getElementById('boy');
+  boy.addEventListener('click', () => { const on = stage.classList.toggle('dar'); boy.setAttribute('aria-pressed', String(on)); });
 
   const btn = document.getElementById('reset');
   let armed = false, timer;
