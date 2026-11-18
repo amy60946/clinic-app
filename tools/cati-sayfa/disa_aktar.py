@@ -19,31 +19,33 @@ def cut(s, start, end_tag):
     j = s.index(end_tag, i) + len(end_tag)
     return s[:i] + s[j:]
 
-FOOT = ('<footer class="alt-bilgi"><div class="ic"><span>© 2026 Moyo</span><span class="ab-yasal">'
-        '<a href="/yasal/gizlilik">Gizlilik Politikası</a><a href="/yasal/kosullar-parentapp">Kullanım Koşulları</a>'
-        '<a href="/yasal/kvkk-basvuru">KVKK başvurusu</a><a href="/destek">Destek</a></span>'
-        '<span>Ekranlardaki adlar örnektir. Bu sayfa çerez, reklam pikseli ya da analiz aracı kullanmaz.</span></div></footer>')
-
+# Sekme simgesi (kullanıcı kararı 18 Kasım 2026; dosyalar Marketing setinden parent-app site/public/img'de → /img/…)
+FAV_ONIZLEME = '<link rel="icon" href="img/favicon-moyo.svg" type="image/svg+xml">'
+FAV = ('<link rel="icon" href="/img/favicon.svg" type="image/svg+xml"><link rel="icon" href="/img/favicon.ico" sizes="any">'
+       '<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">')
+VARLIK = ('ortak.css', 'c.css', 'beyaz.css', 'v4.css', 'hikaye.js', 'eko.js', 'kompakt.js', 'menu.js')
 c = open('c.html').read()
 c = cut(c, '<div class="alt-secici"', '</div>')                       # önizleme: alt başlık seçici
 c = re.sub(r'<span class="alt-sec" data-alt="[23]" hidden>.*?</span>', '', c)
 c = cut(c, '<div class="nk-secici"', '</div>')                         # önizleme: telefon/iPad düzeni seçici
-c = c.replace('<a class="hap cizgi k" href="#">Giriş yap</a>', f'<a class="hap cizgi k" href="{APP}#giris">Giriş yap</a>')
+c = re.sub(r'href="#">Giriş yap</a>', f'href="{APP}#giris">Giriş yap</a>', c)
 c = c.replace('href="#">Ücretsiz deneyin</a>', f'href="{APP}#kayit">Ücretsiz deneyin</a>')
-c = c.replace(yap_c.MERCEK, MERCEK).replace('href="ebeveyn.html"', 'href="/ebeveyn/"').replace('https://moyoapp.com.tr/destek', '/destek')
+c = c.replace(yap_c.MERCEK, MERCEK).replace('href="ebeveyn.html"', 'href="/ebeveyn/"').replace(yap_c.SITE, '/')
 c = c.replace('<a class="logo" href="#"', '<a class="logo" href="/"')
-c = re.sub(r'<footer class="alt-bilgi">.*?</footer>', FOOT, c, flags=re.S)
 c = c.replace('<title>Moyo · Çatı sayfa</title>', '<title>Moyo · Çocuk, aile ve uzman için rutin platformu</title>'
-              '<meta name="description" content="Moyo; evde sizi, oyunda çocuğunuzu ve dilerseniz çalıştığınız uzmanı aynı rutinde buluşturur. Moyo Oyun, Moyo Ebeveyn ve Moyo Mercek.">')
-for a in ('ortak.css', 'c.css', 'beyaz.css', 'hikaye.js', 'dongu.js', 'kompakt.js'):
+              '<meta name="description" content="Moyo; evde sizi, oyunda çocuğunuzu ve dilerseniz çalıştığınız uzmanı aynı rutinde buluşturur. Moyo Ebeveyn, Moyo Oyun ve Moyo Uzman.">')
+for a in VARLIK:
     c = c.replace(f'"{a}"', f'"/c/{a}"')
+c = c.replace(FAV_ONIZLEME, FAV)
 c = c.replace('src="img/', 'src="/c/img/').replace('href="img/', 'href="/c/img/')
 assert 'href="#"' not in c, 'boş bağlantı kaldı'
 assert 'claude.ai' not in c and 'Önizleme' not in c, 'önizleme izi kaldı'
 
 m = open('ebeveyn.html').read()
+m = m.replace(FAV_ONIZLEME, FAV)
 m = m.replace('"m/', '"/c/m/').replace('src="img/', 'src="/c/img/').replace('href="img/', 'href="/c/img/')
 assert 'claude.ai' not in m
+assert FAV in c and FAV in m, 'sekme simgesi bağlantısı yok'
 
 os.makedirs(os.path.join(OUT, 'ebeveyn'), exist_ok=True)
 for d in ('c',):
@@ -51,7 +53,7 @@ for d in ('c',):
 os.makedirs(os.path.join(OUT, 'c', 'img'))
 open(os.path.join(OUT, 'index.html'), 'w').write(c)
 open(os.path.join(OUT, 'ebeveyn', 'index.html'), 'w').write(m)
-for a in ('ortak.css', 'c.css', 'beyaz.css', 'hikaye.js', 'dongu.js', 'kompakt.js'):
+for a in VARLIK:
     shutil.copy(a, os.path.join(OUT, 'c', a))
 shutil.copytree('fonts', os.path.join(OUT, 'c', 'fonts'))
 shutil.copytree('m', os.path.join(OUT, 'c', 'm'))

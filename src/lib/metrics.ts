@@ -491,6 +491,6 @@ export const DECLINE_LABELS: Record<DeclineReason | 'unknown', string> = {
 };
 
 // Yalnız yazdırılan raporda (uzman arayüzünde gösterilmez; kullanıcı kararı 3 Kasım 2026, sözleşme 3.3)
-export const LIMITS_TEXT =
-  'Bu oranlar ev rutinine ilişkin gözlem özetidir; tanı, zekâ ya da dikkat puanı değildir. Veri ebeveynin onayına ve cihaz kullanımına bağlıdır. ' +
-  'Çocuk yalnız kendi geçmişiyle karşılaştırılır (norm yok). Klinik geçerlik bir pilot çalışmayla gösterilene kadar sonuç çıkarmak için tek başına kullanılmamalıdır.';
+// Dışa aktarılan her belgenin (rapor, ilerleme notu, CSV) altındaki tek satır (kullanıcı kararı 14 Kasım 2026,
+// ortak sozlesme/hukuk_notlari.md M.7). Ekranlarda gösterilmez (3 Kasım kararı).
+export const EXPORT_FOOTER = 'Ailenin uygulamada bıraktığı kayıtların özetidir; tanı ya da değerlendirme değildir.';

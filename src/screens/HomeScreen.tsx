@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, Alert, StyleSheet, ActivityIndicator, RefreshControl, Platform, AppState, useWindowDimensions } from 'react-native';
+import { View, Text, TextInput, Pressable, Alert, StyleSheet, ActivityIndicator, RefreshControl, Platform, AppState, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-import { LayoutToggle } from '../lib/layout';
+import { LayoutToggle, useLayout } from '../lib/layout';
+import { TabBarProvider, TabBarScrollView, type TabId } from '../lib/tabBar';
+import LiquidTabBar from '../components/LiquidTabBar';
 import { colors, radius } from '../theme';
 import { Label, Notice } from '../components/ui';
 import { useAuth } from '../lib/auth';
@@ -36,7 +38,7 @@ import { surveyAnswered } from '../lib/survey';
 import { LegalDoc, legalPending } from '../lib/legal';
 import LegalSheet from './legal/LegalSheet';
 import LegalUpdateScreen from './legal/LegalUpdateScreen';
-import { billingStatus, hasAccess, daysLeft, packageName } from '../lib/billing';
+import { billingStatus, hasAccess, daysLeft, packageName, packageOfProduct } from '../lib/billing';
 import ClientScreen, { Tab } from './client/ClientScreen';
 import NotificationsSheet, { notificationTab } from './NotificationsSheet';
 import Bell from '../components/Bell';
@@ -45,6 +47,13 @@ import { useNotifications } from '../lib/notificationsContext';
 import { AppNotification, notificationChildren, onNotificationTap, unregisterPush } from '../lib/notifications';
 import { track, flush } from '../lib/track';
 import { supabase } from '../lib/supabase';
+import { CANCEL_FLOW_FLAG } from '../lib/cancelFlow';
+import { useStoreSubscription, openAppleSubscriptions } from '../lib/storeState';
+import { BillingBanner } from './membership/StoreNotices';
+import { useNudges, NUDGES_FLAG, primerDue, markNudgeOpened, clearNudges } from '../lib/nudges';
+import { NudgePrimer } from './NudgeParts';
+import type { FamilyInvite } from '../lib/invites';
+import type { Training } from '../lib/training';
 
 type State =
   | { kind: 'loading' }
@@ -94,17 +103,21 @@ export default function HomeScreen() {
   const [plans, setPlans] = useState(false);
   const [guide, setGuide] = useState(false);
   const [help, setHelp] = useState(false);          // "Nasıl kullanılır?" (kısa tanıtım + kısa yanıtlar)
+  const [helpFocus, setHelpFocus] = useState<string | null>(null);   // açılırken açık gelecek soru
   const [invitesKey, setInvitesKey] = useState(0);
   const [verify, setVerify] = useState(false);
   const [verification, setVerification] = useState<VerificationState | null>(null);
   // Karşılama anketi (ortak akislar.md 15): cevap yoksa ilk girişte bir kez; bitince seçilen ilk adım
   const [survey, setSurvey] = useState<'unknown' | 'show' | 'hidden'>('unknown');
   const [inviteOpenKey, setInviteOpenKey] = useState(0);
+  const [inviteOpenCode, setInviteOpenCode] = useState<string | null>(null);   // "süresi doluyor" hatırlatması: o davetin penceresi
   const skipGuide = useRef(false);
   // Ayarlar (sağ üstteki ad), örnek aile + tur, "Başlarken" kartı
   const [settings, setSettings] = useState(false);
   // Takvim (ortak akislar.md 20): ana ekrandan; seans bildirimi o seansı açar
   const [calendar, setCalendar] = useState<{ sessionId?: string | null } | null>(null);
+  const calendarOpen = useRef(false);
+  calendarOpen.current = !!calendar;
   // Ebeveyn eğitimi kaynak kütüphanesi (9 Kasım 2026): ana ekrandan; atanınca danışanın Ebeveyn Eğitimi bölümü açılır
   const [library, setLibrary] = useState(false);
   const [todaySessions, setTodaySessions] = useState<Session[] | null>(null);
@@ -112,13 +125,22 @@ export default function HomeScreen() {
   const [sampleTab, setSampleTab] = useState<Tab>('summary');     // "Göster" örnek ailede bir bölümü açar (tur olmadan)
   const [tourStep, setTourStep] = useState<number | null>(null);
   // Lansman odağı "A" (11 Kasım 2026): Takip Planı uzaktan ayar bayrağı açık değilse tur, Başlarken ve danışanın açılış bölümü ebeveyn eğitimine göre
-  const planOn = useClientConfig().flag(CARE_PLAN_FLAG);
+  const config = useClientConfig();
+  const planOn = config.flag(CARE_PLAN_FLAG);
+  // İptal öncesi akış ve yaşam döngüsü hatırlatmaları (uzaktan ayar; yoksa kapalı)
+  const cancelFlow = config.flag(CANCEL_FLOW_FLAG);
+  const nudgesOn = config.flag(NUDGES_FLAG);
+  const [primer, setPrimer] = useState(false);          // bildirim izni açıklaması (ilk davetten sonra)
+  // hatırlatma planı ana ekranın zaten yüklediği listeleri kullanır (undefined: henüz yüklenmedi)
+  const [nudgeInvites, setNudgeInvites] = useState<FamilyInvite[] | null | undefined>(undefined);
+  const [nudgeTrainings, setNudgeTrainings] = useState<Training[] | null | undefined>(undefined);
   const tour = planOn ? TOUR : TRAINING_TOUR;
   const homeTab: Tab = planOn ? 'summary' : 'training';
   const [trainStat, setTrainStat] = useState<{ any: boolean; active: boolean }>({ any: false, active: false });
   const [start, setStart] = useState<StartFlags | null>(null);
   const [inviteCount, setInviteCount] = useState(0);
   const { width } = useWindowDimensions();
+  const { desktop } = useLayout();
   // Yasal metinler (ortak akislar.md 17): onay bekleyen varsa panel yerine yeniden onay ekranı. null: sunucuda yok
   const [legal, setLegal] = useState<'unknown' | LegalDoc[] | null>('unknown');
   // Yasal ve gizlilik (tek sayfa; KVKK başvurusu içinde): false ya da açılacak görünüm
@@ -126,6 +148,14 @@ export default function HomeScreen() {
   const legalAt = useRef(0);
   const { unread, unreadByChild } = useNotifications();
   const pending = useRef<Pick<AppNotification, 'kind' | 'data' | 'childId'> | null>(null);
+  const userId = session?.user.id ?? null;
+  const ready = state.kind === 'ready' ? state : null;
+  // App Store'da ödeme sorunu: yalnız sahibe, ana ekranda tek satır (üyelik ekranında başlıklı)
+  const { sub: storeSub, refresh: refreshStoreSub } = useStoreSubscription(ready && ready.me.role === 'owner' ? ready.me.id : null, cancelFlow);
+  // Hatırlatmalar: bayrak uzaktan ayar okununca belli olur (o âna kadar hiçbir şey planlanmaz ya da silinmez)
+  useNudges(config.status === 'ok' ? nudgesOn : null,
+    ready ? { me: ready.me, clients: ready.clients, signedUpAt: session?.user.created_at ?? ready.me.joined_at ?? null } : null,
+    nudgeInvites, nudgeTrainings);
 
   const refreshToday = useCallback(() => {
     const d = trDay(new Date().toISOString());
@@ -208,7 +238,7 @@ export default function HomeScreen() {
     setSelected({ client: c, tab: step === 'report' ? 'report' : planOn ? 'goals' : 'training', key: Date.now() });
   };
   // "Nasıl kullanılır?" › Göster: gerçek danışan varsa ilkinde, yoksa örnek ailede açar (iOS'ta pencere kapanınca)
-  const afterSheet = (f: () => void) => { setHelp(false); if (Platform.OS === 'ios') setTimeout(f, 450); else f(); };
+  const afterSheet = (f: () => void) => { setHelp(false); setHelpFocus(null); if (Platform.OS === 'ios') setTimeout(f, 450); else f(); };
   const onHelpAction = (a: HelpAction) => afterSheet(() => {
     if (a === 'home') return;
     if (a === 'invite') return inviteFirst();
@@ -222,7 +252,13 @@ export default function HomeScreen() {
     setSampleOpen(false);
     setTourStep(null);
     setSettings(false);
+    setInviteOpenCode(null);
     setInviteOpenKey(Date.now());
+  };
+  // Davet gönderildi ve pencere kapandı: bayrak açıksa ve iOS izni hiç sorulmadıysa önce kendi açıklamamız (iOS'ta pencere kapanınca)
+  const afterInvite = async () => {
+    if (!nudgesOn || !userId || !(await primerDue(userId))) return;
+    setTimeout(() => setPrimer(true), Platform.OS === 'ios' ? 500 : 0);
   };
   // Açılışta ve ön plana gelince (en çok 10 dakikada bir) onay bekleyen yasal metin; kayıtta onaylananlar sessizce kaydedilir
   const signedLegal = session?.user.user_metadata?.legal;
@@ -249,7 +285,7 @@ export default function HomeScreen() {
   const finishSurvey = (action: SurveyAction) => {
     if (action === 'invite' || action === 'plans') skipGuide.current = true;
     setSurvey('hidden');
-    if (action === 'invite') setInviteOpenKey(Date.now());
+    if (action === 'invite') { setInviteOpenCode(null); setInviteOpenKey(Date.now()); }
     if (action === 'plans') setPlans(true);
     if (action === 'joined') load();
   };
@@ -259,12 +295,30 @@ export default function HomeScreen() {
   // Bildirime dokununca ilgili danışan ve sekme. Danışan listede yoksa (yeni paylaşım) liste yenilenip tekrar aranır.
   const openTarget = useCallback(async (n: Pick<AppNotification, 'kind' | 'data' | 'childId'>) => {
     setBell(false);
+    // hangi sekme ya da ekran açıksa (Takvim, Kütüphane, Ayarlar, Üyelik) kapanır: hedef her yerden açılır
     setSettings(false);
+    setLibrary(false);
+    if (calendarOpen.current) refreshToday();   // takvimden çıkılıyor: ana ekrandaki "bugün" satırı yenilenir (Geri ve alt menü gibi)
+    setCalendar(null);
+    setPlans(false);
     setSampleOpen(false);
     setTourStep(null);
     const cur = stateRef.current;
     const target = (n.data as { clinic_id?: string } | null)?.clinic_id;
     if (target && cur.kind === 'ready' && cur.me.workspaces !== undefined && target !== cur.me.clinic_id) { ws.switchTo(target, n); return; }
+    // Yerel hatırlatma (lib/nudges.ts): davet türleri davet penceresini, eğitim türleri o danışanın Ebeveyn Eğitimi'ni, deneme üyelik ekranını açar
+    if (n.kind === 'nudge') {
+      const type = String(n.data?.nudge ?? '');
+      const ref = typeof n.data?.ref === 'string' ? n.data.ref : null;
+      setSelected(null);
+      if (type === 'trial_ending') { setPlans(true); return; }
+      if (type === 'invite_none' || type === 'invite_expiring') { setInviteOpenCode(type === 'invite_expiring' ? ref : null); setInviteOpenKey(Date.now()); return; }
+      let st = stateRef.current;
+      let c = st.kind === 'ready' ? st.clients.find((x) => x.link_id === ref) : undefined;
+      if (!c) { st = await load(); c = st.kind === 'ready' ? st.clients.find((x) => x.link_id === ref) : undefined; }
+      if (c) setSelected({ client: c, tab: 'training', key: Date.now() });
+      return;
+    }
     if (n.kind === 'team_request') { setSelected(null); load(); setReqKey((k) => k + 1); return; }
     if (n.kind === 'team_removed' || n.kind === 'team_left' || n.kind === 'team_request_declined') { setSelected(null); load(); return; }
     if (n.kind === 'team_joined') { setSelected(null); load(); return; }
@@ -295,14 +349,18 @@ export default function HomeScreen() {
       return;
     }
     setSelected({ client: c, tab: notificationTab(n.kind), key: Date.now() });
-  }, [load, ws]);
+  }, [load, ws, refreshToday]);
 
   // Telefon bildirimine dokunma (uygulama kapalıyken de)
   useEffect(() => onNotificationTap((data) => {
     const n = { kind: String(data.kind ?? ''), data, childId: typeof data.child_id === 'string' ? data.child_id : undefined };
+    if (n.kind === 'nudge') {
+      track('nudge.open', { type: String(data.nudge ?? '') });
+      if (userId) markNudgeOpened(userId, String(data.id ?? ''));
+    }
     if (stateRef.current.kind === 'ready') openTarget(n);
     else pending.current = n;
-  }), [openTarget]);
+  }), [openTarget, userId]);
   useEffect(() => {
     if (state.kind !== 'ready') return;
     const moved = ws.takePending();           // alan değiştiren bildirim, yeni alanda açılır
@@ -324,12 +382,13 @@ export default function HomeScreen() {
     // Çıkmadan önce bekleyen kullanım olayları gönderilir ve bu cihaza push kapatılır
     await flush().catch(() => {});
     await unregisterPush().catch(() => {});
+    if (userId) await clearNudges(userId);   // bu cihazda planlı hatırlatma kalmasın
     signOut();
   };
   // Metinler hukuk/50-uygulama-ici-metinler.md 5.2 (tek kişilik klinik · ekipte sahip · ekip üyesi)
   const removeAccount = () => Alert.alert('Hesabın silinsin mi?',
     state.kind === 'ready' && state.team.length <= 1
-      ? 'Kliniğin ve içindeki her şey silinir: danışan paylaşımları, notlar, davranış hedefleri, haftalık değerlendirmeler, macera önerileri, takip planları, davetler ve üyelik kaydı. Ailelerin Moyo\'daki kendi verileri silinmez; yalnız seninle paylaşımları biter. Saklaman gereken kayıtları önce yazdır. App Store üyeliğin varsa Apple Ayarlar\'dan ayrıca kapat. Bu işlem geri alınamaz.'
+      ? 'Kliniğin ve içindeki her şey silinir: danışan paylaşımları, notlar, davranış hedefleri, haftalık değerlendirmeler, rutin ve adım önerileri, takip planları, davetler ve üyelik kaydı. Ailelerin Moyo\'daki kendi verileri silinmez; yalnız seninle paylaşımları biter. Saklaman gereken kayıtları önce yazdır. App Store üyeliğin varsa Apple Ayarlar\'dan ayrıca kapat. Bu işlem geri alınamaz.'
       : state.kind === 'ready' && state.me.role === 'owner'
         ? 'Klinik kalır; sahiplik ekibin en eski üyesine geçer. Kliniğe ait kayıtlar klinikte kalır. Yalnız senin hesabın silinir. Bu işlem geri alınamaz.'
         : 'Yalnız senin hesabın silinir. Kliniğe ait kayıtlar klinikte kalır. Bu işlem geri alınamaz.',
@@ -338,6 +397,7 @@ export default function HomeScreen() {
         try {
           await flush().catch(() => {});
           await unregisterPush().catch(() => {});
+          if (userId) await clearNudges(userId);
           await deleteAccount();
           await supabase.auth.signOut({ scope: 'local' });
         } catch (e) {
@@ -374,6 +434,11 @@ export default function HomeScreen() {
     </>
   );
 
+  // Alt ana menü (kullanıcı isteği 17 Kasım 2026): dört ana ekranda (Danışanlar, Takvim, Kütüphane, Ayarlar) ve yalnız dar
+  // düzende. Ekran seçimi bir işlevde toplandı: çubuk hepsinin üstünde, ağaçta aynı yerde durur; sekme değişince yeniden
+  // kurulmaz, kapsül kayar. `tab` çizilen ekranın sekmesi (danışan, üyelik, yasal onay, anket ve yüklemede null: çubuk yok).
+  let tab = null as TabId | null;
+  const renderScreen = () => {
   if (state.kind === 'ready' && Array.isArray(legal) && legal.length > 0) {
     return <><LegalUpdateScreen docs={legal} onDone={setLegal} footer={accountLinks} />{legalSheets}</>;
   }
@@ -386,7 +451,13 @@ export default function HomeScreen() {
     return <WelcomeSurvey me={state.me} onFinish={finishSurvey} />;
   }
   if (plans && state.kind === 'ready') {
-    return <><MembershipScreen me={state.me} onClose={() => { setPlans(false); load(); }} onChanged={load} footer={accountLinks} />{legalSheets}</>;
+    return (
+      <>
+        <MembershipScreen me={state.me} onClose={() => { setPlans(false); load(); }} onChanged={load} footer={accountLinks}
+          onHelp={() => { setPlans(false); load(); setHelpFocus('invite'); setHelp(true); }} />
+        {legalSheets}
+      </>
+    );
   }
 
   if (sample && state.kind === 'ready') {
@@ -412,6 +483,7 @@ export default function HomeScreen() {
   }
 
   if (library && state.kind === 'ready') {
+    tab = 'library';
     return (
       <LibraryScreen me={state.me} clients={state.clients} onBack={() => setLibrary(false)}
         onOpenTraining={(c) => { setLibrary(false); setSelected({ client: c, tab: 'training', key: Date.now() }); }} />
@@ -419,6 +491,7 @@ export default function HomeScreen() {
   }
 
   if (calendar && state.kind === 'ready') {
+    tab = 'calendar';
     return (
       <CalendarScreen me={state.me} team={state.team} clients={state.clients} initialSessionId={calendar.sessionId}
         onBack={() => { setCalendar(null); refreshToday(); }}
@@ -427,6 +500,7 @@ export default function HomeScreen() {
   }
 
   if (settings && state.kind === 'ready') {
+    tab = 'settings';
     return (
       <>
         <SettingsScreen
@@ -438,6 +512,7 @@ export default function HomeScreen() {
           onOpenClient={(c) => { setSettings(false); setSelected({ client: c, tab: homeTab, key: Date.now() }); }}
           onSample={() => openSample()}
           onLegal={() => setLegalOpen('docs')}
+          nudges={nudgesOn}
           onGuide={() => { setSettings(false); setHelp(true); }}
           onLogout={logout} onDelete={removeAccount}
         />
@@ -468,10 +543,11 @@ export default function HomeScreen() {
 
   const solo = state.kind === 'ready' && (state.me.personal ?? isSolo(state.me, state.team, session?.user.user_metadata?.practice));
   const canSwitch = state.kind === 'ready' && state.me.workspaces !== undefined;
+  if (state.kind === 'ready' && survey !== 'unknown' && legal !== 'unknown') tab = 'clients';
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
-      <ScrollView
+      <TabBarScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
@@ -533,6 +609,10 @@ export default function HomeScreen() {
             <>
               <TeamRequestsCard me={state.me} reloadKey={reqKey} onAccepted={afterAccept} />
               <MembershipRow me={state.me} onOpen={() => setPlans(true)} />
+              {cancelFlow && state.me.role === 'owner' && !!storeSub?.billingIssueAt && (
+                <BillingBanner compact solo={(packageOfProduct(storeSub.productId) ?? state.me.plan) === 'solo'}
+                  onFix={async () => { track('membership.billing_fix'); await openAppleSubscriptions(state.me.id); refreshStoreSub(true); load(); }} />
+              )}
               {!!verification?.enabled && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
               {start && !start.hidden && startDone(progressOf(start), planOn) < startTotal(planOn) && (
                 <StartCard progress={progressOf(start)} plan={planOn} onSample={() => openSample()} onInvite={inviteFirst}
@@ -540,9 +620,10 @@ export default function HomeScreen() {
                   onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide', { done: startDone(progressOf(start), planOn) }); }} />
               )}
               <CalendarRow sessions={todaySessions} clients={state.clients} onOpen={() => setCalendar({})} />
-              <LibraryRow onOpen={() => setLibrary(true)} />
+              {/* dar düzende kütüphane alt menüde; satır yalnız geniş (sol menülü) düzende */}
+              {desktop && <LibraryRow onOpen={() => setLibrary(true)} />}
               <ClientBoard clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onAttention={setAttention}
-                plan={planOn} onTraining={setTrainStat}
+                plan={planOn} onTraining={setTrainStat} onTrainings={setNudgeTrainings}
                 onOpen={(c) => setSelected({ client: c, tab: homeTab, key: Date.now() })} />
               {/* örnek aile listenin altında kendi satırında: ilk açılıştan sonra 30 gün ya da × ile kaldırılana dek */}
               {(state.clients.length === 0 || !!start?.sampleRow) && (
@@ -552,7 +633,8 @@ export default function HomeScreen() {
                   track('sample.hide');
                 }} />
               )}
-              <InvitesCard me={state.me} team={state.team} reloadKey={invitesKey} openKey={inviteOpenKey} onChanged={refresh} onCount={setInviteCount} />
+              <InvitesCard me={state.me} team={state.team} reloadKey={invitesKey} openKey={inviteOpenKey} openCode={inviteOpenCode} onChanged={refresh} onCount={setInviteCount}
+                onItems={setNudgeInvites} onInviteSent={afterInvite} />
               {!solo && (
                 <Pressable onPress={() => setSettings(true)} accessibilityRole="button"
                   style={({ pressed }) => [styles.member, { marginTop: 16 }, pressed && { opacity: 0.8 }]}>
@@ -574,17 +656,38 @@ export default function HomeScreen() {
             </>
           )}
         </View>
-      </ScrollView>
+      </TabBarScrollView>
       <NotificationsSheet visible={bell} onClose={() => setBell(false)} onOpen={openTarget} />
       <VerificationSheet visible={verify} onClose={() => { setVerify(false); loadVerify(); }} />
       <Onboarding visible={guide} plan={planOn} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
       {state.kind === 'ready' && (
-        <HelpSheet visible={help} owner={state.me.role === 'owner'} plan={planOn} onClose={() => setHelp(false)}
+        <HelpSheet visible={help} owner={state.me.role === 'owner'} plan={planOn} focus={helpFocus} onClose={() => { setHelp(false); setHelpFocus(null); }}
           onIntro={() => afterSheet(() => setGuide(true))} onSample={() => afterSheet(() => openSample())} onAction={onHelpAction} />
       )}
       {legalSheets}
       {wsSheet}
+      {!!userId && <NudgePrimer visible={primer} userId={userId} onClose={() => setPrimer(false)} />}
     </SafeAreaView>
+  );
+  };
+  const screen = renderScreen();
+  const barOn = !desktop && tab !== null;
+  const selectTab = (to: TabId) => {
+    if (to === tab) return;
+    track('tabbar.switch', { to });
+    if (calendar) refreshToday();      // takvimden çıkarken ana ekrandaki "bugün" satırı yenilenir (Geri düğmesi gibi)
+    setSelected(null);
+    setLibrary(to === 'library');
+    setCalendar(to === 'calendar' ? {} : null);
+    setSettings(to === 'settings');
+  };
+  return (
+    <TabBarProvider visible={barOn}>
+      <View style={styles.root}>
+        {screen}
+        {barOn && tab !== null && <LiquidTabBar active={tab} onSelect={selectTab} />}
+      </View>
+    </TabBarProvider>
   );
 }
 
@@ -655,12 +758,12 @@ function LibraryRow({ onOpen }: { onOpen: () => void }) {
 function VerificationRow({ v, onOpen }: { v: VerificationState; onOpen: () => void }) {
   const st = v.last?.status;
   const icon = v.verified_at ? 'shield-checkmark' : st === 'pending' && v.last?.submitted ? 'hourglass-outline' : 'shield-outline';
-  const title = v.verified_at ? `Belgesi incelendi: ${v.verified_label}`
+  const title = v.verified_at ? `Belge yüklendi: ${v.verified_label}`
     : st === 'pending' && v.last?.submitted ? 'Belgen incelemede'
     : st && ['rejected', 'auto_rejected', 'suspended'].includes(st) ? 'Belgeni yeniden yükle' : 'Belgeni yükle';
   const sub = v.verified_at ? 'Ailelerin davet ekranında görünür'
     : st === 'pending' && v.last?.submitted ? 'Ekibimiz inceleyince bildirim gelir'
-    : 'Ailelere "Belgesi incelendi" rozeti görünsün';
+    : 'Ailelere "Uzman diploma belgesini yükledi" yazısı görünsün';
   return (
     <Pressable onPress={onOpen} accessibilityRole="button"
       style={({ pressed }) => [styles.member, v.verified_at && { backgroundColor: '#E6F4EA' }, pressed && { opacity: 0.8 }]}>
@@ -675,6 +778,7 @@ function VerificationRow({ v, onOpen }: { v: VerificationState; onOpen: () => vo
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1 },
   safe: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: 24, paddingTop: 16, flexGrow: 1 },
   column: { width: '100%', maxWidth: 760, alignSelf: 'center' },

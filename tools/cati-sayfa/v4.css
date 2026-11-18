@@ -1,0 +1,144 @@
+/* Çatı sayfa, dördüncü sürüm (kullanıcı isteği 17 Kasım 2026). ortak.css + c.css + beyaz.css'in üstüne yüklenir.
+   1) Açılış: yeni metin, altında hemen "Moyo Ekosistemi" anlatımı
+   2) Hap biçiminde adım sayacı (Atlassian'ın sekme çubuğu örnek alındı): etkin adım yeşil dolu, geçilen adımların numarası yeşil
+   3) Ekosistem: ortadaki ekran net; yandakiler bulanık, yana açılmış, geride (eko.js)
+   4) Ürün adları çizgi kilitle: moyo Ebeveyn / Oyun / Uzman
+   5) Alt bilgi: açık zeminli yuvarlak kutuda sütunlar (Atlassian düzeni) */
+
+.gizli { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------- 1) Açılış ---------- */
+.sayfa-c .acilis.c { min-height: 0; display: block; padding-block: clamp(44px, 6vw, 88px) clamp(18px, 2.6vw, 32px); }
+.sayfa-c .acilis.c h1 { font-size: clamp(30px, 4.1vw, 54px); line-height: 1.08; max-width: 1000px; }
+.sayfa-c .acilis .alt-etiket { margin: clamp(22px, 2.6vw, 32px) auto 0; font-size: 14px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0A8F3A; }
+.sayfa-c .acilis .alt { margin-top: 8px; color: var(--yazi-2); }
+.sayfa-c .acilis .dugmeler { margin-top: clamp(22px, 2.6vw, 30px); }
+.sayfa-c .acilis .ince { margin-top: 14px; font-size: 15px; color: var(--yazi-2); }
+
+/* ---------- 2) Hap sayaç ---------- */
+.sayfa-c .sayac { display: inline-flex; align-items: center; gap: 4px; margin: 0; padding: 6px; list-style: none; width: fit-content; max-width: 100%; border: 0; border-radius: 999px; background: #EFF0F3;
+  overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+.sayfa-c .sayac::-webkit-scrollbar { display: none; }
+.sayfa-c .sayac li { flex: none; display: flex; }
+.sayfa-c .sayac a, .sayfa-c .sayac button { flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 7px 18px 7px 9px; border: 0; border-radius: 999px; background: transparent;
+  font: inherit; font-size: 15px; font-weight: 700; line-height: 1; color: var(--lacivert); text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: background-color .28s ease, color .28s ease, padding .28s ease; }
+.sayfa-c .sayac .n { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 0; background: #FFFFFF; color: var(--lacivert); font-size: 13px; font-weight: 800;
+  box-shadow: inset 0 0 0 1.5px #D0CFD8; transition: background-color .28s ease, box-shadow .28s ease, color .28s ease; }
+.sayfa-c .sayac a:hover, .sayfa-c .sayac button:hover { background: rgba(22, 17, 58, .06); }
+/* geçilen adım: numaranın içi yeşil */
+.sayfa-c .sayac .gecti .n { background: var(--yesil); box-shadow: none; }
+/* etkin adım: hapın içi yeşil, numara koyu */
+.sayfa-c .sayac a[aria-current="step"], .sayfa-c .sayac button[aria-selected="true"] { background: var(--yesil); color: var(--lacivert); }
+.sayfa-c .sayac a[aria-current="step"] .n, .sayfa-c .sayac button[aria-selected="true"] .n { background: var(--lacivert); color: #FFFFFF; box-shadow: none; }
+@media (prefers-reduced-motion: reduce) { .sayfa-c .sayac a, .sayfa-c .sayac button, .sayfa-c .sayac .n { transition: none; } }
+/* dar yerde yalnız etkin adımın adı yazılır */
+@media (max-width: 760px) {
+  .sayfa-c .sayac a, .sayfa-c .sayac button { padding: 6px; min-height: 40px; gap: 6px; font-size: 14px; }
+  .sayfa-c .sayac .ad { display: none; }
+  .sayfa-c .sayac a[aria-current="step"], .sayfa-c .sayac button[aria-selected="true"] { padding-right: 14px; }
+  .sayfa-c .sayac a[aria-current="step"] .ad, .sayfa-c .sayac button[aria-selected="true"] .ad { display: inline; }
+}
+@media (max-width: 480px) {
+  .sayfa-c .sayac { gap: 2px; padding: 4px; }
+  .sayfa-c .sayac a, .sayfa-c .sayac button { padding: 4px; min-height: 36px; font-size: 13px; }
+  .sayfa-c .sayac .n { width: 26px; height: 26px; font-size: 12px; }
+  .sayfa-c .sayac a[aria-current="step"], .sayfa-c .sayac button[aria-selected="true"] { padding-right: 11px; }
+}
+
+/* ---------- 3) Moyo Ekosistemi ---------- */
+.sayfa-c .dongu-b { border-top: 0; background: #FFFFFF; }
+.sayfa-c .dongu-b:not(.statik) .d-kayit { height: calc(var(--n) * 52svh + 100svh); }
+.sayfa-c .d-sahne { grid-template-rows: minmax(0, 1fr) auto auto; padding: 22px 20px 22px; }
+.sayfa-c .d-halka-kap { --w: min(48vw, 700px); perspective: 1600px; perspective-origin: 50% 46%; }
+.sayfa-c .d-halka { transform: none; transform-style: preserve-3d; }
+.sayfa-c .d-slot { transform: none; opacity: 0; filter: none; transition: none; backface-visibility: visible; will-change: transform, opacity, filter; }
+.sayfa-c .d-slot > img { box-shadow: 0 34px 80px -34px rgba(22, 17, 58, .45); }
+.sayfa-c .d-slot.t-mercek > img { border: 8px solid #0B0920; border-radius: 18px; }
+.sayfa-c .d-yazilar { min-height: 104px; margin-top: 14px; }
+.sayfa-c .d-yazi-m .rol, .sayfa-c .d-kart .rol { color: #0A8F3A; }
+.sayfa-c .d-yazi-m .rol { justify-content: center; }
+.sayfa-c .d-nokta { margin-top: 12px; }
+.sayfa-c .d-kapanis { padding-top: 18px; }
+/* telefon ve iPad: yana kaydırılan kartlar; ortadaki net, yandakiler bulanık ve küçük */
+.sayfa-c .d-mobil { padding-top: 6px; }
+.sayfa-c .d-nokta-m { margin: 14px auto 0; display: flex; }
+.sayfa-c .dongu-b.js .d-kart { opacity: .5; transform: scale(.93); filter: blur(1.6px); transition: opacity .3s ease, transform .3s ease, filter .3s ease; }
+.sayfa-c .dongu-b.js .d-kart.on { opacity: 1; transform: none; filter: none; }
+@media (prefers-reduced-motion: reduce) { .sayfa-c .dongu-b.js .d-kart { transition: none; filter: none; transform: none; } }
+@media (max-height: 720px) { .sayfa-c .d-yazilar { min-height: 88px; margin-top: 6px; } .sayfa-c .d-nokta { margin-top: 6px; } }
+
+/* ---------- Nasıl çalışır: sayaç ortada ---------- */
+.sayfa-c .hk-nokta { left: 50%; right: auto; bottom: 20px; transform: translateX(-50%); }
+.sayfa-c .hk-sahne { padding-bottom: 92px; }
+.sayfa-c .hk-yazi h3, .sayfa-c .d-yazi-m h3, .sayfa-c .nk-yazi h3 { text-wrap: balance; }
+.sayfa-c .nk-sekmeler { margin: 0 auto 18px; max-width: none; border: 0; background: #EFF0F3; }
+.sayfa-c .nk-sekmeler button { flex: none; }
+
+/* ---------- 4) Ürün kilitleri ---------- */
+.kilit { display: inline-flex; align-items: center; flex: none; color: var(--lacivert); }
+.kilit svg { display: block; height: 34px; width: auto; }
+.sayfa-c .rol { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; letter-spacing: 0; }
+.sayfa-c .rol-ek { font-size: 13.5px; font-weight: 600; color: var(--yazi-2); padding: 3px 11px; border-radius: 999px; background: #EFF0F3; }
+.sayfa-c .hk-yazi .rol .kilit svg { height: 38px; }
+.sayfa-c .nk-yazi .rol .kilit svg { height: 30px; }
+.sayfa-c .nk-rozet { color: var(--lacivert); border-color: var(--cizgi); background: #FFFFFF; }
+
+/* ---------- 5) Alt bilgi ---------- */
+.altb { background: #FFFFFF; padding: 28px 0 calc(34px + env(safe-area-inset-bottom, 0px)); color: var(--lacivert); --altb-ic: clamp(22px, 4vw, 52px); }
+.altb-kutu { background: var(--sis); border-radius: 28px; padding: clamp(28px, 4vw, 52px) var(--altb-ic); display: grid; grid-template-columns: minmax(0, 1.25fr) repeat(3, minmax(0, 1fr)); gap: 36px 28px; }
+.altb .logo { color: var(--lacivert); display: flex; align-items: center; height: 23px; margin: 0 0 16px; }   /* logo satırı = sütun başlığı satırı: bağlantılar aynı hizada başlar */
+.altb .logo svg { height: 28px; transform: none; }
+.altb-s h3 { font-size: 13px; line-height: 23px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 16px; }
+.altb-s ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.altb-s a { display: inline-flex; align-items: center; min-height: 36px; font-size: 16px; color: var(--lacivert); text-decoration: none; }
+.altb-s a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.altb-marka ul a { font-weight: 800; }
+.altb-alt { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 28px; padding: 22px var(--altb-ic) 0; font-size: 14px; color: var(--yazi-2); }
+@media (max-width: 860px) {
+  .altb-kutu { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .altb-marka { grid-column: 1 / -1; }
+  .altb-marka ul { display: flex; flex-wrap: wrap; gap: 0 26px; }
+}
+@media (max-width: 560px) {
+  .altb-kutu { grid-template-columns: 1fr 1fr; border-radius: 22px; }
+  .altb-s:last-child { grid-column: 1 / -1; }
+  .altb-s:last-child ul { display: flex; flex-wrap: wrap; gap: 0 26px; }
+}
+
+/* ---------- 6) Dar ekranda menü ---------- */
+.dar-menu { display: none; }
+@media (max-width: 920px) {
+  .dar-menu { display: block; }
+  .dar-menu summary { list-style: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: var(--lacivert); cursor: pointer; }
+  .dar-menu summary::-webkit-details-marker { display: none; }
+  .dar-menu summary svg { width: 24px; height: 24px; }
+  .dar-menu[open] summary { background: #EFF0F3; }
+  .dar-menu .m-kapat, .dar-menu[open] .m-ac { display: none; }
+  .dar-menu[open] .m-kapat { display: inline; }
+  .dar-menu nav a.yalniz-dar { display: none; }
+  .dar-menu nav { position: absolute; left: 0; right: 0; top: 100%; display: grid; padding: 8px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); background: #FFFFFF; border-bottom: 1px solid var(--cizgi); box-shadow: 0 24px 40px -28px rgba(22, 17, 58, .35); }
+  .dar-menu nav a { display: flex; align-items: center; min-height: 48px; padding: 0 8px; font-size: 17px; font-weight: 700; color: var(--lacivert); text-decoration: none; border-radius: 10px; }
+  .dar-menu nav a:hover { background: #F4F4F7; }
+  .beyaz .ust .ic { position: static; }
+  .beyaz .ust { position: sticky; }
+}
+@media (max-width: 480px) { .beyaz .ust .sag .cizgi { display: none; } .ust .sag { gap: 6px; } .dar-menu nav a.yalniz-dar { display: flex; } }
+
+/* ---------- Nasıl çalışır 2. adım: oyun + onay telefonu. Telefon, oyun ekranının sağ panelinin tam üstünde durur ve okunur boydadır ---------- */
+.sayfa-c .hk-kart.genis .ust-uste { aspect-ratio: 620 / 430; width: min(100%, calc(var(--gh, 100vh) * 1.44)); }
+.sayfa-c .hk-kart.genis .ust-uste .uu-oyun { width: 98.4%; top: 17%; }
+.sayfa-c .hk-kart.genis .ust-uste .uu-tel { height: 100%; top: 0; bottom: auto; right: 0; }
+/* telefonda 2. adım: oyun ekranı + daha küçük onay telefonu (yazıya daha çabuk inilir) */
+@media (max-width: 760px) { .sayfa-c .nk .t-ikili .uu-tel { width: min(60%, 230px); } }
+/* alt bilgide logo satırı sütun başlığıyla aynı yükseklikte */
+.altb .altb-marka .logo { height: 23px; min-height: 0; padding: 0; }
+
+/* Düzen aracı ayarı (kullanıcı, 17 Kasım 2026; geniş ekran > 1024 px; kaynak: Artifact veritabanı duzen/cati-masa sürüm 18).
+   Giriş bandı: başlık +16, metin +16, basamaklar +8; "Nasıl çalışır" bölümü +4. Taban değerler ortak.css'te (10 / 12 / 30 px, -12svh). */
+@media (min-width: 1025px) {
+  .sayfa-c #giris h2 { margin-top: 26px; }
+  .sayfa-c #giris .ic > p:not(.ust-etiket) { margin-top: 28px; }
+  .sayfa-c #giris .basamak { margin-top: 38px; }
+  .sayfa-c .giris-bant + #nasil { margin-top: calc(-12svh + 4px); }
+}

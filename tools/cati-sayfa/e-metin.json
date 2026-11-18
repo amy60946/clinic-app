@@ -1,6 +1,6 @@
 {
  "baslik": "Moyo · Ebeveyn",
- "h1": "DEHB, otizm ve davranışsal zorluklar yaşayan çocuklar için gelişim ve alışkanlık geliştirme uygulaması",
+ "h1": "Çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform",
  "alt": "Rutini bir kez kurarsınız; hatırlatmayı oyun yapar, onay sizden. Dilerseniz çalıştığınız uzmanı da dahil edersiniz.",
  "isaretler": [
   "Reklam ve satın alma yok",
@@ -47,11 +47,15 @@
   ],
   [
    "Uzmanımı nasıl dahil ederim?",
-   "Çalıştığınız uzman Moyo Mercek'ten size davet gönderir ya da siz onun kodunu girersiniz. Neyi paylaşacağınızı siz seçersiniz; paylaşımı istediğiniz an durdurursunuz."
+   "Çalıştığınız uzman Moyo Uzman'dan size davet gönderir ya da siz onun kodunu girersiniz. Neyi paylaşacağınızı siz seçersiniz; paylaşımı istediğiniz an durdurursunuz."
   ],
   [
    "Moyo tanı koyar mı?",
    "Hayır. Moyo rutinleri ve kayıtları bir arada tutar; tanı koymaz, tedavi yerine geçmez."
+  ],
+  [
+   "DEHB ya da otizm tanısı olan çocuklar kullanabilir mi?",
+   "Evet. Moyo tanıdan bağımsız, her çocuğun günlük rutiniyle çalışır; tanı koymaz."
   ],
   [
    "Ücreti nedir?",

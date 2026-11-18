@@ -1,0 +1,11 @@
+[
+ {"name": "moyo-bugun"},
+ {"name": "moyo-rutinler", "steps": ["Rutinler", "?Kapat", "?@İpucunu kapat"]},
+ {"name": "moyo-ekle", "steps": ["Rutin ekle"]},
+ {"name": "moyo-onay", "steps": ["~1 adım onayını bekliyor", "@Yatağını topla, Nazlı: incele", "?Şimdi değil", "?@Yatağını topla, Nazlı: incele"]},
+ {"name": "moyo-gelisim", "steps": ["Gelişim", "?Kapat"]},
+ {"name": "moyo-odul", "steps": ["Ödül", "?Atla"], "hide": ["[aria-label^=\"Harçlık ekle\"]"]},
+ {"name": "moyo-uzman", "clinic": true, "keep": true, "noSessions": true, "steps": ["Uzmanım", "?Kapat"]},
+ {"name": "moyo-oneri", "clinic": true, "keep": true, "noSessions": true, "steps": ["Uzmanım", "?Kapat", "scroll:520"]},
+ {"name": "moyo-egitim", "clinic": true, "steps": ["~Ebeveyn zorlayıcı davranışları ABC"]}
+]

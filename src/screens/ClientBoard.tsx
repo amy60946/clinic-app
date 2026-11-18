@@ -7,7 +7,7 @@ import { Label, Notice } from '../components/ui';
 import Bell from '../components/Bell';
 import { Client, ClinicianMe, Member, loadAttention } from '../lib/clinic';
 import { Attention, BoardRow, Section, TrainingStat, buildBoard } from '../lib/attention';
-import { loadTrainingsFor, loadDetail } from '../lib/training';
+import { loadTrainingsFor, loadDetail, type Training } from '../lib/training';
 import { track } from '../lib/track';
 
 // Tüm danışanlar (kullanıcı kararı 2 Kasım 2026: dikkat panosu "liste + neden"; ortak clinic_attention_summary, veritabani.md 23).
@@ -23,15 +23,16 @@ const MINE_TRAINING_INFO = 'Ebeveynin bitirdiği ve senin henüz açmadığın y
 const SECTIONS: { id: Section; title: string; info: string }[] = [
   { id: 'mine', title: 'Senin sıran', info: 'Aileye gönderilmemiş değişikliğin, değerlendirme zamanı gelen davranış hedefinin ya da takip planı henüz olmayan danışanlar.' },
   { id: 'family', title: 'Ebeveynden yeni', info: 'Son 7 günde ebeveynin girdiği davranış kayıtları ve öneri kararları. "Gördüm" dersen ya da danışanı açarsan, yeni bir şey gelene kadar bu bölümden çıkar (bu cihazda).' },
-  { id: 'quiet', title: 'Sessiz kalanlar', info: 'Ebeveynin 7 gündür hiç kaydı yok: macera, davranış kaydı, program uygulaması, öneri kararı.' },
+  { id: 'quiet', title: 'Sessiz kalanlar', info: 'Ebeveynin 7 gündür hiç kaydı yok: adım onayı, davranış kaydı, program uygulaması, öneri kararı.' },
   { id: 'rest', title: 'Diğer danışanlar', info: 'Şu an bir şey beklemeyen danışanlar.' },
 ];
 
-export default function ClientBoard({ clients, unread, me, team, onOpen, onAttention, plan = true, onTraining }: {
+export default function ClientBoard({ clients, unread, me, team, onOpen, onAttention, plan = true, onTraining, onTrainings }: {
   clients: Client[]; unread: Record<string, number>; me: ClinicianMe; team: Member[]; onOpen: (c: Client) => void;
   onAttention?: (a: Record<string, Attention> | null) => void;      // ana ekrandaki Başlarken kartı aynı özeti kullanır
   plan?: boolean;                                                   // Takip Planı açık mı (uzaktan ayar care_plan); kapalıyken nedenler eğitimden
   onTraining?: (s: { any: boolean; active: boolean }) => void;      // Başlarken: ilk eğitim / Etkin eğitim var mı
+  onTrainings?: (ts: Training[] | null) => void;                    // yüklenen eğitim listesi (hatırlatma planı yeniden okumasın); null: okunamadı
 }) {
   const [q, setQ] = useState('');
   const [att, setAtt] = useState<Record<string, Attention> | null>(null);
@@ -48,6 +49,7 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
     (async () => {
       try {
         const ts = await loadTrainingsFor(clients.map((c) => c.link_id));
+        if (live) onTrainings?.(ts);
         const d = await loadDetail(ts.map((t) => t.id));
         const stat: Record<string, TrainingStat> = {};
         clients.forEach((c) => { stat[c.link_id] = { total: 0, drafts: 0, review: 0 }; });

@@ -33,13 +33,13 @@ import { useLayout, LayoutToggle } from '../../lib/layout';
 export type Tab = 'training' | 'behaviors' | 'summary' | 'routine' | 'goals' | 'sessions' | 'notes' | 'suggestions' | 'report' | 'details';
 type Section = Exclude<Tab, 'suggestions'>;
 
-// Bölümler: geniş ekranda (web, iPad'de "Web görünümü") gruplu sol menü — Planla · İzle · Kayıt (kullanıcı kararı 30 Ekim 2026);
+// Bölümler: geniş ekranda (web, iPad'de "Web görünümü") gruplu sol menü — Planla · Takip · Kayıt (kullanıcı kararı 30 Ekim 2026);
 // telefonda ve "iPad görünümü"nde gri zeminli seçici (4 + 3)
 // Lansman odağı (kullanıcı kararı 11 Kasım 2026, "A"): tek plan ekranı Ebeveyn Eğitimi. Takip Planı uzaktan ayar bayrağı
 // `care_plan` (clientConfig.tsx CARE_PLAN_FLAG) açık değilse menüde yok (verisi durur); danışan Ebeveyn Eğitimi'nde açılır.
 const MENU_KEY = 'clinic.menu.v1';   // bölüm menüsü açık mı (hamburger); cihazda hatırlanır
 type Group = 'plan' | 'watch' | 'record';
-const GROUPS: { id: Group; label: string }[] = [{ id: 'plan', label: 'Planla' }, { id: 'watch', label: 'İzle' }, { id: 'record', label: 'Kayıt' }];
+const GROUPS: { id: Group; label: string }[] = [{ id: 'plan', label: 'Planla' }, { id: 'watch', label: 'Takip' }, { id: 'record', label: 'Kayıt' }];
 const SECTIONS: { id: Section; label: string; icon: keyof typeof Ionicons.glyphMap; group: Group }[] = [
   { id: 'training', label: 'Ebeveyn Eğitimi', icon: 'school-outline', group: 'plan' },
   { id: 'goals', label: 'Takip Planı', icon: 'flag-outline', group: 'plan' },

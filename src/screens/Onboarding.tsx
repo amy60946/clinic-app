@@ -11,7 +11,7 @@ import { track } from '../lib/track';
 // karartılmış, dokunulacak yer altın halka + ① ② numarası, iki dokunuş arasında altın kesikli çizgi;
 // yazı yalnız başlık + tek kısa satır. Yeni hesapta bir kez açılır, ana ekrandaki "Nasıl kullanılır" ile yeniden.
 // 3 Kasım 2026 (ilk kullanım "T1"): ekranlar güncellendi — ana ekran bölümleri (dikkat panosu), Takip Planı'nda
-// "önce taslak, sonra Aileye gönder" kuralı, gruplu menü (Planla · İzle · Kayıt). 4 ekran kalır (3–4 adımlı turlar en çok bitiriliyor).
+// "önce taslak, sonra Aileye gönder" kuralı, gruplu menü (Planla · Takip · Kayıt). 4 ekran kalır (3–4 adımlı turlar en çok bitiriliyor).
 
 const KEY = (userId: string) => `clinic.onboarding.v1.${userId}`;
 export const onboardingSeen = async (userId: string) => {
@@ -40,7 +40,7 @@ const ALL_STEPS: Step[] = [
   { title: 'Aileyi davet et', line: 'E-postayı yaz, "E-posta gönder".', screen: 'invite' },
   { title: 'Kimde ne var', line: 'Ana ekran üç bölüm.', screen: 'board' },
   { title: 'Taslak, sonra gönder', line: 'Bej = taslak. "Aileye gönder" ile gider.', screen: 'plan' },
-  { title: 'İzle ve raporla', line: 'İzle bölümü; dönem sonunda "Rapor".', screen: 'watch' },
+  { title: 'Takip et ve raporla', line: 'Takip bölümü; dönem sonunda "Rapor".', screen: 'watch' },
 ];
 
 export default function Onboarding({ visible, plan = true, onClose }: { visible: boolean; plan?: boolean; onClose: (completed: boolean) => void }) {
@@ -235,7 +235,7 @@ function PlanMock({ wide }: { wide: boolean }) {
   );
 }
 
-// Danışan menüsü: Planla · İzle · Kayıt; İzle ① ve Rapor ②
+// Danışan menüsü: Planla · Takip · Kayıt; Takip ① ve Rapor ②
 // Ebeveyn Eğitimi: taslak eğitim (aile görmez) ① → durumu "Etkin" yap ②; altında üç bölüm
 function TrainingMock({ wide }: { wide: boolean }) {
   return (
@@ -286,7 +286,7 @@ function MenuMock({ plan }: { plan: boolean }) {
       <Header title="Nazlı" sub="8 yaş · Sorumlu: sen" back />
       {group('Planla', plan ? ['Ebeveyn Eğitimi', 'Takip Planı', 'Seanslar'] : ['Ebeveyn Eğitimi', 'Seanslar'])}
       <View>
-        {group('İzle', ['Davranışlar ve Olaylar', 'Özet', 'Ev Rutinleri'], ['Davranışlar ve Olaylar', 'Ev Rutinleri'])}
+        {group('Takip', ['Davranışlar ve Olaylar', 'Özet', 'Ev Rutinleri'], ['Davranışlar ve Olaylar', 'Ev Rutinleri'])}
         <Badge n={1} />
       </View>
       <View>

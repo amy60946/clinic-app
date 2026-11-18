@@ -12,7 +12,7 @@ const version = Application.nativeApplicationVersion
   ? `${Application.nativeApplicationVersion} (${Application.nativeBuildVersion ?? '?'})`
   : Constants.expoConfig?.version ?? null;
 
-type Ev = { event: string; props?: Record<string, string | number | boolean>; at: string; session_id: string };
+type Ev = { event: string; props?: Record<string, string | number | boolean | null>; at: string; session_id: string };
 
 const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
   const r = (Math.random() * 16) | 0;

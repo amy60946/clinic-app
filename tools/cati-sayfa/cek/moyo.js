@@ -1,0 +1,78 @@
+// Çatı sayfa ve Moyo Ebeveyn sayfası için gerçek Moyo (ParentApp) ekranları: 390×844 nokta ×2 → 600×1298 webp, uydurma veri.
+// Önce: parent-app'te `bash preview/build.sh`. Kullanım: node tools/cati-sayfa/cek/moyo.js [ad …]   (CEK_DEBUG=1 → ekrandaki yazıyı da basar)
+// Deneme verisi ve giriş parent-app `store/capture/prep.js` ile (mağaza görselleriyle aynı uydurma aile); adım sözdizimi `store/capture/capture.js` ile aynı:
+//   "Yazı" tam eşleşme · "~Yazı" içeren · "@Etiket" aria-label · "xy:x,y" nokta · "scroll:n" · "wait:ms" · başta "?" = varsa dokun
+// moyo.json: clinic = uzman bağlı kalsın · keep = uzmanın bekleyen önerileri kalsın · noSessions = randevular görünmesin
+const path = require('path');
+const fs = require('fs');
+const os = require('os');
+const { execFileSync } = require('child_process');
+const { chromium } = require('playwright');
+const PARENT = process.env.PARENT_APP || path.resolve(__dirname, '../../../../parent-app');
+const { prep } = require(path.join(PARENT, 'store/capture/prep.js'));
+process.env.PREVIEW_APP_HTML = process.env.PREVIEW_APP_HTML || path.join(PARENT, 'preview/out/app.html');
+const IMG = path.resolve(__dirname, '../img');
+const TMP = path.join(os.tmpdir(), 'cati-cek');
+fs.mkdirSync(TMP, { recursive: true });
+const shots = JSON.parse(fs.readFileSync(path.join(__dirname, 'moyo.json'), 'utf8'));
+const only = process.argv.slice(2);
+const KEY = 'pofi-onizleme-v14';   // parent-app preview/demo-supabase.ts KEY (store/capture/prep.js ile aynı)
+const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-family:BlinkMacSystemFont;src:local('${['Inter', 'Inter Medium', 'Inter SemiBold', 'Inter Bold', 'Inter ExtraBold', 'Inter Black'][i]}');font-weight:${w}}`).join('\n');
+
+(async () => {
+  const b = await chromium.launch();
+  for (const s of shots) {
+    if (only.length && !only.includes(s.name)) continue;
+    const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'tr-TR', timezoneId: 'Europe/Istanbul', colorScheme: 'light' });
+    const p = await ctx.newPage();
+    p.on('pageerror', (e) => console.log('HATA', s.name, String(e.message).slice(0, 160)));
+    await p.addInitScript((css) => { document.addEventListener('DOMContentLoaded', () => { const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st); }); }, FONT);
+    if (s.keep) await p.addInitScript((K) => {
+      const set = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (k, v) {
+        if (k === K && !this.getItem('__cek_pending')) { try { const pend = (JSON.parse(v).clinic_task_suggestions || []).filter((x) => x.status === 'pending'); if (pend.length) set.call(this, '__cek_pending', JSON.stringify(pend)); } catch (e) { /* geç */ } }
+        return set.call(this, k, v);
+      };
+    }, KEY);
+    await prep(p, { clinic: !!s.clinic });
+    if (s.keep || s.noSessions) {
+      // Uzmanım ekranı: uzmanın bekleyen rutin ve adım önerileri görünsün (değişiklik önerisi hariç); randevular bu çekimde yok
+      await p.evaluate(({ K, keep, noSessions }) => {
+        const db = JSON.parse(localStorage.getItem(K));
+        if (keep) JSON.parse(localStorage.getItem('__cek_pending') || '[]').filter((x) => x.kind !== 'change')
+          .forEach((x) => { if (!db.clinic_task_suggestions.some((y) => y.id === x.id)) db.clinic_task_suggestions.push(x); });
+        if (noSessions) db.clinic_sessions = [];
+        localStorage.setItem(K, JSON.stringify(db));
+      }, { K: KEY, keep: !!s.keep, noSessions: !!s.noSessions });
+      await p.reload(); await p.waitForTimeout(2500);
+    }
+    for (const raw of s.steps || []) {
+      const opt = raw.startsWith('?'), st = opt ? raw.slice(1) : raw, timeout = opt ? 1500 : 4000;   // "?…": varsa dokun, yoksa sessizce geç
+      try {
+        if (st.startsWith('wait:')) await p.waitForTimeout(+st.slice(5));
+        else if (st.startsWith('@')) await p.getByLabel(st.slice(1)).first().click({ timeout });
+        else if (st.startsWith('~')) await p.getByText(st.slice(1)).first().click({ timeout });
+        else if (st.startsWith('scroll:')) { await p.mouse.move(195, 500); await p.mouse.wheel(0, +st.slice(7)); }
+        else if (st.startsWith('xy:')) { const [x, y] = st.slice(3).split(',').map(Number); await p.mouse.click(x, y); }
+        else await p.getByText(st, { exact: true }).first().click({ timeout });
+      } catch (e) { if (!opt) console.log('KAÇTI', s.name, st); }
+      await p.waitForTimeout(1100);
+    }
+    for (const lb of s.dismiss || []) {
+      await p.waitForTimeout(900);
+      try { await p.getByText(lb, { exact: true }).first().click({ timeout: 1200 }); } catch { try { await p.getByLabel(lb, { exact: true }).first().click({ timeout: 1200 }); } catch { /* yoksa geç */ } }
+    }
+    for (const sel of s.hide || []) await p.evaluate((q) => document.querySelectorAll(q).forEach((e) => { e.style.display = 'none'; }), sel);
+    await p.waitForTimeout(800);
+    const text = (await p.evaluate(() => document.body.innerText)).replace(/\n{2,}/g, '\n');
+    if (process.env.CEK_DEBUG) console.log(`--- ${s.name}\n${text.slice(0, +process.env.CEK_DEBUG > 1 ? +process.env.CEK_DEBUG : 900)}\n---`);
+    if (/macera/i.test(text)) console.log('UYARI', s.name, 'ekranda "macera" geçiyor:', (text.match(/.{0,40}macera.{0,30}/i) || [''])[0].replace(/\n/g, ' '));
+    if (!s.skip) {
+      const png = path.join(TMP, s.name + '.png');
+      await p.screenshot({ path: png });
+      console.log(execFileSync('python3', [path.join(__dirname, 'kucult.py'), png, path.join(IMG, s.name + '.webp'), '600'], { encoding: 'utf8' }).trim());
+    }
+    await ctx.close();
+  }
+  await b.close();
+})().catch((e) => { console.error(e); process.exit(1); });

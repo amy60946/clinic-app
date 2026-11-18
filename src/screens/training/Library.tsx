@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
 import { Input, Cta, SmallButton, IconButton, Empty } from '../../components/ui';
 import { ClinicianMe, Client } from '../../lib/clinic';
+import { useTabBarScroll } from '../../lib/tabBar';
 import {
   ITEMS, TOPICS, TYPES, LibItem, ItemType, topicLabel, loadFavorites, saveFavorites, loadTrainings, createTraining, addModules,
   loadDetail, parentsOf, loadParents, Training, TrainingNotInstalled,
@@ -172,9 +173,10 @@ export default function LibraryScreen({ me, clients, onBack, onOpenTraining }: {
   me: ClinicianMe; clients: Client[]; onBack: () => void; onOpenTraining: (c: Client) => void;
 }) {
   const [assign, setAssign] = useState<LibItem | null>(null);
+  const { scrollProps, bottomPad } = useTabBarScroll();     // alt ana menü
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 + bottomPad }} keyboardShouldPersistTaps="handled" {...scrollProps}>
         <View style={{ width: '100%', maxWidth: 1240, alignSelf: 'center', gap: 14 }}>
           <Pressable onPress={onBack} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start' }} accessibilityRole="button">
             <Ionicons name="chevron-back" size={16} color={colors.navy} />
@@ -185,6 +187,8 @@ export default function LibraryScreen({ me, clients, onBack, onOpenTraining }: {
             <Text style={styles.body}>Ebeveynlere okuma, test ve açık uçlu sorular gönderin; tamamlama ve ilerlemeyi izleyin.</Text>
           </View>
           <LibraryBrowser me={me} mode="page" onAssign={setAssign} />
+          {/* Kütüphane ekranında bir kez, göze batmadan (kullanıcı kararı 14 Kasım 2026, ortak hukuk_notlari M.5) */}
+          <Text style={styles.footNote}>Genel bilgilendirmedir, mesleki değerlendirmenin yerini tutmaz.</Text>
         </View>
       </ScrollView>
       {assign && <AssignSheet me={me} item={assign} clients={clients} onClose={() => setAssign(null)}
@@ -286,6 +290,7 @@ const styles = StyleSheet.create({
   pageTitle: { fontSize: 24, fontWeight: '700', color: colors.navy },
   body: { fontSize: 14, color: colors.text, lineHeight: 20 },
   fhead: { fontSize: 12, fontWeight: '700', color: colors.muted, marginTop: 10, marginBottom: 2 },
+  footNote: { fontSize: 12, color: colors.muted, textAlign: 'center', marginTop: 8 },
   check: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 5 },
   radio: { width: 18, height: 18, borderRadius: 4, borderWidth: 1.5, borderColor: colors.faint, alignItems: 'center', justifyContent: 'center' },
   radioOn: { backgroundColor: colors.navy, borderColor: colors.navy },

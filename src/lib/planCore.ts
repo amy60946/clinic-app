@@ -135,7 +135,7 @@ export function publishItems(p: {
     const ids = r.items.filter((s) => s.status === 'draft').map((s) => s.id);
     if (!ids.length) continue;
     out.push({ key: `r:${r.key}`, hold: ids, kind: r.single ? 'task' : 'routine', title: r.title, goalId: r.goalId,
-      detail: r.single ? 'yeni macera' : r.state === 'added' ? `${ids.length} macera rutine eklenecek` : `${ids.length} macera · yeni rutin` });
+      detail: r.single ? 'yeni adım' : r.state === 'added' ? `${ids.length} adım rutine eklenecek` : `${ids.length} adım · yeni rutin` });
   }
   const ch = new Map<string, Suggestion[]>();
   p.changes.filter((s) => s.kind === 'change' && s.status === 'draft').forEach((s) => {
@@ -146,7 +146,7 @@ export function publishItems(p: {
     const removes = list.filter((s) => s.change_remove).length;
     out.push({ key: `c:${k}`, hold: list.map((s) => s.id), kind: 'change', title: list[0].routine?.title || list[0].title,
       goalId: list.find((s) => s.goal_id)?.goal_id ?? null,
-      detail: [`${list.length} değişiklik önerisi`, removes ? `${removes} macera çıkar` : ''].filter(Boolean).join(' · ') });
+      detail: [`${list.length} değişiklik önerisi`, removes ? `${removes} adım çıkar` : ''].filter(Boolean).join(' · ') });
   });
   return out;
 }

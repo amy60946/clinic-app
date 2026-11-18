@@ -72,7 +72,7 @@ test('Takip Planı kapalı: plan nedenleri yok, eğitim nedenleri var', () => {
   const all = Object.values(board).flat();
   assert.ok(all.every((r) => !r.reasons.some((x) => ['unsent', 'review', 'noplan'].includes(x.key))), 'plan nedeni kalmaz');
   assert.deepEqual(keys(all.find((r) => r.client.link_id === 'incele').reasons), ['tr_review']);
-  assert.deepEqual(keys(all.find((r) => r.client.link_id === 'tamam').reasons), ['pending'], 'macera önerisi nedeni durur');
+  assert.deepEqual(keys(all.find((r) => r.client.link_id === 'tamam').reasons), ['pending'], 'adım önerisi nedeni durur');
   assert.equal(board.rest.map((r) => r.client.link_id).join(), 'tamam');
 });
 

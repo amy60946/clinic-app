@@ -116,6 +116,15 @@ async function login(b, who) {
   await step(p, 'help', async () => { await tap(p, 'Nasıl kullanılır?'); });
   await closeTop(p);
   await step(p, 'membership', async () => { await tap(p, 'Paketleri ve fiyatları gör'); });
+  // İptal öncesi akış (uzaktan ayar `cancel_flow`: önizlemede açık, PLAN=1 geçişinde kapalı): Üyeliğin → soru → seçenek → çıkış.
+  // Önizlemede mağaza taklit (preview/demo-store.ts); iptal çıkışı her ekranda görünür olmalı.
+  if (!PLAN) {
+  await step(p, 'manage-summary', async () => { await tap(p, 'Aboneliği yönet'); }, 'Planı değiştir');
+  await step(p, 'manage-reason', async () => { await tap(p, 'Aboneliği iptal et', { last: true }); }, 'Yanıtlamadan iptale git');
+  await step(p, 'manage-alt', async () => { await tap(p, 'Aileler uygulamayı kullanmıyor'); await tap(p, 'Devam', { last: true }); if (!(await visible(p, 'Aboneliği iptal et').count())) throw new Error('seçenek ekranında "Aboneliği iptal et" yok'); }, 'Bize yaz');
+  await step(p, 'manage-exit', async () => { await tap(p, 'Aboneliği iptal et', { last: true }); }, 'App Store aboneliklerini aç');
+  await closeTop(p);
+  }
   await closeTop(p);
   await step(p, 'calendar', async () => { await tap(p, 'Takvim'); });
   await step(p, 'calendar-week', async () => { await tap(p, 'Hafta'); }, 'Pzt');
@@ -128,7 +137,8 @@ async function login(b, who) {
   await closeTop(p, true);
   }
   // Kaynak kütüphanesi (ebeveyn eğitimi, 9 Kasım 2026)
-  await step(p, 'library', async () => { await tap(p, 'Kaynak kütüphanesi', { wait: 1800 }); }, 'Ebeveyn eğitimi kaynak kütüphanesi');
+  // dar düzende kütüphane alt ana menüde (17 Kasım 2026); geniş düzende ana ekrandaki satır
+  await step(p, 'library', async () => { await tap(p, (await visible(p, 'Kaynak kütüphanesi').count()) ? 'Kaynak kütüphanesi' : p.locator('[role="tab"][aria-label="Kütüphane"]'), { wait: 1800 }); }, 'Ebeveyn eğitimi kaynak kütüphanesi');
   await step(p, 'library-item', async () => { await tap(p, p.getByRole('button', { name: 'Uzmanınla eğitime başlarken', exact: true }).filter({ visible: true })); }, 'Ebeveyn eğitimi olarak ata');
   await step(p, 'library-assign', async () => { await tap(p, 'Ebeveyn eğitimi olarak ata', { last: true }); }, 'Danışan seç');
   await closeTop(p); await ensureClosed(p);
@@ -222,7 +232,7 @@ async function login(b, who) {
       await step(p, 'routines-stats', async () => { await tap(p, 'Oranlar'); });
       await step(p, 'routines-sent', async () => { await tap(p, p.getByText(/^Gönderilenler/).filter({ visible: true })); });
       await step(p, 'routines-suggest', async () => { await tap(p, 'Öner', { last: true }); });
-      await step(p, 'suggestion-editor', async () => { await tap(p, 'Aileye macera öner', { wait: 1500 }); });
+      await step(p, 'suggestion-editor', async () => { await tap(p, 'Aileye adım öner', { wait: 1500 }); });
       await closeTop(p); await closeTop(p);
     }
   }
@@ -230,7 +240,7 @@ async function login(b, who) {
   // Örnek aile + eğitim turu (lansman odağı "A"; Takip Planı kapalıyken): Ayarlar › Örnek aileyi aç
   if (!PLAN) {
   await ensureClosed(p);
-  await step(p, 'home-again', async () => { if (!(await clickTop(p, p.locator('[aria-label="Danışanlar"]').filter({ visible: true }), 1500))) await tap(p, 'Tüm Danışanlar', { wait: 1500 }); }, 'Kaynak kütüphanesi');
+  await step(p, 'home-again', async () => { if (!(await clickTop(p, p.locator('[aria-label="Danışanlar"]').filter({ visible: true }), 1500))) await tap(p, 'Tüm Danışanlar', { wait: 1500 }); }, 'Aileyi davet et');
   await step(p, 'tour-intro', async () => { await tap(p, p.getByRole('button', { name: 'Ayarlar', exact: true }), { wait: 1500 }); await tap(p, 'Örnek aileyi aç', { wait: 2000 }); }, 'Deniz’le dene');
   await step(p, 'tour-open', async () => { await tap(p, 'Başla', { last: true }); }, 'Eğitimi aç');
   await step(p, 'tour-modules', async () => { await tap(p, p.getByRole('button', { name: /^Ebeveyn zor geçişlerden/ }).filter({ visible: true })); }, 'Ebeveynin okuduğu ve yanıtladığı içerik');
@@ -240,6 +250,16 @@ async function login(b, who) {
   await step(p, 'tour-todos-look', async () => { await tap(p, subTab('Hızlı yapılacaklar'), { last: true }); }, 'bir örneğe dokun');
   await step(p, 'tour-done', async () => { await tap(p, 'İleri', { last: true }); }, 'Hazırsın');
   await step(p, 'tour-closed', async () => { await tap(p, 'Kapat', { last: true }); }, 'hızlı yapılacak');
+  }
+  // App Store durumu (önizlemede taklit, tarayıcı deposunda demo.membership): ödeme alınamadı (ana ekran + üyelik), yenileme kapatıldı
+  if (!ONLY && !PLAN) {
+    for (const [state, mark] of [['billing', 'Ödeme yöntemini güncelle'], ['cancelled', 'Aboneliği sürdür']]) {
+      await p.evaluate((s) => localStorage.setItem('demo.membership', JSON.stringify({ plan: 'clinic', period: 'monthly', state: s })), state);
+      await p.reload(); await p.waitForTimeout(3000);
+      if (state === 'billing') await step(p, 'store-billing-home', async () => {}, mark);
+      await step(p, `store-${state}`, async () => { await tap(p, p.getByText(/^Üyelik: /).filter({ visible: true })); }, mark);
+    }
+    await p.evaluate(() => localStorage.removeItem('demo.membership'));
   }
   fs.writeFileSync(`${OUT}/api.json`, JSON.stringify(api)); 
   await ctx.close();

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Alert, StyleSheet, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,12 +6,17 @@ import { colors, radius } from '../theme';
 import { Card, Label, Cta, Segmented } from '../components/ui';
 import { clinicianMe, type ClinicianMe } from '../lib/clinic';
 import {
-  BillingPlan, Period, PACKAGES, commonTerms, yearlyGift, listPlans, tl, billingStatus, hasAccess, daysLeft, packageName,
+  BillingPlan, PackageId, Period, PACKAGES, commonTerms, yearlyGift, listPlans, tl, billingStatus, hasAccess, daysLeft, packageName, packageOfProduct, periodOfProduct,
 } from '../lib/billing';
 import * as store from '../lib/store';
 import type { StorePrices, StoreResult } from '../lib/storeTypes';
 import { track } from '../lib/track';
 import { useLegalOn, openLegal } from '../lib/legal';
+import { useClientConfig } from '../lib/clientConfig';
+import { CANCEL_FLOW_FLAG } from '../lib/cancelFlow';
+import { useStoreSubscription, openAppleSubscriptions } from '../lib/storeState';
+import ManageSheet from './membership/ManageSheet';
+import { CancelledCard, BillingBanner } from './membership/StoreNotices';
 
 const APPLE_EULA = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL;
@@ -31,11 +36,12 @@ async function waitForServer(planOk: (me: ClinicianMe) => boolean): Promise<bool
 
 // Üyelik ekranı (CANLIYA_ALMA 2.4). blocking: deneme/üyelik bitti, panel yerine bu ekran gösterilir (kapatılamaz).
 // Satın alma yalnız klinik sahibinde ve iOS'ta (App Store, RevenueCat); web'de satış yok. Ekip üyesine fiyat gösterilmez.
-export default function MembershipScreen({ me, blocking, onClose, onChanged, footer }: {
+export default function MembershipScreen({ me, blocking, onClose, onChanged, onHelp, footer }: {
   me: ClinicianMe;
   blocking?: boolean;
   onClose?: () => void;
   onChanged: () => void;
+  onHelp?: () => void;            // "Nasıl kullanılır?" (iptal öncesi akıştaki ipuçları düğmesi; ödeme duvarında yok)
   footer?: React.ReactNode;
 }) {
   const [plans, setPlans] = useState<BillingPlan[]>([]);
@@ -49,6 +55,13 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
   const owner = me.role === 'owner';
   const ios = store.storeKind === 'app_store';
   const shop = ios && owner && store.storeEnabled;
+  // İptal öncesi akış (uzaktan ayar `cancel_flow`, yoksa kapalı): "Aboneliği yönet" önce kendi penceremizi açar
+  // (membership/ManageSheet). Mağazadaki durum (yenileme kapatıldı / ödeme alınamadı) yalnız sahipte ve bayrak açıkken okunur.
+  const cancelFlow = useClientConfig().flag(CANCEL_FLOW_FLAG);
+  const { sub, refresh: refreshSub } = useStoreSubscription(owner ? me.id : null, cancelFlow);
+  const [manageOpen, setManageOpen] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+  const packagesY = useRef(0);
 
   useEffect(() => { track('screen.membership', { status }); }, [status]);
   useEffect(() => {
@@ -125,16 +138,38 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
     }
   };
 
+  // Bugünkü plan: mağazadaki ürün kimliğinden, yoksa sunucudaki üyelikten (yalnız Bireysel / Klinik yönetilir)
+  const subPlan = sub?.productId ? plans.find((p) => p.apple_product_id === sub.productId) : undefined;
+  const mine = status === 'active';
+  const myPkg: PackageId | null = subPlan?.package ?? packageOfProduct(sub?.productId)
+    ?? (mine && (me.plan === 'solo' || me.plan === 'clinic') ? me.plan : null);
+  const myPeriod: Period | null = subPlan?.period ?? periodOfProduct(sub?.productId) ?? (!sub && mine ? me.billing_period ?? null : null);
+  const myPlan = subPlan ?? plans.find((p) => p.package === myPkg && p.period === myPeriod);
+  const appStoreMember = mine && (me.billing_source === 'app_store' || me.billing_source === 'revenuecat');
+  // Pencere yalnız yönetilecek bir App Store aboneliği varken açılır; yoksa (deneme, anlaşmalı klinik) eski davranış
+  const sheetReady = cancelFlow && owner && !!myPkg && (!!sub || appStoreMember);
+
+  // Apple'ın abonelik sayfası (iptal, sürdürme, ödeme yöntemi); kapanınca mağaza durumu ve üyelik yeniden okunur
+  const openApple = async () => {
+    await openAppleSubscriptions(me.id);
+    await refreshSub(true);
+    onChanged();
+  };
   const manage = () => {
     track('membership.manage');
+    if (sheetReady) return setManageOpen(true);
     store.storeManage(me.id).catch(() => {});
+  };
+  const showPackages = (to?: Period) => {
+    if (to) setPeriod(to);
+    scrollRef.current?.scrollTo({ y: Math.max(0, packagesY.current - 12), animated: true });
   };
 
   const shown = plans.filter((p) => p.period === period);
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
         <View style={styles.column}>
           <View style={styles.header}>
             <View style={{ flex: 1 }}>
@@ -148,7 +183,14 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
             )}
           </View>
 
-          <StatusCard me={me} status={status} owner={owner} />
+          {cancelFlow && owner && !!sub?.billingIssueAt && (
+            <BillingBanner solo={myPkg === 'solo'} onFix={() => { track('membership.billing_fix'); openApple(); }} />
+          )}
+          {cancelFlow && owner && !!sub && !sub.billingIssueAt && !sub.willRenew && !!sub.expiresAt && (
+            <CancelledCard until={sub.expiresAt} onResume={() => { track('membership.resume'); openApple(); }} />
+          )}
+          <StatusCard me={me} status={status} owner={owner}
+            store={cancelFlow && owner && sub ? { billing: !!sub.billingIssueAt, willRenew: sub.willRenew, until: sub.expiresAt } : null} />
 
           {!owner ? (
             <Text style={[styles.body, { marginTop: 12 }]}>
@@ -156,7 +198,7 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
             </Text>
           ) : (
             <>
-              <View style={{ marginTop: 20 }}>
+              <View style={{ marginTop: 20 }} onLayout={(e) => { packagesY.current = e.nativeEvent.layout.y; }}>
                 <Segmented options={[{ id: 'monthly', label: 'Aylık' }, { id: 'yearly', label: gift ? `Yıllık · ${gift} ay hediye` : 'Yıllık' }]}
                   value={period} onChange={setPeriod} />
               </View>
@@ -189,12 +231,14 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
                 <Text style={[styles.small, { marginTop: 12 }]}>Üyeliğin App Store üzerinden alındı; iPhone/iPad'de Ayarlar › Apple Hesabı › Abonelikler'den yönetilir.</Text>
               )}
 
-              {shop && (
+              {(shop || sheetReady) && (
                 <View style={styles.links}>
-                  <Pressable onPress={restore} disabled={!!busy} hitSlop={8}>
-                    <Text style={styles.link}>{syncing ? 'Üyelik açılıyor…' : busy === 'restore' ? 'Geri yükleniyor…' : 'Satın alımları geri yükle'}</Text>
-                  </Pressable>
-                  <Pressable onPress={manage} hitSlop={8}><Text style={styles.link}>Aboneliği yönet</Text></Pressable>
+                  {shop && (
+                    <Pressable onPress={restore} disabled={!!busy} hitSlop={8}>
+                      <Text style={styles.link}>{syncing ? 'Üyelik açılıyor…' : busy === 'restore' ? 'Geri yükleniyor…' : 'Satın alımları geri yükle'}</Text>
+                    </Pressable>
+                  )}
+                  <Pressable onPress={manage} hitSlop={8} accessibilityRole="button"><Text style={styles.link}>Aboneliği yönet</Text></Pressable>
                 </View>
               )}
 
@@ -214,11 +258,32 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, foo
           {footer}
         </View>
       </ScrollView>
+      {sheetReady && !!myPkg && (
+        <ManageSheet
+          visible={manageOpen} web={!ios} onClose={() => setManageOpen(false)}
+          summary={{
+            name: PACKAGES[myPkg].title, period: myPeriod, seats: myPlan?.seat_limit ?? null, price: myPlan ? priceOf(myPlan) : null,
+            until: sub ? sub.expiresAt : me.period_end ?? null,
+            willRenew: sub ? sub.willRenew : me.period_end && typeof me.auto_renew === 'boolean' ? me.auto_renew : null,
+          }}
+          plan={{ pkg: myPkg, period: myPeriod, members: me.member_count ?? 1, gift: giftOf(myPkg), help: !!onHelp }}
+          onPackages={showPackages}
+          onRestore={shop || store.storePreview ? restore : undefined}
+          onHelp={onHelp}
+          onExit={openApple}
+          onResume={() => { track('membership.resume'); openApple(); }}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
-function StatusCard({ me, status, owner }: { me: ClinicianMe; status: 'trial' | 'active' | 'expired'; owner: boolean }) {
+// store: App Store'daki güncel durum (bayrak `cancel_flow`, yalnız sahip). Sunucu kaydı gecikebilir; kart üstteki
+// iptal / ödeme bildirimiyle çelişmesin diye yenileme satırı mağazadaki duruma göre yazılır.
+function StatusCard({ me, status, owner, store: st }: {
+  me: ClinicianMe; status: 'trial' | 'active' | 'expired'; owner: boolean;
+  store?: { billing: boolean; willRenew: boolean; until: string | null } | null;
+}) {
   let icon: keyof typeof Ionicons.glyphMap = 'time-outline';
   let title = '';
   let text = '';
@@ -233,10 +298,13 @@ function StatusCard({ me, status, owner }: { me: ClinicianMe; status: 'trial' | 
   } else if (status === 'active') {
     icon = 'checkmark-circle-outline';
     title = `${packageName(me)}${me.billing_period ? ` · ${me.billing_period === 'yearly' ? 'Yıllık' : 'Aylık'}` : ''}`;
-    text = me.period_end
-      ? (me.auto_renew ? `${dateText(me.period_end)} tarihinde yenilenir` : `${dateText(me.period_end)} tarihine kadar açık; yenilenmeyecek`)
+    const until = st?.until ?? me.period_end;
+    const renews = st ? st.willRenew : me.auto_renew;
+    text = st?.billing ? 'Ödeme bekleniyor'
+      : until ? (renews ? `${dateText(until)} tarihinde yenilenir` : `${dateText(until)} tarihine kadar açık; yenilenmeyecek`)
       : 'Etkin';
-    if (me.billing_source) text += ` · ${SOURCE[me.billing_source] ?? me.billing_source}`;
+    // kaynak adı satır sonunda bölünmez ("App / Store"), satır "·" ile başlamaz
+    if (me.billing_source) text += `\u00a0· ${(SOURCE[me.billing_source] ?? me.billing_source).replace(/ /g, '\u00a0')}`;
   } else {
     icon = 'lock-closed-outline';
     title = me.plan === 'trial' ? 'Deneme süren bitti' : 'Üyeliğin sona erdi';

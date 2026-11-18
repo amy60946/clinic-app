@@ -9,15 +9,18 @@ import { ClinicianMe, Client, Member, updateProfile, updateClinicName, listWorks
 import { useWorkspace } from '../lib/workspace';
 import { billingStatus, daysLeft, packageName } from '../lib/billing';
 import { track } from '../lib/track';
+import { useTabBarScroll } from '../lib/tabBar';
 import TeamCard, { PersonalCodeCard } from './TeamCard';
+import { NudgeSettings } from './NudgeParts';
 
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 // Ayarlar (ana ekranda sağ üstteki ad): kişisel bilgiler, klinik adı, ekip, üyelik, danışanlar, yasal ve hesap.
 export default function SettingsScreen({
-  me, team, clients, email, solo, verified, onBack, onChanged, onPlans, onOpenClient, onSample, onLegal, onGuide, onLogout, onDelete, legalOn, onLeft,
+  me, team, clients, email, solo, verified, onBack, onChanged, onPlans, onOpenClient, onSample, onLegal, onGuide, onLogout, onDelete, legalOn, onLeft, nudges,
 }: {
   me: ClinicianMe; team: Member[]; clients: Client[]; email: string; solo: boolean; verified: boolean; legalOn: boolean;
+  nudges?: boolean;   // uzaktan ayar `lifecycle_nudges` açık: Bildirimler bloğu (yalnız iPhone / iPad'de görünür)
   onBack: () => void; onChanged: () => void; onPlans: () => void; onOpenClient: (c: Client) => void; onSample: () => void;
   onLegal: () => void; onGuide: () => void; onLogout: () => void; onDelete: () => void; onLeft: () => void;
 }) {
@@ -27,6 +30,7 @@ export default function SettingsScreen({
   const [clinic, setClinic] = useState(me.clinic);
   const [busy, setBusy] = useState<string | null>(null);
   const st = billingStatus(me);
+  const { scrollProps, bottomPad } = useTabBarScroll();     // alt ana menü
   // Kendi kliniğini kur (kullanıcı kararı 5 Kasım 2026): hesap seçicide değil, burada; kliniğin adını yalnız sahibi yazar.
   // Sahibi olduğu bir klinik varsa görünmez.
   const { switchTo } = useWorkspace();
@@ -67,7 +71,7 @@ export default function SettingsScreen({
       }
     };
     if (verified && name.trim() !== me.name.trim()) {
-      return Alert.alert('Adın değişsin mi?', 'Belge incelemesi adına göre yapıldı; ad değişince "Belgesi incelendi" rozeti kalkar, yeniden belge yüklemen gerekir.',
+      return Alert.alert('Adın değişsin mi?', 'Belge incelemesi adına göre yapıldı; ad değişince "Belge yüklendi" rozeti kalkar, yeniden belge yüklemen gerekir.',
         [{ text: 'Vazgeç', style: 'cancel' }, { text: 'Değiştir', onPress: go }]);
     }
     go();
@@ -93,7 +97,8 @@ export default function SettingsScreen({
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+      <ScrollView contentContainerStyle={[styles.scroll, bottomPad > 0 && { paddingBottom: 48 + bottomPad }]} keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets {...scrollProps}>
         <View style={styles.column}>
           <View style={styles.header}>
             <Pressable onPress={onBack} accessibilityLabel="Geri" hitSlop={8} style={styles.iconBtn}>
@@ -168,6 +173,8 @@ export default function SettingsScreen({
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.faint} />
           </Pressable>
+
+          {nudges && <NudgeSettings userId={me.id} />}
 
           <Text style={styles.section}>{`Danışanlar (${clients.length})`}</Text>
           <Card style={{ padding: 0, overflow: 'hidden' }}>

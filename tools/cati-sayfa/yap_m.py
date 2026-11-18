@@ -4,7 +4,7 @@
 import json, re, html as H
 E = json.load(open('e-metin.json'))
 e = H.escape
-LOGO = open('inline-moyo.svg').read().strip()
+LOGO = open('inline-moyo-ebeveyn.svg').read().strip()   # kilit: "moyo" yazısı + ince "Ebeveyn" (tools/logo/gen.py; yazı 18 Kasım 2026 seçenek 6)
 LOGO = re.sub(r' role="img" aria-label="[^"]*"', ' aria-hidden="true" focusable="false"', LOGO).replace(' xmlns="http://www.w3.org/2000/svg"', '')
 APP = 'https://ebeveyn.moyoapp.com.tr/'
 MERCEK = 'https://mercek.moyoapp.com.tr/'
@@ -17,7 +17,7 @@ I = {
     'sil': '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
     'kvkk': '<path d="M6 3h9l3 3v15H6z"/><path d="M9 12l2 2 4-4"/>',
 }
-APPS = {'ebeveyn': ('img/ikon-moyo.svg', 'Moyo Ebeveyn'), 'oyun': ('img/ikon-oyun.png', 'Moyo Oyun'), 'mercek': ('img/ikon-mercek.svg', 'Moyo Mercek')}
+APPS = {'ebeveyn': ('img/ikon-moyo.svg', 'Moyo Ebeveyn'), 'oyun': ('img/ikon-oyun.png', 'Moyo Oyun'), 'mercek': ('img/ikon-mercek.svg', 'Moyo Uzman')}
 chip = lambda k: f'<span><img src="{APPS[k][0]}" alt="" width="22" height="22">{APPS[k][1]}</span>'
 
 # Neden Moyo: Akış (Mercek sitesindeki seçilen düzen)
@@ -34,13 +34,13 @@ ADIM = [
     ('Oyunda yapsın', 'Moyo Oyun · çocuğunuzun tabletinde', 'Hatırlatmayı oyun yapar', 'Çocuğunuz bugünkü rutinini oyunda adım adım görür; her adım onun için bir macera. Bitirince "Yaptım"a dokunur, dostu Okti ona eşlik eder.', ['oyun'], ('genis', 'img/c-oyun-liste.webp', 'Moyo Oyun: çocuğun bugünkü rutin adımları, oyunda macera olarak')),
     ('Onaylayın', 'Moyo Ebeveyn · bildirimle', 'Tek dokunuşla onaylayın', 'Adım bitince telefonunuza bildirim gelir; onaylarsınız, çocuğunuz ödülünü oyunda toplar. Ödülleri siz belirlersiniz.', ['ebeveyn', 'oyun'], ('tel', 'img/moyo-onay.webp', 'Moyo Ebeveyn: çocuğun tamamladığı adımı onaylama ekranı')),
     ('İlerlemeyi görün', 'Moyo Ebeveyn · Gelişim', 'Günü, haftayı ve ayı tek yerden görün', 'Hangi rutinin kolay, hangisinin zor geçtiğini görürsünüz; zorlanılan anı kısa bir davranış kaydıyla not edersiniz.', ['ebeveyn'], ('tel', 'img/moyo-gelisim.webp', 'Moyo Ebeveyn: çocuğun günlük ve haftalık ilerlemesi')),
-    ('Uzmanınızla', 'İsteğe bağlı · Moyo Mercek', 'Dilerseniz uzmanınız da seanslar arasını görsün', 'Çalıştığınız uzman Moyo Mercek\'ten davet gönderir, siz onaylarsınız. Size kısa ebeveyn eğitimleri gönderir, davranış kayıtlarınıza bakar, rutin önerir; eklemek sizin kararınız. Paylaşımı istediğiniz an durdurursunuz.', ['ebeveyn', 'mercek'], ('kirp', 'img/c-ebeveyn-uzman.webp', 'Moyo Ebeveyn: uzmandan gelen eğitim ve rutin önerileri')),
+    ('Uzmanınızla', 'İsteğe bağlı · Moyo Uzman', 'Dilerseniz uzmanınız da seanslar arasını görsün', 'Çalıştığınız uzman Moyo Uzman\'dan davet gönderir, siz onaylarsınız. Size kısa ebeveyn eğitimleri gönderir, davranış kayıtlarınıza bakar, rutin önerir; eklemek sizin kararınız. Paylaşımı istediğiniz an durdurursunuz.', ['ebeveyn', 'mercek'], ('tel', 'img/moyo-uzman.webp', 'Moyo Ebeveyn: uzmandan gelen eğitim ve rutin önerileri')),
 ]
 tabs = ''.join(f'<button type="button" role="tab" id="nc-t{k}" aria-controls="nc-p{k}" aria-selected="{"true" if k == 0 else "false"}"{"" if k == 0 else " tabindex=\"-1\""}><b>{k + 1}</b>{a[0]}</button>' for k, a in enumerate(ADIM))
 def gorsel(g):
     kind, src, alt = g
     if kind in ('tel', 'kirp'):
-        return f'<figure class="tel{" kirp" if kind == "kirp" else ""}"><img src="{src}" alt="{e(alt)}" width="600" height="1184" loading="lazy"><figcaption>Örnek veri</figcaption></figure>'
+        return f'<figure class="tel{" kirp" if kind == "kirp" else ""}"><img src="{src}" alt="{e(alt)}" width="600" height="1298" loading="lazy"><figcaption>Örnek veri</figcaption></figure>'
     return f'<figure class="shot"><img src="{src}" alt="{e(alt)}" width="1200" height="554" loading="lazy"><figcaption>Örnek veri</figcaption></figure>'
 pan = ''.join(f'''        <div class="nc-p" role="tabpanel" id="nc-p{k}" aria-labelledby="nc-t{k}"{"" if k == 0 else " hidden"}>
           <div class="nc-text"><p class="step-k">{a[1]}</p><h3>{a[2]}</h3><p>{a[3]}</p><p class="nc-apps">{"".join(chip(x) for x in a[4])}</p></div>
@@ -65,7 +65,7 @@ html = f'''<!doctype html>
 <title>Moyo · Rutinler oyunda, onay sizde</title>
 <meta name="description" content="Moyo: çocuğunuzun günlük rutinleri oyunda maceraya dönüşür; siz kurar, onaylar, ilerlemeyi görürsünüz. Dilerseniz çalıştığınız uzmanı da dahil edersiniz.">
 <meta name="theme-color" content="#2D294E">
-<link rel="icon" href="img/ikon-moyo.svg" type="image/svg+xml">
+<link rel="icon" href="img/favicon-moyo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="m/site.css">
 <link rel="stylesheet" href="m/moyo.css">
 <script>document.documentElement.classList.add('js');</script>
@@ -74,7 +74,7 @@ html = f'''<!doctype html>
 <a class="skip" href="#main">Ana içeriğe geç</a>
 <header class="top" id="top">
   <div class="wrap nav">
-    <a class="logo" href="#top" aria-label="Moyo ana sayfa">{LOGO}</a>
+    <a class="logo" href="#top" aria-label="Moyo Ebeveyn ana sayfa">{LOGO}</a>
     <div class="menu" id="menu">
       <nav aria-label="Ana menü"><ul>
         <li><a href="#nasil">Nasıl çalışır</a></li><li><a href="#guvenlik">Güvenlik</a></li><li><a href="#fiyat">Fiyat</a></li><li><a href="#sss">SSS</a></li><li><a href="{MERCEK}">Uzman mısınız?</a></li>
@@ -91,37 +91,35 @@ html = f'''<!doctype html>
 
 <main id="main">
   <section class="hero" aria-labelledby="h-hero">
-    <div class="wrap">
-      <p class="eyebrow">Ebeveynler için</p>
-      <h1 id="h-hero">{E["h1"]}</h1>
-      <p class="sub">{E["alt"]}</p>
-      <div class="actions"><a class="btn btn-cta" href="{APP}#kayit">Ücretsiz deneyin</a><a class="btn btn-line" href="#nasil">Nasıl çalışır?</a></div>
-      <p class="fine">{E["fiyat_not"].replace(" — TL", "")}</p>
-    </div>
-    <div class="wrap wide">
+    <div class="wrap wide mhero">
+      <div class="mhero-yazi">
+        <p class="eyebrow">Ebeveynler için</p>
+        <h1 id="h-hero">{E["h1"]}</h1>
+        <p class="sub">{E["alt"]}</p>
+        <div class="actions"><a class="btn btn-cta" href="{APP}#kayit">Ücretsiz deneyin</a><a class="btn btn-line" href="#nasil">Nasıl çalışır?</a></div>
+        <p class="fine">{E["fiyat_not"].replace(" — TL", "")}</p>
+        <ul class="trust" aria-label="Temel ilkeler">{"".join(f"<li>{CHECK}{x}</li>" for x in E["isaretler"])}<li>{CHECK}Tek oyunculu oyun</li></ul>
+      </div>
       <div class="hero-media mh" role="img" aria-label="Çocuğun oyununda bugünkü rutin adımları; önünde ebeveynin telefonunda onay ekranı. Örnek veri.">
         <img class="mh-oyun" src="img/c-oyun-onay.webp" alt="" width="1200" height="554">
-        <img class="mh-tel" src="img/moyo-onay.webp" alt="" width="600" height="1184">
+        <img class="mh-tel" src="img/moyo-onay.webp" alt="" width="600" height="1298">
       </div>
     </div>
-    <div class="wrap">
-      <ul class="trust" aria-label="Temel ilkeler">{"".join(f"<li>{CHECK}{x}</li>" for x in E["isaretler"])}<li>{CHECK}Tek oyunculu oyun</li></ul>
-    </div>
   </section>
 
-  <section class="sec sec-white" id="degerler" aria-labelledby="h-deger">
-    <div class="wrap">
-      <div class="head"><p class="eyebrow">Neden Moyo</p><h2 id="h-deger">Hatırlatma oyundan, onay sizden.</h2></div>
-      <ol class="nv nv-akis">{akis}</ol>
-    </div>
-  </section>
-
-  <section class="sec sec-soft" id="nasil" aria-labelledby="h-nasil">
+  <section class="sec sec-white" id="nasil" aria-labelledby="h-nasil">
     <div class="wrap">
       <div class="head"><p class="eyebrow">Nasıl çalışır</p><h2 id="h-nasil">Moyo nasıl çalışır?</h2></div>
       <div class="nc" data-nc>
         <div class="nc-tabs" role="tablist" aria-label="Moyo'nun adımları">{tabs}</div>
 {pan}      </div>
+    </div>
+  </section>
+
+  <section class="sec sec-soft" id="degerler" aria-labelledby="h-deger">
+    <div class="wrap">
+      <div class="head"><p class="eyebrow">Neden Moyo</p><h2 id="h-deger">Hatırlatma oyundan, onay sizden.</h2></div>
+      <ol class="nv nv-akis">{akis}</ol>
     </div>
   </section>
 
@@ -135,7 +133,7 @@ html = f'''<!doctype html>
 
   <section class="sec sec-dark" aria-labelledby="h-eko">
     <div class="wrap">
-      <div class="head"><p class="eyebrow">Moyo ekosistemi</p><h2 id="h-eko">Üç uygulama, tek rutin.</h2><p class="intro">Moyo Ebeveyn ve Moyo Oyun birlikte çalışır; dilerseniz uzmanınız Moyo Mercek ile katılır.</p></div>
+      <div class="head"><p class="eyebrow">Moyo ekosistemi</p><h2 id="h-eko">Üç uygulama, tek rutin.</h2><p class="intro">Moyo Ebeveyn ve Moyo Oyun birlikte çalışır; dilerseniz uzmanınız Moyo Uzman ile katılır.</p></div>
       <div class="ekos">{ekosis}</div>
       <p class="eko-link"><a href="/">Ekosistemi görün →</a></p>
     </div>

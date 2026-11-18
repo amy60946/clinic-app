@@ -3,13 +3,11 @@
 import {
   Task, Completion, AbcEvent, weekly, perTask, observations, bySkill, abcSummary, windowStarts, weekStarts, addDays, parseDate, lastFullDay,
   motivationStats, motivationText,
-  DECLINE_LABELS, LIMITS_TEXT, MASTERY_RATE, MASTERY_WEEKS, dec,
+  DECLINE_LABELS, EXPORT_FOOTER, MASTERY_RATE, MASTERY_WEEKS, dec,
 } from './metrics';
 import type { Goal } from './clinic';
 import { skillName } from '../skills';
 
-// Yazdırma/PDF alt bilgisi (ortak hukuk/50-uygulama-ici-metinler.md 13)
-const REPORT_NOTE = 'Bu çıktı ailenin uygulama kayıtlarından ve uzmanın gözlemlerinden oluşur. Tanı değildir; tek başına klinik karar için kullanılmaz.';
 
 export type ReportInput = {
   clinic: string;
@@ -85,9 +83,9 @@ export function buildReportHtml(r: ReportInput): string {
 
 <h2>Özet</h2>
 <div class="stats">
-  <div class="stat"><b>${p(o.rate)}</b>Tamamlama<div class="m">${o.approved}/${o.planned} planlanan macera onaylandı</div></div>
+  <div class="stat"><b>${p(o.rate)}</b>Tamamlama<div class="m">${o.approved}/${o.planned} planlanan adım onaylandı</div></div>
   <div class="stat"><b>${p(o.fullDayRate)}</b>Tam gün<div class="m">${o.fullDays}/${o.plannedDays} gün</div></div>
-  <div class="stat"><b>${p(o.beforeReminderRate)}</b>Hatırlatmadan önce başlama<div class="m">${o.beforeReminder}/${o.withReminder} hatırlatmalı macera</div></div>
+  <div class="stat"><b>${p(o.beforeReminderRate)}</b>Hatırlatmadan önce başlama<div class="m">${o.beforeReminder}/${o.withReminder} hatırlatmalı adım</div></div>
   <div class="stat"><b>${p(o.declineRate)}</b>"Yapamam"<div class="m">${o.declined} kez · ${esc(reasons)}</div></div>
 </div>
 
@@ -103,8 +101,8 @@ export function buildReportHtml(r: ReportInput): string {
 ${motivation.answered ? `<tr><td>Motive etmek (ebeveyn gözlemi)</td><td>${esc(motivationText(motivation))} — ${motivation.answered} incelemede ebeveynin yanıtı; puan değildir</td></tr>` : ''}
 </table>
 
-<h2>Macera başına</h2>
-<table><tr><th>Macera</th><th>Beceri</th><th>Onay/plan</th><th>Oran</th><th>Haftalık %</th></tr>${taskRows || '<tr><td colspan="5">Planlanmış macera yok</td></tr>'}</table>
+<h2>Adım başına</h2>
+<table><tr><th>Adım</th><th>Beceri</th><th>Onay/plan</th><th>Oran</th><th>Haftalık %</th></tr>${taskRows || '<tr><td colspan="5">Planlanmış adım yok</td></tr>'}</table>
 <div class="m">Ustalık: tamamlanmış son ${MASTERY_WEEKS} haftanın her birinde ≥ %${MASTERY_RATE}.</div>
 
 <h2>Beceri alanına göre</h2>
@@ -118,7 +116,6 @@ ${!gasWeeks.length ? '<div class="m">Bu dönemde değerlendirme girilmedi.</div>
 <table><tr><th>Hafta</th>${abc.perWeek.map((x) => `<th class="n">${d(x.start).slice(0, 5)}</th>`).join('')}</tr><tr><td>Kayıt (ş = ort. şiddet 1–5)</td>${abcRows}</tr></table>
 <div class="m">Günün bölümü: sabah ${abc.byDayPart.sabah} · öğle ${abc.byDayPart['öğle']} · akşam ${abc.byDayPart['akşam']} · gece ${abc.byDayPart.gece}</div>
 
-<div class="limits"><b>Sınırlar.</b> ${esc(LIMITS_TEXT)}</div>
-<div class="limits">${esc(REPORT_NOTE)}</div>
+<div class="limits">${esc(EXPORT_FOOTER)}</div>
 </body></html>`;
 }

@@ -25,10 +25,9 @@ a { color: inherit; }
 /* Üst menü */
 .ust { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--lacivert); color: var(--beyaz); border-bottom: 1px solid var(--koyu-cizgi); }
 .ust .ic { height: var(--ust); display: flex; align-items: center; gap: 22px; }
-.logo { display: flex; align-items: center; flex: none; color: var(--yesil-marka); text-decoration: none; }
+.logo { display: flex; align-items: center; flex: none; color: var(--beyaz); text-decoration: none; }   /* yazı koyu zeminde beyaz, açıkta lacivert; yazıda yeşil yok (18 Kasım 2026) */
 .logo svg { height: 34px; width: auto; display: block; transform: translateY(21%); }
-.logo .logo-dot { fill: var(--beyaz); }
-.logo .ek { font-weight: 300; font-size: 26px; letter-spacing: -.02em; margin-left: 8px; color: var(--yesil-marka); }
+.logo .ek { font-weight: 300; font-size: 26px; letter-spacing: -.02em; margin-left: 8px; color: inherit; }
 .menu { display: flex; gap: 22px; margin-right: auto; margin-left: 18px; font-size: 15.5px; font-weight: 600; }
 .menu a { text-decoration: none; color: var(--koyu-yazi-2); padding: 6px 0; }
 .menu a:hover, .menu a[aria-current="page"] { color: var(--beyaz); }

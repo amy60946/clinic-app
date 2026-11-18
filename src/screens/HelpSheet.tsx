@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,8 +21,8 @@ const ITEMS: Item[] = [
   { key: 'sees', q: 'Aile neyi görür?', card: true },
   { key: 'training', noPlan: true, q: 'Ebeveyne eğitim nasıl atarım?', show: 'plan', showLabel: 'Ebeveyn Eğitimi', a: ['Danışan › Ebeveyn Eğitimi › "+ Eğitim ekle". Modül, uygulama görevi ve yapılacak ekle. Eğitim Taslak açılır; "Etkin" yapınca ebeveyn görür.'] },
   { key: 'tasks', noPlan: true, q: 'Uygulama görevi ile hızlı yapılacak farkı ne?', show: 'plan', showLabel: 'Ebeveyn Eğitimi', a: ['Uygulama görevi tekrarlanır; ebeveyn her uyguladığında kayıt girer (ör. "Geçişten önce iki uyarı ver"). Hızlı yapılacak bir kez yapılır ve işaretlenir (ör. "Zamanlayıcı hazırla").'] },
-  { key: 'routine', plan: true, q: 'Rutin ya da macera nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Takip Planı\'ndan eklersen taslak olur. Eklemek ebeveynin kararı.'] },
-  { key: 'routine2', noPlan: true, q: 'Rutin ya da macera nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Eklemek ebeveynin kararı.'] },
+  { key: 'routine', plan: true, q: 'Rutin ya da adım nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Takip Planı\'ndan eklersen taslak olur. Eklemek ebeveynin kararı.'] },
+  { key: 'routine2', noPlan: true, q: 'Rutin ya da adım nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Eklemek ebeveynin kararı.'] },
   { key: 'publish', plan: true, q: '"Aileye gönder" ne yapar?', show: 'plan', showLabel: 'Takip Planı', a: ['Taslakları (bej) aileye yollar. Önce özet açılır; işaretliler tek bildirimle gider.'] },
   { key: 'evaluate', plan: true, q: 'Ne zaman değerlendiririm?', show: 'plan', showLabel: 'Takip Planı', a: ['Dört haftada bir "Değerlendirme zamanı" çıkar › "Değerlendir" › puan › "Kaydet". Aile görmez.'] },
   { key: 'board', q: 'Ana ekrandaki bölümler?', show: 'home', showLabel: 'Ana ekran', a: ['Senin sıran: senden bekleyen. Ebeveynden yeni: son 7 günde ebeveynin girdikleri. Sessiz kalanlar: 7 gündür kayıt yok.'] },
@@ -31,10 +31,12 @@ const ITEMS: Item[] = [
   { key: 'workspace', q: 'Birden çok klinikte çalışıyorum, nasıl ayırırım?', a: ['Sol üstte "Moyo Mercek" yanındaki küçük hesap düğmesine dokun: "Bireysel hesap" ve ekip hesapları (her klinik için bir tane) ayrıdır. Ekip hesabı, klinik seni ekibine eklediğinde ve kabul ettiğinde açılır. Danışanlar, davetler ve seanslar seçili hesaba aittir.'] },
 ];
 
-export default function HelpSheet({ visible, owner, plan = true, onClose, onIntro, onSample, onAction }: {
-  visible: boolean; owner: boolean; plan?: boolean; onClose: () => void; onIntro: () => void; onSample: () => void; onAction: (a: HelpAction) => void;
+export default function HelpSheet({ visible, owner, plan = true, focus, onClose, onIntro, onSample, onAction }: {
+  visible: boolean; owner: boolean; plan?: boolean; focus?: string | null; onClose: () => void; onIntro: () => void; onSample: () => void; onAction: (a: HelpAction) => void;
 }) {
   const [open, setOpen] = useState<string | null>(null);
+  // focus: açılırken açık gelecek soru (ör. iptal öncesi pencereden "İpuçlarına bak" → 'invite')
+  useEffect(() => { if (visible && focus) setOpen(focus); }, [visible, focus]);
   const items = ITEMS.filter((x) => (!x.ownerOnly || owner) && (plan ? !x.noPlan : !x.plan));
   const toggle = (k: string) => {
     setOpen((o) => (o === k ? null : k));
@@ -94,7 +96,7 @@ export default function HelpSheet({ visible, owner, plan = true, onClose, onIntr
 const SEES: { title: string; tone: 'family' | 'private' | 'none'; icon: keyof typeof Ionicons.glyphMap; items: string[] }[] = [
   {
     title: 'Aile görür (sen gönderince)', tone: 'family', icon: 'people-outline',
-    items: ['Davranış hedefi, hedef düzeyi, süre, aileye not', 'Etkin ve tamamlanan programlar', 'Rutin ve macera önerileri', 'Değişiklik önerileri'],
+    items: ['Davranış hedefi, hedef düzeyi, süre, aileye not', 'Etkin ve tamamlanan programlar', 'Rutin ve adım önerileri', 'Değişiklik önerileri'],
   },
   {
     title: 'Yalnız sen ve yetkili ekibin', tone: 'private', icon: 'eye-off-outline',
@@ -105,9 +107,9 @@ const SEES: { title: string; tone: 'family' | 'private' | 'none'; icon: keyof ty
     items: ['Ebeveynin e-posta ve telefonu', 'Ailenin posta kutusu, İnci defteri'],
   },
 ];
-// Takip Planı kapalıyken (lansman odağı "A") aile tarafı: etkin eğitimler ve macera önerileri
+// Takip Planı kapalıyken (lansman odağı "A") aile tarafı: etkin eğitimler, rutin ve adım önerileri
 const SEES_TRAINING: typeof SEES = [
-  { title: 'Aile görür', tone: 'family', icon: 'people-outline', items: ['Etkin eğitimler: modüller, uygulama görevleri, yapılacaklar', 'Hedef davranışlar ve stratejiler', 'Macera önerileri'] },
+  { title: 'Aile görür', tone: 'family', icon: 'people-outline', items: ['Etkin eğitimler: modüller, uygulama görevleri, yapılacaklar', 'Hedef davranışlar ve stratejiler', 'Rutin ve adım önerileri'] },
   { title: 'Yalnız sen ve yetkili ekibin', tone: 'private', icon: 'eye-off-outline', items: ['Notlar', 'Taslak eğitimler', 'Ustalık ölçütü verisi', 'Klinik etiketi'] },
   SEES[2],
 ];

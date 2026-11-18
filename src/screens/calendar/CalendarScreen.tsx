@@ -8,6 +8,7 @@ import { IconButton, Segmented, SmallButton, Notice } from '../../components/ui'
 import type { Client, ClinicianMe, Member } from '../../lib/clinic';
 import { addDays } from '../../lib/metrics';
 import { track } from '../../lib/track';
+import { useTabBarScroll } from '../../lib/tabBar';
 import {
   STATUS_META, KIND_LABEL, DEFAULT_SETTINGS, layoutDay, noteDue, trDay, trMinutes, trToIso, mondayOfDay, shortDay, longDay, timeRange,
   minToHhmm, isClosed,
@@ -31,6 +32,7 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
 }) {
   const { width } = useWindowDimensions();
   const wide = width >= 900;
+  const { scrollProps, bottomPad } = useTabBarScroll();     // alt ana menü: kaydırınca küçülür, içerik arkasında kalmaz
   const today = trDay(new Date().toISOString());
   const [view, setView] = useState<'day' | 'week'>(wide ? 'week' : 'day');
   const [anchor, setAnchor] = useState(today);
@@ -202,7 +204,7 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
           )}
         </View>
         {!!error && <Text style={[s.small, { color: colors.danger, paddingHorizontal: 16 }]}>{error}</Text>}
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 + bottomPad }} {...scrollProps}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.navy} />}>
           {sessions === null ? <ActivityIndicator color={colors.navy} style={{ marginTop: 40 }} /> : (
             <View style={{ flexDirection: wide ? 'row' : 'column', gap: 16, alignItems: 'flex-start' }}>

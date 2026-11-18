@@ -20,9 +20,12 @@ const TONE: Record<string, { bg: string; fg: string }> = {
 
 let lastOpenKey = 0;
 
-export default function InvitesCard({ me, team, reloadKey, openKey, onChanged, onCount }: {
+export default function InvitesCard({ me, team, reloadKey, openKey, openCode, onChanged, onCount, onItems, onInviteSent }: {
   me: ClinicianMe; team: Member[]; reloadKey?: number; openKey?: number; onChanged: () => void;
   onCount?: (n: number) => void;   // ana ekrandaki "Başlarken": ilk davet gönderildi mi
+  openCode?: string | null;        // openKey ile birlikte: yeni davet yerine bu (açık) davetin penceresi ("süresi doluyor" hatırlatması)
+  onItems?: (list: FamilyInvite[] | null) => void;   // yüklenen liste (hatırlatma planı aynı listeyi kullanır, yeniden okumaz)
+  onInviteSent?: () => void;       // yeni davet gönderildi ve pencere kapandı (bildirim izni açıklaması)
 }) {
   const [items, setItems] = useState<FamilyInvite[] | null | undefined>(undefined);
   const [stats, setStats] = useState<InviteStats[]>([]);
@@ -31,16 +34,20 @@ export default function InvitesCard({ me, team, reloadKey, openKey, onChanged, o
   const owner = me.role === 'owner';
   // dışarıdan aç (karşılama anketi, "Başlarken", örnek aile turu). Her istek bir kez: kart yeniden yüklenince
   // (danışandan ana ekrana dönüş) aynı anahtarla pencere tekrar açılmaz
+  const [wantCode, setWantCode] = useState<string | null>(null);
+  const sent = useRef(false);
   useEffect(() => {
     if (!openKey || openKey <= lastOpenKey) return;
     lastOpenKey = openKey;
-    setSheet({ open: true, existing: null });
-  }, [openKey]);
+    if (openCode) setWantCode(openCode);   // liste yüklenince o davet aranır
+    else setSheet({ open: true, existing: null });
+  }, [openKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const load = useCallback(async () => {
     await sweepInvites().catch(() => {});
     const list = await listInvites(90).catch(() => null);
     setItems(list);
+    onItems?.(list);
     if (list) onCount?.(list.length);
     if (list) setStats(await inviteStats(30));
   }, []);
@@ -56,6 +63,13 @@ export default function InvitesCard({ me, team, reloadKey, openKey, onChanged, o
   }, [lastInviteNote, load]);
   const [, tick] = useState(0);
   useEffect(() => { const t = setInterval(() => tick((n) => n + 1), 60_000); return () => clearInterval(t); }, []);
+  // "süresi doluyor" hatırlatmasına dokunuldu: davet hâlâ açıksa onun penceresi (yeniden gönder), değilse yeni davet
+  useEffect(() => {
+    if (!wantCode || items === undefined) return;
+    const i = items?.find((x) => x.code === wantCode && (x.status === 'sent' || x.status === 'opened'));
+    setWantCode(null);
+    setSheet({ open: true, existing: i ? sheetOf(i) : null });
+  }, [wantCode, items]);
 
   const revoke = (i: FamilyInvite) => Alert.alert('Davet iptal edilsin mi?', 'Bağlantı ve kod çalışmaz; davete eklediğin taslak plan silinir.', [
     { text: 'Vazgeç', style: 'cancel' },
@@ -84,8 +98,7 @@ export default function InvitesCard({ me, team, reloadKey, openKey, onChanged, o
               const tone = TONE[i.status] ?? TONE.sent;
               const child = [i.child_name, ageGroupLabel(i.child_age_group)].filter(Boolean).join(', ');
               const who = [i.parent_name || i.parent_email, child, i.label].filter(Boolean).join(' · ') || 'İsimsiz davet';
-              const sheet = { code: i.code, token: i.token, expires_at: i.expires_at, parent_name: i.parent_name, parent_email: i.parent_email,
-                label: i.label, child_name: i.child_name, child_age_group: i.child_age_group, email_status: i.email_status };
+              const sheet = sheetOf(i);
               return (
                 <Card key={i.code} style={{ gap: 6 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -140,10 +153,19 @@ export default function InvitesCard({ me, team, reloadKey, openKey, onChanged, o
       <InviteSheet visible={sheet.open} existing={sheet.existing} clinicId={me.clinic_id} clinicianName={[me.name, me.title].filter(Boolean).join(', ')}
         workspaceName={(me.workspaces ?? 1) > 1 ? (me.personal ? 'bireysel hesabın' : me.clinic) : undefined}
         blocked={me.role === 'member' && me.members_can_invite === false}
-        onClose={() => { setSheet({ open: false }); load(); onChanged(); }} />
+        onSent={() => { sent.current = true; }}
+        onClose={() => {
+          setSheet({ open: false }); load(); onChanged();
+          if (sent.current) { sent.current = false; onInviteSent?.(); }
+        }} />
     </>
   );
 }
+
+const sheetOf = (i: FamilyInvite): SheetInvite => ({
+  code: i.code, token: i.token, expires_at: i.expires_at, parent_name: i.parent_name, parent_email: i.parent_email,
+  label: i.label, child_name: i.child_name, child_age_group: i.child_age_group, email_status: i.email_status,
+});
 
 const CH: Record<string, string> = { whatsapp: 'WhatsApp', email: 'e-posta', sms: 'SMS', copy: 'kopyalandı', other: 'paylaşıldı' };
 

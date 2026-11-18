@@ -439,6 +439,17 @@ function embed(table: string, cols: string, r: Row): Row {
   return out;
 }
 
+// 'demo.membership' (preview/demo-store.ts ile aynı anahtar ve aynı tarihler): { plan, period, state }
+function demoMembership(): Row | null {
+  let d: Row | null = null;
+  try { d = JSON.parse(localStorage.getItem('demo.membership') || 'null'); } catch { /* yok say */ }
+  if (!d || d.plan === 'none') return null;
+  const yearly = d.period === 'yearly';
+  const end = new Date(Date.now() + (yearly ? 143 : 20) * 864e5); end.setHours(12, 0, 0, 0);
+  return { plan: d.plan === 'solo' ? 'solo' : 'clinic', billing_period: yearly ? 'yearly' : 'monthly', period_end: end.toISOString(),
+    billing_source: 'revenuecat', auto_renew: d.state !== 'cancelled' };
+}
+
 function clinicActive(id: string) {
   const c = db.clinics.find((x: Row) => x.id === id);
   return !!c && (['small', 'business', 'custom'].includes(c.plan) || (c.plan === 'trial' && c.trial_ends_at > now())
@@ -579,7 +590,7 @@ class Query implements PromiseLike<{ data: any; error: Err; count?: number }> {
       }));
       if (this.table === 'clinic_task_suggestions' && list.some((r) => r.kind === 'change' && db.clinic_task_suggestions.some((x: Row) =>
         x.kind === 'change' && x.target_task_id === r.target_task_id && ['draft', 'pending'].includes(x.status)))) {
-        return { data: null, error: { message: 'Bu macera için açık bir değişiklik önerisi var', code: '23505' } };
+        return { data: null, error: { message: 'Bu adım için açık bir değişiklik önerisi var', code: '23505' } };
       }
       inserted = list;
       const key = this.conflict ?? PK[this.table] ?? ['id'];
@@ -982,17 +993,21 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     const m = myClinician();
     if (!m) return { data: null, error: null };
     if (m.invalid) return { data: { id: m.id, name: m.name, title: m.title, workspace_invalid: true, access: false }, error: null };
-    const c = db.clinics.find((x: Row) => x.id === m.clinic_id);
+    let c = db.clinics.find((x: Row) => x.id === m.clinic_id);
     const ownerId = db.clinic_members.find((y: Row) => y.clinic_id === c.id && y.role === 'owner' && y.status === 'active')?.clinician_id;
     const owner = db.clinicians.find((o: Row) => o.id === ownerId);
     const used = db.clinic_invites.filter((v: Row) => v.used_by === m.id && v.kind === 'clinician' && v.clinic_id === c.id)
       .sort((a: Row, b: Row) => String(b.used_at).localeCompare(String(a.used_at)))[0];
     const memRow = activeMember(m.id, c.id);
     const inviter = db.clinicians.find((o: Row) => o.id === (memRow?.invited_by ?? used?.clinician_id));
+    // Önizleme: tarayıcı deposunda 'demo.membership' varsa (preview/demo-store.ts; konsolda onizlemeUyelik('iptal' | 'odeme' | 'etkin', …))
+    // sahibin üyeliği de o taklit App Store aboneliği gibi okunur (kayıt değişmez; anahtar silinince deneme hesabına döner)
+    const sim = m.role === 'owner' ? demoMembership() : null;
+    if (sim) c = { ...c, ...sim };
     return { data: { id: m.id, name: m.name, title: m.title, role: m.role, clinic_id: c.id, clinic: c.name, plan: c.plan, seat_limit: c.seat_limit,
       trial_ends_at: c.trial_ends_at, active: clinicActive(c.id), joined_at: memRow?.joined_at ?? m.created_at, owner_name: owner?.name ?? null, invited_by_name: inviter?.name ?? null,
       access: clinicianAccess(m),
-      status: c.plan === 'trial' && c.trial_ends_at > now() ? 'trial' : clinicActive(c.id) ? 'active' : 'expired',
+      status: sim ? 'active' : c.plan === 'trial' && c.trial_ends_at > now() ? 'trial' : clinicActive(c.id) ? 'active' : 'expired',
       billing_period: c.billing_period ?? null, period_end: c.period_end ?? null, billing_source: c.billing_source ?? null,
       auto_renew: !!c.auto_renew, member_count: db.clinic_members.filter((x: Row) => x.clinic_id === c.id && x.status === 'active').length,
       personal: c.personal_of === m.id, members_can_invite: c.members_can_invite !== false, default_clinic_id: baseClinician()?.clinic_id,
@@ -1029,9 +1044,10 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     return { data: n, error: null };
   }
   if (name === 'register_push_token' || name === 'unregister_push_token') return { data: null, error: null };
-  // Uzaktan uygulama ayarı: önizlemede yalnız değişiklik önerisi açık (denemek için tarayıcı deposuna 'demo.client_config' JSON yazılabilir)
+  // Uzaktan uygulama ayarı: önizlemede değişiklik önerisi, iptal öncesi akış (cancel_flow) ve hatırlatmalar (lifecycle_nudges) açık
+  // (denemek için tarayıcı deposuna 'demo.client_config' JSON yazılabilir; yazılırsa yalnız oradaki bayraklar geçerli olur)
   if (name === 'client_config') {
-    let v: Row = { app: {}, flags: { plan_change_suggestions: true } };
+    let v: Row = { app: {}, flags: { plan_change_suggestions: true, cancel_flow: true, lifecycle_nudges: true } };
     try { v = JSON.parse(localStorage.getItem('demo.client_config') || 'null') ?? v; } catch {}
     return { data: v, error: null };
   }
@@ -1216,7 +1232,7 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     if (!n && !drafts.length && !changed) return err('Aileye gösterilecek bir şey yok: "Aile görür" açık bir hedef, etkin bir program ya da bir öneri ekle');
     if (drafts.length || (changed && n)) {
       const child = db.children.find((c: Row) => c.id === l.child_id)?.name ?? '';
-      const body = [changed ? 'Hedefler ve aile programı' : '', k ? `${k} macera önerisi` : '', ch ? `${ch} değişiklik önerisi` : ''].filter(Boolean).join(' · ');
+      const body = [changed ? 'Hedefler ve aile programı' : '', k ? `${k} adım önerisi` : '', ch ? `${ch} değişiklik önerisi` : ''].filter(Boolean).join(' · ');
       db.profiles.filter((p: Row) => p.family_id === l.family_id).forEach((p: Row) => {
         const nid = db.notifications.reduce((a: number, x: Row) => Math.max(a, Number(x.id) || 0), 0) + 1;
         db.notifications.push({ id: nid, user_id: p.id, app: 'parent', kind: changed ? 'care_plan_shared' : 'clinic_suggestion',
@@ -1239,7 +1255,7 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     drafts.forEach((s: Row) => { s.status = 'pending'; s.updated_at = now(); });
     if (!n && !before && !drafts.length) return err('Aileye gösterilecek bir şey yok: "Aile görür" açık bir hedef, etkin bir program ya da bir öneri ekle');
     const child = db.children.find((c: Row) => c.id === l.child_id)?.name ?? '';
-    const body = [n ? 'Hedefler ve aile programı' : '', k ? `${k} macera önerisi` : '', ch ? `${ch} değişiklik önerisi` : ''].filter(Boolean).join(' · ');
+    const body = [n ? 'Hedefler ve aile programı' : '', k ? `${k} adım önerisi` : '', ch ? `${ch} değişiklik önerisi` : ''].filter(Boolean).join(' · ');
     db.profiles.filter((p: Row) => p.family_id === l.family_id).forEach((p: Row) => {
       const nid = db.notifications.reduce((a: number, x: Row) => Math.max(a, Number(x.id) || 0), 0) + 1;
       db.notifications.push({ id: nid, user_id: p.id, app: 'parent', kind: n || !drafts.length ? 'care_plan_shared' : 'clinic_suggestion',

@@ -3,7 +3,7 @@ import Purchases, {
   LOG_LEVEL, PRODUCT_CATEGORY, PURCHASES_ERROR_CODE,
   type CustomerInfo, type PurchasesPackage, type PurchasesStoreProduct,
 } from 'react-native-purchases';
-import type { StorePrices, StoreResult } from './storeTypes';
+import type { StorePrices, StoreResult, StoreSubscription } from './storeTypes';
 
 // App Store üyeliği (RevenueCat; ortak CANLIYA_ALMA.md 1.8 D, 2.4). Mağazayla konuşan tek dosya; web: store.ts.
 // Anahtar: EXPO_PUBLIC_REVENUECAT_IOS_KEY = RevenueCat'in herkese açık iOS anahtarı (appl_…), GitHub Secrets → CI .env.
@@ -19,6 +19,7 @@ export const MANAGE_URL = 'https://apps.apple.com/account/subscriptions';
 
 export const storeKind: 'web' | 'app_store' = 'app_store';
 export const storeEnabled = KEY.startsWith('appl_');
+export const storePreview = false;   // yalnız web önizlemesindeki deneme mağazasında true (preview/demo-store.ts)
 
 let configured = false;
 let current: string | null = null;
@@ -119,8 +120,32 @@ export async function storeRestore(userId: string, clinicId: string): Promise<St
 
 // Aboneliği yönet: uygulama içinde Apple'ın abonelik sayfası; olmazsa App Store bağlantısı
 export async function storeManage(userId: string): Promise<void> {
+  await storeOpenSubscriptions(userId);
+}
+
+// Apple'ın abonelik sayfasını açar (iptal, yeniden başlatma, ödeme yöntemi orada; uygulama iptal edemez). Sırayla:
+// uygulama içi sayfa (StoreKit) → RevenueCat'in verdiği yönetim adresi → App Store abonelikler adresi.
+// Sayfa kapanınca döner; true: bir şey açıldı (web'de false, store.ts).
+export async function storeOpenSubscriptions(userId: string): Promise<boolean> {
+  let url: string | null = null;
   if (await ready(userId)) {
-    try { await Purchases.showManageSubscriptions(); return; } catch { /* bağlantıya düş */ }
+    try { await Purchases.showManageSubscriptions(); return true; } catch { /* bağlantıya düş */ }
+    try { url = (await Purchases.getCustomerInfo()).managementURL; } catch { /* App Store adresi */ }
   }
-  Linking.openURL(MANAGE_URL).catch(() => {});
+  try { await Linking.openURL(url || MANAGE_URL); return true; } catch { return false; }
+}
+
+// Aboneliğin mağazadaki durumu: yenileme kapalı mı (iptal edildi), ödeme sorunu var mı. Yalnız App Store aboneliği
+// (RevenueCat panelinden verilen hak ya da başka mağaza Apple'ın sayfasından yönetilemez → null).
+// fresh: önbellek atılır (Apple'ın sayfasından dönünce ve uygulama ön plana gelince).
+export async function storeSubscription(userId: string, fresh = false): Promise<StoreSubscription | null> {
+  if (!(await ready(userId))) return null;
+  try {
+    if (fresh) await Purchases.invalidateCustomerInfoCache().catch(() => {});
+    const e = (await Purchases.getCustomerInfo()).entitlements.active[ENTITLEMENT];
+    if (!e || (e.store !== 'APP_STORE' && e.store !== 'MAC_APP_STORE')) return null;
+    return { productId: e.productIdentifier ?? null, willRenew: e.willRenew, expiresAt: e.expirationDate, billingIssueAt: e.billingIssueDetectedAt };
+  } catch {
+    return null;
+  }
 }

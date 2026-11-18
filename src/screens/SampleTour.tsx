@@ -121,7 +121,7 @@ export const SECTION_HINTS: Partial<Record<Tab, { title: string; text: string }>
   training: { title: 'Ebeveyn Eğitimi', text: 'Bir eğitim aç: modüller, uygulama görevleri, yapılacaklar. Ebeveyn, sen "Etkin" yapınca görür.' },
   behaviors: { title: 'Davranışlar ve Olaylar', text: 'Hedef davranışı ve stratejileri ekle; ebeveyn olayları aile uygulamasından bildirir.' },
   summary: { title: 'Özet', text: 'Dönemin ev rutini: tamamlama, tam gün, kendiliğinden başlama.' },
-  routine: { title: 'Ev Rutinleri', text: 'Bir maceraya dokun: gün gün ayrıntı. Öneri için "+ Aileye öner".' },
+  routine: { title: 'Ev Rutinleri', text: 'Bir adıma dokun: gün gün ayrıntı. Öneri için "+ Aileye öner".' },
   goals: { title: 'Takip Planı', text: 'Eklediğin her şey taslak (bej), aile görmez. Göndermek için "Aileye gönder".' },
   notes: { title: 'Notlar', text: 'Yalnız sen ve yetkili ekibin görür.' },
   report: { title: 'Rapor', text: 'PDF için "Raporu aç"; not için "Notu kopyala".' },
@@ -213,7 +213,7 @@ export const TOUR: (CoachStep & { tab: Tab })[] = [
     },
   },
   {
-    key: 'watch', tab: 'routine', target: 'routine.row', until: 'routine_row', title: 'Ailenin kaydı', text: 'Bir **maceraya** dokun',
+    key: 'watch', tab: 'routine', target: 'routine.row', until: 'routine_row', title: 'Ailenin kaydı', text: 'Bir **adıma** dokun',
     sheets: {
       taskDetail: [
         { target: 'sheet.task.body', title: 'Gün gün kayıt', info: true },

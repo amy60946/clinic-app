@@ -22,6 +22,9 @@ sonra ezilen (sözcük ortasından kırılan), ekrandan taşan, kartın kenarın
 listelenir. Çıktı: adım başına `temiz` ya da bulgu; ekran görüntüleri ve `api.json` işletim sisteminin geçici
 klasöründe `clinicapp-qa/out-<genişlik>/` altında (`OUT=` ile değişir). Görüntüleri bir alt ajana baktır (ana pencereye değil).
 
+Üyelik adımından sonra iptal öncesi akış da gezilir ("Aboneliği yönet" → soru → seçenek → çıkış; uzaktan ayar `cancel_flow`,
+önizlemede açık, `PLAN=1` geçişinde kapalı) ve sonda taklit App Store durumları (ödeme alınamadı, yenileme kapatıldı).
+
 ## 2. Veritabanı istekleri ↔ gerçek şema
 
 ```

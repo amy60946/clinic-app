@@ -38,7 +38,7 @@
       el.style.transform = 'translateY(' + ((t < 0 ? 1 : -1) * 40 * u).toFixed(1) + 'px)';
       el.setAttribute('aria-hidden', String(i !== act));
     });
-    nokta.forEach(function (a, i) { if (i === act) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current'); });
+    nokta.forEach(function (a, i) { if (i === act) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current'); a.parentNode.classList.toggle('gecti', i < act); });   // geçilen adımın numarası yeşil kalır
   }
   var req = function () { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
   window.addEventListener('scroll', req, { passive: true });
