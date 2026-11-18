@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mercek.moyoapp.com.tr/sitemap.xml
