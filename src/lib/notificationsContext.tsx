@@ -2,6 +2,8 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { AppState } from 'react-native';
 import { supabase } from './supabase';
 import { AppNotification, notificationChildren, registerForPush, setBadge, toNotification } from './notifications';
+import { useClientConfig } from './clientConfig';
+import { NUDGES_FLAG } from './nudgeCore';
 
 // Uygulama içi bildirim kutusu: sunucunun yazdığı satırlar (notifications, app='clinic') + Realtime ile anında yenileri
 type Ctx = {
@@ -24,10 +26,17 @@ export function NotificationsProvider({ userId, children }: { userId: string; ch
     if (!error && data) setItems(data.map(toNotification));
   }, [userId]);
 
+  // Cihaz bildirimi kaydı. Bugünkü davranış: girişte iOS izni istenir. `lifecycle_nudges` bayrağı açıksa izin girişte
+  // istenmez (ilk davetten sonra kendi açıklamamızla: nudges.ts primerDue); daha önce verilmiş izin yine kaydedilir.
+  // Bayrak uzaktan ayar okununca belli olur: o âna kadar beklenir (okunamazsa bugünkü davranış).
+  const { status, flag } = useClientConfig();
+  const deferPrompt = status === 'ok' && flag(NUDGES_FLAG);
+  const settled = status !== 'loading';
+  useEffect(() => { if (settled) registerForPush({ prompt: !deferPrompt }); }, [userId, settled, deferPrompt]);
+
   useEffect(() => {
     setItems([]);
     reload();
-    registerForPush();
     const channel = supabase
       .channel(`notif:${userId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` }, (p) => {

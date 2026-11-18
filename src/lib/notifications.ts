@@ -46,11 +46,14 @@ export async function pushEnabled() {
 }
 
 // Girişten sonra çağrılır: izin ister, anahtarı sunucuya kaydeder. Hata uygulamayı durdurmaz.
-export async function registerForPush(): Promise<'ok' | 'denied' | 'off' | 'unavailable'> {
+// prompt: false → iOS izin penceresi AÇILMAZ; izin daha önce verildiyse anahtar kaydedilir, sorulmadıysa 'undetermined' döner
+// (`lifecycle_nudges` bayrağı açıkken izin girişte değil, ilk davetten sonra kendi açıklamamızla istenir: nudges.ts).
+export async function registerForPush(opts: { prompt?: boolean } = {}): Promise<'ok' | 'denied' | 'off' | 'unavailable' | 'undetermined'> {
   if (Platform.OS === 'web') return 'unavailable';
   if (!(await pushEnabled())) return 'off';
   try {
     let { status } = await Notifications.getPermissionsAsync();
+    if (status !== 'granted' && opts.prompt === false) return status === 'undetermined' ? 'undetermined' : 'denied';
     if (status !== 'granted') ({ status } = await Notifications.requestPermissionsAsync());
     if (status !== 'granted') return 'denied';
     const { data: token } = await Notifications.getDevicePushTokenAsync();

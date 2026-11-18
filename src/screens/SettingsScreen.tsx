@@ -11,14 +11,16 @@ import { billingStatus, daysLeft, packageName } from '../lib/billing';
 import { track } from '../lib/track';
 import { useTabBarScroll } from '../lib/tabBar';
 import TeamCard, { PersonalCodeCard } from './TeamCard';
+import { NudgeSettings } from './NudgeParts';
 
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 // Ayarlar (ana ekranda sağ üstteki ad): kişisel bilgiler, klinik adı, ekip, üyelik, danışanlar, yasal ve hesap.
 export default function SettingsScreen({
-  me, team, clients, email, solo, verified, onBack, onChanged, onPlans, onOpenClient, onSample, onLegal, onGuide, onLogout, onDelete, legalOn, onLeft,
+  me, team, clients, email, solo, verified, onBack, onChanged, onPlans, onOpenClient, onSample, onLegal, onGuide, onLogout, onDelete, legalOn, onLeft, nudges,
 }: {
   me: ClinicianMe; team: Member[]; clients: Client[]; email: string; solo: boolean; verified: boolean; legalOn: boolean;
+  nudges?: boolean;   // uzaktan ayar `lifecycle_nudges` açık: Bildirimler bloğu (yalnız iPhone / iPad'de görünür)
   onBack: () => void; onChanged: () => void; onPlans: () => void; onOpenClient: (c: Client) => void; onSample: () => void;
   onLegal: () => void; onGuide: () => void; onLogout: () => void; onDelete: () => void; onLeft: () => void;
 }) {
@@ -171,6 +173,8 @@ export default function SettingsScreen({
             </View>
             <Ionicons name="chevron-forward" size={18} color={colors.faint} />
           </Pressable>
+
+          {nudges && <NudgeSettings userId={me.id} />}
 
           <Text style={styles.section}>{`Danışanlar (${clients.length})`}</Text>
           <Card style={{ padding: 0, overflow: 'hidden' }}>

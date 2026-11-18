@@ -3,6 +3,7 @@
 // Durum: Taslak (aile görmez) → Etkin → Ustalaştı. Sunucu SQL'i önizleme onayından sonra ortakta yazılacak; önizlemede deneme veritabanı.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './supabase';
+import { nudgeSignal } from './nudgeSignal';
 import LIB from '../data/trainingLibrary.json';
 import { track } from './track';
 
@@ -153,6 +154,7 @@ export async function createTraining(p: { clinic_id: string; link_id: string; pa
       parent_name: p.parent.name, title: p.goal.trim().slice(0, 200) || 'Adsız eğitim', status: 'draft', started_at: now, updated_at: now, seen_at: now }).select('*');
   const row = check((data ?? []) as Training[], error)[0];
   track('training.create', {});
+  nudgeSignal();   // hatırlatma planı: "eğitim yok" düşer
   return row;
 }
 
@@ -178,7 +180,7 @@ export async function updateTraining(id: string, patch: Partial<Pick<Training, '
   if (SMP.isSample(id)) return SMP.update(id, patch);
   const { error } = await supabase.from('parent_trainings').update({ ...patch, updated_at: new Date().toISOString() }).eq('id', id);
   check(null, error);
-  if (patch.status) track('training.status', { status: patch.status });
+  if (patch.status) { track('training.status', { status: patch.status }); nudgeSignal(); }
 }
 
 export async function deleteTraining(id: string) {
@@ -186,6 +188,7 @@ export async function deleteTraining(id: string) {
   const { error } = await supabase.from('parent_trainings').delete().eq('id', id);
   check(null, error);
   track('training.delete', {});
+  nudgeSignal();
 }
 
 // Seçilen öğeler eğitimin sonuna eklenir; eğitimde (arşivlenmemiş) olan öğe ikinci kez eklenmez

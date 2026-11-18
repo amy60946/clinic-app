@@ -62,6 +62,12 @@ export function yearlyGift(monthly: number | null | undefined, yearly: number | 
   return Math.max(0, Math.floor(12 - yearly / monthly + 0.05));
 }
 
+// App Store ürün kimliğinden paket (com.clinicapp.uzman.<paket>.<dönem>); paket tablosu elde yokken (ana ekran) kullanılır
+export const packageOfProduct = (productId: string | null | undefined): PackageId | null =>
+  !productId ? null : productId.includes('.solo.') ? 'solo' : productId.includes('.clinic.') ? 'clinic' : null;
+export const periodOfProduct = (productId: string | null | undefined): Period | null =>
+  !productId ? null : productId.endsWith('.monthly') ? 'monthly' : productId.endsWith('.yearly') ? 'yearly' : null;
+
 export const commonTerms = (gift: number) => [
   'İlk 14 gün ücretsiz, kart gerekmez',
   gift ? `Aylık ya da yıllık; yıllıkta ${gift} ay hediye` : 'Aylık ya da yıllık',

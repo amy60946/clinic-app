@@ -23,15 +23,20 @@ const EMPTY: ClientConfig = { minVersion: null, maintenance: false, banner: null
 
 export const appVersion = Application.nativeApplicationVersion ?? Constants.expoConfig?.version ?? '0';
 
-type Ctx = ClientConfig & { needsUpdate: boolean; flag: (key: string) => boolean; reload: () => Promise<void> };
-const C = createContext<Ctx>({ ...EMPTY, needsUpdate: false, flag: () => false, reload: async () => {} });
+// status: ilk okuma sürüyor ('loading') · en az bir kez okundu ('ok') · okunamadı ('failed': eski sunucu, ağ yok ya da 5 sn doldu).
+// Bayrağın "kapalı" olduğu ancak 'ok' iken bilinir (bayrağa göre geri alınamaz bir iş yapanlar buna bakar).
+export type ConfigStatus = 'loading' | 'ok' | 'failed';
+type Ctx = ClientConfig & { needsUpdate: boolean; status: ConfigStatus; flag: (key: string) => boolean; reload: () => Promise<void> };
+const C = createContext<Ctx>({ ...EMPTY, needsUpdate: false, status: 'failed', flag: () => false, reload: async () => {} });
 
 export function ClientConfigProvider({ children }: { children: React.ReactNode }) {
   const [cfg, setCfg] = useState<ClientConfig>(EMPTY);
+  const [status, setStatus] = useState<ConfigStatus>('loading');
 
   const reload = useCallback(async () => {
-    const { data, error } = await supabase.rpc('client_config', { p_app: 'clinic' });
-    if (error || !data) return; // eski sunucu ya da ağ yok: son bilinen ayar kalır
+    const { data, error } = await supabase.rpc('client_config', { p_app: 'clinic' }).then((r) => r, () => ({ data: null, error: true }));
+    if (error || !data) { setStatus((s) => (s === 'ok' ? s : 'failed')); return; } // eski sunucu ya da ağ yok: son bilinen ayar kalır
+    setStatus('ok');
     const app = (data as any).app ?? {};
     setCfg({
       minVersion: typeof app.min_version === 'string' ? app.min_version : null,
@@ -43,11 +48,13 @@ export function ClientConfigProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     reload();
+    const slow = setTimeout(() => setStatus((s) => (s === 'loading' ? 'failed' : s)), 5000);   // ağ yanıt vermiyorsa bekleyenler takılmasın
     const sub = AppState.addEventListener('change', (s) => { if (s === 'active') reload(); });
     // Web: sekmeye geri dönülünce
     const onVisible = () => { if (document.visibilityState === 'visible') reload(); };
     if (Platform.OS === 'web' && typeof document !== 'undefined') document.addEventListener('visibilitychange', onVisible);
     return () => {
+      clearTimeout(slow);
       sub.remove();
       if (Platform.OS === 'web' && typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVisible);
     };
@@ -55,7 +62,7 @@ export function ClientConfigProvider({ children }: { children: React.ReactNode }
 
   const needsUpdate = !!cfg.minVersion && versionLess(appVersion, cfg.minVersion);
   const flag = useCallback((key: string) => cfg.flags[key] === true, [cfg.flags]);
-  return <C.Provider value={{ ...cfg, needsUpdate, flag, reload }}>{children}</C.Provider>;
+  return <C.Provider value={{ ...cfg, needsUpdate, status, flag, reload }}>{children}</C.Provider>;
 }
 
 export const useClientConfig = () => useContext(C);

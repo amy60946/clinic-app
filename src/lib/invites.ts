@@ -1,5 +1,6 @@
 import { Platform, Share, Linking } from 'react-native';
 import { supabase } from './supabase';
+import { nudgeSignal } from './nudgeSignal';
 
 // Aile daveti (ortak/sozlesme/akislar.md 10): 3 gün geçerli; bağlantı (token) + yazılabilir 6 karakter kod aynı davettir.
 // Ana yol sistem e-postası (Edge Function invite-email, ortak migrations/20261027000000_invite_email.sql); yedek: uzman kodu kopyalar.
@@ -56,6 +57,11 @@ export const STATUS_TEXT: Record<InviteStatus, string> = {
 const missing = (e: { code?: string } | null) => e?.code === 'PGRST202' || e?.code === '42883';
 
 export async function createInvite(i: InviteInput): Promise<NewInvite & { childSaved: boolean }> {
+  const r = await insertInvite(i);
+  nudgeSignal();   // hatırlatma planı: "ilk davet" düşer, "süresi doluyor" eklenir
+  return r;
+}
+async function insertInvite(i: InviteInput): Promise<NewInvite & { childSaved: boolean }> {
   const base = { p_kind: 'family', p_label: i.label.trim(), p_parent_name: i.parentName.trim(), p_parent_email: i.parentEmail.trim() || null };
   const r = await supabase.rpc('clinic_create_invite', { ...base, p_child_name: i.childName.trim(), p_child_age_group: i.childAgeGroup });
   if (!missing(r.error)) {
@@ -81,6 +87,7 @@ export async function markInvite(code: string, channel: Channel): Promise<void> 
 export async function revokeInvite(code: string): Promise<void> {
   const { error } = await supabase.rpc('clinic_invite_mark', { p_code: code, p_channel: null, p_revoke: true });
   if (error) throw new Error(error.message);
+  nudgeSignal();
 }
 
 // Liste ve istatistik: sunucu güncellemesi yoksa boş

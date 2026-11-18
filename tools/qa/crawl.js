@@ -116,6 +116,15 @@ async function login(b, who) {
   await step(p, 'help', async () => { await tap(p, 'Nasıl kullanılır?'); });
   await closeTop(p);
   await step(p, 'membership', async () => { await tap(p, 'Paketleri ve fiyatları gör'); });
+  // İptal öncesi akış (uzaktan ayar `cancel_flow`: önizlemede açık, PLAN=1 geçişinde kapalı): Üyeliğin → soru → seçenek → çıkış.
+  // Önizlemede mağaza taklit (preview/demo-store.ts); iptal çıkışı her ekranda görünür olmalı.
+  if (!PLAN) {
+  await step(p, 'manage-summary', async () => { await tap(p, 'Aboneliği yönet'); }, 'Planı değiştir');
+  await step(p, 'manage-reason', async () => { await tap(p, 'Aboneliği iptal et', { last: true }); }, 'Yanıtlamadan iptale git');
+  await step(p, 'manage-alt', async () => { await tap(p, 'Aileler uygulamayı kullanmıyor'); await tap(p, 'Devam', { last: true }); if (!(await visible(p, 'Aboneliği iptal et').count())) throw new Error('seçenek ekranında "Aboneliği iptal et" yok'); }, 'Bize yaz');
+  await step(p, 'manage-exit', async () => { await tap(p, 'Aboneliği iptal et', { last: true }); }, 'App Store aboneliklerini aç');
+  await closeTop(p);
+  }
   await closeTop(p);
   await step(p, 'calendar', async () => { await tap(p, 'Takvim'); });
   await step(p, 'calendar-week', async () => { await tap(p, 'Hafta'); }, 'Pzt');
@@ -241,6 +250,16 @@ async function login(b, who) {
   await step(p, 'tour-todos-look', async () => { await tap(p, subTab('Hızlı yapılacaklar'), { last: true }); }, 'bir örneğe dokun');
   await step(p, 'tour-done', async () => { await tap(p, 'İleri', { last: true }); }, 'Hazırsın');
   await step(p, 'tour-closed', async () => { await tap(p, 'Kapat', { last: true }); }, 'hızlı yapılacak');
+  }
+  // App Store durumu (önizlemede taklit, tarayıcı deposunda demo.membership): ödeme alınamadı (ana ekran + üyelik), yenileme kapatıldı
+  if (!ONLY && !PLAN) {
+    for (const [state, mark] of [['billing', 'Ödeme yöntemini güncelle'], ['cancelled', 'Aboneliği sürdür']]) {
+      await p.evaluate((s) => localStorage.setItem('demo.membership', JSON.stringify({ plan: 'clinic', period: 'monthly', state: s })), state);
+      await p.reload(); await p.waitForTimeout(3000);
+      if (state === 'billing') await step(p, 'store-billing-home', async () => {}, mark);
+      await step(p, `store-${state}`, async () => { await tap(p, p.getByText(/^Üyelik: /).filter({ visible: true })); }, mark);
+    }
+    await p.evaluate(() => localStorage.removeItem('demo.membership'));
   }
   fs.writeFileSync(`${OUT}/api.json`, JSON.stringify(api)); 
   await ctx.close();

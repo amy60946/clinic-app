@@ -15,6 +15,9 @@ cp "$ROOT/preview/demo-supabase.ts" "$WORK/src/lib/supabase.ts"
 cp "$ROOT/preview/demo-sessions.ts" "$WORK/src/lib/demo-sessions.ts"
 cp "$ROOT/preview/demo-training.ts" "$WORK/src/lib/demo-training.ts"
 cp "$ROOT/preview/demo-behaviors.ts" "$WORK/src/lib/demo-behaviors.ts"
+# Deneme mağazası (App Store aboneliği durumu taklidi) ve deneme cihazı (yerel bildirim planı tarayıcı deposuna): cancel_flow / lifecycle_nudges
+cp "$ROOT/preview/demo-store.ts" "$WORK/src/lib/store.ts"
+cp "$ROOT/preview/demo-nudge-device.ts" "$WORK/src/lib/nudgeDevice.web.ts"
 
 echo "› Tip kontrolü"
 (cd "$WORK" && npx tsc --noEmit)

@@ -26,21 +26,22 @@ export type SheetInvite = NewInvite & {
 // sent: bu davete en az bir e-posta gitti · text: son denemenin uyarısı (ör. 60 sn dolmadı)
 type Mail = { sent: boolean; text: string };
 
-export default function InviteSheet({ visible, onClose, clinicId, clinicianName, existing, workspaceName, blocked }: {
+export default function InviteSheet({ visible, onClose, clinicId, clinicianName, existing, workspaceName, blocked, onSent }: {
   visible: boolean; onClose: () => void; clinicId: string; clinicianName: string; existing?: SheetInvite | null;
   workspaceName?: string; blocked?: boolean;   // çalışma alanı (ortak akislar.md 21): davet o alana gider; sahip kapattıysa üye gönderemez
+  onSent?: () => void;                         // yeni davet oluşturuldu (pencere kapanınca bildirim izni açıklaması için)
 }) {
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      {visible && <Body onClose={onClose} clinicId={clinicId} clinicianName={clinicianName} existing={existing ?? null} workspaceName={workspaceName} blocked={blocked} />}
+      {visible && <Body onClose={onClose} clinicId={clinicId} clinicianName={clinicianName} existing={existing ?? null} workspaceName={workspaceName} blocked={blocked} onSent={onSent} />}
     </Modal>
   );
 }
 
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
-function Body({ onClose, clinicId, clinicianName, existing, workspaceName, blocked }: {
-  onClose: () => void; clinicId: string; clinicianName: string; existing: SheetInvite | null; workspaceName?: string; blocked?: boolean;
+function Body({ onClose, clinicId, clinicianName, existing, workspaceName, blocked, onSent }: {
+  onClose: () => void; clinicId: string; clinicianName: string; existing: SheetInvite | null; workspaceName?: string; blocked?: boolean; onSent?: () => void;
 }) {
   const [inv, setInv] = useState<SheetInvite | null>(existing);
   const [email, setEmail] = useState('');
@@ -73,6 +74,7 @@ function Body({ onClose, clinicId, clinicianName, existing, workspaceName, block
       setInv({ ...r, parent_email: to.toLowerCase(), label: label.trim(),
         child_name: r.childSaved ? childName.trim() || null : null, child_age_group: r.childSaved ? age : null });
       track('invite.family', { email: true, link: !!r.token, child: !!childName.trim() || !!age });
+      onSent?.();
       if (!r.childSaved && (childName.trim() || age)) {
         Alert.alert('Çocuk bilgisi kaydedilmedi', 'Sunucu güncellemesi beklendiği için davete çocuğun adı ve yaş grubu eklenemedi. Davet yine geçerli; ebeveyn çocuğu kendisi ekler.');
       }
