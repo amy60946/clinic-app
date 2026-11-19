@@ -1,141 +1,178 @@
-# Çatı sayfa, 6. adım ("Sürer") görseli: "bu sürekli işleyen bir düzen" diyen üç şema (kullanıcı isteği 18 Kasım 2026).
-# yap_c.py runpy ile yükler: sema(K) -> 'g' (geniş, sahne) ve 'd' (dar, telefon / tablet kartı) düzenleri için satır içi SVG.
-#   a Döngü çemberi · b Yarım halka · c Haftalık şerit. Yazılar c-metin.json "sema" anahtarından; yazı tipi sayfadan (Outfit).
-# Hareket: .s6-akis çizgileri yavaşça akar (c-18.css); hareket azaltmada durur.
+# Çatı sayfa, 6. adım ("Sürer") görseli: "bu her hafta yeniden işleyen bir düzen" diyen halka çizimleri.
+# 18 Kasım 2026: ilk üç şema. 19 Kasım 2026 (kullanıcı: "döngü çemberi fikri güzel", "üst üste binen görsel/yazılar var"):
+# yalnız halka seçenekleri, hiçbir genişlikte yazı yazıya ya da çizgiye binmez.
+#   a Döngü çemberi · b Yörünge · c Dört adımlı halka · d Üç renkli halka
+# yap_c.py runpy ile yükler: sema(K, logo, duzen, onek) -> 'g' (geniş: masaüstü sahnesi, 640 × 400) ve 'd' (dar: telefon / tablet kartı)
+# düzenleri için satır içi SVG. Yazılar c-metin.json "sema" anahtarından; yazı tipi sayfadan (Outfit). onek: sayfada her çizim kopyasının
+# kimlikleri ayrı olsun (sahne ve kart; gizli kopyadaki clipPath'e başvurulmasın).
+# Hareket: .s6-akis (halkada akan noktalar) ve .s6-yol (halkada dolaşan tek nokta), c-18.css; hareket azaltmada durur, nokta yerinde kalır.
+# Kural (tur 2): çocuk adımı gerçek hayatta yapar, oyunda işaretler; ebeveyn planlar (kurmaz).
 import math, html
-L, Y2, YESIL, YESIL_K, LAV, CIZGI, MOR = '#16113A', '#5C5875', '#51E56A', '#0A8F3A', '#ECEBFA', '#E3E1EE', '#7C74E8'
+L, Y2, YESIL, YESIL_K, LAV, CIZGI = '#16113A', '#5C5875', '#51E56A', '#0A8F3A', '#ECEBFA', '#E3E1EE'
+RENK = {'uzman': '#DEDBF8', 'ebeveyn': '#CDF3D6', 'oyun': '#D3E6FC'}     # d: üç uygulamanın yumuşak renkleri (1-2-3 kartlarıyla aynı aile)
 IKON = {'uzman': 'img/ikon-mercek.svg', 'ebeveyn': 'img/ikon-moyo.svg', 'oyun': 'img/ikon-oyun.png'}
+LOGO_ORAN = 1113.5 / 2920.4                                             # inline-moyo.svg viewBox (-33.7 -601.7 2920.4 1113.5)
 e = html.escape
 
 def n(v): return ('%.1f' % v).rstrip('0').rstrip('.')
 def yaz(x, y, s, boy, kalin=400, renk=L, hiza='middle', ek=''):
     return f'<text x="{n(x)}" y="{n(y)}" font-size="{n(boy)}" font-weight="{kalin}" fill="{renk}" text-anchor="{hiza}"{ek}>{e(s)}</text>'
+def satirlar(x, y, sat, boy, aralik, hiza='middle', ilk_kalin=800):
+    # ilk satır ad (kalın, lacivert), sonrakiler fiil (gri)
+    return ''.join(yaz(x, y + i * aralik, s, boy[0] if i == 0 else boy[1], ilk_kalin if i == 0 else 400, L if i == 0 else Y2, hiza) for i, s in enumerate(sat))
 def golge(u):
     return (f'<defs><filter id="{u}-g" x="-40%" y="-40%" width="180%" height="190%">'
-            f'<feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="{L}" flood-opacity=".2"/></filter></defs>')
-def karo(u, k, cx, cy, s):
+            f'<feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="{L}" flood-opacity=".18"/></filter></defs>')
+def karo(u, k, cx, cy, s, golgeli=True):
     # uygulama simgesi karosu: yuvarlak köşe, yumuşak gölge, ince çerçeve (beyaz Moyo Uzman simgesi beyaz zeminde kaybolmasın)
     x, y, r = cx - s / 2, cy - s / 2, s * .235
     kutu = f'x="{n(x)}" y="{n(y)}" width="{n(s)}" height="{n(s)}" rx="{n(r)}"'
-    return (f'<rect {kutu} fill="#fff" filter="url(#{u}-g)"/><clipPath id="{u}-{k}"><rect {kutu}/></clipPath>'
+    return (f'<rect {kutu} fill="#fff"{f" filter=\"url(#{u}-g)\"" if golgeli else ""}/><clipPath id="{u}-{k}"><rect {kutu}/></clipPath>'
             f'<image href="{IKON[k]}" x="{n(x)}" y="{n(y)}" width="{n(s)}" height="{n(s)}" clip-path="url(#{u}-{k})" preserveAspectRatio="xMidYMid slice"/>'
             f'<rect {kutu} fill="none" stroke="{L}" stroke-opacity=".14"/>')
-def ok(x, y, aci, b=5, renk=YESIL_K, kalin=2.4):
-    # (x, y) noktasında, aci (derece, saat yönünde) yönüne bakan ok ucu
-    return (f'<path d="M{n(-b)} {n(-b * 1.15)}L{n(b * .55)} 0L{n(-b)} {n(b * 1.15)}" transform="translate({n(x)} {n(y)}) rotate({n(aci)})" '
-            f'fill="none" stroke="{renk}" stroke-width="{kalin}" stroke-linecap="round" stroke-linejoin="round"/>')
 def ucgen(x, y, aci, b, renk=YESIL_K):
-    # dolu ok ucu (çemberde yön, küçük boyda da "onay işareti" gibi okunmaz)
-    # dar tepe açısı (~40°): eşkenar üçgen döndürülünce yönü okunmuyor
+    # dolu ok ucu, dar tepe açısı (~40°): küçük boyda da yönü okunur, "onay işareti" gibi görünmez
     return (f'<path d="M{n(b * 1.05)} 0L{n(-b * .8)} {n(-b * .66)}L{n(-b * .8)} {n(b * .66)}Z" transform="translate({n(x)} {n(y)}) rotate({n(aci)})" '
             f'fill="{renk}" stroke="{renk}" stroke-width="{n(b * .22)}" stroke-linejoin="round"/>')
+def isaret(x, y, aci, r, b):
+    # halkanın üstünde beyaz yuvarlak içinde yön oku (saat yönünde)
+    return f'<circle cx="{n(x)}" cy="{n(y)}" r="{n(r)}" fill="#fff" stroke="{CIZGI}"/>' + ucgen(x, y, aci + 90, b)
 def kutup(cx, cy, r, aci): return cx + r * math.cos(math.radians(aci)), cy + r * math.sin(math.radians(aci))
+def yay(cx, cy, r, a1, a2):
+    (x1, y1), (x2, y2) = kutup(cx, cy, r, a1), kutup(cx, cy, r, a2)
+    return f'M{n(x1)} {n(y1)}A{n(r)} {n(r)} 0 {1 if (a2 - a1) % 360 > 180 else 0} 1 {n(x2)} {n(y2)}'
+def orta(cx, cy, T, boy, renk=L):
+    return yaz(cx, cy - boy * .14, T['orta'][0], boy, 800, renk) + yaz(cx, cy + boy * 1.02, T['orta'][1], boy, 800, renk)
+def akis(cx, cy, R, iz, renk=L, op=.45):
+    # halkada akan noktalar: yol saat yönünde, üstten başlar
+    return (f'<circle class="s6-akis" cx="{n(cx)}" cy="{n(cy)}" r="{n(R)}" fill="none" stroke="{renk}" stroke-opacity="{op}" stroke-width="{n(iz * .17)}" '
+            f'stroke-dasharray="0.1 {n(iz * .68 - .1)}" stroke-linecap="round" style="--s6:{n(-iz * .68)}" transform="rotate(-90 {n(cx)} {n(cy)})"/>')
 def svg(w, h, ic): return f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">{ic}</svg>'
 
-# ---------- a) Döngü çemberi ----------
+# ---------- a) Döngü çemberi: üç uygulama simgesi halkada, yazılar halkanın DIŞINDA ----------
 def cember(u, T, dar):
-    if dar: W, H, cx, cy, R, ks, b1, b2, iz = 254, 240, 127, 128, 60, 40, 11.5, 11, 11
-    else:   W, H, cx, cy, R, ks, b1, b2, iz = 640, 400, 320, 220, 112, 62, 15.5, 14, 16
+    if dar: W, H, cx, cy, R, ks, iz, b1, b2, ar = 260, 300, 130, 158, 62, 44, 12, 12.5, 11.5, 14.5
+    else:   W, H, cx, cy, R, ks, iz, b1, b2, ar = 640, 400, 320, 222, 116, 64, 16, 16.5, 14.5, 19
     P = {k: kutup(cx, cy, R, a) for k, a in (('uzman', -90), ('ebeveyn', 30), ('oyun', 150))}
-    s = golge(u)
-    s += f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="none" stroke="{LAV}" stroke-width="{iz}"/>'
-    # akan noktalar: yol saat yönünde, üstten başlar
-    s += (f'<circle class="s6-akis" cx="{cx}" cy="{cy}" r="{R}" fill="none" stroke="{L}" stroke-opacity=".45" stroke-width="{n(iz * .17)}" '
-          f'stroke-dasharray="0.1 {n(iz * .68 - .1)}" stroke-linecap="round" style="--s6:{n(-iz * .68)}" transform="rotate(-90 {cx} {cy})"/>')
-    for a in (-30, 90, 210):
-        x, y = kutup(cx, cy, R, a)
-        s += f'<circle cx="{n(x)}" cy="{n(y)}" r="{n(iz * .78)}" fill="#fff" stroke="{CIZGI}"/>' + ucgen(x + (iz * .06) * math.cos(math.radians(a + 90)), y + (iz * .06) * math.sin(math.radians(a + 90)), a + 90, iz * .4)
+    s = golge(u) + f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="none" stroke="{LAV}" stroke-width="{iz}"/>' + akis(cx, cy, R, iz)
+    for a in (-30, 90, 210): s += isaret(*kutup(cx, cy, R, a), a, iz * .78, iz * .4)
     for k in P: s += karo(u, k, P[k][0], P[k][1], ks)
-    # üstte Moyo Uzman: ad ve fiil karonun üstünde; alttakilerde karonun altında
     ux, uy = P['uzman']
-    s += yaz(ux, uy - ks / 2 - b2 - 11, T['uzman'][0], b1, 800) + yaz(ux, uy - ks / 2 - 8, T['uzman'][1], b2, 400, Y2)
-    for k in ('ebeveyn', 'oyun'):
-        x, y = P[k]
-        s += yaz(x, y + ks / 2 + b1 + 6, T[k][0], b1, 800) + yaz(x, y + ks / 2 + b1 + b2 + 10, T[k][1], b2, 400, Y2)
-    # dönüş: Moyo Oyun'dan uzmana giden sol yay
-    if dar:
-        p = T['donus'].split(' ')
-        s += yaz(cx - 43, cy - 74, ' '.join(p[:2]), b2, 600, YESIL_K, 'end') + yaz(cx - 43, cy - 61, ' '.join(p[2:]), b2, 600, YESIL_K, 'end')
-    else:
-        x, y = kutup(cx, cy, R, 210)
-        s += yaz(x - 26, y + 5, T['donus'], b2, 600, YESIL_K, 'end')
-    ob = 12.5 if dar else 18
-    s += yaz(cx, cy - 2, T['orta'][0], ob, 800) + yaz(cx, cy + ob + 1, T['orta'][1], ob, 800)
-    return svg(W, H, s)
+    s += satirlar(ux, uy - ks / 2 - b2 - (12 if dar else 15), T['uzman'], (b1, b2), b2 + 4)            # üstte: ad + fiil, simgenin üstünde
+    ex, ey = P['ebeveyn']; ox, oy = P['oyun']
+    if dar:   # alttakiler: simgenin altında, ortalı; halkanın en alt noktası iki yazının arasında kalır
+        y0 = cy + R + iz / 2 + b1 + 4
+        s += satirlar(ex + 6, y0, T['ebeveyn'], (b1, b2), b2 + 3.5) + satirlar(ox - 6, y0, T['oyun'], (b1, b2), b2 + 3.5)
+        # dönüş: sol üstte, okun ve Moyo Uzman yazısının arasında
+        s += yaz(8, cy - R - 2, T['donus'][0], b2, 600, YESIL_K, 'start') + yaz(8, cy - R + b2 + 1.5, T['donus'][1], b2, 600, YESIL_K, 'start')
+    else:     # alttakiler: simgenin yanında, halkanın dışına doğru
+        y0 = ey - (b1 + b2 + 8) / 2 + b1 * .35
+        s += satirlar(ex + ks / 2 + 16, y0, T['ebeveyn'], (b1, b2), b2 + 5, 'start') + satirlar(ox - ks / 2 - 16, y0, T['oyun'], (b1, b2), b2 + 5, 'end')
+        dx, dy = kutup(cx, cy, R, 210)
+        s += yaz(dx - iz - 10, dy + b2 * .36, ' '.join(T['donus']), b2, 600, YESIL_K, 'end')
+    return svg(W, H, s + orta(cx, cy, T, ar))
 
-# ---------- b) Yarım halka ----------
-def yarim(u, T, logo, dar):
-    if dar: W, H, cx, by, R, kal, ks, tr, b1, b2, lw = 254, 240, 127, 190, 100, 44, 42, 46, 11.5, 11, 50
-    else:   W, H, cx, by, R, kal, ks, tr, b1, b2, lw = 640, 400, 320, 344, 205, 66, 62, 112, 15.5, 14, 112
-    P = {'uzman': kutup(cx, by, R, 210), 'ebeveyn': kutup(cx, by, R, 270), 'oyun': kutup(cx, by, R, 330)}
+# ---------- b) Yörünge: ortada "moyo" yazısı, çevresinde üç uygulama kartı (simge + ad + fiil çipi), halkada dolaşan nokta ----------
+def cip(x, y, sat, boy, hiza='start'):
+    # fiil çipi: açık lavanta zeminli hap; birden çok satır olabilir. (x, y): sol üst ya da üst orta
+    gen = max(len(s) for s in sat) * boy * .5 + boy * 1.3       # Outfit 400, Türkçe küçük harf ortalaması ~0,5 em (tarayıcıda denetlendi)
+    yuk = len(sat) * boy * 1.25 + boy * .6
+    x0 = x if hiza == 'start' else x - gen / 2
+    r = f'<rect x="{n(x0)}" y="{n(y)}" width="{n(gen)}" height="{n(yuk)}" rx="{n(min(yuk / 2, boy * .9))}" fill="{LAV}"/>'
+    return r + ''.join(yaz(x0 + gen / 2, y + boy * .3 + (i + 1) * boy * 1.25 - boy * .22, s, boy, 600, L) for i, s in enumerate(sat)), gen, yuk
+def yorunge(u, T, logo, dar):
+    C = T['kart']
+    if dar: W, H, cx, cy, R = 260, 320, 130, 168, 110
+    else:   W, H, cx, cy, R = 640, 400, 320, 214, 140
+    P = {'uzman': (cx, cy - R), 'ebeveyn': kutup(cx, cy, R, 30 if not dar else 54), 'oyun': kutup(cx, cy, R, 150 if not dar else 126)}
     s = golge(u)
-    s += (f'<path d="M{n(P["uzman"][0])} {n(P["uzman"][1])}A{R} {R} 0 0 1 {n(P["oyun"][0])} {n(P["oyun"][1])}" fill="none" stroke="{LAV}" '
-          f'stroke-width="{kal}" stroke-linecap="round"/>')
-    # ortak taban: yarım daire, içinde yalnız "moyo" yazısı (koyu zeminde beyaz)
-    s += f'<path d="M{cx - tr} {by}A{tr} {tr} 0 0 1 {cx + tr} {by}Z" fill="{L}"/>'
-    lh = lw * 1113.5 / 2920.4
-    s += f'<svg x="{n(cx - lw / 2)}" y="{n(by - tr * (.5 if dar else .56) - lh / 2)}" width="{n(lw)}" height="{n(lh)}" viewBox="-33.7 -601.7 2920.4 1113.5" color="#fff">{logo}</svg>'
-    if dar: s += yaz(cx, by + 19, T['taban'], 12, 800)
-    else:   s += yaz(cx, by - 16, T['taban'], 13.5, 600, '#fff', ek=' fill-opacity=".86"')
-    # üç uygulamadan tabana akan kısa çizgiler
-    for k in P:
-        x, y = P[k]; dx, dy = cx - x, by - y; uz = math.hypot(dx, dy); bx, byy = dx / uz, dy / uz
-        x1, y1, x2, y2 = x + bx * (ks / 2 + 7), y + byy * (ks / 2 + 7), cx - bx * (tr + 9), by - byy * (tr + 9)
-        s += (f'<path class="s6-akis" d="M{n(x1)} {n(y1)}L{n(x2)} {n(y2)}" stroke="{L}" stroke-opacity=".5" stroke-width="{1.6 if dar else 2}" '
-              f'stroke-dasharray="{"3 4" if dar else "4 6"}" stroke-linecap="round" style="--s6:{-7 if dar else -10}"/>')
-        s += ok(cx - bx * (tr + 5), by - byy * (tr + 5), math.degrees(math.atan2(dy, dx)), 3.2 if dar else 4.5, YESIL_K, 1.8 if dar else 2.2)
-    for k in P: s += karo(u, k, P[k][0], P[k][1], ks)
-    ex, ey = P['ebeveyn']
-    vb = ey - kal / 2 - (6 if dar else 9)   # üstteki karonun yazıları yayın dışında, üstünde
-    s += yaz(ex, vb - b2 - 4, T['ebeveyn'][0], b1, 800) + yaz(ex, vb, T['b_ebeveyn'], b2, 400, Y2)
-    for k in ('uzman', 'oyun'):
-        x, y = P[k]
-        s += yaz(x, y + ks / 2 + b1 + (7 if dar else 12), T[k][0], b1, 800) + yaz(x, y + ks / 2 + b1 + b2 + (10 if dar else 16), T[k][1], b2, 400, Y2)
+    s += f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="none" stroke="{LAV}" stroke-width="{4 if dar else 5}"/>'
+    s += f'<circle cx="{cx}" cy="{cy}" r="{n(R * (.42 if dar else .46))}" fill="#F6F5FE"/>'
+    lw = 92 if dar else 132; lh = lw * LOGO_ORAN
+    s += f'<svg x="{n(cx - lw / 2)}" y="{n(cy - lh * .62)}" width="{n(lw)}" height="{n(lh)}" viewBox="-33.7 -601.7 2920.4 1113.5" color="{L}">{logo}</svg>'
+    # dolaşan nokta: tam turu 9 sn; hareket azaltmada sol yayda (Moyo Oyun'dan Moyo Uzman'a dönüşte) durur
+    cevre = 2 * math.pi * R
+    s += (f'<circle class="s6-yol" cx="{n(cx)}" cy="{n(cy)}" r="{R}" fill="none" stroke="{YESIL_K}" stroke-width="{9 if dar else 11}" stroke-linecap="round" '
+          f'stroke-dasharray="0.1 {n(cevre)}" style="--s6c:{n(-cevre)}" transform="rotate(205 {n(cx)} {n(cy)})"/>')
+    for a in ((-30, 90, 210) if not dar else (-45, 90, 225)): s += isaret(*kutup(cx, cy, R, a), a, 8 if dar else 10, 4 if dar else 5)
+    for k, (x, y) in P.items():
+        if dar:   # dar: dikey kart (simge üstte, ad, çip)
+            ks, gen = 30, 116
+            cs, cg, cy_ = cip(x, 0, C[k][1], 10.5, 'middle')
+            yuk = 10 + ks + 8 + 13 + 7 + cy_ + 10
+            y0 = y - yuk / 2
+            s += f'<rect x="{n(x - gen / 2)}" y="{n(y0)}" width="{gen}" height="{n(yuk)}" rx="16" fill="#fff" stroke="{CIZGI}" filter="url(#{u}-g)"/>'
+            s += karo(u, k, x, y0 + 10 + ks / 2, ks, False)
+            s += yaz(x, y0 + 10 + ks + 8 + 10.5, C[k][0], 12, 800)
+            s += cip(x, y0 + 10 + ks + 8 + 13 + 7, C[k][1], 10.5, 'middle')[0]
+        else:     # geniş: yatay kart (simge solda, ad ve çip sağda)
+            ks = 42
+            _, cg, cy_ = cip(0, 0, C[k][1], 12.5)
+            gen = 14 + ks + 12 + max(cg, len(C[k][0]) * 15 * .56) + 16; yuk = max(ks, 18 + 6 + cy_) + 24
+            x0, y0 = x - gen / 2, y - yuk / 2
+            s += f'<rect x="{n(x0)}" y="{n(y0)}" width="{n(gen)}" height="{n(yuk)}" rx="18" fill="#fff" stroke="{CIZGI}" filter="url(#{u}-g)"/>'
+            s += karo(u, k, x0 + 14 + ks / 2, y, ks, False)
+            tx = x0 + 14 + ks + 12; ty = y - (18 + 6 + cy_) / 2
+            s += yaz(tx, ty + 14, C[k][0], 15, 800, L, 'start') + cip(tx, ty + 18 + 6, C[k][1], 12.5)[0]
     return svg(W, H, s)
 
-# ---------- c) Haftalık şerit ----------
-def isaret(tur, x, y, r):
-    if tur == 0:    # rutin: yeşil dolu daire + onay
-        return (f'<circle cx="{n(x)}" cy="{n(y)}" r="{n(r)}" fill="{YESIL}"/><path d="M{n(x - r * .42)} {n(y + r * .02)}l{n(r * .3)} {n(r * .32)}l{n(r * .56)} {n(-r * .62)}" '
-                f'fill="none" stroke="{L}" stroke-width="{n(max(1.4, r * .2))}" stroke-linecap="round" stroke-linejoin="round"/>')
-    if tur == 1:    # davranış kaydı: lacivert yuvarlak köşeli kare
-        return f'<rect x="{n(x - r * .86)}" y="{n(y - r * .86)}" width="{n(r * 1.72)}" height="{n(r * 1.72)}" rx="{n(r * .42)}" fill="{L}"/>'
-    if tur == 2:    # seans: mor eşkenar dörtgen
-        return f'<rect x="{n(x - r * .8)}" y="{n(y - r * .8)}" width="{n(r * 1.6)}" height="{n(r * 1.6)}" rx="{n(r * .28)}" fill="{MOR}" transform="rotate(45 {n(x)} {n(y)})"/>'
-    return (f'<circle cx="{n(x)}" cy="{n(y)}" r="{n(r * .92)}" fill="#fff" stroke="{L}" stroke-width="{n(max(1.4, r * .2))}"/>'          # yeni öneri: artı
-            f'<path d="M{n(x - r * .42)} {n(y)}h{n(r * .84)}M{n(x)} {n(y - r * .42)}v{n(r * .84)}" stroke="{L}" stroke-width="{n(max(1.4, r * .2))}" stroke-linecap="round"/>')
-GUNLER = {0: range(7), 1: (1, 4, 5), 2: (2,), 3: (3,)}   # satır -> işaretli günler (Pzt = 0)
-def serit(u, T, dar):
-    if dar: W, H, x0, ad, gw, y0, sa, r, hb = 254, 240, 34, 31, 25, 56, 22, 6.2, 10.5
-    else:   W, H, x0, ad, gw, y0, sa, r, hb = 640, 400, 190, 60, 50, 122, 40, 9.5, 13.5
-    gun = T['gunler_kisa'] if dar else T['gunler']
-    ust, alt_ = y0 - sa * .62, y0 + sa * 3.62
-    s = ''
-    for i in range(7):
-        x = x0 + ad * i
-        s += f'<rect x="{n(x - gw / 2)}" y="{n(ust)}" width="{gw}" height="{n(alt_ - ust)}" rx="{n(gw * .3)}" fill="{"#F1F0F8" if i < 5 else "#F7F7FA"}"/>'
-        s += yaz(x, ust - (7 if dar else 11), gun[i], hb, 800, L if i < 5 else Y2)
-    for sat, gunler in GUNLER.items():
-        y = y0 + sa * sat
-        if not dar: s += yaz(x0 - gw / 2 - 18, y + 4.5, T['satirlar'][sat], 13.5, 600, Y2, 'end')
-        for g in gunler: s += isaret(sat, x0 + ad * g, y, r)
-    # tekrar oku: pazardan pazartesiye döner
-    xa, xb, ya, yb, k = x0 + ad * 6, x0, alt_ + (7 if dar else 10), alt_ + (24 if dar else 44), (8 if dar else 14)
-    s += (f'<path class="s6-akis" d="M{n(xa)} {n(ya)}V{n(yb - k)}Q{n(xa)} {n(yb)} {n(xa - k)} {n(yb)}H{n(xb + k)}Q{n(xb)} {n(yb)} {n(xb)} {n(yb - k)}V{n(ya + 3)}" fill="none" '
-          f'stroke="{L}" stroke-opacity=".5" stroke-width="{1.6 if dar else 2}" stroke-dasharray="{"3 4" if dar else "4 6"}" stroke-linecap="round" style="--s6:{-7 if dar else -10}"/>')
-    s += ok(xb, ya + 2, -90, 3.4 if dar else 4.8, YESIL_K, 1.8 if dar else 2.2)
-    ob, gen = (11.5, 148) if dar else (15.5, 212)
-    s += f'<rect x="{n((xa + xb) / 2 - gen / 2)}" y="{n(yb - ob)}" width="{gen}" height="{n(ob * 2)}" fill="#fff"/>' + yaz((xa + xb) / 2, yb + ob * .36, T['serit'], ob, 800)
-    if dar:   # satır adları yerine altta açıklama (2 × 2)
-        for j, ad_ in enumerate(T['satirlar']):
-            x, y = (38 if j % 2 == 0 else 142), yb + 30 + (j // 2) * 19
-            s += isaret(j, x, y, 5.4) + yaz(x + 11, y + 3.8, ad_, 11, 600, Y2, 'start')
+# ---------- c) Dört adımlı halka: numaralı dört düğüm, aralarında oklar, ortada "Her hafta yeniden" ----------
+def dort(u, T, dar):
+    A = T['dort']
+    if dar:   # dar: küçük halka üstte, adımlar altında numaralı liste (yazılar halkanın yanına sığmıyor)
+        W, H, cx, cy, R, r, ar = 260, 312, 130, 92, 58, 15, 12.5
+    else:
+        W, H, cx, cy, R, r, ar = 640, 400, 320, 200, 104, 22, 19
+    s = f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="none" stroke="{LAV}" stroke-width="{8 if dar else 12}"/>' + akis(cx, cy, R, 8 if dar else 12, L, .35)
+    acilar = (-90, 0, 90, 180)
+    for i, a in enumerate(acilar):          # ok: bir sonraki düğümün hemen önünde
+        x, y = kutup(cx, cy, R, a + 90 - (r + 9) / R * 180 / math.pi)
+        s += ucgen(x, y, a + 90 + 90 - (r + 9) / R * 180 / math.pi, 4.4 if dar else 6.2)
+    for i, a in enumerate(acilar):
+        x, y = kutup(cx, cy, R, a)
+        s += (f'<circle cx="{n(x)}" cy="{n(y)}" r="{r}" fill="{L}" stroke="#fff" stroke-width="{3 if dar else 4}"/>'
+              + yaz(x, y + (4.6 if dar else 6.6), str(i + 1), 13 if dar else 18, 800, '#fff'))
+    s += orta(cx, cy, T, ar)
+    if dar:
+        for i, sat in enumerate(A):
+            y = 186 + i * 31
+            s += (f'<circle cx="20" cy="{y}" r="10.5" fill="{L}"/>' + yaz(20, y + 4.2, str(i + 1), 11.5, 800, '#fff')
+                  + yaz(38, y + 4.4, ' '.join(sat), 12.5, 600, L, 'start'))
+    else:
+        b, ar_ = 15.5, 20
+        s += satirlar(cx, cy - R - r - 16, A[0][:1], (b, b), ar_, 'middle', 700)
+        s += ''.join(yaz(cx + R + r + 16, cy - ar_ / 2 + 5 + i * ar_, t, b, 700, L, 'start') for i, t in enumerate(A[1]))
+        s += yaz(cx, cy + R + r + 30, ' '.join(A[2]), b, 700)
+        s += ''.join(yaz(cx - R - r - 16, cy - ar_ / 2 + 5 + i * ar_, t, b, 700, L, 'end') for i, t in enumerate(A[3]))
     return svg(W, H, s)
 
-def sema(K, logo, duzen):
-    # duzen: 'g' geniş (sahne) | 'd' dar (kart). Üç seçenek yan yana durur; etkin olmayanlar hidden (oniz.js).
-    T, dar, u = K['sema'], duzen == 'd', 's6' + duzen
+# ---------- d) Üç renkli halka: her uygulama halkanın bir dilimi, eklem yerlerinde ok, yazılar dışta ----------
+def dilim(u, T, dar):
+    if dar: W, H, cx, cy, R, kal, ks, b1, b2, ar = 260, 292, 130, 140, 60, 24, 32, 12.5, 11.5, 13
+    else:   W, H, cx, cy, R, kal, ks, b1, b2, ar = 640, 400, 320, 214, 104, 32, 46, 16.5, 14.5, 19
+    bos = 13                                  # dilimler arasındaki boşluk (derece)
+    D = {'uzman': -90, 'ebeveyn': 30, 'oyun': 150}
+    s = golge(u)
+    for k, m in D.items():
+        s += f'<path d="{yay(cx, cy, R, m - 60 + bos / 2, m + 60 - bos / 2)}" fill="none" stroke="{RENK[k]}" stroke-width="{kal}"/>'
+    for a in (-30, 90, 210):                  # eklem: bir sonraki uygulamaya geçiş
+        s += ucgen(*kutup(cx, cy, R, a), a + 90, kal * (.26 if dar else .24), L)
+    for k, m in D.items(): s += karo(u, k, *kutup(cx, cy, R, m), ks)
+    V = T['dilim']
+    s += satirlar(cx, cy - R - kal / 2 - b2 - (10 if dar else 14), V['uzman'], (b1, b2), b2 + 4)
+    if dar:
+        y0 = cy + R + kal / 2 + b1 + 6
+        s += satirlar(cx + 62, y0, V['ebeveyn'], (b1, b2), b2 + 3.5) + satirlar(cx - 62, y0, V['oyun'], (b1, b2), b2 + 3.5)
+    else:
+        ex, ey = kutup(cx, cy, R + kal / 2, 30); ox, oy = kutup(cx, cy, R + kal / 2, 150)
+        y0 = ey + 2
+        s += satirlar(ex + 18, y0, V['ebeveyn'], (b1, b2), b2 + 5, 'start') + satirlar(ox - 18, y0, V['oyun'], (b1, b2), b2 + 5, 'end')
+    return svg(W, H, s + orta(cx, cy, T, ar))
+
+def sema(K, logo, duzen, onek='s6'):
+    # duzen: 'g' geniş (sahne) | 'd' dar (kart). Dört seçenek yan yana durur; etkin olmayanlar hidden (oniz.js).
+    T, dar, u = K['sema'], duzen == 'd', onek + duzen
     oneri = next(g['oneri'] for g in K['oniz'] if g['k'] == 'dongu6')
-    ic = {'a': cember(u + 'a', T, dar), 'b': yarim(u + 'b', T, logo, dar), 'c': serit(u + 'c', T, dar)}
+    ic = {'a': cember(u + 'a', T, dar), 'b': yorunge(u + 'b', T, logo, dar), 'c': dort(u + 'c', T, dar), 'd': dilim(u + 'd', T, dar)}
     return (f'<div class="d6" role="img" aria-label="{e(K["dongu"][5]["alt"])}">'
-            + ''.join(f'<div class="d6-v" data-var="dongu6:{v}"{"" if v == oneri else " hidden"}>{ic[v]}</div>' for v in ('a', 'b', 'c')) + '</div>')
+            + ''.join(f'<div class="d6-v" data-var="dongu6:{v}"{"" if v == oneri else " hidden"}>{ic[v]}</div>' for v in ('a', 'b', 'c', 'd')) + '</div>')

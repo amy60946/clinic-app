@@ -6,8 +6,13 @@
 # 18 Kasım 2026 turu (kullanıcı geri bildirimi): açılışta küçük alt satır + tek cümlelik deneme notu + kısa güven maddeleri,
 # açılış görselinde oyun ↔ ebeveyn uygulaması ilişkisini anlatan dört vuruşluk anlatım, "Nasıl çalışır" parmakla kaydırılır,
 # "Neden Moyo" üç "neden" kartı, Güvenlik ve Fiyat bölümleri sayfadan çıktı (guven.html, ebeveyn-fiyat.html), yeni alt bilgi.
-# Alternatifler önizleme sözleşmesiyle (oniz.js): alt · anim · nasil · neden. Her [data-var] parçası kendi etiketinden
+# Alternatifler önizleme sözleşmesiyle (oniz.js): alt · anim · neden. Her [data-var] parçası kendi etiketinden
 # bir tane daha içermez (span içinde span, figure içinde figure yok): canlıya aktarırken seçilmeyenler etiketiyle kesilebilir.
+#
+# 19 Kasım 2026, tur 2 (kullanıcının yanıtları): "Nasıl çalışır" başlığı a ile sabitlendi ("Rutinden takibe, beş adım.");
+# beş adım: planla · yapsın, oyunda işaretlesin (onay bu adımda) · zor anı kaydet (yeni ekran img/e-davranis.webp) · ilerleme ·
+# uzman. "Neden Moyo" yeni grup: üç başlık + üç kart takımı, başlığın altında sabit giriş cümlesi. Metinler yalnız e-metin.json'da.
+# 2. adımın oyun ekranı açılış görseline göre değişir (anim a: c-oyun-onay; b ve c: c-oyun-liste), aynı ekran sayfada iki kez görünmez.
 import json, re, html as H
 E = json.load(open('e-metin.json'))
 e = H.escape
@@ -24,6 +29,7 @@ I = {
     'rutin': '<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M8 3.2v3.4M16 3.2v3.4M4 10h16M9 15l2.1 2.1 4-4.2"/>',
     'takip': '<path d="M4 19.5h16"/><path d="M4.5 15.5l4.6-4.6 3.6 2.9L19.5 7"/><path d="M15.4 7h4.1v4.1"/>',
     'uzman': '<circle cx="9" cy="8.4" r="3.1"/><path d="M3.4 19.2c.6-3 2.8-4.7 5.6-4.7s5 1.7 5.6 4.7"/><circle cx="17.2" cy="9.6" r="2.3"/><path d="M16.6 14.6c2.2.2 3.6 1.6 4 4"/>',
+    'kayit': '<path d="M6.5 3.5h8l3.5 3.5v13.5h-11.5z"/><path d="M14.5 3.5v3.5h3.5"/><path d="M9.5 11.5h5.5M9.5 15h5.5M9.5 18.5h3"/>',
 }
 APPS = {'ebeveyn': ('img/ikon-moyo.svg', 'Moyo Ebeveyn'), 'oyun': ('img/ikon-oyun.png', 'Moyo Oyun'), 'mercek': ('img/ikon-mercek.svg', 'Moyo Uzman')}
 chip = lambda k: f'<span><img src="{APPS[k][0]}" alt="" width="22" height="22">{APPS[k][1]}</span>'
@@ -38,13 +44,11 @@ def var(k, d, sarmal=lambda v, t: t):
 # Önizleme alternatifleri (oniz.js sözleşmesi; yalnız önizlemede, canlıya seçilen kalır)
 ONIZ = [
     {'k': 'alt', 'ad': 'Açılış alt satırı', 'hedef': '.hero', 'oneri': 'a',
-     'sec': [['a', 'Kurun, kaydedin, görün'], ['b', 'Oyunda yapar, siz kaydedersiniz'], ['c', 'Tek kısa cümle']]},
+     'sec': [['a', 'Planlayın, kaydedin, görün'], ['b', 'Yapar, oyunda işaretler; siz kaydedersiniz'], ['c', 'Tek kısa cümle']]},
     {'k': 'anim', 'ad': 'Açılış görseli', 'hedef': '.hero', 'oneri': 'a',
      'sec': [['a', 'Dört adımlı anlatım'], ['b', 'İki ok, iki etiket'], ['c', 'Durağan görsel']]},
-    {'k': 'nasil', 'ad': '"Nasıl çalışır" başlığı', 'hedef': '#nasil', 'oneri': 'a',
-     'sec': [['a', 'Rutinden takibe, beş adım.'], ['b', 'Siz kurarsınız, çocuğunuz yapar…'], ['c', 'Tek başlık: Nasıl çalışır?']]},
-    {'k': 'neden', 'ad': '"Neden Moyo" başlığı', 'hedef': '#degerler', 'oneri': 'a',
-     'sec': [['a', 'Tahmin etmeyin, takip edin.'], ['b', 'Evde olanı görün…'], ['c', 'Rutin oyunda kurulur…']]},
+    {'k': 'neden', 'ad': '"Neden Moyo" başlık ve kartları', 'hedef': '#degerler', 'oneri': 'a',
+     'sec': [['a', 'Rutin, zor an ve uzman takibi bir arada'], ['b', 'Evde olanı kaydedin, birlikte yönetin'], ['c', 'Hatırlatmanın ötesinde: kayıtlı takip']]},
 ]
 ONERI = {g['k']: g['oneri'] for g in ONIZ}
 
@@ -110,7 +114,7 @@ def alt(sayfa):
     simdi = ' aria-current="page"' if sayfa == 'fiyat' else ''
     return f'''<footer>
   <div class="wrap">
-    <div class="about"><a class="logo" href="{a or "#top"}" aria-label="Moyo Ebeveyn ana sayfa">{LOGO}</a><p>{E["h1"]}.</p></div>
+    <div class="about"><a class="logo" href="{a or "#top"}" aria-label="Moyo Ebeveyn ana sayfa">{LOGO}</a><p>{E["altbilgi"]}</p></div>
     <div><h2 class="fh">Ürün</h2><ul><li><a href="{a}#nasil">Nasıl çalışır</a></li><li><a href="{FIYAT}"{simdi}>Fiyat</a></li><li><a href="{a}#sss">Sık sorulanlar</a></li><li><a href="{EKO}">Moyo ekosistemi</a></li></ul></div>
     <div><h2 class="fh">Hesap</h2><ul><li><a href="{APP}#giris">Giriş yap</a></li><li><a href="{APP}#kayit">Ücretsiz deneyin</a></li><li><a href="{MERCEK}">Uzmanlar için</a></li></ul></div>
     <div><h2 class="fh">Kurumsal</h2><ul><li><a href="{HAKKIMIZDA}">Hakkımızda</a></li><li><a href="{GUVEN}">Güvenlik ve gizlilik</a></li><li><a href="{SITE}destek">Destek</a></li></ul></div>
@@ -236,29 +240,36 @@ anim_c = f'''<figure class="mc" data-var="anim:c" hidden>
         </figure>'''
 
 # ---------- Nasıl çalışır: beş sekme, Moyo'nun gerçek ekranları (örnek veri) ----------
-ADIM = [
-    ('Rutini kurun', 'Moyo Ebeveyn · telefonunuzda', 'Rutini bir kez kurun, her gün kendiliğinden gelsin', 'Hazır rutinlerden seçin ya da kendiniz yazın: "Sabah rutini · 6 adım" gibi. Saatini ve günlerini siz belirlersiniz; eşiniz de aynı aileden yönetir.', ['ebeveyn'], ('tel', 'img/moyo-ekle.webp', 'Moyo Ebeveyn: yeni rutin adımı ekleme ekranı')),
-    ('Oyunda yapsın', 'Moyo Oyun · çocuğunuzun tabletinde', 'Hatırlatmayı oyun yapar', 'Çocuğunuz bugünkü rutinini oyunda adım adım görür; her adım onun için bir macera. Bitirince "Yaptım"a dokunur, dostu Okti ona eşlik eder.', ['oyun'], ('genis', 'img/c-oyun-liste.webp', 'Moyo Oyun: çocuğun bugünkü rutin adımları, oyunda macera olarak')),
-    ('Onaylayın', 'Moyo Ebeveyn · bildirimle', 'Tek dokunuşla onaylayın', 'Adım bitince telefonunuza bildirim gelir; onaylarsınız, çocuğunuz ödülünü oyunda toplar. Ödülleri siz belirlersiniz.', ['ebeveyn', 'oyun'], ('tel', 'img/moyo-onay.webp', 'Moyo Ebeveyn: çocuğun tamamladığı adımı onaylama ekranı')),
-    ('İlerlemeyi görün', 'Moyo Ebeveyn · Gelişim', 'Günü, haftayı ve ayı tek yerden görün', 'Hangi rutinin kolay, hangisinin zor geçtiğini görürsünüz; zorlandığı anı ve verdiği tepkiyi kısa bir davranış kaydıyla not edersiniz.', ['ebeveyn'], ('tel', 'img/moyo-gelisim.webp', 'Moyo Ebeveyn: çocuğun günlük ve haftalık ilerlemesi')),
-    ('Uzmanınızla', 'İsteğe bağlı · Moyo Uzman', 'Dilerseniz uzmanınızı dahil edin', 'Çalıştığınız uzman Moyo Uzman\'dan davet gönderir, siz onaylarsınız. Uzmanınız yalnız paylaştığınız çocuğun rutin ve davranış kayıtlarını görür; size kısa ebeveyn eğitimleri gönderir, rutin önerir. Eklemek sizin kararınız; paylaşımı dilediğiniz an durdurursunuz.', ['ebeveyn', 'mercek'], ('tel', 'img/moyo-uzman.webp', 'Moyo Ebeveyn: uzmandan gelen eğitim ve rutin önerileri')),
-]
-tabs = ''.join(f'<button type="button" role="tab" id="nc-t{k}" aria-controls="nc-p{k}" aria-selected="{"true" if k == 0 else "false"}"{"" if k == 0 else " tabindex=\"-1\""}><b>{k + 1}</b><span>{a[0]}</span></button>' for k, a in enumerate(ADIM))
-def gorsel(g):
+ADIM = E['adimlar']
+tabs = ''.join(f'<button type="button" role="tab" id="nc-t{k}" aria-controls="nc-p{k}" aria-selected="{"true" if k == 0 else "false"}"{"" if k == 0 else " tabindex=\"-1\""}><b>{k + 1}</b><span>{e(a["sekme"])}</span></button>' for k, a in enumerate(ADIM))
+def gorsel(g, ek=''):
     kind, src, alt_ = g
     if kind in ('tel', 'kirp'):
-        return f'<figure class="tel{" kirp" if kind == "kirp" else ""}"><img src="{src}" alt="{e(alt_)}" width="600" height="1298" loading="lazy"><figcaption>Örnek veri</figcaption></figure>'
-    return f'<figure class="shot"><img src="{src}" alt="{e(alt_)}" width="1200" height="554" loading="lazy"><figcaption>Örnek veri</figcaption></figure>'
+        return f'<figure class="tel{" kirp" if kind == "kirp" else ""}"{ek}><img src="{src}" alt="{e(alt_)}" width="600" height="1298" loading="lazy"><figcaption>Örnek veri</figcaption></figure>'
+    return f'<figure class="shot"{ek}><img src="{src}" alt="{e(alt_)}" width="1200" height="554" loading="lazy"><figcaption>Örnek veri</figcaption></figure>'
+
+
+def medya(a):
+    """Adımın ekranı. 2. adımda oyun ekranı açılış görseline bağlı: anim a'da açılış c-oyun-liste'yi gösterdiği için burada
+    c-oyun-onay; b ve c'de açılış c-oyun-onay'ı gösterdiği için burada c-oyun-liste (aynı ekran sayfada iki kez görünmez)."""
+    if 'gorsel_anim_bc' not in a:
+        return gorsel(a['gorsel'])
+    gizli = lambda v: '' if v == ONERI['anim'] else ' hidden'
+    return (gorsel(a['gorsel'], f' data-var="anim:a"{gizli("a")}')
+            + ''.join(gorsel(a['gorsel_anim_bc'], f' data-var="anim:{v}"{gizli(v)}') for v in ('b', 'c')))
 pan = ''.join(f'''        <div class="nc-p" role="tabpanel" id="nc-p{k}" aria-labelledby="nc-t{k}"{"" if k == 0 else " hidden"}>
-          <div class="nc-text"><p class="step-k">{a[1]}</p><h3>{a[2]}</h3><p>{a[3]}</p><p class="nc-apps">{"".join(chip(x) for x in a[4])}</p></div>
-          <div class="nc-media">{gorsel(a[5])}</div>
+          <div class="nc-text"><p class="step-k">{e(a["ust"])}</p><h3>{e(a["baslik"])}</h3><p>{e(a["metin"])}</p><p class="nc-apps">{"".join(chip(x) for x in a["uygulama"])}</p></div>
+          <div class="nc-media">{medya(a)}</div>
         </div>
 ''' for k, a in enumerate(ADIM))
 
 # ---------- Neden Moyo: üç "neden" kartı ----------
-neden = ''.join(f'<li><span class="ic">{SVG(I[k])}</span>{f"<span class=\"nd-rozet\">{r}</span>" if r else ""}<h3>{t}</h3><p>{p}</p></li>' for k, t, p, r in E['neden_kart'])
-ekosis = ''.join(f'<div class="eko"><img src="{APPS[k][0]}" alt="" width="48" height="48"><h3>{APPS[k][1]}</h3><p>{p}</p></div>' for k, p in [
-    ('oyun', 'Çocuk için: rutin oyunda maceraya dönüşür.'), ('ebeveyn', 'Aile için: kurar, onaylar, kaydeder, ilerlemeyi görür.'), ('mercek', 'Uzman için, isteğe bağlı: evdeki kayıtları görür, rutin önerir.')])
+# Seçenek başına bir başlık ve bir kart listesi (data-var="neden:<değer>"); başlığın altındaki giriş cümlesi hepsinde aynı.
+ND = E['neden']
+kart = lambda k, t, p, r: f'<li><span class="ic">{SVG(I[k])}</span>{f"<span class=\"nd-rozet\">{e(r)}</span>" if r else ""}<h3>{e(t)}</h3><p>{e(p)}</p></li>'
+neden_bas = var('neden', {v: e(o['baslik']) for v, o in ND.items()})
+neden = ''.join(f'<ul class="nd" data-var="neden:{v}"{"" if v == ONERI["neden"] else " hidden"}>{"".join(kart(*x) for x in o["kartlar"])}</ul>' for v, o in ND.items())
+ekosis = ''.join(f'<div class="eko"><img src="{APPS[k][0]}" alt="" width="48" height="48"><h3>{APPS[k][1]}</h3><p>{e(p)}</p></div>' for k, p in E['ekosistem'])
 sss = ''.join(f'<details><summary>{q[0]}</summary><p>{q[1]}</p></details>' for q in E['sss'])
 
 html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
@@ -285,7 +296,7 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
 
   <section class="sec sec-white" id="nasil" aria-labelledby="h-nasil">
     <div class="wrap">
-      <div class="head"><p class="eyebrow" data-var="nasil:a">Nasıl çalışır</p><p class="eyebrow" data-var="nasil:b" hidden>Nasıl çalışır</p><h2 id="h-nasil">{var("nasil", E["nasil"])}</h2></div>
+      <div class="head"><p class="eyebrow">Nasıl çalışır</p><h2 id="h-nasil">{e(E["nasil"])}</h2></div>
       <div class="nc" data-nc>
         <div class="nc-tabs" role="tablist" aria-label="Moyo'nun adımları">{tabs}</div>
 {pan}      </div>
@@ -294,15 +305,15 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
 
   <section class="sec sec-soft" id="degerler" aria-labelledby="h-deger">
     <div class="wrap">
-      <div class="head"><p class="eyebrow">Neden Moyo</p><h2 id="h-deger">{var("neden", E["neden"])}</h2></div>
-      <ul class="nd">{neden}</ul>
+      <div class="head"><p class="eyebrow">Neden Moyo</p><h2 id="h-deger">{neden_bas}</h2><p class="intro nd-giris">{" ".join(f"<span>{e(x)}</span>" for x in re.split(r"(?<=[.])\s+", E["neden_giris"]))}</p></div>
+      {neden}
       <p class="nd-bag"><a href="{HAKKIMIZDA}">{E["neden_bag"]} <span aria-hidden="true">→</span></a></p>
     </div>
   </section>
 
   <section class="sec sec-dark" aria-labelledby="h-eko">
     <div class="wrap">
-      <div class="head"><p class="eyebrow">Moyo ekosistemi</p><h2 id="h-eko">Üç uygulama, tek rutin.</h2><p class="intro">Moyo Ebeveyn ve Moyo Oyun birlikte çalışır; dilerseniz uzmanınız Moyo Uzman ile katılır.</p></div>
+      <div class="head"><p class="eyebrow">Moyo ekosistemi</p><h2 id="h-eko">{e(E["ekosistem_baslik"])}</h2><p class="intro">{e(E["ekosistem_giris"])}</p></div>
       <div class="ekos">{ekosis}</div>
       <p class="eko-link"><a href="{EKO}">Ekosistemi görün →</a></p>
     </div>
@@ -318,9 +329,9 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
   <section class="sec sec-soft" aria-labelledby="h-son">
     <div class="wrap">
       <div class="closing">
-        <h2 id="h-son">{E["kapanis"]}</h2>
+        <h2 id="h-son">{e(E["kapanis"])}</h2>
         <div class="actions"><a class="btn btn-cta" href="{APP}#kayit">Ücretsiz deneyin</a><a class="btn btn-line" href="{APP}#giris">Giriş</a></div>
-        <p class="fine">{E["ince"]}</p>
+        <p class="fine">{e(E["kapanis_ince"])}</p>
       </div>
     </div>
   </section>
@@ -330,4 +341,8 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
 
 if __name__ == '__main__':
     assert 'istediğiniz' not in html and 'seanslar aras' not in html and '—' not in html, 'yasaklı ifade ya da uzun tire kaldı'
+    gorunen = re.sub(r'<[^>]+>', ' ', re.sub(r'<(script|style|svg)\b.*?</\1>', ' ', html, flags=re.S))
+    for yasak in ('oyunda yapar', 'oyunda yapsın', 'oyunda yapmak', 'tek platform', 'tek plan', 'tek kayıt', 'buluş', 'evde başlayın',
+                  'her şeyi', 'döngü kapanır', 'kurun', 'kurarsınız', 'kurduğunuz', 'kurulur', 'kurar,', ' yalnız '):
+        assert yasak not in gorunen.lower(), f'yasaklı ifade: {yasak}'
     open('ebeveyn.html', 'w').write(html); print('ok ebeveyn.html')

@@ -95,6 +95,11 @@ SIMGELER = {
     'yok': '<path d="M6.5 12h11"/>',
     'ok': '<path d="M5 12h13M13 6.5 18.5 12 13 17.5"/>',
     'dis': '<path d="M14 5h5v5M19 5l-8 8"/><path d="M17 13.5V19H5V7h5.5"/>',
+    'kilit': '<rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/><path d="M12 14.5v2"/>',
+    'onay': '<circle cx="12" cy="12" r="8.5"/><path d="m8.3 12.3 2.5 2.5 4.9-5.1"/>',
+    'kalem': '<path d="M5 19.5h4.2L19 9.7a2.3 2.3 0 0 0-3.2-3.2L6 16.3 5 19.5Z"/><path d="m14.3 8 3.2 3.2"/>',
+    'goz': '<path d="M2.8 12S6.2 5.8 12 5.8 21.2 12 21.2 12 17.8 18.2 12 18.2 2.8 12 2.8 12Z"/><circle cx="12" cy="12" r="2.8"/>',
+    'yasak': '<circle cx="12" cy="12" r="8.5"/><path d="m6 6 12 12"/>',
 }
 
 
@@ -132,19 +137,36 @@ def kunye(k):
 
 
 # ======================================================================
-# 1) Hakkımızda
+# 1) Hakkımızda (19 Kasım 2026 tur 2: araştırma yazısından gerçek bir Hakkımızda sayfasına)
+#    Sıra: açılış (misyon + üç uygulama) → neden varız (bir haftanın şeması) → bir araya getirdiklerimiz (5 adım)
+#    → neye inanıyoruz (6 ilke) → araştırmalar (3 satır + dürüstlük notları + açılır kaynak listesi)
+#    → [yalnız önizleme: ekip ve hikâye yer tutucusu, ONIZ:BAS/SON] → iletişim (destek formu + üç kart).
 # ======================================================================
 H = K['hakkimizda']
 GRUP_H = [
-    {'k': 'kbas', 'ad': 'Hakkımızda başlığı', 'hedef': '.k-acilis', 'oneri': 'a',
-     'sec': [['a', 'Tahminle değil, kayıtla'], ['b', 'Seanstan eve, evden seansa'], ['c', 'Tek çatı altında']]},
-    {'k': 'kkisi', 'ad': 'Çocuk, ebeveyn, uzman bölümü', 'hedef': '#kisiler', 'oneri': 'a',
-     'sec': [['a', 'Satır satır (yan yana oku)'], ['b', 'Üç renkli kart']]},
+    {'k': 'kbas', 'ad': 'Hakkımızda başlığı (misyon)', 'hedef': '.k-acilis', 'oneri': 'a',
+     'sec': [['a', 'Hafızadan kayda'], ['b', 'Rutin düzen, kayıt yol'], ['c', 'Herkes kendi uygulamasından']]},
+    {'k': 'kdzn', 'ad': '"Neye inanıyoruz" düzeni', 'hedef': '#ilkeler', 'oneri': 'a',
+     'sec': [['a', 'Kartlar'], ['b', 'Numaralı liste']]},
 ]
 VARSAYILAN = ''.join(f' data-v-{g["k"]}="{g["oneri"]}"' for g in GRUP_H)
 
 h1 = ''.join(f'<span data-var="kbas:{k}"{"" if k == "a" else " hidden"}>{e(v)}</span>' for k, v in H['h1'].items())
-olgular = ''.join(f'<li class="k-olgu"><b>{n}</b><div><strong>{e(ad)}</strong><span>{e(t)}</span></div></li>' for n, ad, t in H['olgular'])
+uclu = ''.join(f'<li>{ikon_img(src, 40, "k-uclu-ikon")}<span><b>{e(ad)}</b><small>{e(kim)}</small></span></li>'
+               for src, ad, kim in H['uygulamalar'])
+
+# Neden varız: bir haftanın şeması (yalnız HTML; ürün ekranı değil). r = rutin adımı, rz = zor an olan rutin, g = görüşme.
+HAFTA = [['r', 'r', 'r'], ['r', 'rz', 'r'], ['r', 'g', 'r', 'r'], ['r', 'r', 'r'], ['r', 'r', 'r'], ['r', 'rz'], ['r', 'r']]
+HF = H['hafta']
+gunler = ''.join(
+    f'<div class="k-gun"><span class="k-gun-ad">{g}</span>'
+    + ''.join(f'<i class="k-h-{x[0]}">{"<b></b>" if "z" in x else ""}{"<em>" + e(HF["gorusme"]) + "</em>" if x == "g" else ""}</i>'
+              for x in HAFTA[i]) + '</div>'
+    for i, g in enumerate(HF['gunler']))
+acik = ''.join(f'<li><i class="k-h-{t}">{"<b></b>" if t == "z" else ""}</i><span><b>{e(ad)}</b> {e(n)}</span></li>'
+               for t, ad, n in HF['acik'])
+hafta = (f'<figure class="k-hafta"><div class="k-hafta-izgara" role="img" aria-label="{e(HF["etiket"])}">{gunler}</div>'
+         f'<figcaption><ul class="k-hafta-acik">{acik}</ul></figcaption></figure>')
 
 adimlar = []
 for i, a in enumerate(H['akis'], 1):
@@ -155,22 +177,22 @@ for i, a in enumerate(H['akis'], 1):
                    f'<p class="k-uyg">{ikon_img(a["ikon"], 22, "k-uyg-ikon")}<span>{e(a["uygulama"])}</span>{rozet}</p>'
                    f'<h3><span class="gizli">{i}. </span>{e(a["ad"])}</h3><p>{e(a["metin"])}</p></div></li>')
 
-PA = H['parca_adlari']
-kisiler = []
-for p in H['kisiler']:
-    ikonlar = ''.join(ikon_img(x, 52 if len(p['ikonlar']) == 1 else 34) for x in p['ikonlar'])
-    ek = f' · {e(p["ek"])}' if p.get('ek') else ''
-    kisiler.append(
-        f'<article class="k-kisi k-kisi-{p["k"]}" aria-labelledby="kisi-{p["k"]}">'
-        f'<header class="k-kisi-bas"><div class="k-kisi-ikon n{len(p["ikonlar"])}">{ikonlar}</div>'
-        f'<div><h3 id="kisi-{p["k"]}">{e(p["ad"])}</h3><p class="k-kisi-uyg">{e(p["uygulama"])}{ek}</p></div></header>'
-        f'<div class="k-parca k-zorluk"><h4>{PA[0]}</h4><p>{p["zorluk"]}</p></div>'
-        f'<div class="k-parca k-arastirma"><h4>{PA[1]}</h4><p>{p["arastirma"]}</p></div>'
-        f'<div class="k-parca k-karsilik"><h4>{PA[2]}</h4><p>{p["karsilik"]}</p></div>'
-        f'</article>')
+# Neye inanıyoruz: a kartlar (simge üstte, numara gizli) · b numaralı liste (numara + simge + metin, ayırıcı çizgi)
+ilkeler = ''.join(f'<li class="k-ilke"><span class="k-ilke-no" aria-hidden="true">{i:02d}</span>'
+                  f'<span class="k-ilke-ikon">{svg(SIMGELER[x["ikon"]])}</span>'
+                  f'<div class="k-ilke-metin"><h3>{e(x["baslik"])}</h3><p>{e(x["metin"])}</p></div></li>'
+                  for i, x in enumerate(H['ilkeler'], 1))
 
-sinirlar = ''.join(f'<li class="k-sinir"><span class="k-sinir-ikon">{svg(SIMGELER[s["ikon"]])}</span>'
-                   f'<h3>{e(s["baslik"])}</h3><p>{s["metin"]}</p></li>' for s in H['sinirlar'])
+bulgular = ''.join(f'<li class="k-bulgu"><div class="k-bulgu-kim">{ikon_img(b["ikon"], 36, "k-bulgu-ikon")}'
+                   f'<div><h3>{e(b["ad"])}</h3><p>{e(b["uygulama"])}</p></div></div><p class="k-bulgu-metin">{b["metin"]}</p></li>'
+                   for b in H['bulgular'])
+durust = ''.join(f'<li><span class="k-durust-ikon">{svg(SIMGELER[d["ikon"]], 20)}</span><p>{d["metin"]}</p></li>' for d in H['durust'])
+
+EK = H['ekip']
+ekip_maddeler = ''.join(f'<li>{e(m)}</li>' for m in EK['maddeler'])
+ekip = ('<!-- ONIZ:BAS -->\n<section class="k-bolum k-ekip" id="ekip" aria-labelledby="h-ekip">\n  <div class="ic k-dar"><div class="k-yer">'
+        f'<p class="k-yer-not">{e(EK["not"])}</p><h2 id="h-ekip">{e(EK["baslik"])}</h2><p>{e(EK["metin"])}</p>'
+        f'<ul>{ekip_maddeler}</ul></div></div>\n</section>\n<!-- ONIZ:SON -->')
 
 
 def kapanis_karti(c):
@@ -179,61 +201,87 @@ def kapanis_karti(c):
             else ikon_img(c['ikon'], 52, 'k-git-ikon'))
     yeni = '<span class="gizli"> (yeni sekmede açılır)</span>' if link.startswith('http') else ''
     oku = svg(SIMGELER['dis' if link.startswith('http') else 'ok'], 20)
-    return (f'<li><a class="k-git k-{c["renk"]}" href="{link}"{dis(link)}>{ikon}<h3>{e(c["ad"])}</h3><p>{e(c["metin"])}</p>'
+    return (f'<li><a class="k-git k-{c["renk"]}" href="{link}"{dis(link)}>{ikon}<span class="k-git-ust">{e(c["ust"])}</span>'
+            f'<h3>{e(c["ad"])}</h3><p>{e(c["metin"])}</p>'
             f'<span class="k-git-alt">{e(c["link_ad"])}{yeni}{oku}</span></a></li>')
 
 
+neden_p = ''.join(f'<p>{e(p)}</p>' for p in H['neden_metin'])
 govde_h = f'''<main id="icerik">
 <section class="k-acilis" aria-labelledby="h1">
   <div class="ic">
     <p class="k-etiket">{e(H["etiket"])}</p>
     <h1 id="h1">{h1}</h1>
     <p class="k-alt">{e(H["alt"])}</p>
+    <ul class="k-uclu" aria-label="Moyo'nun uygulamaları">{uclu}</ul>
     <p class="k-ince">{e(H["ince"])}</p>
-    <ul class="k-olgular" aria-label="Moyo kısaca">{olgular}</ul>
   </div>
 </section>
 
-<section class="k-bolum k-sis" id="ekosistem" aria-labelledby="h-akis">
+<section class="k-bolum k-sis k-neden" id="neden" aria-labelledby="h-neden">
+  <div class="ic k-neden-ic">
+    <div class="k-neden-metin">
+      <p class="k-etiket">{e(H["neden_etiket"])}</p>
+      <h2 id="h-neden">{e(H["neden_baslik"])}</h2>
+      {neden_p}
+      <p class="k-vurgu">{e(H["neden_vurgu"])}</p>
+    </div>
+    {hafta}
+  </div>
+</section>
+
+<section class="k-bolum" id="ekosistem" aria-labelledby="h-akis">
   <div class="ic">
     <div class="k-bas"><p class="k-etiket">{e(H["akis_etiket"])}</p><h2 id="h-akis">{e(H["akis_baslik"])}</h2><p>{e(H["akis_metin"])}</p></div>
     <ol class="k-adimlar">{"".join(adimlar)}</ol>
   </div>
 </section>
 
-<section class="k-bolum" id="kisiler" aria-labelledby="h-kisi">
+<section class="k-bolum k-mavi" id="ilkeler" aria-labelledby="h-ilke">
   <div class="ic">
-    <div class="k-bas"><p class="k-etiket">{e(H["kisi_etiket"])}</p><h2 id="h-kisi">{e(H["kisi_baslik"])}</h2><p>{e(H["kisi_metin"])}</p></div>
-    <div class="k-kisiler">{"".join(kisiler)}</div>
+    <div class="k-bas"><p class="k-etiket">{e(H["ilke_etiket"])}</p><h2 id="h-ilke">{e(H["ilke_baslik"])}</h2></div>
+    <ul class="k-ilkeler">{ilkeler}</ul>
   </div>
 </section>
 
-<section class="k-bolum k-mavi" id="sinirlar" aria-labelledby="h-sinir">
-  <div class="ic">
-    <div class="k-bas"><p class="k-etiket">{e(H["sinir_etiket"])}</p><h2 id="h-sinir">{e(H["sinir_baslik"])}</h2><p>{e(H["sinir_metin"])}</p></div>
-    <ul class="k-sinirlar">{sinirlar}</ul>
-  </div>
-</section>
+<section class="k-bolum" id="arastirma" aria-labelledby="h-ars">
+  <div class="ic k-dar">
+    <div class="k-bas k-bas-sol"><p class="k-etiket">{e(H["ars_etiket"])}</p><h2 id="h-ars">{e(H["ars_baslik"])}</h2></div>
+    <ul class="k-bulgular">{bulgular}</ul>
+    <div class="k-durust"><h3>{e(H["durust_baslik"])}</h3><ul>{durust}</ul></div>
 '''
 govde_h, sira = atiflar(govde_h, K['kaynaklar'])
+fazla = sorted(set(K['kaynaklar']) - set(sira))
+assert not fazla, f'k-metin.json içinde anılmayan kaynak: {fazla}'
 kaynak_listesi = ''.join(f'<li id="kaynak-{i}">{kunye(K["kaynaklar"][k])}</li>' for i, k in enumerate(sira, 1))
-govde_h += f'''
-<section class="k-bolum" id="kaynaklar" aria-labelledby="h-kaynak">
-  <div class="ic k-dar">
-    <h2 id="h-kaynak">{e(H["kaynak_baslik"])}</h2>
-    <p class="k-kaynak-not">{e(H["kaynak_metin"])}</p>
-    <ol class="k-kaynaklar">{kaynak_listesi}</ol>
+kartlar = ''.join(kapanis_karti(c) for c in H['kapanis'])
+destek = yer(H['iletisim_link'])
+ATIF_JS = ('<script>/* atıf numarasına basınca kapalı kaynak listesi açılır */(function () {\n'
+           "  var d = document.getElementById('kaynak-ac');\n"
+           "  function ac() { if (d && /^#kaynak-\\d+$/.test(location.hash)) d.open = true; }\n"
+           "  document.addEventListener('click', function (ev) { if (d && ev.target.closest && ev.target.closest('a[href^=\"#kaynak-\"]')) d.open = true; });\n"
+           "  addEventListener('hashchange', ac); ac();\n"
+           '})();</script>\n')
+govde_h += f'''    <details class="k-kaynak-ac" id="kaynak-ac">
+      <summary><span>{e(H["kaynak_baslik"])} ({len(sira)})</span></summary>
+      <p class="k-kaynak-not">{e(H["kaynak_metin"])}</p>
+      <ol class="k-kaynaklar">{kaynak_listesi}</ol>
+    </details>
   </div>
 </section>
 
-<section class="k-bolum k-kapanis" aria-labelledby="h-kapanis">
+{ekip}
+
+<section class="k-bolum k-sis k-iletisim" id="iletisim" aria-labelledby="h-iletisim">
   <div class="ic">
-    <h2 id="h-kapanis">{e(H["kapanis_baslik"])}</h2>
-    <ul class="k-gitler">{"".join(kapanis_karti(c) for c in H["kapanis"])}</ul>
+    <div class="k-bas"><h2 id="h-iletisim">{e(H["iletisim_baslik"])}</h2><p>{e(H["iletisim_metin"])}</p>
+      <a class="k-destek" href="{destek}"{dis(destek)}>{e(H["iletisim_link_ad"])}{svg(SIMGELER["ok"], 20)}</a></div>
+    <ul class="k-gitler">{kartlar}</ul>
   </div>
 </section>
 </main>
-'''
+{ATIF_JS}'''
+govde_h = govde_h.replace('e-posta', 'e-&#8288;posta')   # "e-" satır sonunda kalmasın (sözcük birleştirici)
 open('hakkimizda.html', 'w', encoding='utf-8').write(bas('hakkimizda', H, GRUP_H, VARSAYILAN) + govde_h + son('hakkimizda'))
 
 
