@@ -78,7 +78,7 @@ iframe { width: 100%; height: 100%; border: 0; display: block; }
   <div class="sahne" id="sahne"><div class="cerceve"><iframe id="sayfa" title="Sayfa önizlemesi" src="c.html"></iframe></div></div>
   <aside class="panel" id="alt-panel" aria-label="Alternatifler" hidden>
     <div class="p-bas"><h2>Alternatifler</h2><button type="button" class="p-kapat" id="alt-kapat" aria-label="Paneli kapat">×</button></div>
-    <p class="p-not">Bir seçeneğe dokunun: sayfa o bölüme gider, seçenek yerinde değişir. Yeşil etiket benim önerim. 18 Kasım sürümü; yayında değil.</p>
+    <p class="p-not">Bir seçeneğe dokunun: sayfa o bölüme gider, seçenek yerinde değişir. Yeşil etiket benim önerim. 19 Kasım, ikinci tur; yayında değil.</p>
     <div class="p-liste" id="alt-liste"></div>
     <div class="p-alt"><button type="button" id="alt-sifirla">Önerilere dön</button><button type="button" class="dolu" id="alt-kopya">Seçimlerimi kopyala</button></div>
     <div class="p-ozet" id="alt-ozet" hidden><textarea id="alt-metin" readonly aria-label="Seçimlerinizin özeti"></textarea><small id="alt-durum" aria-live="polite"></small></div>
@@ -89,13 +89,14 @@ iframe { width: 100%; height: 100%; border: 0; display: block; }
   var f = document.getElementById('sayfa'), s = document.getElementById('sahne'), BOY = { tablet: [820, 1180], tel: [390, 844] };
   var ac = document.getElementById('alt-ac'), panel = document.getElementById('alt-panel'), liste = document.getElementById('alt-liste');
   var ozet = document.getElementById('alt-ozet'), metin = document.getElementById('alt-metin'), durumYazi = document.getElementById('alt-durum');
-  var sayfaDugme = [].slice.call(document.querySelectorAll('[data-sayfa]')), ANAHTAR = 'moyo.oniz.v1', secim = {}, gruplar = [], simdi = 'c.html';
+  var sayfaDugme = [].slice.call(document.querySelectorAll('[data-sayfa]')), ANAHTAR = 'moyo.oniz.v2', secim = {}, gruplar = [], simdi = 'c.html';
   try { secim = JSON.parse(localStorage.getItem(ANAHTAR) || '{}') || {}; } catch (e) { secim = {}; }
   function sakla() { try { localStorage.setItem(ANAHTAR, JSON.stringify(secim)); } catch (e) {} }
   function bas(grup, b) { [].forEach.call(grup.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', String(x === b)); }); }
   function pencere() { try { return f.contentWindow; } catch (e) { return null; } }
   function sayfaAdi(yol) { var b = sayfaDugme.filter(function (x) { return x.dataset.sayfa === yol; })[0]; return b ? b.textContent : yol; }
-  function secili(g) { return (secim[simdi] || {})[g.k] || g.oneri; }
+  function gecerli(g, v) { return !!v && g.sec.some(function (o) { return o[0] === v; }); }
+  function secili(g) { var v = (secim[simdi] || {})[g.k]; return gecerli(g, v) ? v : g.oneri; }
 
   document.querySelector('.bar').addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
@@ -134,7 +135,7 @@ iframe { width: 100%; height: 100%; border: 0; display: block; }
     try { yol = (w.location.pathname.split('/').pop() || 'c.html'); } catch (e) {}
     simdi = yol; gruplar = (w && w.onizGruplar) || [];
     sayfaDugme.forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.sayfa === yol)); });
-    gruplar.forEach(function (g) { var v = (secim[simdi] || {})[g.k]; if (v && v !== g.oneri && w.onizSec) w.onizSec(g.k, v); });
+    gruplar.forEach(function (g) { var v = (secim[simdi] || {})[g.k]; if (gecerli(g, v) && v !== g.oneri && w.onizSec) w.onizSec(g.k, v); });
     ac.hidden = !gruplar.length; document.getElementById('alt-say').textContent = gruplar.length;
     if (!gruplar.length) kapat(); else ciz();
     ozet.hidden = true;

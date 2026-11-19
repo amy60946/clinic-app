@@ -142,14 +142,15 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: v
   var f = document.getElementById('sayfa'), s = document.getElementById('sahne'), not = document.getElementById('not'), BOY = { tablet: [820, 1180], tel: [390, 844] };
   var ac = document.getElementById('alt-ac'), panel = document.getElementById('alt-panel'), liste = document.getElementById('alt-liste');
   var ozet = document.getElementById('alt-ozet'), metin = document.getElementById('alt-metin'), durumYazi = document.getElementById('alt-durum');
-  var sayfaDugme = [].slice.call(document.querySelectorAll('[data-sayfa]')), ANAHTAR = 'mercek.oniz.v1', secim = {}, gruplar = [], simdi = 'index.html';
+  var sayfaDugme = [].slice.call(document.querySelectorAll('[data-sayfa]')), ANAHTAR = 'mercek.oniz.v2', secim = {}, gruplar = [], simdi = 'index.html';
   var azalt = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   try { secim = JSON.parse(localStorage.getItem(ANAHTAR) || '{}') || {}; } catch (e) { secim = {}; }
   function sakla() { try { localStorage.setItem(ANAHTAR, JSON.stringify(secim)); } catch (e) {} }
   function bas(kap, b) { [].forEach.call(kap.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', String(x === b)); }); }
   function pencere() { try { return f.contentWindow; } catch (e) { return null; } }
   function sayfaAdi(yol) { var b = sayfaDugme.filter(function (x) { return x.dataset.sayfa === yol; })[0]; return b ? b.textContent : yol; }
-  function secili(g) { return (secim[simdi] || {})[g.k] || g.oneri; }
+  function gecerli(g, v) { return !!v && g.sec.some(function (o) { return o[0] === v; }); }
+  function secili(g) { var v = (secim[simdi] || {})[g.k]; return gecerli(g, v) ? v : g.oneri; }
   function kapat() { panel.hidden = true; ac.setAttribute('aria-expanded', 'false'); }
 
   // Sayfa sekmeleri ve ekran boyu
@@ -204,7 +205,7 @@ th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: v
     f.setAttribute('data-yuklendi', '1');
     if (!sayfaDugme.some(function (x) { return x.dataset.sayfa === yol; })) yol = 'index.html';
     simdi = yol; gruplar = (w && w.onizGruplar) || [];
-    gruplar.forEach(function (g) { var v = (secim[simdi] || {})[g.k]; if (v && v !== g.oneri && w.onizSec) w.onizSec(g.k, v); });
+    gruplar.forEach(function (g) { var v = (secim[simdi] || {})[g.k]; if (gecerli(g, v) && v !== g.oneri && w.onizSec) w.onizSec(g.k, v); });
     document.getElementById('alt-say').textContent = gruplar.length;
     if (!gruplar.length) kapat(); else ciz();
     if (not.hidden) {   // "Bu turda" açıkken arka plandaki yükleme sekmeyi değiştirmez

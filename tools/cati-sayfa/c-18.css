@@ -39,7 +39,7 @@
 @keyframes d-ipucu-sol { 0%, 60%, 100% { transform: none; } 30% { transform: translateX(-4px); } }
 @keyframes d-ipucu-sag { 0%, 60%, 100% { transform: none; } 30% { transform: translateX(4px); } }
 /* farede: kartın iki yanında ok düğmeleri */
-.d-ok { display: none; position: absolute; z-index: 3; top: calc(20px + var(--dg, 300px) / 2 - 22px); width: 44px; height: 44px; padding: 0; place-items: center; border-radius: 50%; border: 1px solid var(--cizgi); background: #FFFFFF; color: var(--lacivert);
+.d-ok { display: none; position: absolute; z-index: 3; top: calc(22px + var(--dg, 300px) / 2); width: 44px; height: 44px; padding: 0; place-items: center; border-radius: 50%; border: 1px solid var(--cizgi); background: #FFFFFF; color: var(--lacivert);
   box-shadow: 0 10px 24px -12px rgba(22, 17, 58, .45); cursor: pointer; transition: opacity .2s ease; }
 .d-ok svg { width: 22px; height: 22px; display: block; }
 .d-ok.geri { left: max(6px, calc(50% - var(--kw) / 2 - 22px)); }

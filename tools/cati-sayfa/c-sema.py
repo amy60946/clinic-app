@@ -9,7 +9,7 @@
 # Kural (tur 2): çocuk adımı gerçek hayatta yapar, oyunda işaretler; ebeveyn planlar (kurmaz).
 import math, html
 L, Y2, YESIL, YESIL_K, LAV, CIZGI = '#16113A', '#5C5875', '#51E56A', '#0A8F3A', '#ECEBFA', '#E3E1EE'
-RENK = {'uzman': '#DEDBF8', 'ebeveyn': '#CDF3D6', 'oyun': '#D3E6FC'}     # d: üç uygulamanın yumuşak renkleri (1-2-3 kartlarıyla aynı aile)
+RENK = {'uzman': '#D6D2F7', 'ebeveyn': '#C4F0CF', 'oyun': '#CBE0FB'}     # d: üç uygulamanın yumuşak renkleri (1-2-3 kartlarıyla aynı aile)
 IKON = {'uzman': 'img/ikon-mercek.svg', 'ebeveyn': 'img/ikon-moyo.svg', 'oyun': 'img/ikon-oyun.png'}
 LOGO_ORAN = 1113.5 / 2920.4                                             # inline-moyo.svg viewBox (-33.7 -601.7 2920.4 1113.5)
 e = html.escape
@@ -86,29 +86,30 @@ def cip(x, y, sat, boy, hiza='start'):
     return r + ''.join(yaz(x0 + gen / 2, y + boy * .3 + (i + 1) * boy * 1.25 - boy * .22, s, boy, 600, L) for i, s in enumerate(sat)), gen, yuk
 def yorunge(u, T, logo, dar):
     C = T['kart']
-    if dar: W, H, cx, cy, R = 260, 320, 130, 168, 110
+    if dar: W, H, cx, cy, R = 260, 336, 130, 180, 100
     else:   W, H, cx, cy, R = 640, 400, 320, 214, 140
     P = {'uzman': (cx, cy - R), 'ebeveyn': kutup(cx, cy, R, 30 if not dar else 54), 'oyun': kutup(cx, cy, R, 150 if not dar else 126)}
     s = golge(u)
     s += f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="none" stroke="{LAV}" stroke-width="{4 if dar else 5}"/>'
-    s += f'<circle cx="{cx}" cy="{cy}" r="{n(R * (.42 if dar else .46))}" fill="#F6F5FE"/>'
-    lw = 92 if dar else 132; lh = lw * LOGO_ORAN
+    s += f'<circle cx="{cx}" cy="{cy}" r="{n(R * (.36 if dar else .46))}" fill="#F6F5FE"/>'
+    lw = 84 if dar else 132; lh = lw * LOGO_ORAN
     s += f'<svg x="{n(cx - lw / 2)}" y="{n(cy - lh * .62)}" width="{n(lw)}" height="{n(lh)}" viewBox="-33.7 -601.7 2920.4 1113.5" color="{L}">{logo}</svg>'
     # dolaşan nokta: tam turu 9 sn; hareket azaltmada solda (Moyo Oyun'dan Moyo Uzman'a dönüş yayında, iki kartın arasında) durur
     cevre = 2 * math.pi * R
     s += (f'<circle class="s6-yol" cx="{n(cx)}" cy="{n(cy)}" r="{R}" fill="none" stroke="{YESIL_K}" stroke-width="{9 if dar else 11}" stroke-linecap="round" '
           f'stroke-dasharray="0.1 {n(cevre)}" style="--s6c:{n(-cevre)}" transform="rotate({180 if not dar else 190} {n(cx)} {n(cy)})"/>')
-    for a in ((-30, 90, 210) if not dar else (-45, 90, 225)): s += isaret(*kutup(cx, cy, R, a), a, 8 if dar else 10, 4 if dar else 5)
+    for a in ((-30, 90, 210) if not dar else (-42, 222)):   # dar: alttaki kartların arası dar, orada ok yok
+        s += isaret(*kutup(cx, cy, R, a), a, 8 if dar else 10, 4 if dar else 5)
     for k, (x, y) in P.items():
         if dar:   # dar: dikey kart (simge üstte, ad, çip)
-            ks, gen = 30, 116
-            cs, cg, cy_ = cip(x, 0, C[k][1], 10.5, 'middle')
-            yuk = 10 + ks + 8 + 13 + 7 + cy_ + 10
+            ks, gen = 28, 108
+            cs, cg, cy_ = cip(x, 0, C[k][1], 10, 'middle')
+            yuk = 10 + ks + 8 + 12 + 6 + cy_ + 10
             y0 = y - yuk / 2
             s += f'<rect x="{n(x - gen / 2)}" y="{n(y0)}" width="{gen}" height="{n(yuk)}" rx="16" fill="#fff" stroke="{CIZGI}" filter="url(#{u}-g)"/>'
             s += karo(u, k, x, y0 + 10 + ks / 2, ks, False)
-            s += yaz(x, y0 + 10 + ks + 8 + 10.5, C[k][0], 12, 800)
-            s += cip(x, y0 + 10 + ks + 8 + 13 + 7, C[k][1], 10.5, 'middle')[0]
+            s += yaz(x, y0 + 10 + ks + 8 + 10, C[k][0], 11.5, 800)
+            s += cip(x, y0 + 10 + ks + 8 + 12 + 6, C[k][1], 10, 'middle')[0]
         else:     # geniş: yatay kart (simge solda, ad ve çip sağda)
             ks, tek = 42, [' '.join(C[k][1])]      # genişte çip tek satır
             _, cg, cy_ = cip(0, 0, tek, 12.5)
@@ -150,20 +151,25 @@ def dort(u, T, dar):
         s += ''.join(yaz(cx - R - r - 16, cy - ar_ / 2 + 5 + i * ar_, t, b, 700, L, 'end') for i, t in enumerate(A[3]))
     return svg(W, H, s)
 
-# ---------- d) Üç renkli halka: her uygulama halkanın bir dilimi, eklem yerlerinde ok, yazılar dışta ----------
+# ---------- d) Üç renkli halka: her uygulama halkanın bir dilimi; dilimin ucu ok başı, bir sonrakinin girintisine oturur; yazılar dışta ----------
+def dilim_yol(cx, cy, ri, ro, a1, a2, t):
+    # halka dilimi: a1'de girinti, a2'de ok başı (t derece ileride, orta yarıçapta)
+    rm = (ri + ro) / 2
+    p = lambda r, a: '%s %s' % tuple(n(v) for v in kutup(cx, cy, r, a))
+    return (f'M{p(ro, a1)}A{n(ro)} {n(ro)} 0 0 1 {p(ro, a2)}L{p(rm, a2 + t)}L{p(ri, a2)}'
+            f'A{n(ri)} {n(ri)} 0 0 0 {p(ri, a1)}L{p(rm, a1 + t)}Z')
 def dilim(u, T, dar):
-    if dar: W, H, cx, cy, R, kal, ks, b1, b2, ar = 260, 292, 130, 140, 60, 24, 32, 12.5, 11.5, 13
-    else:   W, H, cx, cy, R, kal, ks, b1, b2, ar = 640, 400, 320, 214, 104, 32, 46, 16.5, 14.5, 19
-    bos = 13                                  # dilimler arasındaki boşluk (derece)
+    if dar: W, H, cx, cy, R, kal, ks, b1, b2, ar = 260, 296, 130, 146, 60, 22, 32, 12.5, 11.5, 13
+    else:   W, H, cx, cy, R, kal, ks, b1, b2, ar = 640, 400, 320, 228, 104, 30, 46, 16.5, 14.5, 19
+    bos = 3.2                                 # dilimler arasındaki ince boşluk (derece)
     D = {'uzman': -90, 'ebeveyn': 30, 'oyun': 150}
     s = golge(u)
     for k, m in D.items():
-        s += f'<path d="{yay(cx, cy, R, m - 60 + bos / 2, m + 60 - bos / 2)}" fill="none" stroke="{RENK[k]}" stroke-width="{kal}"/>'
-    for a in (-30, 90, 210):                  # eklem: bir sonraki uygulamaya geçiş
-        s += ucgen(*kutup(cx, cy, R, a), a + 90, kal * (.26 if dar else .24), L)
+        t = math.degrees(kal * .62 / R)       # ok başının boyu (derece)
+        s += f'<path d="{dilim_yol(cx, cy, R - kal / 2, R + kal / 2, m - 60 + bos / 2 - t / 2, m + 60 - bos / 2 - t / 2, t)}" fill="{RENK[k]}"/>'
     for k, m in D.items(): s += karo(u, k, *kutup(cx, cy, R, m), ks)
     V = T['dilim']
-    s += satirlar(cx, cy - R - kal / 2 - b2 - (10 if dar else 14), V['uzman'], (b1, b2), b2 + 4)
+    s += satirlar(cx, cy - R - max(kal, ks) / 2 - b2 - (10 if dar else 14), V['uzman'], (b1, b2), b2 + 4)
     if dar:
         y0 = cy + R + kal / 2 + b1 + 6
         s += satirlar(cx + 62, y0, V['ebeveyn'], (b1, b2), b2 + 3.5) + satirlar(cx - 62, y0, V['oyun'], (b1, b2), b2 + 3.5)
