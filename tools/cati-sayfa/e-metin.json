@@ -116,7 +116,7 @@
    "uzman",
    "Uzmanınız kayıtla yönlendirir",
    "Paylaştığınız rutin ve davranış kayıtlarını görür; bir sonraki adımı bu kayıtlara bakarak önerir.",
-   "İsteğe bağlı"
+   ""
   ]
  ],
  "neden_ekran": {
@@ -129,7 +129,7 @@
    "alt": "Moyo Ebeveyn, davranış kaydı ekranı: kimle ilgili, ne zaman, öncesinde ne oldu, ne yaşandı, sonrasında ne oldu ve ne kadar zordu. Büyütülen bölüm, Ne yaşandı: Ağladı, tableti bırakmak istemedi. Örnek veri."
   },
   "uzman": {
-   "yer": "uzmanınızın ekranı",
+   "yer": "isteğe bağlı",
    "alt": "Moyo Uzman, uzmanın ekranı: sabah rutininin adımları son 7 gün boyunca gün gün işaretli. Büyütülen satır: Yatağını topla adımının son 7 günü. Örnek veri."
   }
  },

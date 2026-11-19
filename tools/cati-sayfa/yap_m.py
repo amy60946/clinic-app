@@ -235,8 +235,8 @@ pan = ''.join(f'''        <div class="nc-p" role="tabpanel" id="nc-p{k}" aria-la
 ''' for k, a in enumerate(ADIM))
 
 # ---------- Neden Moyo: başlık, giriş ve üç "neden" (tur 5: yalnızca "Üç yakın çekim", yeniden tasarım) ----------
-# Kartlar e-metin.json neden_kartlar: [ekran, başlık, metin, rozet]; rozetli olan uzman kartıdır (isteğe bağlı). Her neden kendi panelinde:
-# üstte küçük büyük harfli etiket (uygulama · ekran), kısa başlık ve tek cümle; altta telefonda uygulamanın BÜTÜN ekranı (gerçek ekran, örnek
+# Kartlar e-metin.json neden_kartlar: [ekran, başlık, metin, rozet] (tur 5'te rozet boş: uzman panelinin etiketi "Moyo Uzman · isteğe bağlı").
+# Her neden kendi panelinde: üstte küçük büyük harfli etiket (uygulama · ekran ya da "isteğe bağlı"), kısa başlık ve tek cümle; altta telefonda uygulamanın BÜTÜN ekranı (gerçek ekran, örnek
 # veri; kırpılmaz, panelin alt kenarı yalnızca telefonun altını keser) ve ekranın vurgulanan şeridi, aynı yerde ve aynı görselden, CIKMA kat
 # büyük, telefonun iki kenarından taşan kart olarak (kullanıcının iki örnek görseli: satır ekrandan kalkmış gibi). Ekranlar 780 × 1688
 # (390 × 844 nokta ×2); telefon nokta cinsinden 418 × 872 (kenar 14). cikma: şeridin dikey yeri (y, yükseklik; nokta), şerit hep ekranın tam
@@ -246,15 +246,15 @@ pan = ''.join(f'''        <div class="nc-p" role="tabpanel" id="nc-p{k}" aria-la
 #   uzman: Moyo Uzman telefonda, danışan › Ev rutinleri › Haftalık: "Yatağını topla" adımının son 7 günü
 NZ = {
     'rutin': {'src': 'img/e-nz-plan.webp', 'app': 'ebeveyn', 'cikma': (376, 142)},
-    'kayit': {'src': 'img/e-nz-not.webp', 'app': 'ebeveyn', 'cikma': (382, 102)},
+    'kayit': {'src': 'img/e-nz-not.webp', 'app': 'ebeveyn', 'cikma': (384, 95)},
     'uzman': {'src': 'img/e-nz-uzman.webp', 'app': 'mercek', 'cikma': (491, 80)},
 }
 TEL_G, TEL_Y, KENAR, CIKMA = 418, 872, 14, 1.18
 ND, NE = E['neden_kartlar'], E['neden_ekran']
 bagla = lambda t: re.sub(r' (\S+)$', ' \\1', t) if t.count(' ') >= 2 else t   # son iki sözcük aynı satırda (19 Kasım QA)
-rozet = lambda r: f'<span class="nd-rozet">{e(r)}</span>' if r else ''
 urun = lambda t: re.sub(r'Moyo (Uzman|Ebeveyn|Oyun)', 'Moyo \\1', t)   # ürün adı satır sonunda bölünmesin
-neden_giris = f'<p class="intro nd-giris">{" ".join(f"<span>{e(urun(x))}</span>" for x in re.split(r"(?<=[.])\s+", E["neden_giris"]))}</p>'
+# Giriş: geniş ekranda her cümle kendi satırında; "neyin işe yaradığını" bölünmez (ikinci cümle iki nokta üst üsteden sonra satır atlar)
+neden_giris = f'<p class="intro nd-giris">{" ".join(f"<span>{e(urun(x))}</span>" for x in re.split(r"(?<=[.])\s+", E["neden_giris"]))}</p>'.replace('neyin işe yaradığını', 'neyin\u00a0işe\u00a0yaradığını')
 
 
 def cikma_stil(y, h):
@@ -268,7 +268,7 @@ def nz_panel(k, t, p, r):
     y, h = NZ[k]['cikma']
     ikon, ad = APPS[NZ[k]['app']]
     return (f'<li class="nzp-kart"><div class="nzp-yazi"><p class="nzp-etk"><img src="{ikon}" alt="" width="20" height="20">'
-            f'<span>{ad} · {e(NE[k]["yer"])}</span>{rozet(r)}</p><h3>{e(bagla(t))}</h3><p class="nzp-p">{e(p)}</p></div>'
+            f'<span>{urun(ad)} · {e(NE[k]["yer"])}</span></p><h3>{e(bagla(t))}</h3><p class="nzp-p">{e(urun(p))}</p></div>'
             f'<div class="nzp-sahne"><figure class="nzp"><div class="nzp-tel"><div class="nzp-ekran">'
             f'<img src="{NZ[k]["src"]}" alt="{e(NE[k]["alt"])}" width="780" height="1688" loading="lazy"></div></div>'
             f'<div class="nzp-cikma" style="{cikma_stil(y, h)}" aria-hidden="true"><img src="{NZ[k]["src"]}" alt="" width="780" height="1688" loading="lazy"'
