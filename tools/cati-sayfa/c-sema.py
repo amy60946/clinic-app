@@ -34,9 +34,13 @@ def ucgen(x, y, aci, b, renk=YESIL_K):
     # dolu ok ucu, dar tepe açısı (~40°): küçük boyda da yönü okunur, "onay işareti" gibi görünmez
     return (f'<path d="M{n(b * 1.05)} 0L{n(-b * .8)} {n(-b * .66)}L{n(-b * .8)} {n(b * .66)}Z" transform="translate({n(x)} {n(y)}) rotate({n(aci)})" '
             f'fill="{renk}" stroke="{renk}" stroke-width="{n(b * .22)}" stroke-linejoin="round"/>')
+def sevron(x, y, aci, b, renk=YESIL_K, kalin=2.4):
+    # açık ok ucu (›): küçük boyda da yönü dolu üçgenden daha net okunur (dolu üçgen tarayıcıda "◀" gibi görünüyordu)
+    return (f'<path d="M{n(-b * .55)} {n(-b)}L{n(b * .55)} 0L{n(-b * .55)} {n(b)}" transform="translate({n(x)} {n(y)}) rotate({n(aci)})" '
+            f'fill="none" stroke="{renk}" stroke-width="{n(kalin)}" stroke-linecap="round" stroke-linejoin="round"/>')
 def isaret(x, y, aci, r, b):
     # halkanın üstünde beyaz yuvarlak içinde yön oku (saat yönünde)
-    return f'<circle cx="{n(x)}" cy="{n(y)}" r="{n(r)}" fill="#fff" stroke="{CIZGI}"/>' + ucgen(x, y, aci + 90, b)
+    return f'<circle cx="{n(x)}" cy="{n(y)}" r="{n(r)}" fill="#fff" stroke="{CIZGI}"/>' + sevron(x + b * .12 * math.cos(math.radians(aci + 90)), y + b * .12 * math.sin(math.radians(aci + 90)), aci + 90, b, YESIL_K, max(1.8, b * .42))
 def kutup(cx, cy, r, aci): return cx + r * math.cos(math.radians(aci)), cy + r * math.sin(math.radians(aci))
 def yay(cx, cy, r, a1, a2):
     (x1, y1), (x2, y2) = kutup(cx, cy, r, a1), kutup(cx, cy, r, a2)
@@ -90,10 +94,10 @@ def yorunge(u, T, logo, dar):
     s += f'<circle cx="{cx}" cy="{cy}" r="{n(R * (.42 if dar else .46))}" fill="#F6F5FE"/>'
     lw = 92 if dar else 132; lh = lw * LOGO_ORAN
     s += f'<svg x="{n(cx - lw / 2)}" y="{n(cy - lh * .62)}" width="{n(lw)}" height="{n(lh)}" viewBox="-33.7 -601.7 2920.4 1113.5" color="{L}">{logo}</svg>'
-    # dolaşan nokta: tam turu 9 sn; hareket azaltmada sol yayda (Moyo Oyun'dan Moyo Uzman'a dönüşte) durur
+    # dolaşan nokta: tam turu 9 sn; hareket azaltmada solda (Moyo Oyun'dan Moyo Uzman'a dönüş yayında, iki kartın arasında) durur
     cevre = 2 * math.pi * R
     s += (f'<circle class="s6-yol" cx="{n(cx)}" cy="{n(cy)}" r="{R}" fill="none" stroke="{YESIL_K}" stroke-width="{9 if dar else 11}" stroke-linecap="round" '
-          f'stroke-dasharray="0.1 {n(cevre)}" style="--s6c:{n(-cevre)}" transform="rotate(205 {n(cx)} {n(cy)})"/>')
+          f'stroke-dasharray="0.1 {n(cevre)}" style="--s6c:{n(-cevre)}" transform="rotate({180 if not dar else 190} {n(cx)} {n(cy)})"/>')
     for a in ((-30, 90, 210) if not dar else (-45, 90, 225)): s += isaret(*kutup(cx, cy, R, a), a, 8 if dar else 10, 4 if dar else 5)
     for k, (x, y) in P.items():
         if dar:   # dar: dikey kart (simge üstte, ad, çip)
@@ -106,14 +110,14 @@ def yorunge(u, T, logo, dar):
             s += yaz(x, y0 + 10 + ks + 8 + 10.5, C[k][0], 12, 800)
             s += cip(x, y0 + 10 + ks + 8 + 13 + 7, C[k][1], 10.5, 'middle')[0]
         else:     # geniş: yatay kart (simge solda, ad ve çip sağda)
-            ks = 42
-            _, cg, cy_ = cip(0, 0, C[k][1], 12.5)
+            ks, tek = 42, [' '.join(C[k][1])]      # genişte çip tek satır
+            _, cg, cy_ = cip(0, 0, tek, 12.5)
             gen = 14 + ks + 12 + max(cg, len(C[k][0]) * 15 * .56) + 16; yuk = max(ks, 18 + 6 + cy_) + 24
             x0, y0 = x - gen / 2, y - yuk / 2
             s += f'<rect x="{n(x0)}" y="{n(y0)}" width="{n(gen)}" height="{n(yuk)}" rx="18" fill="#fff" stroke="{CIZGI}" filter="url(#{u}-g)"/>'
             s += karo(u, k, x0 + 14 + ks / 2, y, ks, False)
             tx = x0 + 14 + ks + 12; ty = y - (18 + 6 + cy_) / 2
-            s += yaz(tx, ty + 14, C[k][0], 15, 800, L, 'start') + cip(tx, ty + 18 + 6, C[k][1], 12.5)[0]
+            s += yaz(tx, ty + 14, C[k][0], 15, 800, L, 'start') + cip(tx, ty + 18 + 6, tek, 12.5)[0]
     return svg(W, H, s)
 
 # ---------- c) Dört adımlı halka: numaralı dört düğüm, aralarında oklar, ortada "Her hafta yeniden" ----------
