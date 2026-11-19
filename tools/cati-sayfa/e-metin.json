@@ -1,25 +1,64 @@
 {
- "baslik": "Moyo · Ebeveyn",
+ "baslik": "Moyo Ebeveyn · Rutin, davranış kaydı ve ilerleme takibi",
+ "aciklama": "Çocuğunuzun günlük rutinini kurun, davranışları kaydedin, ilerlemeyi hafta hafta görün. Rutin oyunda maceraya dönüşür. 14 gün ücretsiz, kart gerekmez.",
  "h1": "Çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform",
- "alt": "Rutini bir kez kurarsınız; hatırlatmayı oyun yapar, onay sizden. Dilerseniz çalıştığınız uzmanı da dahil edersiniz.",
+ "alt": {
+  "a": "Günlük rutini kurun, davranışları kaydedin, ilerlemeyi hafta hafta görün. Dilerseniz uzmanınızla paylaşın.",
+  "b": "Çocuğunuz rutinini oyunda yapar; siz evde olanı kaydeder, neyin işe yaradığını görürsünüz.",
+  "c": "Rutin, davranış kaydı ve ilerleme takibi tek uygulamada."
+ },
+ "ince": "Moyo Ebeveyn 14 gün ücretsiz, kart bilgisi gerekmez.",
  "isaretler": [
-  "Reklam ve satın alma yok",
-  "Ayrı çocuk hesabı gerekmez",
-  "Uzmanla paylaşım yalnız onayınızla"
+  "Reklam yok",
+  "Çocuk hesabı gerekmez",
+  "Paylaşım onayınızla",
+  "Tek oyunculu oyun"
  ],
- "fiyat_not": "Moyo Oyun ücretsiz. Moyo Ebeveyn 14 gün ücretsiz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir.",
- "fiyat": [
+ "anim": {
+  "adimlar": [
+   "Siz rutini kurarsınız",
+   "Oyunda macera olur",
+   "Çocuğunuz yapar, Yaptım'a dokunur",
+   "Siz onaylarsınız"
+  ],
+  "cip": "Dişlerini fırçala",
+  "cip_donus": "Yaptım",
+  "git": "Rutin oyuna gider",
+  "gel": "Onay size gelir",
+  "anlatim": "Moyo Ebeveyn'de kurduğunuz rutin adımı Moyo Oyun'da macera olarak görünür; çocuğunuz Yaptım'a dokununca onay telefonunuza gelir. Örnek veri."
+ },
+ "nasil": {
+  "a": "Rutinden takibe, beş adım.",
+  "b": "Siz kurarsınız, çocuğunuz oyunda yapar, birlikte takip edersiniz.",
+  "c": "Nasıl çalışır?"
+ },
+ "neden": {
+  "a": "Tahmin etmeyin, takip edin.",
+  "b": "Evde olanı görün, neyin işe yaradığını bilin.",
+  "c": "Rutin oyunda kurulur, ilerleme kayıtla görünür."
+ },
+ "neden_kart": [
   [
-   "Moyo Oyun",
-   "Ücretsiz",
-   "Çocuğunuzun tabletine kurulur. Reklam ve satın alma yok."
+   "rutin",
+   "Neden rutin?",
+   "Gün her gün aynı sırayla ilerlediğinde çocuğunuz sırada ne olduğunu bilir. Hatırlatmayı siz değil, oyun yapar.",
+   ""
   ],
   [
-   "Moyo Ebeveyn",
-   "14 gün ücretsiz",
-   "Sonrasında aylık ya da yıllık abonelik; dönem sonunda kendiliğinden yenilenir, App Store'dan istediğiniz an iptal edilir. Tek abonelik bütün aileyi kapsar. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak."
+   "takip",
+   "Neden takip?",
+   "Hangi adımın kolay, hangisinin zor geçtiği ve çocuğunuzun nasıl tepki verdiği kayıtlı kalır. Neyin işe yaradığına hafızanızla değil, kayıtla bakarsınız.",
+   ""
+  ],
+  [
+   "uzman",
+   "Neden uzmanla paylaşım?",
+   "Uzmanınız haftada bir seansın yanında evdeki haftayı da görür; önerisini gerçekte olana göre verir.",
+   "İsteğe bağlı"
   ]
  ],
+ "neden_bag": "Yaklaşımımızın dayandığı araştırmalar",
+ "kapanis": "Çocuğunuzun günlük rutinine bugün başlayın",
  "sss": [
   [
    "Hangi yaş için uygun?",
@@ -43,11 +82,11 @@
   ],
   [
    "Uzmanım yoksa kullanabilir miyim?",
-   "Evet. Moyo Oyun ve Moyo Ebeveyn tek başına çalışır; uzmanınızı istediğiniz zaman dahil edersiniz."
+   "Evet. Moyo Oyun ve Moyo Ebeveyn tek başına çalışır; uzmanınızı dilediğiniz zaman dahil edersiniz."
   ],
   [
    "Uzmanımı nasıl dahil ederim?",
-   "Çalıştığınız uzman Moyo Uzman'dan size davet gönderir ya da siz onun kodunu girersiniz. Neyi paylaşacağınızı siz seçersiniz; paylaşımı istediğiniz an durdurursunuz."
+   "Çalıştığınız uzman Moyo Uzman'dan size davet gönderir ya da siz onun kodunu girersiniz. Neyi paylaşacağınızı siz seçersiniz; paylaşımı dilediğiniz an durdurursunuz."
   ],
   [
    "Moyo tanı koyar mı?",
@@ -59,7 +98,7 @@
   ],
   [
    "Ücreti nedir?",
-   "Moyo Oyun ücretsizdir. Moyo Ebeveyn'i 14 gün ücretsiz deneyebilirsiniz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak."
+   "Moyo Oyun ücretsizdir. Moyo Ebeveyn'i 14 gün ücretsiz deneyebilirsiniz, kart bilgisi gerekmez. Paketler ve ayrıntılar <a href=\"ebeveyn-fiyat.html\">fiyat sayfasında</a>."
   ]
  ]
 }

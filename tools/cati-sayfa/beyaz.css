@@ -7,7 +7,6 @@
 .beyaz .hikaye, .beyaz .nk { background: var(--sis); color: var(--lacivert); }
 .beyaz .dongu-b { background: #FFFFFF; color: var(--lacivert); border-top: 1px solid var(--cizgi); }
 .beyaz #sonraki { background: var(--sis); }
-.beyaz #guven { background: #FFFFFF; border-top: 1px solid var(--cizgi); }
 .beyaz #sss { background: var(--sis); }
 /* yeşil üstünde lacivert yazı (değişken yerine açık renk, karışmasın) */
 .beyaz .hap.dolu, .beyaz .basamak .bn, .beyaz .basamak .b-rozet, .beyaz .balon.git, .beyaz .nk-sekmeler button[aria-selected="true"],
@@ -24,7 +23,7 @@
 .beyaz .basamak li { background: var(--sis); border-color: var(--cizgi); }
 .beyaz .basamak li b { color: var(--lacivert); }
 .beyaz .nk-sekmeler { background: #FFFFFF; border-color: var(--cizgi); }
-.beyaz .d-kart, .beyaz .nk[data-duzen="kart"] .nk-adim, .beyaz .nk[data-duzen="liste"] .nk-adim { background: #FFFFFF; border-color: var(--cizgi); }
+.beyaz .d-kart, .beyaz .nk[data-duzen="liste"] .nk-adim { background: #FFFFFF; border-color: var(--cizgi); }
 .beyaz .d-kontrol button, .beyaz .nk-kontrol button { background: #FFFFFF; border-color: var(--cizgi); color: var(--lacivert); }
 /* gölgeler beyazda yumuşar */
 .beyaz .hk-kart img, .beyaz .ikili img, .beyaz .d-slot > img, .beyaz .d-gorsel > img, .beyaz .ust-uste .uu-oyun, .beyaz .ust-uste .uu-tel { box-shadow: 0 24px 60px -28px rgba(22, 17, 58, .35); }

@@ -1,7 +1,7 @@
-/* Moyo Mercek tanıtım sitesi: ortak betik (index.html, fiyat.html). Dışarıya hiçbir istek göndermez. */
+/* Moyo Mercek tanıtım sitesi: ortak betik (index.html, fiyat.html, guvenlik.html). Dışarıya hiçbir istek göndermez. */
 
 /* FİYATLAR: TEK KAYNAK. Aşağıdaki değerler YER TUTUCUDUR; ürün sahibinin fiyat kararı bekleniyor (12 Kasım 2026).
-   İki sayfadaki her fiyat (ana sayfadaki "aylık …'dan başlayan" cümlesi dahil) buradan yazılır. HTML'deki sabit
+   Fiyat yalnız fiyat.html'de yazar (18 Kasım 2026: ana sayfadaki "aylık …'dan başlayan" cümlesi kalktı); hepsi buradan yazılır. HTML'deki sabit
    değerler betiksiz okuyucu içindir ve bunlarla aynı tutulur. draft true iken fiyat sayfasında "Taslak fiyat" etiketi görünür. */
 window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic: { m: 3999.99, y: 39999.99 } };
 
@@ -63,6 +63,21 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
     });
   });
   render();
+
+  /* 2b. Fiyat sayfası (<body data-offers>): yapılandırılmış veride paket teklifleri. Fiyat taslakken (draft: true) YAZILMAZ;
+     ürün sahibi fiyatı kesinleştirip draft false olunca arama motorlarına kendiliğinden gider. Sayılar yukarıdaki tek kaynaktan. */
+  if (P && !P.draft && d.body.hasAttribute('data-offers')) {
+    var teklif = function (ad, plan) {
+      var u = 'https://mercek.moyoapp.com.tr/fiyat';
+      return [{ '@type': 'Offer', name: ad + ' (aylık)', price: plan.m.toFixed(2), priceCurrency: 'TRY', url: u },
+        { '@type': 'Offer', name: ad + ' (yıllık)', price: plan.y.toFixed(2), priceCurrency: 'TRY', url: u }];
+    };
+    var ld = d.createElement('script');
+    ld.type = 'application/ld+json';
+    ld.textContent = JSON.stringify({ '@context': 'https://schema.org', '@type': 'SoftwareApplication', name: 'Moyo Mercek',
+      applicationCategory: 'BusinessApplication', operatingSystem: 'Web, iOS, iPadOS', offers: teklif('Bireysel', P.solo).concat(teklif('Klinik', P.clinic)) });
+    d.head.appendChild(ld);
+  }
 
   /* 3. Üst menü: üst çubuk çizgisi, telefonda tam ekran menü */
   var head = d.getElementById('top'), btn = d.querySelector('.menu-btn'), menu = d.getElementById('menu');
@@ -208,43 +223,179 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
     mark();
   });
 
-  /* 6. Sekmeli "Nasıl çalışır": tıklayınca değişir, kendiliğinden ilerlemez (Atlassian'ın sekme düzeni gibi). */
-  each('[data-nc]', function (box) {
-    var tabs = box.querySelectorAll('[role=tab]'), panels = box.querySelectorAll('[role=tabpanel]');
-    var sel = function (k, focus) {
-      Array.prototype.forEach.call(tabs, function (t, j) { var on = j === k; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
-      Array.prototype.forEach.call(panels, function (p, j) { p.hidden = j !== k; });
-      if (focus) tabs[k].focus();
-      if (tabs[k].scrollIntoView && box.querySelector('.nc-tabs').scrollWidth > box.querySelector('.nc-tabs').clientWidth) tabs[k].scrollIntoView({ block: 'nearest', inline: 'center', behavior: reduce.matches ? 'auto' : 'smooth' });
+  /* 6. Sekmeler: "Platform Nasıl Çalışır?" ([data-nc]) ve "Kimler için" ([data-km]). Tıklayınca, ok tuşlarıyla ve dokunmatik ekranda
+     parmakla sağa sola kaydırınca değişir; kendiliğinden ilerlemez (Atlassian'ın sekme düzeni gibi). 18 Kasım 2026: kaydırma, altı sekme
+     (taşarsa şerit yana kayar, seçili sekme ortaya gelir), Önceki / Sonraki düğmeleri.
+     Bir sekme data-var="grup:değer" taşıyorsa ve <html data-v-grup> başka bir değerdeyse (yalnız önizlemede olur) o sekme yok sayılır. */
+  var varOn = function (el) {
+    var dv = el.getAttribute('data-var');
+    if (!dv) return true;
+    var p = dv.split(':'), cur = root.getAttribute('data-v-' + p[0]);
+    return cur === null || cur === p[1];
+  };
+  var dokunmatik = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  if (dokunmatik) root.classList.add('dokun');
+
+  // Yatay kaydırma: dikey kaydırmayı tarayıcı yapar (CSS touch-action: pan-y), yatay hareketi biz okuruz. Parmak giderken panel biraz izler.
+  var kaydir = function (alan, panel, adim) {
+    var x0 = 0, y0 = 0, dx = 0, acik = false, yatay = null, p = null;
+    var birak = function () { if (p) { p.style.transition = ''; p.style.transform = ''; } p = null; };
+    alan.addEventListener('touchstart', function (e) {
+      acik = e.touches.length === 1; yatay = null; dx = 0;
+      if (acik) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }
+    }, { passive: true });
+    alan.addEventListener('touchmove', function (e) {
+      if (!acik) return;
+      dx = e.touches[0].clientX - x0;
+      var dy = e.touches[0].clientY - y0;
+      if (yatay === null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) yatay = Math.abs(dx) > Math.abs(dy) * 1.2;
+      if (yatay && !reduce.matches) {
+        p = p || panel();
+        if (p) { p.style.transition = 'none'; p.style.transform = 'translateX(' + Math.round(dx * 0.3) + 'px)'; }
+      }
+    }, { passive: true });
+    alan.addEventListener('touchend', function () {
+      if (!acik) return;
+      acik = false;
+      var git = yatay && Math.abs(dx) > 44;
+      birak();
+      if (git) adim(dx < 0 ? 1 : -1);
+    });
+    alan.addEventListener('touchcancel', function () { acik = false; birak(); });
+  };
+
+  var OK_SOL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg>', OK_SAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 5.5L16 12l-6.5 6.5"/></svg>';
+  var kutular = [];
+  var sekmeler = function (box, ad) {
+    var hepsi = Array.prototype.slice.call(box.querySelectorAll('[role=tab]'));
+    var serit = box.querySelector('[role=tablist]'), sahne = box.querySelector('[data-kay]');
+    if (!hepsi.length || !serit || !sahne) return;
+    var pan = function (t) { return d.getElementById(t.getAttribute('aria-controls')); };
+    var canli = function () { return hepsi.filter(varOn); };
+    var secili = function (L) { for (var i = 0; i < L.length; i++) if (L[i].getAttribute('aria-selected') === 'true') return i; return -1; };
+    var gorunen = function () { var L = canli(), k = secili(L); return k < 0 ? null : pan(L[k]); };
+    var bildi = function () { box.classList.add('bilir'); };
+
+    // Önceki / Sonraki + noktalar: dar ekranda ve dokunmatik cihazda görünür (CSS); altındaki ipucu ilk kaydırmada solar.
+    var pager = d.createElement('div'), noktalar = d.createElement('span'), once = d.createElement('button'), sonra = d.createElement('button');
+    pager.className = 'pager';
+    once.type = sonra.type = 'button';
+    once.innerHTML = OK_SOL; sonra.innerHTML = OK_SAG;
+    once.setAttribute('aria-label', 'Önceki ' + ad); sonra.setAttribute('aria-label', 'Sonraki ' + ad);
+    noktalar.className = 'pg-n'; noktalar.setAttribute('aria-hidden', 'true');
+    pager.appendChild(once); pager.appendChild(noktalar); pager.appendChild(sonra);
+    var ipucu = d.createElement('p');
+    ipucu.className = 'kay-ipucu'; ipucu.setAttribute('aria-hidden', 'true');
+    ipucu.textContent = 'Parmağınızla sağa sola kaydırarak da geçebilirsiniz';
+    box.appendChild(pager); box.appendChild(ipucu);
+
+    var kenar = function () {
+      var tasar = serit.scrollWidth > serit.clientWidth + 2;
+      serit.classList.toggle('tasiyor', tasar);
+      serit.classList.toggle('bas', serit.scrollLeft <= 4);
+      serit.classList.toggle('son', serit.scrollLeft + serit.clientWidth >= serit.scrollWidth - 4);
     };
-    // Yükseklik sabit: en uzun panel kadar yer ayrılır, sekme değişince altındaki bölümler zıplamaz.
-    // Yalnız genişlik değişince yeniden ölçülür (iPhone'da adres çubuğu küçülünce panel yeniden belirip kaybolmasın); görünen panelin girişi yeniden oynatılmaz.
-    var lastW = -1;
-    var wrapH = function (force) {
-      var w = box.clientWidth;
-      if (force !== true && w === lastW) return;
-      lastW = w;
-      Array.prototype.forEach.call(panels, function (p) { p.style.minHeight = ''; });
-      var max = 0;
-      Array.prototype.forEach.call(panels, function (p) {
-        var was = p.hidden;
-        if (was) { p.style.animation = 'none'; p.hidden = false; }
-        max = Math.max(max, p.offsetHeight);
-        if (was) { p.hidden = true; p.style.animation = ''; }
+    var sec = function (k, o) {
+      var L = canli(), eski = secili(L);
+      if (k < 0 || k >= L.length) return;
+      hepsi.forEach(function (t) {
+        var on = t === L[k], p = pan(t);
+        t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1;
+        if (!p) return;
+        if (on && eski >= 0 && eski !== k) p.setAttribute('data-yon', k < eski ? 'geri' : 'ileri'); else if (on && !(o && o.sessiz)) p.removeAttribute('data-yon');
+        p.hidden = !on;
       });
-      Array.prototype.forEach.call(panels, function (p) { p.style.minHeight = max + 'px'; });
+      if (o && o.odak) L[k].focus();
+      // Seçili sekme şeridin ortasına: sayfayı oynatmadan yalnız şerit kayar.
+      if (serit.scrollWidth > serit.clientWidth + 2) {
+        var sol = L[k].offsetLeft - (serit.clientWidth - L[k].offsetWidth) / 2;
+        if (serit.scrollTo) serit.scrollTo({ left: sol, behavior: reduce.matches || (o && o.sessiz) ? 'auto' : 'smooth' }); else serit.scrollLeft = sol;
+      }
+      Array.prototype.forEach.call(noktalar.children, function (n, j) { n.className = j === k ? 'on' : ''; });
+      once.disabled = k === 0; sonra.disabled = k === L.length - 1;
     };
-    wrapH(true); window.addEventListener('resize', wrapH); window.addEventListener('load', function () { wrapH(true); });
-    var track = box.querySelector('.nc-tabs');
-    track.addEventListener('scroll', function () { track.classList.toggle('son', track.scrollLeft + track.clientWidth >= track.scrollWidth - 4); }, { passive: true });
-    Array.prototype.forEach.call(tabs, function (t, k) {
-      t.addEventListener('click', function () { sel(k); });
+    var adim = function (yon) { var L = canli(), k = secili(L) + yon; if (k >= 0 && k < L.length) sec(k); bildi(); };
+
+    // Yükseklik sabit: en uzun panel kadar yer ayrılır, sekme değişince altındaki bölümler zıplamaz. Yalnız genişlik değişince yeniden
+    // ölçülür (iPhone'da adres çubuğu küçülünce panel yeniden belirip kaybolmasın); görünen panelin girişi yeniden oynatılmaz.
+    var sonW = -1;
+    var olc = function (zorla) {
+      var w = box.clientWidth;
+      if (!w || (zorla !== true && w === sonW)) return;   // w 0: kutu gizli (önizlemede başka alternatif açık)
+      sonW = w;
+      var P = canli().map(pan), max = 0;
+      hepsi.forEach(function (t) { var p = pan(t); if (p) p.style.minHeight = ''; });
+      P.forEach(function (p) {
+        var gizli = p.hidden;
+        if (gizli) { p.style.animation = 'none'; p.hidden = false; }
+        max = Math.max(max, p.offsetHeight);
+        if (gizli) { p.hidden = true; p.style.animation = ''; }
+      });
+      P.forEach(function (p) { p.style.minHeight = max + 'px'; });
+      kenar();
+    };
+    // Sekme listesi değişince (önizlemede alternatif seçimi) numaralar, noktalar ve seçim yeniden kurulur.
+    var esitle = function (ilk) {
+      var L = canli();
+      hepsi.forEach(function (t) {
+        var var_ = L.indexOf(t) >= 0, p = pan(t);
+        t.hidden = !var_;
+        if (!var_) { t.setAttribute('aria-selected', 'false'); t.tabIndex = -1; if (p) p.hidden = true; }
+      });
+      L.forEach(function (t, i) { var b = t.querySelector('b'); if (b && /^\d+$/.test(b.textContent)) b.textContent = String(i + 1); });
+      noktalar.innerHTML = new Array(L.length + 1).join('<i></i>');
+      sec(ilk === true ? Math.max(0, secili(L)) : Math.max(0, secili(L)), { sessiz: true });
+      olc(true);
+    };
+
+    hepsi.forEach(function (t) {
+      t.addEventListener('click', function () { sec(canli().indexOf(t)); bildi(); });
       t.addEventListener('keydown', function (e) {
-        var n = tabs.length, j = k;
+        var L = canli(), n = L.length, k = L.indexOf(t), j = k;
         if (e.key === 'ArrowRight') j = (k + 1) % n; else if (e.key === 'ArrowLeft') j = (k - 1 + n) % n; else if (e.key === 'Home') j = 0; else if (e.key === 'End') j = n - 1; else return;
-        e.preventDefault(); sel(j, true);
+        e.preventDefault(); sec(j, { odak: true });
       });
     });
+    once.addEventListener('click', function () { adim(-1); });
+    sonra.addEventListener('click', function () { adim(1); });
+    kaydir(sahne, gorunen, adim);
+    serit.addEventListener('scroll', kenar, { passive: true });
+    window.addEventListener('resize', olc);
+    window.addEventListener('load', function () { olc(true); });
+
+    // İlk kez ekrana gelince (yalnız dokunmatik cihazda, hareket azaltma kapalıysa) panel bir kez hafifçe sola oynar: "kaydırılabilir" işareti.
+    if (dokunmatik && 'IntersectionObserver' in window) {
+      var gor = new IntersectionObserver(function (es) {
+        es.forEach(function (en) {
+          if (!en.isIntersecting || en.intersectionRatio < 0.5) return;
+          gor.disconnect();
+          var p = gorunen();
+          if (p && !reduce.matches && !box.classList.contains('bilir')) { p.removeAttribute('data-yon'); p.classList.add('durt'); p.addEventListener('animationend', function () { p.classList.remove('durt'); }, { once: true }); }
+        });
+      }, { threshold: 0.5 });
+      gor.observe(sahne);
+    }
+    esitle(true);
+    kutular.push({ box: box, esitle: esitle, sec: sec });
+  };
+  each('[data-nc]', function (box) { sekmeler(box, 'adım'); });
+  each('[data-km]', function (box) { sekmeler(box, 'meslek grubu'); });
+
+  /* ONIZ:BAS (yalnız önizleme: kabuk bir alternatif seçince sekmeler ve "kayan şerit" yeniden kurulur) */
+  window.addEventListener('oniz', function (e) {
+    kutular.forEach(function (k) { k.esitle(); });
+    if (e.detail && e.detail.k === 'davet' && e.detail.v === 'a') kutular.forEach(function (k) { if (k.box.hasAttribute('data-nc')) k.sec(0, { sessiz: true }); });
   });
+  // "Kimler için" c alternatifi: iki sıra meslek çipi ters yönlere yavaşça kayar. Üstüne gelince, odakta ve dokununca durur; Duraklat düğmesi var.
+  each('[data-ks]', function (box) {
+    var b = d.createElement('button'), zaman = 0;
+    b.type = 'button'; b.className = 'ks-dur';
+    var yaz = function () { var dur = box.classList.contains('dur'); b.textContent = dur ? 'Devam ettir' : 'Duraklat'; b.setAttribute('aria-pressed', String(dur)); };
+    b.addEventListener('click', function () { box.classList.toggle('dur'); yaz(); });
+    box.addEventListener('touchstart', function () { clearTimeout(zaman); box.classList.add('tut'); }, { passive: true });
+    box.addEventListener('touchend', function () { zaman = setTimeout(function () { box.classList.remove('tut'); }, 1500); });
+    box.appendChild(b); yaz();
+  });
+  /* ONIZ:SON */
 
 })();

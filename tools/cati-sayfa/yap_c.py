@@ -2,7 +2,9 @@
 # (yandaki ekranlar bulanık ve geride, hap biçiminde yeşil adım sayacı), menüden Güvenlik / Sorular alt bilgiye, Atlassian düzeninde alt bilgi,
 # adımlarda ürün adları çizgi kilitle ("moyo Ebeveyn / Oyun / Uzman"), tam ekran gerçek ürün görüntüleri.
 # Aileye dönük sayfalarda uzman ürününün adı "Moyo Uzman"; "Moyo Mercek" yalnız uzman platformunda (ortak durumlar.md 5B).
-import re, html as H, json, sys
+# Beşinci tur (kullanıcı geri bildirimi 18 Kasım 2026): alternatifler "oniz" sözleşmesiyle (c-metin.json "oniz" + data-var kardeşler,
+# <html data-v-…> varsayılanları), 6. adımda şema (c-sema.py), 1-2-3 kartları dört tasarım (.uc), Güven bölümü ayrı sayfaya, alt bilgide Kurumsal.
+import re, html as H, json, sys, runpy
 def _svg(dosya):
     s = open(dosya).read().strip()
     return re.sub(r' role="img" aria-label="[^"]*"', ' aria-hidden="true" focusable="false"', s).replace(' xmlns="http://www.w3.org/2000/svg"', '')
@@ -17,8 +19,14 @@ IMG = {'ebeveyn-rutin': 'img/moyo-rutinler.webp', 'ebeveyn-onay': 'img/moyo-onay
        'mercek-veri': 'img/mercek-rutin.webp', 'mercek-egitim': 'img/mercek-egitim.webp',
        'mercek-veri-tel': 'img/mercek-rutin-tel.webp', 'mercek-egitim-tel': 'img/mercek-egitim-tel.webp'}
 e = H.escape
+ONIZ = K['oniz']; ONERI = {g['k']: g['oneri'] for g in ONIZ}
+SEMA = runpy.run_path('c-sema.py')['sema']; LOGO_IC = re.sub(r'^<svg[^>]*>|</svg>$', '', LOGO)
+def secenek(k, d, tag='span', attr=''):
+    # Metin alternatifi: sözlükse her değer data-var="k:değer" taşıyan kardeş öğe olur; önerilmeyenler hidden (oniz.js açar). Düz metinse tek öğe.
+    if isinstance(d, str): return f'<{tag}{attr}>{d}</{tag}>'
+    return ''.join(f'<{tag}{attr} data-var="{k}:{v}"{"" if v == ONERI[k] else " hidden"}>{t}</{tag}>' for v, t in d.items())
 
-def tur(key): return 'ebeveyn' if key.startswith('ebeveyn') else ('mercek' if key.startswith('mercek') else ('ikili' if key == 'ikili' else 'oyun'))
+def tur(key): return 'ebeveyn' if key.startswith('ebeveyn') else ('mercek' if key.startswith('mercek') else (key if key in ('ikili', 'sema') else 'oyun'))
 def cls(key, dar=False): return 'telefon' if key.startswith('ebeveyn') or (dar and key.startswith('mercek')) else ('panel' if key.startswith('mercek') else '')
 def resim(key, alt, c='', dar=False):
     if dar and key.startswith('mercek'): key += '-tel'          # telefonda Moyo Uzman'ın telefon ekranı (masaüstü penceresi okunmaz)
@@ -65,73 +73,95 @@ def kompakt(adimlar):
                         f'<div class="nk-yazi"><span class="rol">{kilit(a["rol"].split(" · ")[0])}{rozet}</span><h3>{a["baslik"]}</h3><p>{a["ozet"]}</p></div></article>')
     return (f'<section class="nk" id="nasil-k" data-duzen="sekme" aria-label="Moyo nasıl çalışır"><div class="ic">'
             f'<div class="nk-sekmeler sayac" role="tablist" aria-label="Adımlar">{"".join(pills)}</div>'
-            f'<div class="nk-paneller" tabindex="0">{"".join(paneller)}</div>'
+            f'<div class="nk-paneller" tabindex="0" aria-label="Uygulamalar, yana kaydırın">{"".join(paneller)}</div>'
             f'<div class="nk-kontrol"><button type="button" class="nk-geri" aria-label="Önceki adım">‹</button><span class="nk-sayac" aria-live="polite">1 / {len(adimlar)}</span><button type="button" class="nk-ileri" aria-label="Sonraki adım">›</button></div>'
             f'</div></section>')
 
-IKON = {   # Basit çizgi ikonlar (24×24, currentColor)
-    'reklam': '<path d="M3 4h2.2l2.2 10.2h10.2L20 7H7"/><circle cx="9.5" cy="18.6" r="1.4"/><circle cx="16.5" cy="18.6" r="1.4"/><path d="M3 3l18 18"/>',
-    'tek': '<path d="M7.5 8.5h9a4 4 0 0 1 3.9 3.2l.9 4.4a2.3 2.3 0 0 1-4 1.9L15.6 16H8.4l-1.7 2a2.3 2.3 0 0 1-4-1.9l.9-4.4a4 4 0 0 1 3.9-3.2z"/><path d="M8 11v3M6.5 12.5h3"/><circle cx="15.8" cy="12.3" r=".6" fill="currentColor"/><circle cx="17.6" cy="13.9" r=".6" fill="currentColor"/>',
-    'kod': '<rect x="3.5" y="3.5" width="7" height="7" rx="1.3"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.3"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.3"/><rect x="5.9" y="5.9" width="2.2" height="2.2" fill="currentColor" stroke="none"/><rect x="15.9" y="5.9" width="2.2" height="2.2" fill="currentColor" stroke="none"/><rect x="5.9" y="15.9" width="2.2" height="2.2" fill="currentColor" stroke="none"/><path d="M13.5 13.5h3v3h-3zM17.5 17.5h3v3h-3zM19 13.5v2M13.5 19h2"/>',
-    'kilit': '<path d="M12 3l7.5 3v5.6c0 4.6-3.2 8-7.5 9.4-4.3-1.4-7.5-4.8-7.5-9.4V6z"/><path d="M8.8 12.2l2.3 2.3 4.2-4.6"/>',
-}
-def ikon(k):
-    return f'<span class="g-ikon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">{IKON[k]}</svg></span>'
-
 def dongu(beats):
     # Moyo Ekosistemi: ortadaki ekran net; yanındakiler bulanık, yana açılmış ve geride. Masaüstünde sayfa kaydıkça ilerler (eko.js),
-    # altında hap biçiminde adım sayacı (geçilen adımların numarası yeşil dolar). Telefonda yana kaydırılan kartlar + aynı sayaç.
+    # altında hap biçiminde adım sayacı (geçilen adımların numarası yeşil dolar). Telefonda ve tablette parmakla yana kaydırılan kartlar + aynı sayaç.
+    # 6. adımın görseli ekran değil şemadır (c-sema.py; üç seçenek, oniz "dongu6").
     slots, pills, kartlar, mpills = [], [], [], []
     for i, b in enumerate(beats):
         t = tur(b['gorsel'])
-        slots.append(f'<div class="d-slot t-{t}" style="--i:{i}">{resim(b["gorsel"], b["alt"], cls(b["gorsel"]))}</div>')
+        genis = SEMA(K, LOGO_IC, 'g') if t == 'sema' else resim(b["gorsel"], b["alt"], cls(b["gorsel"]))
+        dar = SEMA(K, LOGO_IC, 'd') if t == 'sema' else resim(b["gorsel"], b["alt"], cls(b["gorsel"], True), True)
+        slots.append(f'<div class="d-slot t-{t}" style="--i:{i}">{genis}</div>')
         ad = f'{i + 1}. {b["kim"]}: {b["baslik"]}'
         pills.append(f'<li><a href="#hepsi" aria-label="{e(ad)}"><span class="n">{i + 1}</span><span class="ad">{b["kisa"]}</span></a></li>')
         mpills.append(f'<li><a href="#hepsi" aria-label="{e(ad)}"><span class="n">{i + 1}</span><span class="ad">{b["kisa"]}</span></a></li>')
-        kartlar.append(f'<li class="d-kart t-{t}"><div class="d-gorsel">{resim(b["gorsel"], b["alt"], cls(b["gorsel"], True), True)}</div><div class="d-yazi"><span class="rol">{i + 1} · {b["kim"]}</span><h3>{b["baslik"]}</h3><p>{b["metin"]}</p></div></li>')
+        kartlar.append(f'<li class="d-kart t-{t}"><div class="d-gorsel">{dar}</div><div class="d-yazi"><span class="rol">{i + 1} · {b["kim"]}</span><h3>{b["baslik"]}</h3><p>{b["metin"]}</p></div></li>')
     yazilar = ''.join(f'<div class="d-yazi-m" data-i="{i}"><span class="rol">{i + 1} · {b["kim"]}</span><h3>{b["baslik"]}</h3><p>{b["metin"]}</p></div>' for i, b in enumerate(beats))
+    ok_ = lambda c, ad, d: (f'<button type="button" class="d-ok {c}" aria-label="{ad}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{d}" fill="none" stroke="currentColor" '
+                            f'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>')
     return (f'<section class="dongu-b statik" id="hepsi" style="--n:{len(beats)}" aria-label="{e(K["dongu_etiket"])}">'
             f'<h2 class="gizli">{K["dongu_etiket"]}: {K["dongu_baslik"]}</h2>'
             f'<div class="d-kayit"><div class="d-sahne">'
             f'<div class="d-halka-kap" aria-hidden="true"><div class="d-halka">{"".join(slots)}</div></div>'
             f'<div class="d-yazilar" aria-live="polite">{yazilar}</div><ol class="d-nokta sayac" aria-label="Ekosistemin adımları">{"".join(pills)}</ol></div></div>'
-            f'<div class="d-mobil ic"><ol class="d-serit" tabindex="0" aria-label="Ekosistemin adımları, yana kaydırın">{"".join(kartlar)}</ol>'
+            f'<div class="d-mobil ic"><div class="d-pencere"><ol class="d-serit" tabindex="0" aria-label="Ekosistemin adımları, yana kaydırın">{"".join(kartlar)}</ol>'
+            f'{ok_("geri", "Önceki adım", "M14.5 5.5 8 12l6.5 6.5")}{ok_("ileri", "Sonraki adım", "M9.5 5.5 16 12l-6.5 6.5")}</div>'
+            f'<p class="d-ipucu" aria-hidden="true"><span>‹</span> {K["kaydir_ipucu"]} <span>›</span></p>'
             f'<ol class="d-nokta-m sayac" aria-label="Ekosistemin adımları">{"".join(mpills)}</ol></div>'
-            f'<p class="d-kapanis ic">{K["dongu_kapanis"]}</p></section>')
+            f'<div class="d-kapanis ic" id="kapanis">{secenek("kapanis", K["dongu_kapanis"], "p")}</div></section>')
 
-basamak = '<ol class="basamak">' + ''.join(f'<li{" class=\"istege\"" if s[2] else ""}><b><span class="bn">{i + 1}</span>{s[0]}{f"<span class=\"b-rozet\">{s[2]}</span>" if s[2] else ""}</b>{s[1]}</li>' for i, s in enumerate(K['basamak'])) + '</ol>'
+UC_IKON = {   # 1-2-3 kartlarının çizgi ikonları (yalnız "Beyaz ikonlu kartlar" tasarımında görünür)
+    'ev': '<path d="M4 11.2 12 4.5l8 6.7"/><path d="M6.2 9.8V19h11.6V9.8"/><path d="M10 19v-4.6h4V19"/>',
+    'kisi': '<circle cx="9.5" cy="8.2" r="3.4"/><path d="M3.5 19.2c.5-3.4 2.9-5.4 6-5.4s5.5 2 6 5.4"/><path d="M18.5 7.2v5.6M15.7 10h5.6"/>',
+    'tekrar': '<path d="m17.5 3.8 3 3-3 3"/><path d="M3.5 11.2v-.9a3.5 3.5 0 0 1 3.5-3.5h13.2"/><path d="m6.5 20.2-3-3 3-3"/><path d="M20.5 12.8v.9a3.5 3.5 0 0 1-3.5 3.5H3.8"/>',
+}
+def uc_kart(i, s):
+    # Tek işaretleme; "Renkli üç kart · Beyaz ikonlu · Büyük rakamlı · Mevcut" tasarımları <html data-v-uc> ile c-18.css'te.
+    iko = f'<span class="uc-ikon" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">{UC_IKON[s["ikon"]]}</svg></span>'
+    rozet = f'<span class="uc-rozet">{s["rozet"]}</span>' if s['rozet'] else ''
+    return (f'<li class="uc-k uc-{i + 1}{" istege" if s["rozet"] else ""}"><div class="uc-ust">{iko}<span class="uc-no" aria-hidden="true">{i + 1}</span>{rozet}</div>'
+            f'<h3>{secenek("b%d" % (i + 1), s["baslik"]) if isinstance(s["baslik"], dict) else s["baslik"]}</h3>'
+            f'<p>{secenek("b%d" % (i + 1), s["metin"]) if isinstance(s["metin"], dict) else s["metin"]}</p></li>')
+basamak = ('<ol class="uc">' + ''.join(uc_kart(i, s) for i, s in enumerate(K['basamak'])) + '</ol>'
+           + '<div class="uc-nokta" aria-hidden="true">' + ''.join(f'<i{" class=on" if i == 0 else ""}></i>' for i in range(len(K['basamak']))) + '</div>')
 urunler = ''.join(f'<div class="kart urun"><img class="u-ikon" src="{u["ikon"]}" alt="" width="52" height="52"><h3><small>{u["kim"]}</small>{u["ad"]}</h3><p class="sorun2">{u["ozet"]}</p><p>{u["metin"]}</p><a href="{u["link"]}"{" target=\"_blank\" rel=\"noopener\"" if u["link"].startswith("http") else ""}>{u["link_ad"]}</a></div>' for u in K['urunler']).replace('{MERCEK}', MERCEK)
-guven = ''.join(f'<div class="kart g-kart">{ikon(g[2])}<div><h3>{g[0]}</h3><p>{g[1]}</p></div></div>' for g in K['guven'])
+# Güven kartları bu sayfada yok (18 Kasım 2026): ayrı kurumsal sayfa guven.html; metinleri c-metin.json "guven" anahtarında duruyor.
 sss = ''.join(f'<details><summary>{q[0]}</summary><p>{q[1]}</p></details>' for q in K['sss'])
 
-# Alt bilgi (Atlassian düzeni örnek alındı): açık zeminli yuvarlak kutuda logo + dört sütun, altında telif satırı ve yasal bağlantılar.
-# Üst menüden çıkan "Güvenlik" ve "Sıkça sorulan sorular" burada.
+# Alt bilgi (Atlassian düzeni örnek alındı): açık zeminli yuvarlak kutuda logo + slogan (açılış başlığı) ve dört bağlantı sütunu,
+# altında telif satırı. Kurumsal sayfalar (hakkimizda.html, guven.html) ayrı dosyalar; disa_aktar.py gerçek adreslere çevirir.
 def sutun(baslik, baglar): return f'<div class="altb-s"><h3>{baslik}</h3><ul>' + ''.join(f'<li><a href="{h}"{" target=\"_blank\" rel=\"noopener\"" if h.startswith("https://claude.ai") else ""}>{t}</a></li>' for t, h in baglar) + '</ul></div>'
 altbilgi = (f'<footer class="altb"><div class="ic"><div class="altb-kutu">'
-            f'<div class="altb-s altb-marka"><a class="logo" href="#" aria-label="Moyo">{LOGO}</a><ul>'
-            f'<li><a href="ebeveyn.html">Ebeveynler için</a></li><li><a href="{MERCEK}" target="_blank" rel="noopener">Uzmanlar için</a></li><li><a href="#nasil">Nasıl çalışır</a></li><li><a href="{SITE}destek">Bize yazın</a></li></ul></div>'
+            f'<div class="altb-s altb-marka"><a class="logo" href="#" aria-label="Moyo">{LOGO}</a><p class="altb-slogan">{K["altbilgi_slogan"]}</p></div>'
             + sutun('Uygulamalar', [('Moyo Ebeveyn', 'ebeveyn.html'), ('Moyo Oyun', '#sonraki'), ('Moyo Uzman', MERCEK)])
-            + sutun('Yardım', [('Güvenlik', '#guven'), ('Sıkça sorulan sorular', '#sss'), ('Destek', SITE + 'destek')])
+            + sutun('Kurumsal', [('Hakkımızda', 'hakkimizda.html'), ('Güvenlik ve gizlilik', 'guven.html'), ('Destek', SITE + 'destek')])
+            + sutun('Yardım', [('Nasıl çalışır', '#giris'), ('Sıkça sorulan sorular', '#sss')])
             + sutun('Yasal', [('Gizlilik Politikası', SITE + 'yasal/gizlilik'), ('Kullanım Koşulları', SITE + 'yasal/kosullar-parentapp'), ('KVKK başvurusu', SITE + 'yasal/kvkk-basvuru')])
             + f'</div><div class="altb-alt"><span>© 2026 Moyo</span><span class="altb-not">Ekranlardaki adlar örnektir. Bu sayfa çerez, reklam pikseli ya da analiz aracı kullanmaz.</span></div></div></footer>')
 
-html = f'''<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Moyo · Çatı sayfa</title><link rel="icon" href="img/favicon-moyo.svg" type="image/svg+xml"><link rel="stylesheet" href="ortak.css"><link rel="stylesheet" href="c.css"><link rel="stylesheet" href="beyaz.css"><link rel="stylesheet" href="v4.css"></head><body class="sayfa-c beyaz">
+# Önizleme alternatifleri: <html data-v-…> varsayılanları sayfaya yazılır (betik olmadan da önerilen tasarım açılır);
+# #oniz-gruplar + oniz.js yalnız önizlemede (disa_aktar.py çıkarır).
+VARS = ''.join(f' data-v-{g["k"]}="{g["oneri"]}"' for g in ONIZ)
+GRUPLAR = json.dumps([{k: g[k] for k in ('k', 'ad', 'hedef', 'oneri', 'sec')} for g in ONIZ], ensure_ascii=False).replace('</', '<\\/')
+SEO = K['seo']
+assert len(SEO['aciklama']) <= 155, 'açıklama 155 karakteri geçti'
+
+html = f'''<!doctype html><html lang="tr"{VARS}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moyo · Çatı sayfa</title>
+<meta name="description" content="{e(SEO["aciklama"])}">
+<meta property="og:type" content="website"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Moyo">
+<meta property="og:title" content="{e(SEO["og_baslik"])}"><meta property="og:description" content="{e(SEO["aciklama"])}">
+<link rel="icon" href="img/favicon-moyo.svg" type="image/svg+xml"><link rel="stylesheet" href="ortak.css"><link rel="stylesheet" href="c.css"><link rel="stylesheet" href="beyaz.css"><link rel="stylesheet" href="v4.css"><link rel="stylesheet" href="c-18.css">
+<script type="application/json" id="oniz-gruplar">{GRUPLAR}</script><script src="oniz.js"></script></head><body class="sayfa-c beyaz">
 <header class="ust"><div class="ic"><a class="logo" href="#" aria-label="Moyo">{LOGO}</a><nav class="menu" aria-label="Ana menü"><a href="#nasil">Nasıl çalışır</a><a class="kitle" href="ebeveyn.html">Ebeveynler için</a><a class="kitle" href="{MERCEK}" target="_blank" rel="noopener">Uzmanlar için</a></nav><div class="sag"><a class="hap cizgi k" href="#">Giriş yap</a><a class="hap dolu k" href="#">Ücretsiz deneyin</a>
 <details class="dar-menu"><summary aria-label="Menü"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="m-ac" d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="m-kapat" d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary>
 <nav aria-label="Menü"><a href="#nasil">Nasıl çalışır</a><a href="ebeveyn.html">Ebeveynler için</a><a href="{MERCEK}" target="_blank" rel="noopener">Uzmanlar için</a><a class="yalniz-dar" href="#">Giriş yap</a></nav></details></div></div></header>
 <main>
-<section class="acilis c" id="acilis"><div class="ic"><h1>{K["h1"]}</h1><p class="alt-etiket">{K["alt_etiket"]}</p><p class="alt">{K["alt"]}</p>
+<section class="acilis c" id="acilis"><div class="ic"><p class="alt-etiket">{K["alt_etiket"]}</p><h1>{K["h1"]}</h1>{secenek("alt", K["alt"], "p", ' class="alt"')}
 <div class="dugmeler"><a class="hap dolu b" href="#">Ücretsiz deneyin</a><a class="hap cizgi b" href="#nasil">Nasıl çalışır? ↓</a></div>
 <p class="ince">{K["ince"]}</p></div></section>
 {dongu(K["dongu"])}
-<section class="giris-bant" id="giris"><div class="ic"><p class="ust-etiket">{K["giris_etiket"]}</p><h2>{K["giris_baslik"]}</h2><p>{K["giris_metin"]}</p>{basamak}</div></section>
+<section class="giris-bant" id="giris"><div class="ic"><p class="ust-etiket">{K["giris_etiket"]}</p>{secenek("gbas", K["giris_baslik"], "h2")}{secenek("gmet", K["giris_metin"], "p")}{basamak}</div></section>
 {hikaye(K["adimlar"])}
 {kompakt(K["adimlar"])}
-<section class="bant" id="sonraki"><div class="ic"><div class="bas"><p class="ust-etiket">{K["urunler_etiket"]}</p><h2>{K["urunler_baslik"]}</h2><p>{K["urunler_metin"]}</p></div><div class="kartlar3">{urunler}</div></div></section>
-<section class="bant sis" id="guven"><div class="ic"><div class="bas"><p class="ust-etiket">Güven</p><h2>Çocuğun verisi ailenindir</h2></div><div class="kartlar4">{guven}</div></div></section>
+<section class="bant" id="sonraki"><div class="ic"><div class="bas"><p class="ust-etiket">{K["urunler_etiket"]}</p><h2>{K["urunler_baslik"]}</h2>{secenek("urun", K["urunler_metin"], "p")}</div><div class="kartlar3">{urunler}</div></div></section>
 <section class="bant" id="sss"><div class="ic"><div class="bas"><p class="ust-etiket">Sıkça sorulanlar</p><h2>Sorular</h2><p>Sorunuzun yanıtını burada göremediyseniz bize <a href="{SITE}destek">destek sayfasından</a> yazın.</p></div><div class="sss">{sss}</div></div></section>
 </main>
 {altbilgi}
-<script src="hikaye.js"></script><script src="eko.js"></script><script src="kompakt.js"></script><script src="menu.js"></script></body></html>'''
+<script src="c-18.js"></script><script src="hikaye.js"></script><script src="eko.js"></script><script src="kompakt.js"></script><script src="menu.js"></script></body></html>'''
 open('c.html', 'w').write(html); print('ok c.html')

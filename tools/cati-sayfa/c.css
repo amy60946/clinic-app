@@ -1,8 +1,5 @@
 /* Çatı sayfa C, üçüncü sürüm (13 Kasım 2026). ortak.css'in üstüne. */
 .sayfa-c .acilis.c h1 { font-size: clamp(32px, 4.4vw, 54px); max-width: 980px; }
-.alt-secici { display: inline-flex; align-items: center; gap: 6px; margin-top: 18px; padding: 5px 6px 5px 12px; border: 1px dashed rgba(255, 255, 255, .3); border-radius: 999px; font-size: 12.5px; color: rgba(255, 255, 255, .65); }
-.alt-secici button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, .3); background: transparent; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
-.alt-secici button[aria-pressed="true"] { background: var(--yesil); border-color: var(--yesil); color: var(--lacivert); }
 .basamak li b { display: flex; align-items: center; gap: 10px; font-size: 16px; letter-spacing: 0; text-transform: none; color: var(--beyaz); margin-bottom: 8px; }
 .basamak .bn { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--yesil); color: var(--lacivert); font-size: 14px; font-weight: 800; flex: none; }
 .basamak li { font-size: 15.5px; }
@@ -131,15 +128,12 @@
   .d-nokta { margin-top: 4px; }
 }
 
-/* Telefon ve iPad: kaydırma anlatımı yerine kompakt "Nasıl çalışır" (Sekmeler · Kartlar · Liste) */
+/* Telefon ve iPad: kaydırma anlatımı yerine kompakt "Nasıl çalışır" (Sekmeler; tablette alternatif: Liste). Eski önizleme seçicileri 18 Kasım 2026'da kalktı (oniz.js). */
 .nk { display: none; background: var(--lacivert); color: var(--beyaz); padding-block: 10px 52px; }
 @media (max-width: 1024px), (hover: none) and (pointer: coarse) {
   .hikaye { display: none !important; }
   .nk { display: block; }
 }
-.nk-secici { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; width: fit-content; margin: 0 auto 18px; padding: 5px 6px 5px 12px; border: 1px dashed rgba(255, 255, 255, .3); border-radius: 999px; font-size: 12.5px; color: rgba(255, 255, 255, .65); }
-.nk-secici button { border-radius: 999px; border: 1px solid rgba(255, 255, 255, .3); background: transparent; color: #fff; font: inherit; font-weight: 700; padding: 5px 11px; cursor: pointer; }
-.nk-secici button[aria-pressed="true"] { background: var(--yesil); border-color: var(--yesil); color: var(--lacivert); }
 .nk-sekmeler { display: flex; gap: 4px; padding: 4px; margin: 0 auto 16px; max-width: 560px; background: rgba(255, 255, 255, .08); border: 1px solid var(--koyu-cizgi); border-radius: 999px; }
 .nk-sekmeler button { flex: 1 1 0; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 6px 8px; border: 0; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, .72); font: inherit; font-size: 14px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: background .2s ease, color .2s ease; }
 .nk-sekmeler .n { display: inline-grid; place-items: center; width: 20px; height: 20px; flex: none; border-radius: 50%; border: 1px solid currentColor; font-size: 11px; }
@@ -168,13 +162,7 @@
 .nk[data-duzen="sekme"] .nk-adim.on { visibility: visible; animation: nk-gir .28s ease; }
 @keyframes nk-gir { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .nk[data-duzen="sekme"] .nk-adim.on { animation: none; } }
-/* 2) Kartlar: yana kaydırılan kartlar (Moyo Ekosistemi ile aynı dil) */
-.nk[data-duzen="kart"] { --kw: min(calc(100vw - 104px), 440px); }
-.nk[data-duzen="kart"] .nk-sekmeler { display: none; }
-.nk[data-duzen="kart"] .nk-paneller { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(50% - 50vw); padding: 2px calc(50vw - var(--kw) / 2) 10px; }
-.nk[data-duzen="kart"] .nk-paneller::-webkit-scrollbar { display: none; }
-.nk[data-duzen="kart"] .nk-adim { flex: 0 0 var(--kw); scroll-snap-align: center; display: grid; gap: 14px; align-content: start; background: var(--lacivert-2); border: 1px solid var(--koyu-cizgi); border-radius: 22px; padding: 14px; --gh: 260px; }
-/* 3) Liste: üçü birden, görsel solda küçük */
+/* 2) Liste: üçü birden, görsel solda küçük */
 .nk[data-duzen="liste"] .nk-sekmeler, .nk[data-duzen="liste"] .nk-kontrol { display: none; }
 .nk[data-duzen="liste"] .nk-paneller { display: grid; gap: 12px; }
 .nk[data-duzen="liste"] .nk-adim { display: grid; grid-template-columns: minmax(0, 42%) minmax(0, 1fr); gap: 14px; align-items: center; background: var(--lacivert-2); border: 1px solid var(--koyu-cizgi); border-radius: 18px; padding: 12px; --gh: 190px; }
