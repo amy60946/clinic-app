@@ -83,9 +83,10 @@
 .sayfa-c .d-kart .d-gorsel > .d6 { width: 100%; height: 100%; border-radius: 16px; }
 .s6-akis { animation: s6-ak 1.5s linear infinite; }
 @keyframes s6-ak { to { stroke-dashoffset: var(--s6, -10); } }
-/* b: halkada dolaşan tek nokta (tam tur 9 sn) */
-.s6-yol { animation: s6-yol 9s linear infinite; }
-@keyframes s6-yol { to { stroke-dashoffset: var(--s6c, -600); } }
+/* b: halkada dolaşan tek nokta (tam tur 9 sn). Nokta kendi merkezinde dönen bir grupta (transform; çizgi kesiği kaydırılmaz):
+   3B dönmüş sahnede kesik kaydırma her karede kısmi yeniden boyama istiyor, kartların yanında harf kırıntıları bırakıyordu (19 Kasım QA). */
+.s6-yol { transform-box: view-box; animation: s6-yol 9s linear infinite; }
+@keyframes s6-yol { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .s6-akis, .s6-yol { animation: none; } }
 
 /* ---------- 4) 1-2-3 kartları: renkli üç kart (kullanıcı kararı 19 Kasım 2026, "uc" a; Atlassian örnek 1) ---------- */
@@ -120,14 +121,17 @@
 
 /* ---------- 4b) "hikaye" a: her kartın altında bir gerçek ürün ekranı, ayrı ürün anlatımı yok ----------
    Ekran kartın alt kenarından taşar gibi durur (kart köşesinde kırpılır; oranı korunur, büyütülmez): telefonlar ortada ve üst kısmı
-   görünür, Moyo Uzman paneli soldan başlar, sağdan taşar. Masaüstünde üç sütun; tablette (720–999 px) kartlar alt alta, ekran sağda;
-   telefonda alt alta, ekran yazının altında. */
+   görünür. Moyo Uzman ekranı (3. kart) 19 Kasım QA'dan beri taşmaz: img/c-davranis.webp panelden temiz bir sınırda kırpıldı (ilk cümlenin
+   sonu, "Öncül" sütunu ile "Sonuç" sütunu arası, 2. satırın çizgisi) ve kartta bütünüyle görünür; önceden kartın sağ kenarı tablodaki
+   sözcükleri ortasından kesiyordu ("Söyl", telefonda ~%20'si kesik). Masaüstünde üç sütun; tablette (720–999 px) kartlar alt alta, ekran
+   sağda; telefonda alt alta, ekran yazının altında. */
 html[data-v-hikaye="a"] .sayfa-c .uc-k { padding-bottom: 0; }
 .uc-gorsel { --ug: 330px; position: relative; flex: none; height: var(--ug); margin: auto -28px 0; overflow: hidden; border-radius: 0 0 28px 28px; }
 .uc-gorsel img { position: absolute; display: block; max-width: none; height: auto; border: 7px solid #0B0920; background: #0B0920;
   box-shadow: 0 24px 50px -22px rgba(22, 17, 58, .45); -webkit-user-drag: none; }
 .uc-telefon img { left: 50%; top: 26px; width: min(256px, calc(100% - 48px)); transform: translateX(-50%); border-radius: 32px; }
-.uc-panel img { left: 28px; top: 26px; width: max(430px, calc(100% + 40px)); border-width: 6px; border-radius: 16px; }
+.uc-panel img { left: 50%; top: 26px; transform: translateX(-50%); width: auto; height: auto; max-width: calc(100% - 56px); max-height: calc(var(--ug) - 48px);
+  border-width: 6px; border-radius: 16px; }
 @media (min-width: 1000px) { html[data-v-hikaye="a"] .sayfa-c .uc-k + .uc-k::before { top: 46px; margin-top: -8px; } }
 @media (min-width: 1000px) and (max-width: 1199px) { .uc-gorsel { --ug: 300px; } .uc-telefon img { width: min(236px, calc(100% - 36px)); } }
 @media (min-width: 720px) and (max-width: 999px) {
@@ -138,12 +142,12 @@ html[data-v-hikaye="a"] .sayfa-c .uc-k { padding-bottom: 0; }
   html[data-v-hikaye="a"] .sayfa-c .uc .uc-k p { font-size: 16.5px; padding-bottom: 26px; }
   .uc-gorsel { --ug: 330px; grid-column: 2; grid-row: 1 / span 3; align-self: end; margin: 0; border-radius: 0 0 24px 0; }
   .uc-telefon img { top: 0; width: 248px; }
-  .uc-panel img { left: 0; top: 0; width: 470px; }
+  .uc-panel img { left: 0; top: 26px; transform: none; max-width: calc(100% - 28px); max-height: calc(var(--ug) - 52px); }
 }
 @media (max-width: 719px) {
   .uc-gorsel { --ug: 320px; margin-inline: -22px; border-radius: 0 0 24px 24px; }
   .uc-telefon img { width: min(250px, calc(100% - 64px)); border-width: 6px; border-radius: 30px; }
-  .uc-panel img { left: 22px; width: max(420px, calc(100% + 36px)); }
+  .uc-panel img { max-width: calc(100% - 44px); }
 }
 
 /* ---------- 5) Kompakt "Nasıl çalışır" (telefon ve tablet): parmakla sola / sağa ---------- */
@@ -221,8 +225,20 @@ html[data-v-hikaye="a"] .sayfa-c .uc-k { padding-bottom: 0; }
 .sayfa-c .d-mobil { --kw: min(calc(100vw - 84px), 420px); --dg: clamp(300px, 44svh, 380px); }
 .sayfa-c .d-gorsel { height: var(--dg); }
 .sayfa-c .d-gorsel .ikili img { max-height: calc(var(--dg) - 20px); }
-@media (min-width: 700px) { .sayfa-c .d-mobil { --kw: min(calc(100vw - 140px), 600px); --dg: 400px; } }
-@media (min-width: 700px) and (max-height: 820px) { .sayfa-c .d-mobil { --dg: clamp(320px, 50svh, 400px); } }
+/* 19 Kasım QA: tablette ve geniş ekrandaki kartlarda görsel ekranın yüksekliğiyle büyür (1024 × 768'de ~470, 820 × 1180'de 580 px;
+   önceden 384 / 400 px'te kalıyor, telefonlar 1-2-3 kartlarındakinden küçük görünüyordu). Kart yazısı ve sayaç için ~300 px bırakılır.
+   ≥ 1025 px (hareket azaltma ya da dokunmatik büyük ekran): kart sahnedeki ortadaki ekran kadar geniş (912 px, görsel 880 px), Moyo Uzman'ın
+   masaüstü ekranı ve 6. adımın geniş çizimi (.d-gen). Görseller doğal boyutunu geçmez (yalnız max-width / max-height). */
+@media (min-width: 700px) { .sayfa-c .d-mobil { --kw: min(calc(100vw - 140px), 600px); --dg: clamp(380px, calc(100svh - 300px), 580px); } }
+@media (min-width: 1025px) { .sayfa-c .d-mobil { --kw: min(calc(100vw - 220px), 912px); --dg: clamp(400px, calc(100svh - 290px), 610px); } }
+.sayfa-c .d-gorsel > .d-gen { display: none; }
+@media (min-width: 1025px) {
+  .sayfa-c .d-gorsel > .d-dar { display: none; }
+  .sayfa-c .d-gorsel > img.d-gen { display: block; }
+  .sayfa-c .d-kart .d-gorsel > .d6.d-gen { display: block; height: auto; aspect-ratio: 16 / 10; max-height: 100%; }
+}
+/* tablette 6. adımın dar çizimi kartı boydan boya doldurmasın (yazılar 20 px'i geçmesin) */
+@media (min-width: 700px) and (max-width: 1024px) { .sayfa-c .d-kart .d-gorsel > .d6 { max-width: 440px; } }
 /* yandaki kartlar: tanınır kalsın, ikinci planda dursun */
 .sayfa-c .dongu-b.js .d-kart { opacity: .62; transform: scale(.95); filter: blur(1px); }
 .sayfa-c .dongu-b.js .d-kart.on { opacity: 1; transform: none; filter: none; }

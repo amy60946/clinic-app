@@ -7,7 +7,7 @@
  "basamak": [
   {
    "baslik": "Kendiniz başlayın",
-   "metin": "Rutini çocuğunuzun gününe siz planlarsınız. Çocuğunuz adımı yapınca oyunda işaretler, siz onaylarsınız; zor anları kısa bir kayıtla not edersiniz. Bunun için uzman gerekmez.",
+   "metin": "{fiil1} Çocuğunuz adımı yapınca oyunda işaretler, siz onaylarsınız; zor anları kısa bir kayıtla not edersiniz. Bunun için uzman gerekmez.",
    "rozet": "",
    "gorsel": {
     "img": "img/moyo-rutinler.webp",
@@ -23,9 +23,9 @@
    },
    "rozet": "İsteğe bağlı",
    "gorsel": {
-    "img": "img/moyo-oneri.webp",
+    "img": "img/c-baglan.webp",
     "tur": "telefon",
-    "alt": "Moyo Ebeveyn, Uzmanım: bağlı uzman, Uzman bağla düğmesi ve uzmandan gelen rutin önerileri"
+    "alt": "Moyo Ebeveyn, Uzman bağla: davet eden uzman, paylaşılacak çocuğun seçimi, uzmanın neyi göreceği ve Uzmanla bağlan düğmesi"
    }
   },
   {
@@ -36,9 +36,9 @@
    "metin": "Uzmanınız kısa ebeveyn eğitimleri gönderir, davranış kayıtlarınıza bakar, yeni rutin önerir; {b3s}",
    "rozet": "",
    "gorsel": {
-    "img": "img/uzman-davranis.webp",
+    "img": "img/c-davranis.webp",
     "tur": "panel",
-    "alt": "Moyo Uzman: hedef davranış, stratejiler ve ebeveynin bildirdiği olayların öncesi ve sonrası"
+    "alt": "Moyo Uzman: hedef davranış kartı, stratejiler ve ebeveynin bildirdiği olayların tarihi, bildireni ve öncesi"
    }
   }
  ],
@@ -286,7 +286,8 @@
    "ebeveyn": [
     "Moyo Ebeveyn",
     [
-     "planlar, onaylar"
+     "planlar,",
+     "onaylar"
     ]
    ],
    "oyun": [
@@ -522,6 +523,13 @@
    "a": "önerilen rutini çocuğunuzun gününe eklemek sizin kararınız.",
    "b": "öneriyi kabul edip etmemek sizin kararınız.",
    "c": "siz onaylamadan çocuğunuzun gününe hiçbir şey eklenmez."
+  },
+  "fiil1": {
+   "_grup": "fiil",
+   "a": "Rutini çocuğunuzun gününe siz planlarsınız.",
+   "b": "Rutini siz seçer, gün ve saatine yerleştirirsiniz.",
+   "c": "Rutini siz seçip gününü ve saatini belirlersiniz.",
+   "d": "Rutini çocuğunuzun gününe siz atarsınız."
   }
  }
 }

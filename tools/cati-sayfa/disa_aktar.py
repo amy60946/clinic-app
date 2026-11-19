@@ -83,7 +83,9 @@ def canli(ad, s):
     if not m:
         return s
     gruplar = json.loads(m.group(1))
-    secili = {g['k']: SECIM.get(ad, {}).get(g['k'], g['oneri']) for g in gruplar}
+    # Fiyat sayfasının alt bilgisi ana sayfanın "h1" seçimini izler (19 Kasım 2026): o sayfada ayrı seçim yoksa ebeveyn.html'ninki geçer
+    ust = SECIM.get({'ebeveyn-fiyat.html': 'ebeveyn.html'}.get(ad, ''), {})
+    secili = {g['k']: SECIM.get(ad, {}).get(g['k'], ust.get(g['k'], g['oneri'])) for g in gruplar}
     for g in gruplar:
         assert secili[g['k']] in [o[0] for o in g['sec']], f'{ad}: {g["k"]} için geçersiz seçim {secili[g["k"]]}'
     k = Kes(s, secili)

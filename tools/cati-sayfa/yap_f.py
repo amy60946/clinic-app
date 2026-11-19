@@ -22,7 +22,9 @@ tablo = ''.join(
     for g, satirlar in F['tablo'])
 sss = ''.join(f'<details><summary>{e(q)}</summary><p>{e(a)}</p></details>' for q, a in F['sss'])
 
-html = f'''{M.bas(F["baslik"], F["aciklama"], "/ebeveyn/fiyat/")}
+# Alt bilgideki slogan ana sayfanın açılış başlığıdır: "h1" grubu burada da seçilebilir (19 Kasım QA; canlıda ebeveyn.html'nin seçimi geçer)
+ONIZ = [dict(M.H1_GRUP, hedef='footer', ad='Alt bilgideki slogan (ana sayfanın açılış başlığı)')]
+html = f'''{M.bas(F["baslik"], F["aciklama"], "/ebeveyn/fiyat/", ONIZ)}
 <body class="sayfa-moyo sayfa-fiyat">
 {M.ust("fiyat")}
 <main id="main">

@@ -29,8 +29,12 @@ def secenek(k, d, tag='span', attr=''):
     if isinstance(d, str): return f'<{tag}{attr}>{d}</{tag}>'
     return ''.join(f'<{tag}{attr} data-var="{k}:{v}"{"" if v == ONERI[k] else " hidden"}>{t}</{tag}>' for v, t in d.items())
 def doldur(t):
-    # Cümle içindeki tek parça seçenek: "{fiil}" yer tutucusu c-metin.json "parca" sözlüğünden satır içi seçeneklerle dolar
-    return re.sub(r'\{(\w+)\}', lambda m: secenek(m.group(1), K['parca'][m.group(1)]), t)
+    # Cümle içindeki tek parça seçenek: "{fiil}" yer tutucusu c-metin.json "parca" sözlüğünden satır içi seçeneklerle dolar.
+    # Parçada "_grup" varsa başka bir grubun seçimini izler (ör. "fiil1": 1. kartın cümlesi "fiil" grubuyla değişir, 19 Kasım QA).
+    def parca(m):
+        d = K['parca'][m.group(1)]
+        return secenek(d.get('_grup', m.group(1)), {v: x for v, x in d.items() if not v.startswith('_')})
+    return re.sub(r'\{(\w+)\}', parca, t)
 def onerilmez(k, v): return '' if ONERI[k] == v else ' hidden'
 
 def cumleler(d):
@@ -99,6 +103,12 @@ def dongu(beats):
         t = tur(b['gorsel'])
         genis = SEMA(K, LOGO_IC, 'g', 's6s') if t == 'sema' else resim(b["gorsel"], b["alt"], cls(b["gorsel"]))       # sahne
         dar = SEMA(K, LOGO_IC, 'd', 's6k') if t == 'sema' else resim(b["gorsel"], b["alt"], cls(b["gorsel"], True), True)  # kart
+        # Geniş ekranda kartlar (hareket azaltma ya da dokunmatik büyük ekran, ≥ 1025 px) sahnedeki kadar büyük: Moyo Uzman'ın masaüstü
+        # ekranı ve 6. adımın geniş çizimi (c-18.css .d-gen / .d-dar; gizli olan görsel tembel yüklendiği için indirilmez). 19 Kasım QA.
+        if t == 'sema':
+            dar = (dar.replace('class="d6"', 'class="d6 d-dar"', 1) + SEMA(K, LOGO_IC, 'g', 's6w').replace('class="d6"', 'class="d6 d-gen"', 1))
+        elif t == 'mercek':
+            dar = resim(b["gorsel"], b["alt"], 'telefon d-dar', True) + resim(b["gorsel"], b["alt"], 'panel d-gen')
         slots.append(f'<div class="d-slot t-{t}" style="--i:{i}">{genis}</div>')
         ad = f'{i + 1}. {b["kim"]}: {b["baslik"]}'
         pills.append(f'<li><a href="#hepsi" aria-label="{e(ad)}"><span class="n">{i + 1}</span><span class="ad">{b["kisa"]}</span></a></li>')

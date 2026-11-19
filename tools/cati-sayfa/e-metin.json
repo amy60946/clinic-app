@@ -1,8 +1,11 @@
 {
- "_not": "Moyo Ebeveyn sayfası metinleri (yap_m.py okur). Tur 2, 19 Kasım 2026: çocuk adımı gerçek hayatta yapar, oyunda işaretler (oyunda yapmaz); rutin 'planlanır' (kurulmaz); uygulamalar 'birbirine bağlı' (tek platform değil); zor an kaydı kendi adımında; aynı cümle sayfada iki kez ya da çatı sayfayla bire bir geçmez.",
+ "_not": "Moyo Ebeveyn sayfası metinleri (yap_m.py okur). Tur 2, 19 Kasım 2026: çocuk adımı gerçek hayatta yapar, oyunda işaretler (oyunda yapmaz); rutin 'planlanır' (kurulmaz); uygulamalar 'birbirine bağlı' (tek platform değil); zor an kaydı kendi adımında; aynı cümle sayfada iki kez ya da çatı sayfayla bire bir geçmez. h1 (19 Kasım QA): a Moyo Ebeveyn'e özel, b çatı sayfayla aynı; alt bilgideki slogan seçilen başlıktır (kullanıcı isteği, tur 1).",
  "baslik": "Moyo Ebeveyn · Rutin, davranış kaydı ve ilerleme takibi",
  "aciklama": "Çocuğunuzun günlük rutinini planlayın, zor anları kaydedin, ilerlemeyi görün. Her adım oyunda küçük bir macera olur. 14 gün ücretsiz, kart gerekmez.",
- "h1": "Çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform",
+ "h1": {
+  "a": "Çocuğunuzun rutini, zor anları ve ilerlemesi bir arada",
+  "b": "Çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform"
+ },
  "alt": {
   "a": "Günlük rutini planlayın, davranışları kaydedin, ilerlemeyi hafta hafta görün. Dilerseniz uzmanınızla paylaşın.",
   "b": "Çocuğunuz rutin adımlarını yapar ve oyunda işaretler; siz zor anları kaydeder, neyin işe yaradığını görürsünüz.",
@@ -199,7 +202,6 @@
  ],
  "kapanis": "Çocuğunuzun günlük rutinine bugün başlayın.",
  "kapanis_ince": "Deneme bitince kendiliğinden ücret alınmaz, ücretsiz planla devam edebilirsiniz.",
- "altbilgi": "Çocuğunuzun rutinini planlamak, zor anları kaydetmek ve ilerlemeyi görmek için ebeveyn uygulaması.",
  "sss": [
   [
    "Hangi yaş için uygun?",

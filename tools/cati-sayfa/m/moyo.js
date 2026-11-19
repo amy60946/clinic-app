@@ -4,7 +4,9 @@
       olur → çocuğunuz Yaptım'a dokunur → siz onaylarsınız). Fare üstündeyken ve klavye odağı anlatımdayken durur; duraklat düğmesi
       var; görünmezken çalışmaz. Hareket azaltmada (ya da betik yoksa) "duruk" hâl: dört numara, iki ok, dört satırlık liste.
    2. "Nasıl çalışır": telefonda ve tablette parmakla sağa sola kaydırılır (dikey kaydırma etkilenmez), masaüstünde yatay
-      dokunmatik yüzey ve ok tuşları; altta ‹ 2 / 5 › ve dokunmatik cihazda ilk kaydırmaya kadar kısa ipucu. */
+      dokunmatik yüzey ve ok tuşları; altta ‹ 2 / 5 › ve dokunmatik cihazda ilk kaydırmaya kadar kısa ipucu.
+      19 Kasım QA: sekme çubuğu hiçbir genişlikte taşmaz. Beş sekme adıyla sığıyorsa tam düzen (.tam), sığmıyorsa kısa düzen
+      (.kisa: beş eşit numara, etkin adımın adı çubuğun altında); genişlik değişince ve yazı tipi yüklenince yeniden ölçülür. */
 (function () {
   'use strict';
   var d = document;
@@ -136,7 +138,7 @@
   var OK = function (yon) { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + (yon < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '"/></svg>'; };
   var IPUCU = 'moyo.nc.kaydirdi';
   each(d.querySelectorAll('[data-nc]'), function (box) {
-    var tabs = box.querySelectorAll('[role=tab]'), n = tabs.length, serit = box.querySelector('.nc-tabs');
+    var tabs = box.querySelectorAll('[role=tab]'), n = tabs.length, serit = box.querySelector('.nc-tabs'), etiket = box.querySelector('.nc-etiket');
     var secili = function () { for (var i = 0; i < n; i++) if (tabs[i].getAttribute('aria-selected') === 'true') return i; return 0; };
     var cur = secili();
 
@@ -155,8 +157,24 @@
     }
     var ipucuGizle = function () { if (ipucu) { ipucu.remove(); ipucu = null; } depo.yaz(IPUCU, '1'); };
 
+    // Tam düzen sığıyor mu: önce tam düzende ölçülür, taşıyorsa kısa düzene geçilir (yalnız genişlik değişince)
+    var olcW = -1;
+    function sigdir(zorla) {
+      var w = box.clientWidth;
+      if (zorla !== true && w === olcW) return;
+      olcW = w;
+      box.classList.remove('kisa'); box.classList.add('tam');
+      var tasar = serit.scrollWidth > serit.clientWidth + 1;
+      box.classList.toggle('tam', !tasar); box.classList.toggle('kisa', tasar);
+    }
+    sigdir(true);
+    window.addEventListener('resize', sigdir);
+    window.addEventListener('load', function () { sigdir(true); });
+    if (d.fonts && d.fonts.ready) d.fonts.ready.then(function () { sigdir(true); });
+
     function guncelle() {
       say.innerHTML = '<span class="sr">Adım </span>' + (cur + 1) + ' / ' + n;
+      if (etiket) etiket.textContent = (tabs[cur].querySelector('span') || tabs[cur]).textContent;
       onceki.disabled = cur === 0;
       sonraki.disabled = cur === n - 1;
     }

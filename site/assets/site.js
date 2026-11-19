@@ -486,6 +486,10 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
       acik = [];
       ops.forEach(function (o) { var on = !!q && o.__k.indexOf(q) >= 0; o.hidden = !on; if (on) acik.push(o); });
       yok.hidden = !q || acik.length > 0;
+      if (q && !acik.length) {   // eşleşme yoksa önceki sonuç kartı "bulamadık"ın altında kalmasın (19 Kasım QA)
+        dolu.hidden = true; bos.hidden = false;
+        orn.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+      }
       ac(acik.length > 0);
       if (acik.length) lb.scrollTop = 0;
     };

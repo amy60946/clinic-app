@@ -56,8 +56,9 @@
   .sayfa-moyo .mhero h1, .sayfa-moyo .mhero .sub { margin-inline: auto; }
   .sayfa-moyo .mhero .actions, .sayfa-moyo .mhero .trust { justify-content: center; }
   .sayfa-moyo .mhero .hero-media { max-width: 720px; margin-inline: auto; }
-  .sayfa-moyo .nc-tabs button { font-size: 14px; padding: 5px 12px 5px 6px; gap: 6px; }
+  .sayfa-moyo .nc-tabs button { font-size: 14px; padding: 5px 11px 5px 5px; gap: 6px; }
   .sayfa-moyo .nc-tabs b { width: 24px; height: 24px; font-size: 12px; }
+  .sayfa-moyo .nc-tabs { gap: 2px; }
 }
 @media (max-width: 700px) {
   .mhero .mh { aspect-ratio: auto; }
@@ -213,20 +214,49 @@
   .sayfa-moyo .nc-media figure.tel figcaption { margin-top: 8px; font-size: 12px; }
 }
 @media (max-width: 380px) { .sayfa-moyo .nc-media { --nc-h: min(56svh, 440px); } }
+@media (max-width: 760px) { .nc-nav { margin-top: 20px; } }
+
+/* Sekme çubuğu her genişlikte sığar ve adım değişince boyu, yeri değişmez (19 Kasım QA: 390 px'te 2–3. adımda "5" çubuğun dışına,
+   ekranın kenarına taşıyordu; 820 px'te çubuk 8 px taşıyor, "Uzmanınızla" kesiliyor, 3. adım seçilince şerit kayıyordu; çubuğun
+   genişliği adımdan adıma değişiyordu).
+   Tam düzen: beş sekmenin hepsi adıyla (sığdığı sürece; m/moyo.js ölçer). Kısa düzen (.nc.kisa; betik ölçene dek ≤ 760 px'te de): beş eşit
+   numaralı sekme, sabit genişlikte; etkin adımın adı çubuğun altında tek satır (.nc-etiket). Çubukta kaydırma ve kenar soluklaşması yok. */
+.sayfa-moyo .nc-tabs { -webkit-mask-image: none; mask-image: none; }
+.nc-etiket { display: none; }
+.sayfa-moyo .nc.kisa .nc-tabs { display: grid; grid-template-columns: repeat(5, 46px); gap: 6px; width: max-content; overflow: visible; margin-bottom: 12px; }
+.sayfa-moyo .nc.kisa .nc-tabs button { width: 46px; min-width: 0; padding: 0; justify-content: center; }
+.sayfa-moyo .nc.kisa .nc-tabs button span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sayfa-moyo .nc.kisa .nc-tabs b { width: 30px; height: 30px; font-size: 14px; }
+.sayfa-moyo .nc.kisa .nc-etiket { display: block; margin: 0 0 22px; min-height: 1.4em; text-align: center; font-size: 16px; line-height: 1.4; font-weight: 800; color: var(--c-ink); white-space: nowrap; }
 @media (max-width: 760px) {
-  .sayfa-moyo .nc-tabs { overflow: visible; -webkit-mask-image: none; mask-image: none; margin-bottom: 24px; }
-  .sayfa-moyo .nc-tabs button { min-width: 44px; justify-content: center; }
-  .sayfa-moyo .nc-tabs button[aria-selected="false"] { padding: 6px 9px; }
-  .sayfa-moyo .nc-tabs button[aria-selected="false"] span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .sayfa-moyo .nc-tabs button[aria-selected="true"] { padding-right: 14px; }
-  .nc-nav { margin-top: 20px; }
+  .sayfa-moyo .nc:not(.tam) .nc-tabs { display: grid; grid-template-columns: repeat(5, 46px); gap: 6px; width: max-content; overflow: visible; margin-bottom: 12px; }
+  .sayfa-moyo .nc:not(.tam) .nc-tabs button { width: 46px; min-width: 0; padding: 0; justify-content: center; }
+  .sayfa-moyo .nc:not(.tam) .nc-tabs button span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .sayfa-moyo .nc:not(.tam) .nc-tabs b { width: 30px; height: 30px; font-size: 14px; }
+  .sayfa-moyo .nc:not(.tam) .nc-etiket { display: block; margin: 0 0 22px; min-height: 1.4em; text-align: center; font-size: 16px; line-height: 1.4; font-weight: 800; color: var(--c-ink); white-space: nowrap; }
+}
+
+/* 2. adımın yatay oyun ekranı (19 Kasım QA): tek sütunda kutu görsele göre (telefonda 320 × 148'lik ekran 500 px'lik gri kutunun
+   ortasında kalıyordu); "Örnek veri" yazısı görselin üstüne değil altına (önceden üçüncü satırı örtüyordu). Adımlar arasında
+   panellerin yüksekliği yine eşit (m/site.js), ‹ › düğmeleri yerinden oynamaz. */
+.sayfa-moyo .nc-media figure.shot { border: 0; border-radius: 0; overflow: visible; }
+.sayfa-moyo .nc-media figure.shot img { border: 1px solid var(--c-line); border-radius: var(--r-media); }
+.sayfa-moyo .nc-media figure.shot figcaption { position: static; margin: 10px auto 0; width: fit-content; padding: 0; background: none; color: var(--c-text-3); font-size: 12px; font-weight: 600; }
+@media (max-width: 900px) {
+  .sayfa-moyo .nc-media.genis { height: auto; padding: 12px; }
+  .sayfa-moyo .nc-media.genis figure.shot figcaption { margin-top: 8px; }
 }
 
 /* ---------- Neden Moyo: üç "neden" kartı (Atlassian örnek 3: açık mavi bant, beyaz kartlar) ---------- */
 .sayfa-moyo #degerler { background: #EDF0F8; }
 .nd { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap-card); }
 .nd li { position: relative; display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 32px 28px 30px; background: var(--c-bg); border: 1px solid #E1E5F0; border-radius: var(--r-lg); }
-.nd h3 { font-size: 22px; line-height: 1.25; margin-top: 6px; }
+.nd h3 { font-size: 22px; line-height: 1.25; margin-top: 6px; text-wrap: balance; }
+/* 19 Kasım QA: üç sütunda başlık satırları ortak (subgrid): biri iki satıra inince öteki kartların metni de aynı hizadan başlar */
+@media (min-width: 901px) {
+  .nd li { display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 14px; align-content: start; }
+  .nd li > h3 { align-self: start; }
+}
 .nd p { color: var(--c-text-2); font-size: 16.5px; line-height: 1.55; }
 .nd-rozet { position: absolute; top: 40px; right: 24px; padding: 3px 10px; border-radius: var(--r-pill); background: var(--c-soft); border: 1px solid var(--c-line); color: var(--c-text-2);
   font-size: 12.5px; line-height: 1.3; font-weight: 700; }

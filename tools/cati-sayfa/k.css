@@ -249,5 +249,6 @@ html[data-v-kdzn="b"] .k-ilke h3 { margin-top: 9px; }
 }
 
 /* Hakkımızda: başlıklarda ve adım başlıklarında tek kelimelik son satır olmasın (19 Kasım 2026 QA: 1440 px'te 5. adım
-   "Dilerseniz uzmanla / paylaşmak"). text-wrap desteklemeyen tarayıcılar için metinde "uzmanla paylaşmak" bölünmez boşlukla. */
+   "Dilerseniz uzmanla / paylaşmak"; ikinci QA: 2. adım "Yapıp oyunda / işaretlemek"). Metinde son iki sözcük bölünmez
+   boşlukla ("uzmanla paylaşmak", "oyunda işaretlemek"): text-wrap: balance iki satırlık başlıkta tek sözcüğü alta bırakabiliyor. */
 .k-hakkimizda main :is(h1, h2, h3), .k-hakkimizda .k-adim h3 { text-wrap: balance; }

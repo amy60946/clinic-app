@@ -42,7 +42,12 @@ def var(k, d, sarmal=lambda v, t: t):
 
 
 # Önizleme alternatifleri (oniz.js sözleşmesi; yalnız önizlemede, canlıya seçilen kalır)
+# h1 (19 Kasım QA, kural 6: çatı sayfayla aynı başlık): a Moyo Ebeveyn'e özel başlık, b çatı sayfanın başlığı. Alt bilgideki slogan
+# seçilen başlıktır (kullanıcı isteği, tur 1); fiyat sayfasının alt bilgisi de aynı grubu taşır (yap_f.py, disa_aktar.py seçimi izletir).
+H1_GRUP = {'k': 'h1', 'ad': 'Açılış başlığı (alt bilgideki slogan da)', 'hedef': '.hero', 'oneri': 'a',
+           'sec': [['a', "Moyo Ebeveyn'e özel"], ['b', 'Çatı sayfayla aynı (bugünkü)']]}
 ONIZ = [
+    H1_GRUP,
     {'k': 'alt', 'ad': 'Açılış alt satırı', 'hedef': '.hero', 'oneri': 'a',
      'sec': [['a', 'Planlayın, kaydedin, görün'], ['b', 'Yapar, oyunda işaretler; siz kaydedersiniz'], ['c', 'Tek kısa cümle']]},
     {'k': 'anim', 'ad': 'Açılış görseli', 'hedef': '.hero', 'oneri': 'a',
@@ -114,7 +119,7 @@ def alt(sayfa):
     simdi = ' aria-current="page"' if sayfa == 'fiyat' else ''
     return f'''<footer>
   <div class="wrap">
-    <div class="about"><a class="logo" href="{a or "#top"}" aria-label="Moyo Ebeveyn ana sayfa">{LOGO}</a><p>{E["altbilgi"]}</p></div>
+    <div class="about"><a class="logo" href="{a or "#top"}" aria-label="Moyo Ebeveyn ana sayfa">{LOGO}</a><p class="slogan">{var("h1", E["h1"])}</p></div>
     <div><h2 class="fh">Ürün</h2><ul><li><a href="{a}#nasil">Nasıl çalışır</a></li><li><a href="{FIYAT}"{simdi}>Fiyat</a></li><li><a href="{a}#sss">Sık sorulanlar</a></li><li><a href="{EKO}">Moyo ekosistemi</a></li></ul></div>
     <div><h2 class="fh">Hesap</h2><ul><li><a href="{APP}#giris">Giriş yap</a></li><li><a href="{APP}#kayit">Ücretsiz deneyin</a></li><li><a href="{MERCEK}">Uzmanlar için</a></li></ul></div>
     <div><h2 class="fh">Kurumsal</h2><ul><li><a href="{HAKKIMIZDA}">Hakkımızda</a></li><li><a href="{GUVEN}">Güvenlik ve gizlilik</a></li><li><a href="{SITE}destek">Destek</a></li></ul></div>
@@ -259,14 +264,15 @@ def medya(a):
             + ''.join(gorsel(a['gorsel_anim_bc'], f' data-var="anim:{v}"{gizli(v)}') for v in ('b', 'c')))
 pan = ''.join(f'''        <div class="nc-p" role="tabpanel" id="nc-p{k}" aria-labelledby="nc-t{k}"{"" if k == 0 else " hidden"}>
           <div class="nc-text"><p class="step-k">{e(a["ust"])}</p><h3>{e(a["baslik"])}</h3><p>{e(a["metin"])}</p><p class="nc-apps">{"".join(chip(x) for x in a["uygulama"])}</p></div>
-          <div class="nc-media">{medya(a)}</div>
+          <div class="nc-media{" genis" if a["gorsel"][0] == "genis" else ""}">{medya(a)}</div>
         </div>
 ''' for k, a in enumerate(ADIM))
 
 # ---------- Neden Moyo: üç "neden" kartı ----------
 # Seçenek başına bir başlık ve bir kart listesi (data-var="neden:<değer>"); başlığın altındaki giriş cümlesi hepsinde aynı.
 ND = E['neden']
-kart = lambda k, t, p, r: f'<li><span class="ic">{SVG(I[k])}</span>{f"<span class=\"nd-rozet\">{e(r)}</span>" if r else ""}<h3>{e(t)}</h3><p>{e(p)}</p></li>'
+bagla = lambda t: re.sub(r' (\S+)$', '\u00a0\\1', t) if t.count(' ') >= 2 else t   # son iki sözcük aynı satırda (19 Kasım QA)
+kart = lambda k, t, p, r: f'<li><span class="ic">{SVG(I[k])}</span>{f"<span class=\"nd-rozet\">{e(r)}</span>" if r else ""}<h3>{e(bagla(t))}</h3><p>{e(p)}</p></li>'
 neden_bas = var('neden', {v: e(o['baslik']) for v, o in ND.items()})
 neden = ''.join(f'<ul class="nd" data-var="neden:{v}"{"" if v == ONERI["neden"] else " hidden"}>{"".join(kart(*x) for x in o["kartlar"])}</ul>' for v, o in ND.items())
 ekosis = ''.join(f'<div class="eko"><img src="{APPS[k][0]}" alt="" width="48" height="48"><h3>{APPS[k][1]}</h3><p>{e(p)}</p></div>' for k, p in E['ekosistem'])
@@ -280,7 +286,7 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
     <div class="wrap wide mhero">
       <div class="mhero-yazi">
         <p class="eyebrow">Ebeveynler için</p>
-        <h1 id="h-hero">{E["h1"]}</h1>
+        <h1 id="h-hero">{var("h1", E["h1"])}</h1>
         <p class="sub">{var("alt", E["alt"])}</p>
         <div class="actions"><a class="btn btn-cta" href="{APP}#kayit">Ücretsiz deneyin</a><a class="btn btn-line" href="#nasil">Nasıl çalışır?</a></div>
         <p class="fine">{E["ince"]}</p>
@@ -299,6 +305,7 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
       <div class="head"><p class="eyebrow">Nasıl çalışır</p><h2 id="h-nasil">{e(E["nasil"])}</h2></div>
       <div class="nc" data-nc>
         <div class="nc-tabs" role="tablist" aria-label="Moyo'nun adımları">{tabs}</div>
+        <p class="nc-etiket" aria-hidden="true">{e(ADIM[0]["sekme"])}</p>
 {pan}      </div>
     </div>
   </section>
