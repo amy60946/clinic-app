@@ -11,7 +11,7 @@
   var each = function (list, fn) { Array.prototype.forEach.call(list, fn); };
   var izle = function (mq, fn) { if (mq.addEventListener) mq.addEventListener('change', fn); else if (mq.addListener) mq.addListener(fn); };
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-  var dar = window.matchMedia('(max-width: 700px)');
+  var dar = window.matchMedia('(max-width: 520px)');   // m/moyo.css ile aynı: dar sahne
   var depo = {
     al: function (k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
     yaz: function (k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* yok say */ } }

@@ -166,7 +166,8 @@
 .mb-etk { z-index: 4; padding: 5px 12px; border-radius: var(--r-pill); background: var(--c-hero); border: 1.5px solid var(--c-cta); color: var(--c-on-dark);
   font-size: 13.5px; line-height: 1.25; font-weight: 700; white-space: nowrap; }
 
-@media (max-width: 700px) {
+@media (max-width: 520px) {
+  .ma-kutu { max-width: 400px; margin-inline: auto; }
   .ma-sahne { aspect-ratio: var(--da); }
   .ma-oyun, .ma-tel, .ma-halka, .ma-tik, .ma-no, .mb-etk, .ma-etk { left: var(--dx); top: var(--dy); }
   .ma-oyun, .ma-tel, .ma-halka { width: var(--dw); }

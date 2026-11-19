@@ -126,7 +126,7 @@ def alt(sayfa):
 
 # ---------- Açılış görseli: oyun (Moyo Oyun) ile ebeveyn uygulaması (Moyo Ebeveyn) arasındaki ilişki ----------
 # Sahne iki ölçüde çizilir (tek kaynak SAHNE): geniş (620×470: oyun solda, telefon sağda oyunun sağdaki "Oyun görevleri"
-# panelini örter) ve dar (350×494, ≤ 700 px: oyun üstte, telefon altta ortada, oyunun alt satırlarını örter). Her parça
+# panelini örter) ve dar (350×494, ≤ 520 px: oyun üstte, telefon altta ortada, oyunun alt satırlarını örter). Her parça
 # sahne biriminde (x, y, g, y) kutu; CSS değişkenlerine yüzde olarak yazılır (--gx… geniş, --dx… dar). Ekran içi noktalar
 # gerçek görüntülerden ölçüldü: e-rutinler "Dişlerini fırçala" satırı 30–570 × 637–748 (600×1298), e-onay "Onayla"
 # 342–568 × 1160–1245, c-oyun-liste ilk satır 85–815 × 150–243 ve "Yaptım" 678–802 × 160–197 (1200×554).
