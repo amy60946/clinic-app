@@ -56,3 +56,21 @@ Görsel inceleme alt ajanda (kural 8).
 - **Canlıya:** `disa_aktar.py` yeni dosyaları (`v4.css`, `eko.js`, `menu.js`) ve yeni alt bilgiyi taşır; çalıştırmak ve parent-app'e göndermek kullanıcı onayıyla.
 
 **Düzen aracı kaydı işlendi (18 Kasım 2026):** kullanıcının geniş ekran ayarı (`duzen/cati-masa`, 17 Kasım 21:31 UTC: giriş bandı başlık +16, metin +16, basamaklar +8; "Nasıl çalışır" +4 px) `v4.css` sonundaki `@media (min-width: 1025px)` bloğuna yazıldı; veritabanı kaydı boşaltıldı (işlenen değerler `islenen` alanında), araç yeni düzenden sıfırdan başlar. Tablet ve telefon için kayıt yoktu. Yeni kayıt gelince aynı yol: taban değer + fark → `v4.css`, iki önizlemeye `v4.css` yayınlanır, kayıt boşaltılır.
+
+## 18–19 Kasım 2026 turu (kullanıcı geri bildirimi, üç sayfa; önizlemede, canlıya alınmadı)
+
+Seçenekler ve önerilerin gerekçesi: belge https://claude.ai/artifact/U6z9HW9Zv8qfGnJBwG91SX.
+
+- **Önizleme seçici sözleşmesi `oniz.js`:** sayfa `<head>`'de `#oniz-gruplar` JSON'u (grup anahtarı, ad, hedef, öneri, seçenekler) taşır;
+  alternatif parçalar `data-var="<grup>:<değer>"`, seçili değer `<html data-v-<grup>>`. Kabuk `host.html` "Alternatifler" panelinden seçtirir,
+  "Seçimlerimi kopyala" özet verir (seçim tarayıcıda `moyo.oniz.v1`). Canlıya bu parçalar gitmez: `disa_aktar.py` seçileni bırakır
+  (varsayılan öneri; başka seçim `secim.json`: `{"c.html": {"dongu6": "b"}}`), öbürlerini siler.
+- **Çatı sayfa:** yeni katman `c-18.css` + `c-18.js` (1-2-3 tasarımları, kaydırma), `c-sema.py` (6. adımın döngü çizimleri), 11 grup
+  (`alt`, `sahne`, `dongu6`, `kapanis`, `gbas`, `gmet`, `uc`, `b1`, `b2`, `nk`, `urun`). 1–6 sahnesi ve telefon/tablet "Nasıl çalışır"
+  parmakla kaydırılır. Güven bölümü kalktı, alt bilgide Kurumsal sütunu.
+- **Moyo Ebeveyn:** `m/moyo.js` (oyun ↔ uygulama animasyonu, adımların kaydırılması), fiyat sayfası `yap_f.py` + `f-metin.json` → `ebeveyn-fiyat.html`.
+- **Kurumsal sayfalar:** `yap_k.py` + `k-metin.json` + `k.css` → `hakkimizda.html` (doğrulanmış literatür: kaynak özeti tur klasöründe,
+  yalnız "Doğrulandı" kaynaklar), `guven.html`. Üst ve alt bilgiyi `c.html`'den alır: çatı sayfa değişince `python3 yap_k.py`.
+  `k-sitemap.xml` / `k-robots.txt` canlıda `/sitemap.xml` / `/robots.txt`.
+- **Canlı yollar:** `/`, `/ebeveyn/`, `/ebeveyn/fiyat/`, `/hakkimizda/`, `/guven/` (`disa_aktar.py` `SAYFA`, `YOL`). Site Cloudflare Access
+  kilidinin arkasında olduğu için arama motorları kilit kalkana kadar okuyamaz.

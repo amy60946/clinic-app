@@ -238,3 +238,29 @@
 .sayfa-moyo footer .about p { max-width: 30ch; line-height: 1.5; }
 @media (max-width: 1000px) { .sayfa-moyo footer .wrap { grid-template-columns: repeat(4, minmax(0, 1fr)); } .sayfa-moyo footer .about { grid-column: 1 / -1; } }
 @media (max-width: 640px) { .sayfa-moyo footer .wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 20px; padding-top: 56px; } }
+
+/* ---------- Fiyat sayfası (ebeveyn-fiyat.html; yapı Mercek sitesinin fiyat sayfası) ---------- */
+.sayfa-fiyat .ph .sub { max-width: 700px; }
+.fy-deneme { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 12px; max-width: 856px; margin: 0 auto 32px; padding: 16px 22px;
+  border-radius: var(--r-md); background: var(--c-ok-bg); color: var(--c-ink); text-align: center; font-size: 16px; line-height: 1.45; }
+.fy-deneme b { font-weight: 800; }
+.fy-deneme span { color: var(--c-text-2); }
+.plan .amount.fy-donem { font-size: 28px; line-height: 1.2; }
+.plan .per.fy-yok { min-height: 0; color: var(--c-text-2); }
+.fy-yenile { margin-top: 12px; font-size: 14px; line-height: 1.45; color: var(--c-text-3); }
+.fy-oyun { display: flex; align-items: center; gap: 18px; max-width: 856px; margin: 24px auto 0; padding: 22px 26px; background: var(--c-bg); border: 1px solid var(--c-line); border-radius: var(--r-md); }
+.fy-oyun img { flex: none; border-radius: 14px; }
+.fy-oyun h2 { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 22px; line-height: 1.2; }
+.fy-oyun h2 span { padding: 3px 10px; border-radius: var(--r-pill); background: var(--c-cta); color: var(--c-cta-text); font-size: 13px; line-height: 1.3; letter-spacing: 0; font-weight: 800; }
+.fy-oyun p { margin-top: 6px; color: var(--c-text-2); font-size: 16px; line-height: 1.5; }
+.fy-her { max-width: 856px; margin: 32px auto 0; text-align: center; }
+.fy-her h2 { font-size: 13px; line-height: 1.3; letter-spacing: .08em; text-transform: uppercase; color: var(--c-text-2); font-weight: 700; }
+.fy-her ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 10px; margin-top: 12px; }
+.fy-her li { padding: 7px 14px; border-radius: var(--r-pill); background: var(--c-bg); border: 1px solid var(--c-line); font-size: 14.5px; line-height: 1.35; font-weight: 600; color: var(--c-ink); }
+.fy-tnot { margin-top: 12px; font-size: 16px; line-height: 1.5; color: var(--c-text-2); }
+.cmp td:not(.yes):not(.no) { font-weight: 700; }
+.cmp .no svg { width: 18px; height: 18px; margin-inline: auto; fill: none; stroke: var(--c-text-3); stroke-width: 2.2; stroke-linecap: round; }
+@media (max-width: 860px) { .fy-oyun, .fy-deneme { max-width: 520px; } }
+@media (max-width: 480px) { .fy-oyun { flex-direction: column; align-items: flex-start; padding: 20px; gap: 12px; } .fy-deneme { padding: 14px 16px; } }
+.sayfa-fiyat .plan .price { min-height: 44px; align-items: flex-end; }
+.sayfa-fiyat .plan .per { min-height: 2.9em; }

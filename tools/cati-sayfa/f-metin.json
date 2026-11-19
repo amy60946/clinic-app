@@ -2,54 +2,143 @@
  "_kaynak": "Yalnız doğrulanmış olgular (18 Kasım 2026). Deneme 14 gün, kartsız, bitince kendiliğinden ücret yok: ortak sozlesme/durumlar.md P12, proposed/20261118200000_parent_trial_14.sql başlığı, parent-app src/screens/PaywallScreen.tsx. Ücretsiz plan sınırları: ortak migrations/20261022110000_subscriptions.sql (3 etkin adım, 1 çocuk; davranış kaydı, mesaj kapalı), 20261022130000_sun_stones_rewards.sql (ödüller), parent-app src/data/plans.ts freeFeatures. Premium aylık/yıllık, App Store, yenileme ve iptal: durumlar.md P12, PaywallScreen.tsx yasal metni. Web'de satış yok, üyelik web'de açılır: parent-app src/lib/purchases.web.ts. Davet kodu 21 gün: durumlar.md 'Aile davet et', akislar.md 19 (aile davet kodu; uzman daveti süreyi değiştirmez). FİYAT: kararlaştırılmış rakam yok (parent-app src/data/plans.ts YER TUTUCU); rakam yazılmaz.",
  "baslik": "Moyo Ebeveyn fiyatları",
  "aciklama": "Moyo Oyun ücretsiz. Moyo Ebeveyn 14 gün ücretsiz, kart gerekmez; sonra ücretsiz plan ya da aylık veya yıllık Premium. Planları karşılaştırın.",
- "h1": "Moyo Oyun ücretsiz. Moyo Ebeveyn 14&nbsp;gün ücretsiz.",
+ "h1": "Moyo&nbsp;Oyun ücretsiz. Moyo&nbsp;Ebeveyn 14&nbsp;gün ücretsiz.",
  "alt": "Deneme bütün özelliklerle açılır, kart bilgisi gerekmez. Deneme bitince kendiliğinden ücret alınmaz: ücretsiz planla devam eder ya da Premium'u seçersiniz.",
- "deneme": ["14 gün ücretsiz deneme", "Premium'un bütün özellikleri açık, kart bilgisi gerekmez. Süre bitince kendiliğinden ücret alınmaz."],
+ "deneme": [
+  "14 gün ücretsiz deneme",
+  "Premium'un bütün özellikleri açık, kart bilgisi gerekmez. Süre bitince kendiliğinden ücret alınmaz."
+ ],
  "fiyat_yok": "Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak.",
  "ucretsiz": {
   "ad": "Ücretsiz plan",
   "kim": "Deneme bitince, süre sınırı olmadan",
-  "not": "Seçmeniz gerekmez: deneme bitip Premium'u seçmezseniz Moyo Ebeveyn bu planla devam eder.",
+  "not": "Deneme bitip Premium'u seçmezseniz Moyo Ebeveyn bu planla devam eder.",
   "tutar": "Ücretsiz",
   "birim": "",
   "alt": "Verileriniz silinmez",
-  "madde": ["1 çocuk", "En çok 3 etkin rutin adımı", "Adım onayı ve Moyo Oyun bağlantısı", "Uzmanınızla paylaşım (Moyo Uzman)", "Eşinizle aynı aileden yönetme"]
+  "madde": [
+   "1 çocuk",
+   "En çok 3 etkin rutin adımı",
+   "Adım onayı ve Moyo Oyun bağlantısı",
+   "Uzmanınızla paylaşım (Moyo Uzman)",
+   "Eşinizle aynı aileden yönetme"
+  ]
  },
  "premium": {
   "ad": "Premium",
   "kim": "Bütün aile için tek abonelik",
   "not": "App Store'dan alınır, aynı hesapla web'de de açılır.",
   "tutar": "Aylık ya da yıllık",
-  "madde": ["Ücretsiz plandaki her şey", "Çocuk ve rutin adımı sınırı yok", "Davranış kaydı", "Ödüller: siz belirlersiniz", "Çocuğunuzla mesajlaşma", "Eşiniz de aynı üyelikle kullanır"],
+  "madde": [
+   "Ücretsiz plandaki bütün özellikler",
+   "Çocuk ve rutin adımı sınırı yok",
+   "Davranış kaydı",
+   "Ödüller: siz belirlersiniz",
+   "Çocuğunuzla mesajlaşma",
+   "Eşiniz de aynı üyelikle kullanır"
+  ],
   "yenileme": "Dönem sonunda aynı süreyle kendiliğinden yenilenir; App Store'dan dilediğiniz an iptal edersiniz."
  },
- "oyun": ["Moyo Oyun", "Ücretsiz", "Çocuğunuzun iPhone ya da iPad'inde. Rutin adımları macera olarak görünür; reklam yok. Moyo Ebeveyn'deki kodla bağlanır."],
- "her_iki": ["14 gün deneme, kart bilgisi gerekmez", "Deneme bitince kendiliğinden ücret alınmaz", "Premium App Store'dan alınır", "Dönem sonunda kendiliğinden yenilenir", "App Store'dan iptal"],
+ "oyun": [
+  "Moyo Oyun",
+  "Ücretsiz",
+  "Çocuğunuzun iPhone ya da iPad'inde. Rutin adımları macera olarak görünür; reklam yok. Moyo Ebeveyn'deki kodla bağlanır."
+ ],
+ "her_iki": [
+  "Kart bilgisi gerekmez",
+  "Deneme bitince kendiliğinden ücret alınmaz",
+  "Premium App Store'dan alınır, web'de de açılır",
+  "Dönem sonunda kendiliğinden yenilenir",
+  "App Store'dan dilediğiniz an iptal"
+ ],
  "tablo_not": "Deneme süresince (14 gün) Premium'un bütün özellikleri açıktır.",
  "tablo": [
-  ["Çocuk ve rutin", [
-   ["Çocuk sayısı", "1", "Sınır yok"],
-   ["Etkin rutin adımı", "En çok 3", "Sınır yok"],
-   ["Adım onayı (Yaptım → onay)", true, true],
-   ["Moyo Oyun bağlantısı", true, true]
-  ]],
-  ["Takip", [
-   ["Davranış kaydı", false, true],
-   ["Ödüller (siz belirlersiniz)", false, true],
-   ["Çocuğunuzla mesajlaşma", false, true]
-  ]],
-  ["Aile ve uzman", [
-   ["Eşinizle aynı aileden yönetme", true, true],
-   ["Uzmanınızla paylaşım (Moyo Uzman)", true, true]
-  ]]
+  [
+   "Çocuk ve rutin",
+   [
+    [
+     "Çocuk sayısı",
+     "1",
+     "Sınır yok"
+    ],
+    [
+     "Etkin rutin adımı",
+     "En çok 3",
+     "Sınır yok"
+    ],
+    [
+     "Adım onayı (Yaptım → onay)",
+     true,
+     true
+    ],
+    [
+     "Moyo Oyun bağlantısı",
+     true,
+     true
+    ]
+   ]
+  ],
+  [
+   "Takip",
+   [
+    [
+     "Davranış kaydı",
+     false,
+     true
+    ],
+    [
+     "Ödüller (siz belirlersiniz)",
+     false,
+     true
+    ],
+    [
+     "Çocuğunuzla mesajlaşma",
+     false,
+     true
+    ]
+   ]
+  ],
+  [
+   "Aile ve uzman",
+   [
+    [
+     "Eşinizle aynı aileden yönetme",
+     true,
+     true
+    ],
+    [
+     "Uzmanınızla paylaşım (Moyo Uzman)",
+     true,
+     true
+    ]
+   ]
+  ]
  ],
  "sss": [
-  ["Deneme bitince ne olur?", "Kendiliğinden ücret alınmaz. Moyo Ebeveyn ücretsiz planla devam eder: 1 çocuk ve en çok 3 etkin rutin adımı; davranış kaydı, ödüller ve mesajlaşma kapanır. Verileriniz silinmez, dilediğiniz an Premium'a geçebilirsiniz."],
-  ["Kart bilgisi gerekir mi?", "Deneme için gerekmez. Premium'u seçerseniz ödeme iPhone ya da iPad'deki Moyo Ebeveyn'den, App Store üzerinden alınır; üyeliğiniz aynı hesapla web'de de açılır."],
-  ["Premium nasıl yenilenir, nasıl iptal ederim?", "Premium aylık ya da yıllık alınır; dönem bitmeden en az 24 saat önce iptal edilmezse aynı süreyle kendiliğinden yenilenir. iPhone'da Ayarlar › adınız › Abonelikler'den ya da uygulamadaki \"Aboneliği yönet\"ten dilediğiniz an iptal edersiniz; iptal, ödenmiş dönemin sonunda geçerli olur."],
-  ["Tek abonelik kaç çocuğu ve ebeveyni kapsar?", "Abonelik aileye bağlıdır: ailenizdeki bütün çocuklar ve aileye katılan eşiniz aynı üyelikle kullanır."],
-  ["Uzman daveti ya da davet kodu deneme süresini değiştirir mi?", "Uzmanınızın daveti deneme süresini değiştirmez; deneme 14 gündür. Moyo Ebeveyn kullanan bir aileden 8 karakterli davet kodu aldıysanız ve Moyo'ya yeni başladıysanız deneme 21 gün olur."],
-  ["Moyo Oyun ücretli mi?", "Hayır. Moyo Oyun ücretsizdir ve reklam göstermez. Çocuğunuzun cihazına kurulur, Moyo Ebeveyn'deki kodla bağlanır."]
+  [
+   "Deneme bitince ne olur?",
+   "Kendiliğinden ücret alınmaz. Moyo Ebeveyn ücretsiz planla devam eder: 1 çocuk ve en çok 3 etkin rutin adımı; davranış kaydı, ödüller ve mesajlaşma kapanır. Verileriniz silinmez, dilediğiniz an Premium'a geçebilirsiniz."
+  ],
+  [
+   "Kart bilgisi gerekir mi?",
+   "Deneme için gerekmez. Premium'u seçerseniz ödeme iPhone ya da iPad'deki Moyo Ebeveyn'den, App Store üzerinden alınır; üyeliğiniz aynı hesapla web'de de açılır."
+  ],
+  [
+   "Premium nasıl yenilenir, nasıl iptal ederim?",
+   "Premium aylık ya da yıllık alınır; dönem bitmeden en az 24 saat önce iptal edilmezse aynı süreyle kendiliğinden yenilenir. iPhone'da Ayarlar › adınız › Abonelikler'den ya da uygulamadaki \"Aboneliği yönet\"ten dilediğiniz an iptal edersiniz; iptal, ödenmiş dönemin sonunda geçerli olur."
+  ],
+  [
+   "Tek abonelik kaç çocuğu ve ebeveyni kapsar?",
+   "Abonelik aileye bağlıdır: ailenizdeki bütün çocuklar ve aileye katılan eşiniz aynı üyelikle kullanır."
+  ],
+  [
+   "Uzman daveti ya da davet kodu deneme süresini değiştirir mi?",
+   "Uzmanınızın daveti deneme süresini değiştirmez; deneme 14 gündür. Moyo Ebeveyn kullanan bir aileden 8 karakterli davet kodu aldıysanız ve Moyo'ya yeni başladıysanız deneme 21 gün olur."
+  ],
+  [
+   "Moyo Oyun ücretli mi?",
+   "Hayır. Moyo Oyun ücretsizdir ve reklam göstermez. Çocuğunuzun cihazına kurulur, Moyo Ebeveyn'deki kodla bağlanır."
+  ]
  ],
  "kapanis": "14 gün ücretsiz deneyin",
  "kapanis_ince": "Moyo Ebeveyn 14 gün ücretsiz, kart bilgisi gerekmez; deneme bitince kendiliğinden ücret alınmaz. Premium'u seçerseniz ücret App Store üzerinden alınır ve dönem sonunda kendiliğinden yenilenir."

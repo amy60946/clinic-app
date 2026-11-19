@@ -5,7 +5,8 @@
    2) Sahnenin zemini: a açık panel · b koyu panel · c düz (bugünkü); bir kezlik giriş hareketi
    3) 6. adım görseli: şema (c-sema.py; a çember · b yarım halka · c haftalık şerit)
    4) 1-2-3 kartları (.uc): a renkli üç kart · b beyaz ikonlu kartlar · c büyük rakamlı kartlar · d bugünkü
-   5) Kompakt "Nasıl çalışır": kaydırma, tablette sekme düzeni */
+   5) Kompakt "Nasıl çalışır": kaydırma, tablette sekme düzeni (adım değişince yükseklik sabit, sekmeler ortada)
+   6) Küçük düzeltmeler: cümle sınırında satır, kapanış cümlesi, kart başlık hizası, hareket azaltmada 2. adım görseli, tablette uygulama kartları */
 
 /* ---------- 0) Alternatifler ---------- */
 [data-var][hidden] { display: none !important; }
