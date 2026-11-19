@@ -82,3 +82,12 @@ onay ekranı: uzman, paylaşılacak çocuk, Uzmanla bağlan; `cek/moyo.json` `c-
 geniş çizimi `.d-gen`); yörüngedeki nokta `transform` ile döner (harf kırıntısı kalmaz), dar çizimlerde yazılar 390 px'te ≥ 12 px, üç ok görünür.
 Moyo Ebeveyn: sekme çubuğu tam / kısa düzen (`m/moyo.js` ölçer), 2. adımın yatay görseli, yeni `h1` grubu (a özel başlık, b çatıyla aynı;
 alt bilgideki slogan seçilen başlık, fiyat sayfasında da; `disa_aktar.py` fiyat sayfasına ebeveyn.html'nin seçimini geçirir).
+
+**Tur 3–6 (19 Kasım 2026, kullanıcının seçimleri; önizlemede):** seçilen her seçenek kalıcı oldu, gruplar silindi; **hiçbir sayfada seçenek
+kalmadı** (`#oniz-gruplar` / `oniz.js` yalnız gerektiğinde geri eklenir; sözleşme aynı, kabuktaki seçim anahtarı `moyo.oniz.v2`, geçersiz eski
+seçimleri yok sayar). Çatı: 6. adım yörünge (`c-sema.py` yalnız bu çizim), ayrı ürün bölümü yok, ekranlar 1-2-3 kartlarının içinde.
+Moyo Ebeveyn: "Neden Moyo" üç tam ekran telefon + telefondan taşan büyütülmüş satır kartı (ince lacivert çizgi, yeşil yok; görseller
+`img/e-nz-plan|not|uzman.webp`, 780 × 1688), beş adımda "Zorlandığı anı kaydedin" (`img/e-davranis.webp`); fiyat sayfası yer tutucu
+349 TL / ay. Hakkımızda (Atlassian 'Company' kaydı örneğiyle beş bölüm): misyon + gerçek ekranlar, lacivert bantta üç kartlı döngü (çizgiler
+görününce çizilir) + yöntem uyarısı + kaynaklar, Neden varız (hafıza / kayıt hafta çizgisi), ekip ve hikâye yer tutucusu (ONIZ, canlıya
+gitmez), iletişim kartları.

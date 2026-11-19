@@ -35,11 +35,10 @@
       }
     ],
     "dongu": {
-      "_not": "Açılışın altındaki döngü (tur 4, tur 5'te lacivert banda alındı): üç durak (Çocuk, Ebeveyn, Uzman) gerçek ürün ekranlarıyla; her durakta ne olduğu ve dayandığı araştırma (kaynak işaretli). Ekranlar img/k-*.webp (c-oyun-liste, moyo-egitim, mercek-davranis kırpımları; dar kartta Uzman için yalnız Öncül ve Sonuç sütunları: k-uzman-dar). gecisler: Çocuk → Ebeveyn, Ebeveyn → Uzman, Uzman → Çocuk. merkez yalnız b düzeninde görünür. Kural: çocuk adımı gerçek hayatta yapar, oyunda işaretler; araştırma cümleleri genel bilgidir, ürünün etkisi gibi sunulmaz (hukuk/45 §1.4), altındaki not bunu söyler.",
+      "_not": "Açılışın altındaki döngü (tur 4; tur 5'te lacivert banda alındı, tur 6'da bu düzen kalıcı oldu): üç durak (Çocuk, Ebeveyn, Uzman) gerçek ürün ekranlarıyla; her durakta ne olduğu ve dayandığı araştırma (kaynak işaretli). Ekranlar img/k-*.webp (c-oyun-liste, moyo-egitim, mercek-davranis kırpımları; dar kartta Uzman için yalnız Öncül ve Sonuç sütunları: k-uzman-dar). gecisler: Çocuk → Ebeveyn, Ebeveyn → Uzman, Uzman → Çocuk. Kural: çocuk adımı gerçek hayatta yapar, oyunda işaretler; araştırma cümleleri genel bilgidir, ürünün etkisi gibi sunulmaz (hukuk/45 §1.4), altındaki not bunu söyler.",
       "etiket": "Üç uygulama",
       "baslik": "Adımdan kayda, kayıttan öneriye",
       "alt": "Her uygulamanın yaptığı iş, araştırmalarda incelenmiş bir yönteme dayanır.",
-      "merkez": "Düzen ve kayıt",
       "ars_etiket": "Araştırmalar",
       "istege_etiket": "İsteğe bağlı",
       "duraklar": [

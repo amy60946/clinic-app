@@ -29,10 +29,6 @@
 <script>document.documentElement.classList.add('js');</script>
 <noscript><style>.nc-p[hidden] { display: grid !important; margin-bottom: 40px; }</style></noscript>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://moyoapp.com.tr/#kurum","name":"Moyo","url":"https://moyoapp.com.tr/","logo":"https://mercek.moyoapp.com.tr/assets/icon.png"},{"@type":"WebSite","@id":"https://mercek.moyoapp.com.tr/#site","url":"https://mercek.moyoapp.com.tr/","name":"Moyo Mercek","inLanguage":"tr","publisher":{"@id":"https://moyoapp.com.tr/#kurum"}},{"@type":"SoftwareApplication","@id":"https://mercek.moyoapp.com.tr/#uygulama","name":"Moyo Mercek","url":"https://mercek.moyoapp.com.tr/","applicationCategory":"BusinessApplication","operatingSystem":"Web, iOS, iPadOS","inLanguage":"tr","description":"Çocuk ve aile uzmanları için ebeveyn eğitimi ve ev programı takip platformu. Ailenin evdeki kayıtları yalnızca ebeveynin izniyle sizinle paylaşılır.","publisher":{"@id":"https://moyoapp.com.tr/#kurum"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Aile Moyo kullanmıyorsa?","acceptedAnswer":{"@type":"Answer","text":"Davet e-postası kurulumu anlatır. Ebeveyn çocuğunu ekler ve paylaşımı onaylar."}},{"@type":"Question","name":"Ebeveyn paylaşımı durdurursa?","acceptedAnswer":{"@type":"Answer","text":"Çocuğun verisine erişiminiz o an biter. Kendi notlarınız klinikte kalır."}},{"@type":"Question","name":"Hangi cihazlarda çalışır?","acceptedAnswer":{"@type":"Answer","text":"Moyo Mercek web'de, iPad'de ve iPhone'da çalışır. Aynı hesapla hepsinde oturum açarsınız."}},{"@type":"Question","name":"Ödeme nereden yapılır?","acceptedAnswer":{"@type":"Answer","text":"iPhone ya da iPad'deki Moyo Mercek'ten, App Store ile. Üyelik web'de de açılır. Deneme bitince hiçbir şey silinmez."}},{"@type":"Question","name":"Bireysel çalışıyorum, klinik açmam gerekir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Kayıtta \"Bireysel uzman\"ı seçin. Ekibiniz olursa Klinik paketine geçersiniz."}},{"@type":"Question","name":"Ekipte kim neyi görür?","acceptedAnswer":{"@type":"Answer","text":"Uzman kendi davet ettiği ve kendisine atanan aileleri görür. Klinik sahibi hepsini görür."}},{"@type":"Question","name":"Tanı koyar ya da puan verir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Göstergeler ev rutininin gözlem özetidir; karar uzmanındır."}}]}]}</script>
-<!-- ONIZ:BAS -->
-<script type="application/json" id="oniz-gruplar">[{"k":"pvurgu","ad":"Pano: üç bölümü gösterme","hedef":"#pano","oneri":"a","neden":"Alt başlıktaki üç ifade ile panodaki üç bölüm aynı renkte: cümlenin kendisi lejant olur, ayrıca açıklama yazısı gerekmez, aynı şey iki kez yazılmaz. Panonun üstüne yazı ya da büyüteç binmez, hiçbir kart kapanmaz; telefonda da aynı. b daha çok açıklar ama metin tekrar eder ve pano küçülür; c dikkat çeker ama hareketli, bir bölüm görünürken öteki ikisi soluk; d en sade ama renk bağı zayıf.","sec":[["a","Renkli başlık ve çerçeve, alt başlık lejant"],["b","Numaralı işaretler, yanda açıklama"],["c","Sırayla vurgu, altta açıklama"],["d","Yalın: başlıkta renkli çizgi"]]}]</script>
-<script src="assets/oniz.js"></script>
-<!-- ONIZ:SON -->
 </head>
 <body>
 <a class="skip" href="#main">Ana içeriğe geç</a>
@@ -176,17 +172,18 @@
         <p class="intro"><span class="pi n1">Sırası size gelenleri</span>, <span class="pi n2">ebeveynden yeni kayıt gelenleri</span> ve <span class="pi n3">bir süredir kaydı gelmeyenleri</span> ayrı&nbsp;ayrı görürsünüz.</p>
       </div>
       <!-- Pano: renkli başlıklar (19 Kasım 2026, tur 4; kullanıcı isteği: büyüteçler olmadı, ilgili başlıklar renkli bir göstergeyle
-           gösterilsin). Önizlemede "pvurgu": a öneri ve canlı düzen (alt başlıktaki üç ifade ve panodaki üç bölüm aynı renkte: başlıkta
-           fosforlu kalem, kartların çevresinde ince çizgi) · b numaralı işaretler ve yanda açıklama · c sırayla vurgu · d yalın çizgi.
-           Görsel assets/pano-2x.webp (2880 × 1800, pano kaydıyla aynı veri). İşaretler görselin üstünde, 1440 × 900 düzleminde --x/--y/--w/--h
-           ile yerleşir; dar ekranda görsel panoya kırpılır (--ox/--oy/--ow/--oh), işaretler kendiliğinden kayar. site.css "Pano: renkli başlıklar". -->
-      <figure class="pn pa" data-pn data-var="pvurgu:a">
+           gösterilsin; tur 6'da kullanıcı seçimiyle kalıcı, eski önizleme grubu "pvurgu" a). Alt başlıktaki üç ifade ve panodaki üç bölüm
+           aynı renkte: başlıkta fosforlu kalem, kartların solunda yalnızca ince renkli çizgi (tur 6, kullanıcı: çevresi çerçeve olmasın, içi
+           renklenmesin). Görsel assets/pano-2x.webp (2880 × 1800, pano kaydıyla aynı veri). İşaretler görselin üstünde, 1440 × 900 düzleminde
+           --x/--y/--w/--h ile yerleşir (sol çizgide --x kart grubunun sol kenarı, çizgi CSS'le onun hemen solunda); dar ekranda görsel panoya
+           kırpılır (--ox/--oy/--ow/--oh), işaretler kendiliğinden kayar. site.css "Pano: renkli başlıklar". -->
+      <figure class="pn" data-pn>
         <div class="pn-cer">
           <div class="pn-shot">
             <img src="assets/pano-2x.webp" alt="Moyo Mercek danışan panosu, örnek veriyle: Senin sıran, Ebeveynden yeni ve Sessiz kalanlar başlıkları altında altı danışan ve her birinin bekleyen işi." width="2880" height="1800" loading="lazy">
-            <span class="pn-o pa-k n1" style="--x:336;--y:204;--w:768;--h:214" aria-hidden="true"></span>
-            <span class="pn-o pa-k n2" style="--x:336;--y:444;--w:768;--h:200" aria-hidden="true"></span>
-            <span class="pn-o pa-k n3" style="--x:336;--y:669;--w:768;--h:203" aria-hidden="true"></span>
+            <span class="pn-o pa-k n1" style="--x:336;--y:204;--h:214" aria-hidden="true"></span>
+            <span class="pn-o pa-k n2" style="--x:336;--y:444;--h:200" aria-hidden="true"></span>
+            <span class="pn-o pa-k n3" style="--x:336;--y:669;--h:203" aria-hidden="true"></span>
             <span class="pn-o pa-h n1" style="--x:336;--y:183;--w:125;--h:21" aria-hidden="true"></span>
             <span class="pn-o pa-h n2" style="--x:336;--y:421;--w:161;--h:21" aria-hidden="true"></span>
             <span class="pn-o pa-h n3" style="--x:336;--y:648;--w:159;--h:21" aria-hidden="true"></span>
@@ -194,55 +191,6 @@
           <span class="pn-not">Örnek veri</span>
         </div>
       </figure>
-      <!-- ONIZ:BAS -->
-      <figure class="pn pb" data-var="pvurgu:b" hidden>
-        <div class="pn-cer">
-          <div class="pn-shot">
-            <img src="assets/pano-2x.webp" alt="Moyo Mercek danışan panosu, örnek veriyle: Senin sıran, Ebeveynden yeni ve Sessiz kalanlar başlıkları altında altı danışan ve her birinin bekleyen işi." width="2880" height="1800" loading="lazy">
-            <span class="pn-o pb-n n1" style="--x:333;--y:193.5" aria-hidden="true">1</span>
-            <span class="pn-o pb-n n2" style="--x:333;--y:431.5" aria-hidden="true">2</span>
-            <span class="pn-o pb-n n3" style="--x:333;--y:658.5" aria-hidden="true">3</span>
-          </div>
-          <span class="pn-not">Örnek veri</span>
-        </div>
-        <figcaption class="pb-l">
-          <p class="n1" style="--y:300"><i aria-hidden="true">1</i><b>Senin sıran</b><span class="sr">: </span><span>Sizden bir adım bekleyenler: incelenecek yanıt, taslak eğitim.</span></p>
-          <p class="n2" style="--y:533"><i aria-hidden="true">2</i><b>Ebeveynden yeni</b><span class="sr">: </span><span>Ebeveynin son 7 günde girdiği davranış kayıtları ve öneri kararları.</span></p>
-          <p class="n3" style="--y:760"><i aria-hidden="true">3</i><b>Sessiz kalanlar</b><span class="sr">: </span><span>Ebeveynden 7 gündür kayıt gelmeyenler.</span></p>
-        </figcaption>
-      </figure>
-      <figure class="pn pc" data-pc data-on="hepsi" data-var="pvurgu:c" hidden>
-        <div class="pn-cer">
-          <div class="pn-shot">
-            <img src="assets/pano-2x.webp" alt="Moyo Mercek danışan panosu, örnek veriyle: Senin sıran, Ebeveynden yeni ve Sessiz kalanlar başlıkları altında altı danışan ve her birinin bekleyen işi." width="2880" height="1800" loading="lazy">
-            <span class="pn-o pc-k n1" style="--x:336;--y:204;--w:768;--h:214" aria-hidden="true"></span>
-            <span class="pn-o pc-k n2" style="--x:336;--y:444;--w:768;--h:200" aria-hidden="true"></span>
-            <span class="pn-o pc-k n3" style="--x:336;--y:669;--w:768;--h:203" aria-hidden="true"></span>
-            <span class="pn-o pc-isik" aria-hidden="true"></span>
-          </div>
-          <span class="pn-not">Örnek veri</span>
-        </div>
-        <figcaption class="pc-l">
-          <button type="button" class="n1" data-n="1" aria-pressed="false"><i aria-hidden="true"></i><b>Senin sıran</b><span class="sr">: </span><span>Sizden bir adım bekleyenler: incelenecek yanıt, taslak eğitim.</span></button>
-          <button type="button" class="n2" data-n="2" aria-pressed="false"><i aria-hidden="true"></i><b>Ebeveynden yeni</b><span class="sr">: </span><span>Ebeveynin son 7 günde girdiği davranış kayıtları ve öneri kararları.</span></button>
-          <button type="button" class="n3" data-n="3" aria-pressed="false"><i aria-hidden="true"></i><b>Sessiz kalanlar</b><span class="sr">: </span><span>Ebeveynden 7 gündür kayıt gelmeyenler.</span></button>
-        </figcaption>
-      </figure>
-      <figure class="pn pd" data-var="pvurgu:d" hidden>
-        <div class="pn-cer">
-          <div class="pn-shot">
-            <img src="assets/pano-2x.webp" alt="Moyo Mercek danışan panosu, örnek veriyle: Senin sıran, Ebeveynden yeni ve Sessiz kalanlar başlıkları altında altı danışan ve her birinin bekleyen işi." width="2880" height="1800" loading="lazy">
-            <span class="pn-o pd-c n1" style="--x:325;--y:186;--h:228" aria-hidden="true"></span>
-            <span class="pn-o pd-c n2" style="--x:325;--y:424;--h:216" aria-hidden="true"></span>
-            <span class="pn-o pd-c n3" style="--x:325;--y:651;--h:217" aria-hidden="true"></span>
-            <span class="pn-o pd-u n1" style="--x:340;--y:203;--w:116" aria-hidden="true"></span>
-            <span class="pn-o pd-u n2" style="--x:340;--y:441;--w:152" aria-hidden="true"></span>
-            <span class="pn-o pd-u n3" style="--x:340;--y:668;--w:150" aria-hidden="true"></span>
-          </div>
-          <span class="pn-not">Örnek veri</span>
-        </div>
-      </figure>
-      <!-- ONIZ:SON -->
     </div>
   </section>
 

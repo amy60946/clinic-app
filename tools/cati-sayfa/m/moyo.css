@@ -227,7 +227,8 @@
 /* ---------- Neden Moyo: başlık, giriş ve üç "neden" (tur 5, 19 Kasım 2026: "Üç yakın çekim" yeniden) ----------
    Her neden kendi uzun panelinde: üstte küçük büyük harfli etiket, kısa başlık ve tek cümle (ortalı); altta telefonda uygulamanın bütün ekranı
    (kırpılmaz; panelin alt kenarı yalnızca telefonun altını keser). Ekranın vurgulanan şeridi aynı yerde, aynı görselden, 1,18 kat büyük bir
-   kart olarak telefonun iki kenarından taşar (kullanıcının örnek görselleri: satır ekrandan kalkmış gibi; yumuşak gölge, ince yeşil çizgi).
+   kart olarak telefonun iki kenarından taşar (kullanıcının örnek görselleri: satır ekrandan kalkmış gibi; yumuşak gölge, çok ince, düşük
+   opaklıkta lacivert çizgi; 19 Kasım tur 6, kullanıcı: "yeşil olmasın, daha minimal"; vurguda yeşil yok, kalkışı gölge verir).
    Çatı sayfanın 1-2-3 kartlarından ayrı: üç panel tek ve açık renkte (renkli zemin, numara ve sola dayalı yazı yok), telefon kartın büyük
    kısmını kaplar, vurgu kartı telefonun dışına taşar. */
 .sayfa-moyo #degerler { background: #EDF0F8; }
@@ -263,11 +264,11 @@
 .nzp-ekran img { display: block; width: 100%; height: auto; max-width: none; }
 /* Vurgu kartı: telefon kutusunda şeridin yerinde (yüzdeler yap_m.py'den), içinde aynı görsel; --k0 = başlangıçta ekrandaki şerit kadar */
 .nzp-cikma { position: absolute; z-index: 1; overflow: hidden; border-radius: clamp(16px, calc(var(--tw) * .085), 24px); background: #F4F6F8;
-  box-shadow: 0 0 0 1.5px #2FD158, 0 22px 44px -12px rgba(22, 17, 58, .38), 0 6px 14px rgba(22, 17, 58, .12);
+  box-shadow: 0 0 0 1px rgba(22, 17, 58, .2), 0 22px 44px -12px rgba(22, 17, 58, .38), 0 6px 14px rgba(22, 17, 58, .12);
   transition: transform .8s cubic-bezier(.2, .75, .25, 1), box-shadow .8s ease; }
 .nzp-cikma img { position: absolute; left: 0; width: 100%; height: auto; max-width: none; }
-.nzp.bekle .nzp-cikma { transform: scale(var(--k0)); box-shadow: 0 0 0 1.5px rgba(47, 209, 88, 0), 0 0 0 rgba(22, 17, 58, 0), 0 0 0 rgba(22, 17, 58, 0); }
-@media (prefers-reduced-motion: reduce) { .nzp-cikma { transition: none; } .nzp.bekle .nzp-cikma { transform: none; box-shadow: 0 0 0 1.5px #2FD158, 0 22px 44px -12px rgba(22, 17, 58, .38), 0 6px 14px rgba(22, 17, 58, .12); } }
+.nzp.bekle .nzp-cikma { transform: scale(var(--k0)); box-shadow: 0 0 0 1px rgba(22, 17, 58, 0), 0 0 0 rgba(22, 17, 58, 0), 0 0 0 rgba(22, 17, 58, 0); }
+@media (prefers-reduced-motion: reduce) { .nzp-cikma { transition: none; } .nzp.bekle .nzp-cikma { transform: none; box-shadow: 0 0 0 1px rgba(22, 17, 58, .2), 0 22px 44px -12px rgba(22, 17, 58, .38), 0 6px 14px rgba(22, 17, 58, .12); } }
 
 @media (max-width: 1199px) {
   .nzp-uc { --tw: 260px; grid-template-columns: repeat(2, minmax(0, 1fr)); }

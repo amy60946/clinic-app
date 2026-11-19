@@ -264,7 +264,6 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
   };
 
   var OK_SOL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg>', OK_SAG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 5.5L16 12l-6.5 6.5"/></svg>';
-  var kutular = [];
   var sekmeler = function (box, ad) {
     var hepsi = Array.prototype.slice.call(box.querySelectorAll('[role=tab]'));
     var serit = box.querySelector('[role=tablist]'), sahne = box.querySelector('[data-kay]');
@@ -377,7 +376,6 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
       gor.observe(sahne);
     }
     esitle(true);
-    kutular.push({ box: box, esitle: esitle, sec: sec });
   };
   each('[data-nc]', function (box) { sekmeler(box, 'adım'); });
 
@@ -414,8 +412,8 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
     kur();
   });
 
-  /* 8. Pano: renkli başlıklar ([data-pn], 19 Kasım 2026, tur 4): görünür olunca başlık bantları soldan sağa çizilir, kart çizgileri
-     sırayla belirir (CSS .bekle). Hareket azaltmada, eski tarayıcıda ve betik yoksa .bekle hiç eklenmez: her şey baştan yerinde durur. */
+  /* 8. Pano: renkli başlıklar ([data-pn], 19 Kasım 2026, tur 4): görünür olunca başlık bantları soldan sağa çizilir, kartların sol
+     çizgileri sırayla uzar (CSS .bekle). Hareket azaltmada, eski tarayıcıda ve betik yoksa .bekle hiç eklenmez: her şey baştan yerinde durur. */
   if ('IntersectionObserver' in window && !reduce.matches) {
     each('[data-pn]', function (fig) {
       fig.classList.add('bekle');
@@ -427,46 +425,5 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
       io.observe(fig);
     });
   }
-
-  /* ONIZ:BAS (yalnız önizleme) */
-  // Kabuk bir seçeneği değiştirince sekmelerin yüksekliği ve şerit yeniden ölçülür.
-  window.addEventListener('oniz', function () {
-    kutular.forEach(function (x) { x.esitle(); });
-    window.dispatchEvent(new Event('resize'));
-  });
-  // "pvurgu" c: sırayla vurgu ([data-pc]). Görünürken 2,8 sn'de bir sonraki bölüm (data-on 1 → 2 → 3), iki turdan sonra üçü birlikte
-  // ("hepsi"). Açıklamanın üstüne gelince ya da odaklanınca o bölüm; dokununca o bölüm sabitlenir (aria-pressed), yeniden dokununca
-  // bırakılır. Kullanıcı bir kez dokunur, üstüne gelir ya da odaklanırsa kendiliğinden geçiş biter. Hareket azaltmada kendiliğinden geçiş yok.
-  each('[data-pc]', function (fig) {
-    var dugme = Array.prototype.slice.call(fig.querySelectorAll('[data-n]')), sabit = null, adim = 0, zaman = 0, bitti = false, gorunur = false;
-    var goster = function (n) {
-      fig.setAttribute('data-on', n || 'hepsi');
-      dugme.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-n') === sabit)); });
-    };
-    var dur = function () { bitti = true; clearTimeout(zaman); };
-    var ilerle = function () {
-      clearTimeout(zaman);
-      if (bitti || !gorunur || reduce.matches || fig.hidden) return;
-      if (adim >= 6) { dur(); goster(null); return; }
-      goster(String(adim % 3 + 1)); adim++;
-      zaman = setTimeout(ilerle, 2800);
-    };
-    dugme.forEach(function (b) {
-      var n = b.getAttribute('data-n');
-      b.addEventListener('mouseenter', function () { dur(); goster(n); });
-      b.addEventListener('focus', function () { dur(); goster(n); });
-      b.addEventListener('mouseleave', function () { goster(sabit); });
-      b.addEventListener('blur', function () { goster(sabit); });
-      b.addEventListener('click', function () { dur(); sabit = sabit === n ? null : n; goster(sabit || n); });
-    });
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (es) {
-        gorunur = es[0].isIntersecting && es[0].intersectionRatio >= 0.5;
-        if (gorunur) { if (!bitti) ilerle(); } else clearTimeout(zaman);
-      }, { threshold: [0, 0.5] }).observe(fig);
-    }
-    window.addEventListener('oniz', function (e) { if (e.detail && e.detail.k === 'pvurgu' && e.detail.v === 'c' && !bitti) { adim = 0; ilerle(); } });
-  });
-  /* ONIZ:SON */
 
 })();

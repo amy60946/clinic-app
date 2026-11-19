@@ -133,12 +133,10 @@ def kunye(k):
 #    → döngü (lacivert bant, üç beyaz kart, kartların çevresinde bir kez çizilen ince ok; altında not ve açılır kaynak listesi)
 #    → neden varız (gri bant, beyaz kart + bir görüşmeden ötekine haftanın şeması, kayıtlar bir kez yanar)
 #    → [yalnız önizleme: ekip ve hikâye yer tutucusu, ONIZ:BAS/SON] → iletişim (beyaz, üç çerçeveli bağlantı kartı).
-#    Önizleme grubu "kdon" (yalnız CSS): a lacivert bant + üç kart (öneri), b tur 4'ün yuvarlak yolu (ters üçgen, dolaşan nokta).
-#    İkisi aynı işaretlemeyi kullanır (dongu_bolumu); düzeni <html data-v-kdon> seçer (k.css "Döngü").
+#    Döngü düzeni 19 Kasım 2026 tur 6'da kullanıcı seçimiyle kalıcı: lacivert bant + üç kart (önizleme grubu "kdon" a; b, yuvarlak yol, kalktı).
+#    Sayfada önizleme grubu kalmadı: oniz.js ve #oniz-gruplar yüklenmez.
 # ======================================================================
 H = K['hakkimizda']
-GRUPLAR_H = [{'k': 'kdon', 'ad': 'Üç uygulamanın döngüsü', 'hedef': '#dongu', 'oneri': 'a',
-              'sec': [['a', 'Lacivert bant, üç kart'], ['b', 'Yuvarlak yol, ters üçgen']]}]
 LOGO = bul(r'<svg class="logo-svg".*?</svg>', UST).group(0)   # "moyo" yazısı (fill: currentColor)
 
 SIMGELER.update({
@@ -160,17 +158,16 @@ def kolaj(ekranlar):
     return f'<div class="kh-kolaj" role="group" aria-label="{e(H["kolaj_etiket"])}">{sekil}{img}</div>'
 
 
-def kd_ok(ek=''):
-    """Döngünün yön oku (b: lacivert yuvarlak; a: çizginin ucundaki ok başı); yönü CSS verir (--kd-yon)."""
-    return (f'<span class="kd-ok{ek}" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M9.5 6.5 15 12l-5.5 5.5" fill="none" '
+def kd_ok():
+    """Döngünün yön oku: çizginin ucundaki ok başı; yönü CSS verir (--kd-yon)."""
+    return (f'<span class="kd-ok" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M9.5 6.5 15 12l-5.5 5.5" fill="none" '
             'stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>')
 
 
 def dongu_bolumu(D):
     """Açılışın altındaki döngü: üç durak (Çocuk, Ebeveyn, Uzman), her birinde gerçek ekran, "burada ne olur" satırı ve dayandığı araştırma.
-    Tek işaretleme, iki düzen (k.css "Döngü"): a = lacivert bant, yan yana üç kart; geçiş yazıları kartların üstünde ve altında köşeli
-    çizgilerin üstünde (Çocuk → Ebeveyn, Ebeveyn → Uzman üstte; Uzman → Çocuk altta), çizgiler bir kez çizilir. b = tur 4'ün yuvarlak yolu
-    (.kd-yol, ortada .kd-merkez, yolda dolaşan nokta DONGU_JS). Dar ekranda ikisinde de kartlar alt alta.
+    Lacivert bant, yan yana üç kart (k.css "Döngü"); geçiş yazıları kartların üstünde ve altında köşeli çizgilerin üstünde
+    (Çocuk → Ebeveyn, Ebeveyn → Uzman üstte; Uzman → Çocuk altta), çizgiler bir kez çizilir. Dar ekranda kartlar alt alta.
     Araştırma cümlelerindeki [[Anahtar]] işaretleri sayfanın atıf adımında numaralanır; kaynak listesi {KAYNAK_LISTESI} yerine konur."""
     duraklar = []
     for d in D['duraklar']:
@@ -191,40 +188,10 @@ def dongu_bolumu(D):
     # Okuma sırası: Çocuk, geçiş, Ebeveyn, geçiş, Uzman, dönüş (görünür yerleri ızgara alanlarıyla, k.css).
     return (f'<section class="kd" id="dongu" aria-labelledby="h-dongu">\n  <div class="kd-ic">\n'
             f'    <div class="kh-bas kd-ust">{ust(D["etiket"])}<h2 id="h-dongu">{e(D["baslik"])}</h2><p>{e(D["alt"])}</p></div>\n'
-            f'    <div class="kd-izgara" data-gor>\n      <div class="kd-yol" aria-hidden="true">{kd_ok(" kd-ok-don")}</div>\n'
-            f'      {duraklar[0]}\n      {g1}\n      {duraklar[1]}\n      {g2}\n      {duraklar[2]}\n      {g3}\n'
-            f'      <p class="kd-merkez" aria-hidden="true">{e(D["merkez"])}</p>\n    </div>\n'
+            f'    <div class="kd-izgara" data-gor>\n'
+            f'      {duraklar[0]}\n      {g1}\n      {duraklar[1]}\n      {g2}\n      {duraklar[2]}\n      {g3}\n    </div>\n'
             f'    <p class="kd-not">{e(D["not"])}</p>\n    {{KAYNAK_LISTESI}}\n  </div>\n</section>')
 
-
-# b düzeninde yolda dolaşan nokta: yolun (.kd-yol, CSS kenarlığı) orta çizgisi ölçülüp SVG yolu çizilir, nokta animateMotion ile yürür
-# (masaüstünde saat yönünde, dar ekranda tersine). Boyut değişince yeniden çizilir; a düzeninde yol gizli (genişlik 0), çizilmez.
-DONGU_JS = r"""<script>/* döngü b: yolda yavaş dolaşan nokta (hareket azaltmada yok) */(function () {
-  var yol = document.querySelector('.kd-yol'); if (!yol || !window.ResizeObserver) return;
-  var az = matchMedia('(prefers-reduced-motion: reduce)'), dar = matchMedia('(max-width: 999px)'), NS = 'http://www.w3.org/2000/svg', svg = null, bek = 0;
-  function ciz() {
-    bek = 0; if (svg) { svg.remove(); svg = null; }
-    if (az.matches) return;
-    var cs = getComputedStyle(yol), b = parseFloat(cs.borderTopWidth) || 0, w = yol.offsetWidth, h = yol.offsetHeight;
-    var r = Math.max(0, Math.min(parseFloat(cs.borderTopLeftRadius) || 0, w / 2, h / 2) - b / 2), x = b / 2, y = b / 2, W = w - b, H = h - b;
-    if (W <= 2 * r || H <= 2 * r) return;
-    var d = 'M' + (x + r) + ' ' + y + 'H' + (x + W - r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x + W) + ' ' + (y + r) + 'V' + (y + H - r) +
-            'A' + r + ' ' + r + ' 0 0 1 ' + (x + W - r) + ' ' + (y + H) + 'H' + (x + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + x + ' ' + (y + H - r) +
-            'V' + (y + r) + 'A' + r + ' ' + r + ' 0 0 1 ' + (x + r) + ' ' + y + 'Z';
-    var uzun = 2 * (W + H - 4 * r) + 2 * Math.PI * r;
-    svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'kd-nokta'); svg.setAttribute('width', w); svg.setAttribute('height', h);
-    svg.setAttribute('aria-hidden', 'true'); svg.setAttribute('focusable', 'false');
-    var c = document.createElementNS(NS, 'circle'); c.setAttribute('r', '7');
-    var m = document.createElementNS(NS, 'animateMotion');
-    m.setAttribute('dur', Math.round(uzun / 70) + 's'); m.setAttribute('repeatCount', 'indefinite'); m.setAttribute('path', d);
-    if (dar.matches) { m.setAttribute('keyPoints', '1;0'); m.setAttribute('keyTimes', '0;1'); m.setAttribute('calcMode', 'linear'); }
-    c.appendChild(m); svg.appendChild(c); yol.appendChild(svg);
-  }
-  function iste() { if (!bek) bek = requestAnimationFrame(ciz); }
-  new ResizeObserver(iste).observe(yol);
-  az.addEventListener('change', iste); dar.addEventListener('change', iste);
-})();</script>
-"""
 
 # Bir kez görünür olunca: döngünün okları çizilir (a), haftanın kayıtları soldan sağa yanar. Sayfa açılırken zaten görünen parça,
 # hareket azaltma ve eski tarayıcı: durağan son hâl (CSS yalnız .bekle / .goster sınıflarına bağlı).
@@ -345,9 +312,9 @@ ATIF_JS = ('<script>/* atıf numarasına basınca kapalı kaynak listesi açıl�
            "  document.addEventListener('click', function (ev) { if (d && ev.target.closest && ev.target.closest('a[href^=\"#kaynak-\"]')) d.open = true; });\n"
            "  addEventListener('hashchange', ac); ac();\n"
            '})();</script>\n')
-govde_h += ATIF_JS + GOR_JS + DONGU_JS
+govde_h += ATIF_JS + GOR_JS
 govde_h = govde_h.replace('e-posta', 'e-&#8288;posta')   # "e-" satır sonunda kalmasın (sözcük birleştirici)
-open('hakkimizda.html', 'w', encoding='utf-8').write(bas('hakkimizda', H, GRUPLAR_H) + govde_h + son('hakkimizda'))
+open('hakkimizda.html', 'w', encoding='utf-8').write(bas('hakkimizda', H) + govde_h + son('hakkimizda'))
 
 
 # ======================================================================

@@ -17,9 +17,9 @@ Başka pencereden yayınlarken önce `read`, sonra `url`.
 - **19 Kasım 2026 (tur 4):** kabul edilen `tema` (b: açık renk ağırlıklı; değerler `site.css`'in temel kurallarında, koyu bölüm kalmadı,
   pano bölümünün sınıfı `sec-tint`), `neden` (a: ekranlı renkli kartlar) ve `psub` (a) kalıcı; öteki seçenekler, metinleri, stilleri ve
   betikleri silindi. Fiyat ve güvenlik sayfalarında grup kalmadı (`#oniz-gruplar` ve `oniz.js` yok, kabukta Alternatifler düğmesi gizli).
-  Pano büyüteci (`plens`) kalktı; yerine `pvurgu` (pano: üç bölümü gösterme): a öneri ve canlı düzen (alt başlıktaki üç ifade `.pi` ve
-  panodaki üç bölüm aynı renkte: başlıkta bant, kartların çevresinde çizgi), b numaralı işaretler ve açıklamalar, c sırayla vurgu (betik
-  `site.js` ONIZ bölümünde), d yalın çizgi; b, c, d ONIZ'de. Görsel `site/assets/pano-2x.webp`; işaretler görselin 1440 × 900 düzleminde,
+  Pano büyüteci (`plens`) kalktı; yerine kalıcı "renkli gösterge" (tur 6, kullanıcı seçimi `pvurgu` a, sadeleştirilmiş): alt başlıktaki üç
+  ifade `.pi` ve panodaki üç bölüm aynı renkte (mavi / yeşil / sarı): başlıkta bant, kartların yalnız sol kenarında 4 px çizgi (telefonda
+  3 px; iç dolgu yok, görünüme girince aşağı doğru uzar). b, c, d silindi; sayfada grup kalmadı. Görsel `site/assets/pano-2x.webp`; işaretler görselin 1440 × 900 düzleminde,
   kırpım `--ox/--oy/--ow/--oh` (`site.css` "Pano: renkli başlıklar"). Eski `assets/motion/pano.*` kaydı artık hiçbir sayfada kullanılmıyor.
 - Açılıştaki ürün turu `site/assets/motion/akis.mp4` ← `tools/landing-motion` `node record.js akis` (`scenes/akis.js`; kamera
   yakınlaşması `kit.js` `zoom` / `unzoom`). Kaydın altındaki 1-2-3 çiplerinin `data-t` saniyeleri `out/manifest.json`'daki `beats`'ten.

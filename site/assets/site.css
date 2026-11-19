@@ -643,22 +643,23 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
 @media (prefers-reduced-motion: reduce) { .ks.akar .ks-sira { animation: none; } }
 @media (max-width: 640px) { .ks-sira li { font-size: 15px; padding: 9px 15px; } }
 
-/* ---------- Pano: renkli başlıklar (19 Kasım 2026, tur 4; önizlemede "pvurgu", a öneri ve canlı düzen) ----------
+/* ---------- Pano: renkli başlıklar (19 Kasım 2026, tur 4; tur 6'da kullanıcı seçimiyle kalıcı, eski önizleme grubu "pvurgu" a) ----------
    Kullanıcı isteği: büyüteçler olmadı; panodaki üç bölüm (Senin sıran, Ebeveynden yeni, Sessiz kalanlar) renkli bir göstergeyle kolay
-   görünsün, abartısız. a: alt başlıktaki üç ifade (.pi) ile panodaki üç bölüm aynı renkte; bölüm başlığında fosforlu kalem bandı,
-   kartların çevresinde ince renkli çizgi ve çok hafif renk. Alt başlık lejanttır; ayrıca açıklama yazısı yok, panonun üstüne yazı binmez.
+   görünsün, abartısız. Alt başlıktaki üç ifade (.pi) ile panodaki üç bölüm aynı renkte; bölüm başlığında fosforlu kalem bandı (.pa-h),
+   kartların solunda yalnızca ince renkli dikey çizgi (.pa-k; tur 6, kullanıcı: kartların çevresinde çerçeve ve içinde renk olmasın).
+   Alt başlık lejanttır; ayrıca açıklama yazısı yok, panonun üstüne yazı binmez.
    Görsel assets/pano-2x.webp (2880 × 1800, pano kaydıyla aynı veri). İşaretler (.pn-o) görselin 1440 × 900 düzleminde --x / --y / --w / --h
    ile yerleşir (yüzde); kırpım --ox / --oy / --ow / --oh: geniş ekranda tam görsel, tablette ve telefonda panoya kırpılır, işaretler
    kendiliğinden kayar. Renkler sitenin vurgu renklerinden: mavi #4C7CF0, yeşil (çizgi #1FA34A, bant marka yeşili), sarı (çizgi #B7791F,
    bant #FFD339); çizgiler pano zemininde en az 3:1, bantların üstündeki yazı lacivert. İşaretler süs (aria-hidden); anlamı alt başlık ve
-   görselin alt metni taşır. Görünür olunca bantlar soldan sağa çizilir, çizgiler belirir (site.js "8"); hareket azaltmada ve betik yokken
-   her şey baştan yerinde. */
-#pano { --pn1: #4C7CF0; --pn1-a: rgba(76, 124, 240, .3); --pn1-t: rgba(76, 124, 240, .06);
-  --pn2: #1FA34A; --pn2-a: rgba(81, 229, 106, .48); --pn2-t: rgba(81, 229, 106, .09);
-  --pn3: #B7791F; --pn3-a: rgba(255, 211, 57, .62); --pn3-t: rgba(255, 211, 57, .13); }
-#pano .n1 { --c: var(--pn1); --a: var(--pn1-a); --t: var(--pn1-t); }
-#pano .n2 { --c: var(--pn2); --a: var(--pn2-a); --t: var(--pn2-t); }
-#pano .n3 { --c: var(--pn3); --a: var(--pn3-a); --t: var(--pn3-t); }
+   görselin alt metni taşır. Görünür olunca bantlar soldan sağa çizilir, sol çizgiler yukarıdan aşağı uzar (site.js "8"); hareket
+   azaltmada ve betik yokken her şey baştan yerinde. */
+#pano { --pn1: #4C7CF0; --pn1-a: rgba(76, 124, 240, .3);
+  --pn2: #1FA34A; --pn2-a: rgba(81, 229, 106, .48);
+  --pn3: #B7791F; --pn3-a: rgba(255, 211, 57, .62); }
+#pano .n1 { --c: var(--pn1); --a: var(--pn1-a); }
+#pano .n2 { --c: var(--pn2); --a: var(--pn2-a); }
+#pano .n3 { --c: var(--pn3); --a: var(--pn3-a); }
 .pi { color: var(--c-ink); padding-inline: .06em; background: linear-gradient(transparent 54%, var(--a) 54%, var(--a) 94%, transparent 94%);
   -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .pn { margin: 0; background: var(--plate); border-radius: var(--r-lg); padding: clamp(10px, 1.8vw, 20px); }
@@ -671,13 +672,14 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
 .pn-cer { position: relative; }
 .pn-not { position: absolute; left: 12px; bottom: 12px; z-index: 2; white-space: nowrap; padding: 4px 10px; border-radius: var(--r-pill); background: rgba(22, 17, 58, .78); color: #FFFFFF;
   font-size: 12px; line-height: 1.3; font-weight: 700; }
-.pa-k { border: 2.5px solid var(--c); border-radius: calc(20 * var(--u)); background: var(--t); mix-blend-mode: multiply; }
+/* sol çizgi: --x kart grubunun sol kenarı; çizgi onun 6 px solunda (telefonda 4 px), kartların yüksekliğinde */
+.pa-k { width: 4px; margin-left: -10px; border-radius: 2px; background: var(--c); transform-origin: center top; }
 .pa-h { background: var(--a); border-radius: calc(5 * var(--u)); mix-blend-mode: multiply; transform-origin: left center; }
 @media (prefers-reduced-motion: no-preference) {   /* geçiş yalnız .bekle kalkınca: sınıf eklenirken anında gizlenir */
   .pn.bekle .pa-h { transform: scaleX(0); }
-  .pn.bekle .pa-k { opacity: 0; }
+  .pn.bekle .pa-k { transform: scaleY(0); }
   .pn:not(.bekle) .pa-h { transition: transform .6s cubic-bezier(.3, .7, .2, 1); }
-  .pn:not(.bekle) .pa-k { transition: opacity .5s ease .25s; }
+  .pn:not(.bekle) .pa-k { transition: transform .6s cubic-bezier(.3, .7, .2, 1) .25s; }
   .pn:not(.bekle) .pa-h.n2 { transition-delay: .45s; } .pn:not(.bekle) .pa-k.n2 { transition-delay: .7s; }
   .pn:not(.bekle) .pa-h.n3 { transition-delay: .9s; } .pn:not(.bekle) .pa-k.n3 { transition-delay: 1.15s; }
 }
@@ -688,7 +690,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
 @media (max-width: 640px) {   /* telefonda görselde boş köşe kalmıyor: "Örnek veri" görselin altında */
   .pn-shot { --ox: 316; --oy: 172; --ow: 798; --oh: 712; }
   .pn-not { position: static; display: inline-block; margin-top: 8px; font-size: 11px; }
-  .pa-k { border-width: 2px; }
+  .pa-k { width: 3px; margin-left: -7px; border-radius: 1.5px; }
 }
 
 /* ---------- Fiyat sayfası, tur 3 (19 Kasım 2026): kısa açılış, paketler fiyatıyla ilk ekranda ----------
@@ -753,76 +755,3 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
   .kur-adim li::before { left: 17px; right: auto; top: 40px; bottom: -18px; width: 2px; height: auto; }
   .kur-karo { grid-template-columns: minmax(0, 1fr); }
 }
-
-/* ONIZ:BAS (yalnız önizleme: önerilmeyen alternatiflerin stili; biri seçilirse kendi bloğu bu işaretlerin dışına alınır) */
-
-/* "pvurgu" b, c, d (yalnız önizleme; ortak düzen ve renkler yukarıda "Pano: renkli başlıklar"). Alt başlıktaki renkli bant yalnız a'da;
-   d'de aynı ifadeler renkli alt çizgiyle. */
-html:not([data-v-pvurgu="a"]) .pi { color: inherit; padding: 0; background: none; }
-html[data-v-pvurgu="d"] .pi { color: var(--c-ink); text-decoration: underline 3px var(--c); text-underline-offset: .3em; text-decoration-skip-ink: none; }
-
-/* b: bölüm başlıklarının solunda numaralı renkli halka; yanda (dar ekranda altta) aynı numara ve renkte kısa açıklama. Geniş ekranda
-   açıklamalar bölümlerin hizasında (--y: bölümün ortası, görselin düzleminde). */
-.pb-n { display: grid; place-items: center; width: 26px; height: 26px; margin: -13px 0 0 -26px; border-radius: 50%; background: #FFFFFF; border: 2.5px solid var(--c);
-  color: var(--c-ink); font-size: 13px; font-weight: 800; line-height: 1; box-shadow: 0 2px 8px -3px rgba(22, 17, 58, .4); }
-@media (min-width: 1000px) {   /* "Örnek veri" görselde boş köşe kalmadığı için açıklama sütununun altında */
-  .pb .pn-shot { --ox: 262; --oy: 90; --ow: 868; --oh: 798; }
-  .pb .pn-not { left: calc(100% + clamp(20px, 2.8vw, 40px)); top: 0; bottom: auto; }
-}
-.pb-l p { display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: start; align-content: start; column-gap: 12px; row-gap: 2px; font-size: 15.5px; line-height: 1.45; color: var(--c-text-2); }
-.pb-l i { grid-row: span 2; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid var(--c); font-style: normal;
-  font-size: 14px; font-weight: 800; line-height: 1; color: var(--c-ink); }
-.pb-l b { font-size: 17px; line-height: 1.35; color: var(--c-ink); padding-top: 3px; }
-@media (min-width: 1000px) {
-  .pb { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); align-items: stretch; column-gap: clamp(20px, 2.8vw, 40px); }
-  .pb-l { position: relative; }
-  .pb-l p { position: absolute; left: 0; right: 0; top: calc((var(--y) - 90) / 798 * 100%); transform: translateY(-50%); max-width: 320px; }
-}
-@media (max-width: 999px) {
-  .pb-l { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
-  .pb-l p { padding: 16px 14px; border-radius: var(--r-md); background: var(--c-soft); font-size: 14.5px; }
-}
-@media (max-width: 640px) {
-  .pb .pn-shot { --ox: 274; --oy: 168; --ow: 846; --oh: 716; }
-  .pb-n { width: 18px; height: 18px; margin: -9px 0 0 -18px; border-width: 2px; font-size: 10.5px; }
-  .pb-l { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-  .pb-l p { padding: 12px 14px; }
-  .pb-l i { width: 26px; height: 26px; font-size: 12.5px; }
-  .pb-l b { font-size: 16px; padding-top: 1px; }
-}
-
-/* c: sırayla vurgu. Bir bölüm renkli çerçeveyle görünür, panonun geri kalanı hafifçe kararır (.pc-isik: delikli perde); 2,8 sn'de bir
-   sonraki bölüme geçer, iki turdan sonra üçü birlikte çerçeveli durur. Alttaki üç açıklamanın üstüne gelince, odaklanınca ya da dokununca
-   o bölüm gösterilir ve kendiliğinden geçiş durur (site.js ONIZ "c"). Hareket azaltmada geçiş ve perde yok: üç bölüm birlikte çerçeveli;
-   açıklamaya dokununca yalnız o bölümün çerçevesi kalır. */
-.pc-k { border: 2.5px solid var(--c); border-radius: calc(20 * var(--u)); transition: opacity .35s ease; }
-.pc:not([data-on="hepsi"]) .pc-k { opacity: 0; }
-.pc-isik { --x: 327; --y: 178; --w: 786; --h: 242; border: 2.5px solid var(--c, var(--pn1)); border-radius: calc(22 * var(--u)); opacity: 0;
-  box-shadow: 0 0 0 200vmax rgba(22, 17, 58, .16); transition: opacity .35s ease, top .55s cubic-bezier(.4, 0, .2, 1), height .55s cubic-bezier(.4, 0, .2, 1), border-color .35s ease; }
-.pc[data-on="1"] .pc-isik { --c: var(--pn1); opacity: 1; }
-.pc[data-on="2"] .pc-isik { --c: var(--pn2); --y: 419; --h: 228; opacity: 1; }
-.pc[data-on="3"] .pc-isik { --c: var(--pn3); --y: 646; --h: 230; opacity: 1; }
-.pc-l { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
-.pc-l button { display: grid; grid-template-columns: 12px minmax(0, 1fr); align-items: baseline; align-content: start; column-gap: 10px; row-gap: 2px; padding: 14px 16px; text-align: left;
-  border: 1.5px solid var(--c-line); border-radius: var(--r-md); background: var(--c-bg); color: var(--c-text-2); font: inherit; font-size: 14.5px; line-height: 1.45;
-  cursor: pointer; transition: border-color .25s ease, background-color .25s ease; }
-.pc-l i { grid-row: 1; grid-column: 1; width: 12px; height: 12px; border-radius: 50%; background: var(--c); align-self: center; }
-.pc-l b, .pc-l span { grid-column: 2; }
-.pc-l b { font-size: 16.5px; line-height: 1.35; color: var(--c-ink); }
-.pc-l button:hover { border-color: var(--c); }
-.pc[data-on="1"] .pc-l .n1, .pc[data-on="2"] .pc-l .n2, .pc[data-on="3"] .pc-l .n3 { border-color: var(--c); background: var(--t); box-shadow: inset 0 0 0 1px var(--c); }
-@media (prefers-reduced-motion: reduce) {
-  .pc-isik { display: none; }
-  .pc[data-on="1"] .pc-k.n1, .pc[data-on="2"] .pc-k.n2, .pc[data-on="3"] .pc-k.n3 { opacity: 1; }
-}
-@media (max-width: 640px) {
-  .pc-l { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-  .pc-l button { padding: 11px 14px; }
-  .pc-k, .pc-isik { border-width: 2px; }
-}
-
-/* d: yalın. Bölümün solunda ince renkli dikey çizgi, başlığın altında aynı renkte kısa çizgi; alt başlıktaki ifadeler aynı renkte alt çizgili. */
-.pd-c { width: 4px; border-radius: 2px; background: var(--c); }
-.pd-u { height: 3px; border-radius: 2px; background: var(--c); }
-@media (max-width: 640px) { .pd-c { width: 3px; } .pd-u { height: 2px; } }
-/* ONIZ:SON */
