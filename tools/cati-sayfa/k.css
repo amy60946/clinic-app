@@ -6,7 +6,7 @@
 
 .sayfa-k { --k-yesil-yazi: #0A7A33; --k-yesil-zemin: #E2F8E7; --k-ara: clamp(56px, 7.5vw, 104px);
   --kh-gri: #F1F0F5; --kh-ust: #4A4666; --kh-cerceve: #DCD9E4; --kh-bant: clamp(72px, 8vw, 112px); }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .sayfa-k * { transition: none !important; animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .sayfa-k *, .sayfa-k *::before, .sayfa-k *::after { transition: none !important; animation: none !important; } }
 .sayfa-k .gizli { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .sayfa-k p { text-wrap: pretty; }
 .sayfa-k main a:focus-visible { outline: 3px solid var(--camgobegi); outline-offset: 3px; border-radius: 6px; }
