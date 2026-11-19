@@ -18,14 +18,14 @@
   "adimlar": [
    "Siz rutini kurarsınız",
    "Oyunda macera olur",
-   "Çocuğunuz yapar, Yaptım'a dokunur",
+   "Çocuğunuz yapar, \"Yaptım\"a dokunur",
    "Siz onaylarsınız"
   ],
   "cip": "Dişlerini fırçala",
   "cip_donus": "Yaptım",
   "git": "Rutin oyuna gider",
   "gel": "Onay size gelir",
-  "anlatim": "Moyo Ebeveyn'de kurduğunuz rutin adımı Moyo Oyun'da macera olarak görünür; çocuğunuz Yaptım'a dokununca onay telefonunuza gelir. Örnek veri."
+  "anlatim": "Moyo Ebeveyn'de kurduğunuz rutin adımı Moyo Oyun'da macera olarak görünür; çocuğunuz \"Yaptım\"a dokununca onay telefonunuza gelir. Örnek veri."
  },
  "nasil": {
   "a": "Rutinden takibe, beş adım.",

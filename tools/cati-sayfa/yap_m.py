@@ -16,7 +16,8 @@ LOGO = re.sub(r' role="img" aria-label="[^"]*"', ' aria-hidden="true" focusable=
 APP = 'https://ebeveyn.moyoapp.com.tr/'
 MERCEK = 'https://mercek.moyoapp.com.tr/'
 KOK = 'https://moyoapp.com.tr'          # canlı adres (canonical ve og:url)
-ANA, FIYAT = 'ebeveyn.html', 'ebeveyn-fiyat.html'   # önizlemede göreli; canlıda /ebeveyn/ ve /ebeveyn/fiyat/
+ANA, FIYAT = 'ebeveyn.html', 'ebeveyn-fiyat.html'
+SITE, EKO = 'https://moyoapp.com.tr/', 'c.html'   # destek / yasal ve ekosistem; disa_aktar.py canlı yollara çevirir   # önizlemede göreli; canlıda /ebeveyn/ ve /ebeveyn/fiyat/
 HAKKIMIZDA, GUVEN = 'hakkimizda.html', 'guven.html'   # kurumsal sayfalar (başka pencere kurar); canlıda /hakkimizda/ ve /guven/
 SVG = lambda d: f'<svg viewBox="0 0 24 24" aria-hidden="true">{d}</svg>'
 I = {
@@ -110,10 +111,10 @@ def alt(sayfa):
     return f'''<footer>
   <div class="wrap">
     <div class="about"><a class="logo" href="{a or "#top"}" aria-label="Moyo Ebeveyn ana sayfa">{LOGO}</a><p>{E["h1"]}.</p></div>
-    <div><h2 class="fh">Ürün</h2><ul><li><a href="{a}#nasil">Nasıl çalışır</a></li><li><a href="{FIYAT}"{simdi}>Fiyat</a></li><li><a href="{a}#sss">Sık sorulanlar</a></li><li><a href="/">Moyo ekosistemi</a></li></ul></div>
+    <div><h2 class="fh">Ürün</h2><ul><li><a href="{a}#nasil">Nasıl çalışır</a></li><li><a href="{FIYAT}"{simdi}>Fiyat</a></li><li><a href="{a}#sss">Sık sorulanlar</a></li><li><a href="{EKO}">Moyo ekosistemi</a></li></ul></div>
     <div><h2 class="fh">Hesap</h2><ul><li><a href="{APP}#giris">Giriş yap</a></li><li><a href="{APP}#kayit">Ücretsiz deneyin</a></li><li><a href="{MERCEK}">Uzmanlar için</a></li></ul></div>
-    <div><h2 class="fh">Kurumsal</h2><ul><li><a href="{HAKKIMIZDA}">Hakkımızda</a></li><li><a href="{GUVEN}">Güvenlik ve gizlilik</a></li><li><a href="/destek">Destek</a></li></ul></div>
-    <div><h2 class="fh">Yasal</h2><ul><li><a href="/yasal/gizlilik">Gizlilik Politikası</a></li><li><a href="/yasal/kosullar-parentapp">Kullanım Koşulları</a></li><li><a href="/yasal/kvkk-basvuru">KVKK başvurusu</a></li></ul></div>
+    <div><h2 class="fh">Kurumsal</h2><ul><li><a href="{HAKKIMIZDA}">Hakkımızda</a></li><li><a href="{GUVEN}">Güvenlik ve gizlilik</a></li><li><a href="{SITE}destek">Destek</a></li></ul></div>
+    <div><h2 class="fh">Yasal</h2><ul><li><a href="{SITE}yasal/gizlilik">Gizlilik Politikası</a></li><li><a href="{SITE}yasal/kosullar-parentapp">Kullanım Koşulları</a></li><li><a href="{SITE}yasal/kvkk-basvuru">KVKK başvurusu</a></li></ul></div>
     <div class="legal"><span>© 2026 Moyo</span><span>Ekranlardaki adlar örnektir. Bu sayfa çerez, reklam pikseli ya da analiz aracı kullanmaz.</span></div>
   </div>
 </footer>
@@ -303,7 +304,7 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
     <div class="wrap">
       <div class="head"><p class="eyebrow">Moyo ekosistemi</p><h2 id="h-eko">Üç uygulama, tek rutin.</h2><p class="intro">Moyo Ebeveyn ve Moyo Oyun birlikte çalışır; dilerseniz uzmanınız Moyo Uzman ile katılır.</p></div>
       <div class="ekos">{ekosis}</div>
-      <p class="eko-link"><a href="/">Ekosistemi görün →</a></p>
+      <p class="eko-link"><a href="{EKO}">Ekosistemi görün →</a></p>
     </div>
   </section>
 
