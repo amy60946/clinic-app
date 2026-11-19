@@ -1,10 +1,20 @@
 # Moyo Mercek tanıtım sitesi: önizleme kabuğu
 
 Önizleme: https://claude.ai/artifact/4g3viopCTWujHervSVzpWt. `host.html` sayfa olarak, sitenin dosyaları `site/…` yoluyla
-`files` ile yayınlanır (`site/index.html`, `site/fiyat.html`, `site/assets/**`). Başka pencereden yayınlarken önce `read`, sonra `url`.
+`files` ile yayınlanır: `site/index.html`, `site/fiyat.html`, `site/guvenlik.html`, `site/assets/**` (`site/assets/oniz.js` dahil).
+Başka pencereden yayınlarken önce `read`, sonra `url`.
 
-- Sekmeler: Ana sayfa · Fiyat sayfası · 14 Kasım notu ve benchmark; Masaüstü / Telefon.
-- "Neden" bölümünün üç düzeni (1 Akış · 2 Bento · 3 Hafta) `site/index.html?neden=N` ile seçilir (`site.js` 7. madde); yayında
-  `#degerler` `data-neden` varsayılanı kalır. Seçim gelince öteki ikisi HTML ve CSS'ten silinir.
+- Sekmeler: Ana sayfa · Fiyat · Gizlilik ve güvenlik · Bu turda (18 Kasım notu: yapılanlar, açılış görseli ölçüleri, bekleyen
+  kontroller). Ekran boyu: Masaüstü / Tablet 820 × 1180 / Telefon 390 × 844 (kabuk 720 px'ten darsa gizli, sayfa tam genişlik).
+- **Alternatifler** (18 Kasım 2026): sayfa `<head>`'de `#oniz-gruplar` JSON'unu ve `site/assets/oniz.js`'i taşır
+  (`tools/cati-sayfa/oniz.js` ile aynı dosya). Kabuk `iframe.contentWindow.onizGruplar`'ı okur, seçeneğe dokununca `onizSec(k, v)`
+  çağırır ve `hedef`e (değere özel `hedefler[v]` varsa ona) kaydırır. Gruptaki `neden` panelde önerinin gerekçesi olarak yazar.
+  Seçimler tarayıcıda `mercek.oniz.v1` anahtarında; "Seçimlerimi kopyala" sohbete yapıştırılacak özeti verir, "Önerilere dön" sıfırlar.
+- Sitede önizlemeye özel her parça `ONIZ:BAS` … `ONIZ:SON` işaretleri arasındadır (HTML'de yorum, CSS ve JS'de blok yorumu, işaretler
+  kendi satırlarında). `bash site/build.sh` bu aralıkları ve önerilen alternatiflerdeki `data-var` işaretini canlı çıktıdan
+  (`dist-mercek/`) siler, `oniz.js`'i kopyalamaz. Bir alternatif seçilince: seçilen parça işaretlerin dışına alınır, öteki
+  parçalar ve stilleri silinir, grup JSON'dan çıkar.
+- Eski "Neden" düzenleri (`?neden=N`) 14 Kasım'da kapandı; yalnız "1 Akış" duruyor.
 - Açılıştaki ürün turu `site/assets/motion/akis.mp4` ← `tools/landing-motion` `node record.js akis` (`scenes/akis.js`; kamera
   yakınlaşması `kit.js` `zoom` / `unzoom`). Kaydın altındaki 1-2-3 çiplerinin `data-t` saniyeleri `out/manifest.json`'daki `beats`'ten.
+  Boyutu yalnız CSS'te (`site.css` "Açılış" bölümü, `--hm-w`): ilk ekranda kaydın yaklaşık %45'i görünür.
