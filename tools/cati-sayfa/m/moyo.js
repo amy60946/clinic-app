@@ -7,9 +7,8 @@
       dokunmatik yüzey ve ok tuşları; altta ‹ 2 / 5 › ve dokunmatik cihazda ilk kaydırmaya kadar kısa ipucu.
       19 Kasım QA: sekme çubuğu hiçbir genişlikte taşmaz. Beş sekme adıyla sığıyorsa tam düzen (.tam), sığmıyorsa kısa düzen
       (.kisa: beş eşit numara, etkin adımın adı çubuğun altında); genişlik değişince ve yazı tipi yüklenince yeniden ölçülür.
-   3. "Neden Moyo", tasarım b (tur 4, önizlemede seçilir): tek telefon; nedenler kaydıkça (ya da birine dokununca) telefonun görüntüsü
-      o nedenin işlevine yakınlaşır: önce telefonun tamamına uzaklaşır, ekran değişir, sonra yeni işleve yakınlaşır (1,5 sn, sakin).
-      Hareket azaltmada ya da betik yoksa .duruk: pencere yok, her nedenin yanında kendi sabit kırpımı. */
+   3. "Neden Moyo" (tur 5): ekranın büyütülen şeridi (vurgu kartı) ekrana girince bir kez, ekrandaki yerinden kalkarak büyür.
+      Betik yoksa, IntersectionObserver yoksa ya da hareket azaltmada kart baştan yerindedir. */
 (function () {
   'use strict';
   var d = document;
@@ -228,87 +227,13 @@
     });
   });
 
-  /* ---------------- 3. Neden Moyo (ndzn b): tek telefon, "kamera" ---------------- */
-  // Telefon sahnede nokta ölçüsünde: kenar B, gövde 418 × 872, ekran 390 × 844 (m/moyo.css .nz-govde). Katman başına iki bölge
-  // (data-g uzun, data-d kısa; nokta, ekranın sol üstünden): pencere enine genişse kısa bölge, değilse uzun bölge pencereye sığdırılır.
-  each(d.querySelectorAll('[data-nz]'), function (kutu) {
-    var pencere = kutu.querySelector('.nz-pencere'), kamera = kutu.querySelector('.nz-kamera');
-    var katman = kutu.querySelectorAll('.nz-katman'), sebep = kutu.querySelectorAll('.nz-sebep > li');
-    var telefon = window.matchMedia('(max-width: 760px)');
-    var B = 14, TW = 390 + 2 * B, TH = 844 + 2 * B, SURE = 1500, EGRI = 'cubic-bezier(.45, 0, .55, 1)';
-    var aktif = -1, anim = null, gozcu = null, canli = false;
-    var enine = function () { return pencere.clientWidth > pencere.clientHeight * 1.05; };
-    var bolge = function (k) { return katman[k].getAttribute(enine() ? 'data-d' : 'data-g').split(',').map(Number); };
-    var donustur = function (tx, ty, s) { return 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + s.toFixed(4) + ')'; };
-    // Bölge pencereye sığdırılır; pencere bölgeden uzunsa artan yer bölgenin ÜSTÜNDE kalır (alt kenar sabit): davranış kaydında "Sesli
-    // anlat" alanı görünmesin (tur 4: kayıt ses kaydı gibi okunmasın), rutinde üstteki "Hangi günler?" de görünsün.
-    function hedef(k) {
-      var W = pencere.clientWidth, H = pencere.clientHeight, r = bolge(k);
-      var s = Math.min(W * 0.94 / (r[2] + 2 * B), H * 0.94 / r[3]);
-      return donustur(W / 2 - s * (B + r[0] + r[2] / 2), H * 0.99 - s * (B + r[1] + r[3]), s);
-    }
-    function genel() {
-      var W = pencere.clientWidth, H = pencere.clientHeight, s = Math.min(W * 0.9 / TW, H * 0.9 / TH);
-      return donustur((W - s * TW) / 2, (H - s * TH) / 2, s);
-    }
-    function durdur() {   // süren geçişi olduğu yerde dondurur
-      if (!anim) return;
-      var t = getComputedStyle(kamera).transform, op = [].map.call(katman, function (el) { return getComputedStyle(el).opacity; });
-      anim.forEach(function (a) { a.cancel(); });
-      anim = null;
-      kamera.style.transform = t === 'none' ? '' : t;
-      each(katman, function (el, j) { el.style.opacity = op[j]; });
-    }
-    function sec(k, hemen) {
-      if (!pencere.clientWidth) { aktif = k; return; }      // seçenek gizliyken ölçü yok: görünür olunca kurulur
-      if (k === aktif && !hemen) return;
-      var onceki = aktif;
-      aktif = k;
-      each(sebep, function (li, j) { li.classList.toggle('on', j === k); });
-      pencere.setAttribute('aria-label', katman[k].getAttribute(enine() ? 'data-alt-d' : 'data-alt-g'));
-      durdur();
-      var son = hedef(k);
-      if (hemen || onceki < 0 || !canli || !kamera.animate) {
-        kamera.style.transform = son;
-        each(katman, function (el, j) { el.style.opacity = j === k ? '1' : '0'; });
-        return;
-      }
-      var bas = kamera.style.transform || son, parcalar = [];
-      parcalar.push(kamera.animate([{ transform: bas, easing: EGRI }, { transform: genel(), offset: 0.42, easing: EGRI }, { transform: son }], { duration: SURE }));
-      each(katman, function (el, j) {
-        var a = parseFloat(el.style.opacity) || 0, b = j === k ? 1 : 0;
-        if (a !== b) parcalar.push(el.animate([{ opacity: a }, { opacity: a, offset: 0.36 }, { opacity: b, offset: 0.56 }, { opacity: b }], { duration: SURE }));
-        el.style.opacity = String(b);
-      });
-      kamera.style.transform = son;
-      anim = parcalar;
-      parcalar[0].onfinish = function () { if (anim === parcalar) anim = null; };
-    }
-    var cizgiY = -1;
-    function gozle() {
-      // Okuma çizgisi: geniş ekranda yapışkan pencerenin ortası; telefonda pencerenin altında kalan alanın üst yarısı
-      var ust = parseFloat(getComputedStyle(pencere).top) || 0, h = pencere.offsetHeight, vh = window.innerHeight;
-      var y = Math.round(telefon.matches ? ust + h + (vh - ust - h) * 0.42 : ust + h / 2);
-      if (!h || (gozcu && y === cizgiY)) return;
-      cizgiY = y;
-      if (gozcu) gozcu.disconnect();
-      gozcu = new IntersectionObserver(function (es) {
-        es.forEach(function (en) { if (en.isIntersecting) sec([].indexOf.call(sebep, en.target)); });
-      }, { rootMargin: -y + 'px 0px ' + -(vh - y - 1) + 'px 0px' });
-      each(sebep, function (li) { gozcu.observe(li); });
-    }
-    function kip() {
-      canli = !reduce.matches && 'IntersectionObserver' in window;
-      kutu.classList.toggle('duruk', !canli);
-      if (canli) { sec(aktif < 0 ? 0 : aktif, true); gozle(); }
-      else { durdur(); if (gozcu) { gozcu.disconnect(); gozcu = null; } }
-    }
-    function olc() { if (canli) { if (aktif >= 0) sec(aktif, true); gozle(); } }
-    each(sebep, function (li, j) { li.addEventListener('click', function () { if (canli) sec(j); }); });
-    if ('ResizeObserver' in window) new ResizeObserver(olc).observe(pencere);
-    window.addEventListener('resize', olc);
-    izle(reduce, kip);
-    window.addEventListener('oniz', olc);
-    kip();
-  });
+  /* ---------------- 3. Neden Moyo: vurgu kartı bir kez yerine oturur ---------------- */
+  var nzp = d.querySelectorAll('.nzp');
+  if (nzp.length && 'IntersectionObserver' in window && !reduce.matches) {
+    var gozcu = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.isIntersecting) { en.target.parentNode.classList.remove('bekle'); gozcu.unobserve(en.target); } });
+    }, { threshold: 0.75 });
+    each(nzp, function (f) { f.classList.add('bekle'); gozcu.observe(f.querySelector('.nzp-cikma')); });
+    izle(reduce, function () { if (reduce.matches) each(nzp, function (f) { f.classList.remove('bekle'); gozcu.disconnect(); }); });
+  }
 })();

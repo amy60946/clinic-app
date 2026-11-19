@@ -224,102 +224,67 @@
   .sayfa-moyo .nc-media.genis figure.shot figcaption { margin-top: 8px; }
 }
 
-/* ---------- Neden Moyo: başlık, giriş (nlead) ve üç "neden"; tasarım ndzn ile seçilir (tur 4, 19 Kasım 2026) ----------
-   Her neden kendi ekranının yakın çekimiyle ("neden"i "nasıl" ile pekiştir): gerçek ekranın bir bölümü, telefonun üst kısmı gibi çerçeveli
-   (.nz-tel: koyu kenar, yuvarlak üst köşeler, alta doğru zemine karışır), işlevin çevresinde yeşil halka (açılış görselinin halkası, nabızsız).
-   Çatı sayfanın renkli 1-2-3 kartlarına (renkli zemin, numara, altta tam telefon) ve Mercek sitesinin renkli kartlarına (kartın üstünde
-   taşan masaüstü kırpımı) benzemez: kart zemini ve numara yok, görsel koyu telefon parçası, yazı bölümün zemininde (tur 3 kuralı). */
+/* ---------- Neden Moyo: başlık, giriş ve üç "neden" (tur 5, 19 Kasım 2026: "Üç yakın çekim" yeniden) ----------
+   Her neden kendi uzun panelinde: üstte küçük büyük harfli etiket, kısa başlık ve tek cümle (ortalı); altta telefonda uygulamanın bütün ekranı
+   (kırpılmaz; panelin alt kenarı yalnızca telefonun altını keser). Ekranın vurgulanan şeridi aynı yerde, aynı görselden, 1,18 kat büyük bir
+   kart olarak telefonun iki kenarından taşar (kullanıcının örnek görselleri: satır ekrandan kalkmış gibi; yumuşak gölge, ince yeşil çizgi).
+   Çatı sayfanın 1-2-3 kartlarından ayrı: üç panel tek ve açık renkte (renkli zemin, numara ve sola dayalı yazı yok), telefon kartın büyük
+   kısmını kaplar, vurgu kartı telefonun dışına taşar. */
 .sayfa-moyo #degerler { background: #EDF0F8; }
 /* Başlığın altındaki giriş: geniş ekranda her cümle kendi satırında (tur 2) */
 .nd-giris { max-width: 820px; text-wrap: pretty; }
-.nd-giris b { color: var(--c-ink); font-weight: 800; }
 @media (min-width: 761px) { .nd-giris span { display: block; text-wrap: balance; } }
-.nd-rozet { display: inline-block; padding: 3px 10px; border-radius: var(--r-pill); background: var(--c-bg); border: 1px solid #D9DEEA; color: var(--c-text-2);
-  font-family: var(--font-body); font-size: 12.5px; line-height: 1.3; letter-spacing: 0; font-weight: 700; white-space: nowrap; }
+.nd-rozet { display: inline-block; padding: 3px 10px; border-radius: var(--r-pill); background: #EEF1F7; border: 1px solid #D9DEEA; color: var(--c-text-2);
+  font-family: var(--font-body); font-size: 12.5px; line-height: 1.3; letter-spacing: 0; text-transform: none; font-weight: 700; white-space: nowrap; }
 .nd-bag { margin-top: 40px; text-align: center; }
 .nd-bag a { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; font-weight: 700; color: var(--c-ink); text-underline-offset: 4px; }
 
-/* Ortak: yakın çekim. --y ve --h ekranda gösterilen bölüm (nokta; ekran 390 × 844, görsel ×2). Kenar ve köşe telefonun genişliğine göre. */
-.nz-tel { container-type: inline-size; position: relative; -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 30px), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 30px), transparent); }
-.nz-kasa { padding: 3.2cqw 3.2cqw 0; border-radius: 13cqw 13cqw 0 0; background: #0B0920; }
-.nz-ekran { position: relative; overflow: hidden; aspect-ratio: 390 / var(--h); border-radius: 10cqw 10cqw 0 0; background: #FFFFFF; }
-.nz-ekran img { position: absolute; left: 0; top: 0; width: 100%; height: auto; max-width: none; transform: translateY(calc(var(--y) * -100% / 844)); }
-.nz-halka { position: absolute; z-index: 1; border: 2.5px solid #2FD158; border-radius: 12px; box-shadow: 0 0 0 4px rgba(81, 229, 106, .2); pointer-events: none; }
-/* Uygulamanın adı ve ekranın yeri; uzman satırında "İsteğe bağlı" */
-.nz-etk { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; min-height: 26px; font-size: 14px; line-height: 1.3; font-weight: 700; color: var(--c-text-2); }
-.nz-etk img { flex: none; width: 22px; height: 22px; border-radius: 6px; box-shadow: 0 0 0 1px rgba(22, 17, 58, .1); }
-.nz-yazi { min-width: 0; }
-.nz-yazi h3 { margin-top: 12px; font-size: 22px; line-height: 1.25; text-wrap: balance; }
-.nz-yazi .nz-p { margin-top: 8px; color: var(--c-text-2); font-size: 16.5px; line-height: 1.55; text-wrap: pretty; }
+/* Paneller: ≥ 1200 px üç sütun; 761–1199 px iki sütun + altta geniş panel (yazı solda, telefon sağda); telefonda alt alta.
+   --tw telefonun genişliği; telefonun altı panelin alt kenarında kesilir (görünen: ekranın üstten ~764 noktası). */
+.nzp-uc { --tw: 248px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 2.2vw, 28px); }
+.nzp-kart { display: flex; flex-direction: column; min-width: 0; overflow: hidden; padding: 34px 26px 0; border-radius: 28px; text-align: center;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 42%, #F7F8FC 100%); box-shadow: 0 1px 0 rgba(22, 17, 58, .04), 0 0 0 1px #DFE3EE; }
+.nzp-yazi { min-width: 0; }
+.nzp-etk { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 8px; min-height: 24px; font-size: 12.5px; line-height: 1.35;
+  font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--c-text-2); }
+.nzp-etk img { flex: none; width: 20px; height: 20px; border-radius: 5px; box-shadow: 0 0 0 1px rgba(22, 17, 58, .1); }
+.nzp-yazi h3 { margin-top: 12px; font-size: clamp(22px, 1.6vw + 6px, 26px); line-height: 1.2; text-wrap: balance; }
+.nzp-p { max-width: 34ch; margin: 10px auto 0; color: var(--c-text-2); font-size: 16px; line-height: 1.5; text-wrap: pretty; }
+/* Telefon panelin altına oturur (yazı kısa olsa da telefonlar aynı hizada); panel telefonun altını keser */
+.nzp-sahne { display: flex; justify-content: center; margin-top: auto; padding-top: 28px; }
+.nzp { position: relative; flex: none; width: var(--tw); margin: 0 0 calc(var(--tw) * -.2249); }
+.nzp-tel { aspect-ratio: 418 / 872; padding: 3.35%; border-radius: 14.8% / 7.1%; background: #0B0920; box-shadow: 0 30px 60px -28px rgba(22, 17, 58, .45); }
+.nzp-ekran { height: 100%; overflow: hidden; border-radius: 12.3% / 5.69%; background: #F4F6F8; }
+.nzp-ekran img { display: block; width: 100%; height: auto; max-width: none; }
+/* Vurgu kartı: telefon kutusunda şeridin yerinde (yüzdeler yap_m.py'den), içinde aynı görsel; --k0 = başlangıçta ekrandaki şerit kadar */
+.nzp-cikma { position: absolute; z-index: 1; overflow: hidden; border-radius: clamp(16px, calc(var(--tw) * .085), 24px); background: #F4F6F8;
+  box-shadow: 0 0 0 1.5px #2FD158, 0 22px 44px -12px rgba(22, 17, 58, .38), 0 6px 14px rgba(22, 17, 58, .12);
+  transition: transform .8s cubic-bezier(.2, .75, .25, 1), box-shadow .8s ease; }
+.nzp-cikma img { position: absolute; left: 0; width: 100%; height: auto; max-width: none; }
+.nzp.bekle .nzp-cikma { transform: scale(var(--k0)); box-shadow: 0 0 0 1.5px rgba(47, 209, 88, 0), 0 0 0 rgba(22, 17, 58, 0), 0 0 0 rgba(22, 17, 58, 0); }
+@media (prefers-reduced-motion: reduce) { .nzp-cikma { transition: none; } .nzp.bekle .nzp-cikma { transform: none; box-shadow: 0 0 0 1.5px #2FD158, 0 22px 44px -12px rgba(22, 17, 58, .38), 0 6px 14px rgba(22, 17, 58, .12); } }
 
-/* a · üç yakın çekim: üç sütun (≥ 1200 px), 2 + 1 (761–1199 px: üçüncüsü yatay, görsel solda), telefonda alt alta */
-.nz-uc { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 56px clamp(28px, 3vw, 44px); }
-.nz-uc li { display: flex; flex-direction: column; min-width: 0; }
-.nz-uc .nz-tel { margin-bottom: 4px; }
 @media (max-width: 1199px) {
-  .nz-uc { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .nz-uc li:last-child { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: inherit; align-items: center; }
-  .nz-uc li:last-child .nz-tel { margin-bottom: 0; }
+  .nzp-uc { --tw: 240px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Üçüncü panel iki sütunu kaplar: yazı solda (sola dayalı), telefon sağda */
+  .nzp-kart:last-child { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; column-gap: 32px;
+    padding: 0 26px 0 clamp(28px, 4vw, 48px); text-align: left; }
+  .nzp-kart:last-child .nzp-yazi { padding-block: 32px; }
+  .nzp-kart:last-child .nzp-etk { justify-content: flex-start; }
+  .nzp-kart:last-child .nzp-p { margin-inline: 0; }
+  .nzp-kart:last-child .nzp-sahne { align-self: end; padding-top: 34px; }
 }
 @media (max-width: 760px) {
-  .nz-uc { grid-template-columns: minmax(0, 1fr); gap: 48px; max-width: 460px; margin-inline: auto; }
-  .nz-uc li:last-child { display: flex; align-items: stretch; }
-  .nz-uc li:last-child .nz-tel { margin-bottom: 4px; }
-  .nz-yazi h3 { font-size: 20px; }
-  .nz-yazi .nz-p { font-size: 16px; }
+  .nzp-uc { --tw: min(236px, 66vw); grid-template-columns: minmax(0, 1fr); gap: 20px; max-width: 460px; margin-inline: auto; }
+  .nzp-kart, .nzp-kart:last-child { display: flex; padding: 28px 20px 0; text-align: center; }
+  .nzp-kart:last-child .nzp-yazi { padding-block: 0; }
+  .nzp-kart:last-child .nzp-etk { justify-content: center; }
+  .nzp-kart:last-child .nzp-p { margin-inline: auto; }
+  .nzp-kart:last-child .nzp-sahne { padding-top: 24px; }
+  .nzp-sahne { padding-top: 24px; }
+  .nzp-yazi h3 { font-size: 21px; }
+  .nzp-etk { font-size: 12px; letter-spacing: .06em; }
 }
-
-/* c · liste: solda neden, sağda kısa kırpım; satırlar ince çizgiyle ayrılır (telefonda kırpım yazının altında) */
-.nz-liste { max-width: 1000px; margin-inline: auto; border-top: 1px solid #D5DAE7; }
-.nz-liste .nz-satir, .nz-tek.duruk .nz-satir { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: clamp(28px, 5vw, 72px); align-items: center;
-  padding: 36px 0 30px; border-bottom: 1px solid #D5DAE7; }
-.nz-liste .nz-yazi, .nz-tek.duruk .nz-yazi { max-width: 470px; }
-.nz-liste .nz-tel, .nz-tek.duruk .nz-tel { align-self: end; margin-bottom: -30px; }   /* kırpım alt çizgiye oturur */
-@media (max-width: 760px) {
-  .nz-liste .nz-satir, .nz-tek.duruk .nz-satir { grid-template-columns: minmax(0, 1fr); gap: 22px; padding: 30px 0 26px; }
-  .nz-liste .nz-tel, .nz-tek.duruk .nz-tel { width: min(100%, 360px); margin-bottom: -26px; }
-}
-
-/* b · tek telefon (m/moyo.js): solda yapışkan pencere, sağda nedenler; kaydırdıkça telefonun görüntüsü o nedenin işlevine yakınlaşır.
-   Telefon sahnede nokta ölçüsünde (1 px = 1 nokta, kenar 14) çizilir, "kamera" onu ölçekleyip kaydırır. Hareket azaltmada .duruk: pencere
-   yok, her nedenin yanında kendi kısa kırpımı (c'nin satır düzeni). */
-.nz-tek { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
-.nz-tek.duruk { display: block; max-width: 1000px; margin-inline: auto; border-top: 1px solid #D5DAE7; }
-.nz-tek.duruk .nz-pencere { display: none; }
-.nz-tek:not(.duruk) .nz-sabit { display: none; }
-.nz-pencere { position: sticky; top: calc(var(--h-nav) + 24px); width: 100%; aspect-ratio: 20 / 23; max-height: min(580px, 100svh - var(--h-nav) - 48px); overflow: hidden;
-  border-radius: 28px; background: #F7F8FC; box-shadow: inset 0 0 0 1px #DCE1EC; }
-.nz-kamera { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
-.nz-govde { width: 418px; height: 872px; padding: 14px; border-radius: 62px; background: #0B0920; box-shadow: 0 30px 70px rgba(22, 17, 58, .2); }
-.nz-ekran-tam { position: relative; width: 390px; height: 844px; overflow: hidden; border-radius: 48px; background: #FFFFFF; }
-.nz-katman { position: absolute; inset: 0; opacity: 0; }
-.nz-katman:first-child { opacity: 1; }
-.nz-katman img { display: block; width: 390px; height: 844px; max-width: none; }
-.nz-katman .nz-halka { border-width: 2.5px; border-radius: 11px; }
-.nz-sebep { display: grid; }
-/* Nedenler: solda ince bir ray, etkin nedenin yazısı rayda koyu. Son nedenden sonra boşluk: üçüncü neden etkinken pencere bir süre daha
-   tümüyle görünür (pencere ile neden yüksekliğinin farkının yarısı + 12svh). */
-.nz-tek:not(.duruk) .nz-sebep { border-left: 2px solid #D5DAE7; }
-.nz-tek:not(.duruk) .nz-sebep::after { content: ""; height: calc(max(0px, (min(580px, 100svh - var(--h-nav) - 48px) - max(240px, 38svh)) / 2) + 12svh); }
-/* Etkin olmayan nedenler soluk değil (okunurluk): başlık ve etiket gri, simge yarı saydam; etkin nedende başlık koyu, rayda koyu çizgi. */
-.nz-tek:not(.duruk) .nz-satir { display: flex; flex-direction: column; justify-content: center; min-height: max(240px, 38svh); padding: 8px 0 8px 30px; cursor: pointer; }
-.nz-tek:not(.duruk) .nz-satir .nz-yazi { position: relative; }
-.nz-tek:not(.duruk) .nz-satir .nz-yazi::before { content: ""; position: absolute; left: -32px; top: -4px; bottom: -4px; width: 2px; background: transparent; transition: background-color .35s ease; }
-.nz-tek:not(.duruk) .nz-satir h3, .nz-tek:not(.duruk) .nz-satir .nz-etk { color: var(--c-text-3); transition: color .35s ease; }
-.nz-tek:not(.duruk) .nz-satir .nz-etk img { opacity: .5; transition: opacity .35s ease; }
-.nz-tek:not(.duruk) .nz-satir.on h3 { color: var(--c-ink); }
-.nz-tek:not(.duruk) .nz-satir.on .nz-etk { color: var(--c-text-2); }
-.nz-tek:not(.duruk) .nz-satir.on .nz-etk img { opacity: 1; }
-.nz-tek:not(.duruk) .nz-satir.on .nz-yazi::before { background: var(--c-ink); }
-@media (max-width: 760px) {
-  .nz-tek { grid-template-columns: minmax(0, 1fr); gap: 0; }
-  .nz-pencere { z-index: 2; top: calc(var(--h-nav) + 10px); aspect-ratio: auto; height: min(300px, 38svh); max-height: none; box-shadow: inset 0 0 0 1px #DCE1EC, 0 0 0 10px #EDF0F8; }
-  .nz-tek:not(.duruk) .nz-sebep { margin-top: 28px; }
-  .nz-tek:not(.duruk) .nz-sebep::after { content: none; }
-  .nz-tek:not(.duruk) .nz-satir { min-height: max(280px, 44svh); padding-left: 22px; }
-  .nz-tek:not(.duruk) .nz-satir .nz-yazi::before { left: -24px; }
-}
-@media (prefers-reduced-motion: reduce) { .nz-tek .nz-satir h3, .nz-tek .nz-etk, .nz-tek .nz-etk img, .nz-tek .nz-yazi::before { transition: none; } }
 
 /* ---------- Alt bilgi: logo + açılış başlığı, dört sütun (Ürün · Hesap · Kurumsal · Yasal) ---------- */
 .sayfa-moyo footer .wrap { grid-template-columns: minmax(0, 1.5fr) repeat(4, minmax(0, 1fr)); gap: 40px 28px; }

@@ -25,6 +25,12 @@
 # tasarımı (ndzn) her nedeni ilgili ekranın yakın çekimiyle gösterir: a üç yakın çekim · b tek telefon, kaydırdıkça bir işlevden ötekine
 # yakınlaşır (m/moyo.js; hareket azaltmada ve betiksiz üç sabit kırpım) · c liste ve yanında küçük kırpım. Kırpımlar gerçek ekranlardan
 # (img/e-nz-*.webp, 780 × 1688 = 390 × 844 nokta ×2; tools/cati-sayfa/cek düzeniyle çekildi), yalnızca CSS ile kırpılır (NZ_EKRAN).
+#
+# 19 Kasım 2026, tur 5 (kullanıcının yanıtları): "nlead" a ve "ndzn" a sabitlendi (gruplar, b ve c seçeneklerinin metni, işareti, stili ve
+# betiği silindi; sayfada önizleme grubu kalmadı). Giriş kısaldı (iki "neden" ve faydası, iki kısa cümle). "Üç yakın çekim" yeniden: ekranlar
+# kırpılmaz; her neden kendi panelinde, üstte küçük büyük harfli etiket, başlık ve tek cümle, altta telefonda uygulamanın bütün ekranı (panelin
+# alt kenarı yalnızca telefonun altını keser) ve ekranın vurgulanan şeridi aynı yerde ~1,18 kat büyük, telefonun iki kenarından taşan kart
+# olarak (kullanıcının iki örnek görselindeki vurgu biçimi; NZ). Kart aynı görselden kırpılır (CSS), ekrana girince bir kez yerine oturur.
 import json, re, html as H
 E = json.load(open('e-metin.json'))
 e = H.escape
@@ -39,18 +45,6 @@ HAKKIMIZDA, GUVEN = 'hakkimizda.html', 'guven.html'   # kurumsal sayfalar (başk
 APPS = {'ebeveyn': ('img/ikon-moyo.svg', 'Moyo Ebeveyn'), 'oyun': ('img/ikon-oyun.png', 'Moyo Oyun'), 'mercek': ('img/ikon-mercek.svg', 'Moyo Uzman')}
 chip = lambda k: f'<span><img src="{APPS[k][0]}" alt="" width="22" height="22">{APPS[k][1]}</span>'
 CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
-
-
-# Önizleme alternatifleri (oniz.js sözleşmesi; yalnız önizlemede, canlıya seçilen kalır)
-# nlead (tur 4): "Neden Moyo" başlığının altındaki giriş; rutini neden planladığınızı ve çocuğunuzun zorlandığı anları neden not ettiğinizi söyler.
-# ndzn (tur 4): bölümün tasarımı; üçünde içerik aynı (neden_kartlar + neden_ekran), her neden kendi ekranının yakın çekimiyle.
-ONIZ = [
-    {'k': 'nlead', 'ad': '"Neden Moyo" giriş cümlesi', 'hedef': '#degerler', 'oneri': 'a',
-     'sec': [['a', 'İki neden, iki cümle'], ['b', 'Soru ve yanıt'], ['c', 'Örneğe en yakın, uzmanla']]},
-    {'k': 'ndzn', 'ad': '"Neden Moyo" tasarımı', 'hedef': '#degerler', 'oneri': 'a',
-     'sec': [['a', 'Üç yakın çekim'], ['b', 'Tek telefon, kaydırdıkça yakınlaşır'], ['c', 'Liste, yanında küçük kırpım']]},
-]
-ONERI = {g['k']: g['oneri'] for g in ONIZ}
 
 
 # ---------- Ortak parçalar (fiyat sayfası da kullanır) ----------
@@ -240,66 +234,52 @@ pan = ''.join(f'''        <div class="nc-p" role="tabpanel" id="nc-p{k}" aria-la
         </div>
 ''' for k, a in enumerate(ADIM))
 
-# ---------- Neden Moyo: başlık, giriş (nlead) ve üç "neden" (ndzn: üç tasarım, içerik aynı) ----------
-# Kartlar e-metin.json neden_kartlar: [ekran, başlık, metin, rozet]; rozetli olan uzman kartıdır (isteğe bağlı). Her neden kendi ekranının
-# yakın çekimiyle (tur 4: "neden"i "nasıl" ile pekiştir): gerçek ekran (örnek veri), telefonun üst kısmı gibi çerçevelenir, işlevin çevresinde
-# yeşil halka. Ekranlar 780 × 1688 (390 × 844 nokta ×2); bölgeler nokta cinsinden (x, y, g, y), hep ekranın tam genişliği (x 0, g 390):
-# genis = a ve b (uzun; üçü aynı boyda, a'da hizalı dursun), kisa = c ve b'nin hareketsiz hâli (kısa). Davranış kaydında bölge "Sesli anlat"
-# alanından (y 590) önce biter. halka: işlevin kutusu (x, y, g, y); bölgenin içinde kalanlar çizilir.
-#   rutin: "Hazır rutin" ekranı (yeni çekim, cek/moyo.js düzeni: Rutin ekle › Güne hazır sabah): Hangi günler? (Hafta içi) ve adımların saatleri
-#   kayit: "Davranış kaydı ekle" (img/e-davranis.webp ile aynı çekimin ×2'si): Öncesinde / Ne yaşandı (halka) / Sonrasında ne oldu? ("Sesli anlat" dışarıda)
-#   uzman: Moyo Uzman telefonda, danışan › Ev rutinleri › Haftalık (img/mercek-rutin-tel.webp'in ×2'si): adımların son 7 günü
-NZ_EKRAN = {
-    'rutin': {'src': 'img/e-nz-plan.webp', 'app': 'ebeveyn', 'genis': (228, 348), 'kisa': (380, 205), 'halka': [(22, 268, 116, 32), (284, 398, 76, 102)]},
-    'kayit': {'src': 'img/e-nz-not.webp', 'app': 'ebeveyn', 'genis': (232, 348), 'kisa': (374, 205), 'halka': [(12, 382, 364, 98)]},
-    'uzman': {'src': 'img/e-nz-uzman.webp', 'app': 'mercek', 'genis': (436, 348), 'kisa': (436, 205), 'halka': [(22, 499, 352, 67)]},
+# ---------- Neden Moyo: başlık, giriş ve üç "neden" (tur 5: yalnızca "Üç yakın çekim", yeniden tasarım) ----------
+# Kartlar e-metin.json neden_kartlar: [ekran, başlık, metin, rozet]; rozetli olan uzman kartıdır (isteğe bağlı). Her neden kendi panelinde:
+# üstte küçük büyük harfli etiket (uygulama · ekran), kısa başlık ve tek cümle; altta telefonda uygulamanın BÜTÜN ekranı (gerçek ekran, örnek
+# veri; kırpılmaz, panelin alt kenarı yalnızca telefonun altını keser) ve ekranın vurgulanan şeridi, aynı yerde ve aynı görselden, CIKMA kat
+# büyük, telefonun iki kenarından taşan kart olarak (kullanıcının iki örnek görseli: satır ekrandan kalkmış gibi). Ekranlar 780 × 1688
+# (390 × 844 nokta ×2); telefon nokta cinsinden 418 × 872 (kenar 14). cikma: şeridin dikey yeri (y, yükseklik; nokta), şerit hep ekranın tam
+# genişliği: kart büyüyünce telefonun iki yanından da ~%5 taşar.
+#   rutin: "Hazır rutin" (Rutin ekle › Güne hazır sabah): ilk iki adım saatleriyle (07:00 Odanın perdesini aç, 07:05 Yatağını topla)
+#   kayit: "Davranış kaydı ekle": "Ne yaşandı?" alanı (şerit "Sonrasında ne oldu?"dan, dolayısıyla "Sesli anlat"tan önce biter)
+#   uzman: Moyo Uzman telefonda, danışan › Ev rutinleri › Haftalık: "Yatağını topla" adımının son 7 günü
+NZ = {
+    'rutin': {'src': 'img/e-nz-plan.webp', 'app': 'ebeveyn', 'cikma': (376, 142)},
+    'kayit': {'src': 'img/e-nz-not.webp', 'app': 'ebeveyn', 'cikma': (382, 102)},
+    'uzman': {'src': 'img/e-nz-uzman.webp', 'app': 'mercek', 'cikma': (491, 80)},
 }
+TEL_G, TEL_Y, KENAR, CIKMA = 418, 872, 14, 1.18
 ND, NE = E['neden_kartlar'], E['neden_ekran']
-gizli = lambda k, v: '' if v == ONERI[k] else ' hidden'
 bagla = lambda t: re.sub(r' (\S+)$', ' \\1', t) if t.count(' ') >= 2 else t   # son iki sözcük aynı satırda (19 Kasım QA)
 rozet = lambda r: f'<span class="nd-rozet">{e(r)}</span>' if r else ''
 urun = lambda t: re.sub(r'Moyo (Uzman|Ebeveyn|Oyun)', 'Moyo \\1', t)   # ürün adı satır sonunda bölünmesin
-soru = lambda t: re.sub(r'^(Neden [^?]+\?)', r'<b>\1</b>', t)                  # nlead b: "Neden rutin?" kalın
-neden_giris = ''.join(f'<p class="intro nd-giris" data-var="nlead:{v}"{gizli("nlead", v)}>{" ".join(f"<span>{soru(e(urun(x)))}</span>" for x in re.split(r"(?<=[.])\s+", t))}</p>'
-                      for v, t in E['neden_giris'].items())
+neden_giris = f'<p class="intro nd-giris">{" ".join(f"<span>{e(urun(x))}</span>" for x in re.split(r"(?<=[.])\s+", E["neden_giris"]))}</p>'
 
 
-def dilim(k, boy, ek=''):
-    """Bir ekranın bölgesi, telefonun üst kısmı gibi çerçeveli (--y, --h nokta; m/moyo.css .nz-tel kırpar)."""
-    y, h = NZ_EKRAN[k][boy]
-    alt_ = NE[k]['alt' if boy == 'genis' else 'alt_kisa']
-    halkalar = ''.join(f'<i class="nz-halka" style="left:{x / 3.9:.2f}%;top:{(hy - y) / h * 100:.2f}%;width:{g / 3.9:.2f}%;height:{yk / h * 100:.2f}%"></i>'
-                       for x, hy, g, yk in NZ_EKRAN[k]['halka'] if hy >= y and hy + yk <= y + h)
-    return (f'<div class="nz-tel{ek}" style="--y:{y};--h:{h}"><div class="nz-kasa"><div class="nz-ekran"><img src="{NZ_EKRAN[k]["src"]}" alt="{e(alt_)}" width="780" height="1688" loading="lazy">'
-            f'{halkalar}</div></div></div>')
+def cikma_stil(y, h):
+    """Kartın telefon kutusundaki yeri (yüzde) ve içindeki görselin kayması: şeridin ortası yerinde kalır, kart CIKMA kat büyür."""
+    g, yk = 390 * CIKMA, h * CIKMA
+    return (f'--k0:{1 / CIKMA:.4f};left:{(TEL_G - g) / 2 / TEL_G * 100:.3f}%;width:{g / TEL_G * 100:.3f}%;'
+            f'top:{(KENAR + y + h / 2 - yk / 2) / TEL_Y * 100:.3f}%;height:{yk / TEL_Y * 100:.3f}%')
 
 
-etk = lambda k, r: (f'<p class="nz-etk"><img src="{APPS[NZ_EKRAN[k]["app"]][0]}" alt="" width="22" height="22">'
-                    f'<span>{APPS[NZ_EKRAN[k]["app"]][1]} · {e(NE[k]["yer"])}</span>{rozet(r)}</p>')
-yazi = lambda k, t, p, r: f'{etk(k, r)}<h3>{e(bagla(t))}</h3><p class="nz-p">{e(p)}</p>'
-# a · üç yakın çekim: her nedenin üstünde kendi ekranının uzun kırpımı (≥ 1200 px üç sütun, 761–1199 px 2 + 1, telefonda alt alta)
-nd_a = (f'<ul class="nz-uc" data-var="ndzn:a"{gizli("ndzn", "a")}>'
-        + ''.join(f'<li>{dilim(k, "genis")}<div class="nz-yazi">{yazi(k, t, p, r)}</div></li>' for k, t, p, r in ND)
-        + '</ul>')
-# b · tek telefon: nedenler kaydıkça telefonun görüntüsü bir işlevden ötekine yakınlaşır (m/moyo.js "kamera"). Pencere betik açınca görünür;
-# hareket azaltmada ya da betik yoksa her nedenin yanında kendi kısa kırpımı (.nz-sabit). Katman başına iki bölge (data-g uzun, data-d kısa:
-# pencere enine genişse kısa bölge) ve alt metinleri; halkalar telefonun ekranında nokta cinsinden.
-katman = lambda k: (f'<div class="nz-katman" data-g="0,{NZ_EKRAN[k]["genis"][0]},390,{NZ_EKRAN[k]["genis"][1]}" data-d="0,{NZ_EKRAN[k]["kisa"][0]},390,{NZ_EKRAN[k]["kisa"][1]}"'
-                    f' data-alt-g="{e(NE[k]["alt"])}" data-alt-d="{e(NE[k]["alt_kisa"])}"><img src="{NZ_EKRAN[k]["src"]}" alt="" width="780" height="1688" loading="lazy">'
-                    + ''.join(f'<i class="nz-halka" style="left:{x}px;top:{y}px;width:{g}px;height:{h}px"></i>' for x, y, g, h in NZ_EKRAN[k]['halka']) + '</div>')
-nd_b = (f'<div class="nz-tek duruk" data-nz data-var="ndzn:b"{gizli("ndzn", "b")}>'
-        f'<div class="nz-pencere" role="img" aria-label="{e(NE[ND[0][0]]["alt"])}"><div class="nz-kamera"><div class="nz-govde"><div class="nz-ekran-tam">'
-        + ''.join(katman(k) for k, *_ in ND) + '</div></div></div></div>'
-        + '<ol class="nz-sebep">' + ''.join(f'<li class="nz-satir"><div class="nz-yazi">{yazi(k, t, p, r)}</div>{dilim(k, "kisa", " nz-sabit")}</li>' for k, t, p, r in ND)
-        + '</ol></div>')
-# c · liste: solda neden, sağda (telefonda altta) kendi ekranının kısa kırpımı; satırlar ince çizgiyle ayrılır
-nd_c = (f'<ul class="nz-liste" data-var="ndzn:c"{gizli("ndzn", "c")}>'
-        + ''.join(f'<li class="nz-satir"><div class="nz-yazi">{yazi(k, t, p, r)}</div>{dilim(k, "kisa")}</li>' for k, t, p, r in ND)
-        + '</ul>')
+def nz_panel(k, t, p, r):
+    y, h = NZ[k]['cikma']
+    ikon, ad = APPS[NZ[k]['app']]
+    return (f'<li class="nzp-kart"><div class="nzp-yazi"><p class="nzp-etk"><img src="{ikon}" alt="" width="20" height="20">'
+            f'<span>{ad} · {e(NE[k]["yer"])}</span>{rozet(r)}</p><h3>{e(bagla(t))}</h3><p class="nzp-p">{e(p)}</p></div>'
+            f'<div class="nzp-sahne"><figure class="nzp"><div class="nzp-tel"><div class="nzp-ekran">'
+            f'<img src="{NZ[k]["src"]}" alt="{e(NE[k]["alt"])}" width="780" height="1688" loading="lazy"></div></div>'
+            f'<div class="nzp-cikma" style="{cikma_stil(y, h)}" aria-hidden="true"><img src="{NZ[k]["src"]}" alt="" width="780" height="1688" loading="lazy"'
+            f' style="top:{-y / h * 100:.3f}%"></div></figure></div></li>')
+
+
+neden = '<ul class="nzp-uc">' + ''.join(nz_panel(*x) for x in ND) + '</ul>'
 ekosis = ''.join(f'<div class="eko"><img src="{APPS[k][0]}" alt="" width="48" height="48"><h3>{APPS[k][1]}</h3><p>{e(p)}</p></div>' for k, p in E['ekosistem'])
 sss = ''.join(f'<details><summary>{q[0]}</summary><p>{q[1]}</p></details>' for q in E['sss'])
 
-html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
+html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/")}
 <body class="sayfa-moyo">
 {ust("ana")}
 <main id="main">
@@ -332,9 +312,7 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
   <section class="sec sec-soft" id="degerler" aria-labelledby="h-deger">
     <div class="wrap">
       <div class="head"><p class="eyebrow">Neden Moyo</p><h2 id="h-deger">{e(E["neden_baslik"]).replace("zorlandığı anlar", "zorlandığı\u00a0anlar")}</h2>{neden_giris}</div>
-      {nd_a}
-      {nd_b}
-      {nd_c}
+      {neden}
       <p class="nd-bag"><a href="{HAKKIMIZDA}">{E["neden_bag"]} <span aria-hidden="true">→</span></a></p>
     </div>
   </section>

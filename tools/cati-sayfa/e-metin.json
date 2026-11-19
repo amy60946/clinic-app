@@ -1,5 +1,5 @@
 {
- "_not": "Moyo Ebeveyn sayfası metinleri (yap_m.py okur). Tur 2, 19 Kasım 2026: çocuk adımı gerçek hayatta yapar, oyunda işaretler (oyunda yapmaz); rutin 'planlanır' (kurulmaz); uygulamalar 'birbirine bağlı' (tek platform değil); çocuğun zorlandığı anın kaydı kendi adımında; aynı cümle sayfada iki kez ya da çatı sayfayla bire bir geçmez. Tur 3: alt ve açılış görseli a ile, 'Neden Moyo' başlığı ve kartları a ile sabitlendi. Tur 4, 19 Kasım 2026 (kullanıcı kararları): h1 a ile sabitlendi (alt bilgideki slogan da bu); 'zorlanılan an' yerine 'zorlandığı an' (cümlede 'çocuğunuzun zorlandığı an', kısa etikette 'Zorlandığı anı kaydedin'); kayıt ses kaydı gibi okunmasın: 'not edersiniz', 'yazılı not'. 'Neden Moyo' giriş cümlesi (neden_giris, grup nlead) rutini ve notu NEDEN tuttuğunuzu söyler; bölümün tasarımı (ndzn) her nedenin yanında ilgili ekranın yakın çekimini gösterir (neden_ekran: etiket, görselin alt metni; geniş ve kısa kırpım ayrı).",
+ "_not": "Moyo Ebeveyn sayfası metinleri (yap_m.py okur). Tur 2, 19 Kasım 2026: çocuk adımı gerçek hayatta yapar, oyunda işaretler (oyunda yapmaz); rutin 'planlanır' (kurulmaz); uygulamalar 'birbirine bağlı' (tek platform değil); çocuğun zorlandığı anın kaydı kendi adımında; aynı cümle sayfada iki kez ya da çatı sayfayla bire bir geçmez. Tur 3: alt ve açılış görseli a ile, 'Neden Moyo' başlığı ve kartları a ile sabitlendi. Tur 4, 19 Kasım 2026 (kullanıcı kararları): h1 a ile sabitlendi (alt bilgideki slogan da bu); 'zorlanılan an' yerine 'zorlandığı an' (cümlede 'çocuğunuzun zorlandığı an', kısa etikette 'Zorlandığı anı kaydedin'); kayıt ses kaydı gibi okunmasın: 'not edersiniz', 'yazılı not'. 'Neden Moyo' giriş cümlesi (neden_giris, grup nlead) rutini ve notu NEDEN tuttuğunuzu söyler; bölümün tasarımı (ndzn) her nedenin yanında ilgili ekranın yakın çekimini gösterir (neden_ekran: etiket, görselin alt metni; geniş ve kısa kırpım ayrı). Tur 5, 19 Kasım 2026: nlead a ve ndzn a sabitlendi; giriş kısaldı (neden_giris tek metin), neden_ekran'da alt yalnızca bütün ekranı ve büyütülen şeridi anlatır.",
  "baslik": "Moyo Ebeveyn · Rutin, davranış kaydı ve ilerleme takibi",
  "aciklama": "Çocuğunuzun günlük rutinini planlayın, zorlandığı anları not edin, ilerlemeyi görün. Her adım oyunda küçük bir macera olur. 14 gün ücretsiz, kart gerekmez.",
  "h1": "Çocuğunuzun rutinini ve zorlandığı anları takip edin",
@@ -97,11 +97,7 @@
    ]
   }
  ],
- "neden_giris": {
-  "a": "Rutini planlarsınız; böylece günün sırası bellidir ve adımları tek tek sizin hatırlatmanız gerekmez. Çocuğunuzun zorlandığı anları birkaç dokunuşla not edersiniz; böylece neyin işe yaradığını hafızanıza değil, yazılı notlara bakarak görürsünüz.",
-  "b": "Neden rutin? Günün sırası bellidir, hatırlatmayı oyun yapar. Neden not? Çocuğunuzun zorlandığı anda ne olduğunu ve ne denediğinizi yazarsınız; neyin işe yaradığı tahminle değil, notlarla görünür.",
-  "c": "Rutin, çocuğunuzun gününe belli bir sıra verir; zorlandığı anlarda olanı da birkaç dokunuşla not edersiniz. Böylece neyin işe yaradığını tahminle değil, yazılı kayıtla görürsünüz; onay verdiyseniz uzmanınız da aynı notlara bakar."
- },
+ "neden_giris": "Rutini planlarsınız: günün sırası belli olur, adımları tek tek hatırlatmanız gerekmez. Çocuğunuzun zorlandığı anları not edersiniz: neyin işe yaradığını tahminle değil, notlarla görürsünüz.",
  "neden_baslik": "Rutin, çocuğunuzun zorlandığı anlar ve uzman takibi bir arada.",
  "neden_kartlar": [
   [
@@ -125,19 +121,16 @@
  ],
  "neden_ekran": {
   "rutin": {
-   "yer": "günler ve saatler",
-   "alt": "Moyo Ebeveyn, hazır rutin: Hangi günler sorusunda Hafta içi seçili; adımlar saatleriyle: 07:00 Odanın perdesini aç, 07:05 Yatağını topla, 07:15 Sabah dişlerini fırçala. Örnek veri.",
-   "alt_kisa": "Moyo Ebeveyn, hazır rutin: adımlar sırasıyla ve saatleriyle: 07:00 Odanın perdesini aç, 07:05 Yatağını topla, 07:15 Sabah dişlerini fırçala. Örnek veri."
+   "yer": "rutin planı",
+   "alt": "Moyo Ebeveyn, hazır rutin ekranı: Güne hazır sabah rutini; Hangi günler sorusunda Hafta içi seçili; adımlar sırasıyla ve saatleriyle. Büyütülen bölüm: 07:00 Odanın perdesini aç, 07:05 Yatağını topla. Örnek veri."
   },
   "kayit": {
    "yer": "davranış kaydı",
-   "alt": "Moyo Ebeveyn, davranış kaydı: Akşam seçili. Öncesinde ne oldu: Tablet süresi bitti, kapatması istendi. Ne yaşandı: Ağladı, tableti bırakmak istemedi. Sonrasında ne oldu: İki dakika verdik, sonra kendisi kapattı. Örnek veri.",
-   "alt_kisa": "Moyo Ebeveyn, davranış kaydı. Ne yaşandı: Ağladı, tableti bırakmak istemedi. Sonrasında ne oldu: İki dakika verdik, sonra kendisi kapattı. Örnek veri."
+   "alt": "Moyo Ebeveyn, davranış kaydı ekranı: kimle ilgili, ne zaman, öncesinde ne oldu, ne yaşandı, sonrasında ne oldu ve ne kadar zordu. Büyütülen bölüm, Ne yaşandı: Ağladı, tableti bırakmak istemedi. Örnek veri."
   },
   "uzman": {
    "yer": "uzmanınızın ekranı",
-   "alt": "Moyo Uzman, uzmanın ekranı: sabah rutininin adımları son 7 gün boyunca gün gün işaretli; Yatağını topla, 10 dakika kitap oku, Dişlerini fırçala, Okul için giyin. Örnek veri.",
-   "alt_kisa": "Moyo Uzman, uzmanın ekranı: Yatağını topla ve 10 dakika kitap oku adımlarının son 7 günü, gün gün işaretli. Örnek veri."
+   "alt": "Moyo Uzman, uzmanın ekranı: sabah rutininin adımları son 7 gün boyunca gün gün işaretli. Büyütülen satır: Yatağını topla adımının son 7 günü. Örnek veri."
   }
  },
  "neden_bag": "Yaklaşımımızın dayandığı araştırmalar",
