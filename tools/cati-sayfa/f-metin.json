@@ -1,20 +1,14 @@
 {
- "_kaynak": "Yalnız doğrulanmış olgular (18 Kasım 2026). Deneme 14 gün, kartsız, bitince kendiliğinden ücret yok: ortak sozlesme/durumlar.md P12, proposed/20261118200000_parent_trial_14.sql başlığı, parent-app src/screens/PaywallScreen.tsx. Ücretsiz plan sınırları: ortak migrations/20261022110000_subscriptions.sql (3 etkin adım, 1 çocuk; davranış kaydı, mesaj kapalı), 20261022130000_sun_stones_rewards.sql (ödüller), parent-app src/data/plans.ts freeFeatures. Premium aylık/yıllık, App Store, yenileme ve iptal: durumlar.md P12, PaywallScreen.tsx yasal metni. Web'de satış yok, üyelik web'de açılır: parent-app src/lib/purchases.web.ts. Davet kodu 21 gün: durumlar.md 'Aile davet et', akislar.md 19 (aile davet kodu; uzman daveti süreyi değiştirmez). FİYAT: kararlaştırılmış rakam yok (parent-app src/data/plans.ts YER TUTUCU); rakam yazılmaz.",
+ "_kaynak": "Yalnız doğrulanmış olgular (18 Kasım 2026). Deneme 14 gün, kartsız, bitince kendiliğinden ücret yok: ortak sozlesme/durumlar.md P12, proposed/20261118200000_parent_trial_14.sql başlığı, parent-app src/screens/PaywallScreen.tsx. Ücretsiz plan sınırları: ortak migrations/20261022110000_subscriptions.sql (3 etkin adım, 1 çocuk; davranış kaydı, mesaj kapalı), 20261022130000_sun_stones_rewards.sql (ödüller), parent-app src/data/plans.ts freeFeatures. Premium aylık/yıllık, App Store, yenileme ve iptal: durumlar.md P12, PaywallScreen.tsx yasal metni. Web'de satış yok, üyelik web'de açılır: parent-app src/lib/purchases.web.ts. Davet kodu 21 gün: durumlar.md 'Aile davet et', akislar.md 19 (aile davet kodu; uzman daveti süreyi değiştirmez). FİYAT (tur 3, 19 Kasım 2026, kullanıcı kararı): kesin karara kadar yer tutucu Premium 349 TL / ay; önizlemede yanında 'Taslak fiyat' etiketi (ONIZ yorumları arasında, canlıya gitmez). Yıllık rakam yok: uygulamada yıllık ürün var (parent-app src/data/plans.ts 'yearly', PaywallScreen), bu yüzden yalnızca 'Yıllık seçenek uygulamada' yazılır.",
  "baslik": "Moyo Ebeveyn fiyatları",
  "aciklama": "Moyo Oyun ücretsiz. Moyo Ebeveyn 14 gün ücretsiz, kart gerekmez; sonra ücretsiz plan ya da aylık veya yıllık Premium. Planları karşılaştırın.",
- "h1": "Moyo&nbsp;Oyun ücretsiz. Moyo&nbsp;Ebeveyn 14&nbsp;gün ücretsiz.",
- "alt": "Deneme bütün özelliklerle açılır, kart bilgisi gerekmez. Deneme bitince kendiliğinden ücret alınmaz: ücretsiz planla devam eder ya da Premium'u seçersiniz.",
- "deneme": [
-  "14 gün ücretsiz deneme",
-  "Premium'un bütün özellikleri açık, kart bilgisi gerekmez. Süre bitince kendiliğinden ücret alınmaz."
- ],
- "fiyat_yok": "Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak.",
+ "h1": "Moyo&nbsp;Oyun <em>ücretsiz</em>. Moyo&nbsp;Ebeveyn <em>14&nbsp;gün ücretsiz</em>.",
+ "alt": "14 günlük deneme bütün özelliklerle açılır. Başlamak için kart bilgisi gerekmez.",
  "ucretsiz": {
   "ad": "Ücretsiz plan",
-  "kim": "Deneme bitince, süre sınırı olmadan",
-  "not": "Deneme bitip Premium'u seçmezseniz Moyo Ebeveyn bu planla devam eder.",
+  "kim": "Süre sınırı olmadan",
+  "not": "Deneme bitince kendiliğinden ücret alınmaz; Moyo Ebeveyn bu planla devam eder.",
   "tutar": "Ücretsiz",
-  "birim": "",
   "alt": "Verileriniz silinmez",
   "madde": [
    "1 çocuk",
@@ -28,7 +22,7 @@
   "ad": "Premium",
   "kim": "Bütün aile için tek abonelik",
   "not": "App Store'dan alınır, aynı hesapla web'de de açılır.",
-  "tutar": "Aylık ya da yıllık",
+  "tutar": "349 TL",
   "madde": [
    "Ücretsiz plandaki bütün özellikler",
    "Çocuk ve rutin adımı sınırı yok",
@@ -37,19 +31,16 @@
    "Çocuğunuzla mesajlaşma",
    "Eşiniz de aynı üyelikle kullanır"
   ],
-  "yenileme": "Dönem sonunda aynı süreyle kendiliğinden yenilenir; App Store'dan dilediğiniz an iptal edersiniz."
+  "yenileme": "Dönem sonunda kendiliğinden yenilenir; App Store'dan dilediğiniz an iptal edersiniz.",
+  "rozet": "14 gün ücretsiz",
+  "birim": "/ ay",
+  "taslak": "Taslak fiyat",
+  "donem": "Aylık abonelik, KDV dahil. Yıllık seçenek uygulamada."
  },
  "oyun": [
   "Moyo Oyun",
   "Ücretsiz",
   "Çocuğunuzun iPhone ya da iPad'inde. Rutin adımları macera olarak görünür; reklam yok. Moyo Ebeveyn'deki kodla bağlanır."
- ],
- "her_iki": [
-  "Kart bilgisi gerekmez",
-  "Deneme bitince kendiliğinden ücret alınmaz",
-  "Premium App Store'dan alınır, web'de de açılır",
-  "Dönem sonunda kendiliğinden yenilenir",
-  "App Store'dan dilediğiniz an iptal"
  ],
  "tablo_not": "Deneme süresince (14 gün) Premium'un bütün özellikleri açıktır.",
  "tablo": [
@@ -141,5 +132,5 @@
   ]
  ],
  "kapanis": "14 gün ücretsiz deneyin",
- "kapanis_ince": "Moyo Ebeveyn 14 gün ücretsiz, kart bilgisi gerekmez; deneme bitince kendiliğinden ücret alınmaz. Premium'u seçerseniz ücret App Store üzerinden alınır ve dönem sonunda kendiliğinden yenilenir."
+ "kapanis_ince": "Deneme için kart gerekmez, süre bitince ücret alınmaz. Premium'u seçerseniz ödeme App Store üzerinden alınır ve abonelik dönem sonunda yenilenir."
 }

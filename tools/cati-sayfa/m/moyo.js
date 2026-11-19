@@ -1,7 +1,7 @@
 /* Moyo Ebeveyn tanıtım sayfası: sayfaya özel davranış (m/site.js'in üstüne; site.js Mercek sitesinin kopyasıdır, dokunulmaz).
    Dışarıya hiçbir istek göndermez. 18 Kasım 2026 turu:
-   1. Açılış görseli "a": Moyo Ebeveyn ile Moyo Oyun arasındaki ilişkiyi dört vuruşta anlatır (rutini kurarsınız → oyunda macera
-      olur → çocuğunuz Yaptım'a dokunur → siz onaylarsınız). Fare üstündeyken ve klavye odağı anlatımdayken durur; duraklat düğmesi
+   1. Açılış görseli (tur 3'te tek sürüm): Moyo Ebeveyn ile Moyo Oyun arasındaki ilişkiyi dört vuruşta anlatır (rutini planlarsınız →
+      oyunda macera olur → çocuğunuz yapar, oyunda "Yaptım"a dokunur → siz onaylarsınız). Fare üstündeyken ve klavye odağı anlatımdayken durur; duraklat düğmesi
       var; görünmezken çalışmaz. Hareket azaltmada (ya da betik yoksa) "duruk" hâl: dört numara, iki ok, dört satırlık liste.
    2. "Nasıl çalışır": telefonda ve tablette parmakla sağa sola kaydırılır (dikey kaydırma etkilenmez), masaüstünde yatay
       dokunmatik yüzey ve ok tuşları; altta ‹ 2 / 5 › ve dokunmatik cihazda ilk kaydırmaya kadar kısa ipucu.
@@ -127,8 +127,6 @@
     d.addEventListener('visibilitychange', surdur);
     window.addEventListener('resize', function () { if (hareket) ciz(t); });
     izle(reduce, kip);
-    // Önizleme: "Açılış görseli" seçeneği yeniden a olunca anlatım baştan başlar
-    window.addEventListener('oniz', function (e) { if (e.detail && e.detail.k === 'anim' && e.detail.v === 'a' && hareket) { t = 400; ciz(t); surdur(); } });
     fig.maAn = function (x) { t = x; ciz(t); };   // denetim için: belirli bir anı çiz
     dugmeDurumu();
     kip();

@@ -3,7 +3,7 @@
  "baslik": "Moyo Ebeveyn · Rutin, davranış kaydı ve ilerleme takibi",
  "aciklama": "Çocuğunuzun günlük rutinini planlayın, zorlanılan anları kaydedin, ilerlemeyi görün. Her adım oyunda küçük bir macera olur. 14 gün ücretsiz, kart gerekmez.",
  "h1": {
-  "a": "Çocuğunuzun rutini, zorlanılan anları ve ilerlemesi bir arada",
+  "a": "Çocuğunuzun rutinini ve zorlanılan anlarını takip edin",
   "b": "Çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform"
  },
  "alt": "Günlük rutini planlayın, davranışları kaydedin, ilerlemeyi hafta hafta görün. Dilerseniz uzmanınızla paylaşın.",
@@ -127,8 +127,8 @@
   ]
  ],
  "neden_yer": {
-  "ev": "Evde · Moyo Ebeveyn",
-  "uzman": "Uzmanınızın panelinde · Moyo Uzman",
+  "ev": "Evde",
+  "uzman": "Uzmanınızın panelinde, isteğe bağlı",
   "gecis": "Kayıtlar",
   "gecis_alt": "onayınızla"
  },

@@ -1,10 +1,15 @@
 # Moyo Ebeveyn fiyat sayfası (kullanıcı isteği 18 Kasım 2026: fiyat ana sayfadan ayrı sayfaya; canlıda /ebeveyn/fiyat/).
 # Yapı Mercek sitesinin fiyat sayfasıyla aynı sırada (site/fiyat.html): açılış → plan kartları → karşılaştırma → kısa SSS →
 # deneme kapanışı. Üst menü, alt bilgi ve <head> yap_m.py'den (aynı tasarım: m/site.css + m/moyo.css + m/moyo.js).
-# Metin f-metin.json; yalnız doğrulanmış olgular (kaynaklar dosyanın "_kaynak" alanında). FİYAT RAKAMI YOK: ortakta ve
-# parent-app'te kararlaştırılmış fiyat bulunmadı (plans.ts yer tutucu); karar gelince f-metin.json'a eklenir.
+# Metin f-metin.json; yalnız doğrulanmış olgular (kaynaklar dosyanın "_kaynak" alanında).
+# Tur 3 (19 Kasım 2026, kullanıcı kararları): fiyat kesinleşene kadar yer tutucu Premium 349 TL / ay, gerçek fiyat gibi gösterilir; yanında
+# dönem, kendiliğinden yenileme ve App Store'dan iptal yazar; "Taslak fiyat" etiketi yalnızca önizlemede (<!-- ONIZ:BAS/SON -->,
+# disa_aktar.py canlıya taşımaz). Yıllık rakam yazılmaz ("Yıllık seçenek uygulamada"). "Ücretsiz" ve "14 gün" yeşil: koyu açılışta
+# marka yeşili yazı (8,3:1), beyaz kartta --c-ok yazı (5,3:1) ve yeşil zeminli koyu yazılı rozet. Açılış kısaldı, deneme bandı ve
+# "Moyo Ebeveyn'de" maddeleri çıktı (söyledikleri artık açılışta ve kartlarda; aynı cümle iki kez geçmesin): plan kartları fiyatlarıyla
+# 1440×900 ve 1366×768'de kaydırmadan, 390×844'te ilk kartın adı ve fiyatı ilk ekranda görünür.
 # Kullanım: cd tools/cati-sayfa && python3 yap_f.py  → ebeveyn-fiyat.html
-import json
+import json, re
 import yap_m as M
 
 F = json.load(open('f-metin.json'))
@@ -38,26 +43,24 @@ html = f'''{M.bas(F["baslik"], F["aciklama"], "/ebeveyn/fiyat/", ONIZ)}
 
   <section class="sec sec-soft" aria-label="Planlar">
     <div class="wrap">
-      <p class="fy-deneme"><b>{e(F["deneme"][0])}</b><span>{e(F["deneme"][1])}</span></p>
       <div class="plans">
         <article class="plan" aria-labelledby="h-ucretsiz">
           <h2 id="h-ucretsiz">{e(U["ad"])}</h2>
           <p class="who">{e(U["kim"])}</p>
           <p class="note">{e(U["not"])}</p>
-          <p class="price"><span class="amount">{e(U["tutar"])}</span></p>
-          <p class="per">{e(U["alt"])}</p>
+          <p class="price"><span class="amount fy-yesil">{e(U["tutar"])}</span></p>
+          <div class="fy-kosul"><p>{e(U["alt"])}</p></div>
           <a class="btn btn-ink block" href="{M.APP}#kayit">Ücretsiz deneyin</a>
           <ul>{liste(U["madde"])}</ul>
         </article>
 
         <article class="plan plus" aria-labelledby="h-premium">
-          <h2 id="h-premium">{e(P["ad"])}</h2>
+          <h2 id="h-premium">{e(P["ad"])} <span class="fy-rozet">{e(P["rozet"])}</span></h2>
           <p class="who">{e(P["kim"])}</p>
           <p class="note">{e(P["not"])}</p>
-          <p class="price"><span class="amount fy-donem">{e(P["tutar"])}</span></p>
-          <p class="per fy-yok">{e(F["fiyat_yok"])}</p>
+          <p class="price"><span class="amount">{e(P["tutar"])}</span> <span class="unit">{e(P["birim"])}</span><!-- ONIZ:BAS --> <span class="draft">{e(P["taslak"])}</span><!-- ONIZ:SON --></p>
+          <div class="fy-kosul"><p>{e(P["donem"])}</p><p>{e(P["yenileme"])}</p></div>
           <a class="btn btn-cta block" href="{M.APP}#kayit">14 gün ücretsiz deneyin</a>
-          <p class="fy-yenile">{e(P["yenileme"])}</p>
           <ul>{liste(P["madde"])}</ul>
         </article>
       </div>
@@ -65,10 +68,6 @@ html = f'''{M.bas(F["baslik"], F["aciklama"], "/ebeveyn/fiyat/", ONIZ)}
       <div class="fy-oyun">
         <img src="{M.APPS["oyun"][0]}" alt="" width="56" height="56">
         <div><h2>{e(F["oyun"][0])} <span>{e(F["oyun"][1])}</span></h2><p>{e(F["oyun"][2])}</p></div>
-      </div>
-
-      <div class="fy-her">
-        <h2>Moyo Ebeveyn'de</h2><ul>{liste(F["her_iki"])}</ul>
       </div>
     </div>
   </section>
@@ -109,9 +108,13 @@ html = f'''{M.bas(F["baslik"], F["aciklama"], "/ebeveyn/fiyat/", ONIZ)}
 </main>
 
 {M.alt("fiyat")}'''
+html = html.replace('App Store', 'App&nbsp;Store')   # görünen metinde "App / Store" diye bölünmesin (tur 3)
 
 if __name__ == '__main__':
     assert 'istediğiniz' not in html and '—' not in html, 'yasaklı ifade ya da uzun tire'
-    assert '₺' not in html, 'fiyat rakamı yazılmaz (karar yok)'
+    assert html.count('Taslak fiyat') == 1 and re.search(r'<!-- ONIZ:BAS --> <span class="draft">Taslak fiyat</span><!-- ONIZ:SON -->', html), 'taslak etiketi yalnızca önizlemede'
+    gorunen = re.sub(r'<[^>]+>', ' ', re.sub(r'<(script|style|svg)\b.*?</\1>', ' ', html, flags=re.S))
+    for yasak in ('kurun', 'kurarsınız', ' yalnız ', 'zor an', 'tek platform'):
+        assert yasak not in gorunen.lower(), f'yasaklı ifade: {yasak}'
     assert html.count('<h1') == 1
     open('ebeveyn-fiyat.html', 'w').write(html); print('ok ebeveyn-fiyat.html')

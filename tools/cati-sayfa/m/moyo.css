@@ -92,6 +92,9 @@
 /* tur 3 ("Telefonun altındaki Moyo Ebeveyn çerçevesi doğru görünmüyor"): etiket sahnenin sağ kenarına yakın durduğu için kutusu kalan
    genişliğe daralıyor, yazı çerçevenin dışına taşıyordu. Etiket metni kadar geniş; koyu zeminde koyu simgenin kenarı ince bir halkayla görünür. */
 .ma-etk { width: max-content; }
+.ma-etk.oyun { transform: translateY(calc(-100% - 8px)); }   /* oyunun üst kenarının 8 px üstünde */
+.ma-etk.tel { transform: translate(-50%, 8px); }             /* telefonun alt kenarının 8 px altında, ortada */
+@media (max-width: 520px) { .ma-etk.oyun { transform: translateY(calc(-100% - 5px)); } .ma-etk.tel { transform: translate(-50%, 5px); } }
 .ma-etk img { box-shadow: 0 0 0 1px rgba(255, 255, 255, .22); }
 
 /* Vurgu halkası, numara, onay işareti, yürüyen çip */
@@ -228,7 +231,7 @@
 .sayfa-moyo #degerler { background: #EDF0F8; }
 /* Başlığın altındaki giriş: geniş ekranda her cümle kendi satırında (tur 2) */
 .nd-giris { max-width: 780px; text-wrap: pretty; }
-@media (min-width: 761px) { .nd-giris span { display: block; } }
+@media (min-width: 761px) { .nd-giris span { display: block; text-wrap: balance; } }
 .nd-rozet { display: inline-block; padding: 3px 10px; border-radius: var(--r-pill); background: var(--c-soft); border: 1px solid var(--c-line); color: var(--c-text-2);
   font-family: var(--font-body); font-size: 12.5px; line-height: 1.3; letter-spacing: 0; font-weight: 700; white-space: nowrap; }
 .nd-bag { margin-top: 32px; text-align: center; }
@@ -247,7 +250,7 @@
 .nd-akis li:not(:last-child)::before { content: ""; position: absolute; top: 22px; right: calc(15px - var(--nd-ara)); width: 9px; height: 9px; border-top: 2px solid var(--c-ink);
   border-right: 2px solid var(--c-ink); transform: rotate(45deg); }
 .nd-akis h3 { margin-top: 22px; font-size: 22px; line-height: 1.25; text-wrap: balance; }
-.nd-akis h3 .nd-rozet { margin-left: 8px; vertical-align: 3px; }
+.nd-akis .nd-rozet { position: absolute; left: 72px; top: 15px; }   /* uzman durağının yanında (sağında çizgi yok) */
 .nd-akis p { margin-top: 10px; color: var(--c-text-2); font-size: 16.5px; line-height: 1.55; }
 @media (max-width: 760px) {
   .nd-akis { grid-template-columns: minmax(0, 1fr); gap: 30px 0; padding: 28px 22px 30px; border-radius: 24px; max-width: 600px; margin-inline: auto; }
@@ -258,6 +261,7 @@
   .nd-akis li:nth-last-child(2)::after { background: repeating-linear-gradient(180deg, var(--c-ink) 0 6px, transparent 6px 12px); }
   .nd-akis li:not(:last-child)::before { top: auto; bottom: -24px; right: auto; left: 23.5px; transform: rotate(135deg); }
   .nd-akis h3 { margin-top: 2px; font-size: 20px; }
+  .nd-akis .nd-rozet { position: static; margin: 0 0 8px; }
   .nd-akis p { font-size: 16px; }
 }
 
@@ -266,15 +270,18 @@
 .nd-yan { min-width: 0; border-radius: 24px; padding: 28px clamp(22px, 2.6vw, 36px) 32px; }
 .nd-ev { background: var(--c-bg); border: 1px solid #E1E5F0; }
 .nd-uz { background: var(--c-ink); color: var(--c-on-dark); }
-.nd-yer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; font-size: 14.5px; line-height: 1.3; font-weight: 800; color: var(--c-text-2); }
-.nd-yer img { flex: none; border-radius: 8px; box-shadow: 0 0 0 1px rgba(22, 17, 58, .12); }
-.nd-yer span:first-of-type { min-width: 0; }
-.nd-uz .nd-yer { color: rgba(255, 255, 255, .82); }
+.nd-yer { display: flex; align-items: center; gap: 12px; padding-bottom: 20px; border-bottom: 1px solid #E8EBF3; }
+.nd-yer img { flex: none; border-radius: 10px; box-shadow: 0 0 0 1px rgba(22, 17, 58, .12); }
+.nd-yer span { display: flex; flex-direction: column; min-width: 0; font-size: 14px; line-height: 1.35; font-weight: 600; color: var(--c-text-2); }
+.nd-yer b { font-size: 16px; font-weight: 800; color: var(--c-ink); }
+.nd-uz .nd-yer { border-color: rgba(255, 255, 255, .14); }
+.nd-uz .nd-yer span { color: rgba(255, 255, 255, .78); }
+.nd-uz .nd-yer b { color: #FFFFFF; }
 .nd-uz .nd-yer img { box-shadow: none; }
-.nd-uz .nd-rozet { margin-left: auto; background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .22); color: #FFFFFF; }
 .nd-yan ul { display: grid; gap: 24px; margin-top: 24px; }
 .nd-ev ul { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px clamp(20px, 2.4vw, 36px); }
 .nd-yan li { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.nd-yan li > div { flex: 1 1 auto; min-width: 0; }
 .nd-uz .ic { background: rgba(255, 255, 255, .1); }
 .nd-uz .ic svg { stroke: #FFFFFF; }
 .nd-yan h3 { font-size: 21px; line-height: 1.25; text-wrap: balance; }
@@ -286,7 +293,6 @@
 .nd-kayit svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .nd-ok { width: 44px; height: 18px; fill: none; stroke: var(--c-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .nd-gec-alt { font-size: 13.5px; line-height: 1.3; font-weight: 700; color: var(--c-text-2); white-space: nowrap; }
-@media (max-width: 1100px) and (min-width: 901px) { .nd-ev ul { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 900px) {
   .nd-iki { grid-template-columns: minmax(0, 1fr); max-width: 600px; margin-inline: auto; }
   .nd-ev ul { grid-template-columns: minmax(0, 1fr); }
@@ -321,30 +327,47 @@
 @media (max-width: 1000px) { .sayfa-moyo footer .wrap { grid-template-columns: repeat(4, minmax(0, 1fr)); } .sayfa-moyo footer .about { grid-column: 1 / -1; } }
 @media (max-width: 640px) { .sayfa-moyo footer .wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 20px; padding-top: 56px; } }
 
-/* ---------- Fiyat sayfası (ebeveyn-fiyat.html; yapı Mercek sitesinin fiyat sayfası) ---------- */
-.sayfa-fiyat .ph .sub { max-width: 700px; }
-.fy-deneme { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 12px; max-width: 856px; margin: 0 auto 32px; padding: 16px 22px;
-  border-radius: var(--r-md); background: var(--c-ok-bg); color: var(--c-ink); text-align: center; font-size: 16px; line-height: 1.45; }
-.fy-deneme b { font-weight: 800; }
-.fy-deneme span { color: var(--c-text-2); }
-.plan .amount.fy-donem { font-size: 28px; line-height: 1.2; }
-.plan .per.fy-yok { min-height: 0; color: var(--c-text-2); }
-.fy-yenile { margin-top: 12px; font-size: 14px; line-height: 1.45; color: var(--c-text-3); }
+/* ---------- Fiyat sayfası (ebeveyn-fiyat.html; yapı Mercek sitesinin fiyat sayfası) ----------
+   Tur 3 (19 Kasım 2026): kısa açılış, plan kartları fiyatlarıyla ilk ekranda (1440×900, 1366×768; 390×844'te ilk kartın adı ve fiyatı).
+   "Ücretsiz" ve "14 gün" yeşil: koyu açılışta marka yeşili yazı (#51E56A / #2D294E 8,3:1), beyaz kartta --c-ok yazı (5,3:1),
+   Premium'da yeşil zeminli koyu yazılı rozet (10,9:1). */
+.sayfa-fiyat .ph { padding-block: clamp(28px, 3.4vw, 44px) clamp(30px, 3.6vw, 48px); }
+.sayfa-fiyat .ph h1 { margin-top: 10px; font-size: clamp(30px, 16px + 2.2vw, 48px); line-height: 1.1; }
+.sayfa-fiyat .ph h1 em { font-style: normal; color: var(--c-cta); }
+.sayfa-fiyat .ph .sub { max-width: 700px; margin-top: 14px; font-size: clamp(16.5px, 15px + .3vw, 19px); }
+.sayfa-fiyat .ph + .sec { padding-top: clamp(24px, 3vw, 40px); }
+/* Kartın satırları iki kartta aynı hizada (fiyat, koşullar, düğme, liste): ≥ 861 px'te ortak satırlar (subgrid) */
+@media (min-width: 861px) {
+  .sayfa-fiyat .plans { grid-template-rows: repeat(7, auto); }
+  .sayfa-fiyat .plan { display: grid; grid-row: span 7; grid-template-rows: subgrid; row-gap: 0; }
+}
+.sayfa-fiyat .plan { padding-top: 30px; }
+.sayfa-fiyat .plan.plus { padding-top: 29px; }
+.sayfa-fiyat .plan h2 { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.fy-rozet { padding: 4px 11px; border-radius: var(--r-pill); background: var(--c-cta); color: var(--c-cta-text); font-family: var(--font-body); font-size: 14px; line-height: 1.3;
+  letter-spacing: 0; font-weight: 800; white-space: nowrap; }
+.sayfa-fiyat .plan .note { min-height: 0; }
+.sayfa-fiyat .plan .price { margin-top: 18px; align-items: baseline; }
+.sayfa-fiyat .plan .price .draft { align-self: center; }
+.plan .amount.fy-yesil { color: var(--c-ok); }
+.fy-kosul { margin-top: 8px; }
+.fy-kosul p { font-size: 14.5px; line-height: 1.45; color: var(--c-text-2); }
+.fy-kosul p + p { margin-top: 2px; }
+.sayfa-fiyat .plan .btn { margin-top: 20px; }
+.sayfa-fiyat .plan ul { margin-top: 22px; }
 .fy-oyun { display: flex; align-items: center; gap: 18px; max-width: 856px; margin: 24px auto 0; padding: 22px 26px; background: var(--c-bg); border: 1px solid var(--c-line); border-radius: var(--r-md); }
 .fy-oyun img { flex: none; border-radius: 14px; }
 .fy-oyun h2 { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 22px; line-height: 1.2; }
 .fy-oyun h2 span { padding: 3px 10px; border-radius: var(--r-pill); background: var(--c-cta); color: var(--c-cta-text); font-size: 13px; line-height: 1.3; letter-spacing: 0; font-weight: 800; }
 .fy-oyun p { margin-top: 6px; color: var(--c-text-2); font-size: 16px; line-height: 1.5; }
-.fy-her { max-width: 856px; margin: 32px auto 0; text-align: center; }
-.fy-her h2 { font-size: 13px; line-height: 1.3; letter-spacing: .08em; text-transform: uppercase; color: var(--c-text-2); font-weight: 700; }
-.fy-her ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 10px; margin-top: 12px; }
-.fy-her li { padding: 7px 14px; border-radius: var(--r-pill); background: var(--c-bg); border: 1px solid var(--c-line); font-size: 14.5px; line-height: 1.35; font-weight: 600; color: var(--c-ink); }
 .fy-tnot { margin-top: 12px; font-size: 16px; line-height: 1.5; color: var(--c-text-2); }
 .cmp td:not(.yes):not(.no) { font-weight: 700; }
 .cmp .no svg { width: 18px; height: 18px; margin-inline: auto; fill: none; stroke: var(--c-text-3); stroke-width: 2.2; stroke-linecap: round; }
-@media (max-width: 860px) { .fy-oyun, .fy-deneme { max-width: 520px; } }
-@media (max-width: 480px) { .fy-oyun { flex-direction: column; align-items: flex-start; padding: 20px; gap: 12px; } .fy-deneme { padding: 14px 16px; } }
-.sayfa-fiyat .plan .price { min-height: 44px; align-items: flex-end; }
-.sayfa-fiyat .plan .per { min-height: 2.9em; }
+@media (max-width: 860px) { .fy-oyun { max-width: 520px; } }
+@media (max-width: 480px) {
+  .fy-oyun { flex-direction: column; align-items: flex-start; padding: 20px; gap: 12px; }
+  .sayfa-fiyat .plan { padding-top: 24px; } .sayfa-fiyat .plan.plus { padding-top: 26px; }
+  .sayfa-fiyat .plan .price { margin-top: 14px; }
+}
 /* Karşılaştırma tablosu, telefonda (≤ 640 px; tablo blok düzende): başlık ve altındaki not sütun genişliğinde (önceden ~180 px'e daralıp kötü bölünüyordu) */
 @media (max-width: 640px) { .sayfa-fiyat .cmp caption { display: block; width: 100%; } }

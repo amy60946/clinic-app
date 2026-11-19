@@ -147,11 +147,12 @@ def alt(sayfa):
 # 342–568 × 1160–1245, c-oyun-liste ilk satır 85–815 × 150–243 ve "Yaptım" 678–802 × 160–197 (1200×554).
 # Yollar cihazların ALTINDA çizilir (yalnız koyu zemindeki parçası görünür); çip ise üstte, yolun tamamında yürür.
 # y1/y2: çipin tam yolu (telefondaki satır → oyundaki satır; "Yaptım" → "Onayla"); s1/s2: durağan hâlde (hareket azaltma, betik yok)
-# görünen ok uçlu yaylar (görünen parçaları). etk-*: uygulama adları; aygıtlarından aynı uzaklıkta (geniş ~8, dar ~4 birim).
+# görünen ok uçlu yaylar (görünen parçaları). etk-*: uygulama adlarının dayandığı nokta: oyunun üst kenarı, telefonun alt kenarı
+# (m/moyo.css etiketi bu noktadan sabit piksel uzaklıkta tutar: her ölçekte aygıtına aynı uzaklıkta).
 SAHNE = {
     'g': {'boy': (620, 470),
           'oyun': (0, 93, 600, 277), 'tel': (421, 8, 199, 416.5), 'tel_pay': 6,
-          'etk-oyun': (0, 51), 'etk-tel': (520.5, 434),
+          'etk-oyun': (0, 93), 'etk-tel': (520.5, 424.5),
           'h-rutin': (433, 209.5, 175, 41), 'h-satir': (40, 166, 370, 51), 'h-yaptim': (335, 169, 70, 27), 'h-onay': (530, 372, 78, 34),
           'tik': (370, 182), 'n2': (283, 36.5), 'n4': (336.5, 417),
           'y1': 'M440 229C432 150 430 72 384 54Q260 6 146 72C124 92 120 150 122 191',
@@ -159,7 +160,7 @@ SAHNE = {
           's1': 'M410 60Q285 0 152 86', 's2': 'M300 376Q318 436 410 420'},
     'd': {'boy': (350, 494),
           'oyun': (0, 34, 350, 161.6), 'tel': (95, 120, 160, 334.5), 'tel_pay': 5,
-          'etk-oyun': (0, 2), 'etk-tel': (175, 462),
+          'etk-oyun': (0, 34), 'etk-tel': (175, 454.5),
           'h-rutin': (105, 281.5, 140, 33), 'h-satir': (22, 75, 219, 33), 'h-yaptim': (194, 77, 44, 18), 'h-onay': (182, 412, 63, 27.5),
           'tik': (215.8, 86.1), 'n2': (56.5, 266.5), 'n4': (300, 320.5),
           'y1': 'M112 298C80 300 52 290 48 250C44 200 50 140 62 92',
@@ -255,21 +256,23 @@ ND, YER = E['neden_kartlar'], E['neden_yer']
 gizli = lambda k, v: '' if v == ONERI[k] else ' hidden'
 bagla = lambda t: re.sub(r' (\S+)$', '\u00a0\\1', t) if t.count(' ') >= 2 else t   # son iki sözcük aynı satırda (19 Kasım QA)
 rozet = lambda r: f'<span class="nd-rozet">{e(r)}</span>' if r else ''
-neden_giris = ''.join(f'<p class="intro nd-giris" data-var="nlead:{v}"{gizli("nlead", v)}>{" ".join(f"<span>{e(x)}</span>" for x in re.split(r"(?<=[.])\s+", t))}</p>'
+urun = lambda t: re.sub(r'Moyo (Uzman|Ebeveyn|Oyun)', 'Moyo\u00a0\\1', t)   # ürün adı satır sonunda bölünmesin
+neden_giris = ''.join(f'<p class="intro nd-giris" data-var="nlead:{v}"{gizli("nlead", v)}>{" ".join(f"<span>{e(urun(x))}</span>" for x in re.split(r"(?<=[.])\s+", t))}</p>'
                       for v, t in E['neden_giris'].items())
 # a · akış bandı: tek beyaz şerit, üç durak bir çizgiyle bağlı (dar ekranda dikey); numara ve renkli kart yok
 nd_a = (f'<ol class="nd-akis" data-var="ndzn:a"{gizli("ndzn", "a")}>'
-        + ''.join(f'<li{" class=\"ops\"" if r else ""}><span class="nd-dur">{SVG(I[k])}</span><h3>{e(bagla(t))}{rozet(r)}</h3><p>{e(p)}</p></li>' for k, t, p, r in ND)
+        + ''.join(f'<li{" class=\"ops\"" if r else ""}><span class="nd-dur">{SVG(I[k])}</span>{rozet(r)}<h3>{e(bagla(t))}</h3><p>{e(p)}</p></li>' for k, t, p, r in ND)
         + '</ol>')
-# b · evde ve uzman panelinde: solda ailenin uygulaması (iki madde), ortada onayla geçen kayıtlar, sağda uzmanın paneli (isteğe bağlı)
+# b · evde ve uzman panelinde: solda ailenin uygulaması (iki madde), ortada onayla geçen kayıtlar, sağda uzmanın paneli. Panel başlığı
+# uygulamanın adı + yeri; "isteğe bağlı" uzman panelinin başlığında yazar (rozet yok).
 madde = lambda k, t, p: f'<li><span class="ic">{SVG(I[k])}</span><div><h3>{e(bagla(t))}</h3><p>{e(p)}</p></div></li>'
-yan = lambda cls, app, ad, xs, r='': (f'<div class="nd-yan {cls}"><p class="nd-yer"><img src="{APPS[app][0]}" alt="" width="28" height="28"><span>{e(ad)}</span>{rozet(r)}</p>'
-                                      f'<ul>{"".join(madde(k, t, p) for k, t, p, _ in xs)}</ul></div>')
+yan = lambda cls, app, yer_, xs: (f'<div class="nd-yan {cls}"><p class="nd-yer"><img src="{APPS[app][0]}" alt="" width="36" height="36">'
+                                  f'<span><b>{APPS[app][1]}</b> {e(yer_)}</span></p><ul>{"".join(madde(k, t, p) for k, t, p, _ in xs)}</ul></div>')
 OK_SAG = '<svg class="nd-ok" viewBox="0 0 40 16" aria-hidden="true"><path d="M2 8h34M29 2.5 36 8l-7 5.5"/></svg>'
 nd_b = (f'<div class="nd-iki" data-var="ndzn:b"{gizli("ndzn", "b")}>'
         + yan('nd-ev', 'ebeveyn', YER['ev'], [x for x in ND if not x[3]])
         + f'<p class="nd-gec"><span class="nd-kayit">{SVG(I["kayit"])}{e(YER["gecis"])}</span>{OK_SAG}<span class="nd-gec-alt">{e(YER["gecis_alt"])}</span></p>'
-        + yan('nd-uz', 'mercek', YER['uzman'], [x for x in ND if x[3]], next(x[3] for x in ND if x[3]))
+        + yan('nd-uz', 'mercek', YER['uzman'], [x for x in ND if x[3]])
         + '</div>')
 # c · üst kenarı renkli beyaz kartlar: simge kartın rengini taşır, numara yok
 nd_c = (f'<ul class="nd" data-var="ndzn:c"{gizli("ndzn", "c")}>'
