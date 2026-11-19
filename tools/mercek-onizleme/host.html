@@ -2,183 +2,242 @@
 <html lang="tr">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Moyo Mercek Yeni Site</title>
+<title>Moyo Mercek Sitesi</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-/* Düzen: tek ekranlık gezgin. Üstte sekmeler (Ana sayfa · Fiyat · Benchmark notu) ve ekran boyutu; altında sayfa gerçek hâliyle çerçevede. */
+/* Önizleme kabuğu: üstte sayfa sekmeleri, ekran boyu ve "Alternatifler"; altında sitenin kendisi (site/… dosyaları, aynı köken).
+   Alternatifler paneli sayfanın bildirdiği grupları okur (site/assets/oniz.js sözleşmesi: onizGruplar, onizSec); seçim sayfada yerinde değişir.
+   Dışarıya istek yok: yazı tipi sitenin kendi dosyasından. */
 @font-face { font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 200 800; font-display: swap; src: url(site/assets/fonts/plus-jakarta-sans-latin-ext.woff2) format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+20A0-20C0; }
 @font-face { font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 200 800; font-display: swap; src: url(site/assets/fonts/plus-jakarta-sans-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212; }
 :root {
-  --bg: #EEEDF3; --panel: #FFFFFF; --ink: #16113A; --text: #2E2A4A; --muted: #5C5875; --line: #DEDCE6;
-  --accent: #2D294E; --chip: #E6E4EF; --good: #1F6B3A; --good-bg: #E3F5E8; --warn: #7A5410; --warn-bg: #FBF1DC; --bezel: #16113A;
+  --bg: #EEEDF3; --panel: #FFFFFF; --ink: #16113A; --text: #2E2A4A; --muted: #5C5875; --line: #DEDCE6; --accent: #16113A; --on-accent: #FFFFFF;
+  --bezel: #16113A; --tag: #E3F7EA; --tag-ink: #0B6B33; --warn: #7A5410; --warn-bg: #FBF1DC; --shadow: 0 18px 50px rgba(22, 17, 58, .22);
   --font: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #0E0B26; --panel: #1A1640; --ink: #F2F1F8; --text: #D3D1E3; --muted: #A2A0B8; --line: #2F2A5A; --accent: #C9C5F2; --chip: #272356; --good: #8FE0A6; --good-bg: #183324; --warn: #F0CB7C; --warn-bg: #3A2E14; --bezel: #3A3570; color-scheme: dark; }
+  :root:not([data-theme="light"]) { --bg: #0E0B26; --panel: #19153D; --ink: #F2F1F8; --text: #D3D1E3; --muted: #A2A0B8; --line: #2F2A5A; --accent: #CFCBF5; --on-accent: #16113A;
+    --bezel: #3A3570; --tag: #123B25; --tag-ink: #8CE5AE; --warn: #F0CB7C; --warn-bg: #3A2E14; --shadow: 0 18px 50px rgba(0, 0, 0, .55); color-scheme: dark; }
 }
-:root[data-theme="dark"] { --bg: #0E0B26; --panel: #1A1640; --ink: #F2F1F8; --text: #D3D1E3; --muted: #A2A0B8; --line: #2F2A5A; --accent: #C9C5F2; --chip: #272356; --good: #8FE0A6; --good-bg: #183324; --warn: #F0CB7C; --warn-bg: #3A2E14; --bezel: #3A3570; color-scheme: dark; }
+:root[data-theme="dark"] { --bg: #0E0B26; --panel: #19153D; --ink: #F2F1F8; --text: #D3D1E3; --muted: #A2A0B8; --line: #2F2A5A; --accent: #CFCBF5; --on-accent: #16113A;
+  --bezel: #3A3570; --tag: #123B25; --tag-ink: #8CE5AE; --warn: #F0CB7C; --warn-bg: #3A2E14; --shadow: 0 18px 50px rgba(0, 0, 0, .55); color-scheme: dark; }
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.55; display: flex; flex-direction: column; }
-.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-header { flex: none; background: var(--panel); border-bottom: 1px solid var(--line); padding-block: 10px; display: flex; flex-direction: column; gap: 6px; }
-.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
-h1 { font-size: 16px; font-weight: 800; color: var(--ink); margin: 0 auto 0 0; letter-spacing: -.01em; }
-h1 b { font-weight: 800; letter-spacing: -.03em; } h1 span { font-weight: 300; }
-.tabs, .dev { display: flex; gap: 4px; background: var(--bg); border-radius: 12px; padding: 4px; max-width: 100%; overflow-x: auto; }
-.tabs button, .dev button { font: inherit; font-size: 13.5px; font-weight: 700; color: var(--muted); background: none; border: 0; border-radius: 9px; padding: 8px 12px; cursor: pointer; white-space: nowrap; min-height: 36px; }
-.tabs button[aria-selected="true"], .dev button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
-button:focus-visible, a:focus-visible { outline: 3px solid #51E56A; outline-offset: 2px; }
-.hint { font-size: 13px; color: var(--muted); min-height: 20px; }
-.hint b { color: var(--ink); }
-main { flex: 1; min-height: 0; display: flex; }
-.view { flex: 1; min-width: 0; min-height: 0; display: flex; justify-content: center; padding-block: 12px; }
-.frame { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #FFFFFF; }
-.view.phone .frame { flex: none; width: 390px; max-width: 100%; border: 9px solid var(--bezel); border-radius: 38px; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.5; display: flex; flex-direction: column; overflow: hidden; }
+.bar { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding-block: 8px; background: var(--panel); border-bottom: 1px solid var(--line);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1 { margin: 0 6px 0 0; font-size: 15px; font-weight: 800; color: var(--ink); letter-spacing: -.01em; white-space: nowrap; }
+h1 b { letter-spacing: -.03em; } h1 span { font-weight: 300; }
+.seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: var(--bg); max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.seg::-webkit-scrollbar { display: none; }
+.seg button { flex: none; min-height: 36px; padding: 0 14px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+button:focus-visible, a:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.alt-ac { min-height: 40px; margin-left: auto; padding: 0 16px; border: 1.5px solid var(--accent); border-radius: 999px; background: transparent; color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
+.alt-ac[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); }
+.alt-ac b { min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--tag); color: var(--tag-ink); font-size: 12.5px; display: inline-grid; place-items: center; }
+[hidden] { display: none !important; }
+.orta { position: relative; flex: 1 1 auto; min-height: 0; display: flex; }
+.sahne { flex: 1 1 auto; min-width: 0; min-height: 0; display: grid; place-items: center; }
+.sahne.dar { padding: 14px 0; overflow: auto; }
+.cerceve { width: 100%; height: 100%; background: #FFFFFF; }
+.sahne.dar .cerceve { width: var(--w); height: min(var(--h), 100%); border: 9px solid var(--bezel); border-radius: 34px; overflow: hidden; }
 iframe { width: 100%; height: 100%; border: 0; display: block; }
-.doc { flex: 1; min-width: 0; overflow-y: auto; padding-block: 24px 48px; }
-.doc .in { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
-.doc h2 { font-size: 20px; font-weight: 800; color: var(--ink); margin: 0 0 10px; letter-spacing: -.015em; text-wrap: balance; }
-.doc p { margin: 0; max-width: 72ch; }
-.lead { font-size: 16.5px; color: var(--ink); }
-.box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+/* Alternatifler paneli */
+.panel { position: absolute; z-index: 5; top: 10px; right: max(10px, env(safe-area-inset-right, 0px)); bottom: 10px; width: min(360px, calc(100% - 20px)); display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; }
+.p-bas { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 12px 6px 16px; }
+.p-bas h2 { margin: 0; font-size: 16px; color: var(--ink); }
+.p-kapat { width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--bg); color: var(--ink); font: inherit; font-size: 20px; line-height: 1; cursor: pointer; }
+.p-not { flex: none; margin: 0; padding: 0 16px 10px; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.p-liste { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 2px 12px 8px; overscroll-behavior: contain; }
+.grup { margin: 0 0 10px; padding: 10px 10px 8px; border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
+.grup legend { padding: 0 6px; font-size: 13.5px; font-weight: 800; color: var(--ink); }
+.grup p { margin: 0 2px 8px; font-size: 12.5px; line-height: 1.45; color: var(--muted); }
+.sec { display: flex; flex-direction: column; gap: 4px; }
+.sec button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 38px; padding: 6px 10px; border: 1px solid transparent; border-radius: 9px; background: var(--bg); color: var(--ink); font: inherit; font-size: 13.5px; text-align: left; cursor: pointer; }
+.sec button i { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--muted); display: grid; place-items: center; font-style: normal; font-size: 11.5px; font-weight: 800; text-transform: uppercase; color: var(--muted); }
+.sec button span { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.sec button em { flex: none; padding: 2px 7px; border-radius: 999px; background: var(--tag); color: var(--tag-ink); font-style: normal; font-size: 11.5px; font-weight: 800; }
+.sec button[aria-pressed="true"] { border-color: var(--accent); background: transparent; font-weight: 800; }
+.sec button[aria-pressed="true"] i { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.p-alt { flex: none; display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); }
+.p-alt button { flex: 1 1 0; min-height: 40px; padding: 0 10px; border-radius: 999px; border: 1.5px solid var(--accent); background: transparent; color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.p-alt button.dolu { background: var(--accent); color: var(--on-accent); }
+.p-ozet { flex: none; margin: 0; padding: 0 12px 12px; }
+.p-ozet textarea { display: block; width: 100%; height: 112px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit; font-size: 12.5px; line-height: 1.4; resize: vertical; }
+.p-ozet small { display: block; margin-top: 6px; font-size: 12.5px; color: var(--muted); }
+/* "Bu turda" notu */
+.doc { flex: 1 1 auto; min-width: 0; overflow-y: auto; padding: 24px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)); }
+.doc .in { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.box h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--ink); letter-spacing: -.01em; }
+.box ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 7px; }
+.box b { color: var(--ink); }
 .box.note { background: var(--warn-bg); border-color: transparent; }
 .box.note h2 { color: var(--warn); }
-.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.box ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
 .tbl { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
-th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 800; }
-td:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
-.tag { display: inline-block; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; border-radius: 999px; padding: 2px 9px; background: var(--good-bg); color: var(--good); vertical-align: 2px; }
-.src { font-size: 13px; color: var(--muted); }
-.src a, .box a { color: var(--accent); font-weight: 700; }
-@media (max-width: 860px) { .tabs { flex-wrap: wrap; } .grid2 { grid-template-columns: 1fr; } .dev { display: none; } h1 { width: 100%; } }
+@media (max-width: 720px) {
+  .boy, h1 { display: none; }
+  .panel { top: auto; left: 8px; right: 8px; bottom: max(8px, env(safe-area-inset-bottom, 0px)); width: auto; max-height: 56%; }
+  .alt-ac { margin-left: 0; }
+}
 </style>
 
-<header class="gut">
-  <div class="row">
-    <h1><b>moyo</b> <span>Mercek</span> · yeni tanıtım sitesi (önizleme)</h1>
-    <div class="tabs" role="tablist" aria-label="Sayfa">
-      <button role="tab" id="t-home" data-v="home" aria-selected="true">Ana sayfa</button>
-      <button role="tab" id="t-fiyat" data-v="fiyat" aria-selected="false">Fiyat sayfası</button>
-      <button role="tab" id="t-not" data-v="not" aria-selected="false">14 Kasım notu ve benchmark</button>
-    </div>
-    <div class="dev" role="group" aria-label="Ekran boyutu">
-      <button type="button" id="d-desk" data-d="desk" aria-pressed="true">Masaüstü</button>
-      <button type="button" id="d-phone" data-d="phone" aria-pressed="false">Telefon</button>
-    </div>
+<div class="bar">
+  <h1><b>moyo</b> <span>Mercek</span> · site önizlemesi</h1>
+  <div class="seg" role="group" aria-label="Sayfa">
+    <button type="button" data-sayfa="index.html" aria-pressed="true">Ana sayfa</button>
+    <button type="button" data-sayfa="fiyat.html" aria-pressed="false">Fiyat</button>
+    <button type="button" data-sayfa="guvenlik.html" aria-pressed="false">Gizlilik ve güvenlik</button>
+    <button type="button" data-sayfa="not" aria-pressed="false">Bu turda</button>
   </div>
-  <div class="row">
-    <div class="hint" id="hint"></div>
+  <div class="seg boy" role="group" aria-label="Ekran boyu">
+    <button type="button" data-boy="masa" aria-pressed="true">Masaüstü</button>
+    <button type="button" data-boy="tablet" aria-pressed="false">Tablet</button>
+    <button type="button" data-boy="tel" aria-pressed="false">Telefon</button>
   </div>
-</header>
+  <button type="button" class="alt-ac" id="alt-ac" aria-expanded="false" aria-controls="alt-panel" hidden>Alternatifler <b id="alt-say">0</b></button>
+</div>
 
-<main class="gut">
-  <div class="view" id="view"><div class="frame"><iframe id="page" title="Seçilen sayfa" src="site/index.html"></iframe></div></div>
-  <div class="doc" id="doc" hidden>
+<div class="orta">
+  <div class="sahne" id="sahne"><div class="cerceve"><iframe id="sayfa" title="Sayfa önizlemesi" src="site/index.html"></iframe></div></div>
+  <aside class="panel" id="alt-panel" aria-label="Alternatifler" hidden>
+    <div class="p-bas"><h2>Alternatifler</h2><button type="button" class="p-kapat" id="alt-kapat" aria-label="Paneli kapat">×</button></div>
+    <p class="p-not">Bir seçeneğe dokun: sayfa o bölüme gider, seçenek yerinde değişir. Yeşil etiket benim önerim; sayfa önerilerle açılır.</p>
+    <div class="p-liste" id="alt-liste"></div>
+    <div class="p-alt"><button type="button" id="alt-sifirla">Önerilere dön</button><button type="button" class="dolu" id="alt-kopya">Seçimlerimi kopyala</button></div>
+    <div class="p-ozet" id="alt-ozet" hidden><textarea id="alt-metin" readonly aria-label="Seçimlerinin özeti"></textarea><small id="alt-durum" aria-live="polite"></small></div>
+  </aside>
+
+  <div class="doc" id="not" hidden>
     <div class="in">
-      <p class="lead"><b>Ne değişti:</b> ürün kendi gerçek ekranlarıyla, biri kullanıyormuş gibi yavaş hareketle anlatılıyor; bölümler ferah, üstte gerçek bir menü var, fiyat kendi sayfasında. Metinler bugünkü sayfadan aynen alındı; yalnız ad değişti (Moyo Mercek, Moyo, Moyo Oyun).</p>
-
-      <div class="box" style="border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset">
-        <h2>14 Kasım: Atlassian referansıyla üç değişiklik</h2>
-        <p>Referans: senin Atlassian ana sayfası ekran kaydın (84 sn) ve atlassian.com/ecosystem. Rakam, müşteri logosu ve iddia alınmadı (44% / 48%, logo şeridi, "secure, compliant").</p>
+      <div class="box">
+        <h2>19 Kasım, 6. tur: cevaplarınla yapılanlar</h2>
         <ul>
-          <li><b>Açılışta yavaş ürün turu:</b> Atlassian'daki gibi tek çerçevede, kendi oynayan gerçek arayüz; önemli anlarda "kamera" yavaşça yakınlaşıp geri çıkıyor. Sıra senin istediğin gibi: <b>1 uzman ebeveyn eğitimi oluşturur</b> (hedef yazar, kütüphaneden modül ekler, Etkin yapar) → <b>2 çocuğun ev rutinlerini görür</b> (haftalık tablo) → <b>3 ebeveynin bildirdiği ABC olaylarına bakar</b>. Atlassian'da yazı yok; bizde kaydın altında 1-2-3 çipi kayıtla birlikte yanıyor, dokununca o adıma gidiyor. Duraklat düğmesi ve "hareketi azalt" desteği var.</li>
-          <li><b>"Nasıl çalışır" sekmeli:</b> Atlassian'ın "Teamwork · Strategy · Service · Software · Product" bölümü gibi: üstte hap biçiminde beş sekme (Eğitim · Aile uygulaması · ABC verisi · İlerleme · Oyun), altında solda kısa yazı ve hangi uygulamaların işin içinde olduğu (uygulama çipleri), sağda o adımın kaydı. Tıklayınca değişir, kendiliğinden ilerlemez (Atlassian'da da öyle); beş adım tek ekrana sığıyor ve sekme değişince sayfa zıplamıyor. Telefonda sekmeler hap içinde yana kayar, görsel üstte.</li>
-          <li><b>"Neden Moyo Mercek" için üç görsel düzen</b> (üstteki düğmelerle değiştir): <b>1 Akış</b> (üç düğüm ve aralarında çizgi: kurarsınız → aile uygular → hafta önünüze gelir) · <b>2 Bento</b> (üç kutu, içlerinde küçük arayüz parçaları: modül listesi, haftalık tablo, ilerleme notu) · <b>3 Hafta</b> (bir haftanın şeridi: Çarşamba seans, aradaki günlerde rutin işaretleri ve olaylar; "seans bir gün, takip yedi gün"). <b>Önerim 1 Akış:</b> bağımsız incelemede en hızlı okunan ve telefonda en kısa olan bu çıktı. 3 Hafta "seans bir gün, takip yedi gün" mesajına en uygun olanı; ikinci seçenek. Bento en kalabalığı.</li>
-          <li><b>Metin:</b> kısaltılan bölümlerde bizim için doğrulanamayan ifadeler çıktı: "haftada 4–6 saat", "5 dakikadan kısa sürede", "kanıta dayalı", "tedavi süreci", "uyumu artırır" ve bizde olmayan "uzman oyun erişimini etkinleştirebilir" (oyunu aile yönetir). "100'den fazla Türkçe kaynak" kalıyor (kütüphanede 131 öğe var). Açılıştaki başlık ve alt yazıya dokunmadım.</li>
-          <li><b>Rutin / macera:</b> uzman ve aile metinlerinde "rutin"; oyun adımında ve "Kim neyi görür"de kısa not: çocuk oyunda macera olarak görür. Fiyat sayfasında "macera" geçen iki satır "rutin" oldu.</li>
-          <li><b>Yayındaki önizleme eskiydi:</b> 12 Kasım'dan sonraki logo ve renk değişiklikleri bu önizlemeye hiç girmemişti; şimdi depodaki son hâliyle birlikte geliyor.</li>
+          <li><b>Pano:</b> renkli başlıklar ve alt başlıktaki açıklama kalıcı oldu. Panodaki çerçeve artık yalnızca her bölümün sol kenarında ince renkli bir çizgi; çevreleyen çerçeve ve içindeki renk kalktı. Öteki üç seçenek silindi.</li>
+          <li><b>Sayfada seçenek kalmadı:</b> Alternatifler düğmesi bu yüzden görünmüyor.</li>
+          <li><b>Renkler:</b> mavi, yeşil, sarı; yalnızca bölümleri ayırır, "iyi, kötü" ya da uyarı anlamı yok.</li>
+          <li><b>Önceki turlarda kalıcı olanlar:</b> açık renk teması (üç sayfa), ekranlı renkli "Neden Moyo Mercek" kartları, pano alt başlığı.</li>
         </ul>
       </div>
-
-      <div class="box">
-        <h2>İki sitede ölçtüğümüz ve aldığımız (12 Kasım 2026)</h2>
-        <p>Sayfalar tarayıcıda açıldı, ölçüler sayfanın kendisinden okundu. İçerik, metin ve görsel kopyalanmadı; yalnız işleyiş ve oran örnek alındı.</p>
-        <div class="tbl"><table>
-          <thead><tr><th scope="col">Konu</th><th scope="col">ClickUp</th><th scope="col">Geckoboard</th><th scope="col">Bizde</th></tr></thead>
-          <tbody>
-            <tr><td>Ürün gösterimi</td><td>Uygulamanın canlandırılmış kopyası, 35 sn'lik döngü, imleçler, yazı yazılıyor</td><td>Canlı pano, "kamera" yakınlaşıp gezer (~15 sn), sonra yerinde canlı kalır</td><td>Gerçek ekran kayıtları, 9–20 sn, imleç sakin hareket eder; ekrana gelince oynar, çıkınca durur, duraklat düğmesi var</td></tr>
-            <tr><td>Bölüm aralığı</td><td>80 px, hepsi beyaz</td><td>120 px, koyu / beyaz / gri sırayla</td><td>120 px (telefonda 60), koyu / beyaz / gri sırayla</td></tr>
-            <tr><td>Başlıklar</td><td>H1 60, H2 48</td><td>H1 58 (en çok 2 satır), H2 50</td><td>H1 58, H2 48, gövde 18</td></tr>
-            <tr><td>Yazı sütunu</td><td>~450–600 px</td><td>~550 px (satırda ~50 harf)</td><td>450–540 px</td></tr>
-            <tr><td>Açılış görseli</td><td>Sayfa genişliğinin %75'i, ince çerçeve</td><td>%80'i, koyu zeminde gölgeli</td><td>%80'e kadar, 16:10, gölgeli</td></tr>
-            <tr><td>Üst menü</td><td>60 px, 6 başlık, büyük açılır menüler</td><td>70 px, 6 başlık, küçük açılır menüler</td><td>68 px, 5 başlık, açılır menü yok (bizde o kadar içerik yok)</td></tr>
-            <tr><td>Fiyat</td><td>Ana sayfada yok, menüde ayrı sayfa</td><td>Ana sayfada yok, menüde ayrı sayfa</td><td>Ana sayfadan çıktı, menüde "Fiyat"</td></tr>
-            <tr><td>Fiyat sayfası</td><td>Aylık/yıllık (yıllık seçili), 4 kart, "en popüler" etiketi, 175 satırlık karşılaştırma, SSS</td><td>Aylık/yıllık (yıllık seçili, "%20" etiketi), 3 kart, ortadaki renkli, 57 satırlık tablo, 10 SSS</td><td>Aylık/yıllık (yıllık seçili, "n ay sizden"), 2 kart, Klinik yalnız renkle ayrılır (etiket yok), kısa karşılaştırma, 6 SSS</td></tr>
-          </tbody>
-        </table></div>
-        <p class="src">Kaynaklar: <a href="https://clickup.com/" target="_blank" rel="noopener">ClickUp ana sayfa</a> · <a href="https://clickup.com/pricing" target="_blank" rel="noopener">ClickUp fiyat</a> · <a href="https://www.geckoboard.com/" target="_blank" rel="noopener">Geckoboard ana sayfa</a> · <a href="https://www.geckoboard.com/pricing/" target="_blank" rel="noopener">Geckoboard fiyat</a></p>
-      </div>
-
-      <div class="grid2">
-        <div class="box">
-          <h2>Gezinme seçimi (A / B / C) nereye düştü</h2>
-          <p>Yeni sayfa <b>C'ye (Kendiliğinden)</b> en yakın: her adımın kaydı ekrana gelince kendi oynar ve duraklatılabilir. Farkı, açılışta beş adımlık tek bir tur yerine her adımın kendi kaydının olması. A (kaydırınca sabitlenen bölüm) ve B (tıklayınca açılan adımlar) kullanılmadı.</p>
-          <p>Bu yön seçilirse eski A / B / C kararı da kapanır.</p>
-        </div>
-        <div class="box">
-          <h2>Şimdilik yer tutucu olanlar</h2>
-          <ul>
-            <li><b>Logo, renk ve yazı tipi:</b> "moyo" kalın, "Mercek" ince olarak yazıyla duruyor; renkler Geckoboard paletinden. Moyo penceresinin hazırladığı marka kiti seçilince tek yerden değişir.</li>
-            <li><b>Fiyatlar:</b> 1.199,99 / 11.999,99 (Bireysel) ve 3.999,99 / 39.999,99 (Klinik) koordinatörün önerisi, karar değil; fiyat sayfasında "Taslak fiyat" yazar.</li>
-            <li><b>Telefon kayıtları:</b> telefonda da aynı geniş kayıtlar oynuyor; telefona özel dikey kayıt sonraki adım.</li>
-          </ul>
-        </div>
-      </div>
-
       <div class="box note">
         <h2>Karar ya da kontrol bekleyenler</h2>
         <ul>
-          <li>Eski metindeki riskli ifadeler ("haftada 4–6 saat", "kanıta dayalı", "tedavi", "5 dakika") ve bizde henüz olmayan "uzman oyun erişimini etkinleştirebilir" cümlesi yerinde duruyor; yeni düzende çoğaltılmadı. Tanıtım metni kararı (avukat dosyası, karar 2) ve Marketing kontrolü bekleniyor.</li>
-          <li>Menüdeki ve alt çubuktaki "14 gün ücretsiz deneyin" düğmesinin yanında fiyat yok (eski sayfada da yoktu); ücretsiz ifadesinin yanına fiyat, dönem ve yenilenme yazılması gerekiyor (pazarlama kuralları). Açılışta, kapanışta ve fiyat sayfasında yazıyor.</li>
-          <li>Kayıtlarda: kütüphane kaydının sonunda "Eğitimi kur" düğmesi kısa bir an küçülüp dönen simgeye dönüşüyor (uygulamadaki gerçek yükleme hâli); Davranışlar ve Olaylar kaydındaki "Çocuğun tepkisi 1–5" sütunu puan gibi okunabilir. İstersen bu iki sahneyi değiştiririm.</li>
-          <li>"Ekip kodunuz mu var? Kodla katılın" satırı kaldırıldı: uygulama artık ekip koduyla değil, kişisel kodla çalışıyor.</li>
+          <li>Kayan şeritte Duraklat düğmesi yok. Erişilebilirlik kuralı (WCAG 2.2.2) 5 saniyeden uzun, kendiliğinden kayan içerik için durdurma düğmesi ister; şimdi yalnızca üstüne gelince, odaklanınca ve dokununca durma ve hareket azaltma ayarı var. Canlıdan önce bir kez daha bakılmalı.</li>
+          <li>Açılış alt yazısındaki "Ev programlarına uyumu artıran" ve kapanıştaki "Daha az idari iş yükü · Daha fazla ebeveyn katılımı · Daha ölçülebilir klinik ilerleme" sonuç iddiası sayılabilir; senin metnin, dokunmadım. Marketing kontrolü gerekiyor.</li>
+          <li>Fiyat sayfasındaki "Bireysel paketteki her şey" satırı istemediğin "her şeyi" sözüne yakın. İstersen "Bireysel paketteki bütün özellikler" yazarım.</li>
         </ul>
       </div>
     </div>
   </div>
-</main>
+</div>
 
 <script>
 (function () {
-  var HINTS = {
-    home: '<b>Canlıdaki sürüm (14 Kasım):</b> açılışta ürün turu (eğitim → rutinler → davranış kayıtları), "Neden" 1 Akış, "Nasıl çalışır" sekmeli. Veriler uydurma.',
-    fiyat: '<b>Aylık / Yıllık</b>\'ı dene. Fiyatlar taslak; karşılaştırma tablosu kaydırırken başlığını üstte tutar.',
-    not: 'İki sitede ölçtüklerimiz, nereye uyguladığımız ve karar bekleyenler.'
-  };
-  var SRC = { home: 'site/index.html', fiyat: 'site/fiyat.html' };
-  var view = document.getElementById('view'), doc = document.getElementById('doc'), page = document.getElementById('page'), hint = document.getElementById('hint');
-  var tabs = [].slice.call(document.querySelectorAll('.tabs button')), devs = [].slice.call(document.querySelectorAll('.dev button'));
-  var cur = null;
-  function show(v, force) {
-    if (!HINTS[v]) v = 'home';
-    cur = v;
-    tabs.forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-v') === v)); });
-    hint.innerHTML = HINTS[v];
-    var isDoc = v === 'not';
-    doc.hidden = !isDoc; view.hidden = isDoc;
-    if (!isDoc && (force || page.getAttribute('data-v') !== v)) { page.setAttribute('data-v', v); page.src = SRC[v]; }
-    try { if (location.hash.slice(1) !== v) history.replaceState(null, '', '#' + v); } catch (e) {}
+  var f = document.getElementById('sayfa'), s = document.getElementById('sahne'), not = document.getElementById('not'), BOY = { tablet: [820, 1180], tel: [390, 844] };
+  var ac = document.getElementById('alt-ac'), panel = document.getElementById('alt-panel'), liste = document.getElementById('alt-liste');
+  var ozet = document.getElementById('alt-ozet'), metin = document.getElementById('alt-metin'), durumYazi = document.getElementById('alt-durum');
+  var sayfaDugme = [].slice.call(document.querySelectorAll('[data-sayfa]')), ANAHTAR = 'mercek.oniz.v3', secim = {}, gruplar = [], simdi = 'index.html';
+  var azalt = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  try { secim = JSON.parse(localStorage.getItem(ANAHTAR) || '{}') || {}; } catch (e) { secim = {}; }
+  function sakla() { try { localStorage.setItem(ANAHTAR, JSON.stringify(secim)); } catch (e) {} }
+  function bas(kap, b) { [].forEach.call(kap.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', String(x === b)); }); }
+  function pencere() { try { return f.contentWindow; } catch (e) { return null; } }
+  function sayfaAdi(yol) { var b = sayfaDugme.filter(function (x) { return x.dataset.sayfa === yol; })[0]; return b ? b.textContent : yol; }
+  function gecerli(g, v) { return !!v && g.sec.some(function (o) { return o[0] === v; }); }
+  function secili(g) { var v = (secim[simdi] || {})[g.k]; return gecerli(g, v) ? v : g.oneri; }
+  function kapat() { panel.hidden = true; ac.setAttribute('aria-expanded', 'false'); }
+
+  // Sayfa sekmeleri ve ekran boyu
+  function sayfaGoster(yol) {
+    sayfaDugme.forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.sayfa === yol)); });
+    var notMu = yol === 'not';
+    not.hidden = !notMu; s.hidden = notMu;
+    if (notMu) { ac.hidden = true; kapat(); }
+    else { ac.hidden = !gruplar.length; if (simdi !== yol || !f.getAttribute('data-yuklendi')) f.src = 'site/' + yol; }
+    try { history.replaceState(null, '', '#' + yol.replace('.html', '')); } catch (e) {}
   }
-  tabs.forEach(function (b) { b.addEventListener('click', function () { show(b.getAttribute('data-v')); }); });
-  devs.forEach(function (b) { b.addEventListener('click', function () {
-    devs.forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
-    view.classList.toggle('phone', b.getAttribute('data-d') === 'phone');
-    if (cur && cur !== 'not') show(cur, true);   // boyut değişince sayfa baştan yerleşsin
-  }); });
-  window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
-  // Önizlemede sitenin kendi sayfaları (ana sayfa ↔ fiyat) çerçevede açılır, sekme de buna uyar; dış bağlantılar yeni sekmede.
-  page.addEventListener('load', function () {
-    var w, d;
-    try { w = page.contentWindow; d = w.document; } catch (e) { return; }
-    var p = w.location.pathname;
-    var v = /fiyat\.html$/.test(p) ? 'fiyat' : /index\.html$/.test(p) ? 'home' : null;
-    if (v && v !== cur) { cur = v; page.setAttribute('data-v', v); tabs.forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-v') === v)); }); hint.innerHTML = HINTS[v]; try { history.replaceState(null, '', '#' + v); } catch (e) {} }
+  document.querySelector('.bar').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.sayfa) sayfaGoster(b.dataset.sayfa);
+    if (b.dataset.boy) {
+      bas(b.parentNode, b); var d = BOY[b.dataset.boy]; s.classList.toggle('dar', !!d);
+      if (d) { s.style.setProperty('--w', d[0] + 18 + 'px'); s.style.setProperty('--h', d[1] + 18 + 'px'); }
+      if (!s.hidden) f.src = 'site/' + simdi;   // boyut değişince sayfa baştan yerleşsin (ölçüler ve sekmeler)
+    }
+  });
+
+  // Alternatifler
+  function ciz() {
+    liste.textContent = '';
+    gruplar.forEach(function (g) {
+      var fs = document.createElement('fieldset'), lg = document.createElement('legend'), kutu = document.createElement('div');
+      fs.className = 'grup'; lg.textContent = g.ad; kutu.className = 'sec'; fs.appendChild(lg);
+      if (g.neden) { var p = document.createElement('p'); p.textContent = 'Neden ' + g.oneri.toUpperCase() + ': ' + g.neden; fs.appendChild(p); }
+      fs.appendChild(kutu);
+      g.sec.forEach(function (o) {
+        var b = document.createElement('button'), i = document.createElement('i'), sp = document.createElement('span');
+        b.type = 'button'; b.setAttribute('aria-pressed', String(secili(g) === o[0])); i.textContent = o[0]; sp.textContent = o[1];
+        b.appendChild(i); b.appendChild(sp);
+        if (o[0] === g.oneri) { var em = document.createElement('em'); em.textContent = 'öneri'; b.appendChild(em); }
+        b.addEventListener('click', function () { sec(g, o[0]); bas(kutu, b); });
+        kutu.appendChild(b);
+      });
+      liste.appendChild(fs);
+    });
+  }
+  function sec(g, v) {
+    var w = pencere(); if (!w || !w.onizSec) return;
+    (secim[simdi] = secim[simdi] || {})[g.k] = v; sakla();
+    w.onizSec(g.k, v);
+    var hedef = (g.hedefler && g.hedefler[v]) || g.hedef;
+    try { var h = hedef && w.document.querySelector(hedef); if (h) h.scrollIntoView({ behavior: azalt ? 'auto' : 'smooth', block: 'start' }); } catch (e) {}
+    ozet.hidden = true;
+  }
+  f.addEventListener('load', function () {
+    var w = pencere(), yol = 'index.html', d;
+    try { yol = w.location.pathname.split('/').pop() || 'index.html'; d = w.document; } catch (e) { return; }
+    f.setAttribute('data-yuklendi', '1');
+    if (!sayfaDugme.some(function (x) { return x.dataset.sayfa === yol; })) yol = 'index.html';
+    simdi = yol; gruplar = (w && w.onizGruplar) || [];
+    gruplar.forEach(function (g) { var v = (secim[simdi] || {})[g.k]; if (gecerli(g, v) && v !== g.oneri && w.onizSec) w.onizSec(g.k, v); });
+    document.getElementById('alt-say').textContent = gruplar.length;
+    if (!gruplar.length) kapat(); else ciz();
+    if (not.hidden) {   // "Bu turda" açıkken arka plandaki yükleme sekmeyi değiştirmez
+      sayfaDugme.forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.sayfa === yol)); });
+      ac.hidden = !gruplar.length;
+      try { history.replaceState(null, '', '#' + yol.replace('.html', '')); } catch (e) {}
+    }
+    ozet.hidden = true;
+    // Sitenin dış bağlantıları (uygulama, yasal metinler, destek) yeni sekmede açılır; önizleme kabuğu yerinde kalır.
     [].forEach.call(d.querySelectorAll('a[href^="http"]'), function (a) { a.target = '_blank'; a.rel = 'noopener'; });
   });
-  show(location.hash.slice(1) || 'home');
+  ac.addEventListener('click', function () { var acik = panel.hidden; panel.hidden = !acik; ac.setAttribute('aria-expanded', String(acik)); });
+  document.getElementById('alt-kapat').addEventListener('click', function () { kapat(); ac.focus(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { kapat(); ac.focus(); } });
+  document.getElementById('alt-sifirla').addEventListener('click', function () {
+    var w = pencere(); delete secim[simdi]; sakla();
+    gruplar.forEach(function (g) { if (w && w.onizSec) w.onizSec(g.k, g.oneri); });
+    ciz(); ozet.hidden = true;
+  });
+  document.getElementById('alt-kopya').addEventListener('click', function () {
+    var satir = ['Moyo Mercek sitesi, ' + sayfaAdi(simdi) + ' seçimlerim:'];
+    gruplar.forEach(function (g) {
+      var v = secili(g), o = g.sec.filter(function (x) { return x[0] === v; })[0] || g.sec[0];
+      satir.push('- ' + g.ad + ': ' + v.toUpperCase() + ' (' + o[1] + ')' + (v === g.oneri ? '' : ' [önerilen ' + g.oneri.toUpperCase() + ' yerine]'));
+    });
+    metin.value = satir.join('\n'); ozet.hidden = false; metin.focus(); metin.select();
+    var tamam = function () { durumYazi.textContent = 'Kopyalandı. Sohbete yapıştırman yeterli.'; };
+    var elle = function () { durumYazi.textContent = 'Metin seçili; kopyalayıp sohbete yapıştır.'; };
+    try { navigator.clipboard.writeText(metin.value).then(tamam, elle); } catch (e) { elle(); }
+  });
+
+  var ilk = (location.hash || '').slice(1);
+  var ilkYol = ilk === 'not' ? 'not' : ilk === 'fiyat' ? 'fiyat.html' : ilk === 'guvenlik' ? 'guvenlik.html' : 'index.html';
+  if (ilkYol === 'not') sayfaGoster('not'); else if (ilkYol !== 'index.html') { simdi = ilkYol; f.src = 'site/' + ilkYol; }
 })();
 </script>

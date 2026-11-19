@@ -2,7 +2,9 @@
 // Önce: parent-app'te `bash preview/build.sh`. Kullanım: node tools/cati-sayfa/cek/moyo.js [ad …]   (CEK_DEBUG=1 → ekrandaki yazıyı da basar)
 // Deneme verisi ve giriş parent-app `store/capture/prep.js` ile (mağaza görselleriyle aynı uydurma aile); adım sözdizimi `store/capture/capture.js` ile aynı:
 //   "Yazı" tam eşleşme · "~Yazı" içeren · "@Etiket" aria-label · "xy:x,y" nokta · "scroll:n" · "wait:ms" · başta "?" = varsa dokun
+//   "type:Yer tutucu=metin" alana harf harf yazar · "cb:Ad" adı tam eşleşen onay kutusuna dokunur (önceki ekranlardaki gizli kopyalar atlanır)
 // moyo.json: clinic = uzman bağlı kalsın · keep = uzmanın bekleyen önerileri kalsın · noSessions = randevular görünmesin
+//   invite = bağlanmamış bir uzman daveti eklenir (kod K7M2PA, örnek uzman; "Uzman bağla" onay ekranı için, 19 Kasım 2026)
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -35,6 +37,17 @@ const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-famil
       };
     }, KEY);
     await prep(p, { clinic: !!s.clinic });
+    if (s.invite) {
+      // prep.js davetleri siler: "Uzman bağla" ekranı için bu aileye henüz bağlanmamış bir davet (çocuk önerisi yok) eklenir
+      await p.evaluate((K) => {
+        const db = JSON.parse(localStorage.getItem(K));
+        db.clinic_invites.push({ code: 'K7M2PA', token: 'aa11bb22cc33dd44ee55ff6677889900', kind: 'family', clinic_id: 'demo-clinic', clinician_id: 'demo-clinician', label: '',
+          child_name: null, child_age_group: null, created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 47 * 3600e3).toISOString(),
+          used_at: null, used_by: null, claimed_at: null, claimed_family: null, revoked_at: null });
+        localStorage.setItem(K, JSON.stringify(db));
+      }, KEY);
+      await p.reload(); await p.waitForTimeout(2500);
+    }
     if (s.keep || s.noSessions) {
       // Uzmanım ekranı: uzmanın bekleyen rutin ve adım önerileri görünsün (değişiklik önerisi hariç); randevular bu çekimde yok
       await p.evaluate(({ K, keep, noSessions }) => {
@@ -53,6 +66,8 @@ const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-famil
         else if (st.startsWith('@')) await p.getByLabel(st.slice(1)).first().click({ timeout });
         else if (st.startsWith('~')) await p.getByText(st.slice(1)).first().click({ timeout });
         else if (st.startsWith('scroll:')) { await p.mouse.move(195, 500); await p.mouse.wheel(0, +st.slice(7)); }
+        else if (st.startsWith('type:')) { const [ph, v] = st.slice(5).split('='); await p.getByPlaceholder(ph).first().pressSequentially(v, { delay: 60, timeout }); }
+        else if (st.startsWith('cb:')) await p.getByRole('checkbox', { name: st.slice(3), exact: true }).last().click({ timeout });
         else if (st.startsWith('xy:')) { const [x, y] = st.slice(3).split(',').map(Number); await p.mouse.click(x, y); }
         else await p.getByText(st, { exact: true }).first().click({ timeout });
       } catch (e) { if (!opt) console.log('KAÇTI', s.name, st); }

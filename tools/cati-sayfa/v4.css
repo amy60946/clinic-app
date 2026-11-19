@@ -2,7 +2,7 @@
    1) Açılış: yeni metin, altında hemen "Moyo Ekosistemi" anlatımı
    2) Hap biçiminde adım sayacı (Atlassian'ın sekme çubuğu örnek alındı): etkin adım yeşil dolu, geçilen adımların numarası yeşil
    3) Ekosistem: ortadaki ekran net; yandakiler bulanık, yana açılmış, geride (eko.js)
-   4) Ürün adları çizgi kilitle: moyo Ebeveyn / Oyun / Uzman
+   4) Adım etiketi (ürün kilitleri tur 3'te ayrı ürün anlatımıyla kalktı)
    5) Alt bilgi: açık zeminli yuvarlak kutuda sütunlar (Atlassian düzeni) */
 
 .gizli { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -10,8 +10,9 @@
 /* ---------- 1) Açılış ---------- */
 .sayfa-c .acilis.c { min-height: 0; display: block; padding-block: clamp(44px, 6vw, 88px) clamp(18px, 2.6vw, 32px); }
 .sayfa-c .acilis.c h1 { font-size: clamp(30px, 4.1vw, 54px); line-height: 1.08; max-width: 1000px; }
-.sayfa-c .acilis .alt-etiket { margin: clamp(22px, 2.6vw, 32px) auto 0; font-size: 14px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0A8F3A; }
-.sayfa-c .acilis .alt { margin-top: 8px; color: var(--yazi-2); }
+/* 18 Kasım 2026: "Moyo Ekosistemi" etiketi başlığın ÜSTÜNDE (küçük üst etiket) */
+.sayfa-c .acilis .alt-etiket { margin: 0 auto clamp(12px, 1.4vw, 18px); font-size: 14px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #077A31; }
+.sayfa-c .acilis .alt { margin-top: clamp(18px, 2vw, 24px); color: var(--yazi-2); }
 .sayfa-c .acilis .dugmeler { margin-top: clamp(22px, 2.6vw, 30px); }
 .sayfa-c .acilis .ince { margin-top: 14px; font-size: 15px; color: var(--yazi-2); }
 
@@ -56,10 +57,9 @@
 .sayfa-c .d-slot > img { box-shadow: 0 34px 80px -34px rgba(22, 17, 58, .45); }
 .sayfa-c .d-slot.t-mercek > img { border: 8px solid #0B0920; border-radius: 18px; }
 .sayfa-c .d-yazilar { min-height: 104px; margin-top: 14px; }
-.sayfa-c .d-yazi-m .rol, .sayfa-c .d-kart .rol { color: #0A8F3A; }
+.sayfa-c .d-yazi-m .rol, .sayfa-c .d-kart .rol { color: #077A31; }
 .sayfa-c .d-yazi-m .rol { justify-content: center; }
 .sayfa-c .d-nokta { margin-top: 12px; }
-.sayfa-c .d-kapanis { padding-top: 18px; }
 /* telefon ve iPad: yana kaydırılan kartlar; ortadaki net, yandakiler bulanık ve küçük */
 .sayfa-c .d-mobil { padding-top: 6px; }
 .sayfa-c .d-nokta-m { margin: 14px auto 0; display: flex; }
@@ -68,42 +68,33 @@
 @media (prefers-reduced-motion: reduce) { .sayfa-c .dongu-b.js .d-kart { transition: none; filter: none; transform: none; } }
 @media (max-height: 720px) { .sayfa-c .d-yazilar { min-height: 88px; margin-top: 6px; } .sayfa-c .d-nokta { margin-top: 6px; } }
 
-/* ---------- Nasıl çalışır: sayaç ortada ---------- */
-.sayfa-c .hk-nokta { left: 50%; right: auto; bottom: 20px; transform: translateX(-50%); }
-.sayfa-c .hk-sahne { padding-bottom: 92px; }
-.sayfa-c .hk-yazi h3, .sayfa-c .d-yazi-m h3, .sayfa-c .nk-yazi h3 { text-wrap: balance; }
-.sayfa-c .nk-sekmeler { margin: 0 auto 18px; max-width: none; border: 0; background: #EFF0F3; }
-.sayfa-c .nk-sekmeler button { flex: none; }
+/* ---------- Ekosistem yazıları: dengeli satır ---------- */
+.sayfa-c .d-yazi-m h3 { text-wrap: balance; }
 
-/* ---------- 4) Ürün kilitleri ---------- */
-.kilit { display: inline-flex; align-items: center; flex: none; color: var(--lacivert); }
-.kilit svg { display: block; height: 34px; width: auto; }
+/* ---------- 4) Adım etiketi (1 · Uzmanınız …) ---------- */
 .sayfa-c .rol { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; letter-spacing: 0; }
-.sayfa-c .rol-ek { font-size: 13.5px; font-weight: 600; color: var(--yazi-2); padding: 3px 11px; border-radius: 999px; background: #EFF0F3; }
-.sayfa-c .hk-yazi .rol .kilit svg { height: 38px; }
-.sayfa-c .nk-yazi .rol .kilit svg { height: 30px; }
-.sayfa-c .nk-rozet { color: var(--lacivert); border-color: var(--cizgi); background: #FFFFFF; }
 
 /* ---------- 5) Alt bilgi ---------- */
 .altb { background: #FFFFFF; padding: 28px 0 calc(34px + env(safe-area-inset-bottom, 0px)); color: var(--lacivert); --altb-ic: clamp(22px, 4vw, 52px); }
-.altb-kutu { background: var(--sis); border-radius: 28px; padding: clamp(28px, 4vw, 52px) var(--altb-ic); display: grid; grid-template-columns: minmax(0, 1.25fr) repeat(3, minmax(0, 1fr)); gap: 36px 28px; }
+.altb-kutu { background: var(--sis); border-radius: 28px; padding: clamp(28px, 4vw, 52px) var(--altb-ic); display: grid; grid-template-columns: minmax(0, 1.55fr) repeat(4, minmax(0, 1fr)); gap: 36px 28px; }
 .altb .logo { color: var(--lacivert); display: flex; align-items: center; height: 23px; margin: 0 0 16px; }   /* logo satırı = sütun başlığı satırı: bağlantılar aynı hizada başlar */
 .altb .logo svg { height: 28px; transform: none; }
 .altb-s h3 { font-size: 13px; line-height: 23px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin: 0 0 16px; }
 .altb-s ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .altb-s a { display: inline-flex; align-items: center; min-height: 36px; font-size: 16px; color: var(--lacivert); text-decoration: none; }
 .altb-s a:hover { text-decoration: underline; text-underline-offset: 4px; }
-.altb-marka ul a { font-weight: 800; }
+/* logo altında slogan: açılış başlığıyla aynı cümle (18 Kasım 2026) */
+.altb-slogan { margin: 0; max-width: 26ch; font-size: 15.5px; line-height: 1.45; color: var(--yazi-2); text-wrap: pretty; }
 .altb-alt { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 28px; padding: 22px var(--altb-ic) 0; font-size: 14px; color: var(--yazi-2); }
-@media (max-width: 860px) {
-  .altb-kutu { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* dört bağlantı sütunu (Uygulamalar · Kurumsal · Yardım · Yasal): tablette logo satırı üstte, telefonda ikişer */
+@media (max-width: 1040px) {
+  .altb-kutu { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px 22px; }
   .altb-marka { grid-column: 1 / -1; }
-  .altb-marka ul { display: flex; flex-wrap: wrap; gap: 0 26px; }
+  .altb-slogan { max-width: 44ch; }
 }
-@media (max-width: 560px) {
-  .altb-kutu { grid-template-columns: 1fr 1fr; border-radius: 22px; }
-  .altb-s:last-child { grid-column: 1 / -1; }
-  .altb-s:last-child ul { display: flex; flex-wrap: wrap; gap: 0 26px; }
+@media (max-width: 640px) {
+  .altb-kutu { grid-template-columns: 1fr 1fr; border-radius: 22px; gap: 28px 18px; }
+  .altb-s a { font-size: 15.5px; }
 }
 
 /* ---------- 6) Dar ekranda menü ---------- */
@@ -125,20 +116,17 @@
 }
 @media (max-width: 480px) { .beyaz .ust .sag .cizgi { display: none; } .ust .sag { gap: 6px; } .dar-menu nav a.yalniz-dar { display: flex; } }
 
-/* ---------- Nasıl çalışır 2. adım: oyun + onay telefonu. Telefon, oyun ekranının sağ panelinin tam üstünde durur ve okunur boydadır ---------- */
-.sayfa-c .hk-kart.genis .ust-uste { aspect-ratio: 620 / 430; width: min(100%, calc(var(--gh, 100vh) * 1.44)); }
-.sayfa-c .hk-kart.genis .ust-uste .uu-oyun { width: 98.4%; top: 17%; }
-.sayfa-c .hk-kart.genis .ust-uste .uu-tel { height: 100%; top: 0; bottom: auto; right: 0; }
-/* telefonda 2. adım: oyun ekranı + daha küçük onay telefonu (yazıya daha çabuk inilir) */
-@media (max-width: 760px) { .sayfa-c .nk .t-ikili .uu-tel { width: min(60%, 230px); } }
 /* alt bilgide logo satırı sütun başlığıyla aynı yükseklikte */
 .altb .altb-marka .logo { height: 23px; min-height: 0; padding: 0; }
 
 /* Düzen aracı ayarı (kullanıcı, 17 Kasım 2026; geniş ekran > 1024 px; kaynak: Artifact veritabanı duzen/cati-masa sürüm 18).
-   Giriş bandı: başlık +16, metin +16, basamaklar +8; "Nasıl çalışır" bölümü +4. Taban değerler ortak.css'te (10 / 12 / 30 px, -12svh). */
+   Giriş bandı: başlık +16, metin +16, basamaklar +8. Taban değerler ortak.css'te (10 / 12 / 30 px).
+   18 Kasım 2026: basamakların yeni sınıfı .uc (ayar aynı). Kullanıcının "+4" verdiği "Nasıl çalışır" bölümü artık yukarı çekilmiyor
+   (kullanıcı: "1-2-3 maddelerine çok yakın"): -12svh + 4 yerine bölümler arasında açık boşluk, bütün genişliklerde (aşağıda). */
 @media (min-width: 1025px) {
   .sayfa-c #giris h2 { margin-top: 26px; }
   .sayfa-c #giris .ic > p:not(.ust-etiket) { margin-top: 28px; }
-  .sayfa-c #giris .basamak { margin-top: 38px; }
-  .sayfa-c .giris-bant + #nasil { margin-top: calc(-12svh + 4px); }
+  .sayfa-c #giris .uc { margin-top: 38px; }
 }
+/* 1-2-3 kartları ile "Ekosistemin Uygulamaları" arası: beyaz bantta alt boşluk */
+.sayfa-c .giris-bant { padding-bottom: clamp(48px, 6.4vw, 92px); }

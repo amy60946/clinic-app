@@ -1,0 +1,190 @@
+/* Çatı sayfa, beşinci katman (kullanıcı geri bildirimi 18 Kasım 2026; tur 2: 19 Kasım 2026). ortak.css + c.css + beyaz.css + v4.css'in üstüne yüklenir.
+   0) Önizleme alternatifleri: <html data-v-<anahtar>="…"> (yap_c.py önerilenleri sayfaya yazar; oniz.js değiştirir).
+      Metin alternatifleri data-var kardeşleri; tasarım alternatifleri html[data-v-…] ile. Tur 4'ten beri sayfada grup yok (kural yeni gruplar için durur).
+   1) Ekosistem sahnesi telefonda ve tablette parmakla kaydırılır (eko.js): pencere + şerit, ipucu, ok düğmeleri
+   2) Sahnenin zemini: açık panel (tur 2'de tek sürüm); bir kezlik giriş hareketi
+   3) 6. adım görseli: yörünge çizimi (c-sema.py; tur 4'te tek sürüm, kullanıcı kararı "dongu6" b)
+   4) 1-2-3 kartları (.uc): renkli üç kart (tur 2'de tek sürüm); 4b) kartların altında ürün ekranı (tur 3'te tek sürüm)
+   5) (tur 3'te kalktı: ayrı ürün anlatımı #nasil / #nasil-k, kaydırma ve sekme düzeni)
+   6) Küçük düzeltmeler: cümle sınırında satır, tablette uygulama kartları
+   7) (tur 3'te kalktı: ayrı anlatımın görsel kutusu)
+   8) Tur 2: sahnedeki ekranlar büyük (masaüstünde ortadaki ekran ~%25 geniş, telefon ve tablet kartlarında görsel ~%25 yüksek) */
+
+/* ---------- 0) Alternatifler ---------- */
+[data-var][hidden] { display: none !important; }
+
+/* ---------- 1) Sahne: parmakla kaydırılan kartlar ---------- */
+.d-pencere { position: relative; }
+.dongu-b.js .d-pencere { overflow: hidden; touch-action: pan-y pinch-zoom; }
+.dongu-b.js .d-serit { position: relative; overflow: visible; scroll-snap-type: none; margin-inline: 0; padding-inline: 0;
+  transition: transform .46s cubic-bezier(.22, .8, .24, 1); will-change: transform; -webkit-user-select: none; user-select: none; outline-offset: -3px; }
+.dongu-b.js .d-serit.aninda, .dongu-b.js .d-pencere.surukleniyor .d-serit { transition: none; }
+.dongu-b.js .d-serit img { -webkit-user-drag: none; }
+.sayfa-c .dongu-b.js .d-kart { transition: opacity .4s ease, transform .4s ease, filter .4s ease; }
+@media (hover: hover) and (pointer: fine) { .dongu-b.js .d-pencere { cursor: grab; } .dongu-b.js .d-pencere.surukleniyor { cursor: grabbing; } }
+@media (prefers-reduced-motion: reduce) { .dongu-b.js .d-serit { transition: none; } }
+/* ilk kaydırmaya kadar görünen sakin ipucu (dokunmatik) */
+.d-ipucu { display: none; margin: 10px 0 0; text-align: center; font-size: 13.5px; font-weight: 600; letter-spacing: .02em; line-height: 20px; color: var(--yazi-2); transition: opacity .5s ease; }
+.d-ipucu span { display: inline-block; font-size: 18px; line-height: 20px; vertical-align: top; }
+@media (hover: none) and (pointer: coarse) {
+  .dongu-b.js.statik .d-ipucu { display: block; }
+  .sayfa-c .dongu-b.js.statik .d-nokta-m { margin-top: 8px; }
+}
+.dongu-b.kaydirildi .d-ipucu { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .d-ipucu span:first-child { animation: d-ipucu-sol 1.8s ease-in-out infinite; }
+  .d-ipucu span:last-child { animation: d-ipucu-sag 1.8s ease-in-out infinite; }
+  .dongu-b.kaydirildi .d-ipucu span { animation: none; }
+}
+@keyframes d-ipucu-sol { 0%, 60%, 100% { transform: none; } 30% { transform: translateX(-4px); } }
+@keyframes d-ipucu-sag { 0%, 60%, 100% { transform: none; } 30% { transform: translateX(4px); } }
+/* farede: kartın iki yanında ok düğmeleri */
+.d-ok { display: none; position: absolute; z-index: 3; top: calc(22px + var(--dg, 300px) / 2); width: 44px; height: 44px; padding: 0; place-items: center; border-radius: 50%; border: 1px solid var(--cizgi); background: #FFFFFF; color: var(--lacivert);
+  box-shadow: 0 10px 24px -12px rgba(22, 17, 58, .45); cursor: pointer; transition: opacity .2s ease; }
+.d-ok svg { width: 22px; height: 22px; display: block; }
+.d-ok.geri { left: max(6px, calc(50% - var(--kw) / 2 - 22px)); }
+.d-ok.ileri { right: max(6px, calc(50% - var(--kw) / 2 - 22px)); }
+.d-ok:disabled { opacity: 0; pointer-events: none; }
+@media (hover: hover) and (pointer: fine) { .dongu-b.js.statik .d-ok { display: grid; } }
+
+/* ---------- 2) Sahnenin zemini: açık panel (kullanıcı kararı 19 Kasım 2026, "sahne" a) ----------
+   Sahne büyük, yumuşak köşeli açık bir panelin üstünde; ortadaki ekranın arkasında hafif ışık. */
+.sayfa-c .d-sahne { --pk: clamp(12px, 2.2vw, 32px); padding: 22px 20px 24px; clip-path: inset(8px var(--pk) 10px round 40px); }
+.sayfa-c .d-sahne::before { content: ""; position: absolute; z-index: -1; inset: 8px var(--pk) 10px; border-radius: 40px;
+  background: linear-gradient(180deg, #EAE9FB 0%, #EFF3FF 55%, #FAFAFF 100%); }
+.sayfa-c .d-halka-kap::before { content: ""; position: absolute; left: 50%; top: 50%; width: min(86vw, 1180px); height: 124%; transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 255, 255, .96), rgba(255, 255, 255, 0) 74%); pointer-events: none; }
+.sayfa-c .d-mobil { max-width: none; margin: 0 max(8px, calc((100% - 1250px) / 2)) clamp(24px, 4vw, 48px); padding: 2px 0 20px; border-radius: 28px; overflow: hidden;
+  background: linear-gradient(180deg, #EAE9FB 0%, #EFF3FF 55%, #FAFAFF 100%); }
+.sayfa-c .d-nokta-m { max-width: calc(100% - 20px); }
+.sayfa-c .dongu-b:not(.statik) { padding-bottom: clamp(16px, 2vw, 28px); }
+.sayfa-c .d-kart { border-color: transparent; box-shadow: 0 18px 40px -28px rgba(22, 17, 58, .4); }
+/* giriş: sahne ekrana girince bir kez. Ortadaki ekran hafifçe yükselip büyür, yandakiler kenardan gelir (eko.js .bekle -> .gir -> .girdi) */
+@media (prefers-reduced-motion: no-preference) {
+  .sayfa-c .dongu-b.bekle .d-slot > * { opacity: 0; transform: translateX(110px); }
+  .sayfa-c .dongu-b.bekle .d-slot.sol > * { transform: translateX(-110px); }
+  .sayfa-c .dongu-b.bekle .d-slot.on > * { transform: translateY(24px) scale(.96); }
+  .sayfa-c .dongu-b.gir:not(.girdi) .d-slot > * { transition: opacity .7s ease, transform .95s cubic-bezier(.2, .7, .2, 1); }
+  .sayfa-c .dongu-b.js.bekle .d-kart { opacity: 0; transform: translateX(72px) scale(.95); }
+  .sayfa-c .dongu-b.js.bekle .d-kart.sol { transform: translateX(-72px) scale(.95); }
+  .sayfa-c .dongu-b.js.bekle .d-kart.on { transform: translateY(20px) scale(.97); filter: none; }
+  .sayfa-c .dongu-b.js.gir:not(.girdi) .d-kart { transition: opacity .7s ease, transform .95s cubic-bezier(.2, .7, .2, 1), filter .6s ease; }
+  /* adım değişirken görsel, kartının içinde hafifçe kayarak yerine oturur */
+  .sayfa-c .dongu-b.js .d-kart .d-gorsel > * { transition: transform .55s cubic-bezier(.2, .7, .2, 1); }
+  .sayfa-c .dongu-b.js .d-kart:not(.on) .d-gorsel > * { transform: translateX(12px); }
+  .sayfa-c .dongu-b.js .d-kart.sol .d-gorsel > * { transform: translateX(-12px); }
+}
+
+/* ---------- 3) 6. adım: yörünge çizimi (c-sema.py; kullanıcı kararı tur 4, "dongu6" b) ---------- */
+.d6 { position: relative; background: #FFFFFF; border: 1px solid var(--cizgi); border-radius: 18px; overflow: hidden; color: var(--lacivert); }
+.d6 svg { display: block; width: 100%; height: 100%; }
+.d6 svg { font-family: var(--font); }
+.sayfa-c .d-slot > .d6 { flex: none; width: 100%; aspect-ratio: 16 / 10; max-height: 100%; box-shadow: 0 24px 60px -28px rgba(22, 17, 58, .35); }
+.sayfa-c .d-kart .d-gorsel > .d6 { width: 100%; height: 100%; border-radius: 16px; }
+/* halkada dolaşan tek nokta (tam tur 9 sn). Nokta kendi merkezinde dönen bir grupta (transform; çizgi kesiği kaydırılmaz):
+   3B dönmüş sahnede kesik kaydırma her karede kısmi yeniden boyama istiyor, kartların yanında harf kırıntıları bırakıyordu (19 Kasım QA). */
+.s6-yol { transform-box: view-box; animation: s6-yol 9s linear infinite; }
+@keyframes s6-yol { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .s6-yol { animation: none; } }
+
+/* ---------- 4) 1-2-3 kartları: renkli üç kart (kullanıcı kararı 19 Kasım 2026, "uc" a; Atlassian örnek 1) ---------- */
+.sayfa-c .uc { position: relative; list-style: none; margin: 30px auto 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; max-width: none; text-align: left; }
+.sayfa-c .uc-k { position: relative; min-width: 0; display: flex; flex-direction: column; border-radius: 28px; padding: 26px 28px 34px; }
+.sayfa-c .uc-1 { background: #E2F8E7; }
+.sayfa-c .uc-2 { background: #ECEBFB; }
+.sayfa-c .uc-3 { background: #E1EFFF; }
+.sayfa-c .uc-k h3 { margin: 22px 0 0; font-size: clamp(20px, 1.9vw, 24px); line-height: 1.18; font-weight: 800; color: var(--lacivert); text-wrap: balance; }
+.sayfa-c .uc .uc-k p { margin: 10px 0 0; max-width: none; font-size: 16px; line-height: 1.5; color: #4A4666; text-wrap: pretty; }
+.uc-ust { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; }
+.uc-no { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--lacivert); color: #FFFFFF; font-size: 17px; font-weight: 800; line-height: 1; }
+.uc-rozet { font-size: 12.5px; font-weight: 800; line-height: 1; white-space: nowrap; color: var(--lacivert); background: #FFFFFF; border-radius: 999px; padding: 7px 12px; }
+@media (min-width: 1000px) {
+  .sayfa-c .uc-k + .uc-k::before { content: ""; position: absolute; left: -30px; top: 50%; width: 30px; height: 16px; margin-top: -8px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 16'%3E%3Cpath d='M2 8h17M13.5 2.5 19 8l-5.5 5.5' fill='none' stroke='%2316113A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 22px 16px no-repeat; }
+}
+/* üç sütunda başlıklar iki satırlık yer tutar, metinler aynı hizada başlar */
+@media (min-width: 720px) { .sayfa-c .uc-k h3 { min-height: 2.4em; display: flex; flex-direction: column; justify-content: flex-end; } }
+@media (max-width: 999px) {
+  .sayfa-c .uc { gap: 14px; }
+  .sayfa-c .uc-k { padding: 20px 20px 26px; border-radius: 24px; }
+  .sayfa-c .uc-k h3 { font-size: 19px; margin-top: 18px; }
+  .sayfa-c .uc .uc-k p { font-size: 15.5px; }
+}
+@media (max-width: 719px) {
+  .sayfa-c .uc { grid-template-columns: 1fr; }
+  .sayfa-c .uc-k { padding: 22px 22px 26px; }
+  .sayfa-c .uc-k h3 { font-size: 21px; margin-top: 16px; }
+  .sayfa-c .uc .uc-k p { font-size: 16px; }
+}
+
+/* ---------- 4b) Her kartın altında bir gerçek ürün ekranı (kullanıcı kararı tur 3, 19 Kasım 2026: ayrı ürün anlatımı yok) ----------
+   Ekran kartın alt kenarından taşar gibi durur (kart köşesinde kırpılır; oranı korunur, büyütülmez): telefonlar ortada ve üst kısmı
+   görünür. Moyo Uzman ekranı (3. kart) 19 Kasım QA'dan beri taşmaz: img/c-davranis.webp panelden temiz bir sınırda kırpıldı (ilk cümlenin
+   sonu, "Öncül" sütunu ile "Sonuç" sütunu arası, 2. satırın çizgisi) ve kartta bütünüyle görünür; önceden kartın sağ kenarı tablodaki
+   sözcükleri ortasından kesiyordu ("Söyl", telefonda ~%20'si kesik). Masaüstünde üç sütun; tablette (720–999 px) kartlar alt alta, ekran
+   sağda; telefonda alt alta, ekran yazının altında. */
+.sayfa-c .uc-k { padding-bottom: 0; }
+.uc-gorsel { --ug: 330px; position: relative; flex: none; height: var(--ug); margin: auto -28px 0; overflow: hidden; border-radius: 0 0 28px 28px; }
+.uc-gorsel img { position: absolute; display: block; max-width: none; height: auto; border: 7px solid #0B0920; background: #0B0920;
+  box-shadow: 0 24px 50px -22px rgba(22, 17, 58, .45); -webkit-user-drag: none; }
+.uc-telefon img { left: 50%; top: 26px; width: min(256px, calc(100% - 48px)); transform: translateX(-50%); border-radius: 32px; }
+.uc-panel img { left: 50%; top: 26px; transform: translateX(-50%); width: auto; height: auto; max-width: calc(100% - 56px); max-height: calc(var(--ug) - 48px);
+  border-width: 6px; border-radius: 16px; }
+@media (min-width: 1000px) { .sayfa-c .uc-k + .uc-k::before { top: 46px; margin-top: -8px; } }
+@media (min-width: 1000px) and (max-width: 1199px) { .uc-gorsel { --ug: 300px; } .uc-telefon img { width: min(236px, calc(100% - 36px)); } }
+@media (min-width: 720px) and (max-width: 999px) {
+  .sayfa-c .uc { grid-template-columns: 1fr; gap: 16px; }
+  .sayfa-c .uc-k { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 46%); grid-template-rows: auto auto 1fr; column-gap: 28px; padding: 26px 0 0 28px; }
+  .sayfa-c .uc-k > :not(.uc-gorsel) { grid-column: 1; }
+  .sayfa-c .uc-k h3 { min-height: 0; font-size: 22px; }
+  .sayfa-c .uc .uc-k p { font-size: 16.5px; padding-bottom: 26px; }
+  .uc-gorsel { --ug: 330px; grid-column: 2; grid-row: 1 / span 3; align-self: end; margin: 0; border-radius: 0 0 24px 0; }
+  .uc-telefon img { top: 0; width: 248px; }
+  .uc-panel img { left: 0; top: 26px; transform: none; max-width: calc(100% - 28px); max-height: calc(var(--ug) - 52px); }
+}
+@media (max-width: 719px) {
+  .uc-gorsel { --ug: 320px; margin-inline: -22px; border-radius: 0 0 24px 24px; }
+  .uc-telefon img { width: min(250px, calc(100% - 64px)); border-width: 6px; border-radius: 30px; }
+  .uc-panel img { max-width: calc(100% - 44px); }
+}
+
+/* ---------- 6) Küçük düzeltmeler (18 Kasım 2026 turu, ikinci geçiş) ---------- */
+/* Uzun tanıtım cümleleri geniş ekranda cümle sınırında satır atlar (yap_c.py cumleler) */
+@media (min-width: 720px) { .sayfa-c .cumle { display: inline-block; } }
+/* "Ekosistemin Uygulamaları": tablet dikte (700–860 px) üç kart yan yana (önceden tek sütunda, geniş ve seyrek duruyordu) */
+@media (min-width: 700px) and (max-width: 860px) {
+  .sayfa-c #sonraki .kartlar3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .sayfa-c #sonraki .kart { padding: 20px 18px 22px; }
+  .sayfa-c #sonraki .kart h3 { font-size: 19px; }
+  .sayfa-c #sonraki .kart p { font-size: 15px; }
+}
+
+/* ---------- 8) Tur 2 (kullanıcı, 19 Kasım 2026: "kayan ekranların içeriği zor seçiliyor"): ekranlar büyük ----------
+   Masaüstü sahnesi: ortadaki ekranın genişliği min(48vw, 700px) yerine min(62vw, 880px) (1440 px'te 691 → 880, %27); panel ve oyun
+   ekranı genişlikle, telefonlar sahnenin yüksekliğiyle büyür (yazı ve sayaç için kalan yer biraz sıkıştı). Görseller doğal boyutunu
+   geçmez (img'de genişlik verilmez, yalnız max-width / max-height). Yandaki ekranlar daha az küçülür ve daha az bulanık (eko.js).
+   Telefon ve tablet kartları: görsel kutusu 300 → 360–400 px, tablette kart 420 → 600 px. */
+.sayfa-c .d-halka-kap { --w: min(62vw, 880px); }
+.sayfa-c .d-yazilar { min-height: 98px; margin-top: 8px; }
+.sayfa-c .d-nokta { margin-top: 8px; }
+@media (max-height: 720px) { .sayfa-c .d-yazilar { min-height: 86px; margin-top: 4px; } .sayfa-c .d-nokta { margin-top: 4px; } }
+.sayfa-c .d-mobil { --kw: min(calc(100vw - 84px), 420px); --dg: clamp(300px, 44svh, 380px); }
+.sayfa-c .d-gorsel { height: var(--dg); }
+/* 19 Kasım QA: tablette ve geniş ekrandaki kartlarda görsel ekranın yüksekliğiyle büyür (1024 × 768'de ~470, 820 × 1180'de 580 px;
+   önceden 384 / 400 px'te kalıyor, telefonlar 1-2-3 kartlarındakinden küçük görünüyordu). Kart yazısı ve sayaç için ~300 px bırakılır.
+   ≥ 1025 px (hareket azaltma ya da dokunmatik büyük ekran): kart sahnedeki ortadaki ekran kadar geniş (912 px, görsel 880 px), Moyo Uzman'ın
+   masaüstü ekranı ve 6. adımın geniş çizimi (.d-gen). Görseller doğal boyutunu geçmez (yalnız max-width / max-height). */
+@media (min-width: 700px) { .sayfa-c .d-mobil { --kw: min(calc(100vw - 140px), 600px); --dg: clamp(380px, calc(100svh - 300px), 580px); } }
+@media (min-width: 1025px) { .sayfa-c .d-mobil { --kw: min(calc(100vw - 220px), 912px); --dg: clamp(400px, calc(100svh - 290px), 610px); } }
+.sayfa-c .d-gorsel > .d-gen { display: none; }
+@media (min-width: 1025px) {
+  .sayfa-c .d-gorsel > .d-dar { display: none; }
+  .sayfa-c .d-gorsel > img.d-gen { display: block; }
+  .sayfa-c .d-kart .d-gorsel > .d6.d-gen { display: block; height: auto; aspect-ratio: 16 / 10; max-height: 100%; }
+}
+/* tablette 6. adımın dar çizimi kartı boydan boya doldurmasın (yazılar 20 px'i geçmesin) */
+@media (min-width: 700px) and (max-width: 1024px) { .sayfa-c .d-kart .d-gorsel > .d6 { max-width: 440px; } }
+/* yandaki kartlar: tanınır kalsın, ikinci planda dursun */
+.sayfa-c .dongu-b.js .d-kart { opacity: .62; transform: scale(.95); filter: blur(1px); }
+.sayfa-c .dongu-b.js .d-kart.on { opacity: 1; transform: none; filter: none; }
+@media (prefers-reduced-motion: reduce) { .sayfa-c .dongu-b.js .d-kart { filter: none; transform: none; } }

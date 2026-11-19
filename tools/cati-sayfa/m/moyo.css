@@ -1,11 +1,5 @@
 /* Moyo (ebeveyn) sayfası: Mercek sitesinin düzeni (site.css) üstüne yalnız Moyo'ya özel parçalar (14 Kasım 2026). */
 .sayfa-moyo .logo .logo-svg { height: 26px; width: auto; }
-/* Açılış görseli: oyunun ekranı, önünde ebeveynin telefonu */
-.mh { position: relative; aspect-ratio: 16 / 9; max-width: 1080px; margin-inline: auto; }
-.mh-oyun { position: absolute; left: 0; top: 4%; width: 80%; border-radius: 18px; box-shadow: var(--shadow-hero); }
-.mh-tel { position: absolute; right: 2%; bottom: 0; height: 92%; width: auto; border: 8px solid #0B0920; border-radius: 34px; box-shadow: var(--shadow-hero); background: #fff; }
-.mh-etiket { position: absolute; left: 12px; bottom: 12%; padding: 4px 10px; border-radius: var(--r-pill); background: rgba(22, 17, 58, .78); color: #fff; font-size: 12px; font-weight: 700; }
-@media (max-width: 700px) { .mh { aspect-ratio: 4 / 3.2; } .mh-oyun { width: 100%; top: 0; } .mh-tel { height: 70%; right: 0; border-width: 5px; border-radius: 22px; } .mh-etiket { bottom: 4px; } }
 .trust svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 /* Sekmelerde telefon ekranı: okunur büyüklükte, çerçeveli */
 .nc-media figure.tel { position: relative; margin: 0 auto; width: fit-content; }
@@ -19,32 +13,16 @@
 .eko h3 { font-size: 20px; } .eko p { color: var(--c-on-dark-2); font-size: 16px; }
 .eko-link { text-align: center; margin-top: 28px; } .eko-link a { color: var(--c-cta); font-weight: 800; text-decoration: none; }
 @media (max-width: 900px) { .ekos { grid-template-columns: 1fr; max-width: 560px; margin-inline: auto; } }
-/* Fiyat */
-.fks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap-card); max-width: 900px; margin-inline: auto; }
-.fk { background: var(--c-bg); border: 1px solid var(--c-line); border-radius: var(--r-lg); padding: 28px; }
-.fk-ad { font-size: 15px; font-weight: 800; color: var(--c-text-2); }
-.fk-fiyat { font-size: 32px; font-weight: 800; margin: 4px 0 10px; }
-.fk p:last-child { color: var(--c-text-2); font-size: 16px; }
-@media (max-width: 760px) { .fks { grid-template-columns: 1fr; } }
 /* Canlı öncesi inceleme (14 Kasım 2026) */
 .sayfa-moyo .hero h1 { font-size: clamp(28px, 18px + 2.6vw, 52px); }
-.mh-etiket { top: calc(4% + 12px); bottom: auto; }
 .nc-media figure.tel figcaption { position: static; transform: none; margin: 10px auto 0; width: fit-content; background: none; color: var(--c-text-3); padding: 0; font-weight: 600; }
 .nc-media figure.tel.kirp { width: min(100%, 320px); }
 .nc-media figure.tel.kirp img { height: auto; width: 100%; border-radius: 24px; }
-@media (max-width: 700px) {
-  .mh { aspect-ratio: auto; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-  .mh-oyun, .mh-tel { position: static; }
-  .mh-oyun { width: 100%; }
-  .mh-tel { height: auto; width: min(68%, 280px); }
-  .mh-etiket { top: 10px; left: 10px; }
-}
 @media (max-width: 560px) {
   .nc-media figure.tel img { height: auto; width: min(84vw, 320px); }
 }
 
-/* Açılış iki sütun (kullanıcı isteği 17 Kasım 2026): solda başlık, sağda oyun + onay ekranı yan yana; kilit logo "moyo Ebeveyn".
-   Telefon, oyun ekranının sağdaki "Oyun görevleri" panelinin tam üstüne gelir: yazı ortasından kesilen bir şey kalmaz. */
+/* Açılış iki sütun (kullanıcı isteği 17 Kasım 2026): solda başlık, sağda açılış görseli (dört vuruşluk anlatım, aşağıda); kilit logo "moyo Ebeveyn". */
 .sayfa-moyo .logo .logo-svg { height: 30px; }
 .sayfa-moyo .hero { overflow: clip; }
 .mhero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); align-items: center; gap: clamp(28px, 4vw, 64px); text-align: left; }
@@ -55,19 +33,321 @@
 .sayfa-moyo .mhero .trust { justify-content: flex-start; margin-top: 24px; gap: 8px 20px; }
 .sayfa-moyo .mhero .trust li { padding: 0; border: 0; background: none; font-size: 15px; gap: 8px; }
 .sayfa-moyo .mhero .hero-media { margin: 0; width: 100%; }
-.mhero .mh { aspect-ratio: 620 / 430; max-width: none; }
-.mhero .mh-oyun { left: 0; top: 17%; width: 98.4%; }
-.mhero .mh-tel { right: 0; top: 0; bottom: auto; height: 100%; }
 @media (max-width: 1000px) {
   .mhero { grid-template-columns: 1fr; text-align: center; gap: 36px; }
   .sayfa-moyo .mhero h1, .sayfa-moyo .mhero .sub { margin-inline: auto; }
   .sayfa-moyo .mhero .actions, .sayfa-moyo .mhero .trust { justify-content: center; }
   .sayfa-moyo .mhero .hero-media { max-width: 720px; margin-inline: auto; }
-  .sayfa-moyo .nc-tabs button { font-size: 14px; padding: 5px 12px 5px 6px; gap: 6px; }
+  .sayfa-moyo .nc-tabs button { font-size: 14px; padding: 5px 11px 5px 5px; gap: 6px; }
   .sayfa-moyo .nc-tabs b { width: 24px; height: 24px; font-size: 12px; }
+  .sayfa-moyo .nc-tabs { gap: 2px; }
 }
-@media (max-width: 700px) {
-  .mhero .mh { aspect-ratio: auto; }
-  .mhero .mh-oyun { width: 100%; }
-  .mhero .mh-tel { height: auto; }
+
+/* =====================================================================================================================
+   18 Kasım 2026 turu (kullanıcı geri bildirimi). Önizleme alternatifleri html[data-v-<grup>] ve [data-var] ile (oniz.js).
+   ===================================================================================================================== */
+[hidden] { display: none !important; }   /* hidden her zaman gizler (display veren sınıflar dahil: alternatifler, paneller) */
+
+/* Açılış: alt satır başlığın açıkça altında (küçük), tek cümlelik deneme notu, kısa güven maddeleri */
+.sayfa-moyo .mhero .sub { margin-top: 18px; max-width: 500px; font-size: clamp(16px, 15px + .25vw, 18.5px); line-height: 1.5; color: var(--c-on-dark-2); }
+.sayfa-moyo .mhero .actions { margin-top: 28px; }
+.sayfa-moyo .mhero .fine { margin-top: 14px; font-size: 14.5px; }
+.sayfa-moyo .mhero .trust { margin-top: 18px; display: grid; grid-template-columns: repeat(2, max-content); justify-content: start; gap: 6px 22px; }
+.sayfa-moyo .mhero .trust li { font-size: 13.5px; font-weight: 600; color: var(--c-on-dark-2); gap: 6px; }
+.sayfa-moyo .mhero .trust svg { width: 15px; height: 15px; stroke: var(--c-cta); stroke-width: 2.4; }
+.sayfa-moyo .mhero .mhv { align-self: center; }
+@media (max-width: 1000px) { .sayfa-moyo .mhero .trust { justify-content: center; } .sayfa-moyo .mhero .sub { margin-inline: auto; } }
+
+/* ---------- Açılış görseli a/b: sahne (parçaların yeri yap_m.py SAHNE'den CSS değişkeniyle; --g… geniş, --d… dar) ---------- */
+.ma { margin: 0; }
+.ma-kutu { position: relative; }
+.ma-sahne { position: relative; width: 100%; aspect-ratio: var(--ga); }
+.ma-oyun, .ma-tel, .ma-halka { position: absolute; left: var(--gx); top: var(--gy); width: var(--gw); }
+.ma-halka { height: var(--gh); }
+.ma-tik, .ma-no { position: absolute; left: var(--gx); top: var(--gy); transform: translate(-50%, -50%); }
+.ma-etk { position: absolute; left: var(--gx); top: var(--gy); }
+.ma-etk.tel { transform: translateX(-50%); }
+
+.ma-oyun { border-radius: 14px; overflow: hidden; box-shadow: 0 26px 60px rgba(0, 0, 0, .38); background: #8EC5E6; }
+.ma-oyun img, .ma-ekran img { display: block; width: 100%; height: auto; }
+.ma-tel { z-index: 2; padding: var(--gp); background: #0B0920; border-radius: 13.5% / 6.6%; box-shadow: 0 30px 70px rgba(0, 0, 0, .42), 0 0 0 1px rgba(255, 255, 255, .08); }
+.ma-ekran { position: relative; overflow: hidden; border-radius: 11% / 5.1%; background: #fff; }
+.ma .ust { position: absolute; inset: 0; opacity: 0; transition: opacity .35s ease; }
+.ma .ust.on { opacity: 1; }
+
+/* Yollar: cihazların altında, yalnız koyu zemindeki parçası görünür */
+.ma-yol { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.ma-yol.dar { display: none; }
+.ma-yol path { fill: none; }
+.ma-yol .y { stroke: rgba(255, 255, 255, .5); stroke-width: 2; stroke-dasharray: 5 7; stroke-linecap: round; opacity: 0; transition: opacity .35s ease; }
+.ma-yol .y.on { opacity: 1; }
+.ma-yol .s { stroke: var(--c-cta); stroke-width: 2.2; stroke-dasharray: 6 6; stroke-linecap: round; opacity: 0; }
+.ma-yol .ok { fill: none; stroke: var(--c-cta); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ma.duruk .ma-yol .s { opacity: 1; }
+
+/* Uygulama adları */
+.ma-etk { z-index: 3; display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px 4px 4px; border-radius: var(--r-pill); background: rgba(255, 255, 255, .1);
+  border: 1px solid var(--c-line-dark); color: var(--c-on-dark); font-size: 13px; line-height: 1.2; font-weight: 700; white-space: nowrap; }
+.ma-etk img { width: 20px; height: 20px; border-radius: 6px; }
+/* tur 3 ("Telefonun altındaki Moyo Ebeveyn çerçevesi doğru görünmüyor"): etiket sahnenin sağ kenarına yakın durduğu için kutusu kalan
+   genişliğe daralıyor, yazı çerçevenin dışına taşıyordu. Etiket metni kadar geniş; koyu zeminde koyu simgenin kenarı ince bir halkayla görünür. */
+.ma-etk { width: max-content; }
+.ma-etk.oyun { transform: translateY(calc(-100% - 8px)); }   /* oyunun üst kenarının 8 px üstünde */
+.ma-etk.tel { transform: translate(-50%, 8px); }             /* telefonun alt kenarının 8 px altında, ortada */
+@media (max-width: 520px) { .ma-etk.oyun { transform: translateY(calc(-100% - 5px)); } .ma-etk.tel { transform: translate(-50%, 5px); } }
+.ma-etk img { box-shadow: 0 0 0 1px rgba(255, 255, 255, .22); }
+
+/* Vurgu halkası, numara, onay işareti, yürüyen çip */
+.ma-halka { z-index: 4; border: 2.5px solid var(--c-cta); border-radius: 10px; box-shadow: 0 0 0 4px rgba(81, 229, 106, .22); opacity: 0; transition: opacity .3s ease; pointer-events: none; }
+.ma-halka.on { opacity: 1; animation: ma-nabiz 1.2s ease-in-out infinite; }
+@keyframes ma-nabiz { 50% { box-shadow: 0 0 0 9px rgba(81, 229, 106, .1); } }
+.ma-halka::after, .ma-no { content: attr(data-no); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--c-cta); color: var(--c-ink);
+  font-size: 13px; line-height: 1; font-weight: 800; font-style: normal; box-shadow: 0 2px 8px rgba(0, 0, 0, .3); }
+.ma-halka::after { position: absolute; left: -13px; top: -13px; }
+.ma-halka.h-onay::after { left: auto; right: -13px; }
+.ma-no { z-index: 4; display: none; }
+.ma.duruk .h-rutin, .ma.duruk .h-yaptim { opacity: 1; }
+.ma.duruk .ma-no { display: grid; }
+.ma-tik { z-index: 5; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--c-cta); box-shadow: 0 4px 12px rgba(0, 0, 0, .3);
+  opacity: 0; transform: translate(-50%, -50%) scale(.5); transition: opacity .25s ease, transform .25s ease; }
+.ma-tik.on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.ma-tik svg { width: 16px; height: 16px; fill: none; stroke: var(--c-ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.ma-cip { position: absolute; left: 0; top: 0; z-index: 6; display: inline-flex; align-items: center; padding: 7px 13px; border-radius: var(--r-pill); background: #fff; color: var(--c-ink);
+  font-size: 14px; line-height: 1.2; font-weight: 800; white-space: nowrap; box-shadow: 0 10px 26px rgba(0, 0, 0, .38), 0 0 0 2px var(--c-cta); opacity: 0; pointer-events: none; will-change: transform, opacity; }
+.ma-cip .c2 { display: none; align-items: center; gap: 6px; }
+.ma-cip[data-k="2"] .c1 { display: none; }
+.ma-cip[data-k="2"] .c2 { display: inline-flex; }
+.ma-cip svg { width: 15px; height: 15px; fill: none; stroke: var(--c-ok); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.ma.duruk .ma-cip { display: none; }
+
+/* Duraklat / oynat (5 sn'den uzun hareket için) */
+.ma-dur { position: absolute; left: 0; bottom: 0; z-index: 7; width: 40px; height: 40px; padding: 0; border: 1px solid var(--c-line-dark); border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; background: rgba(255, 255, 255, .1); color: #fff; transition: background-color var(--t); }
+.ma-dur::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; }
+.ma-dur:hover { background: rgba(255, 255, 255, .2); }
+.ma-dur svg { width: 14px; height: 14px; fill: currentColor; }
+.ma-dur .i-play, .ma-dur[data-state="paused"] .i-pause { display: none; }
+.ma-dur[data-state="paused"] .i-play { display: block; }
+
+/* Dört numaralı anlatım: hareketliyken etkin adım yanar, dokununca o adıma gider; duruk hâlde düz liste */
+.ma-adim { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 10px; margin-top: 18px; }
+.ma-adim li, .ma-adim button { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--c-on-dark); font-size: 14px; line-height: 1.3; font-weight: 600; text-align: left; }
+.ma-adim li { padding: 7px 10px 7px 7px; border: 1px solid var(--c-line-dark); border-radius: 12px; }
+.ma-adim li:has(> button) { padding: 0; border: 0; }
+.ma-adim button { width: 100%; min-height: 46px; padding: 7px 10px 7px 7px; border: 1px solid var(--c-line-dark); border-radius: 12px; background: transparent; color: var(--c-on-dark-2);
+  cursor: pointer; transition: background-color .25s, border-color .25s, color .25s; }
+.ma-adim button:hover { color: var(--c-on-dark); border-color: rgba(255, 255, 255, .32); }
+.ma-adim b { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid currentColor; font-size: 13px; line-height: 1; }
+.ma-adim li > b { background: var(--c-cta); border-color: var(--c-cta); color: var(--c-ink); }
+.ma-adim span { min-width: 0; }
+.ma-adim button[aria-current="step"] { background: rgba(81, 229, 106, .14); border-color: var(--c-cta); color: var(--c-on-dark); }
+.ma-adim button[aria-current="step"] b { background: var(--c-cta); border-color: var(--c-cta); color: var(--c-ink); }
+.ma.duruk .ma-adim button { cursor: default; color: var(--c-on-dark); }
+.ma.duruk .ma-adim button b { background: var(--c-cta); border-color: var(--c-cta); color: var(--c-ink); }
+
+@media (max-width: 520px) {
+  .ma-kutu { max-width: 400px; margin-inline: auto; }
+  .ma-sahne { aspect-ratio: var(--da); }
+  .ma-oyun, .ma-tel, .ma-halka, .ma-tik, .ma-no, .ma-etk { left: var(--dx); top: var(--dy); }
+  .ma-oyun, .ma-tel, .ma-halka { width: var(--dw); }
+  .ma-halka { height: var(--dh); border-radius: 8px; }
+  .ma-tel { padding: var(--dp); }
+  .ma-oyun { border-radius: 10px; }
+  .ma-yol.genis { display: none; }
+  .ma-yol.dar { display: block; }
+  .ma-tik { width: 22px; height: 22px; }
+  .ma-tik svg { width: 14px; height: 14px; }
+  .ma-cip { font-size: 13px; padding: 6px 11px; }
+  .ma-etk { font-size: 12.5px; }
+  .ma-adim { gap: 8px; }
+  .ma-adim li, .ma-adim button { font-size: 13.5px; gap: 8px; }
+  .ma-adim b { width: 24px; height: 24px; font-size: 12px; }
 }
+@media (max-width: 380px) { .ma-adim { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .ma-halka.on { animation: none; } }
+
+/* ---------- Nasıl çalışır: parmakla kaydırma, ‹ 2 / 5 ›, telefonda sığan sekme çubuğu ---------- */
+.sayfa-moyo .nc { overscroll-behavior-x: contain; }
+.sayfa-moyo .nc-p { touch-action: pan-y; }
+.nc[data-yon="ileri"] .nc-p:not([hidden]) { animation-name: nc-ileri; }
+.nc[data-yon="geri"] .nc-p:not([hidden]) { animation-name: nc-geri; }
+@keyframes nc-ileri { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: none; } }
+@keyframes nc-geri { from { opacity: 0; transform: translateX(-32px); } to { opacity: 1; transform: none; } }
+.nc-nav { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 28px; }
+.nc-nav button { width: 44px; height: 44px; padding: 0; border: 1px solid var(--c-line); border-radius: 50%; background: var(--c-bg); color: var(--c-ink); cursor: pointer;
+  display: grid; place-items: center; transition: background-color var(--t), border-color var(--t); }
+.nc-nav button:hover:not(:disabled) { border-color: var(--c-ink); }
+.nc-nav button:disabled { opacity: .35; cursor: default; }
+.nc-nav svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.nc-say { min-width: 4.2em; text-align: center; font-size: 15px; font-weight: 700; color: var(--c-text-2); font-variant-numeric: tabular-nums; }
+.nc-ipucu { flex-basis: 100%; text-align: center; font-size: 13.5px; color: var(--c-text-3); margin-top: -2px; }
+.nc-nav { flex-wrap: wrap; }
+/* Tek sütunda görseller sabit yükseklikte açık zeminli bir sahnede: telefon ve oyun ekranı aynı yeri kaplar, adım değişince
+   metin ve ‹ › düğmeleri yerinden oynamaz (site.js panelleri en uzun panel kadar yüksek tutar). */
+@media (max-width: 900px) {
+  .sayfa-moyo .nc-media { --nc-h: min(60svh, 500px); height: var(--nc-h); display: flex; align-items: center; justify-content: center; padding: 14px; background: var(--c-soft); border-radius: var(--r-lg); }
+  .sayfa-moyo .nc-media figure.tel img { height: calc(var(--nc-h) - 62px); width: auto; max-width: 100%; border-width: 6px; border-radius: 28px; }
+  .sayfa-moyo .nc-media figure.shot { width: 100%; }
+  .sayfa-moyo .nc-media figure.tel figcaption { margin-top: 8px; font-size: 12px; }
+}
+@media (max-width: 380px) { .sayfa-moyo .nc-media { --nc-h: min(56svh, 440px); } }
+@media (max-width: 760px) { .nc-nav { margin-top: 20px; } }
+
+/* Sekme çubuğu her genişlikte sığar ve adım değişince boyu, yeri değişmez (19 Kasım QA: 390 px'te 2–3. adımda "5" çubuğun dışına,
+   ekranın kenarına taşıyordu; 820 px'te çubuk 8 px taşıyor, "Uzmanınızla" kesiliyor, 3. adım seçilince şerit kayıyordu; çubuğun
+   genişliği adımdan adıma değişiyordu).
+   Tam düzen: beş sekmenin hepsi adıyla (sığdığı sürece; m/moyo.js ölçer). Kısa düzen (.nc.kisa; betik ölçene dek ≤ 760 px'te de): beş eşit
+   numaralı sekme, sabit genişlikte; etkin adımın adı çubuğun altında tek satır (.nc-etiket). Çubukta kaydırma ve kenar soluklaşması yok. */
+.sayfa-moyo .nc-tabs { -webkit-mask-image: none; mask-image: none; }
+.nc-etiket { display: none; }
+.sayfa-moyo .nc.kisa .nc-tabs { display: grid; grid-template-columns: repeat(5, 46px); gap: 6px; width: max-content; overflow: visible; margin-bottom: 12px; }
+.sayfa-moyo .nc.kisa .nc-tabs button { width: 46px; min-width: 0; padding: 0; justify-content: center; }
+.sayfa-moyo .nc.kisa .nc-tabs button span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sayfa-moyo .nc.kisa .nc-tabs b { width: 30px; height: 30px; font-size: 14px; }
+.sayfa-moyo .nc.kisa .nc-etiket { display: block; margin: 0 0 22px; min-height: 1.4em; text-align: center; font-size: 16px; line-height: 1.4; font-weight: 800; color: var(--c-ink); white-space: nowrap; }
+@media (max-width: 760px) {
+  .sayfa-moyo .nc:not(.tam) .nc-tabs { display: grid; grid-template-columns: repeat(5, 46px); gap: 6px; width: max-content; overflow: visible; margin-bottom: 12px; }
+  .sayfa-moyo .nc:not(.tam) .nc-tabs button { width: 46px; min-width: 0; padding: 0; justify-content: center; }
+  .sayfa-moyo .nc:not(.tam) .nc-tabs button span { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .sayfa-moyo .nc:not(.tam) .nc-tabs b { width: 30px; height: 30px; font-size: 14px; }
+  .sayfa-moyo .nc:not(.tam) .nc-etiket { display: block; margin: 0 0 22px; min-height: 1.4em; text-align: center; font-size: 16px; line-height: 1.4; font-weight: 800; color: var(--c-ink); white-space: nowrap; }
+}
+
+/* 2. adımın yatay oyun ekranı (19 Kasım QA): tek sütunda kutu görsele göre (telefonda 320 × 148'lik ekran 500 px'lik gri kutunun
+   ortasında kalıyordu); "Örnek veri" yazısı görselin üstüne değil altına (önceden üçüncü satırı örtüyordu). Adımlar arasında
+   panellerin yüksekliği yine eşit (m/site.js), ‹ › düğmeleri yerinden oynamaz. */
+.sayfa-moyo .nc-media figure.shot { border: 0; border-radius: 0; overflow: visible; }
+.sayfa-moyo .nc-media figure.shot img { border: 1px solid var(--c-line); border-radius: var(--r-media); }
+.sayfa-moyo .nc-media figure.shot figcaption { position: static; margin: 10px auto 0; width: fit-content; padding: 0; background: none; color: var(--c-text-3); font-size: 12px; font-weight: 600; }
+@media (max-width: 900px) {
+  .sayfa-moyo .nc-media.genis { height: auto; padding: 12px; }
+  .sayfa-moyo .nc-media.genis figure.shot figcaption { margin-top: 8px; }
+}
+
+/* ---------- Neden Moyo: başlık, giriş ve üç "neden" (tur 5, 19 Kasım 2026: "Üç yakın çekim" yeniden) ----------
+   Her neden kendi uzun panelinde: üstte küçük büyük harfli etiket, kısa başlık ve tek cümle (ortalı); altta telefonda uygulamanın bütün ekranı
+   (kırpılmaz; panelin alt kenarı yalnızca telefonun altını keser). Ekranın vurgulanan şeridi aynı yerde, aynı görselden, 1,18 kat büyük bir
+   kart olarak telefonun iki kenarından taşar (kullanıcının örnek görselleri: satır ekrandan kalkmış gibi; yumuşak gölge, çok ince, düşük
+   opaklıkta lacivert çizgi; 19 Kasım tur 6, kullanıcı: "yeşil olmasın, daha minimal"; vurguda yeşil yok, kalkışı gölge verir).
+   Çatı sayfanın 1-2-3 kartlarından ayrı: üç panel tek ve açık renkte (renkli zemin, numara ve sola dayalı yazı yok), telefon kartın büyük
+   kısmını kaplar, vurgu kartı telefonun dışına taşar. */
+.sayfa-moyo #degerler { background: #EDF0F8; }
+/* Başlığın altındaki giriş: geniş ekranda her cümle kendi satırında (tur 2) */
+.nd-giris { max-width: 820px; text-wrap: pretty; }
+@media (min-width: 761px) { .nd-giris span { display: block; text-wrap: balance; } }
+.nd-bag { margin-top: 40px; text-align: center; }
+.nd-bag a { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; font-weight: 700; color: var(--c-ink); text-underline-offset: 4px; }
+
+/* Paneller: ≥ 1200 px üç sütun; 761–1199 px iki sütun + altta geniş panel (yazı solda, telefon sağda); telefonda alt alta.
+   --tw telefonun genişliği; telefonun altı panelin alt kenarında kesilir (görünen: ekranın üstten ~764 noktası). */
+.nzp-uc { --tw: 276px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 2.2vw, 28px); }
+.nzp-kart { display: flex; flex-direction: column; min-width: 0; overflow: hidden; padding: 34px 26px 0; border-radius: 28px; text-align: center;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 42%, #F7F8FC 100%); box-shadow: 0 1px 0 rgba(22, 17, 58, .04), 0 0 0 1px #DFE3EE; }
+.nzp-yazi { min-width: 0; }
+.nzp-etk { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 8px; min-height: 24px; font-size: 12.5px; line-height: 1.35;
+  font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--c-text-2); }
+.nzp-etk img { flex: none; width: 20px; height: 20px; border-radius: 5px; box-shadow: 0 0 0 1px rgba(22, 17, 58, .1); }
+.nzp-yazi h3 { margin-top: 12px; font-size: clamp(22px, 1.6vw + 6px, 26px); line-height: 1.2; text-wrap: balance; }
+.nzp-p { max-width: 34ch; margin: 10px auto 0; color: var(--c-text-2); font-size: 16px; line-height: 1.5; text-wrap: pretty; }
+/* ≥ 1200 px: üç panelin etiket, başlık ve metin satırları aynı hizada (subgrid; tek satırlık başlık metnine yakın, satırın altında) */
+@media (min-width: 1200px) {
+  .nzp-uc { grid-template-rows: repeat(4, auto); }
+  .nzp-kart { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; }
+  .nzp-yazi { display: contents; }
+  .nzp-yazi h3 { align-self: end; }
+}
+/* Telefon panelin altına oturur (yazı kısa olsa da telefonlar aynı hizada); panel telefonun altını keser */
+.nzp-sahne { display: flex; justify-content: center; margin-top: auto; padding-top: 28px; }
+.nzp { position: relative; flex: none; width: var(--tw); margin: 0 0 calc(var(--tw) * -.2249); }
+.nzp-tel { aspect-ratio: 418 / 872; padding: 3.35%; border-radius: 14.8% / 7.1%; background: #0B0920; box-shadow: 0 30px 60px -28px rgba(22, 17, 58, .45); }
+.nzp-ekran { height: 100%; overflow: hidden; border-radius: 12.3% / 5.69%; background: #F4F6F8; }
+.nzp-ekran img { display: block; width: 100%; height: auto; max-width: none; }
+/* Vurgu kartı: telefon kutusunda şeridin yerinde (yüzdeler yap_m.py'den), içinde aynı görsel; --k0 = başlangıçta ekrandaki şerit kadar */
+.nzp-cikma { position: absolute; z-index: 1; overflow: hidden; border-radius: clamp(16px, calc(var(--tw) * .085), 24px); background: #F4F6F8;
+  box-shadow: 0 0 0 1px rgba(22, 17, 58, .2), 0 22px 44px -12px rgba(22, 17, 58, .38), 0 6px 14px rgba(22, 17, 58, .12);
+  transition: transform .8s cubic-bezier(.2, .75, .25, 1), box-shadow .8s ease; }
+.nzp-cikma img { position: absolute; left: 0; width: 100%; height: auto; max-width: none; }
+.nzp.bekle .nzp-cikma { transform: scale(var(--k0)); box-shadow: 0 0 0 1px rgba(22, 17, 58, 0), 0 0 0 rgba(22, 17, 58, 0), 0 0 0 rgba(22, 17, 58, 0); }
+@media (prefers-reduced-motion: reduce) { .nzp-cikma { transition: none; } .nzp.bekle .nzp-cikma { transform: none; box-shadow: 0 0 0 1px rgba(22, 17, 58, .2), 0 22px 44px -12px rgba(22, 17, 58, .38), 0 6px 14px rgba(22, 17, 58, .12); } }
+
+@media (max-width: 1199px) {
+  .nzp-uc { --tw: 260px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* ilk iki panelin satırları aynı hizada (≥ 1200 px'teki gibi) */
+  .nzp-uc { grid-template-rows: repeat(4, auto) auto; }
+  .nzp-kart:not(:last-child) { display: grid; grid-row: 1 / span 4; grid-template-rows: subgrid; row-gap: 0; }
+  .nzp-kart:not(:last-child) .nzp-yazi { display: contents; }
+  .nzp-kart:not(:last-child) h3 { align-self: end; }
+  .nzp-kart:last-child { grid-row: 5; }
+  /* Üçüncü panel iki sütunu kaplar: yazı solda (sola dayalı), telefon sağda */
+  .nzp-kart:last-child { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; column-gap: 32px;
+    padding: 0 26px 0 clamp(28px, 4vw, 48px); text-align: left; }
+  .nzp-kart:last-child .nzp-yazi { padding-block: 32px; }
+  .nzp-kart:last-child .nzp-etk { justify-content: flex-start; }
+  .nzp-kart:last-child .nzp-p { margin-inline: 0; }
+  .nzp-kart:last-child .nzp-sahne { align-self: end; padding-top: 34px; }
+}
+@media (min-width: 1000px) and (max-width: 1199px) { .nzp-uc { --tw: 290px; } }
+@media (max-width: 760px) {
+  .nzp-uc { --tw: min(250px, 66vw); grid-template-columns: minmax(0, 1fr); gap: 20px; max-width: 460px; margin-inline: auto; }
+  .nzp-uc { grid-template-rows: none; }
+  .nzp-kart, .nzp-kart:last-child, .nzp-kart:not(:last-child) { display: flex; grid-row: auto; padding: 28px 20px 0; text-align: center; }
+  .nzp-kart:not(:last-child) .nzp-yazi { display: block; }
+  .nzp-kart:last-child .nzp-yazi { padding-block: 0; }
+  .nzp-kart:last-child .nzp-etk { justify-content: center; }
+  .nzp-kart:last-child .nzp-p { margin-inline: auto; }
+  .nzp-kart:last-child .nzp-sahne { align-self: stretch; padding-top: 24px; }
+  .nzp-sahne { padding-top: 24px; }
+  .nzp-yazi h3 { font-size: 21px; }
+  .nzp-etk { font-size: 12px; letter-spacing: .06em; }
+}
+
+/* ---------- Alt bilgi: logo + açılış başlığı, dört sütun (Ürün · Hesap · Kurumsal · Yasal) ---------- */
+.sayfa-moyo footer .wrap { grid-template-columns: minmax(0, 1.5fr) repeat(4, minmax(0, 1fr)); gap: 40px 28px; }
+.sayfa-moyo footer .about p { max-width: 30ch; line-height: 1.5; }
+@media (max-width: 1000px) { .sayfa-moyo footer .wrap { grid-template-columns: repeat(4, minmax(0, 1fr)); } .sayfa-moyo footer .about { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .sayfa-moyo footer .wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 20px; padding-top: 56px; } }
+
+/* ---------- Fiyat sayfası (ebeveyn-fiyat.html; yapı Mercek sitesinin fiyat sayfası) ----------
+   Tur 3 (19 Kasım 2026): kısa açılış, plan kartları fiyatlarıyla ilk ekranda (1440×900, 1366×768; 390×844'te ilk kartın adı ve fiyatı).
+   "Ücretsiz" ve "14 gün" yeşil: koyu açılışta marka yeşili yazı (#51E56A / #2D294E 8,3:1), beyaz kartta --c-ok yazı (5,3:1),
+   Premium'da yeşil zeminli koyu yazılı rozet (10,9:1). */
+.sayfa-fiyat .ph { padding-block: clamp(28px, 3.4vw, 44px) clamp(30px, 3.6vw, 48px); }
+.sayfa-fiyat .ph h1 { margin-top: 10px; font-size: clamp(30px, 16px + 2.2vw, 48px); line-height: 1.1; }
+.sayfa-fiyat .ph h1 em { font-style: normal; color: var(--c-cta); }
+.sayfa-fiyat .ph .sub { max-width: 700px; margin-top: 14px; font-size: clamp(16.5px, 15px + .3vw, 19px); }
+.sayfa-fiyat .ph + .sec { padding-top: clamp(24px, 3vw, 40px); }
+/* Kartın satırları iki kartta aynı hizada (fiyat, koşullar, düğme, liste): ≥ 861 px'te ortak satırlar (subgrid) */
+@media (min-width: 861px) {
+  .sayfa-fiyat .plans { grid-template-rows: repeat(7, auto); }
+  .sayfa-fiyat .plan { display: grid; grid-row: span 7; grid-template-rows: subgrid; row-gap: 0; }
+}
+.sayfa-fiyat .plan { padding-top: 30px; }
+.sayfa-fiyat .plan.plus { padding-top: 29px; }
+.sayfa-fiyat .plan h2 { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.fy-rozet { padding: 4px 11px; border-radius: var(--r-pill); background: var(--c-cta); color: var(--c-cta-text); font-family: var(--font-body); font-size: 14px; line-height: 1.3;
+  letter-spacing: 0; font-weight: 800; white-space: nowrap; }
+.sayfa-fiyat .plan .note { min-height: 0; }
+.sayfa-fiyat .plan .price { margin-top: 18px; align-items: baseline; }
+.sayfa-fiyat .plan .price .draft { align-self: center; }
+.plan .amount.fy-yesil { color: var(--c-ok); }
+.fy-kosul { margin-top: 8px; }
+.fy-kosul p { font-size: 14.5px; line-height: 1.45; color: var(--c-text-2); }
+.fy-kosul p + p { margin-top: 2px; }
+.sayfa-fiyat .plan .btn { margin-top: 20px; }
+.sayfa-fiyat .plan ul { margin-top: 22px; }
+.fy-oyun { display: flex; align-items: center; gap: 18px; max-width: 856px; margin: 24px auto 0; padding: 22px 26px; background: var(--c-bg); border: 1px solid var(--c-line); border-radius: var(--r-md); }
+.fy-oyun img { flex: none; border-radius: 14px; }
+.fy-oyun h2 { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 22px; line-height: 1.2; }
+.fy-oyun h2 span { padding: 3px 10px; border-radius: var(--r-pill); background: var(--c-cta); color: var(--c-cta-text); font-size: 13px; line-height: 1.3; letter-spacing: 0; font-weight: 800; }
+.fy-oyun p { margin-top: 6px; color: var(--c-text-2); font-size: 16px; line-height: 1.5; }
+.fy-tnot { margin-top: 12px; font-size: 16px; line-height: 1.5; color: var(--c-text-2); }
+.cmp td:not(.yes):not(.no) { font-weight: 700; }
+.cmp .no svg { width: 18px; height: 18px; margin-inline: auto; fill: none; stroke: var(--c-text-3); stroke-width: 2.2; stroke-linecap: round; }
+@media (max-width: 860px) { .fy-oyun { max-width: 520px; } }
+@media (max-width: 480px) {
+  .fy-oyun { flex-direction: column; align-items: flex-start; padding: 20px; gap: 12px; }
+  .sayfa-fiyat .plan { padding-top: 24px; } .sayfa-fiyat .plan.plus { padding-top: 26px; }
+  .sayfa-fiyat .plan .price { margin-top: 14px; }
+}
+/* Karşılaştırma tablosu, telefonda (≤ 640 px; tablo blok düzende): başlık ve altındaki not sütun genişliğinde (önceden ~180 px'e daralıp kötü bölünüyordu) */
+@media (max-width: 640px) { .sayfa-fiyat .cmp caption { display: block; width: 100%; } }

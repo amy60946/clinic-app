@@ -56,3 +56,38 @@ Görsel inceleme alt ajanda (kural 8).
 - **Canlıya:** `disa_aktar.py` yeni dosyaları (`v4.css`, `eko.js`, `menu.js`) ve yeni alt bilgiyi taşır; çalıştırmak ve parent-app'e göndermek kullanıcı onayıyla.
 
 **Düzen aracı kaydı işlendi (18 Kasım 2026):** kullanıcının geniş ekran ayarı (`duzen/cati-masa`, 17 Kasım 21:31 UTC: giriş bandı başlık +16, metin +16, basamaklar +8; "Nasıl çalışır" +4 px) `v4.css` sonundaki `@media (min-width: 1025px)` bloğuna yazıldı; veritabanı kaydı boşaltıldı (işlenen değerler `islenen` alanında), araç yeni düzenden sıfırdan başlar. Tablet ve telefon için kayıt yoktu. Yeni kayıt gelince aynı yol: taban değer + fark → `v4.css`, iki önizlemeye `v4.css` yayınlanır, kayıt boşaltılır.
+
+## 18–19 Kasım 2026 turu (kullanıcı geri bildirimi, üç sayfa; önizlemede, canlıya alınmadı)
+
+Seçenekler ve önerilerin gerekçesi: belge https://claude.ai/artifact/U6z9HW9Zv8qfGnJBwG91SX.
+
+- **Önizleme seçici sözleşmesi `oniz.js`:** sayfa `<head>`'de `#oniz-gruplar` JSON'u (grup anahtarı, ad, hedef, öneri, seçenekler) taşır;
+  alternatif parçalar `data-var="<grup>:<değer>"`, seçili değer `<html data-v-<grup>>`. Kabuk `host.html` "Alternatifler" panelinden seçtirir,
+  "Seçimlerimi kopyala" özet verir (seçim tarayıcıda `moyo.oniz.v1`). Canlıya bu parçalar gitmez: `disa_aktar.py` seçileni bırakır
+  (varsayılan öneri; başka seçim `secim.json`: `{"c.html": {"dongu6": "b"}}`), öbürlerini siler.
+- **Çatı sayfa:** yeni katman `c-18.css` + `c-18.js` (1-2-3 tasarımları, kaydırma), `c-sema.py` (6. adımın döngü çizimleri), 11 grup
+  (`alt`, `sahne`, `dongu6`, `kapanis`, `gbas`, `gmet`, `uc`, `b1`, `b2`, `nk`, `urun`). 1–6 sahnesi ve telefon/tablet "Nasıl çalışır"
+  parmakla kaydırılır. Güven bölümü kalktı, alt bilgide Kurumsal sütunu.
+- **Moyo Ebeveyn:** `m/moyo.js` (oyun ↔ uygulama animasyonu, adımların kaydırılması), fiyat sayfası `yap_f.py` + `f-metin.json` → `ebeveyn-fiyat.html`.
+- **Kurumsal sayfalar:** `yap_k.py` + `k-metin.json` + `k.css` → `hakkimizda.html` (doğrulanmış literatür: kaynak özeti tur klasöründe,
+  yalnız "Doğrulandı" kaynaklar), `guven.html`. Üst ve alt bilgiyi `c.html`'den alır: çatı sayfa değişince `python3 yap_k.py`.
+  `k-sitemap.xml` / `k-robots.txt` canlıda `/sitemap.xml` / `/robots.txt`.
+- **Canlı yollar:** `/`, `/ebeveyn/`, `/ebeveyn/fiyat/`, `/hakkimizda/`, `/guven/` (`disa_aktar.py` `SAYFA`, `YOL`). Site Cloudflare Access
+  kilidinin arkasında olduğu için arama motorları kilit kalkana kadar okuyamaz.
+
+**İkinci bağımsız QA düzeltmeleri (19 Kasım 2026, önizlemede):** çatı sayfa 2. kart ekranı `img/c-baglan.webp` (Moyo Ebeveyn "Uzman bağla"
+onay ekranı: uzman, paylaşılacak çocuk, Uzmanla bağlan; `cek/moyo.json` `c-baglan`, `invite` seçeneği), 3. kart `img/c-davranis.webp`
+(`mercek-davranis.webp`'ten temiz sınırda kırpım, kartta bütünüyle görünür); 1. kartın cümlesi de "fiil" grubunu izler (`c-metin.json`
+`parca.fiil1`, `_grup`); 1–6 kartları tablette ve geniş ekranda büyük (`c-18.css` 8, ≥ 1025 px'te Moyo Uzman'ın masaüstü ekranı ve 6. adımın
+geniş çizimi `.d-gen`); yörüngedeki nokta `transform` ile döner (harf kırıntısı kalmaz), dar çizimlerde yazılar 390 px'te ≥ 12 px, üç ok görünür.
+Moyo Ebeveyn: sekme çubuğu tam / kısa düzen (`m/moyo.js` ölçer), 2. adımın yatay görseli, yeni `h1` grubu (a özel başlık, b çatıyla aynı;
+alt bilgideki slogan seçilen başlık, fiyat sayfasında da; `disa_aktar.py` fiyat sayfasına ebeveyn.html'nin seçimini geçirir).
+
+**Tur 3–6 (19 Kasım 2026, kullanıcının seçimleri; önizlemede):** seçilen her seçenek kalıcı oldu, gruplar silindi; **hiçbir sayfada seçenek
+kalmadı** (`#oniz-gruplar` / `oniz.js` yalnız gerektiğinde geri eklenir; sözleşme aynı, kabuktaki seçim anahtarı `moyo.oniz.v2`, geçersiz eski
+seçimleri yok sayar). Çatı: 6. adım yörünge (`c-sema.py` yalnız bu çizim), ayrı ürün bölümü yok, ekranlar 1-2-3 kartlarının içinde.
+Moyo Ebeveyn: "Neden Moyo" üç tam ekran telefon + telefondan taşan büyütülmüş satır kartı (ince lacivert çizgi, yeşil yok; görseller
+`img/e-nz-plan|not|uzman.webp`, 780 × 1688), beş adımda "Zorlandığı anı kaydedin" (`img/e-davranis.webp`); fiyat sayfası yer tutucu
+349 TL / ay. Hakkımızda (Atlassian 'Company' kaydı örneğiyle beş bölüm): misyon + gerçek ekranlar, lacivert bantta üç kartlı döngü (çizgiler
+görününce çizilir) + yöntem uyarısı + kaynaklar, Neden varız (hafıza / kayıt hafta çizgisi), ekip ve hikâye yer tutucusu (ONIZ, canlıya
+gitmez), iletişim kartları.

@@ -1,25 +1,157 @@
 {
- "baslik": "Moyo · Ebeveyn",
- "h1": "Çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform",
- "alt": "Rutini bir kez kurarsınız; hatırlatmayı oyun yapar, onay sizden. Dilerseniz çalıştığınız uzmanı da dahil edersiniz.",
+ "_not": "Moyo Ebeveyn sayfası metinleri (yap_m.py okur). Tur 2, 19 Kasım 2026: çocuk adımı gerçek hayatta yapar, oyunda işaretler (oyunda yapmaz); rutin 'planlanır' (kurulmaz); uygulamalar 'birbirine bağlı' (tek platform değil); çocuğun zorlandığı anın kaydı kendi adımında; aynı cümle sayfada iki kez ya da çatı sayfayla bire bir geçmez. Tur 3: alt ve açılış görseli a ile, 'Neden Moyo' başlığı ve kartları a ile sabitlendi. Tur 4, 19 Kasım 2026 (kullanıcı kararları): h1 a ile sabitlendi (alt bilgideki slogan da bu); 'zorlanılan an' yerine 'zorlandığı an' (cümlede 'çocuğunuzun zorlandığı an', kısa etikette 'Zorlandığı anı kaydedin'); kayıt ses kaydı gibi okunmasın: 'not edersiniz', 'yazılı not'. 'Neden Moyo' giriş cümlesi (neden_giris, grup nlead) rutini ve notu NEDEN tuttuğunuzu söyler; bölümün tasarımı (ndzn) her nedenin yanında ilgili ekranın yakın çekimini gösterir (neden_ekran: etiket, görselin alt metni; geniş ve kısa kırpım ayrı). Tur 5, 19 Kasım 2026: nlead a ve ndzn a sabitlendi; giriş kısaldı (neden_giris tek metin), neden_ekran'da alt yalnızca bütün ekranı ve büyütülen şeridi anlatır.",
+ "baslik": "Moyo Ebeveyn · Rutin, davranış kaydı ve ilerleme takibi",
+ "aciklama": "Çocuğunuzun günlük rutinini planlayın, zorlandığı anları not edin, ilerlemeyi görün. Her adım oyunda küçük bir macera olur. 14 gün ücretsiz, kart gerekmez.",
+ "h1": "Çocuğunuzun rutinini ve zorlandığı anları takip edin",
+ "alt": "Günlük rutini planlayın, davranışları kaydedin, ilerlemeyi hafta hafta görün. Dilerseniz uzmanınızla paylaşın.",
+ "ince": "Moyo Ebeveyn 14 gün ücretsiz, kart bilgisi gerekmez.",
  "isaretler": [
-  "Reklam ve satın alma yok",
-  "Ayrı çocuk hesabı gerekmez",
-  "Uzmanla paylaşım yalnız onayınızla"
+  "Reklam yok",
+  "Çocuk hesabı gerekmez",
+  "Paylaşım onayınızla",
+  "Tek oyunculu oyun"
  ],
- "fiyat_not": "Moyo Oyun ücretsiz. Moyo Ebeveyn 7 gün ücretsiz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir.",
- "fiyat": [
+ "anim": {
+  "adimlar": [
+   "Siz rutini planlarsınız",
+   "Oyunda macera olur",
+   "Çocuğunuz yapar, oyunda işaretler",
+   "Siz onaylarsınız"
+  ],
+  "cip": "Dişlerini fırçala",
+  "cip_donus": "Yaptım",
+  "anlatim": "Moyo Ebeveyn'de planladığınız rutin adımı Moyo Oyun'da macera olarak görünür; çocuğunuz adımı yapıp oyunda \"Yaptım\"a dokununca onay telefonunuza gelir. Örnek veri."
+ },
+ "nasil": "Rutinden takibe, beş adım.",
+ "adimlar": [
+  {
+   "sekme": "Rutini planlayın",
+   "ust": "Moyo Ebeveyn · telefonunuzda",
+   "baslik": "Rutini çocuğunuzun gününe planlayın",
+   "metin": "Hazır bir rutin seçin ya da kendiniz yazın; hangi gün ve saatlerde geleceğini siz belirlersiniz. Eşiniz de aynı aileden yönetir.",
+   "uygulama": [
+    "ebeveyn"
+   ],
+   "gorsel": [
+    "tel",
+    "img/moyo-ekle.webp",
+    "Moyo Ebeveyn: hazır rutinlerden seçme ve adım ekleme ekranı"
+   ]
+  },
+  {
+   "sekme": "Yapsın, işaretlesin",
+   "ust": "Moyo Oyun · çocuğunuzun tabletinde",
+   "baslik": "Gerçek hayatta yapar, oyunda işaretler",
+   "metin": "Moyo Oyun adımın zamanını hatırlatır ve her adımı küçük bir macera olarak gösterir. Adım bitince çocuğunuz oyunda \"Yaptım\"a dokunur, siz de tek dokunuşla onaylarsınız. Ödülleri de siz seçersiniz.",
+   "uygulama": [
+    "oyun",
+    "ebeveyn"
+   ],
+   "gorsel": [
+    "genis",
+    "img/c-oyun-onay.webp",
+    "Moyo Oyun: çocuğun \"Yaptım\" dediği adım, ailenin onayını bekliyor"
+   ]
+  },
+  {
+   "sekme": "Zorlandığı anı kaydedin",
+   "ust": "Moyo Ebeveyn · davranış kaydı",
+   "baslik": "Zorlandığı anı kısaca kaydedin",
+   "metin": "Çocuğunuzun zorlandığı bir an olduğunda şunları yazın: öncesinde ne vardı, ne yaşandı, ne denediniz ve nasıl karşılık verdi. Ne kadar zor geçtiğini de 1'den 5'e işaretlersiniz.",
+   "uygulama": [
+    "ebeveyn"
+   ],
+   "gorsel": [
+    "tel",
+    "img/e-davranis.webp",
+    "Moyo Ebeveyn: davranış kaydı ekleme ekranı; öncesinde ne oldu, ne yaşandı, sonrasında ne oldu ve ne kadar zordu"
+   ]
+  },
+  {
+   "sekme": "İlerlemeyi görün",
+   "ust": "Moyo Ebeveyn · Gelişim",
+   "baslik": "Neyin kolay, neyin zor geçtiğini görün",
+   "metin": "Gelişim ekranında tamamlanan adımlar gün, hafta ve ay olarak görünür; davranış kayıtlarınız da buradan açılır.",
+   "uygulama": [
+    "ebeveyn"
+   ],
+   "gorsel": [
+    "tel",
+    "img/moyo-gelisim.webp",
+    "Moyo Ebeveyn: çocuğun günlük ve haftalık ilerlemesi, üstte davranış kayıtları"
+   ]
+  },
+  {
+   "sekme": "Uzmanınızla",
+   "ust": "İsteğe bağlı · Moyo Uzman",
+   "baslik": "Dilerseniz uzmanınızı bağlayın",
+   "metin": "Uzmanınız Moyo Uzman'dan davet gönderir ya da size verdiği kodu girersiniz; paylaşım onayınızla başlar. Paylaştığınız çocuğun yalnızca rutin ve davranış kayıtlarını görür, size kısa ebeveyn eğitimleri ve rutin önerileri gönderir. Eklemek sizin kararınız; paylaşımı dilediğiniz an durdurabilirsiniz.",
+   "uygulama": [
+    "ebeveyn",
+    "mercek"
+   ],
+   "gorsel": [
+    "tel",
+    "img/moyo-uzman.webp",
+    "Moyo Ebeveyn, Uzmanım: uzmandan gelen eğitim ve rutin önerileri"
+   ]
+  }
+ ],
+ "neden_giris": "Rutini planlarsınız: günün sırası belli olur, adımları tek tek hatırlatmanız gerekmez. Çocuğunuzun zorlandığı anları not edersiniz: neyin işe yaradığını tahminle değil, notlarla görürsünüz.",
+ "neden_baslik": "Rutin, çocuğunuzun zorlandığı anlar ve uzman takibi bir arada.",
+ "neden_kartlar": [
   [
-   "Moyo Oyun",
-   "Ücretsiz",
-   "Çocuğunuzun tabletine kurulur. Reklam ve satın alma yok."
+   "rutin",
+   "Her gün aynı sıra",
+   "Planladığınız adımlar her gün çocuğunuzun oyununa gelir, zamanı gelince Moyo Oyun hatırlatır.",
+   ""
   ],
   [
-   "Moyo Ebeveyn",
-   "7 gün ücretsiz",
-   "Sonrasında aylık ya da yıllık abonelik; dönem sonunda kendiliğinden yenilenir, App Store'dan istediğiniz an iptal edilir. Tek abonelik bütün aileyi kapsar. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak."
+   "kayit",
+   "Zorlandığı anı not edersiniz",
+   "Notlar tarihiyle saklanır; biriktikçe hangi durumların tekrar ettiğini görürsünüz.",
+   ""
+  ],
+  [
+   "uzman",
+   "Uzmanınız kayıtla yönlendirir",
+   "Paylaştığınız rutin ve davranış kayıtlarını görür; bir sonraki adımı bu kayıtlara bakarak önerir.",
+   ""
   ]
  ],
+ "neden_ekran": {
+  "rutin": {
+   "yer": "rutin planı",
+   "alt": "Moyo Ebeveyn, hazır rutin ekranı: Güne hazır sabah rutini; Hangi günler sorusunda Hafta içi seçili; adımlar sırasıyla ve saatleriyle. Büyütülen bölüm: 07:00 Odanın perdesini aç, 07:05 Yatağını topla. Örnek veri."
+  },
+  "kayit": {
+   "yer": "davranış kaydı",
+   "alt": "Moyo Ebeveyn, davranış kaydı ekranı: kimle ilgili, ne zaman, öncesinde ne oldu, ne yaşandı, sonrasında ne oldu ve ne kadar zordu. Büyütülen bölüm, Ne yaşandı: Ağladı, tableti bırakmak istemedi. Örnek veri."
+  },
+  "uzman": {
+   "yer": "isteğe bağlı",
+   "alt": "Moyo Uzman, uzmanın ekranı: sabah rutininin adımları son 7 gün boyunca gün gün işaretli. Büyütülen satır: Yatağını topla adımının son 7 günü. Örnek veri."
+  }
+ },
+ "neden_bag": "Yaklaşımımızın dayandığı araştırmalar",
+ "ekosistem_baslik": "Birbirine bağlı üç uygulama.",
+ "ekosistem_giris": "Moyo Ebeveyn ve Moyo Oyun birlikte çalışır; dilerseniz uzmanınız Moyo Uzman ile katılır.",
+ "ekosistem": [
+  [
+   "oyun",
+   "Çocuk için: bugünün adımları, \"Yaptım\" düğmesi ve oyun içi ödüller."
+  ],
+  [
+   "ebeveyn",
+   "Aile için: planlar, onaylar, çocuğun zorlandığı anları not eder, ilerlemeyi görür."
+  ],
+  [
+   "mercek",
+   "Uzman için, isteğe bağlı: paylaştığınız kayıtları görür, rutin önerir."
+  ]
+ ],
+ "kapanis": "Çocuğunuzun günlük rutinine bugün başlayın.",
+ "kapanis_ince": "Deneme bitince kendiliğinden ücret alınmaz, ücretsiz planla devam edebilirsiniz.",
  "sss": [
   [
    "Hangi yaş için uygun?",
@@ -31,35 +163,35 @@
   ],
   [
    "Rutin ile macera aynı şey mi?",
-   "Moyo Ebeveyn'de kurduğunuz rutinin her adımı (ör. \"Sabah rutini · 6 adım\"), çocuğunuzun oyununda bir macera olarak görünür."
+   "Rutin, Moyo Ebeveyn'de planladığınız adımların bütünüdür (ör. \"Sabah rutini · 6 adım\"). Çocuğunuz her adımı oyunda bir macera olarak görür; adımın kendisi oyunda değil, gerçek hayatta yapılır."
   ],
   [
    "Ödülleri kim belirler?",
-   "Ödülleri siz belirlersiniz. Oyun gerçek bir ödül vermez."
+   "Siz. Ödülleri Moyo Ebeveyn'de çocuğunuza göre eklersiniz; oyun kendi başına gerçek bir ödül vermez."
   ],
   [
    "Eşim de kullanabilir mi?",
-   "Evet. Eşiniz aynı aileye katılır, rutinleri birlikte yönetirsiniz."
+   "Evet. Eşiniz aynı aileye katılır; ikiniz de rutinleri, onayları ve kayıtları görürsünüz."
   ],
   [
    "Uzmanım yoksa kullanabilir miyim?",
-   "Evet. Moyo Oyun ve Moyo Ebeveyn tek başına çalışır; uzmanınızı istediğiniz zaman dahil edersiniz."
+   "Evet. Rutin, onay, davranış kaydı ve ilerleme uzman olmadan da çalışır; bir uzmanla çalışmaya başlarsanız onu sonradan bağlarsınız."
   ],
   [
-   "Uzmanımı nasıl dahil ederim?",
-   "Çalıştığınız uzman Moyo Uzman'dan size davet gönderir ya da siz onun kodunu girersiniz. Neyi paylaşacağınızı siz seçersiniz; paylaşımı istediğiniz an durdurursunuz."
+   "Uzmanım neyi görür, neyi görmez?",
+   "Uzmanınız yalnızca paylaştığınız çocuğun rutin adımlarını, tamamlananları ve davranış kayıtlarını görür. Aile içi mesajlaşmanızı, ödül defterini ve paylaşmadığınız kardeşleri görmez."
   ],
   [
    "Moyo tanı koyar mı?",
-   "Hayır. Moyo rutinleri ve kayıtları bir arada tutar; tanı koymaz, tedavi yerine geçmez."
+   "Hayır. Moyo günlük rutini ve kaydettiklerinizi düzenli tutar; tanı koymaz, tedavinin yerini tutmaz."
   ],
   [
    "DEHB ya da otizm tanısı olan çocuklar kullanabilir mi?",
-   "Evet. Moyo tanıdan bağımsız, her çocuğun günlük rutiniyle çalışır; tanı koymaz."
+   "Evet. Moyo tanıya göre değil, çocuğunuzun gününe göre çalışır: adımları ona uygun seçer ya da kendiniz yazarsınız."
   ],
   [
    "Ücreti nedir?",
-   "Moyo Oyun ücretsizdir. Moyo Ebeveyn'i 7 gün ücretsiz deneyebilirsiniz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak."
+   "Moyo Oyun ücretsiz. Moyo Ebeveyn'in 14 günlük denemesinde bütün özellikler açıktır; planlar ve ayrıntılar <a href=\"ebeveyn-fiyat.html\">fiyat sayfasında</a>."
   ]
  ]
 }

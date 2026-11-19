@@ -16,7 +16,6 @@
     ['eko_kart_gorsel', '#hepsi .d-kart .d-gorsel', 'Ekosistem kartı: ekran'],
     ['eko_kart_yazi', '#hepsi .d-kart .d-yazi', 'Ekosistem kartı: yazı'],
     ['eko_sayac_dar', '#hepsi .d-nokta-m', 'Ekosistem: 1–6 sayacı'],
-    ['eko_kapanis', '#hepsi .d-kapanis', 'Ekosistem: kapanış cümlesi'],
     ['giris_etiket', '#giris .ust-etiket', 'Giriş bandı: etiket'],
     ['giris_baslik', '#giris h2', 'Giriş bandı: başlık'],
     ['giris_metin', '#giris .ic > p:not(.ust-etiket)', 'Giriş bandı: metin'],

@@ -7,5 +7,6 @@
  {"name": "moyo-odul", "steps": ["Ödül", "?Atla"], "hide": ["[aria-label^=\"Harçlık ekle\"]"]},
  {"name": "moyo-uzman", "clinic": true, "keep": true, "noSessions": true, "steps": ["Uzmanım", "?Kapat"]},
  {"name": "moyo-oneri", "clinic": true, "keep": true, "noSessions": true, "steps": ["Uzmanım", "?Kapat", "scroll:520"]},
+ {"name": "c-baglan", "invite": true, "steps": ["Uzmanım", "~Uzman bağla", "type:KOD=K7M2PA", "wait:1500", "cb:Nazlı", "~Bu uzmanı tanıyorum"]},
  {"name": "moyo-egitim", "clinic": true, "steps": ["~Ebeveyn zorlayıcı davranışları ABC"]}
 ]
