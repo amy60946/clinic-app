@@ -245,3 +245,10 @@ html[data-v-uc="d"] .sayfa-c .uc-k.istege { border: 1.5px dashed rgba(15, 211, 8
 .sayfa-c .hk-liste .l-gorsel.genis .ust-uste { width: 100%; max-width: 680px; aspect-ratio: 620 / 430; }
 .sayfa-c .hk-liste .l-gorsel.genis .ust-uste .uu-oyun { width: 98.4%; top: 17%; }
 .sayfa-c .hk-liste .l-gorsel.genis .ust-uste .uu-tel { width: auto; height: 100%; top: 0; bottom: auto; right: 0; border-radius: 20px; }
+/* "Ekosistemin Uygulamaları": tablet dikte (700–860 px) üç kart yan yana (önceden tek sütunda, geniş ve seyrek duruyordu) */
+@media (min-width: 700px) and (max-width: 860px) {
+  .sayfa-c #sonraki .kartlar3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .sayfa-c #sonraki .kart { padding: 20px 18px 22px; }
+  .sayfa-c #sonraki .kart h3 { font-size: 19px; }
+  .sayfa-c #sonraki .kart p { font-size: 15px; }
+}
