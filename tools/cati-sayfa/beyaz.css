@@ -11,7 +11,7 @@
 .beyaz .hap.dolu, .beyaz .basamak .bn, .beyaz .basamak .b-rozet, .beyaz .d-nokta a[aria-current="step"] { color: #16113A; }
 /* koyu zemin için yazılmış beyaz saydam yazılar */
 .beyaz .d-nokta a { color: var(--yazi-2); border-color: var(--cizgi); background: #FFFFFF; }
-.beyaz .d-yazi-m .rol, .beyaz .d-kart .rol, .beyaz .dongu-b .ust-etiket, .beyaz .giris-bant .ust-etiket { color: #0A8F3A; }
+.beyaz .d-yazi-m .rol, .beyaz .d-kart .rol, .beyaz .dongu-b .ust-etiket, .beyaz .giris-bant .ust-etiket { color: #077A31; }
 /* kartlar: beyaz kart, ince çizgi */
 .beyaz .basamak li { background: var(--sis); border-color: var(--cizgi); }
 .beyaz .basamak li b { color: var(--lacivert); }
@@ -27,7 +27,7 @@
 
 /* Canlı öncesi inceleme (14 Kasım 2026) */
 .beyaz .menu a:hover, .beyaz .menu a[aria-current="page"] { color: var(--lacivert); }
-.beyaz .ust-etiket, .beyaz .bas .ust-etiket { color: #0A8F3A; }   /* bölüm etiketleri tek renk */
+.beyaz .ust-etiket, .beyaz .bas .ust-etiket { color: #077A31; }   /* bölüm etiketleri tek renk */
 @media (max-width: 920px) {                                        /* telefonda da Giriş */
   .beyaz .ust .sag .cizgi { display: inline-flex; border-color: transparent; padding-inline: 8px; }
 }

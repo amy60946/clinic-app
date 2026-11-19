@@ -11,7 +11,7 @@
 .sayfa-c .acilis.c { min-height: 0; display: block; padding-block: clamp(44px, 6vw, 88px) clamp(18px, 2.6vw, 32px); }
 .sayfa-c .acilis.c h1 { font-size: clamp(30px, 4.1vw, 54px); line-height: 1.08; max-width: 1000px; }
 /* 18 Kasım 2026: "Moyo Ekosistemi" etiketi başlığın ÜSTÜNDE (küçük üst etiket) */
-.sayfa-c .acilis .alt-etiket { margin: 0 auto clamp(12px, 1.4vw, 18px); font-size: 14px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0A8F3A; }
+.sayfa-c .acilis .alt-etiket { margin: 0 auto clamp(12px, 1.4vw, 18px); font-size: 14px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #077A31; }
 .sayfa-c .acilis .alt { margin-top: clamp(18px, 2vw, 24px); color: var(--yazi-2); }
 .sayfa-c .acilis .dugmeler { margin-top: clamp(22px, 2.6vw, 30px); }
 .sayfa-c .acilis .ince { margin-top: 14px; font-size: 15px; color: var(--yazi-2); }
@@ -57,7 +57,7 @@
 .sayfa-c .d-slot > img { box-shadow: 0 34px 80px -34px rgba(22, 17, 58, .45); }
 .sayfa-c .d-slot.t-mercek > img { border: 8px solid #0B0920; border-radius: 18px; }
 .sayfa-c .d-yazilar { min-height: 104px; margin-top: 14px; }
-.sayfa-c .d-yazi-m .rol, .sayfa-c .d-kart .rol { color: #0A8F3A; }
+.sayfa-c .d-yazi-m .rol, .sayfa-c .d-kart .rol { color: #077A31; }
 .sayfa-c .d-yazi-m .rol { justify-content: center; }
 .sayfa-c .d-nokta { margin-top: 12px; }
 /* telefon ve iPad: yana kaydırılan kartlar; ortadaki net, yandakiler bulanık ve küçük */
