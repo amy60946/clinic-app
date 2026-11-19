@@ -1,5 +1,5 @@
 {
-  "_not": "Kurumsal sayfaların metinleri (18-19 Kasım 2026; Hakkımızda 19 Kasım tur 2'de gerçek bir Hakkımızda sayfasına dönüştü; tur 4'te dürüstlük notları, ilkeler ve beş adımlı akış kalktı, araştırma satırları açılıştaki döngüye taşındı). yap_k.py okur: hakkimizda.html, guven.html. Kaynak işaretleri [[Anahtar]] ya da [[A, B]]; numaralar sayfadaki ilk geçişe göre verilir, kaynak listesi yalnız anılanlardan kurulur. Kaynaklar literatür özetindeki 'Doğrulandı' kayıtlarından (tur18/literatur.md). Satır içi HTML serbest; uzun çizgi kullanılmaz.",
+  "_not": "Kurumsal sayfaların metinleri (18-19 Kasım 2026; Hakkımızda 19 Kasım tur 2'de gerçek bir Hakkımızda sayfasına dönüştü; tur 4'te dürüstlük notları, ilkeler ve beş adımlı akış kalktı, araştırma satırları açılıştaki döngüye taşındı; tur 5'te kullanıcının gönderdiği örnek 'Company' sayfasının yapısıyla beş bölüme indi: açılış, döngü, neden varız, ekip (yalnız önizleme), iletişim). yap_k.py okur: hakkimizda.html, guven.html. Kaynak işaretleri [[Anahtar]] ya da [[A, B]]; numaralar sayfadaki ilk geçişe göre verilir, kaynak listesi yalnız anılanlardan kurulur. Kaynaklar literatür özetindeki 'Doğrulandı' kayıtlarından (tur18/literatur.md). Satır içi HTML serbest; uzun çizgi kullanılmaz.",
   "hakkimizda": {
     "title": "Moyo · Hakkımızda",
     "aciklama": "Moyo; çocuk, ebeveyn ve uzman için birbirine bağlı üç uygulama. Neden varız, kim ne yapar, yaklaşımımız hangi araştırmalara dayanır?",
@@ -10,9 +10,35 @@
     "h1": "Rutin güne düzen versin, kayıt neyin işe yaradığını göstersin",
     "alt": "Moyo; çocuk, ebeveyn ve uzman için birbirine bağlı üç uygulamadan oluşan bir yazılım aracıdır.",
     "ince": "Bir sağlık hizmeti değildir: tanı koymaz, tedavi yerine geçmez.",
+    "kolaj_etiket": "Moyo'nun üç uygulamasından örnek ekranlar",
+    "acilis_ekranlar": [
+      {
+        "k": "uzman",
+        "img": "img/k-h-uzman.webp",
+        "en": 880,
+        "boy": 561,
+        "alt": "Moyo Uzman: bir çocuğun sabah rutini, adım adım son yedi günün işaretleri ve yapılan / planlanan sayıları"
+      },
+      {
+        "k": "oyun",
+        "img": "img/k-h-oyun.webp",
+        "en": 756,
+        "boy": 323,
+        "alt": "Moyo Oyun: çocuk Dişlerini fırçala adımına Yaptım dedi, adımın yanında Ailen bakıyor yazıyor"
+      },
+      {
+        "k": "ebeveyn",
+        "img": "img/k-h-ebeveyn.webp",
+        "en": 480,
+        "boy": 688,
+        "alt": "Moyo Ebeveyn: bugün ekranında 1 adım onayını bekliyor kartı ve çocukların bugünkü ilerlemesi"
+      }
+    ],
     "dongu": {
-      "_not": "Açılışın altındaki döngü (tur 4, 19 Kasım 2026): üç durak (Çocuk, Ebeveyn, Uzman) gerçek ürün ekranlarıyla; her durakta ne olduğu ve dayandığı araştırma (kaynak işaretli). Ekranlar img/k-*.webp (c-oyun-liste, moyo-egitim, mercek-davranis kırpımları; telefonda Uzman için yalnız Öncül ve Sonuç sütunları: k-uzman-dar). gecisler: Çocuk → Ebeveyn, Ebeveyn → Uzman, Uzman → Çocuk okları. Kural: çocuk adımı gerçek hayatta yapar, oyunda işaretler; araştırma cümleleri genel bilgidir, ürünün etkisi gibi sunulmaz (hukuk/45 §1.4), altındaki not bunu söyler.",
-      "baslik": "Kim ne yapar, dayandığımız araştırmalar",
+      "_not": "Açılışın altındaki döngü (tur 4, tur 5'te lacivert banda alındı): üç durak (Çocuk, Ebeveyn, Uzman) gerçek ürün ekranlarıyla; her durakta ne olduğu ve dayandığı araştırma (kaynak işaretli). Ekranlar img/k-*.webp (c-oyun-liste, moyo-egitim, mercek-davranis kırpımları; dar kartta Uzman için yalnız Öncül ve Sonuç sütunları: k-uzman-dar). gecisler: Çocuk → Ebeveyn, Ebeveyn → Uzman, Uzman → Çocuk. merkez yalnız b düzeninde görünür. Kural: çocuk adımı gerçek hayatta yapar, oyunda işaretler; araştırma cümleleri genel bilgidir, ürünün etkisi gibi sunulmaz (hukuk/45 §1.4), altındaki not bunu söyler.",
+      "etiket": "Üç uygulama",
+      "baslik": "Adımdan kayda, kayıttan öneriye",
+      "alt": "Her uygulamanın yaptığı iş, araştırmalarda incelenmiş bir yönteme dayanır.",
       "merkez": "Düzen ve kayıt",
       "ars_etiket": "Araştırmalar",
       "istege_etiket": "İsteğe bağlı",
@@ -63,90 +89,86 @@
       ],
       "not": "Bu çalışmalar yöntemler hakkındadır; Moyo'nun kendisi araştırılmadı."
     },
-    "neden_etiket": "Neden varız",
-    "neden_baslik": "Haftanın çoğu evde geçer",
-    "neden_metin": [
-      "Bir uzmanla çalışılıyorsa görüşme haftada bir saat kadardır; sabahlar, ödevler ve akşamlar evde geçer.",
-      "Rutinleri her gün aynı biçimde sürdürmek, zor bir anda ne olduğunu ve neyin denendiğini sonradan hatırlamak kolay değildir. Uzman da evde olanı çoğunlukla ebeveynin hatırladığı kadarıyla öğrenir."
-    ],
-    "neden_vurgu": "Moyo'yu bunun için yaptık: evde olan o gün kayda geçsin, dilerseniz uzmanınızla paylaşılsın.",
-    "hafta": {
-      "etiket": "Bir hafta, şema: her gün sabah, ödev ve akşam rutinleri; salı ve cumartesi zor anlar; bir uzmanla çalışılıyorsa çarşamba bir saatlik görüşme.",
-      "gunler": [
-        "Pzt",
-        "Sal",
-        "Çar",
-        "Per",
-        "Cum",
-        "Cmt",
-        "Paz"
+    "neden": {
+      "etiket": "Neden varız",
+      "baslik": "Haftanın çoğu evde geçer",
+      "metin": [
+        "Bir uzmanla çalışılıyorsa görüşme haftada bir saat kadardır; günlerin geri kalanı evde geçer.",
+        "Zor bir anda ne olduğu ve neyin denendiği, birkaç gün sonra hatırlandığı kadarıyla anlatılır."
       ],
-      "acik": [
-        [
-          "r",
-          "Rutin adımları",
-          "her gün, evde"
+      "vurgu": "Moyo'yu bunun için yaptık: evde olan o gün kayda geçsin, dilerseniz uzmanınızla paylaşılsın.",
+      "hafta": {
+        "_not": "Şema, ürün ekranı değil. gunler: iki uçta görüşme günü, arada altı ev günü. hafiza_gun: hafıza satırında soluk işaret olan sütunlar (1-6 ev günleri).",
+        "etiket": "Şema: bir çarşamba görüşmesinden sonraki çarşambaya bir hafta. Kayıt satırında altı ev gününün her biri işaretli; hafıza satırında yalnızca son iki gün, soluk.",
+        "gunler": [
+          "Çar",
+          "Per",
+          "Cum",
+          "Cmt",
+          "Paz",
+          "Pzt",
+          "Sal",
+          "Çar"
         ],
-        [
-          "z",
-          "Zor anlar",
-          "bazı günler"
+        "gorusme": "Görüşme",
+        "hafiza": "Hafıza",
+        "hafiza_gun": [
+          5,
+          6
         ],
-        [
-          "g",
-          "Uzmanla görüşme",
-          "varsa, haftada bir"
+        "kayit": "Kayıt",
+        "acik": [
+          [
+            "Hafıza",
+            "görüşmede, hatırlandığı kadar."
+          ],
+          [
+            "Kayıt",
+            "o gün, olduğu gibi."
+          ]
         ]
-      ],
-      "gorusme": "1 saat"
+      }
     },
     "kaynak_baslik": "Kaynaklar",
     "kaynak_metin": "Bu sayfada anılan çalışmalar. Bağlantılar yayıncının ya da PubMed'in sayfasını yeni sekmede açar.",
     "ekip": {
       "not": "Önizleme notu",
       "baslik": "Ekip ve hikâyemiz",
-      "metin": "Bu bölüm yalnızca önizlemede görünür, canlıya taşınmaz. Benzer ürünlerin Hakkımızda sayfalarında kim olduğumuzu ve nasıl başladığımızı anlatan bir bölüm var. Bunun için sizden gerekenler:",
+      "metin": "Bu bölüm yalnızca önizlemede görünür, canlıya taşınmaz. Örnek sayfadaki gibi kim olduğumuzu ve nasıl başladığımızı anlatmak için sizden gerekenler:",
       "maddeler": [
         "Şirketin unvanı ve bulunduğu şehir",
         "Kurucular ya da ekip: ad ve rol (kişinin izniyle; fotoğraf isteğe bağlı)",
         "Moyo'nun nasıl başladığı: iki ya da üç cümle",
-        "Birlikte çalışılan uzman ya da danışmanlar (yalnızca yazılı izinle)",
         "Kuruluş yılı (isteğe bağlı) ve iletişim e-postası"
       ]
     },
-    "iletisim_baslik": "İletişim",
-    "iletisim_metin": "Sorunuz, öneriniz ya da bildirmek istediğiniz bir sorun varsa destek formundan bize yazın; yanıtı e-postayla veririz.",
-    "iletisim_link": "{SITE}destek",
-    "iletisim_link_ad": "Destek formu",
-    "kapanis": [
-      {
-        "renk": "yesil",
-        "ikon": "img/ikon-moyo.svg",
-        "ust": "Aileler için",
-        "ad": "Moyo Ebeveyn",
-        "metin": "Rutini planlayın, adımları onaylayın, zor anları kaydedin.",
-        "link": "ebeveyn.html",
-        "link_ad": "Ebeveyn sayfası"
-      },
-      {
-        "renk": "mavi",
-        "ikon": "img/ikon-mercek.svg",
-        "ust": "Uzmanlar için",
-        "ad": "Moyo Uzman",
-        "metin": "Ebeveynin onayıyla paylaşılan kayıtlar, ebeveyn eğitimi ve ilerleme notu için panel.",
-        "link": "{MERCEK}",
-        "link_ad": "Uzman sitesi"
-      },
-      {
-        "renk": "mor",
-        "ikon": "kalkan",
-        "ust": "Herkes için",
-        "ad": "Güvenlik ve gizlilik",
-        "metin": "Kim neyi görür, veriler nerede durur, paylaşım nasıl durdurulur.",
-        "link": "guven.html",
-        "link_ad": "Güvenlik sayfası"
-      }
-    ]
+    "iletisim": {
+      "etiket": "İletişim",
+      "baslik": "Bize ulaşın",
+      "kartlar": [
+        {
+          "ikon": "zarf",
+          "ad": "Bize yazın",
+          "metin": "Soru, öneri ya da bir sorun için destek formunu doldurun; yanıtı e-postayla veririz.",
+          "link": "{SITE}destek",
+          "link_ad": "Destek formu"
+        },
+        {
+          "ikon": "kisi",
+          "ad": "Uzman mısınız?",
+          "metin": "Ebeveynin onayıyla paylaşılan kayıtlar, ebeveyn eğitimi ve ilerleme notu için panel.",
+          "link": "{MERCEK}",
+          "link_ad": "Uzman sitesi"
+        },
+        {
+          "ikon": "kalkan",
+          "ad": "Güvenlik ve gizlilik",
+          "metin": "Kim neyi görür, veriler nerede durur, paylaşım nasıl durdurulur.",
+          "link": "guven.html",
+          "link_ad": "Güvenlik sayfası"
+        }
+      ]
+    }
   },
   "guven": {
     "title": "Moyo · Güvenlik ve gizlilik",
