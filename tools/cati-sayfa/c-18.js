@@ -47,6 +47,13 @@
       nokta.forEach(function (n, j) { n.classList.toggle('on', j === en); });
     };
     uc.addEventListener('scroll', function () { if (!bekle) { bekle = true; requestAnimationFrame(isaretle); } }, { passive: true });
-    addEventListener('oniz', function (e) { if (e.detail && e.detail.k === 'uc') { uc.scrollLeft = 0; isaretle(); } });
+    // yana kayarken klavyeyle de gezilsin (← →): yalnız bu tasarımda ve dar ekranda odaklanabilir
+    var dar = matchMedia('(max-width: 719px)');
+    var odak = function () {
+      if (document.documentElement.getAttribute('data-v-uc') === 'c' && dar.matches) { uc.tabIndex = 0; uc.setAttribute('aria-label', 'Üç adım, yana kaydırın'); }
+      else { uc.removeAttribute('tabindex'); uc.removeAttribute('aria-label'); }
+    };
+    dar.addEventListener('change', odak); odak();
+    addEventListener('oniz', function (e) { if (e.detail && e.detail.k === 'uc') { uc.scrollLeft = 0; isaretle(); odak(); } });
   }
 })();

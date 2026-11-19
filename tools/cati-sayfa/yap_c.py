@@ -125,6 +125,7 @@ def uc_kart(i, s):
 basamak = ('<ol class="uc">' + ''.join(uc_kart(i, s) for i, s in enumerate(K['basamak'])) + '</ol>'
            + '<div class="uc-nokta" aria-hidden="true">' + ''.join(f'<i{" class=on" if i == 0 else ""}></i>' for i in range(len(K['basamak']))) + '</div>')
 urunler = ''.join(f'<div class="kart urun"><img class="u-ikon" src="{u["ikon"]}" alt="" width="52" height="52"><h3><small>{u["kim"]}</small>{u["ad"]}</h3><p class="sorun2">{u["ozet"]}</p><p>{u["metin"]}</p><a href="{u["link"]}"{" target=\"_blank\" rel=\"noopener\"" if u["link"].startswith("http") else ""}>{u["link_ad"]}</a></div>' for u in K['urunler']).replace('{MERCEK}', MERCEK)
+# Menüde ve açılışta "Nasıl çalışır" #giris'e gider (bütün genişliklerde görünür; #nasil telefonda ve tablette gizli).
 # Güven kartları bu sayfada yok (18 Kasım 2026): ayrı kurumsal sayfa guven.html; metinleri c-metin.json "guven" anahtarında duruyor.
 sss = ''.join(f'<details><summary>{q[0]}</summary><p>{q[1]}</p></details>' for q in K['sss'])
 
@@ -153,12 +154,12 @@ html = f'''<!doctype html><html lang="tr"{VARS}><head><meta charset="utf-8"><met
 <meta property="og:title" content="{e(SEO["og_baslik"])}"><meta property="og:description" content="{e(SEO["aciklama"])}">
 <link rel="icon" href="img/favicon-moyo.svg" type="image/svg+xml"><link rel="stylesheet" href="ortak.css"><link rel="stylesheet" href="c.css"><link rel="stylesheet" href="beyaz.css"><link rel="stylesheet" href="v4.css"><link rel="stylesheet" href="c-18.css">
 <script type="application/json" id="oniz-gruplar">{GRUPLAR}</script><script src="oniz.js"></script></head><body class="sayfa-c beyaz">
-<header class="ust"><div class="ic"><a class="logo" href="#" aria-label="Moyo">{LOGO}</a><nav class="menu" aria-label="Ana menü"><a href="#nasil">Nasıl çalışır</a><a class="kitle" href="ebeveyn.html">Ebeveynler için</a><a class="kitle" href="{MERCEK}" target="_blank" rel="noopener">Uzmanlar için</a></nav><div class="sag"><a class="hap cizgi k" href="#">Giriş yap</a><a class="hap dolu k" href="#">Ücretsiz deneyin</a>
+<header class="ust"><div class="ic"><a class="logo" href="#" aria-label="Moyo">{LOGO}</a><nav class="menu" aria-label="Ana menü"><a href="#giris">Nasıl çalışır</a><a class="kitle" href="ebeveyn.html">Ebeveynler için</a><a class="kitle" href="{MERCEK}" target="_blank" rel="noopener">Uzmanlar için</a></nav><div class="sag"><a class="hap cizgi k" href="#">Giriş yap</a><a class="hap dolu k" href="#">Ücretsiz deneyin</a>
 <details class="dar-menu"><summary aria-label="Menü"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="m-ac" d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="m-kapat" d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary>
-<nav aria-label="Menü"><a href="#nasil">Nasıl çalışır</a><a href="ebeveyn.html">Ebeveynler için</a><a href="{MERCEK}" target="_blank" rel="noopener">Uzmanlar için</a><a class="yalniz-dar" href="#">Giriş yap</a></nav></details></div></div></header>
+<nav aria-label="Menü"><a href="#giris">Nasıl çalışır</a><a href="ebeveyn.html">Ebeveynler için</a><a href="{MERCEK}" target="_blank" rel="noopener">Uzmanlar için</a><a class="yalniz-dar" href="#">Giriş yap</a></nav></details></div></div></header>
 <main>
 <section class="acilis c" id="acilis"><div class="ic"><p class="alt-etiket">{K["alt_etiket"]}</p><h1>{K["h1"]}</h1>{secenek("alt", K["alt"], "p", ' class="alt"')}
-<div class="dugmeler"><a class="hap dolu b" href="#">Ücretsiz deneyin</a><a class="hap cizgi b" href="#nasil">Nasıl çalışır? ↓</a></div>
+<div class="dugmeler"><a class="hap dolu b" href="#">Ücretsiz deneyin</a><a class="hap cizgi b" href="#giris">Nasıl çalışır? ↓</a></div>
 <p class="ince">{K["ince"]}</p></div></section>
 {dongu(K["dongu"])}
 <section class="giris-bant" id="giris"><div class="ic"><p class="ust-etiket">{K["giris_etiket"]}</p>{secenek("gbas", K["giris_baslik"], "h2")}{secenek("gmet", K["giris_metin"], "p")}{basamak}</div></section>

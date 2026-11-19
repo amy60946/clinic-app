@@ -203,6 +203,15 @@
 .nc-say { min-width: 4.2em; text-align: center; font-size: 15px; font-weight: 700; color: var(--c-text-2); font-variant-numeric: tabular-nums; }
 .nc-ipucu { flex-basis: 100%; text-align: center; font-size: 13.5px; color: var(--c-text-3); margin-top: -2px; }
 .nc-nav { flex-wrap: wrap; }
+/* Tek sütunda görseller sabit yükseklikte açık zeminli bir sahnede: telefon ve oyun ekranı aynı yeri kaplar, adım değişince
+   metin ve ‹ › düğmeleri yerinden oynamaz (site.js panelleri en uzun panel kadar yüksek tutar). */
+@media (max-width: 900px) {
+  .sayfa-moyo .nc-media { --nc-h: min(60svh, 500px); height: var(--nc-h); display: flex; align-items: center; justify-content: center; padding: 14px; background: var(--c-soft); border-radius: var(--r-lg); }
+  .sayfa-moyo .nc-media figure.tel img { height: calc(var(--nc-h) - 62px); width: auto; max-width: 100%; border-width: 6px; border-radius: 28px; }
+  .sayfa-moyo .nc-media figure.shot { width: 100%; }
+  .sayfa-moyo .nc-media figure.tel figcaption { margin-top: 8px; font-size: 12px; }
+}
+@media (max-width: 380px) { .sayfa-moyo .nc-media { --nc-h: min(56svh, 440px); } }
 @media (max-width: 760px) {
   .sayfa-moyo .nc-tabs { overflow: visible; -webkit-mask-image: none; mask-image: none; margin-bottom: 24px; }
   .sayfa-moyo .nc-tabs button { min-width: 44px; justify-content: center; }
