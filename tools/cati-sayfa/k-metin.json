@@ -1,0 +1,160 @@
+{
+  "_not": "Kurumsal sayfaların metinleri (18-19 Kasım 2026). yap_k.py okur: hakkimizda.html, guven.html. Kaynak işaretleri [[Anahtar]] ya da [[A, B]]; numaralar sayfadaki ilk geçişe göre verilir, kaynak listesi yalnız anılanlardan kurulur. Kaynaklar literatür özetindeki 'Doğrulandı' kayıtlarından (tur18/literatur.md). Satır içi HTML serbest; uzun çizgi kullanılmaz.",
+
+  "hakkimizda": {
+    "title": "Moyo · Hakkımızda",
+    "aciklama": "Moyo; çocuk, ebeveyn ve uzman için rutin, davranış kaydı ve ilerleme takibini bir araya getiren yazılım platformu. Neyi neden böyle kurduk?",
+    "og_baslik": "Moyo · Hakkımızda",
+    "og_aciklama": "Rutin güne düzen verir, kayıt neyin denendiğini gösterir, dilerseniz uzmanınız süreci bu kayıtlarla yönlendirir. Moyo'yu neden böyle kurduk?",
+    "kanonik": "https://moyoapp.com.tr/hakkimizda/",
+
+    "etiket": "Hakkımızda",
+    "h1": {
+      "a": "Evdeki süreç tahminle değil, kayıtla ilerlesin",
+      "b": "Seansta konuşulanı eve, evde olanı seansa taşıyoruz",
+      "c": "Rutin, kayıt ve uzman desteği tek çatı altında"
+    },
+    "alt": "Moyo; çocuk, ebeveyn ve uzman için üç uygulamadan oluşan bir yazılım platformudur. Rutinler güne bir düzen verir, davranış kayıtları ne denendiğini ve nasıl gittiğini gösterir; dilerseniz uzmanınız süreci bu kayıtlarla yönlendirir.",
+    "ince": "Moyo tanı koymaz, tedavi yerine geçmez.",
+    "olgular": [
+      ["3", "uygulama", "Çocuk için Moyo Oyun, aile için Moyo Ebeveyn, uzman için Moyo Uzman."],
+      ["1", "ortak kayıt", "Üç uygulama, ebeveynin paylaştığı ölçüde aynı rutinlere ve kayıtlara bakar."],
+      ["0", "reklam", "Reklam, veri satışı ve üçüncü taraf analiz aracı yok."]
+    ],
+
+    "akis_etiket": "Ekosistem",
+    "akis_baslik": "Neyi bir araya getiriyoruz",
+    "akis_metin": "Rutini kurmaktan uzmanla paylaşmaya kadar her adım aynı kayda işlenir. Son adım isteğe bağlıdır.",
+    "istege_etiket": "İsteğe bağlı",
+    "akis": [
+      {"ad": "Rutin kurmak", "uygulama": "Moyo Ebeveyn", "ikon": "img/ikon-moyo.svg",
+       "metin": "Ebeveyn sabah, ödev ya da yatma rutinini küçük adımlarla bir kez kurar."},
+      {"ad": "Oyunda yapmak", "uygulama": "Moyo Oyun", "ikon": "img/ikon-oyun.png",
+       "metin": "Çocuk her adımı oyunda bir macera olarak görür, bitirince \"Yaptım\"a dokunur."},
+      {"ad": "Onay ve davranış kaydı", "uygulama": "Moyo Ebeveyn", "ikon": "img/ikon-moyo.svg",
+       "metin": "Ebeveyn adımı onaylar. Zor bir an olduysa o gün kaydeder: ne oldu, ne denendi, çocuk nasıl karşılık verdi."},
+      {"ad": "İlerlemeyi görmek", "uygulama": "Moyo Ebeveyn", "ikon": "img/ikon-moyo.svg",
+       "metin": "Tamamlanan adımlar ve davranış kayıtları gün, hafta ve ay olarak bir arada görünür."},
+      {"ad": "Dilerseniz uzmanla paylaşmak", "uygulama": "Moyo Uzman", "ikon": "img/ikon-mercek.svg", "istege": true,
+       "metin": "Ebeveyn onay verirse uzman kayıtları okur, ebeveyn eğitimi gönderir, rutin önerir. Öneriyi eklemek ebeveynin kararıdır."}
+    ],
+
+    "kisi_etiket": "Neden böyle kurduk",
+    "kisi_baslik": "Üç kişi, üç ayrı zorluk",
+    "kisi_metin": "Her biri için önce zorluğu, sonra araştırmaların ne dediğini, en sonda Moyo'daki karşılığını yazdık. Araştırmalar yaklaşımlar hakkındadır; Moyo üzerinde yapılmış değildir.",
+    "parca_adlari": ["Zorluk", "Araştırmalar ne diyor", "Moyo'da karşılığı"],
+    "kisiler": [
+      {"k": "cocuk", "ad": "Çocuk", "uygulama": "Moyo Oyun", "ikonlar": ["img/ikon-oyun.png"],
+       "zorluk": "Sabah hazırlanmak, ödeve oturmak, yatağa gitmek: çocuğun günü art arda gelen geçişlerden oluşur. Sırada ne olduğunu göremeyen bir çocuk için her geçiş yeni bir hatırlatma demektir.",
+       "arastirma": "Araştırmalar, düzenli aile rutinlerinin çocukların uyumu ve öz düzenlemesiyle ilişkili olduğunu gösteriyor [[Fiese2002, Selman2024]]. Ebeveyn programları üzerine yapılan çalışmalarda da olumlu pekiştirme, özellikle övgü, daha güçlü etkiyle ilişkilendirilen ögeler arasında [[Leijten2019]].",
+       "karsilik": "Moyo Oyun'da günün rutini küçük adımlar hâlinde görünür, her adım oyunda bir macera olur. Çocuk bitirdiği adımda \"Yaptım\"a dokunur; ebeveyni onaylayınca karşılığını oyunda görür."},
+      {"k": "ebeveyn", "ad": "Ebeveyn", "uygulama": "Moyo Ebeveyn", "ikonlar": ["img/ikon-moyo.svg"],
+       "zorluk": "Öğrenilen bir yöntemi yorgun bir akşamın ortasında, her gün aynı biçimde uygulamak zordur. Neyin denendiğini ve çocuğun nasıl karşılık verdiğini bir sonraki görüşmeye kadar akılda tutmak da çoğu zaman ebeveynin üzerine kalır.",
+       "arastirma": "Araştırmalar, davranışsal ebeveyn eğitimi programlarının çocuklardaki davranış sorunlarını azaltmada ve ebeveynlik becerilerini güçlendirmede etkili olduğunu gösteriyor [[Furlong2012]]. İnternet üzerinden sunulan programlarda da küçük ama anlamlı olumlu etkiler bildirilmiş; bu alandaki araştırma daha yeni [[Thongseiratch2020]].",
+       "karsilik": "Moyo Ebeveyn'de rutinleri ebeveyn kurar, tamamlanan adımları onaylar, olanı o gün kısa bir davranış kaydıyla not eder: ne oldu, hangi strateji denendi, çocuk nasıl karşılık verdi. Bir uzmanla çalışıyorsa uzmanın gönderdiği ebeveyn eğitimleri de aynı yerde durur."},
+      {"k": "uzman", "ad": "Uzman", "uygulama": "Moyo Uzman", "ek": "isteğe bağlı", "ikonlar": ["img/ikon-mercek.svg"],
+       "zorluk": "Uzman aileyi çoğunlukla haftada bir görür; evde olanı ebeveynin hatırladığı kadarıyla öğrenir. Önerdiği çalışmanın evde nasıl gittiği bir sonraki görüşmeye kadar belirsiz kalır.",
+       "arastirma": "Terapi araştırmaları, görüşme dışında yapılan uygulamaya uyumun daha iyi sonuçlarla ilişkili olduğunu gösteriyor [[Mausbach2010]]; bir ebeveyn eğitimi çalışmasında evde daha çok uygulayan ebeveynler becerilere daha az oturumda ulaşmış [[Stokes2016]]. Geriye dönük anlatım hatırlama yanılgısına açıktır; o anda tutulan kısa kayıt bu yanılgıyı azaltmak için geliştirilmiş bir yöntemdir [[Shiffman2008]].",
+       "karsilik": "Moyo Uzman'da, ebeveyn onay verirse, paylaşılan çocuğun rutin ve davranış kayıtları gün gün panele gelir. Uzman bu kayıtlara bakarak ebeveyn eğitimi gönderir, rutin önerir ve dönemin kayıtlarından derlenen ilerleme notunu alır."},
+      {"k": "birlikte", "ad": "Birlikte", "uygulama": "Üç uygulama, aynı kayıt", "ikonlar": ["img/ikon-oyun.png", "img/ikon-moyo.svg", "img/ikon-mercek.svg"],
+       "zorluk": "Çocuk evde, okulda ve görüşme odasında aynı görünmeyebilir; herkes kendi gördüğü parçayı anlatır.",
+       "arastirma": "Araştırmalar, çocuğu farklı ortamlarda gören kişilerin anlattıklarının yalnız kısmen örtüştüğünü [[DeLosReyes2015]], çocuk, ebeveyn ve uzmanın da çoğu zaman hangi sorun üzerinde çalışılacağında uzlaşmadan yola çıktığını gösteriyor [[HawleyWeisz2003]].",
+       "karsilik": "Moyo'da çocuk, ebeveyn ve uzman aynı rutinlere ve kayıtlara kendi ekranından bakar. Neyin paylaşılacağına ebeveyn karar verir ve paylaşımı dilediği an durdurur."}
+    ],
+
+    "sinir_etiket": "Sınırlar",
+    "sinir_baslik": "Dürüst olmak istediğimiz konular",
+    "sinir_metin": "Araştırmaların ne söylediği kadar ne söylemediği de önemli.",
+    "sinirlar": [
+      {"ikon": "kitap", "baslik": "Bulgular Moyo'ya ait değil",
+       "metin": "Anılan çalışmalar belirli programlarla ve belirli gruplarla, çoğunlukla ABD ve Batı Avrupa'da yapıldı. Moyo'nun kendisi henüz araştırılmadı."},
+      {"ikon": "bag", "baslik": "Çoğu bulgu bir ilişkiyi gösterir",
+       "metin": "\"Rutini düzenli çocuklar daha uyumlu\" bulgusu, \"rutin kurarsanız çocuğunuz daha uyumlu olur\" demek değildir. Sonuçlar aileden aileye değişir; programı yarıda bırakmak da yaygındır, zorlanan tek aile siz değilsiniz [[Chacko2016]]."},
+      {"ikon": "hediye", "baslik": "Ödül dikkat ister",
+       "metin": "Çocuğun zaten severek yaptığı bir iş için önceden vaat edilen maddi ödülün o işe ilgiyi azaltabildiğini gösteren deneyler var; konu araştırmacılar arasında hâlâ tartışılıyor [[Deci1999, Cameron2001]]. Moyo'daki ödül oyunun içinde kalır; ebeveynin övgüsünün yerini tutmaz."},
+      {"ikon": "pano", "baslik": "Kayıt bir gözlemdir",
+       "metin": "Ailenin ve çocuğun bildirimlerinin uzmana düzenli ulaşmasının çocuk ve genç terapisindeki yararı için henüz yeterli kanıt yok [[Bergman2018]]. Moyo bir yazılım aracıdır: tanı koymaz, tedavi yerine geçmez, uzmanın değerlendirmesinin yerini tutmaz."}
+    ],
+
+    "kaynak_baslik": "Kaynaklar",
+    "kaynak_metin": "Bu sayfada anılan çalışmalar. Bağlantılar yayıncının ya da PubMed'in sayfasını yeni sekmede açar.",
+
+    "kapanis_baslik": "Buradan devam edin",
+    "kapanis": [
+      {"renk": "yesil", "ikon": "img/ikon-moyo.svg", "ad": "Moyo Ebeveyn",
+       "metin": "Rutini kurun, adımları onaylayın, olanı kaydedin; ilerlemeyi tek yerden görün.",
+       "link": "ebeveyn.html", "link_ad": "Ebeveyn sayfası"},
+      {"renk": "mavi", "ikon": "img/ikon-mercek.svg", "ad": "Moyo Uzman",
+       "metin": "Uzmanlar için panel: ebeveynin onayıyla paylaşılan kayıtlar, ebeveyn eğitimi ve ilerleme notu.",
+       "link": "{MERCEK}", "link_ad": "Uzman sitesi"},
+      {"renk": "mor", "ikon": "kalkan", "ad": "Güvenlik ve gizlilik",
+       "metin": "Kim neyi görür, veriler nerede durur, paylaşım nasıl durdurulur.",
+       "link": "guven.html", "link_ad": "Güvenlik sayfası"}
+    ]
+  },
+
+  "guven": {
+    "title": "Moyo · Güvenlik ve gizlilik",
+    "aciklama": "Moyo'da neyin toplandığı, kimin gördüğü ve paylaşımın nasıl sonlandırıldığı: çocuk, aile ve uzman için güvenlik ve gizlilik ilkeleri.",
+    "og_baslik": "Moyo · Güvenlik ve gizlilik",
+    "og_aciklama": "Moyo'da neyin toplandığı, kimin gördüğü ve paylaşımın nasıl sonlandırıldığı: çocuk, aile ve uzman için güvenlik ve gizlilik ilkeleri.",
+    "kanonik": "https://moyoapp.com.tr/guven/",
+
+    "etiket": "Kurumsal",
+    "h1": "Güvenlik ve gizlilik",
+    "giris": "Çocuğun verisi ailenindir. Neyin kaydedildiğini, kimin gördüğünü ve paylaşımın ne zaman biteceğini siz belirlersiniz.",
+    "bu_sayfada": "Bu sayfada",
+
+    "cocuk": {"id": "cocuk", "baslik": "Çocuğunuz için", "uygulama": "Moyo Oyun", "ikon": "img/ikon-oyun.png", "maddeler": [
+      ["Reklam ve satın alma yok.", "Moyo Oyun'da reklam ve uygulama içi satın alma yoktur."],
+      ["Tek oyunculu, yabancı yok.", "Moyo Oyun tek oyunculu bir oyundur; yabancılarla iletişim yoktur. Çocuğunuz yalnızca ailesine mesaj gönderebilir."],
+      ["Ayrı çocuk hesabı gerekmez.", "Çocuğunuzun e-postası ve şifresi olmaz. Oyun, Moyo Ebeveyn'de oluşturduğunuz tek kullanımlık bir kodla bağlanır."]
+    ]},
+    "aile": {"id": "aile", "baslik": "Aileniz için", "uygulama": "Moyo Ebeveyn", "ikon": "img/ikon-moyo.svg", "maddeler": [
+      ["Paylaşım yalnız onayınızla.", "Uzmanla paylaşım siz onaylayınca açılır; hangi çocuğu paylaşacağınızı siz seçersiniz."],
+      ["Dilediğiniz an durdurursunuz.", "Paylaşımı sonlandırdığınızda uzmanın erişimi hemen biter."],
+      ["Hesabınız ve verileriniz sizde.", "Hesabınızı ve verilerinizi uygulamadan silebilirsiniz."]
+    ]},
+    "uzman": {"id": "uzman", "baslik": "Uzmanınız neyi görür, neyi görmez", "uygulama": "Moyo Uzman", "ikon": "img/ikon-mercek.svg",
+      "gorur_baslik": "Görür", "gorur_ek": "yalnız paylaştığınız çocuk için",
+      "gorur": ["Rutinler ve tamamlanma durumu", "Davranış kayıtlarınız", "Gönderdiği eğitim ve önerilerdeki ilerleme"],
+      "gormez_baslik": "Görmez",
+      "gormez": ["Aile içi mesajlar", "Ödül (İnci) defteri", "Paylaşmadığınız kardeşler"],
+      "not": "Uzman kayıtları yalnız okur ve öneride bulunur; önerilen rutini eklemek sizin kararınızdır."
+    },
+    "veri": {"id": "veri", "baslik": "Verileriniz nerede, kimlerle", "maddeler": [
+      "Veriler Avrupa Birliği'nde (Frankfurt, Almanya) barındırılır.",
+      "Reklam ağı, veri satışı, profil çıkarma ve üçüncü taraf analiz aracı yoktur.",
+      "Bu site çerez, reklam pikseli ya da analiz aracı kullanmaz.",
+      "Kimin neyi görebileceği sunucuda denetlenir; uygulama izin verilmeyen kaydı alamaz.",
+      "Çalıştığımız hizmet sağlayıcıların listesi: <a href=\"{SITE}yasal/alt-isleyenler\">Hizmet sağlayıcılar</a>."
+    ]},
+    "degil": {"id": "degil", "baslik": "Moyo ne değildir",
+      "metin": "Moyo bir yazılım aracıdır: rutinleri ve kayıtları bir arada tutar. Tanı koymaz, tedavi yerine geçmez, acil durum hizmeti değildir."},
+    "yasal": {"id": "yasal", "baslik": "Haklarınız ve yasal metinler", "baglantilar": [
+      ["Gizlilik Politikası", "{SITE}yasal/gizlilik", ""],
+      ["Kullanım Koşulları", "{SITE}yasal/kosullar-parentapp", ""],
+      ["KVKK başvurusu", "{SITE}yasal/kvkk-basvuru", "Uygulamadan da yapılır"],
+      ["Hizmet sağlayıcılar", "{SITE}yasal/alt-isleyenler", ""],
+      ["Destek", "{SITE}destek", "Sorularınız için"]
+    ]},
+    "son": "Uzmanlar için gizlilik ve güvenlik bilgisi <a href=\"{MERCEK_GUVEN}\" target=\"_blank\" rel=\"noopener\">Moyo Uzman sitesindedir</a>."
+  },
+
+  "kaynaklar": {
+    "Fiese2002": {"kunye": "Fiese, B. H., Tomcho, T. J., Douglas, M., Josephs, K., Poltrock, S., & Baker, T. (2002). A review of 50 years of research on naturally occurring family routines and rituals: Cause for celebration? *Journal of Family Psychology, 16*(4), 381–390.", "doi": "10.1037/0893-3200.16.4.381", "pmid": "12561283"},
+    "Selman2024": {"kunye": "Selman, S. B., & Dilworth-Bart, J. E. (2024). Routines and child development: A systematic review. *Journal of Family Theory & Review.*", "doi": "10.1111/jftr.12549", "pmid": ""},
+    "Leijten2019": {"kunye": "Leijten, P., Gardner, F., Melendez-Torres, G. J., van Aar, J., Hutchings, J., Schulz, S., Knerr, W., & Overbeek, G. (2019). Meta-analyses: Key parenting program components for disruptive child behavior. *Journal of the American Academy of Child & Adolescent Psychiatry, 58*(2), 180–190.", "doi": "10.1016/j.jaac.2018.07.900", "pmid": "30738545"},
+    "Furlong2012": {"kunye": "Furlong, M., McGilloway, S., Bywater, T., Hutchings, J., Smith, S. M., & Donnelly, M. (2012). Behavioural and cognitive-behavioural group-based parenting programmes for early-onset conduct problems in children aged 3 to 12 years. *Cochrane Database of Systematic Reviews,* (2), CD008225.", "doi": "10.1002/14651858.CD008225.pub2", "pmid": "22336837"},
+    "Thongseiratch2020": {"kunye": "Thongseiratch, T., Leijten, P., & Melendez-Torres, G. J. (2020). Online parent programs for children's behavioral problems: A meta-analytic review. *European Child & Adolescent Psychiatry, 29*(11), 1555–1568.", "doi": "10.1007/s00787-020-01472-0", "pmid": "31925545"},
+    "Mausbach2010": {"kunye": "Mausbach, B. T., Moore, R., Roesch, S., Cardenas, V., & Patterson, T. L. (2010). The relationship between homework compliance and therapy outcomes: An updated meta-analysis. *Cognitive Therapy and Research, 34*(5), 429–438.", "doi": "10.1007/s10608-010-9297-z", "pmid": "20930925"},
+    "Stokes2016": {"kunye": "Stokes, J. O., Jent, J. F., Weinstein, A., Davis, E. M., Brown, T. M., Cruz, L., & Wavering, H. (2016). Does practice make perfect? The relationship between self-reported treatment homework completion and parental skill acquisition and child behaviors. *Behavior Therapy, 47*(4), 538–549.", "doi": "10.1016/j.beth.2016.04.004", "pmid": "27423169"},
+    "Shiffman2008": {"kunye": "Shiffman, S., Stone, A. A., & Hufford, M. R. (2008). Ecological momentary assessment. *Annual Review of Clinical Psychology, 4*, 1–32.", "doi": "10.1146/annurev.clinpsy.3.022806.091415", "pmid": "18509902"},
+    "DeLosReyes2015": {"kunye": "De Los Reyes, A., Augenstein, T. M., Wang, M., Thomas, S. A., Drabick, D. A. G., Burgers, D. E., & Rabinowitz, J. (2015). The validity of the multi-informant approach to assessing child and adolescent mental health. *Psychological Bulletin, 141*(4), 858–900.", "doi": "10.1037/a0038498", "pmid": "25915035"},
+    "HawleyWeisz2003": {"kunye": "Hawley, K. M., & Weisz, J. R. (2003). Child, parent, and therapist (dis)agreement on target problems in outpatient therapy: The therapist's dilemma and its implications. *Journal of Consulting and Clinical Psychology, 71*(1), 62–70.", "doi": "10.1037/0022-006X.71.1.62", "pmid": "12602426"},
+    "Chacko2016": {"kunye": "Chacko, A., Jensen, S. A., Lowry, L. S., Cornwell, M., Chimklis, A., Chan, E., Lee, D., & Pulgarin, B. (2016). Engagement in behavioral parent training: Review of the literature and implications for practice. *Clinical Child and Family Psychology Review, 19*(3), 204–215.", "doi": "10.1007/s10567-016-0205-2", "pmid": "27311693"},
+    "Deci1999": {"kunye": "Deci, E. L., Koestner, R., & Ryan, R. M. (1999). A meta-analytic review of experiments examining the effects of extrinsic rewards on intrinsic motivation. *Psychological Bulletin, 125*(6), 627–668.", "doi": "10.1037/0033-2909.125.6.627", "pmid": "10589297"},
+    "Cameron2001": {"kunye": "Cameron, J., Banko, K. M., & Pierce, W. D. (2001). Pervasive negative effects of rewards on intrinsic motivation: The myth continues. *The Behavior Analyst, 24*(1), 1–44.", "doi": "10.1007/BF03392017", "pmid": "22478353"},
+    "Bergman2018": {"kunye": "Bergman, H., Kornør, H., Nikolakopoulou, A., Hanssen-Bauer, K., Soares-Weiser, K., Tollefsen, T. K., & Bjørndal, A. (2018). Client feedback in psychological therapy for children and adolescents with mental health problems. *Cochrane Database of Systematic Reviews, 8*, CD011729.", "doi": "10.1002/14651858.CD011729.pub2", "pmid": "30124233"}
+  }
+}

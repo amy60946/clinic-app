@@ -210,3 +210,38 @@ html[data-v-uc="d"] .sayfa-c .uc-k.istege { border: 1.5px dashed rgba(15, 211, 8
 .sayfa-c .nk[data-duzen="sekme"] .nk-paneller { touch-action: pan-y pinch-zoom; -webkit-user-select: none; user-select: none; outline-offset: 4px; }
 .sayfa-c .nk[data-duzen="sekme"] .nk-paneller img { -webkit-user-drag: none; }
 @media (hover: hover) and (pointer: fine) { .sayfa-c .nk[data-duzen="sekme"] .nk-paneller { cursor: grab; } .sayfa-c .nk[data-duzen="sekme"] .nk-paneller.surukleniyor { cursor: grabbing; } }
+/* sekmeler ortada (17 Kasım'da sola yaslı kalıyordu) */
+.sayfa-c .nk[data-duzen="sekme"] .nk-sekmeler { display: flex; }
+/* Gizli adımlar da etkin adımla aynı düzende durur: bölümün yüksekliği adım değişince zıplamaz (önceden yalnız etkin adım iki sütundu,
+   gizli adımlar tek sütunda uzayıp yüksekliği belirliyordu). */
+@media (min-width: 700px) {
+  .sayfa-c .nk[data-duzen="sekme"] .nk-adim { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; gap: 32px; }
+}
+/* Tablet dik (700–899 px): oyun + onay ekranı dar sütunda küçük kalıyordu; bu adımda görsel üstte, tam genişlikte, yazı altında */
+@media (min-width: 700px) and (max-width: 899px) {
+  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ikili { grid-template-columns: minmax(0, 1fr); gap: 22px; align-content: center; }
+  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ikili .nk-gorsel { height: auto; }
+  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ikili .ust-uste { width: min(100%, 640px); }
+  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ikili .nk-yazi { width: min(100%, 640px); margin-inline: auto; }
+}
+
+/* ---------- 6) Küçük düzeltmeler (18 Kasım 2026 turu, ikinci geçiş) ---------- */
+/* Uzun tanıtım cümleleri geniş ekranda cümle sınırında satır atlar (yap_c.py cumleler) */
+@media (min-width: 720px) { .sayfa-c .cumle { display: inline-block; } }
+/* Sahne altındaki kapanış cümlesi bölümün ana fikri: ara başlık gibi okunsun (önceden gri ve küçük, alt yazı gibi duruyordu) */
+.sayfa-c .d-kapanis { max-width: 820px; }
+.sayfa-c .d-kapanis p { font-size: clamp(18px, 1.75vw, 22px); line-height: 1.45; font-weight: 600; color: var(--lacivert); }
+/* 1-2-3 kartları (renkli ve büyük rakamlı): üç sütunda başlıklar iki satırlık yer tutar, metinler aynı hizada başlar */
+@media (min-width: 720px) {
+  html[data-v-uc="a"] .sayfa-c .uc-k h3, html[data-v-uc="c"] .sayfa-c .uc-k h3 { min-height: 2.4em; display: flex; flex-direction: column; justify-content: flex-end; }
+}
+/* Beyaz ikonlu kartlar, telefonda: "İsteğe bağlı" başlığın üstünde küçük etiket (başlık üç satıra bölünmesin) */
+@media (max-width: 719px) {
+  html[data-v-uc="b"] .sayfa-c .uc-2 h3 { padding-right: 0; margin-top: 34px; }
+  html[data-v-uc="b"] .uc-2 .uc-rozet { top: 18px; right: auto; left: 84px; padding: 5px 10px; }
+}
+/* Hareket azaltmada (ve betik yokken) geniş ekrandaki alt alta anlatım: 2. adımın oyun + onay görseli sıfır genişliğe çöküyordu
+   (--gh tanımsız); kayan sahnedeki ölçüyle aynı */
+.sayfa-c .hk-liste .l-gorsel.genis .ust-uste { width: 100%; max-width: 680px; aspect-ratio: 620 / 430; }
+.sayfa-c .hk-liste .l-gorsel.genis .ust-uste .uu-oyun { width: 98.4%; top: 17%; }
+.sayfa-c .hk-liste .l-gorsel.genis .ust-uste .uu-tel { width: auto; height: 100%; top: 0; bottom: auto; right: 0; border-radius: 20px; }

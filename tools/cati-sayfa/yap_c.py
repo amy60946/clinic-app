@@ -26,6 +26,11 @@ def secenek(k, d, tag='span', attr=''):
     if isinstance(d, str): return f'<{tag}{attr}>{d}</{tag}>'
     return ''.join(f'<{tag}{attr} data-var="{k}:{v}"{"" if v == ONERI[k] else " hidden"}>{t}</{tag}>' for v, t in d.items())
 
+def cumleler(d):
+    # Uzun tanıtım cümleleri geniş ekranda cümle sınırında satır atlasın ("…tasarlandı. Birlikte / kullanıldığında" yerine): her cümle bir span.
+    bol = lambda t: ''.join(f'<span class="cumle">{c}</span> ' for c in re.split(r'(?<=[.!?]) (?=[A-ZÇĞİÖŞÜ"])', t)).strip()
+    return bol(d) if isinstance(d, str) else {k: bol(v) for k, v in d.items()}
+
 def tur(key): return 'ebeveyn' if key.startswith('ebeveyn') else ('mercek' if key.startswith('mercek') else (key if key in ('ikili', 'sema') else 'oyun'))
 def cls(key, dar=False): return 'telefon' if key.startswith('ebeveyn') or (dar and key.startswith('mercek')) else ('panel' if key.startswith('mercek') else '')
 def resim(key, alt, c='', dar=False):
@@ -103,7 +108,7 @@ def dongu(beats):
             f'{ok_("geri", "Önceki adım", "M14.5 5.5 8 12l6.5 6.5")}{ok_("ileri", "Sonraki adım", "M9.5 5.5 16 12l-6.5 6.5")}</div>'
             f'<p class="d-ipucu" aria-hidden="true"><span>‹</span> {K["kaydir_ipucu"]} <span>›</span></p>'
             f'<ol class="d-nokta-m sayac" aria-label="Ekosistemin adımları">{"".join(mpills)}</ol></div>'
-            f'<div class="d-kapanis ic" id="kapanis">{secenek("kapanis", K["dongu_kapanis"], "p")}</div></section>')
+            f'<div class="d-kapanis ic" id="kapanis">{secenek("kapanis", cumleler(K["dongu_kapanis"]), "p")}</div></section>')
 
 UC_IKON = {   # 1-2-3 kartlarının çizgi ikonları (yalnız "Beyaz ikonlu kartlar" tasarımında görünür)
     'ev': '<path d="M4 11.2 12 4.5l8 6.7"/><path d="M6.2 9.8V19h11.6V9.8"/><path d="M10 19v-4.6h4V19"/>',
@@ -159,7 +164,7 @@ html = f'''<!doctype html><html lang="tr"{VARS}><head><meta charset="utf-8"><met
 <section class="giris-bant" id="giris"><div class="ic"><p class="ust-etiket">{K["giris_etiket"]}</p>{secenek("gbas", K["giris_baslik"], "h2")}{secenek("gmet", K["giris_metin"], "p")}{basamak}</div></section>
 {hikaye(K["adimlar"])}
 {kompakt(K["adimlar"])}
-<section class="bant" id="sonraki"><div class="ic"><div class="bas"><p class="ust-etiket">{K["urunler_etiket"]}</p><h2>{K["urunler_baslik"]}</h2>{secenek("urun", K["urunler_metin"], "p")}</div><div class="kartlar3">{urunler}</div></div></section>
+<section class="bant" id="sonraki"><div class="ic"><div class="bas"><p class="ust-etiket">{K["urunler_etiket"]}</p><h2>{K["urunler_baslik"]}</h2>{secenek("urun", cumleler(K["urunler_metin"]), "p")}</div><div class="kartlar3">{urunler}</div></div></section>
 <section class="bant" id="sss"><div class="ic"><div class="bas"><p class="ust-etiket">Sıkça sorulanlar</p><h2>Sorular</h2><p>Sorunuzun yanıtını burada göremediyseniz bize <a href="{SITE}destek">destek sayfasından</a> yazın.</p></div><div class="sss">{sss}</div></div></section>
 </main>
 {altbilgi}

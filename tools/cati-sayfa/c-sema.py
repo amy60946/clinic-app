@@ -24,6 +24,11 @@ def ok(x, y, aci, b=5, renk=YESIL_K, kalin=2.4):
     # (x, y) noktasında, aci (derece, saat yönünde) yönüne bakan ok ucu
     return (f'<path d="M{n(-b)} {n(-b * 1.15)}L{n(b * .55)} 0L{n(-b)} {n(b * 1.15)}" transform="translate({n(x)} {n(y)}) rotate({n(aci)})" '
             f'fill="none" stroke="{renk}" stroke-width="{kalin}" stroke-linecap="round" stroke-linejoin="round"/>')
+def ucgen(x, y, aci, b, renk=YESIL_K):
+    # dolu ok ucu (çemberde yön, küçük boyda da "onay işareti" gibi okunmaz)
+    # dar tepe açısı (~40°): eşkenar üçgen döndürülünce yönü okunmuyor
+    return (f'<path d="M{n(b * 1.05)} 0L{n(-b * .8)} {n(-b * .66)}L{n(-b * .8)} {n(b * .66)}Z" transform="translate({n(x)} {n(y)}) rotate({n(aci)})" '
+            f'fill="{renk}" stroke="{renk}" stroke-width="{n(b * .22)}" stroke-linejoin="round"/>')
 def kutup(cx, cy, r, aci): return cx + r * math.cos(math.radians(aci)), cy + r * math.sin(math.radians(aci))
 def svg(w, h, ic): return f'<svg viewBox="0 0 {w} {h}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">{ic}</svg>'
 
@@ -39,7 +44,7 @@ def cember(u, T, dar):
           f'stroke-dasharray="0.1 {n(iz * .68 - .1)}" stroke-linecap="round" style="--s6:{n(-iz * .68)}" transform="rotate(-90 {cx} {cy})"/>')
     for a in (-30, 90, 210):
         x, y = kutup(cx, cy, R, a)
-        s += f'<circle cx="{n(x)}" cy="{n(y)}" r="{n(iz * .78)}" fill="#fff" stroke="{CIZGI}"/>' + ok(x, y, a + 90, iz * .3, YESIL_K, 2 if dar else 2.4)
+        s += f'<circle cx="{n(x)}" cy="{n(y)}" r="{n(iz * .78)}" fill="#fff" stroke="{CIZGI}"/>' + ucgen(x + (iz * .06) * math.cos(math.radians(a + 90)), y + (iz * .06) * math.sin(math.radians(a + 90)), a + 90, iz * .4)
     for k in P: s += karo(u, k, P[k][0], P[k][1], ks)
     # üstte Moyo Uzman: ad ve fiil karonun üstünde; alttakilerde karonun altında
     ux, uy = P['uzman']
