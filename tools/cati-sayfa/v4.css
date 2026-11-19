@@ -2,7 +2,7 @@
    1) Açılış: yeni metin, altında hemen "Moyo Ekosistemi" anlatımı
    2) Hap biçiminde adım sayacı (Atlassian'ın sekme çubuğu örnek alındı): etkin adım yeşil dolu, geçilen adımların numarası yeşil
    3) Ekosistem: ortadaki ekran net; yandakiler bulanık, yana açılmış, geride (eko.js)
-   4) Ürün adları çizgi kilitle: moyo Ebeveyn / Oyun / Uzman
+   4) Adım etiketi (ürün kilitleri tur 3'te ayrı ürün anlatımıyla kalktı)
    5) Alt bilgi: açık zeminli yuvarlak kutuda sütunlar (Atlassian düzeni) */
 
 .gizli { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -68,21 +68,11 @@
 @media (prefers-reduced-motion: reduce) { .sayfa-c .dongu-b.js .d-kart { transition: none; filter: none; transform: none; } }
 @media (max-height: 720px) { .sayfa-c .d-yazilar { min-height: 88px; margin-top: 6px; } .sayfa-c .d-nokta { margin-top: 6px; } }
 
-/* ---------- Nasıl çalışır: sayaç ortada ---------- */
-.sayfa-c .hk-nokta { left: 50%; right: auto; bottom: 20px; transform: translateX(-50%); }
-.sayfa-c .hk-sahne { padding-bottom: 92px; }
-.sayfa-c .hk-yazi h3, .sayfa-c .d-yazi-m h3, .sayfa-c .nk-yazi h3 { text-wrap: balance; }
-.sayfa-c .nk-sekmeler { margin: 0 auto 18px; max-width: none; border: 0; background: #EFF0F3; }
-.sayfa-c .nk-sekmeler button { flex: none; }
+/* ---------- Ekosistem yazıları: dengeli satır ---------- */
+.sayfa-c .d-yazi-m h3 { text-wrap: balance; }
 
-/* ---------- 4) Ürün kilitleri ---------- */
-.kilit { display: inline-flex; align-items: center; flex: none; color: var(--lacivert); }
-.kilit svg { display: block; height: 34px; width: auto; }
+/* ---------- 4) Adım etiketi (1 · Uzmanınız …) ---------- */
 .sayfa-c .rol { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; letter-spacing: 0; }
-.sayfa-c .rol-ek { font-size: 13.5px; font-weight: 600; color: var(--yazi-2); padding: 3px 11px; border-radius: 999px; background: #EFF0F3; }
-.sayfa-c .hk-yazi .rol .kilit svg { height: 38px; }
-.sayfa-c .nk-yazi .rol .kilit svg { height: 30px; }
-.sayfa-c .nk-rozet { color: var(--lacivert); border-color: var(--cizgi); background: #FFFFFF; }
 
 /* ---------- 5) Alt bilgi ---------- */
 .altb { background: #FFFFFF; padding: 28px 0 calc(34px + env(safe-area-inset-bottom, 0px)); color: var(--lacivert); --altb-ic: clamp(22px, 4vw, 52px); }
@@ -126,12 +116,6 @@
 }
 @media (max-width: 480px) { .beyaz .ust .sag .cizgi { display: none; } .ust .sag { gap: 6px; } .dar-menu nav a.yalniz-dar { display: flex; } }
 
-/* ---------- Nasıl çalışır 2. adım: oyun + onay telefonu. Telefon, oyun ekranının sağ panelinin tam üstünde durur ve okunur boydadır ---------- */
-.sayfa-c .hk-kart.genis .ust-uste { aspect-ratio: 620 / 430; width: min(100%, calc(var(--gh, 100vh) * 1.44)); }
-.sayfa-c .hk-kart.genis .ust-uste .uu-oyun { width: 98.4%; top: 17%; }
-.sayfa-c .hk-kart.genis .ust-uste .uu-tel { height: 100%; top: 0; bottom: auto; right: 0; }
-/* telefonda 2. adım: oyun ekranı + daha küçük onay telefonu (yazıya daha çabuk inilir) */
-@media (max-width: 760px) { .sayfa-c .nk .t-ikili .uu-tel { width: min(60%, 230px); } }
 /* alt bilgide logo satırı sütun başlığıyla aynı yükseklikte */
 .altb .altb-marka .logo { height: 23px; min-height: 0; padding: 0; }
 
@@ -144,7 +128,5 @@
   .sayfa-c #giris .ic > p:not(.ust-etiket) { margin-top: 28px; }
   .sayfa-c #giris .uc { margin-top: 38px; }
 }
-/* 1-2-3 kartları ile ürün anlatımı (Moyo Ebeveyn / Oyun / Uzman) arası: beyaz bantta alt boşluk + anlatım kendi zemininde başlar */
+/* 1-2-3 kartları ile "Ekosistemin Uygulamaları" arası: beyaz bantta alt boşluk */
 .sayfa-c .giris-bant { padding-bottom: clamp(48px, 6.4vw, 92px); }
-.sayfa-c .giris-bant + #nasil, .sayfa-c .giris-bant + #nasil.statik { margin-top: 0; }
-.sayfa-c .nk { padding-top: clamp(28px, 4.6vw, 44px); }

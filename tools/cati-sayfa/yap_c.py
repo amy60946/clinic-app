@@ -7,18 +7,19 @@
 # Tur 2 (kullanıcı yanıtları 19 Kasım 2026): kabul edilen seçenekler tek sürüm (açık sahne, renkli 1-2-3 kartları, başlık ve kart 1),
 # sahnenin kapanış cümlesi kalktı; yeni gruplar: dongu6 (dört halka), fiil, b2, b3, b3s, hikaye (kartlarda ekran / yalnızca kartlar / bugünkü).
 # Kural: çocuk adımı gerçek hayatta yapar, oyunda işaretler; ebeveyn rutini planlar; uygulamalar "birbirine bağlı" (tek platform değil).
+# Tur 3 (kullanıcı yanıtları 19 Kasım 2026): alt, fiil ("planlar"), hikaye (ekranlar 1-2-3 kartlarında) ve urun tek sürüm; ayrı ürün
+# anlatımı (#nasil, telefon ve tablette #nasil-k) kalktı, hikaye.js ve kompakt.js bu sayfada yüklenmez; nk grubu da onunla gitti.
 import re, html as H, json, sys, runpy
 def _svg(dosya):
     s = open(dosya).read().strip()
     return re.sub(r' role="img" aria-label="[^"]*"', ' aria-hidden="true" focusable="false"', s).replace(' xmlns="http://www.w3.org/2000/svg"', '')
 LOGO = _svg('inline-moyo.svg')
-KILIT = {k: _svg('inline-moyo-%s.svg' % k) for k in ('ebeveyn', 'oyun', 'uzman')}   # tools/logo/gen.py üretir
 MERCEK = 'https://claude.ai/artifact/H2hwv9mqx9CDtjjEsYP6UE#mercek'
 SITE = 'https://moyoapp.com.tr/'               # yasal ve destek bağlantıları (disa_aktar.py kök yola çevirir)
 K = json.load(open('c-metin.json'))            # metinler ayrı dosyada
-# Tam ekran, kırpılmamış gerçek ürün ekranları (örnek veri): tools/cati-sayfa/cek ile çekilir
-IMG = {'ebeveyn-rutin': 'img/moyo-rutinler.webp', 'ebeveyn-onay': 'img/moyo-onay.webp', 'ebeveyn-uzman': 'img/moyo-uzman.webp',
-       'oyun-onay': 'img/c-oyun-onay.webp', 'oyun-liste': 'img/c-oyun-liste.webp',
+# Moyo Ekosistemi sahnesinin tam ekran, kırpılmamış gerçek ürün ekranları (örnek veri): tools/cati-sayfa/cek ile çekilir.
+# 1-2-3 kartlarının ekranları c-metin.json "basamak" içinde (sahnedekilerden farklı).
+IMG = {'ebeveyn-onay': 'img/moyo-onay.webp', 'ebeveyn-uzman': 'img/moyo-uzman.webp', 'oyun-onay': 'img/c-oyun-onay.webp',
        'mercek-veri': 'img/mercek-rutin.webp', 'mercek-egitim': 'img/mercek-egitim.webp',
        'mercek-veri-tel': 'img/mercek-rutin-tel.webp', 'mercek-egitim-tel': 'img/mercek-egitim-tel.webp'}
 e = H.escape
@@ -29,70 +30,18 @@ def secenek(k, d, tag='span', attr=''):
     if isinstance(d, str): return f'<{tag}{attr}>{d}</{tag}>'
     return ''.join(f'<{tag}{attr} data-var="{k}:{v}"{"" if v == ONERI[k] else " hidden"}>{t}</{tag}>' for v, t in d.items())
 def doldur(t):
-    # Cümle içindeki tek parça seçenek: "{fiil}" yer tutucusu c-metin.json "parca" sözlüğünden satır içi seçeneklerle dolar.
-    # Parçada "_grup" varsa başka bir grubun seçimini izler (ör. "fiil1": 1. kartın cümlesi "fiil" grubuyla değişir, 19 Kasım QA).
-    def parca(m):
-        d = K['parca'][m.group(1)]
-        return secenek(d.get('_grup', m.group(1)), {v: x for v, x in d.items() if not v.startswith('_')})
-    return re.sub(r'\{(\w+)\}', parca, t)
-def onerilmez(k, v): return '' if ONERI[k] == v else ' hidden'
+    # Cümle içindeki tek parça seçenek: "{b3s}" yer tutucusu c-metin.json "parca" sözlüğünden satır içi seçeneklerle dolar.
+    return re.sub(r'\{(\w+)\}', lambda m: secenek(m.group(1), K['parca'][m.group(1)]), t)
 
-def cumleler(d):
+def cumleler(t):
     # Uzun tanıtım cümleleri geniş ekranda cümle sınırında satır atlasın ("…tasarlandı. Birlikte / kullanıldığında" yerine): her cümle bir span.
-    bol = lambda t: ''.join(f'<span class="cumle">{c}</span> ' for c in re.split(r'(?<=[.!?]) (?=[A-ZÇĞİÖŞÜ"])', t)).strip()
-    return bol(d) if isinstance(d, str) else {k: bol(v) for k, v in d.items()}
+    return ''.join(f'<span class="cumle">{c}</span> ' for c in re.split(r'(?<=[.!?]) (?=[A-ZÇĞİÖŞÜ"])', t)).strip()
 
-def tur(key): return 'ebeveyn' if key.startswith('ebeveyn') else ('mercek' if key.startswith('mercek') else (key if key in ('ikili', 'sema') else 'oyun'))
+def tur(key): return 'ebeveyn' if key.startswith('ebeveyn') else ('mercek' if key.startswith('mercek') else (key if key == 'sema' else 'oyun'))
 def cls(key, dar=False): return 'telefon' if key.startswith('ebeveyn') or (dar and key.startswith('mercek')) else ('panel' if key.startswith('mercek') else '')
 def resim(key, alt, c='', dar=False):
     if dar and key.startswith('mercek'): key += '-tel'          # telefonda Moyo Uzman'ın telefon ekranı (masaüstü penceresi okunmaz)
     return f'<img class="{c}" src="{IMG[key]}" alt="{e(alt)}" loading="lazy" decoding="async">'
-def kilit(ad):
-    # "Moyo Ebeveyn" → kalın "moyo" + ince ek; Moyo Mercek logosuyla aynı çizim kuralı
-    return f'<span class="kilit" role="img" aria-label="{e(ad)}">{KILIT[ad.split()[-1].lower()]}</span>'
-def rol(metin, no=None):
-    p = metin.split(' · ')
-    ek = ''.join(f'<span class="rol-ek">{x}</span>' for x in p[1:])
-    return f'<span class="rol">{f"<span class=rol-no>{no}</span>" if no else ""}{kilit(p[0])}{ek}</span>'
-
-def mini_ikili():
-    # Oyun ekranı + köşesinde ebeveynin onay ekranı (üst üste, tek görsel kadar yer)
-    return (f'<div class="ust-uste" role="img" aria-label="{e(K["ikili_alt"])}">'
-            f'{resim("oyun-onay", K["oyun_onay_alt"], "uu-oyun")}{resim("ebeveyn-onay", K["ebeveyn_onay_alt"], "uu-tel")}</div>')
-def adim_gorsel(a, dar=False):
-    return mini_ikili() if a['gorsel'] == 'ikili' else resim(a['gorsel'], a['alt'], cls(a['gorsel'], dar), dar)
-
-def hikaye(adimlar):
-    yaz, kart, nok, lis = [], [], [], []
-    for i, a in enumerate(adimlar):
-        ol = ('<ol class="adim-liste">' + ''.join(f'<li><b>{x[0]}</b> {x[1]}</li>' for x in a.get('liste', [])) + '</ol>') if a.get('liste') else ''
-        yaz.append(f'<div class="hk-yazi">{rol(a["rol"])}<h2>{a["baslik"]}</h2><p>{a["metin"]}</p>{ol}</div>')
-        g = adim_gorsel(a)
-        c = 'genis' if a['gorsel'] == 'ikili' else cls(a['gorsel'])
-        kart.append(f'<figure class="hk-kart {c}">{g}' + (f'<figcaption>{a["etiket"]}</figcaption>' if a.get('etiket') else '') + '</figure>')
-        nok.append(f'<li><a href="#nasil" aria-label="{i + 1}. adım: {a["kisa"]}"><span class="n">{i + 1}</span><span class="ad">{a["kisa"]}</span></a></li>')
-        lis.append(f'<article class="cikis"><div class="l-yazi">{rol(a["rol"])}<h2>{a["baslik"]}</h2><p>{a["metin"]}</p>{ol}</div><div class="l-gorsel {c}">{g}</div></article>')
-    # Ayrı ürün anlatımı yalnız "hikaye" seçeneği c'de (bugünkü düzen); a'da ekranlar 1-2-3 kartlarında, b'de yalnız kartlar
-    return (f'<section class="hikaye statik" id="nasil" data-mobil="liste" data-var="hikaye:c"{onerilmez("hikaye", "c")} style="--adim:{len(adimlar)}" aria-label="Moyo nasıl çalışır"><div class="hk-sahne ic">'
-            f'<div class="hk-yazilar">{"".join(yaz)}</div><div class="hk-kartlar" aria-hidden="true">{"".join(kart)}</div>'
-            f'<ol class="hk-nokta sayac" aria-label="Adımlar">{"".join(nok)}</ol>'
-            f'<div class="hk-liste">{"".join(lis)}</div></div></section>')
-
-def kompakt(adimlar):
-    # Telefon ve iPad için "Nasıl çalışır": telefonda sekmeler, iPad'de alt alta liste (kompakt.js)
-    pills, paneller = [], []
-    for i, a in enumerate(adimlar):
-        g = adim_gorsel(a, dar=True)
-        rozet = '<span class="nk-rozet">İsteğe bağlı</span>' if 'isteğe bağlı' in a['rol'] else ''
-        uzun = '<span class="uzun">Moyo </span>'
-        pills.append(f'<button type="button" role="tab" id="nk-t{i}" aria-controls="nk-p{i}" aria-selected="{"true" if i == 0 else "false"}" data-i="{i}"><span class="n">{i + 1}</span><span class="ad">{a["kisa"].replace("Moyo ", uzun)}</span></button>')
-        paneller.append(f'<article class="nk-adim t-{tur(a["gorsel"])}" role="tabpanel" id="nk-p{i}" aria-labelledby="nk-t{i}" data-i="{i}"><div class="nk-gorsel">{g}</div>'
-                        f'<div class="nk-yazi"><span class="rol">{kilit(a["rol"].split(" · ")[0])}{rozet}</span><h3>{a["baslik"]}</h3><p>{a["ozet"]}</p></div></article>')
-    return (f'<section class="nk" id="nasil-k" data-duzen="sekme" data-var="hikaye:c"{onerilmez("hikaye", "c")} aria-label="Moyo nasıl çalışır"><div class="ic">'
-            f'<div class="nk-sekmeler sayac" role="tablist" aria-label="Adımlar">{"".join(pills)}</div>'
-            f'<div class="nk-paneller" tabindex="0" aria-label="Uygulamalar, yana kaydırın">{"".join(paneller)}</div>'
-            f'<div class="nk-kontrol"><button type="button" class="nk-geri" aria-label="Önceki adım">‹</button><span class="nk-sayac" aria-live="polite">1 / {len(adimlar)}</span><button type="button" class="nk-ileri" aria-label="Sonraki adım">›</button></div>'
-            f'</div></section>')
 
 def dongu(beats):
     # Moyo Ekosistemi: ortadaki ekran net; yanındakiler bulanık, yana açılmış ve geride. Masaüstünde sayfa kaydıkça ilerler (eko.js),
@@ -129,17 +78,16 @@ def dongu(beats):
 
 def uc_kart(i, s):
     # Renkli üç kart (kullanıcı kararı 19 Kasım 2026; Atlassian örnek 1). Başlık ya da metin sözlükse grup "b<n>" seçenekleri;
-    # metindeki "{anahtar}" cümle içi seçenek (doldur). "hikaye" a'da kartın altında bir gerçek ürün ekranı (1-6 sahnesindekilerden farklı).
+    # metindeki "{anahtar}" cümle içi seçenek (doldur). Kartın altında bir gerçek ürün ekranı (1-6 sahnesindekilerden farklı; tur 3'te tek sürüm).
     rozet = f'<span class="uc-rozet">{s["rozet"]}</span>' if s['rozet'] else ''
     g = s['gorsel']
-    ekran = (f'<div class="uc-gorsel uc-{g["tur"]}" data-var="hikaye:a"{onerilmez("hikaye", "a")}>'
-             f'<img src="{g["img"]}" alt="{e(g["alt"])}" loading="lazy" decoding="async"></div>')
+    ekran = f'<div class="uc-gorsel uc-{g["tur"]}"><img src="{g["img"]}" alt="{e(g["alt"])}" loading="lazy" decoding="async"></div>'
     return (f'<li class="uc-k uc-{i + 1}{" istege" if s["rozet"] else ""}"><div class="uc-ust"><span class="uc-no" aria-hidden="true">{i + 1}</span>{rozet}</div>'
             f'<h3>{secenek("b%d" % (i + 1), s["baslik"]) if isinstance(s["baslik"], dict) else s["baslik"]}</h3>'
             f'<p>{secenek("b%d" % (i + 1), s["metin"]) if isinstance(s["metin"], dict) else doldur(s["metin"])}</p>{ekran}</li>')
 basamak = '<ol class="uc">' + ''.join(uc_kart(i, s) for i, s in enumerate(K['basamak'])) + '</ol>'
 urunler = ''.join(f'<div class="kart urun"><img class="u-ikon" src="{u["ikon"]}" alt="" width="52" height="52"><h3><small>{u["kim"]}</small>{u["ad"]}</h3><p class="sorun2">{u["ozet"]}</p><p>{u["metin"]}</p><a href="{u["link"]}"{" target=\"_blank\" rel=\"noopener\"" if u["link"].startswith("http") else ""}>{u["link_ad"]}</a></div>' for u in K['urunler']).replace('{MERCEK}', MERCEK)
-# Menüde ve açılışta "Nasıl çalışır" #giris'e gider (bütün genişliklerde görünür; #nasil telefonda ve tablette gizli).
+# Menüde ve açılışta "Nasıl çalışır" #giris'e gider (1-2-3 kartları; ayrı ürün anlatımı tur 3'te kalktı).
 # Güven kartları bu sayfada yok (18 Kasım 2026): ayrı kurumsal sayfa guven.html; metinleri c-metin.json "guven" anahtarında duruyor.
 sss = ''.join(f'<details><summary>{q[0]}</summary><p>{q[1]}</p></details>' for q in K['sss'])
 
@@ -172,16 +120,14 @@ html = f'''<!doctype html><html lang="tr"{VARS}><head><meta charset="utf-8"><met
 <details class="dar-menu"><summary aria-label="Menü"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="m-ac" d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="m-kapat" d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary>
 <nav aria-label="Menü"><a href="#giris">Nasıl çalışır</a><a href="ebeveyn.html">Ebeveynler için</a><a href="{MERCEK}" target="_blank" rel="noopener">Uzmanlar için</a><a class="yalniz-dar" href="#">Giriş yap</a></nav></details></div></div></header>
 <main>
-<section class="acilis c" id="acilis"><div class="ic"><p class="alt-etiket">{K["alt_etiket"]}</p><h1>{K["h1"]}</h1>{secenek("alt", K["alt"], "p", ' class="alt"')}
+<section class="acilis c" id="acilis"><div class="ic"><p class="alt-etiket">{K["alt_etiket"]}</p><h1>{K["h1"]}</h1><p class="alt">{K["alt"]}</p>
 <div class="dugmeler"><a class="hap dolu b" href="#">Ücretsiz deneyin</a><a class="hap cizgi b" href="#giris">Nasıl çalışır? ↓</a></div>
 <p class="ince">{K["ince"]}</p></div></section>
 {dongu(K["dongu"])}
-<section class="giris-bant" id="giris"><div class="ic"><p class="ust-etiket">{K["giris_etiket"]}</p><h2>{K["giris_baslik"]}</h2><p>{doldur(K["giris_metin"])}</p>{basamak}</div></section>
-{hikaye(K["adimlar"])}
-{kompakt(K["adimlar"])}
-<section class="bant" id="sonraki"><div class="ic"><div class="bas"><p class="ust-etiket">{K["urunler_etiket"]}</p><h2>{K["urunler_baslik"]}</h2>{secenek("urun", cumleler(K["urunler_metin"]), "p")}</div><div class="kartlar3">{urunler}</div></div></section>
+<section class="giris-bant" id="giris"><div class="ic"><p class="ust-etiket">{K["giris_etiket"]}</p><h2>{K["giris_baslik"]}</h2><p>{K["giris_metin"]}</p>{basamak}</div></section>
+<section class="bant" id="sonraki"><div class="ic"><div class="bas"><p class="ust-etiket">{K["urunler_etiket"]}</p><h2>{K["urunler_baslik"]}</h2><p>{cumleler(K["urunler_metin"])}</p></div><div class="kartlar3">{urunler}</div></div></section>
 <section class="bant" id="sss"><div class="ic"><div class="bas"><p class="ust-etiket">Sıkça sorulanlar</p><h2>Sorular</h2><p>Sorunuzun yanıtını burada göremediyseniz bize <a href="{SITE}destek">destek sayfasından</a> yazın.</p></div><div class="sss">{sss}</div></div></section>
 </main>
 {altbilgi}
-<script src="c-18.js"></script><script src="hikaye.js"></script><script src="eko.js"></script><script src="kompakt.js"></script><script src="menu.js"></script></body></html>'''
+<script src="c-18.js"></script><script src="eko.js"></script><script src="menu.js"></script></body></html>'''
 open('c.html', 'w').write(html); print('ok c.html')

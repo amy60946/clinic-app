@@ -1,16 +1,12 @@
 {
- "_not": "Moyo Ebeveyn sayfası metinleri (yap_m.py okur). Tur 2, 19 Kasım 2026: çocuk adımı gerçek hayatta yapar, oyunda işaretler (oyunda yapmaz); rutin 'planlanır' (kurulmaz); uygulamalar 'birbirine bağlı' (tek platform değil); zor an kaydı kendi adımında; aynı cümle sayfada iki kez ya da çatı sayfayla bire bir geçmez. h1 (19 Kasım QA): a Moyo Ebeveyn'e özel, b çatı sayfayla aynı; alt bilgideki slogan seçilen başlıktır (kullanıcı isteği, tur 1).",
+ "_not": "Moyo Ebeveyn sayfası metinleri (yap_m.py okur). Tur 2, 19 Kasım 2026: çocuk adımı gerçek hayatta yapar, oyunda işaretler (oyunda yapmaz); rutin 'planlanır' (kurulmaz); uygulamalar 'birbirine bağlı' (tek platform değil); zorlanılan an kaydı kendi adımında; aynı cümle sayfada iki kez ya da çatı sayfayla bire bir geçmez. Tur 3, 19 Kasım 2026: bu sayfada 'zor an' yerine 'zorlanılan an' (kullanıcı kararı); alt ve açılış görseli a ile sabitlendi; 'Neden Moyo' başlığı ve kartları a ile sabitlendi, giriş cümlesi (neden_giris) ve bölümün tasarımı önizlemede seçilir (gruplar nlead, ndzn). h1: a Moyo Ebeveyn'e özel, b çatı sayfayla aynı; alt bilgideki slogan seçilen başlıktır (kullanıcı isteği, tur 1).",
  "baslik": "Moyo Ebeveyn · Rutin, davranış kaydı ve ilerleme takibi",
- "aciklama": "Çocuğunuzun günlük rutinini planlayın, zor anları kaydedin, ilerlemeyi görün. Her adım oyunda küçük bir macera olur. 14 gün ücretsiz, kart gerekmez.",
+ "aciklama": "Çocuğunuzun günlük rutinini planlayın, zorlanılan anları kaydedin, ilerlemeyi görün. Her adım oyunda küçük bir macera olur. 14 gün ücretsiz, kart gerekmez.",
  "h1": {
-  "a": "Çocuğunuzun rutini, zor anları ve ilerlemesi bir arada",
+  "a": "Çocuğunuzun rutini, zorlanılan anları ve ilerlemesi bir arada",
   "b": "Çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform"
  },
- "alt": {
-  "a": "Günlük rutini planlayın, davranışları kaydedin, ilerlemeyi hafta hafta görün. Dilerseniz uzmanınızla paylaşın.",
-  "b": "Çocuğunuz rutin adımlarını yapar ve oyunda işaretler; siz zor anları kaydeder, neyin işe yaradığını görürsünüz.",
-  "c": "Rutin, davranış kaydı ve ilerleme takibi tek uygulamada."
- },
+ "alt": "Günlük rutini planlayın, davranışları kaydedin, ilerlemeyi hafta hafta görün. Dilerseniz uzmanınızla paylaşın.",
  "ince": "Moyo Ebeveyn 14 gün ücretsiz, kart bilgisi gerekmez.",
  "isaretler": [
   "Reklam yok",
@@ -27,8 +23,6 @@
   ],
   "cip": "Dişlerini fırçala",
   "cip_donus": "Yaptım",
-  "git": "Rutin oyuna gider",
-  "gel": "Onay size gelir",
   "anlatim": "Moyo Ebeveyn'de planladığınız rutin adımı Moyo Oyun'da macera olarak görünür; çocuğunuz adımı yapıp oyunda \"Yaptım\"a dokununca onay telefonunuza gelir. Örnek veri."
  },
  "nasil": "Rutinden takibe, beş adım.",
@@ -60,18 +54,13 @@
     "genis",
     "img/c-oyun-onay.webp",
     "Moyo Oyun: çocuğun \"Yaptım\" dediği adım, ailenin onayını bekliyor"
-   ],
-   "gorsel_anim_bc": [
-    "genis",
-    "img/c-oyun-liste.webp",
-    "Moyo Oyun: bugünün adımları, her biri bir macera ve yanında \"Yaptım\" düğmesi"
    ]
   },
   {
-   "sekme": "Zor anı kaydedin",
+   "sekme": "Zorlanılan anı kaydedin",
    "ust": "Moyo Ebeveyn · davranış kaydı",
    "baslik": "Zorlanılan anı birkaç dokunuşla kaydedin",
-   "metin": "Zor bir an olduğunda kısaca yazın: öncesinde ne vardı, ne yaşandı, ne denediniz ve çocuğunuz nasıl karşılık verdi. Ne kadar zor geçtiğini de 1'den 5'e işaretlersiniz.",
+   "metin": "Zorlanılan bir an olduğunda kısaca yazın: öncesinde ne vardı, ne yaşandı, ne denediniz ve çocuğunuz nasıl karşılık verdi. Ne kadar zor geçtiğini de 1'den 5'e işaretlersiniz.",
    "uygulama": [
     "ebeveyn"
    ],
@@ -111,77 +100,37 @@
    ]
   }
  ],
- "neden_giris": "Seansta konuşulan evde uygulanır, evde olan uzmanınıza kayıtlı ulaşır. Süreç tahminle değil, gerçekte olanla ilerler.",
- "neden": {
-  "a": {
-   "baslik": "Rutin, zor an ve uzman takibi bir arada.",
-   "kartlar": [
-    [
-     "rutin",
-     "Her gün aynı sıra",
-     "Planladığınız adımlar her gün çocuğunuzun oyununa gelir, zamanı gelince Moyo Oyun hatırlatır.",
-     ""
-    ],
-    [
-     "kayit",
-     "Zor an kayda geçer",
-     "Zorlanılan an tarihiyle saklanır; neyin işe yaradığına hafızanızla değil, kayıtlara bakarak karar verirsiniz.",
-     ""
-    ],
-    [
-     "uzman",
-     "Uzmanınız kayıtla yönlendirir",
-     "Paylaştığınız rutin ve davranış kayıtlarını görür; bir sonraki adımı bu kayıtlara bakarak önerir.",
-     "İsteğe bağlı"
-    ]
-   ]
-  },
-  "b": {
-   "baslik": "Evde olanı kaydedin, süreci birlikte yönetin.",
-   "kartlar": [
-    [
-     "rutin",
-     "Planlayın",
-     "Rutin bir kez planlanır, her gün çocuğunuzun oyununda yerini alır.",
-     ""
-    ],
-    [
-     "kayit",
-     "Kaydedin",
-     "Zor anın öncesi, kendisi ve sonrası birkaç dokunuşla kayda geçer.",
-     ""
-    ],
-    [
-     "uzman",
-     "Birlikte yönetin",
-     "Uzmanınızla aynı kayıtlara bakar, bir sonraki adıma birlikte karar verirsiniz.",
-     "İsteğe bağlı"
-    ]
-   ]
-  },
-  "c": {
-   "baslik": "Hatırlatmanın ötesinde: kayıtlı takip.",
-   "kartlar": [
-    [
-     "rutin",
-     "Hatırlatma oyundan",
-     "Adımın zamanı gelince Moyo Oyun hatırlatır, biten adım onayınıza gelir.",
-     ""
-    ],
-    [
-     "kayit",
-     "Kayıt sizden",
-     "Onayladığınız adımlar ve zor anlar tarihleriyle saklanır, geriye dönüp bakarsınız.",
-     ""
-    ],
-    [
-     "uzman",
-     "Takip uzmanınızla",
-     "Dilerseniz uzmanınız aynı kayıtları görür ve önerisini bunlara dayandırır.",
-     "İsteğe bağlı"
-    ]
-   ]
-  }
+ "neden_giris": {
+  "a": "Seansta konuşulanı evde uygularsınız. Tamamlanan rutin adımları ve kaydettiğiniz zorlanılan anlar, onay verdiyseniz uzmanınızın Moyo Uzman paneline gelir.",
+  "b": "Onay verdiyseniz, evde tuttuğunuz kayıtlar uzmanınızın Moyo Uzman paneline kendiliğinden gelir. Ayrıca anlatmanız ya da göndermeniz gerekmez.",
+  "c": "Rutin adımları ve zorlanılan anlar Moyo Ebeveyn'de kayda geçer. Paylaşıma onay verdiyseniz uzmanınız aynı kayıtları Moyo Uzman panelinde görür."
+ },
+ "neden_baslik": "Rutin, zorlanılan anlar ve uzman takibi bir arada.",
+ "neden_kartlar": [
+  [
+   "rutin",
+   "Her gün aynı sıra",
+   "Planladığınız adımlar her gün çocuğunuzun oyununa gelir, zamanı gelince Moyo Oyun hatırlatır.",
+   ""
+  ],
+  [
+   "kayit",
+   "Zorlanılan an kayda geçer",
+   "Tarihiyle saklanır; kayıtlar biriktikçe çocuğunuzun hangi anlarda zorlandığını ve neyin işe yaradığını görürsünüz.",
+   ""
+  ],
+  [
+   "uzman",
+   "Uzmanınız kayıtla yönlendirir",
+   "Paylaştığınız rutin ve davranış kayıtlarını görür; bir sonraki adımı bu kayıtlara bakarak önerir.",
+   "İsteğe bağlı"
+  ]
+ ],
+ "neden_yer": {
+  "ev": "Evde · Moyo Ebeveyn",
+  "uzman": "Uzmanınızın panelinde · Moyo Uzman",
+  "gecis": "Kayıtlar",
+  "gecis_alt": "onayınızla"
  },
  "neden_bag": "Yaklaşımımızın dayandığı araştırmalar",
  "ekosistem_baslik": "Birbirine bağlı üç uygulama.",
@@ -193,7 +142,7 @@
   ],
   [
    "ebeveyn",
-   "Aile için: planlar, onaylar, zor anı kaydeder, ilerlemeyi görür."
+   "Aile için: planlar, onaylar, zorlanılan anı kaydeder, ilerlemeyi görür."
   ],
   [
    "mercek",

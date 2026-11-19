@@ -6,13 +6,18 @@
 # 18 Kasım 2026 turu (kullanıcı geri bildirimi): açılışta küçük alt satır + tek cümlelik deneme notu + kısa güven maddeleri,
 # açılış görselinde oyun ↔ ebeveyn uygulaması ilişkisini anlatan dört vuruşluk anlatım, "Nasıl çalışır" parmakla kaydırılır,
 # "Neden Moyo" üç "neden" kartı, Güvenlik ve Fiyat bölümleri sayfadan çıktı (guven.html, ebeveyn-fiyat.html), yeni alt bilgi.
-# Alternatifler önizleme sözleşmesiyle (oniz.js): alt · anim · neden. Her [data-var] parçası kendi etiketinden
+# Alternatifler önizleme sözleşmesiyle (oniz.js; bugün h1 · nlead · ndzn). Her [data-var] parçası kendi etiketinden
 # bir tane daha içermez (span içinde span, figure içinde figure yok): canlıya aktarırken seçilmeyenler etiketiyle kesilebilir.
 #
 # 19 Kasım 2026, tur 2 (kullanıcının yanıtları): "Nasıl çalışır" başlığı a ile sabitlendi ("Rutinden takibe, beş adım.");
 # beş adım: planla · yapsın, oyunda işaretlesin (onay bu adımda) · zor anı kaydet (yeni ekran img/e-davranis.webp) · ilerleme ·
 # uzman. "Neden Moyo" yeni grup: üç başlık + üç kart takımı, başlığın altında sabit giriş cümlesi. Metinler yalnız e-metin.json'da.
 # 2. adımın oyun ekranı açılış görseline göre değişir (anim a: c-oyun-onay; b ve c: c-oyun-liste), aynı ekran sayfada iki kez görünmez.
+#
+# 19 Kasım 2026, tur 3 (kullanıcının yanıtları): "alt" a ve "anim" a sabitlendi (öteki seçeneklerin metni, işareti, stili ve betiği
+# silindi); bu sayfada "zor an" yerine "zorlanılan an"; telefonun altındaki "Moyo Ebeveyn" etiketi metni taşırıyordu (m/moyo.css).
+# "Neden Moyo" başlığı ve kartları a ile sabitlendi; giriş cümlesi (nlead) ve bölümün tasarımı (ndzn: a akış bandı · b evde → uzman
+# paneli · c üst kenarı renkli kartlar) önizlemede seçilir. Tasarımlar çatı sayfanın renkli 1-2-3 kartlarına benzemez (tur 3 kuralı).
 import json, re, html as H
 E = json.load(open('e-metin.json'))
 e = H.escape
@@ -46,14 +51,14 @@ def var(k, d, sarmal=lambda v, t: t):
 # seçilen başlıktır (kullanıcı isteği, tur 1); fiyat sayfasının alt bilgisi de aynı grubu taşır (yap_f.py, disa_aktar.py seçimi izletir).
 H1_GRUP = {'k': 'h1', 'ad': 'Açılış başlığı (alt bilgideki slogan da)', 'hedef': '.hero', 'oneri': 'a',
            'sec': [['a', "Moyo Ebeveyn'e özel"], ['b', 'Çatı sayfayla aynı (bugünkü)']]}
+# nlead (tur 3): "Neden Moyo" başlığının altındaki giriş; kayıtların uzmana nasıl ulaştığını somut söyler (önceki "evde olan uzmanınıza
+# kayıtlı ulaşır" anlaşılmıyordu). ndzn (tur 3): bölümün tasarımı; içerik üçünde aynı (neden_kartlar).
 ONIZ = [
     H1_GRUP,
-    {'k': 'alt', 'ad': 'Açılış alt satırı', 'hedef': '.hero', 'oneri': 'a',
-     'sec': [['a', 'Planlayın, kaydedin, görün'], ['b', 'Yapar, oyunda işaretler; siz kaydedersiniz'], ['c', 'Tek kısa cümle']]},
-    {'k': 'anim', 'ad': 'Açılış görseli', 'hedef': '.hero', 'oneri': 'a',
-     'sec': [['a', 'Dört adımlı anlatım'], ['b', 'İki ok, iki etiket'], ['c', 'Durağan görsel']]},
-    {'k': 'neden', 'ad': '"Neden Moyo" başlık ve kartları', 'hedef': '#degerler', 'oneri': 'a',
-     'sec': [['a', 'Rutin, zor an ve uzman takibi bir arada'], ['b', 'Evde olanı kaydedin, birlikte yönetin'], ['c', 'Hatırlatmanın ötesinde: kayıtlı takip']]},
+    {'k': 'nlead', 'ad': '"Neden Moyo" giriş cümlesi', 'hedef': '#degerler', 'oneri': 'a',
+     'sec': [['a', 'Seansta konuşulanı evde uygularsınız'], ['b', 'Kayıtlar kendiliğinden gelir'], ['c', 'Aynı kayıtlar iki ekranda']]},
+    {'k': 'ndzn', 'ad': '"Neden Moyo" tasarımı', 'hedef': '#degerler', 'oneri': 'b',
+     'sec': [['a', 'Akış bandı'], ['b', 'Evde ve uzman panelinde'], ['c', 'Üst kenarı renkli kartlar']]},
 ]
 ONERI = {g['k']: g['oneri'] for g in ONIZ}
 
@@ -141,14 +146,14 @@ def alt(sayfa):
 # gerçek görüntülerden ölçüldü: e-rutinler "Dişlerini fırçala" satırı 30–570 × 637–748 (600×1298), e-onay "Onayla"
 # 342–568 × 1160–1245, c-oyun-liste ilk satır 85–815 × 150–243 ve "Yaptım" 678–802 × 160–197 (1200×554).
 # Yollar cihazların ALTINDA çizilir (yalnız koyu zemindeki parçası görünür); çip ise üstte, yolun tamamında yürür.
-# y1/y2: çipin tam yolu (telefondaki satır → oyundaki satır; "Yaptım" → "Onayla"); s1/s2: durağan hâlde ve "iki ok"
-# seçeneğinde görünen ok uçlu yaylar (görünen parçaları).
+# y1/y2: çipin tam yolu (telefondaki satır → oyundaki satır; "Yaptım" → "Onayla"); s1/s2: durağan hâlde (hareket azaltma, betik yok)
+# görünen ok uçlu yaylar (görünen parçaları). etk-*: uygulama adları; aygıtlarından aynı uzaklıkta (geniş ~8, dar ~4 birim).
 SAHNE = {
     'g': {'boy': (620, 470),
           'oyun': (0, 93, 600, 277), 'tel': (421, 8, 199, 416.5), 'tel_pay': 6,
-          'etk-oyun': (0, 58), 'etk-tel': (520.5, 436),
+          'etk-oyun': (0, 51), 'etk-tel': (520.5, 434),
           'h-rutin': (433, 209.5, 175, 41), 'h-satir': (40, 166, 370, 51), 'h-yaptim': (335, 169, 70, 27), 'h-onay': (530, 372, 78, 34),
-          'tik': (370, 182), 'n2': (283, 36.5), 'n4': (336.5, 417), 'e1': (283, 36.5), 'e2': (336.5, 417),
+          'tik': (370, 182), 'n2': (283, 36.5), 'n4': (336.5, 417),
           'y1': 'M440 229C432 150 430 72 384 54Q260 6 146 72C124 92 120 150 122 191',
           'y2': 'M370 182C372 260 336 330 334 380Q338 432 400 426C450 422 520 410 548 389',
           's1': 'M410 60Q285 0 152 86', 's2': 'M300 376Q318 436 410 420'},
@@ -156,7 +161,7 @@ SAHNE = {
           'oyun': (0, 34, 350, 161.6), 'tel': (95, 120, 160, 334.5), 'tel_pay': 5,
           'etk-oyun': (0, 2), 'etk-tel': (175, 462),
           'h-rutin': (105, 281.5, 140, 33), 'h-satir': (22, 75, 219, 33), 'h-yaptim': (194, 77, 44, 18), 'h-onay': (182, 412, 63, 27.5),
-          'tik': (215.8, 86.1), 'n2': (56.5, 266.5), 'n4': (300, 320.5), 'e1': (47, 262), 'e2': (303, 318),
+          'tik': (215.8, 86.1), 'n2': (56.5, 266.5), 'n4': (300, 320.5),
           'y1': 'M112 298C80 300 52 290 48 250C44 200 50 140 62 92',
           'y2': 'M216 86C260 120 300 160 302 230C304 330 300 400 262 424C248 432 232 430 214 425',
           's1': 'M90 304Q40 280 56 202', 's2': 'M298 202Q320 330 262 420'},
@@ -180,12 +185,12 @@ def yer(ad):
 SAHNE_STIL = ';'.join(f'--{o}a:{s["boy"][0]} / {s["boy"][1]}' for o, s in SAHNE.items())
 
 
-def yollar(on, cip):
+def yollar():
     out = ''
     for o, boy in (('g', 'genis'), ('d', 'dar')):
         s = SAHNE[o]
-        ok = f'ok-{on}{o}'
-        hareket = f'<path class="y y1" d="{s["y1"]}"/><path class="y y2" d="{s["y2"]}"/>' if cip else ''
+        ok = f'ok-{o}'
+        hareket = f'<path class="y y1" d="{s["y1"]}"/><path class="y y2" d="{s["y2"]}"/>'
         out += (f'<svg class="ma-yol {boy}" viewBox="0 0 {s["boy"][0]} {s["boy"][1]}" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
                 f'<defs><marker id="{ok}" viewBox="0 0 10 10" refX="7.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path class="ok" d="M2 1.6 8 5 2 8.4"/></marker></defs>'
                 f'{hareket}<path class="s s1" d="{s["s1"]}" marker-end="url(#{ok})"/><path class="s s2" d="{s["s2"]}" marker-end="url(#{ok})"/></svg>')
@@ -205,13 +210,14 @@ TIK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.2 8.4l3 3 6.4-6.8
 halka = lambda ad, no: f'<i class="ma-halka {ad}" data-no="{no}"{yer(ad)}></i>'
 # Betik hareketi başlatınca her madde düğmeye dönüşür (dokununca o adıma gider); betiksiz ya da hareket azaltmada düz liste.
 adimlar = ''.join(f'<li data-b="{k}"><b>{k + 1}</b><span>{e(t)}</span></li>' for k, t in enumerate(A['adimlar']))
-# a · dört vuruş: ① telefonda rutin ② adım oyuna gider ③ çocuk "Yaptım"a dokunur ④ onay telefona gelir, oyunda taş görünür.
+# Dört vuruş (kullanıcı kararı tur 3, "anim" a): ① telefonda rutin ② adım oyuna gider ③ çocuk "Yaptım"a dokunur ④ onay telefona gelir,
+# oyunda taş görünür.
 # Ekranlar gerçek: Rutinler ve inceleme (Moyo Ebeveyn), bugünün maceraları ve "Taş geldi!" (Moyo Oyun); üstlerine yalnız çip, halka ve ok çizilir.
 # JS yoksa ya da hareket azaltma açıksa "duruk" hâl kalır: dört numara, iki ok, altında dört satırlık anlatım.
-anim_a = f'''<figure class="ma duruk" data-var="anim:a" data-ma>
+anim = f'''<figure class="ma duruk" data-ma>
           <div class="ma-kutu">
             <div class="ma-sahne" style="{SAHNE_STIL}" role="img" aria-label="{e(A["anlatim"])}">
-              {yollar("a", True)}
+              {yollar()}
               {etiketler()}
               <div class="ma-oyun"{yer("oyun")}>{OYUN("img/c-oyun-liste.webp")}{OYUN("img/c-oyun-odul.webp", ' class="ust" loading="lazy"')}</div>
               <div class="ma-tel"{yer("tel")}><div class="ma-ekran">{TEL("img/e-rutinler.webp")}{TEL("img/e-onay.webp", ' class="ust" loading="lazy"')}</div></div>
@@ -224,25 +230,6 @@ anim_a = f'''<figure class="ma duruk" data-var="anim:a" data-ma>
           </div>
           <ol class="ma-adim" aria-label="Moyo Oyun ile Moyo Ebeveyn nasıl birlikte çalışır">{adimlar}</ol>
         </figure>'''
-# b · durağan iki ekran, iki yönde akan kesikli bağ ve iki etiket
-anim_b = f'''<figure class="ma mb" data-var="anim:b" hidden>
-          <div class="ma-kutu">
-            <div class="ma-sahne" style="{SAHNE_STIL}" role="img" aria-label="{e(A["anlatim"])}">
-              {yollar("b", False)}
-              {etiketler()}
-              <div class="ma-oyun"{yer("oyun")}>{OYUN("img/c-oyun-onay.webp", ' loading="lazy"')}</div>
-              <div class="ma-tel"{yer("tel")}><div class="ma-ekran">{TEL("img/e-onay.webp", ' loading="lazy"')}</div></div>
-              <span class="mb-etk e1"{yer("e1")}>{e(A["git"])}</span><span class="mb-etk e2"{yer("e2")}>{e(A["gel"])}</span>
-            </div>
-          </div>
-        </figure>'''
-# c · bugünkü durağan düzen (17 Kasım): oyunun ekranı, önünde ebeveynin telefonu
-anim_c = f'''<figure class="mc" data-var="anim:c" hidden>
-          <div class="mh" role="img" aria-label="Çocuğun oyununda bugünkü rutin adımları; önünde ebeveynin telefonunda onay ekranı. Örnek veri.">
-            <img class="mh-oyun" src="img/c-oyun-onay.webp" alt="" width="1200" height="554" loading="lazy">
-            <img class="mh-tel" src="img/e-onay.webp" alt="" width="600" height="1298" loading="lazy">
-          </div>
-        </figure>'''
 
 # ---------- Nasıl çalışır: beş sekme, Moyo'nun gerçek ekranları (örnek veri) ----------
 ADIM = E['adimlar']
@@ -254,27 +241,40 @@ def gorsel(g, ek=''):
     return f'<figure class="shot"{ek}><img src="{src}" alt="{e(alt_)}" width="1200" height="554" loading="lazy"><figcaption>Örnek veri</figcaption></figure>'
 
 
-def medya(a):
-    """Adımın ekranı. 2. adımda oyun ekranı açılış görseline bağlı: anim a'da açılış c-oyun-liste'yi gösterdiği için burada
-    c-oyun-onay; b ve c'de açılış c-oyun-onay'ı gösterdiği için burada c-oyun-liste (aynı ekran sayfada iki kez görünmez)."""
-    if 'gorsel_anim_bc' not in a:
-        return gorsel(a['gorsel'])
-    gizli = lambda v: '' if v == ONERI['anim'] else ' hidden'
-    return (gorsel(a['gorsel'], f' data-var="anim:a"{gizli("a")}')
-            + ''.join(gorsel(a['gorsel_anim_bc'], f' data-var="anim:{v}"{gizli(v)}') for v in ('b', 'c')))
+# 2. adımın oyun ekranı c-oyun-onay: açılış anlatımı c-oyun-liste'yi gösterir, aynı ekran sayfada iki kez görünmez.
+medya = lambda a: gorsel(a['gorsel'])
 pan = ''.join(f'''        <div class="nc-p" role="tabpanel" id="nc-p{k}" aria-labelledby="nc-t{k}"{"" if k == 0 else " hidden"}>
           <div class="nc-text"><p class="step-k">{e(a["ust"])}</p><h3>{e(a["baslik"])}</h3><p>{e(a["metin"])}</p><p class="nc-apps">{"".join(chip(x) for x in a["uygulama"])}</p></div>
           <div class="nc-media{" genis" if a["gorsel"][0] == "genis" else ""}">{medya(a)}</div>
         </div>
 ''' for k, a in enumerate(ADIM))
 
-# ---------- Neden Moyo: üç "neden" kartı ----------
-# Seçenek başına bir başlık ve bir kart listesi (data-var="neden:<değer>"); başlığın altındaki giriş cümlesi hepsinde aynı.
-ND = E['neden']
+# ---------- Neden Moyo: başlık, giriş (nlead) ve üç "neden" (ndzn: üç tasarım, içerik aynı) ----------
+# Kartlar e-metin.json neden_kartlar: [simge, başlık, metin, rozet]; rozetli olan uzman kartıdır (isteğe bağlı).
+ND, YER = E['neden_kartlar'], E['neden_yer']
+gizli = lambda k, v: '' if v == ONERI[k] else ' hidden'
 bagla = lambda t: re.sub(r' (\S+)$', '\u00a0\\1', t) if t.count(' ') >= 2 else t   # son iki sözcük aynı satırda (19 Kasım QA)
-kart = lambda k, t, p, r: f'<li><span class="ic">{SVG(I[k])}</span>{f"<span class=\"nd-rozet\">{e(r)}</span>" if r else ""}<h3>{e(bagla(t))}</h3><p>{e(p)}</p></li>'
-neden_bas = var('neden', {v: e(o['baslik']) for v, o in ND.items()})
-neden = ''.join(f'<ul class="nd" data-var="neden:{v}"{"" if v == ONERI["neden"] else " hidden"}>{"".join(kart(*x) for x in o["kartlar"])}</ul>' for v, o in ND.items())
+rozet = lambda r: f'<span class="nd-rozet">{e(r)}</span>' if r else ''
+neden_giris = ''.join(f'<p class="intro nd-giris" data-var="nlead:{v}"{gizli("nlead", v)}>{" ".join(f"<span>{e(x)}</span>" for x in re.split(r"(?<=[.])\s+", t))}</p>'
+                      for v, t in E['neden_giris'].items())
+# a · akış bandı: tek beyaz şerit, üç durak bir çizgiyle bağlı (dar ekranda dikey); numara ve renkli kart yok
+nd_a = (f'<ol class="nd-akis" data-var="ndzn:a"{gizli("ndzn", "a")}>'
+        + ''.join(f'<li{" class=\"ops\"" if r else ""}><span class="nd-dur">{SVG(I[k])}</span><h3>{e(bagla(t))}{rozet(r)}</h3><p>{e(p)}</p></li>' for k, t, p, r in ND)
+        + '</ol>')
+# b · evde ve uzman panelinde: solda ailenin uygulaması (iki madde), ortada onayla geçen kayıtlar, sağda uzmanın paneli (isteğe bağlı)
+madde = lambda k, t, p: f'<li><span class="ic">{SVG(I[k])}</span><div><h3>{e(bagla(t))}</h3><p>{e(p)}</p></div></li>'
+yan = lambda cls, app, ad, xs, r='': (f'<div class="nd-yan {cls}"><p class="nd-yer"><img src="{APPS[app][0]}" alt="" width="28" height="28"><span>{e(ad)}</span>{rozet(r)}</p>'
+                                      f'<ul>{"".join(madde(k, t, p) for k, t, p, _ in xs)}</ul></div>')
+OK_SAG = '<svg class="nd-ok" viewBox="0 0 40 16" aria-hidden="true"><path d="M2 8h34M29 2.5 36 8l-7 5.5"/></svg>'
+nd_b = (f'<div class="nd-iki" data-var="ndzn:b"{gizli("ndzn", "b")}>'
+        + yan('nd-ev', 'ebeveyn', YER['ev'], [x for x in ND if not x[3]])
+        + f'<p class="nd-gec"><span class="nd-kayit">{SVG(I["kayit"])}{e(YER["gecis"])}</span>{OK_SAG}<span class="nd-gec-alt">{e(YER["gecis_alt"])}</span></p>'
+        + yan('nd-uz', 'mercek', YER['uzman'], [x for x in ND if x[3]], next(x[3] for x in ND if x[3]))
+        + '</div>')
+# c · üst kenarı renkli beyaz kartlar: simge kartın rengini taşır, numara yok
+nd_c = (f'<ul class="nd" data-var="ndzn:c"{gizli("ndzn", "c")}>'
+        + ''.join(f'<li class="t{i + 1}"><span class="ic">{SVG(I[k])}</span>{rozet(r)}<h3>{e(bagla(t))}</h3><p>{e(p)}</p></li>' for i, (k, t, p, r) in enumerate(ND))
+        + '</ul>')
 ekosis = ''.join(f'<div class="eko"><img src="{APPS[k][0]}" alt="" width="48" height="48"><h3>{APPS[k][1]}</h3><p>{e(p)}</p></div>' for k, p in E['ekosistem'])
 sss = ''.join(f'<details><summary>{q[0]}</summary><p>{q[1]}</p></details>' for q in E['sss'])
 
@@ -287,15 +287,13 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
       <div class="mhero-yazi">
         <p class="eyebrow">Ebeveynler için</p>
         <h1 id="h-hero">{var("h1", E["h1"])}</h1>
-        <p class="sub">{var("alt", E["alt"])}</p>
+        <p class="sub">{e(E["alt"])}</p>
         <div class="actions"><a class="btn btn-cta" href="{APP}#kayit">Ücretsiz deneyin</a><a class="btn btn-line" href="#nasil">Nasıl çalışır?</a></div>
         <p class="fine">{E["ince"]}</p>
         <ul class="trust" aria-label="Temel ilkeler">{"".join(f"<li>{CHECK}{x}</li>" for x in E["isaretler"])}</ul>
       </div>
       <div class="hero-media mhv">
-        {anim_a}
-        {anim_b}
-        {anim_c}
+        {anim}
       </div>
     </div>
   </section>
@@ -312,8 +310,10 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
 
   <section class="sec sec-soft" id="degerler" aria-labelledby="h-deger">
     <div class="wrap">
-      <div class="head"><p class="eyebrow">Neden Moyo</p><h2 id="h-deger">{neden_bas}</h2><p class="intro nd-giris">{" ".join(f"<span>{e(x)}</span>" for x in re.split(r"(?<=[.])\s+", E["neden_giris"]))}</p></div>
-      {neden}
+      <div class="head"><p class="eyebrow">Neden Moyo</p><h2 id="h-deger">{e(E["neden_baslik"])}</h2>{neden_giris}</div>
+      {nd_a}
+      {nd_b}
+      {nd_c}
       <p class="nd-bag"><a href="{HAKKIMIZDA}">{E["neden_bag"]} <span aria-hidden="true">→</span></a></p>
     </div>
   </section>
@@ -350,6 +350,6 @@ if __name__ == '__main__':
     assert 'istediğiniz' not in html and 'seanslar aras' not in html and '—' not in html, 'yasaklı ifade ya da uzun tire kaldı'
     gorunen = re.sub(r'<[^>]+>', ' ', re.sub(r'<(script|style|svg)\b.*?</\1>', ' ', html, flags=re.S))
     for yasak in ('oyunda yapar', 'oyunda yapsın', 'oyunda yapmak', 'tek platform', 'tek plan', 'tek kayıt', 'buluş', 'evde başlayın',
-                  'her şeyi', 'döngü kapanır', 'kurun', 'kurarsınız', 'kurduğunuz', 'kurulur', 'kurar,', ' yalnız '):
+                  'her şeyi', 'döngü kapanır', 'kurun', 'kurarsınız', 'kurduğunuz', 'kurulur', 'kurar,', ' yalnız ', 'zor an'):
         assert yasak not in gorunen.lower(), f'yasaklı ifade: {yasak}'
     open('ebeveyn.html', 'w').write(html); print('ok ebeveyn.html')

@@ -1,11 +1,5 @@
 /* Moyo (ebeveyn) sayfası: Mercek sitesinin düzeni (site.css) üstüne yalnız Moyo'ya özel parçalar (14 Kasım 2026). */
 .sayfa-moyo .logo .logo-svg { height: 26px; width: auto; }
-/* Açılış görseli: oyunun ekranı, önünde ebeveynin telefonu */
-.mh { position: relative; aspect-ratio: 16 / 9; max-width: 1080px; margin-inline: auto; }
-.mh-oyun { position: absolute; left: 0; top: 4%; width: 80%; border-radius: 18px; box-shadow: var(--shadow-hero); }
-.mh-tel { position: absolute; right: 2%; bottom: 0; height: 92%; width: auto; border: 8px solid #0B0920; border-radius: 34px; box-shadow: var(--shadow-hero); background: #fff; }
-.mh-etiket { position: absolute; left: 12px; bottom: 12%; padding: 4px 10px; border-radius: var(--r-pill); background: rgba(22, 17, 58, .78); color: #fff; font-size: 12px; font-weight: 700; }
-@media (max-width: 700px) { .mh { aspect-ratio: 4 / 3.2; } .mh-oyun { width: 100%; top: 0; } .mh-tel { height: 70%; right: 0; border-width: 5px; border-radius: 22px; } .mh-etiket { bottom: 4px; } }
 .trust svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 /* Sekmelerde telefon ekranı: okunur büyüklükte, çerçeveli */
 .nc-media figure.tel { position: relative; margin: 0 auto; width: fit-content; }
@@ -21,23 +15,14 @@
 @media (max-width: 900px) { .ekos { grid-template-columns: 1fr; max-width: 560px; margin-inline: auto; } }
 /* Canlı öncesi inceleme (14 Kasım 2026) */
 .sayfa-moyo .hero h1 { font-size: clamp(28px, 18px + 2.6vw, 52px); }
-.mh-etiket { top: calc(4% + 12px); bottom: auto; }
 .nc-media figure.tel figcaption { position: static; transform: none; margin: 10px auto 0; width: fit-content; background: none; color: var(--c-text-3); padding: 0; font-weight: 600; }
 .nc-media figure.tel.kirp { width: min(100%, 320px); }
 .nc-media figure.tel.kirp img { height: auto; width: 100%; border-radius: 24px; }
-@media (max-width: 700px) {
-  .mh { aspect-ratio: auto; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-  .mh-oyun, .mh-tel { position: static; }
-  .mh-oyun { width: 100%; }
-  .mh-tel { height: auto; width: min(68%, 280px); }
-  .mh-etiket { top: 10px; left: 10px; }
-}
 @media (max-width: 560px) {
   .nc-media figure.tel img { height: auto; width: min(84vw, 320px); }
 }
 
-/* Açılış iki sütun (kullanıcı isteği 17 Kasım 2026): solda başlık, sağda oyun + onay ekranı yan yana; kilit logo "moyo Ebeveyn".
-   Telefon, oyun ekranının sağdaki "Oyun görevleri" panelinin tam üstüne gelir: yazı ortasından kesilen bir şey kalmaz. */
+/* Açılış iki sütun (kullanıcı isteği 17 Kasım 2026): solda başlık, sağda açılış görseli (dört vuruşluk anlatım, aşağıda); kilit logo "moyo Ebeveyn". */
 .sayfa-moyo .logo .logo-svg { height: 30px; }
 .sayfa-moyo .hero { overflow: clip; }
 .mhero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); align-items: center; gap: clamp(28px, 4vw, 64px); text-align: left; }
@@ -48,9 +33,6 @@
 .sayfa-moyo .mhero .trust { justify-content: flex-start; margin-top: 24px; gap: 8px 20px; }
 .sayfa-moyo .mhero .trust li { padding: 0; border: 0; background: none; font-size: 15px; gap: 8px; }
 .sayfa-moyo .mhero .hero-media { margin: 0; width: 100%; }
-.mhero .mh { aspect-ratio: 620 / 430; max-width: none; }
-.mhero .mh-oyun { left: 0; top: 17%; width: 98.4%; }
-.mhero .mh-tel { right: 0; top: 0; bottom: auto; height: 100%; }
 @media (max-width: 1000px) {
   .mhero { grid-template-columns: 1fr; text-align: center; gap: 36px; }
   .sayfa-moyo .mhero h1, .sayfa-moyo .mhero .sub { margin-inline: auto; }
@@ -59,11 +41,6 @@
   .sayfa-moyo .nc-tabs button { font-size: 14px; padding: 5px 11px 5px 5px; gap: 6px; }
   .sayfa-moyo .nc-tabs b { width: 24px; height: 24px; font-size: 12px; }
   .sayfa-moyo .nc-tabs { gap: 2px; }
-}
-@media (max-width: 700px) {
-  .mhero .mh { aspect-ratio: auto; }
-  .mhero .mh-oyun { width: 100%; }
-  .mhero .mh-tel { height: auto; }
 }
 
 /* =====================================================================================================================
@@ -87,7 +64,7 @@
 .ma-sahne { position: relative; width: 100%; aspect-ratio: var(--ga); }
 .ma-oyun, .ma-tel, .ma-halka { position: absolute; left: var(--gx); top: var(--gy); width: var(--gw); }
 .ma-halka { height: var(--gh); }
-.ma-tik, .ma-no, .mb-etk { position: absolute; left: var(--gx); top: var(--gy); transform: translate(-50%, -50%); }
+.ma-tik, .ma-no { position: absolute; left: var(--gx); top: var(--gy); transform: translate(-50%, -50%); }
 .ma-etk { position: absolute; left: var(--gx); top: var(--gy); }
 .ma-etk.tel { transform: translateX(-50%); }
 
@@ -106,12 +83,16 @@
 .ma-yol .y.on { opacity: 1; }
 .ma-yol .s { stroke: var(--c-cta); stroke-width: 2.2; stroke-dasharray: 6 6; stroke-linecap: round; opacity: 0; }
 .ma-yol .ok { fill: none; stroke: var(--c-cta); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.ma.duruk .ma-yol .s, .mb .ma-yol .s { opacity: 1; }
+.ma.duruk .ma-yol .s { opacity: 1; }
 
 /* Uygulama adları */
 .ma-etk { z-index: 3; display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px 4px 4px; border-radius: var(--r-pill); background: rgba(255, 255, 255, .1);
   border: 1px solid var(--c-line-dark); color: var(--c-on-dark); font-size: 13px; line-height: 1.2; font-weight: 700; white-space: nowrap; }
 .ma-etk img { width: 20px; height: 20px; border-radius: 6px; }
+/* tur 3 ("Telefonun altındaki Moyo Ebeveyn çerçevesi doğru görünmüyor"): etiket sahnenin sağ kenarına yakın durduğu için kutusu kalan
+   genişliğe daralıyor, yazı çerçevenin dışına taşıyordu. Etiket metni kadar geniş; koyu zeminde koyu simgenin kenarı ince bir halkayla görünür. */
+.ma-etk { width: max-content; }
+.ma-etk img { box-shadow: 0 0 0 1px rgba(255, 255, 255, .22); }
 
 /* Vurgu halkası, numara, onay işareti, yürüyen çip */
 .ma-halka { z-index: 4; border: 2.5px solid var(--c-cta); border-radius: 10px; box-shadow: 0 0 0 4px rgba(81, 229, 106, .22); opacity: 0; transition: opacity .3s ease; pointer-events: none; }
@@ -161,16 +142,10 @@
 .ma.duruk .ma-adim button { cursor: default; color: var(--c-on-dark); }
 .ma.duruk .ma-adim button b { background: var(--c-cta); border-color: var(--c-cta); color: var(--c-ink); }
 
-/* b · iki etiketli, iki yönde akan bağ */
-.mb .ma-yol .s1, .mb .ma-yol .s2 { animation: mb-akis 1.4s linear infinite; }
-@keyframes mb-akis { to { stroke-dashoffset: -24; } }
-.mb-etk { z-index: 4; padding: 5px 12px; border-radius: var(--r-pill); background: var(--c-hero); border: 1.5px solid var(--c-cta); color: var(--c-on-dark);
-  font-size: 13.5px; line-height: 1.25; font-weight: 700; white-space: nowrap; }
-
 @media (max-width: 520px) {
   .ma-kutu { max-width: 400px; margin-inline: auto; }
   .ma-sahne { aspect-ratio: var(--da); }
-  .ma-oyun, .ma-tel, .ma-halka, .ma-tik, .ma-no, .mb-etk, .ma-etk { left: var(--dx); top: var(--dy); }
+  .ma-oyun, .ma-tel, .ma-halka, .ma-tik, .ma-no, .ma-etk { left: var(--dx); top: var(--dy); }
   .ma-oyun, .ma-tel, .ma-halka { width: var(--dw); }
   .ma-halka { height: var(--dh); border-radius: 8px; }
   .ma-tel { padding: var(--dp); }
@@ -181,7 +156,6 @@
   .ma-tik svg { width: 14px; height: 14px; }
   .ma-cip { font-size: 13px; padding: 6px 11px; }
   .ma-etk { font-size: 12.5px; }
-  .mb-etk { white-space: normal; width: max-content; max-width: 94px; text-align: center; border-radius: 12px; padding: 5px 6px; font-size: 12.5px; }
   .ma-adim { gap: 8px; }
   .ma-adim li, .ma-adim button { font-size: 13.5px; gap: 8px; }
   .ma-adim b { width: 24px; height: 24px; font-size: 12px; }
@@ -247,25 +221,99 @@
   .sayfa-moyo .nc-media.genis figure.shot figcaption { margin-top: 8px; }
 }
 
-/* ---------- Neden Moyo: üç "neden" kartı (Atlassian örnek 3: açık mavi bant, beyaz kartlar) ---------- */
+/* ---------- Neden Moyo: başlık, giriş (nlead) ve üç "neden"; tasarım ndzn ile seçilir (tur 3, 19 Kasım 2026) ----------
+   Çatı sayfanın 1-2-3 kartları (renkli zeminli üç kart, numara, aradaki oklar) ile aynı görünmez (tur 3: "tasarım perspektifinden
+   tekrara düşürmemek"): a tek beyaz şerit üstünde çizgiyle bağlı üç durak, b iki panel (evde · uzmanın panelinde) ve aradan geçen
+   kayıtlar, c beyaz kartlar ve renkli üst kenar. Üçünde numara yok. */
 .sayfa-moyo #degerler { background: #EDF0F8; }
+/* Başlığın altındaki giriş: geniş ekranda her cümle kendi satırında (tur 2) */
+.nd-giris { max-width: 780px; text-wrap: pretty; }
+@media (min-width: 761px) { .nd-giris span { display: block; } }
+.nd-rozet { display: inline-block; padding: 3px 10px; border-radius: var(--r-pill); background: var(--c-soft); border: 1px solid var(--c-line); color: var(--c-text-2);
+  font-family: var(--font-body); font-size: 12.5px; line-height: 1.3; letter-spacing: 0; font-weight: 700; white-space: nowrap; }
+.nd-bag { margin-top: 32px; text-align: center; }
+.nd-bag a { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; font-weight: 700; color: var(--c-ink); text-underline-offset: 4px; }
+
+/* a · akış bandı: üç durak bir çizgiyle bağlı; uzman durağı kesikli (isteğe bağlı). Dar ekranda çizgi dikey. */
+.nd-akis { --nd-ara: clamp(28px, 3.4vw, 56px); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 var(--nd-ara); margin: 0;
+  padding: 38px clamp(24px, 3.4vw, 52px) 40px; background: var(--c-bg); border-radius: 28px; }
+.nd-akis li { position: relative; min-width: 0; }
+.nd-dur { position: relative; z-index: 1; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--c-ink); color: #FFFFFF; }
+.nd-dur svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.nd-akis .ops .nd-dur { background: var(--c-bg); color: var(--c-ink); border: 2px dashed var(--c-ink); }
+.nd-akis li:not(:last-child)::after { content: ""; position: absolute; top: 27px; left: 72px; right: calc(16px - var(--nd-ara)); height: 2px; background: var(--c-ink);
+  -webkit-mask: linear-gradient(90deg, #000 calc(100% - 1px), transparent 0); }
+.nd-akis li:nth-last-child(2)::after { background: repeating-linear-gradient(90deg, var(--c-ink) 0 6px, transparent 6px 12px); }
+.nd-akis li:not(:last-child)::before { content: ""; position: absolute; top: 22px; right: calc(15px - var(--nd-ara)); width: 9px; height: 9px; border-top: 2px solid var(--c-ink);
+  border-right: 2px solid var(--c-ink); transform: rotate(45deg); }
+.nd-akis h3 { margin-top: 22px; font-size: 22px; line-height: 1.25; text-wrap: balance; }
+.nd-akis h3 .nd-rozet { margin-left: 8px; vertical-align: 3px; }
+.nd-akis p { margin-top: 10px; color: var(--c-text-2); font-size: 16.5px; line-height: 1.55; }
+@media (max-width: 760px) {
+  .nd-akis { grid-template-columns: minmax(0, 1fr); gap: 30px 0; padding: 28px 22px 30px; border-radius: 24px; max-width: 600px; margin-inline: auto; }
+  .nd-akis li { padding-left: 72px; min-height: 56px; }
+  .nd-dur { position: absolute; left: 0; top: 0; }
+  .nd-akis li:not(:last-child)::after { top: 64px; bottom: -22px; left: 27px; right: auto; width: 2px; height: auto;
+    -webkit-mask: linear-gradient(180deg, #000 calc(100% - 1px), transparent 0); }
+  .nd-akis li:nth-last-child(2)::after { background: repeating-linear-gradient(180deg, var(--c-ink) 0 6px, transparent 6px 12px); }
+  .nd-akis li:not(:last-child)::before { top: auto; bottom: -24px; right: auto; left: 23.5px; transform: rotate(135deg); }
+  .nd-akis h3 { margin-top: 2px; font-size: 20px; }
+  .nd-akis p { font-size: 16px; }
+}
+
+/* b · evde ve uzman panelinde: solda ailenin uygulaması (beyaz), sağda uzmanın paneli (lacivert), aradan onayla geçen kayıtlar */
+.nd-iki { display: grid; grid-template-columns: minmax(0, 1.3fr) auto minmax(0, 1fr); align-items: stretch; }
+.nd-yan { min-width: 0; border-radius: 24px; padding: 28px clamp(22px, 2.6vw, 36px) 32px; }
+.nd-ev { background: var(--c-bg); border: 1px solid #E1E5F0; }
+.nd-uz { background: var(--c-ink); color: var(--c-on-dark); }
+.nd-yer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; font-size: 14.5px; line-height: 1.3; font-weight: 800; color: var(--c-text-2); }
+.nd-yer img { flex: none; border-radius: 8px; box-shadow: 0 0 0 1px rgba(22, 17, 58, .12); }
+.nd-yer span:first-of-type { min-width: 0; }
+.nd-uz .nd-yer { color: rgba(255, 255, 255, .82); }
+.nd-uz .nd-yer img { box-shadow: none; }
+.nd-uz .nd-rozet { margin-left: auto; background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .22); color: #FFFFFF; }
+.nd-yan ul { display: grid; gap: 24px; margin-top: 24px; }
+.nd-ev ul { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px clamp(20px, 2.4vw, 36px); }
+.nd-yan li { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.nd-uz .ic { background: rgba(255, 255, 255, .1); }
+.nd-uz .ic svg { stroke: #FFFFFF; }
+.nd-yan h3 { font-size: 21px; line-height: 1.25; text-wrap: balance; }
+.nd-yan p { margin-top: 8px; color: var(--c-text-2); font-size: 16px; line-height: 1.55; }
+.nd-uz p { color: var(--c-on-dark-2); }
+.nd-gec { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0 clamp(12px, 1.6vw, 22px); text-align: center; }
+.nd-kayit { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 9px; border-radius: var(--r-pill); background: var(--c-cta); color: var(--c-cta-text);
+  font-size: 14px; line-height: 1.2; font-weight: 800; white-space: nowrap; }
+.nd-kayit svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.nd-ok { width: 44px; height: 18px; fill: none; stroke: var(--c-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.nd-gec-alt { font-size: 13.5px; line-height: 1.3; font-weight: 700; color: var(--c-text-2); white-space: nowrap; }
+@media (max-width: 1100px) and (min-width: 901px) { .nd-ev ul { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 900px) {
+  .nd-iki { grid-template-columns: minmax(0, 1fr); max-width: 600px; margin-inline: auto; }
+  .nd-ev ul { grid-template-columns: minmax(0, 1fr); }
+  .nd-yan li { flex-direction: row; align-items: flex-start; gap: 16px; }
+  .nd-yan h3 { font-size: 20px; }
+  .nd-gec { flex-direction: row; gap: 10px; padding: 14px 0; }
+  .nd-ok { width: 18px; height: 34px; transform: rotate(90deg); margin-inline: 8px; }
+}
+
+/* c · üst kenarı renkli beyaz kartlar (simgenin zemini kartın rengi; zemin beyaz, numara yok) */
 .nd { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap-card); }
-.nd li { position: relative; display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 32px 28px 30px; background: var(--c-bg); border: 1px solid #E1E5F0; border-radius: var(--r-lg); }
+.nd li { --t: #51E56A; --t-bg: #E2F8E7; position: relative; display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 36px 28px 30px; overflow: hidden;
+  background: var(--c-bg); border: 1px solid #E1E5F0; border-radius: var(--r-lg); }
+.nd li::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: var(--t); }
+.nd .t2 { --t: #8C84EC; --t-bg: #ECEBFB; }
+.nd .t3 { --t: #5E9CEB; --t-bg: #E1EFFF; }
+.nd .ic { background: var(--t-bg); }
+.nd .ic svg { stroke: var(--c-ink); }
 .nd h3 { font-size: 22px; line-height: 1.25; margin-top: 6px; text-wrap: balance; }
-/* 19 Kasım QA: üç sütunda başlık satırları ortak (subgrid): biri iki satıra inince öteki kartların metni de aynı hizadan başlar */
+/* üç sütunda başlık satırları ortak (subgrid): biri iki satıra inince öteki kartların metni de aynı hizadan başlar */
 @media (min-width: 901px) {
   .nd li { display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 14px; align-content: start; }
   .nd li > h3 { align-self: start; }
 }
 .nd p { color: var(--c-text-2); font-size: 16.5px; line-height: 1.55; }
-.nd-rozet { position: absolute; top: 40px; right: 24px; padding: 3px 10px; border-radius: var(--r-pill); background: var(--c-soft); border: 1px solid var(--c-line); color: var(--c-text-2);
-  font-size: 12.5px; line-height: 1.3; font-weight: 700; }
-/* Başlığın altındaki giriş: geniş ekranda her cümle kendi satırında (tur 2, 19 Kasım 2026) */
-.nd-giris { max-width: 760px; text-wrap: pretty; }
-@media (min-width: 761px) { .nd-giris span { display: block; } }
-.nd-bag { margin-top: 32px; text-align: center; }
-.nd-bag a { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; font-weight: 700; color: var(--c-ink); text-underline-offset: 4px; }
-@media (max-width: 900px) { .nd { grid-template-columns: minmax(0, 1fr); max-width: 600px; margin-inline: auto; } .nd li { padding: 26px 22px; } .nd-rozet { top: 34px; right: 20px; } }
+.nd .nd-rozet { position: absolute; top: 46px; right: 24px; }
+@media (max-width: 900px) { .nd { grid-template-columns: minmax(0, 1fr); max-width: 600px; margin-inline: auto; } .nd li { padding: 30px 22px 26px; } .nd .nd-rozet { top: 40px; right: 20px; } }
 
 /* ---------- Alt bilgi: logo + açılış başlığı, dört sütun (Ürün · Hesap · Kurumsal · Yasal) ---------- */
 .sayfa-moyo footer .wrap { grid-template-columns: minmax(0, 1.5fr) repeat(4, minmax(0, 1fr)); gap: 40px 28px; }

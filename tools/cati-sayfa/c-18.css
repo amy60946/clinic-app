@@ -4,10 +4,10 @@
    1) Ekosistem sahnesi telefonda ve tablette parmakla kaydırılır (eko.js): pencere + şerit, ipucu, ok düğmeleri
    2) Sahnenin zemini: açık panel (tur 2'de tek sürüm); bir kezlik giriş hareketi
    3) 6. adım görseli: halka çizimi (c-sema.py; a döngü çemberi · b yörünge · c dört adımlı halka · d üç renkli halka)
-   4) 1-2-3 kartları (.uc): renkli üç kart (tur 2'de tek sürüm); 4b) "hikaye" a: kartların altında ürün ekranı
-   5) Kompakt "Nasıl çalışır" ("hikaye" c): kaydırma, tablette sekme düzeni (adım değişince yükseklik sabit, sekmeler ortada)
-   6) Küçük düzeltmeler: cümle sınırında satır, hareket azaltmada 2. adım görseli, tablette uygulama kartları
-   7) Kompakt "Nasıl çalışır": görsel kutusu her adımda aynı boyda
+   4) 1-2-3 kartları (.uc): renkli üç kart (tur 2'de tek sürüm); 4b) kartların altında ürün ekranı (tur 3'te tek sürüm)
+   5) (tur 3'te kalktı: ayrı ürün anlatımı #nasil / #nasil-k, kaydırma ve sekme düzeni)
+   6) Küçük düzeltmeler: cümle sınırında satır, tablette uygulama kartları
+   7) (tur 3'te kalktı: ayrı anlatımın görsel kutusu)
    8) Tur 2: sahnedeki ekranlar büyük (masaüstünde ortadaki ekran ~%25 geniş, telefon ve tablet kartlarında görsel ~%25 yüksek) */
 
 /* ---------- 0) Alternatifler ---------- */
@@ -119,27 +119,27 @@
   .sayfa-c .uc .uc-k p { font-size: 16px; }
 }
 
-/* ---------- 4b) "hikaye" a: her kartın altında bir gerçek ürün ekranı, ayrı ürün anlatımı yok ----------
+/* ---------- 4b) Her kartın altında bir gerçek ürün ekranı (kullanıcı kararı tur 3, 19 Kasım 2026: ayrı ürün anlatımı yok) ----------
    Ekran kartın alt kenarından taşar gibi durur (kart köşesinde kırpılır; oranı korunur, büyütülmez): telefonlar ortada ve üst kısmı
    görünür. Moyo Uzman ekranı (3. kart) 19 Kasım QA'dan beri taşmaz: img/c-davranis.webp panelden temiz bir sınırda kırpıldı (ilk cümlenin
    sonu, "Öncül" sütunu ile "Sonuç" sütunu arası, 2. satırın çizgisi) ve kartta bütünüyle görünür; önceden kartın sağ kenarı tablodaki
    sözcükleri ortasından kesiyordu ("Söyl", telefonda ~%20'si kesik). Masaüstünde üç sütun; tablette (720–999 px) kartlar alt alta, ekran
    sağda; telefonda alt alta, ekran yazının altında. */
-html[data-v-hikaye="a"] .sayfa-c .uc-k { padding-bottom: 0; }
+.sayfa-c .uc-k { padding-bottom: 0; }
 .uc-gorsel { --ug: 330px; position: relative; flex: none; height: var(--ug); margin: auto -28px 0; overflow: hidden; border-radius: 0 0 28px 28px; }
 .uc-gorsel img { position: absolute; display: block; max-width: none; height: auto; border: 7px solid #0B0920; background: #0B0920;
   box-shadow: 0 24px 50px -22px rgba(22, 17, 58, .45); -webkit-user-drag: none; }
 .uc-telefon img { left: 50%; top: 26px; width: min(256px, calc(100% - 48px)); transform: translateX(-50%); border-radius: 32px; }
 .uc-panel img { left: 50%; top: 26px; transform: translateX(-50%); width: auto; height: auto; max-width: calc(100% - 56px); max-height: calc(var(--ug) - 48px);
   border-width: 6px; border-radius: 16px; }
-@media (min-width: 1000px) { html[data-v-hikaye="a"] .sayfa-c .uc-k + .uc-k::before { top: 46px; margin-top: -8px; } }
+@media (min-width: 1000px) { .sayfa-c .uc-k + .uc-k::before { top: 46px; margin-top: -8px; } }
 @media (min-width: 1000px) and (max-width: 1199px) { .uc-gorsel { --ug: 300px; } .uc-telefon img { width: min(236px, calc(100% - 36px)); } }
 @media (min-width: 720px) and (max-width: 999px) {
-  html[data-v-hikaye="a"] .sayfa-c .uc { grid-template-columns: 1fr; gap: 16px; }
-  html[data-v-hikaye="a"] .sayfa-c .uc-k { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 46%); grid-template-rows: auto auto 1fr; column-gap: 28px; padding: 26px 0 0 28px; }
-  html[data-v-hikaye="a"] .sayfa-c .uc-k > :not(.uc-gorsel) { grid-column: 1; }
-  html[data-v-hikaye="a"] .sayfa-c .uc-k h3 { min-height: 0; font-size: 22px; }
-  html[data-v-hikaye="a"] .sayfa-c .uc .uc-k p { font-size: 16.5px; padding-bottom: 26px; }
+  .sayfa-c .uc { grid-template-columns: 1fr; gap: 16px; }
+  .sayfa-c .uc-k { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 46%); grid-template-rows: auto auto 1fr; column-gap: 28px; padding: 26px 0 0 28px; }
+  .sayfa-c .uc-k > :not(.uc-gorsel) { grid-column: 1; }
+  .sayfa-c .uc-k h3 { min-height: 0; font-size: 22px; }
+  .sayfa-c .uc .uc-k p { font-size: 16.5px; padding-bottom: 26px; }
   .uc-gorsel { --ug: 330px; grid-column: 2; grid-row: 1 / span 3; align-self: end; margin: 0; border-radius: 0 0 24px 0; }
   .uc-telefon img { top: 0; width: 248px; }
   .uc-panel img { left: 0; top: 26px; transform: none; max-width: calc(100% - 28px); max-height: calc(var(--ug) - 52px); }
@@ -150,33 +150,9 @@ html[data-v-hikaye="a"] .sayfa-c .uc-k { padding-bottom: 0; }
   .uc-panel img { max-width: calc(100% - 44px); }
 }
 
-/* ---------- 5) Kompakt "Nasıl çalışır" (telefon ve tablet): parmakla sola / sağa ---------- */
-.sayfa-c .nk[data-duzen="sekme"] .nk-paneller { touch-action: pan-y pinch-zoom; -webkit-user-select: none; user-select: none; outline-offset: 4px; }
-.sayfa-c .nk[data-duzen="sekme"] .nk-paneller img { -webkit-user-drag: none; }
-@media (hover: hover) and (pointer: fine) { .sayfa-c .nk[data-duzen="sekme"] .nk-paneller { cursor: grab; } .sayfa-c .nk[data-duzen="sekme"] .nk-paneller.surukleniyor { cursor: grabbing; } }
-/* sekmeler ortada (17 Kasım'da sola yaslı kalıyordu) */
-.sayfa-c .nk[data-duzen="sekme"] .nk-sekmeler { display: flex; }
-/* Gizli adımlar da etkin adımla aynı düzende durur: bölümün yüksekliği adım değişince zıplamaz (önceden yalnız etkin adım iki sütundu,
-   gizli adımlar tek sütunda uzayıp yüksekliği belirliyordu). */
-@media (min-width: 700px) {
-  .sayfa-c .nk[data-duzen="sekme"] .nk-adim { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: center; gap: 32px; }
-}
-/* Tablet dik (700–899 px): oyun + onay ekranı dar sütunda küçük kalıyordu; bu adımda görsel üstte, tam genişlikte, yazı altında */
-@media (min-width: 700px) and (max-width: 899px) {
-  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ikili { grid-template-columns: minmax(0, 1fr); gap: 22px; align-content: center; }
-  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ikili .nk-gorsel { height: auto; }
-  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ikili .ust-uste { width: min(100%, 640px); }
-  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ikili .nk-yazi { width: min(100%, 640px); margin-inline: auto; }
-}
-
 /* ---------- 6) Küçük düzeltmeler (18 Kasım 2026 turu, ikinci geçiş) ---------- */
 /* Uzun tanıtım cümleleri geniş ekranda cümle sınırında satır atlar (yap_c.py cumleler) */
 @media (min-width: 720px) { .sayfa-c .cumle { display: inline-block; } }
-/* Hareket azaltmada (ve betik yokken) geniş ekrandaki alt alta anlatım: 2. adımın oyun + onay görseli sıfır genişliğe çöküyordu
-   (--gh tanımsız); kayan sahnedeki ölçüyle aynı */
-.sayfa-c .hk-liste .l-gorsel.genis .ust-uste { width: 100%; max-width: 680px; aspect-ratio: 620 / 430; }
-.sayfa-c .hk-liste .l-gorsel.genis .ust-uste .uu-oyun { width: 98.4%; top: 17%; }
-.sayfa-c .hk-liste .l-gorsel.genis .ust-uste .uu-tel { width: auto; height: 100%; top: 0; bottom: auto; right: 0; border-radius: 20px; }
 /* "Ekosistemin Uygulamaları": tablet dikte (700–860 px) üç kart yan yana (önceden tek sütunda, geniş ve seyrek duruyordu) */
 @media (min-width: 700px) and (max-width: 860px) {
   .sayfa-c #sonraki .kartlar3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
@@ -184,34 +160,6 @@ html[data-v-hikaye="a"] .sayfa-c .uc-k { padding-bottom: 0; }
   .sayfa-c #sonraki .kart h3 { font-size: 19px; }
   .sayfa-c #sonraki .kart p { font-size: 15px; }
 }
-
-/* ---------- 7) Kompakt "Nasıl çalışır" (19 Kasım 2026 QA): üç ürünün görsel kutusu her genişlikte aynı boyda ----------
-   Önceden her adımın görsel yüksekliği ayrıydı (390 px'te 490 / 616 / 743, 820 px'te 560 / 356 / 460); adımlar aynı hücrede
-   üst üste durduğu için kısa adımların altında ‹ 1/3 › düğmelerine kadar 280 px'e varan boşluk kalıyordu. Şimdi kutu tek ölçü,
-   görseller içine sığar (oranı korunur); en uzun adımla en kısa adım arasında yalnız yazı farkı kalır. */
-.sayfa-c .nk[data-duzen="sekme"] .nk-adim:is(.t-ebeveyn, .t-ikili, .t-mercek) { --gh: clamp(300px, 52svh, 440px); }
-.sayfa-c .nk[data-duzen="sekme"] .nk-adim:is(.t-ebeveyn, .t-ikili, .t-mercek) .nk-gorsel { height: var(--gh); }
-.sayfa-c .nk[data-duzen="sekme"] .nk-gorsel > img { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
-/* Telefon (≤ 560 px): oyun ekranı üstte (kutunun en çok %40'ı), ebeveynin onay telefonu kalan yükseklikte, üst üste binmeden */
-@media (max-width: 560px) {
-  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ikili .nk-gorsel { height: calc(var(--gh) + 24px); }   /* iki ekran: biraz daha yer (öteki adımların yazısı ~25 px kısa) */
-  .sayfa-c .nk[data-duzen="sekme"] .t-ikili .ust-uste { height: 100%; gap: 10px; justify-content: center; }
-  .sayfa-c .nk[data-duzen="sekme"] .t-ikili .uu-oyun { flex: none; width: auto; height: auto; max-width: 100%; max-height: 40%; }
-  .sayfa-c .nk[data-duzen="sekme"] .t-ikili .uu-tel { flex: 1 1 0; min-height: 0; width: auto; height: auto; max-width: 100%; }
-}
-/* Tablet ve dokunmatik geniş ekran (≥ 700 px): görsel solda, yazı sağda; kutu üç adımda aynı */
-@media (min-width: 700px) {
-  .sayfa-c .nk[data-duzen="sekme"] .nk-adim:is(.t-ebeveyn, .t-ikili, .t-mercek) { --gh: clamp(340px, 50svh, 520px); }
-}
-/* Tablet dik (700–899 px): oyun adımında görsel üstte, yazı altında kalır; görsel, ikisinin toplamı öteki adımların kutusunu
-   geçmeyecek kadar (yazı ~150 px) */
-@media (min-width: 700px) and (max-width: 899px) {
-  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ikili .nk-gorsel.nk-gorsel { height: auto; }
-  .sayfa-c .nk[data-duzen="sekme"] .nk-adim.t-ikili .ust-uste { width: min(100%, 640px, calc((var(--gh) - 160px) * 1.8)); }
-}
-/* 561 px ve üstü, oyun + onay üst üste görseli: onay telefonu yalnız yüksekliğinden boyutlanır. Önceden 561–760 px'te v4.css'in
-   telefon (alt alta) genişliği de geçerliydi, telefon 230 × 243 gibi basık çiziliyordu (iki düzende de). */
-@media (min-width: 561px) { .sayfa-c .nk .t-ikili .uu-tel.uu-tel { width: auto; } }
 
 /* ---------- 8) Tur 2 (kullanıcı, 19 Kasım 2026: "kayan ekranların içeriği zor seçiliyor"): ekranlar büyük ----------
    Masaüstü sahnesi: ortadaki ekranın genişliği min(48vw, 700px) yerine min(62vw, 880px) (1440 px'te 691 → 880, %27); panel ve oyun
@@ -224,7 +172,6 @@ html[data-v-hikaye="a"] .sayfa-c .uc-k { padding-bottom: 0; }
 @media (max-height: 720px) { .sayfa-c .d-yazilar { min-height: 86px; margin-top: 4px; } .sayfa-c .d-nokta { margin-top: 4px; } }
 .sayfa-c .d-mobil { --kw: min(calc(100vw - 84px), 420px); --dg: clamp(300px, 44svh, 380px); }
 .sayfa-c .d-gorsel { height: var(--dg); }
-.sayfa-c .d-gorsel .ikili img { max-height: calc(var(--dg) - 20px); }
 /* 19 Kasım QA: tablette ve geniş ekrandaki kartlarda görsel ekranın yüksekliğiyle büyür (1024 × 768'de ~470, 820 × 1180'de 580 px;
    önceden 384 / 400 px'te kalıyor, telefonlar 1-2-3 kartlarındakinden küçük görünüyordu). Kart yazısı ve sayaç için ~300 px bırakılır.
    ≥ 1025 px (hareket azaltma ya da dokunmatik büyük ekran): kart sahnedeki ortadaki ekran kadar geniş (912 px, görsel 880 px), Moyo Uzman'ın

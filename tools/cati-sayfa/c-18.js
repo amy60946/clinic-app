@@ -1,4 +1,4 @@
-// Çatı sayfa, 18 Kasım 2026 turu: küçük ortak yardımcılar. eko.js ve kompakt.js'ten ÖNCE yüklenir.
+// Çatı sayfa, 18 Kasım 2026 turu: küçük ortak yardımcılar. eko.js'ten ÖNCE yüklenir (tur 3: kompakt.js bu sayfada yok).
 // 1) moyoKaydir(el, o): parmakla (fareyle de) sola / sağa kaydırma. Öğe CSS'te touch-action: pan-y taşır; dikey hareket sayfanın
 //    kendi kaydırmasıdır (tarayıcı pointercancel yollar, adım değişmez). Yatay hareket 8 pikseli geçince kilitlenir:
 //    o.surukle(dx) parmağı izler, o.bitir(dx) bırakınca çağrılır (eşik çağıranda: 40 piksel), o.iptal() vazgeçince.

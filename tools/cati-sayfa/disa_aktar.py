@@ -26,7 +26,7 @@ import yap_c  # noqa: E402  (önizleme adresleri için)
 SAYFA = {'c.html': 'index.html', 'ebeveyn.html': 'ebeveyn/index.html', 'ebeveyn-fiyat.html': 'ebeveyn/fiyat/index.html',
          'hakkimizda.html': 'hakkimizda/index.html', 'guven.html': 'guven/index.html'}
 YOL = {'c.html': '/', 'ebeveyn.html': '/ebeveyn/', 'ebeveyn-fiyat.html': '/ebeveyn/fiyat/', 'hakkimizda.html': '/hakkimizda/', 'guven.html': '/guven/'}
-VARLIK = ('ortak.css', 'c.css', 'beyaz.css', 'v4.css', 'c-18.css', 'k.css', 'hikaye.js', 'eko.js', 'kompakt.js', 'menu.js', 'c-18.js')
+VARLIK = ('ortak.css', 'c.css', 'beyaz.css', 'v4.css', 'c-18.css', 'k.css', 'eko.js', 'menu.js', 'c-18.js')
 # Sekme simgesi (kullanıcı kararı 18 Kasım 2026; dosyalar Marketing setinden parent-app site/public/img'de → /img/…)
 FAV_ONIZLEME = '<link rel="icon" href="img/favicon-moyo.svg" type="image/svg+xml">'
 FAV = ('<link rel="icon" href="/img/favicon.svg" type="image/svg+xml"><link rel="icon" href="/img/favicon.ico" sizes="any">'
