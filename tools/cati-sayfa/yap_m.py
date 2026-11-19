@@ -6,7 +6,7 @@
 # 18 Kasım 2026 turu (kullanıcı geri bildirimi): açılışta küçük alt satır + tek cümlelik deneme notu + kısa güven maddeleri,
 # açılış görselinde oyun ↔ ebeveyn uygulaması ilişkisini anlatan dört vuruşluk anlatım, "Nasıl çalışır" parmakla kaydırılır,
 # "Neden Moyo" üç "neden" kartı, Güvenlik ve Fiyat bölümleri sayfadan çıktı (guven.html, ebeveyn-fiyat.html), yeni alt bilgi.
-# Alternatifler önizleme sözleşmesiyle (oniz.js; bugün h1 · nlead · ndzn). Her [data-var] parçası kendi etiketinden
+# Alternatifler önizleme sözleşmesiyle (oniz.js; tur 4'te nlead · ndzn). Her [data-var] parçası kendi etiketinden
 # bir tane daha içermez (span içinde span, figure içinde figure yok): canlıya aktarırken seçilmeyenler etiketiyle kesilebilir.
 #
 # 19 Kasım 2026, tur 2 (kullanıcının yanıtları): "Nasıl çalışır" başlığı a ile sabitlendi ("Rutinden takibe, beş adım.");

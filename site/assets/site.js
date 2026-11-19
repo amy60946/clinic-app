@@ -79,8 +79,8 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
     d.head.appendChild(ld);
   }
 
-  /* 3. Üst menü: üst çubuk çizgisi, telefonda tam ekran menü */
-  var head = d.getElementById('top'), btn = d.querySelector('.menu-btn'), menu = d.getElementById('menu');
+  /* 3. Üst menü: telefonda tam ekran menü */
+  var btn = d.querySelector('.menu-btn'), menu = d.getElementById('menu');
   var outside = function () { return d.querySelectorAll('body > :not(header):not(script)'); };
   var isOpen = function () { return root.classList.contains('menu-open'); };
   var setMenu = function (open, refocus) {
@@ -102,7 +102,6 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
 
   var dock = d.getElementById('dock'), hero = d.querySelector('.hero, .ph');
   var onScroll = function () {
-    if (head) head.classList.toggle('scrolled', window.scrollY > 4);
     if (!dock || !hero) return;
     var on = window.scrollY > hero.offsetHeight - 120 && (window.innerHeight + window.scrollY) < d.body.scrollHeight - 220;
     dock.classList.toggle('on', on);
@@ -114,7 +113,7 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
 
   /* 4. Ürün kayıtları: görünür olunca sessiz döngü; duraklat/oynat düğmesi (5 sn'den uzun hareket için zorunlu).
      Hareket azaltma açıksa kendiliğinden başlamaz; düğmeyle bir kez, döngüsüz oynar. Betik yoksa ya da video açılmazsa kapak görseli kalır. */
-  var WEBM = { aile: 1, pano: 1 }; // webm yalnız mp4ten küçükse var (hero, kutuphane, davranis, rapor yalnız mp4)
+  var WEBM = { aile: 1 }; // webm yalnız mp4ten küçükse var (hero, kutuphane, davranis, rapor yalnız mp4)
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   var ICONS = '<svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1"/><rect x="9.4" y="2" width="3.6" height="12" rx="1"/></svg>' +
     '<svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .8.9 1.3 1.6.8l8.6-5.8c.6-.4.6-1.2 0-1.6L5.6 1.4C4.9.9 4 1.4 4 2.2z"/></svg>';
@@ -415,10 +414,10 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
     kur();
   });
 
-  /* 8. Pano büyüteci ([data-pl], 19 Kasım 2026, tur 3): görünür olunca halkalar, çizgiler ve büyüteçler sırayla belirir (CSS .bekle).
-     Hareket azaltmada, eski tarayıcıda ve betik yoksa .bekle hiç eklenmez: her şey baştan yerinde durur. */
+  /* 8. Pano: renkli başlıklar ([data-pn], 19 Kasım 2026, tur 4): görünür olunca başlık bantları soldan sağa çizilir, kart çizgileri
+     sırayla belirir (CSS .bekle). Hareket azaltmada, eski tarayıcıda ve betik yoksa .bekle hiç eklenmez: her şey baştan yerinde durur. */
   if ('IntersectionObserver' in window && !reduce.matches) {
-    each('[data-pl]', function (fig) {
+    each('[data-pn]', function (fig) {
       fig.classList.add('bekle');
       var io = new IntersectionObserver(function (es) {
         if (!es[0].isIntersecting) return;
@@ -429,17 +428,44 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
     });
   }
 
-  /* ONIZ:BAS (yalnız önizleme: kabuk bir seçeneği değiştirince sekmelerin yüksekliği ve şerit yeniden ölçülür; "tema" a seçiliyse
-     tarayıcı çubuğunun rengi bugünkü koyu menüye döner. Canlıda açık tema: <meta name="theme-color" content="#FFFFFF">) */
-  var renk = function () {
-    var m = d.querySelector('meta[name="theme-color"]');
-    if (m) m.setAttribute('content', root.getAttribute('data-v-tema') === 'a' ? '#2D294E' : '#FFFFFF');
-  };
-  renk();
+  /* ONIZ:BAS (yalnız önizleme) */
+  // Kabuk bir seçeneği değiştirince sekmelerin yüksekliği ve şerit yeniden ölçülür.
   window.addEventListener('oniz', function () {
-    renk();
     kutular.forEach(function (x) { x.esitle(); });
     window.dispatchEvent(new Event('resize'));
+  });
+  // "pvurgu" c: sırayla vurgu ([data-pc]). Görünürken 2,8 sn'de bir sonraki bölüm (data-on 1 → 2 → 3), iki turdan sonra üçü birlikte
+  // ("hepsi"). Açıklamanın üstüne gelince ya da odaklanınca o bölüm; dokununca o bölüm sabitlenir (aria-pressed), yeniden dokununca
+  // bırakılır. Kullanıcı bir kez dokunur, üstüne gelir ya da odaklanırsa kendiliğinden geçiş biter. Hareket azaltmada kendiliğinden geçiş yok.
+  each('[data-pc]', function (fig) {
+    var dugme = Array.prototype.slice.call(fig.querySelectorAll('[data-n]')), sabit = null, adim = 0, zaman = 0, bitti = false, gorunur = false;
+    var goster = function (n) {
+      fig.setAttribute('data-on', n || 'hepsi');
+      dugme.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-n') === sabit)); });
+    };
+    var dur = function () { bitti = true; clearTimeout(zaman); };
+    var ilerle = function () {
+      clearTimeout(zaman);
+      if (bitti || !gorunur || reduce.matches || fig.hidden) return;
+      if (adim >= 6) { dur(); goster(null); return; }
+      goster(String(adim % 3 + 1)); adim++;
+      zaman = setTimeout(ilerle, 2800);
+    };
+    dugme.forEach(function (b) {
+      var n = b.getAttribute('data-n');
+      b.addEventListener('mouseenter', function () { dur(); goster(n); });
+      b.addEventListener('focus', function () { dur(); goster(n); });
+      b.addEventListener('mouseleave', function () { goster(sabit); });
+      b.addEventListener('blur', function () { goster(sabit); });
+      b.addEventListener('click', function () { dur(); sabit = sabit === n ? null : n; goster(sabit || n); });
+    });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) {
+        gorunur = es[0].isIntersecting && es[0].intersectionRatio >= 0.5;
+        if (gorunur) { if (!bitti) ilerle(); } else clearTimeout(zaman);
+      }, { threshold: [0, 0.5] }).observe(fig);
+    }
+    window.addEventListener('oniz', function (e) { if (e.detail && e.detail.k === 'pvurgu' && e.detail.v === 'c' && !bitti) { adim = 0; ilerle(); } });
   });
   /* ONIZ:SON */
 
