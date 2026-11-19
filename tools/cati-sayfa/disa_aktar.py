@@ -139,6 +139,8 @@ for ad in SAYFA:
         s = cut(s, '<div class="alt-secici"', '</div>')          # eski önizleme seçicileri (artık üretilmiyorsa etkisiz)
         s = cut(s, '<div class="nk-secici"', '</div>')
         s = s.replace('<title>Moyo · Çatı sayfa</title>', '<title>Moyo · Çocuk, ebeveyn ve uzman için rutin ve davranış takibi</title>')
+        if 'rel="canonical"' not in s:
+            s = s.replace('</title>', '</title><link rel="canonical" href="https://moyoapp.com.tr/">', 1)
         if 'name="description"' not in s:
             s = s.replace('</title>', '</title><meta name="description" content="Rutini kurun, davranışları kaydedin, ilerlemeyi görün; dilerseniz uzmanınızla paylaşın. Moyo Ebeveyn, Moyo Oyun ve Moyo Uzman.">', 1)
     s = baglantilar(canli(ad, s))
