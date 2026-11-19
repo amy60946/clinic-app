@@ -74,7 +74,7 @@ html = f'''{M.bas(F["baslik"], F["aciklama"], "/ebeveyn/fiyat/")}
   <section class="sec sec-white" aria-labelledby="h-cmp">
     <div class="wrap">
       <div class="cmp">
-        <table>
+        <table aria-labelledby="h-cmp">
           <caption><h2 id="h-cmp">Planları karşılaştırın</h2><p class="fy-tnot">{e(F["tablo_not"])}</p></caption>
           <thead>
             <tr>

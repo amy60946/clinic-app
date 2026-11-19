@@ -265,3 +265,5 @@
 @media (max-width: 480px) { .fy-oyun { flex-direction: column; align-items: flex-start; padding: 20px; gap: 12px; } .fy-deneme { padding: 14px 16px; } }
 .sayfa-fiyat .plan .price { min-height: 44px; align-items: flex-end; }
 .sayfa-fiyat .plan .per { min-height: 2.9em; }
+/* Karşılaştırma tablosu, telefonda (≤ 640 px; tablo blok düzende): başlık ve altındaki not sütun genişliğinde (önceden ~180 px'e daralıp kötü bölünüyordu) */
+@media (max-width: 640px) { .sayfa-fiyat .cmp caption { display: block; width: 100%; } }

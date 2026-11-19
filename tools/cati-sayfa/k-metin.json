@@ -35,7 +35,7 @@
        "metin": "Ebeveyn adımı onaylar. Zor bir an olduysa o gün kaydeder: ne oldu, ne denendi, çocuk nasıl karşılık verdi."},
       {"ad": "İlerlemeyi görmek", "uygulama": "Moyo Ebeveyn", "ikon": "img/ikon-moyo.svg",
        "metin": "Tamamlanan adımlar ve davranış kayıtları gün, hafta ve ay olarak bir arada görünür."},
-      {"ad": "Dilerseniz uzmanla paylaşmak", "uygulama": "Moyo Uzman", "ikon": "img/ikon-mercek.svg", "istege": true,
+      {"ad": "Dilerseniz uzmanla\u00a0paylaşmak", "uygulama": "Moyo Uzman", "ikon": "img/ikon-mercek.svg", "istege": true,
        "metin": "Ebeveyn onay verirse uzman kayıtları okur, ebeveyn eğitimi gönderir, rutin önerir. Öneriyi eklemek ebeveynin kararıdır."}
     ],
 

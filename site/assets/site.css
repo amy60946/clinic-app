@@ -435,6 +435,8 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-dark); p
   .cmp tbody th[scope="row"] { grid-column: 1 / -1; padding: 14px 0 2px; border-bottom: 0; }
   .cmp tbody td { width: auto; padding: 4px 8px 14px; }
   .cmp .grp th { grid-column: 1 / -1; }
+  /* tablo blok olunca başlık (caption) kendi içeriği kadar daralıyordu (390 px'te ~180 px); sütun genişliğinde dursun */
+  .cmp caption { display: block; width: 100%; }
 }
 
 .trial { margin-top: 0; }

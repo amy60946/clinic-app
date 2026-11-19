@@ -237,3 +237,7 @@ html[data-v-kkisi="b"] .k-kisi-birlikte .k-karsilik { margin-top: 0; border: 1px
   .k-gorur { grid-template-columns: minmax(0, 1fr); }
   .k-bu a { min-height: 38px; padding: 6px 12px; font-size: 14px; }
 }
+
+/* Hakkımızda: başlıklarda ve adım başlıklarında tek kelimelik son satır olmasın (19 Kasım 2026 QA: 1440 px'te 5. adım
+   "Dilerseniz uzmanla / paylaşmak"). text-wrap desteklemeyen tarayıcılar için metinde "uzmanla paylaşmak" bölünmez boşlukla. */
+.k-hakkimizda main :is(h1, h2, h3), .k-hakkimizda .k-adim h3 { text-wrap: balance; }
