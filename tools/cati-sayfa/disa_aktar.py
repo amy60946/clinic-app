@@ -143,6 +143,7 @@ for ad in SAYFA:
             s = s.replace('</title>', '</title><link rel="canonical" href="https://moyoapp.com.tr/">', 1)
         if 'name="description"' not in s:
             s = s.replace('</title>', '</title><meta name="description" content="Rutini kurun, davranışları kaydedin, ilerlemeyi görün; dilerseniz uzmanınızla paylaşın. Moyo Ebeveyn, Moyo Oyun ve Moyo Uzman.">', 1)
+    s = re.sub(r'<!-- ONIZ:BAS -->.*?<!-- ONIZ:SON -->\s*', '', s, flags=re.S)   # yalnız önizleme (ör. ekip yer tutucusu)
     s = baglantilar(canli(ad, s))
     assert 'claude.ai' not in s and 'Önizleme' not in s, f'{ad}: önizleme izi kaldı'
     assert 'href="#"' not in s, f'{ad}: boş bağlantı kaldı'

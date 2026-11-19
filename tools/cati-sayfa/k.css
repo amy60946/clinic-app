@@ -171,7 +171,7 @@ html[data-v-kdzn="b"] .k-ilke h3 { margin-top: 9px; }
 /* ---------- Yalnız önizleme: ekip ve hikâye yer tutucusu (ONIZ:BAS/SON; canlıya taşınmaz) ---------- */
 .k-ekip { padding-top: 0; }
 .k-yer { border: 2px dashed #C9B26A; border-radius: 22px; background: #FFFCF2; padding: 22px 24px 24px; }
-.k-yer-not { display: inline-block; font-size: 12.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #7A5600; background: #FFEFC2; border-radius: 999px; padding: 4px 10px; }
+.k-yer p.k-yer-not { display: inline-block; margin: 0; font-size: 12.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #7A5600; background: #FFEFC2; border-radius: 999px; padding: 4px 10px; }
 .k-yer h2 { font-size: clamp(24px, 2.6vw, 30px); line-height: 1.18; font-weight: 800; margin-top: 12px; }
 .k-yer p { font-size: 16px; line-height: 1.55; color: var(--yazi-2); margin-top: 8px; }
 .k-yer ul { margin: 12px 0 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: 15.5px; line-height: 1.5; color: var(--yazi-2); }

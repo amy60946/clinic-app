@@ -60,7 +60,6 @@
 .sayfa-c .d-yazi-m .rol, .sayfa-c .d-kart .rol { color: #0A8F3A; }
 .sayfa-c .d-yazi-m .rol { justify-content: center; }
 .sayfa-c .d-nokta { margin-top: 12px; }
-.sayfa-c .d-kapanis { padding-top: 18px; }
 /* telefon ve iPad: yana kaydırılan kartlar; ortadaki net, yandakiler bulanık ve küçük */
 .sayfa-c .d-mobil { padding-top: 6px; }
 .sayfa-c .d-nokta-m { margin: 14px auto 0; display: flex; }

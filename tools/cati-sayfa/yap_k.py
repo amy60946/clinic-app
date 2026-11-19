@@ -145,7 +145,7 @@ def kunye(k):
 H = K['hakkimizda']
 GRUP_H = [
     {'k': 'kbas', 'ad': 'Hakkımızda başlığı (misyon)', 'hedef': '.k-acilis', 'oneri': 'a',
-     'sec': [['a', 'Hafızadan kayda'], ['b', 'Rutin düzen, kayıt yol'], ['c', 'Herkes kendi uygulamasından']]},
+     'sec': [['a', 'Hafızadan kayda'], ['b', 'Rutin ve kayıt'], ['c', 'Herkes kendi uygulamasında']]},
     {'k': 'kdzn', 'ad': '"Neye inanıyoruz" düzeni', 'hedef': '#ilkeler', 'oneri': 'a',
      'sec': [['a', 'Kartlar'], ['b', 'Numaralı liste']]},
 ]

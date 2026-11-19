@@ -1,12 +1,14 @@
-/* Çatı sayfa, beşinci katman (kullanıcı geri bildirimi 18 Kasım 2026). ortak.css + c.css + beyaz.css + v4.css'in üstüne yüklenir.
+/* Çatı sayfa, beşinci katman (kullanıcı geri bildirimi 18 Kasım 2026; tur 2: 19 Kasım 2026). ortak.css + c.css + beyaz.css + v4.css'in üstüne yüklenir.
    0) Önizleme alternatifleri: <html data-v-<anahtar>="…"> (yap_c.py önerilenleri sayfaya yazar; oniz.js değiştirir).
       Metin alternatifleri data-var kardeşleri; tasarım alternatifleri aşağıda html[data-v-…] ile.
    1) Ekosistem sahnesi telefonda ve tablette parmakla kaydırılır (eko.js): pencere + şerit, ipucu, ok düğmeleri
-   2) Sahnenin zemini: a açık panel · b koyu panel · c düz (bugünkü); bir kezlik giriş hareketi
-   3) 6. adım görseli: şema (c-sema.py; a çember · b yarım halka · c haftalık şerit)
-   4) 1-2-3 kartları (.uc): a renkli üç kart · b beyaz ikonlu kartlar · c büyük rakamlı kartlar · d bugünkü
-   5) Kompakt "Nasıl çalışır": kaydırma, tablette sekme düzeni (adım değişince yükseklik sabit, sekmeler ortada)
-   6) Küçük düzeltmeler: cümle sınırında satır, kapanış cümlesi, kart başlık hizası, hareket azaltmada 2. adım görseli, tablette uygulama kartları */
+   2) Sahnenin zemini: açık panel (tur 2'de tek sürüm); bir kezlik giriş hareketi
+   3) 6. adım görseli: halka çizimi (c-sema.py; a döngü çemberi · b yörünge · c dört adımlı halka · d üç renkli halka)
+   4) 1-2-3 kartları (.uc): renkli üç kart (tur 2'de tek sürüm); 4b) "hikaye" a: kartların altında ürün ekranı
+   5) Kompakt "Nasıl çalışır" ("hikaye" c): kaydırma, tablette sekme düzeni (adım değişince yükseklik sabit, sekmeler ortada)
+   6) Küçük düzeltmeler: cümle sınırında satır, hareket azaltmada 2. adım görseli, tablette uygulama kartları
+   7) Kompakt "Nasıl çalışır": görsel kutusu her adımda aynı boyda
+   8) Tur 2: sahnedeki ekranlar büyük (masaüstünde ortadaki ekran ~%25 geniş, telefon ve tablet kartlarında görsel ~%25 yüksek) */
 
 /* ---------- 0) Alternatifler ---------- */
 [data-var][hidden] { display: none !important; }
@@ -37,64 +39,43 @@
 @keyframes d-ipucu-sol { 0%, 60%, 100% { transform: none; } 30% { transform: translateX(-4px); } }
 @keyframes d-ipucu-sag { 0%, 60%, 100% { transform: none; } 30% { transform: translateX(4px); } }
 /* farede: kartın iki yanında ok düğmeleri */
-.d-ok { display: none; position: absolute; z-index: 3; top: 172px; width: 44px; height: 44px; padding: 0; place-items: center; border-radius: 50%; border: 1px solid var(--cizgi); background: #FFFFFF; color: var(--lacivert);
+.d-ok { display: none; position: absolute; z-index: 3; top: calc(20px + var(--dg, 300px) / 2 - 22px); width: 44px; height: 44px; padding: 0; place-items: center; border-radius: 50%; border: 1px solid var(--cizgi); background: #FFFFFF; color: var(--lacivert);
   box-shadow: 0 10px 24px -12px rgba(22, 17, 58, .45); cursor: pointer; transition: opacity .2s ease; }
 .d-ok svg { width: 22px; height: 22px; display: block; }
 .d-ok.geri { left: max(6px, calc(50% - var(--kw) / 2 - 22px)); }
 .d-ok.ileri { right: max(6px, calc(50% - var(--kw) / 2 - 22px)); }
 .d-ok:disabled { opacity: 0; pointer-events: none; }
 @media (hover: hover) and (pointer: fine) { .dongu-b.js.statik .d-ok { display: grid; } }
-.sayfa-c .d-kapanis p { margin: 0; }
 
-/* ---------- 2) Sahnenin zemini ---------- */
-/* c (düz, bugünkü): kartlar ekran kenarına kadar */
-html[data-v-sahne="c"] .dongu-b.js .d-pencere { margin-inline: calc(50% - 50vw); }
-/* a (açık) ve b (koyu): sahne büyük, yumuşak köşeli bir panelin üstünde; ortadaki ekranın arkasında hafif ışık */
-html:not([data-v-sahne="c"]) .sayfa-c .d-sahne { --pk: clamp(12px, 2.2vw, 32px); padding: 34px 20px 32px; clip-path: inset(8px var(--pk) 10px round 40px); }
-html:not([data-v-sahne="c"]) .sayfa-c .d-sahne::before { content: ""; position: absolute; z-index: -1; inset: 8px var(--pk) 10px; border-radius: 40px;
+/* ---------- 2) Sahnenin zemini: açık panel (kullanıcı kararı 19 Kasım 2026, "sahne" a) ----------
+   Sahne büyük, yumuşak köşeli açık bir panelin üstünde; ortadaki ekranın arkasında hafif ışık. */
+.sayfa-c .d-sahne { --pk: clamp(12px, 2.2vw, 32px); padding: 22px 20px 24px; clip-path: inset(8px var(--pk) 10px round 40px); }
+.sayfa-c .d-sahne::before { content: ""; position: absolute; z-index: -1; inset: 8px var(--pk) 10px; border-radius: 40px;
   background: linear-gradient(180deg, #EAE9FB 0%, #EFF3FF 55%, #FAFAFF 100%); }
-html:not([data-v-sahne="c"]) .sayfa-c .d-halka-kap::before { content: ""; position: absolute; left: 50%; top: 50%; width: min(78vw, 1040px); height: 124%; transform: translate(-50%, -50%);
+.sayfa-c .d-halka-kap::before { content: ""; position: absolute; left: 50%; top: 50%; width: min(86vw, 1180px); height: 124%; transform: translate(-50%, -50%);
   background: radial-gradient(closest-side, rgba(255, 255, 255, .96), rgba(255, 255, 255, 0) 74%); pointer-events: none; }
-html:not([data-v-sahne="c"]) .sayfa-c .d-mobil { max-width: none; margin-inline: max(8px, calc((100% - 1250px) / 2)); padding: 2px 0 20px; border-radius: 28px; overflow: hidden;
+.sayfa-c .d-mobil { max-width: none; margin: 0 max(8px, calc((100% - 1250px) / 2)) clamp(24px, 4vw, 48px); padding: 2px 0 20px; border-radius: 28px; overflow: hidden;
   background: linear-gradient(180deg, #EAE9FB 0%, #EFF3FF 55%, #FAFAFF 100%); }
-html:not([data-v-sahne="c"]) .sayfa-c .d-nokta-m { max-width: calc(100% - 20px); }
-html:not([data-v-sahne="c"]) .sayfa-c .d-kapanis { padding-top: 28px; }
-html[data-v-sahne="a"] .sayfa-c .d-kart { border-color: transparent; box-shadow: 0 18px 40px -28px rgba(22, 17, 58, .4); }
-/* b: koyu panel; yazı ve sayaç koyu zemine göre */
-html[data-v-sahne="b"] .sayfa-c .d-sahne::before, html[data-v-sahne="b"] .sayfa-c .d-mobil { background: radial-gradient(120% 90% at 50% 0%, #2C2670 0%, #16113A 64%); }
-html[data-v-sahne="b"] .sayfa-c .d-halka-kap::before { background: radial-gradient(closest-side, rgba(132, 124, 240, .5), rgba(132, 124, 240, 0) 74%); }
-html[data-v-sahne="b"] .sayfa-c .d-slot > * { box-shadow: 0 34px 80px -30px rgba(0, 0, 0, .75); }
-html[data-v-sahne="b"] .sayfa-c .d-yazi-m h3 { color: #FFFFFF; }
-html[data-v-sahne="b"] .sayfa-c .d-yazi-m p { color: rgba(255, 255, 255, .82); }
-html[data-v-sahne="b"] .sayfa-c .d-yazi-m .rol { color: var(--yesil); }
-html[data-v-sahne="b"] .sayfa-c #hepsi .sayac { background: rgba(255, 255, 255, .12); }
-html[data-v-sahne="b"] .sayfa-c #hepsi .sayac a { color: #FFFFFF; }
-html[data-v-sahne="b"] .sayfa-c #hepsi .sayac a:hover { background: rgba(255, 255, 255, .1); }
-html[data-v-sahne="b"] .sayfa-c #hepsi .sayac .n { background: transparent; color: #FFFFFF; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .5); }
-html[data-v-sahne="b"] .sayfa-c #hepsi .sayac .gecti .n { background: var(--yesil); color: #16113A; box-shadow: none; }
-html[data-v-sahne="b"] .sayfa-c #hepsi .sayac a[aria-current="step"] { background: var(--yesil); color: #16113A; }
-html[data-v-sahne="b"] .sayfa-c #hepsi .sayac a[aria-current="step"] .n { background: #16113A; color: #FFFFFF; box-shadow: none; }
-html[data-v-sahne="b"] .sayfa-c #hepsi :focus-visible { outline-color: #FFFFFF; }
-html[data-v-sahne="b"] .sayfa-c .d-ipucu { color: rgba(255, 255, 255, .78); }
-html[data-v-sahne="b"] .sayfa-c .d-kart { border-color: transparent; }
-html[data-v-sahne="b"] .sayfa-c .dongu-b.js .d-kart:not(.on) { opacity: .6; }
+.sayfa-c .d-nokta-m { max-width: calc(100% - 20px); }
+.sayfa-c .dongu-b:not(.statik) { padding-bottom: clamp(16px, 2vw, 28px); }
+.sayfa-c .d-kart { border-color: transparent; box-shadow: 0 18px 40px -28px rgba(22, 17, 58, .4); }
 /* giriş: sahne ekrana girince bir kez. Ortadaki ekran hafifçe yükselip büyür, yandakiler kenardan gelir (eko.js .bekle -> .gir -> .girdi) */
 @media (prefers-reduced-motion: no-preference) {
-  html:not([data-v-sahne="c"]) .sayfa-c .dongu-b.bekle .d-slot > * { opacity: 0; transform: translateX(110px); }
-  html:not([data-v-sahne="c"]) .sayfa-c .dongu-b.bekle .d-slot.sol > * { transform: translateX(-110px); }
-  html:not([data-v-sahne="c"]) .sayfa-c .dongu-b.bekle .d-slot.on > * { transform: translateY(24px) scale(.96); }
-  html:not([data-v-sahne="c"]) .sayfa-c .dongu-b.gir:not(.girdi) .d-slot > * { transition: opacity .7s ease, transform .95s cubic-bezier(.2, .7, .2, 1); }
-  html:not([data-v-sahne="c"]) .sayfa-c .dongu-b.js.bekle .d-kart { opacity: 0; transform: translateX(72px) scale(.93); }
-  html:not([data-v-sahne="c"]) .sayfa-c .dongu-b.js.bekle .d-kart.sol { transform: translateX(-72px) scale(.93); }
-  html:not([data-v-sahne="c"]) .sayfa-c .dongu-b.js.bekle .d-kart.on { transform: translateY(20px) scale(.96); filter: none; }
-  html:not([data-v-sahne="c"]) .sayfa-c .dongu-b.js.gir:not(.girdi) .d-kart { transition: opacity .7s ease, transform .95s cubic-bezier(.2, .7, .2, 1), filter .6s ease; }
+  .sayfa-c .dongu-b.bekle .d-slot > * { opacity: 0; transform: translateX(110px); }
+  .sayfa-c .dongu-b.bekle .d-slot.sol > * { transform: translateX(-110px); }
+  .sayfa-c .dongu-b.bekle .d-slot.on > * { transform: translateY(24px) scale(.96); }
+  .sayfa-c .dongu-b.gir:not(.girdi) .d-slot > * { transition: opacity .7s ease, transform .95s cubic-bezier(.2, .7, .2, 1); }
+  .sayfa-c .dongu-b.js.bekle .d-kart { opacity: 0; transform: translateX(72px) scale(.95); }
+  .sayfa-c .dongu-b.js.bekle .d-kart.sol { transform: translateX(-72px) scale(.95); }
+  .sayfa-c .dongu-b.js.bekle .d-kart.on { transform: translateY(20px) scale(.97); filter: none; }
+  .sayfa-c .dongu-b.js.gir:not(.girdi) .d-kart { transition: opacity .7s ease, transform .95s cubic-bezier(.2, .7, .2, 1), filter .6s ease; }
   /* adım değişirken görsel, kartının içinde hafifçe kayarak yerine oturur */
-  html:not([data-v-sahne="c"]) .sayfa-c .dongu-b.js .d-kart .d-gorsel > * { transition: transform .55s cubic-bezier(.2, .7, .2, 1); }
-  html:not([data-v-sahne="c"]) .sayfa-c .dongu-b.js .d-kart:not(.on) .d-gorsel > * { transform: translateX(12px); }
-  html:not([data-v-sahne="c"]) .sayfa-c .dongu-b.js .d-kart.sol .d-gorsel > * { transform: translateX(-12px); }
+  .sayfa-c .dongu-b.js .d-kart .d-gorsel > * { transition: transform .55s cubic-bezier(.2, .7, .2, 1); }
+  .sayfa-c .dongu-b.js .d-kart:not(.on) .d-gorsel > * { transform: translateX(12px); }
+  .sayfa-c .dongu-b.js .d-kart.sol .d-gorsel > * { transform: translateX(-12px); }
 }
 
-/* ---------- 3) 6. adım şeması ---------- */
+/* ---------- 3) 6. adım: halka çizimi (c-sema.py; a döngü çemberi · b yörünge · c dört adımlı halka · d üç renkli halka) ---------- */
 .d6 { position: relative; background: #FFFFFF; border: 1px solid var(--cizgi); border-radius: 18px; overflow: hidden; color: var(--lacivert); }
 .d6-v, .d6 svg { display: block; width: 100%; height: 100%; }
 .d6 svg { font-family: var(--font); }
@@ -102,110 +83,68 @@ html[data-v-sahne="b"] .sayfa-c .dongu-b.js .d-kart:not(.on) { opacity: .6; }
 .sayfa-c .d-kart .d-gorsel > .d6 { width: 100%; height: 100%; border-radius: 16px; }
 .s6-akis { animation: s6-ak 1.5s linear infinite; }
 @keyframes s6-ak { to { stroke-dashoffset: var(--s6, -10); } }
-@media (prefers-reduced-motion: reduce) { .s6-akis { animation: none; } }
+/* b: halkada dolaşan tek nokta (tam tur 9 sn) */
+.s6-yol { animation: s6-yol 9s linear infinite; }
+@keyframes s6-yol { to { stroke-dashoffset: var(--s6c, -600); } }
+@media (prefers-reduced-motion: reduce) { .s6-akis, .s6-yol { animation: none; } }
 
-/* ---------- 4) 1-2-3 kartları ---------- */
-.sayfa-c .uc { position: relative; list-style: none; margin: 30px auto 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: none; text-align: left; }
-.sayfa-c .uc-k { position: relative; min-width: 0; }
-.sayfa-c .uc-k h3 { margin: 0; font-weight: 800; color: var(--lacivert); text-wrap: balance; }
-.sayfa-c .uc .uc-k p { margin: 0; max-width: none; color: var(--yazi-2); text-wrap: pretty; }
-.uc-ikon, .uc-nokta { display: none; }
-.uc-no, .uc-rozet { font-weight: 800; line-height: 1; }
-.uc-rozet { white-space: nowrap; }
-
-/* a) Renkli üç kart: her kart ayrı yumuşak renk, numara rozeti, masaüstünde aralarında ince ok */
-html[data-v-uc="a"] .sayfa-c .uc { gap: 30px; }
-html[data-v-uc="a"] .sayfa-c .uc-k { display: flex; flex-direction: column; border-radius: 28px; padding: 26px 28px 34px; }
-html[data-v-uc="a"] .sayfa-c .uc-1 { background: #E2F8E7; }
-html[data-v-uc="a"] .sayfa-c .uc-2 { background: #ECEBFB; }
-html[data-v-uc="a"] .sayfa-c .uc-3 { background: #E1EFFF; }
-html[data-v-uc="a"] .uc-ust { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; }
-html[data-v-uc="a"] .uc-no { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--lacivert); color: #FFFFFF; font-size: 17px; }
-html[data-v-uc="a"] .uc-rozet { font-size: 12.5px; color: var(--lacivert); background: #FFFFFF; border-radius: 999px; padding: 7px 12px; }
-html[data-v-uc="a"] .sayfa-c .uc-k h3 { font-size: clamp(20px, 1.9vw, 24px); line-height: 1.18; margin-top: 22px; }
-html[data-v-uc="a"] .sayfa-c .uc .uc-k p { font-size: 16px; line-height: 1.5; margin-top: 10px; color: #4A4666; }
+/* ---------- 4) 1-2-3 kartları: renkli üç kart (kullanıcı kararı 19 Kasım 2026, "uc" a; Atlassian örnek 1) ---------- */
+.sayfa-c .uc { position: relative; list-style: none; margin: 30px auto 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; max-width: none; text-align: left; }
+.sayfa-c .uc-k { position: relative; min-width: 0; display: flex; flex-direction: column; border-radius: 28px; padding: 26px 28px 34px; }
+.sayfa-c .uc-1 { background: #E2F8E7; }
+.sayfa-c .uc-2 { background: #ECEBFB; }
+.sayfa-c .uc-3 { background: #E1EFFF; }
+.sayfa-c .uc-k h3 { margin: 22px 0 0; font-size: clamp(20px, 1.9vw, 24px); line-height: 1.18; font-weight: 800; color: var(--lacivert); text-wrap: balance; }
+.sayfa-c .uc .uc-k p { margin: 10px 0 0; max-width: none; font-size: 16px; line-height: 1.5; color: #4A4666; text-wrap: pretty; }
+.uc-ust { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; }
+.uc-no { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--lacivert); color: #FFFFFF; font-size: 17px; font-weight: 800; line-height: 1; }
+.uc-rozet { font-size: 12.5px; font-weight: 800; line-height: 1; white-space: nowrap; color: var(--lacivert); background: #FFFFFF; border-radius: 999px; padding: 7px 12px; }
 @media (min-width: 1000px) {
-  html[data-v-uc="a"] .sayfa-c .uc-k + .uc-k::before { content: ""; position: absolute; left: -30px; top: 50%; width: 30px; height: 16px; margin-top: -8px;
+  .sayfa-c .uc-k + .uc-k::before { content: ""; position: absolute; left: -30px; top: 50%; width: 30px; height: 16px; margin-top: -8px;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 16'%3E%3Cpath d='M2 8h17M13.5 2.5 19 8l-5.5 5.5' fill='none' stroke='%2316113A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 22px 16px no-repeat; }
 }
+/* üç sütunda başlıklar iki satırlık yer tutar, metinler aynı hizada başlar */
+@media (min-width: 720px) { .sayfa-c .uc-k h3 { min-height: 2.4em; display: flex; flex-direction: column; justify-content: flex-end; } }
 @media (max-width: 999px) {
-  html[data-v-uc="a"] .sayfa-c .uc { gap: 14px; }
-  html[data-v-uc="a"] .sayfa-c .uc-k { padding: 20px 20px 26px; border-radius: 24px; }
-  html[data-v-uc="a"] .sayfa-c .uc-k h3 { font-size: 19px; margin-top: 18px; }
-  html[data-v-uc="a"] .sayfa-c .uc .uc-k p { font-size: 15.5px; }
+  .sayfa-c .uc { gap: 14px; }
+  .sayfa-c .uc-k { padding: 20px 20px 26px; border-radius: 24px; }
+  .sayfa-c .uc-k h3 { font-size: 19px; margin-top: 18px; }
+  .sayfa-c .uc .uc-k p { font-size: 15.5px; }
 }
 @media (max-width: 719px) {
-  html[data-v-uc="a"] .sayfa-c .uc { grid-template-columns: 1fr; }
-  html[data-v-uc="a"] .sayfa-c .uc-k { padding: 22px 22px 26px; }
-  html[data-v-uc="a"] .sayfa-c .uc-k h3 { font-size: 21px; margin-top: 16px; }
-  html[data-v-uc="a"] .sayfa-c .uc .uc-k p { font-size: 16px; }
+  .sayfa-c .uc { grid-template-columns: 1fr; }
+  .sayfa-c .uc-k { padding: 22px 22px 26px; }
+  .sayfa-c .uc-k h3 { font-size: 21px; margin-top: 16px; }
+  .sayfa-c .uc .uc-k p { font-size: 16px; }
 }
 
-/* b) Beyaz ikonlu kartlar: bölüm açık renkli yuvarlak bir zeminde, üç beyaz kart, her birinde küçük çizgi ikon */
-html[data-v-uc="b"] .sayfa-c .giris-bant { position: relative; isolation: isolate; }
-html[data-v-uc="b"] .sayfa-c .giris-bant::before { content: ""; position: absolute; z-index: -1; inset: clamp(8px, 1.6vw, 20px) max(6px, calc((100% - 1250px) / 2)) clamp(14px, 2.6vw, 34px);
-  border-radius: clamp(24px, 3vw, 40px); background: #EEF1FE; }
-html[data-v-uc="b"] .sayfa-c .uc { gap: 20px; }
-html[data-v-uc="b"] .sayfa-c .uc-k { display: flex; flex-direction: column; background: #FFFFFF; border-radius: 22px; padding: 26px 26px 30px; box-shadow: 0 1px 2px rgba(22, 17, 58, .05), 0 22px 44px -32px rgba(22, 17, 58, .35); }
-html[data-v-uc="b"] .uc-ust { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 48px; }
-html[data-v-uc="b"] .uc-ikon { display: grid; place-items: center; flex: none; width: 48px; height: 48px; border-radius: 14px; background: #EEF1FE; color: var(--lacivert); }
-html[data-v-uc="b"] .uc-no { display: none; }
-html[data-v-uc="b"] .uc-rozet { font-size: 12.5px; color: #0B6B2E; background: #E2F8E7; border-radius: 999px; padding: 7px 12px; }
-html[data-v-uc="b"] .sayfa-c .uc-k h3 { font-size: 20px; line-height: 1.22; margin-top: 20px; }
-html[data-v-uc="b"] .sayfa-c .uc .uc-k p { font-size: 16px; line-height: 1.5; margin-top: 8px; }
-@media (max-width: 999px) {
-  html[data-v-uc="b"] .sayfa-c .uc { gap: 12px; }
-  html[data-v-uc="b"] .sayfa-c .uc-k { padding: 20px 20px 24px; }
-  html[data-v-uc="b"] .sayfa-c .uc-k h3 { font-size: 18.5px; margin-top: 16px; }
-  html[data-v-uc="b"] .sayfa-c .uc .uc-k p { font-size: 15.5px; }
+/* ---------- 4b) "hikaye" a: her kartın altında bir gerçek ürün ekranı, ayrı ürün anlatımı yok ----------
+   Ekran kartın alt kenarından taşar gibi durur (kart köşesinde kırpılır; oranı korunur, büyütülmez): telefonlar ortada ve üst kısmı
+   görünür, Moyo Uzman paneli soldan başlar, sağdan taşar. Masaüstünde üç sütun; tablette (720–999 px) kartlar alt alta, ekran sağda;
+   telefonda alt alta, ekran yazının altında. */
+html[data-v-hikaye="a"] .sayfa-c .uc-k { padding-bottom: 0; }
+.uc-gorsel { --ug: 330px; position: relative; flex: none; height: var(--ug); margin: auto -28px 0; overflow: hidden; border-radius: 0 0 28px 28px; }
+.uc-gorsel img { position: absolute; display: block; max-width: none; height: auto; border: 7px solid #0B0920; background: #0B0920;
+  box-shadow: 0 24px 50px -22px rgba(22, 17, 58, .45); -webkit-user-drag: none; }
+.uc-telefon img { left: 50%; top: 26px; width: min(256px, calc(100% - 48px)); transform: translateX(-50%); border-radius: 32px; }
+.uc-panel img { left: 28px; top: 26px; width: max(430px, calc(100% + 40px)); border-width: 6px; border-radius: 16px; }
+@media (min-width: 1000px) { html[data-v-hikaye="a"] .sayfa-c .uc-k + .uc-k::before { top: 46px; margin-top: -8px; } }
+@media (min-width: 1000px) and (max-width: 1199px) { .uc-gorsel { --ug: 300px; } .uc-telefon img { width: min(236px, calc(100% - 36px)); } }
+@media (min-width: 720px) and (max-width: 999px) {
+  html[data-v-hikaye="a"] .sayfa-c .uc { grid-template-columns: 1fr; gap: 16px; }
+  html[data-v-hikaye="a"] .sayfa-c .uc-k { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 46%); grid-template-rows: auto auto 1fr; column-gap: 28px; padding: 26px 0 0 28px; }
+  html[data-v-hikaye="a"] .sayfa-c .uc-k > :not(.uc-gorsel) { grid-column: 1; }
+  html[data-v-hikaye="a"] .sayfa-c .uc-k h3 { min-height: 0; font-size: 22px; }
+  html[data-v-hikaye="a"] .sayfa-c .uc .uc-k p { font-size: 16.5px; padding-bottom: 26px; }
+  .uc-gorsel { --ug: 330px; grid-column: 2; grid-row: 1 / span 3; align-self: end; margin: 0; border-radius: 0 0 24px 0; }
+  .uc-telefon img { top: 0; width: 248px; }
+  .uc-panel img { left: 0; top: 0; width: 470px; }
 }
 @media (max-width: 719px) {
-  html[data-v-uc="b"] .sayfa-c .uc { grid-template-columns: 1fr; }
-  html[data-v-uc="b"] .sayfa-c .uc-k { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 16px; align-items: start; padding: 20px; }
-  html[data-v-uc="b"] .uc-ust { grid-row: 1 / span 2; flex-direction: column; align-items: flex-start; justify-content: flex-start; }
-  html[data-v-uc="b"] .sayfa-c .uc-k h3 { grid-column: 2; font-size: 19px; margin-top: 2px; }
-  html[data-v-uc="b"] .sayfa-c .uc .uc-k p { grid-column: 2; margin-top: 6px; }
-  html[data-v-uc="b"] .uc-rozet { position: absolute; top: 20px; right: 20px; }
-  html[data-v-uc="b"] .sayfa-c .uc-2 h3 { padding-right: 104px; }
+  .uc-gorsel { --ug: 320px; margin-inline: -22px; border-radius: 0 0 24px 24px; }
+  .uc-telefon img { width: min(250px, calc(100% - 64px)); border-width: 6px; border-radius: 30px; }
+  .uc-panel img { left: 22px; width: max(420px, calc(100% + 36px)); }
 }
-
-/* c) Büyük rakamlı kartlar: iri 1 2 3; telefonda yana kaydırılan kartlar + noktalar */
-html[data-v-uc="c"] .sayfa-c .uc { gap: 18px; }
-html[data-v-uc="c"] .sayfa-c .uc-k { display: flex; flex-direction: column; background: var(--sis); border: 1px solid var(--cizgi); border-radius: 24px; padding: 20px 26px 30px; }
-html[data-v-uc="c"] .uc-ust { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-html[data-v-uc="c"] .uc-no { font-size: clamp(72px, 8.4vw, 112px); line-height: .94; letter-spacing: -.04em; color: var(--lacivert); }
-html[data-v-uc="c"] .uc-no::after { content: "."; color: var(--yesil-marka); }
-html[data-v-uc="c"] .uc-rozet { margin-top: 10px; font-size: 12.5px; color: #16113A; background: var(--yesil); border-radius: 999px; padding: 7px 12px; }
-html[data-v-uc="c"] .sayfa-c .uc-k h3 { font-size: 21px; line-height: 1.2; margin-top: 14px; }
-html[data-v-uc="c"] .sayfa-c .uc .uc-k p { font-size: 16px; line-height: 1.5; margin-top: 8px; }
-@media (max-width: 999px) {
-  html[data-v-uc="c"] .sayfa-c .uc { gap: 12px; }
-  html[data-v-uc="c"] .sayfa-c .uc-k { padding: 16px 20px 24px; }
-  html[data-v-uc="c"] .sayfa-c .uc-k h3 { font-size: 19px; }
-  html[data-v-uc="c"] .sayfa-c .uc .uc-k p { font-size: 15.5px; }
-}
-@media (max-width: 719px) {
-  html[data-v-uc="c"] .sayfa-c .uc { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch;
-    margin-inline: calc(-1 * max(20px, env(safe-area-inset-left, 0px))); padding: 2px 20px 4px; }
-  html[data-v-uc="c"] .sayfa-c .uc::-webkit-scrollbar { display: none; }
-  html[data-v-uc="c"] .sayfa-c .uc-k { flex: 0 0 min(84%, 330px); scroll-snap-align: center; padding: 18px 22px 26px; }
-  html[data-v-uc="c"] .sayfa-c .uc-k h3 { font-size: 21px; }
-  html[data-v-uc="c"] .sayfa-c .uc .uc-k p { font-size: 16px; }
-  html[data-v-uc="c"] .uc-nokta { display: flex; justify-content: center; gap: 7px; margin-top: 14px; }
-  html[data-v-uc="c"] .uc-nokta i { width: 8px; height: 8px; border-radius: 4px; background: #D3D1DF; transition: width .25s ease, background-color .25s ease; }
-  html[data-v-uc="c"] .uc-nokta i.on { width: 22px; background: var(--lacivert); }
-}
-
-/* d) Mevcut (17 Kasım): gri küçük kartlar, yeşil numara, "İsteğe bağlı" kenarlığın üstünde */
-html[data-v-uc="d"] .sayfa-c .uc { gap: 14px; }
-html[data-v-uc="d"] .sayfa-c .uc-k { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px 10px; background: var(--sis); border: 1px solid var(--cizgi); border-radius: 16px; padding: 16px 18px; }
-html[data-v-uc="d"] .uc-ust { display: contents; }
-html[data-v-uc="d"] .uc-no { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--yesil); color: #16113A; font-size: 14px; }
-html[data-v-uc="d"] .sayfa-c .uc-k h3 { font-size: 16px; line-height: 1.3; }
-html[data-v-uc="d"] .sayfa-c .uc .uc-k p { grid-column: 1 / -1; font-size: 15.5px; line-height: 1.45; }
-html[data-v-uc="d"] .uc-rozet { position: absolute; top: -11px; left: 16px; font-size: 11.5px; letter-spacing: .02em; color: #16113A; background: var(--yesil); border-radius: 999px; padding: 5px 9px; }
-html[data-v-uc="d"] .sayfa-c .uc-k.istege { border: 1.5px dashed rgba(15, 211, 84, .75); }
-@media (max-width: 760px) { html[data-v-uc="d"] .sayfa-c .uc { grid-template-columns: 1fr; } }
 
 /* ---------- 5) Kompakt "Nasıl çalışır" (telefon ve tablet): parmakla sola / sağa ---------- */
 .sayfa-c .nk[data-duzen="sekme"] .nk-paneller { touch-action: pan-y pinch-zoom; -webkit-user-select: none; user-select: none; outline-offset: 4px; }
@@ -229,18 +168,6 @@ html[data-v-uc="d"] .sayfa-c .uc-k.istege { border: 1.5px dashed rgba(15, 211, 8
 /* ---------- 6) Küçük düzeltmeler (18 Kasım 2026 turu, ikinci geçiş) ---------- */
 /* Uzun tanıtım cümleleri geniş ekranda cümle sınırında satır atlar (yap_c.py cumleler) */
 @media (min-width: 720px) { .sayfa-c .cumle { display: inline-block; } }
-/* Sahne altındaki kapanış cümlesi bölümün ana fikri: ara başlık gibi okunsun (önceden gri ve küçük, alt yazı gibi duruyordu) */
-.sayfa-c .d-kapanis { max-width: 820px; }
-.sayfa-c .d-kapanis p { font-size: clamp(18px, 1.75vw, 22px); line-height: 1.45; font-weight: 600; color: var(--lacivert); }
-/* 1-2-3 kartları (renkli ve büyük rakamlı): üç sütunda başlıklar iki satırlık yer tutar, metinler aynı hizada başlar */
-@media (min-width: 720px) {
-  html[data-v-uc="a"] .sayfa-c .uc-k h3, html[data-v-uc="c"] .sayfa-c .uc-k h3 { min-height: 2.4em; display: flex; flex-direction: column; justify-content: flex-end; }
-}
-/* Beyaz ikonlu kartlar, telefonda: "İsteğe bağlı" başlığın üstünde küçük etiket (başlık üç satıra bölünmesin) */
-@media (max-width: 719px) {
-  html[data-v-uc="b"] .sayfa-c .uc-2 h3 { padding-right: 0; margin-top: 34px; }
-  html[data-v-uc="b"] .uc-2 .uc-rozet { top: 18px; right: auto; left: 84px; padding: 5px 10px; }
-}
 /* Hareket azaltmada (ve betik yokken) geniş ekrandaki alt alta anlatım: 2. adımın oyun + onay görseli sıfır genişliğe çöküyordu
    (--gh tanımsız); kayan sahnedeki ölçüyle aynı */
 .sayfa-c .hk-liste .l-gorsel.genis .ust-uste { width: 100%; max-width: 680px; aspect-ratio: 620 / 430; }
@@ -281,3 +208,22 @@ html[data-v-uc="d"] .sayfa-c .uc-k.istege { border: 1.5px dashed rgba(15, 211, 8
 /* 561 px ve üstü, oyun + onay üst üste görseli: onay telefonu yalnız yüksekliğinden boyutlanır. Önceden 561–760 px'te v4.css'in
    telefon (alt alta) genişliği de geçerliydi, telefon 230 × 243 gibi basık çiziliyordu (iki düzende de). */
 @media (min-width: 561px) { .sayfa-c .nk .t-ikili .uu-tel.uu-tel { width: auto; } }
+
+/* ---------- 8) Tur 2 (kullanıcı, 19 Kasım 2026: "kayan ekranların içeriği zor seçiliyor"): ekranlar büyük ----------
+   Masaüstü sahnesi: ortadaki ekranın genişliği min(48vw, 700px) yerine min(62vw, 880px) (1440 px'te 691 → 880, %27); panel ve oyun
+   ekranı genişlikle, telefonlar sahnenin yüksekliğiyle büyür (yazı ve sayaç için kalan yer biraz sıkıştı). Görseller doğal boyutunu
+   geçmez (img'de genişlik verilmez, yalnız max-width / max-height). Yandaki ekranlar daha az küçülür ve daha az bulanık (eko.js).
+   Telefon ve tablet kartları: görsel kutusu 300 → 360–400 px, tablette kart 420 → 600 px. */
+.sayfa-c .d-halka-kap { --w: min(62vw, 880px); }
+.sayfa-c .d-yazilar { min-height: 98px; margin-top: 8px; }
+.sayfa-c .d-nokta { margin-top: 8px; }
+@media (max-height: 720px) { .sayfa-c .d-yazilar { min-height: 86px; margin-top: 4px; } .sayfa-c .d-nokta { margin-top: 4px; } }
+.sayfa-c .d-mobil { --kw: min(calc(100vw - 84px), 420px); --dg: clamp(300px, 44svh, 380px); }
+.sayfa-c .d-gorsel { height: var(--dg); }
+.sayfa-c .d-gorsel .ikili img { max-height: calc(var(--dg) - 20px); }
+@media (min-width: 700px) { .sayfa-c .d-mobil { --kw: min(calc(100vw - 140px), 600px); --dg: 400px; } }
+@media (min-width: 700px) and (max-height: 820px) { .sayfa-c .d-mobil { --dg: clamp(320px, 50svh, 400px); } }
+/* yandaki kartlar: tanınır kalsın, ikinci planda dursun */
+.sayfa-c .dongu-b.js .d-kart { opacity: .62; transform: scale(.95); filter: blur(1px); }
+.sayfa-c .dongu-b.js .d-kart.on { opacity: 1; transform: none; filter: none; }
+@media (prefers-reduced-motion: reduce) { .sayfa-c .dongu-b.js .d-kart { filter: none; transform: none; } }

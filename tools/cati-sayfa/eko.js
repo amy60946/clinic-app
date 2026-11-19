@@ -1,4 +1,5 @@
-// Moyo Ekosistemi (17 Kasım 2026; 18 Kasım: parmakla kaydırma, giriş hareketi, 6. adım şeması).
+// Moyo Ekosistemi (17 Kasım 2026; 18 Kasım: parmakla kaydırma, giriş hareketi, 6. adım şeması; 19 Kasım: açık sahne tek sürüm,
+// ekranlar büyük, yandakiler daha az küçük ve bulanık: kullanıcı "kayan ekranların içeriği zor seçiliyor").
 // Ortadaki ekran net; yanındakiler bulanık, yana açılmış ve geride durur.
 // Masaüstünde sayfa kaydıkça ilerler (sayfanın kendi kaydırması; hız ve durma noktası değişmez), her adımda kısa bir duruş vardır.
 //   Ek: ← → tuşları ve izleme dörtgeninde yatay kaydırma bir adım ilerletir (yine sayfanın kaydırmasıyla).
@@ -10,7 +11,6 @@
 (function () {
   var sec = document.querySelector('.dongu-b'); if (!sec) return;
   sec.classList.add('js');
-  var kok = document.documentElement;
   var kmp = matchMedia('(max-width: 1024px), (hover: none) and (pointer: coarse)'), az = matchMedia('(prefers-reduced-motion: reduce)');
   var kayit = sec.querySelector('.d-kayit'), sahne = sec.querySelector('.d-sahne'), slot = [].slice.call(sec.querySelectorAll('.d-slot')), yazi = [].slice.call(sec.querySelectorAll('.d-yazi-m')),
       nokta = [].slice.call(sec.querySelectorAll('.d-nokta a')), n = slot.length, aktif = -1, tick = false;
@@ -27,7 +27,7 @@
   // ---------- Masaüstü: sayfa kaydıkça ilerleyen sahne ----------
   function prog() { var h = kayit.offsetHeight - innerHeight; return h > 0 ? clamp(-kayit.getBoundingClientRect().top / h, 0, 1) : 0; }
   // Yan ekranın uzaklığı görsellerin gerçek genişliğinden: geniş panel de dar telefon da ortadakine yapışmaz.
-  var P = 1600, Z = 260, PZ = P / (P + Z), KUC = 0.86, X = [0];
+  var P = 1600, Z = 200, PZ = P / (P + Z), KUC = 0.9, X = [0];
   function olc() {
     var w = slot.map(function (s) { var c = s.firstElementChild; return (c && c.offsetWidth) || s.offsetWidth; }), g = Math.max(36, innerWidth * 0.04);
     X = [0];
@@ -43,8 +43,8 @@
       var t = k - pos, a = Math.abs(t), m = Math.min(a, 1);
       // yana açıl, geriye çekil, hafifçe içe dön ve küçül; uzaklaştıkça bulanıklaş ve sol
       s.style.transform = 'translateX(' + (X[k] - x0).toFixed(1) + 'px) translateZ(' + (-Math.min(a, 2) * Z).toFixed(1) + 'px) rotateY(' + clamp(-t * 20, -32, 32).toFixed(2) + 'deg) scale(' + (1 - (1 - KUC) * m).toFixed(3) + ')';
-      s.style.filter = a < 0.52 ? 'none' : 'blur(' + Math.min(6, (a - 0.52) / 0.48 * 5.2).toFixed(2) + 'px)';   // yarı yola kadar ikisi de net
-      s.style.opacity = (a <= 1 ? 1 - a * 0.36 : Math.max(0, 0.64 * (1 - (a - 1) / 0.85))).toFixed(3);
+      s.style.filter = a < 0.52 ? 'none' : 'blur(' + Math.min(4, (a - 0.52) / 0.48 * 2.6).toFixed(2) + 'px)';   // yarı yola kadar ikisi de net; yandaki tanınır kalır
+      s.style.opacity = (a <= 1 ? 1 - a * 0.26 : Math.max(0, 0.74 * (1 - (a - 1) / 0.85))).toFixed(3);
       s.style.zIndex = String(100 - Math.round(a * 10));
     });
     if (i !== aktif) {
@@ -127,9 +127,9 @@
   addEventListener('load', yenidenOlc);
   kmp.addEventListener('change', mod); az.addEventListener('change', mod); mod();
 
-  // ---------- Giriş hareketi (sahne "açık" ve "koyu" seçeneklerinde; bir kez, sahne ekrana girince) ----------
+  // ---------- Giriş hareketi (bir kez, sahne ekrana girince) ----------
   // Ortadaki ekran hafifçe yükselip büyür, yandakiler kenardan gelir (c-18.css .bekle / .gir). Hareket azaltmada yok.
-  function girisVar() { return kok.getAttribute('data-v-sahne') !== 'c' && !az.matches && 'IntersectionObserver' in window; }
+  function girisVar() { return !az.matches && 'IntersectionObserver' in window; }
   function gir() { sec.classList.remove('bekle'); sec.classList.add('gir'); setTimeout(function () { sec.classList.add('girdi'); }, 1100); }
   if (girisVar()) {
     sec.classList.add('bekle');
@@ -144,12 +144,8 @@
   var hazir = false; addEventListener('load', function () { setTimeout(function () { hazir = true; }, 700); });
   addEventListener('oniz', function (e) {
     var k = e.detail && e.detail.k;
-    if (k === 'dongu6' || k === 'sahne') requestAnimationFrame(yenidenOlc);
+    if (k === 'dongu6') requestAnimationFrame(yenidenOlc);
     if (!hazir) return;                                   // kabuk, sayfa açılırken kayıtlı seçimleri uygular: o sırada kıpırdama
-    if (k === 'dongu6') { if (statik()) git(n - 1); else setTimeout(function () { adimaGit(n - 1); }, 650); }   // şema 6. adımda: oraya git
-    if (k === 'sahne' && girisVar()) {                    // giriş hareketini yeniden göster
-      sec.classList.remove('gir', 'girdi'); sec.classList.add('bekle');
-      setTimeout(gir, 420);
-    }
+    if (k === 'dongu6') { if (statik()) git(n - 1); else setTimeout(function () { adimaGit(n - 1); }, 650); }   // halka 6. adımda: oraya git
   });
 })();

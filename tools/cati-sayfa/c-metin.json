@@ -2,41 +2,44 @@
  "h1": "Çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform",
  "fiyat_not": "Moyo Oyun ücretsiz. Moyo Ebeveyn 14 gün ücretsiz; sonrasında aylık ya da yıllık abonelik, dönem sonunda kendiliğinden yenilenir. Fiyatlar uygulama App Store'da yayınlandığında burada yer alacak.",
  "giris_etiket": "Nasıl çalışır",
- "giris_baslik": {
-  "a": "Kendiniz başlayın, dilerseniz uzmanınızı dahil edin",
-  "b": "Tek başınıza başlayın, dilerseniz uzmanınızla sürdürün"
- },
- "giris_metin": {
-  "a": "Moyo ile çocuğunuzun günlük rutinini kurar, davranışlarını ve verdiği tepkileri kaydedersiniz. Dilerseniz çalıştığınız uzmanı dahil edin; seans dışında olanları ona düzenli ve sistemli aktarın.",
-  "b": "Rutini siz kurarsınız, çocuğunuz oyunda yapar, olanlar kayda geçer. Dilerseniz uzmanınız bu kayıtlara bakarak süreci sizinle birlikte yönlendirir.",
-  "c": "Önce kendi düzeninizi kurun. Dilerseniz uzmanınızı ekleyin; seansta \"Bu hafta nasıl geçti?\" sorusunun yanıtı hazır olsun."
- },
+ "giris_baslik": "Kendiniz başlayın, dilerseniz uzmanınızı dahil edin",
+ "giris_metin": "Moyo ile çocuğunuzun günlük rutinini {fiil}, davranışlarını ve verdiği tepkileri kaydedersiniz. Dilerseniz çalıştığınız uzmanı dahil edin; seans dışında olanları ona düzenli ve sistemli aktarın.",
  "basamak": [
   {
-   "baslik": {
-    "a": "Kendiniz başlayın",
-    "b": "Uzman olmadan da başlayın",
-    "c": "Önce siz başlayın"
-   },
-   "metin": "Rutini siz kurarsınız, çocuğunuz oyunda adım adım yapar. Bir uzmanla çalışmasanız da Moyo Ebeveyn'in özelliklerini kendiniz kullanırsınız.",
+   "baslik": "Kendiniz başlayın",
+   "metin": "Rutini çocuğunuzun gününe siz planlarsınız. Çocuğunuz adımı yapınca oyunda işaretler, siz onaylarsınız; zor anları kısa bir kayıtla not edersiniz. Bunun için uzman gerekmez.",
    "rozet": "",
-   "ikon": "ev"
+   "gorsel": {
+    "img": "img/moyo-rutinler.webp",
+    "tur": "telefon",
+    "alt": "Moyo Ebeveyn: çocuğun gününe planlanmış rutin adımları, saatleri ve onay bekleyen adım"
+   }
   },
   {
    "baslik": "Dilerseniz uzmanınızı dahil edin",
    "metin": {
-    "a": "Çalıştığınız uzman size davet gönderir, siz onaylarsınız. Uzmanınız yalnız paylaştığınız çocuğun rutin ve davranış kayıtlarını görür; paylaşımı dilediğiniz an durdurursunuz.",
-    "b": "Davet uzmanınızdan, onay sizden. Uzmanınız evde rutinin nasıl gittiğini ve kaydettiğiniz davranışları görür; aile içi mesajlarınızı ve ödülleri görmez.",
-    "c": "Uzmanınız, onay verdiğiniz kayıtlar üzerinden evde neyin kolay, neyin zor geçtiğini görür."
+    "a": "Uzmanınız sizi davet eder ya da size verdiği kodu girersiniz; siz onaylarsınız. Uzmanınız yalnızca paylaştığınız çocuğunuzun rutin ve davranış kayıtlarını görür. Paylaşımı dilediğiniz an durdurabilirsiniz.",
+    "b": "Çalıştığınız uzman size davet gönderir, siz onaylarsınız. Uzmanınız yalnızca paylaştığınız çocuğunuzun rutin ve davranış kayıtlarını görür. Paylaşımı dilediğiniz an durdurabilirsiniz."
    },
    "rozet": "İsteğe bağlı",
-   "ikon": "kisi"
+   "gorsel": {
+    "img": "img/moyo-oneri.webp",
+    "tur": "telefon",
+    "alt": "Moyo Ebeveyn, Uzmanım: bağlı uzman, Uzman bağla düğmesi ve uzmandan gelen rutin önerileri"
+   }
   },
   {
-   "baslik": "Seans dışında birlikte ilerleyin",
-   "metin": "Uzmanınız kısa ebeveyn eğitimleri gönderir, davranış kayıtlarınıza bakar, yeni rutin önerir; eklemek sizin kararınız.",
+   "baslik": {
+    "a": "Seans dışında da birlikte ilerleyin",
+    "b": "Seans vakti dışında da birlikte ilerleyin"
+   },
+   "metin": "Uzmanınız kısa ebeveyn eğitimleri gönderir, davranış kayıtlarınıza bakar, yeni rutin önerir; {b3s}",
    "rozet": "",
-   "ikon": "tekrar"
+   "gorsel": {
+    "img": "img/uzman-davranis.webp",
+    "tur": "panel",
+    "alt": "Moyo Uzman: ebeveynin kaydettiği davranışlar, denenen stratejiler, her olayın öncesi ve sonrası"
+   }
   }
  ],
  "adimlar": [
@@ -44,11 +47,11 @@
    "rol": "Moyo Ebeveyn · telefonunuzda",
    "kisa": "Moyo Ebeveyn",
    "baslik": "Her gün aynı saatte, aynı sırayla.",
-   "metin": "Sabah, akşam ve okul hazırlığı rutinini yaşa uygun hazır listelerden bir kez kurarsınız; her gün çocuğunuzun oyununa gelir. Gün içinde ona destek olur, zorlandığı anları kısa bir davranış kaydıyla not eder, günü, haftayı ve ayı tek yerden görürsünüz.",
+   "metin": "Sabah, akşam ve okul hazırlığı rutinini yaşa uygun hazır listelerden seçip çocuğunuzun gününe planlarsınız; her gün oyunda ona hatırlatılır. Gün içinde ona destek olur, zorlandığı anları kısa bir davranış kaydıyla not eder, günü, haftayı ve ayı uygulamada görürsünüz.",
    "gorsel": "ebeveyn-rutin",
    "alt": "Moyo Ebeveyn: çocuğun günlük ve haftalık ilerlemesi",
    "etiket": "Moyo Ebeveyn · gerçek ekran, örnek veri",
-   "ozet": "Yaşa uygun hazır rutinleri bir kez kurarsınız; her gün çocuğunuzun oyununa gelir. Zorlanılan anları kısa bir kayıtla not eder, günü ve haftayı tek yerden görürsünüz."
+   "ozet": "Yaşa uygun hazır rutinleri çocuğunuzun gününe planlarsınız; her gün oyunda ona hatırlatılır. Zorlanılan anları kısa bir kayıtla not eder, günü ve haftayı uygulamada görürsünüz."
   },
   {
    "rol": "Moyo Oyun · çocuğunuzun tabletinde",
@@ -58,7 +61,7 @@
    "liste": [
     [
      "1.",
-     "Çocuğunuz işi bitirince oyunda \"Yaptım\"a dokunur."
+     "Çocuğunuz adımı gerçek hayatta yapar, bitirince oyunda \"Yaptım\"a dokunur."
     ],
     [
      "2.",
@@ -78,11 +81,11 @@
    "rol": "Moyo Uzman · uzmanınızın panelinde · isteğe bağlı",
    "kisa": "Moyo Uzman",
    "baslik": "Dilerseniz uzmanınız süreci sizinle birlikte takip etsin.",
-   "metin": "Çalıştığınız uzmanı siz dahil edersiniz: uzmanınız Moyo Uzman'dan davet gönderir, siz onaylarsınız. Uzmanınız yalnız paylaştığınız çocuğun rutin ve davranış kayıtlarını görür, size kısa ebeveyn eğitimleri gönderir, yeni rutin önerir; böylece önerisini gerçekte olana göre verir. Paylaşımı dilediğiniz an durdurursunuz.",
+   "metin": "Çalıştığınız uzmanı siz dahil edersiniz: uzmanınız Moyo Uzman'dan davet gönderir, siz onaylarsınız. Paylaştığınız kayıtlara bakarak size kısa ebeveyn eğitimleri gönderir, yeni rutin önerir; böylece önerisini gerçekte olana göre verir. Paylaşımı Moyo Ebeveyn'deki Uzmanım bölümünden kapatabilirsiniz.",
    "gorsel": "mercek-veri",
    "alt": "Moyo Uzman: uzmanın gördüğü rutin kayıtları",
    "etiket": "Moyo Uzman · gerçek ekran, örnek veri",
-   "ozet": "Dahil ettiğiniz uzman yalnız paylaştığınız çocuğun rutin ve davranış kayıtlarını görür, size ebeveyn eğitimi gönderir, yeni rutin önerir."
+   "ozet": "Dahil ettiğiniz uzman, paylaştığınız kayıtlara bakarak size ebeveyn eğitimi gönderir ve yeni rutin önerir."
   }
  ],
  "ikili_alt": "Solda çocuğun oyununda rutin onay penceresi, sağda ebeveynin telefonunda onay ekranı",
@@ -105,14 +108,14 @@
    "kim": "Siz",
    "kisa": "Öğrenirsiniz",
    "baslik": "Eğitimi okur, rutini eklersiniz.",
-   "metin": "Kısa dersler; eklemek ya da eklememek sizin kararınız.",
+   "metin": "Kısa dersler ve rutin önerileri Moyo Ebeveyn'in Uzmanım bölümüne gelir.",
    "gorsel": "ebeveyn-uzman",
    "alt": "Moyo Ebeveyn: uzmandan gelenler"
   },
   {
    "kim": "Çocuğunuz",
-   "kisa": "Oynar",
-   "baslik": "Oyunda yapar, \"Yaptım\"a dokunur.",
+   "kisa": "Yapar",
+   "baslik": "Yapar, oyunda \"Yaptım\"a dokunur.",
    "metin": "Hatırlatmayı oyun yapar.",
    "gorsel": "oyun-onay",
    "alt": "Moyo Oyun: \"Yaptım\" denen rutin, ailenin onayını bekliyor"
@@ -121,7 +124,7 @@
    "kim": "Siz",
    "kisa": "Onaylarsınız",
    "baslik": "Onaylar, zorlanılan anı kaydedersiniz.",
-   "metin": "Bir dokunuşla onay; gerekirse kısa bir davranış kaydı.",
+   "metin": "Tek dokunuşla onay; zor bir anda olanı, denediğiniz yolu ve çocuğunuzun tepkisini yazarsınız.",
    "gorsel": "ebeveyn-onay",
    "alt": "Moyo Ebeveyn: onay ekranı"
   },
@@ -139,27 +142,21 @@
    "baslik": "Süreç her hafta kaldığı yerden devam eder.",
    "metin": "Uzmanınız kayıtlara bakar, öneriyi günceller; yeni adım ertesi gün oyunda.",
    "gorsel": "sema",
-   "alt": "Şema: uzmanınız önerir, siz ekler ve onaylarsınız, çocuğunuz oyunda yapar, kayıt uzmanınıza ulaşır; süreç her hafta kaldığı yerden devam eder."
+   "alt": "Döngü: uzmanınız önerir; siz planlar, onaylar ve zor anları kaydedersiniz; çocuğunuz yapar ve oyunda işaretler; kayıt uzmanınıza ulaşır. Süreç her hafta yeniden başlar."
   }
  ],
- "dongu_kapanis": {
-  "a": "Seansta konuşulan evde uygulanır, evde olan uzmanınıza kayıtlı ulaşır. Süreç tahminle değil, gerçekte olanla ilerler.",
-  "b": "Seansta konuşulan unutulmaz: öneri ertesi gün çocuğunuzun oyununda, sonucu uzmanınızın ekranında.",
-  "c": "Rutinler, davranışlar ve çocuğunuzun tepkileri tek yerde kayıtlı. Neyin işe yaradığını uzmanınızla birlikte görürsünüz.",
-  "d": "Hafta boyunca evde olanları hatırlamaya çalışmazsınız; kayıtlar seansta uzmanınızın önünde hazırdır."
- },
- "urunler_baslik": "Üç uygulama, tek plan",
+ "urunler_baslik": "Birbirine bağlı üç uygulama",
  "urunler_metin": {
-  "a": "Çocuğunuz oyunda yapar, siz kaydedersiniz, uzmanınız yönlendirir. Birlikte kullanıldığında takip kolaylaşır, kimse aynı şeyi iki kez anlatmaz.",
-  "b": "Biri çocuğunuz, biri sizin, biri uzmanınız için. Üçü aynı kayıtlarla çalışır; takip kolaylaşır.",
-  "c": "Her uygulama bir kişiye göre tasarlandı. Birlikte kullanıldığında takip kolaylaşır, seans daha verimli geçer."
+  "a": "Oyun hatırlatır, siz kaydedersiniz, uzmanınız yönlendirir. Uygulamalar birbirine bağlı olduğu için kimse aynı şeyi iki kez anlatmaz.",
+  "b": "Biri çocuğunuz, biri sizin, biri uzmanınız için. Üçü birbirine bağlı çalışır; takip kolaylaşır.",
+  "c": "Her uygulama bir kişiye göre tasarlandı. Birbirine bağlı oldukları için paylaştığınız kayıtlar seansta uzmanınızın önündedir."
  },
  "urunler": [
   {
    "ikon": "img/ikon-oyun.png",
    "kim": "Çocuk için",
    "ad": "Moyo Oyun",
-   "ozet": "Rutinleri oyunda maceraya çevirir; ödül oyunun içinde.",
+   "ozet": "Rutinin her adımını oyunda küçük bir macera olarak hatırlatır; ödül oyunun içinde.",
    "metin": "Tek oyunculu; ayrı çocuk hesabı gerekmez, Moyo Ebeveyn'de oluşturduğunuz kodla bağlanır. Reklam ve satın alma yok.",
    "link": "ebeveyn.html",
    "link_ad": "Nasıl oynanır →"
@@ -168,8 +165,8 @@
    "ikon": "img/ikon-moyo.svg",
    "kim": "Aile için",
    "ad": "Moyo Ebeveyn",
-   "ozet": "Rutini kurar, davranışı kaydeder, ilerlemeyi gösterir.",
-   "metin": "Rutinleri kurar, tamamlananları onaylar, uzmanınızla neyi paylaşacağınızı siz seçersiniz.",
+   "ozet": "Rutini planlar, zor anları kaydeder, ilerlemeyi gösterir.",
+   "metin": "Çocuğunuzun yaptığı adımları onaylarsınız; uzmanınızla neyi paylaşacağınızı siz seçersiniz.",
    "link": "ebeveyn.html",
    "link_ad": "Ebeveyn sayfası →"
   },
@@ -178,7 +175,7 @@
    "kim": "Uzman için · isteğe bağlı",
    "ad": "Moyo Uzman",
    "ozet": "Evde olanları uzmanınızın önüne düzenli getirir.",
-   "metin": "Onayınızla, yalnız paylaştığınız çocuğun rutin ve davranış kayıtlarını görür; ebeveyn eğitimi gönderir, rapor ve ilerleme notunu kayıtlardan hazırlar.",
+   "metin": "Yalnızca onay verdiğiniz kayıtları uzmanınıza açar. Uzmanınız buradan ebeveyn eğitimi gönderir, rapor ve ilerleme notunu kayıtlardan hazırlar.",
    "link": "{MERCEK}",
    "link_ad": "Uzman sayfası →"
   }
@@ -212,7 +209,7 @@
   ],
   [
    "Uzmanımı nasıl dahil ederim?",
-   "Çalıştığınız uzman Moyo Uzman'dan size davet gönderir ya da siz onun kodunu girersiniz. Neyi paylaşacağınızı siz seçersiniz; paylaşımı dilediğiniz an durdurursunuz."
+   "Çalıştığınız uzman Moyo Uzman'dan size davet gönderir ya da siz onun verdiği kodu Moyo Ebeveyn'de Uzmanım › Uzman bağla bölümüne girersiniz. Neyi paylaşacağınızı siz seçersiniz, paylaşımı da dilediğiniz an durdurabilirsiniz."
   ],
   [
    "Uzmanım yoksa kullanabilir miyim?",
@@ -224,7 +221,7 @@
   ],
   [
    "Rutin ile macera aynı şey mi?",
-   "Moyo Ebeveyn'de kurduğunuz rutinin her adımı (ör. \"Sabah rutini · 6 adım\"), çocuğunuzun oyununda bir macera olarak görünür."
+   "Moyo Ebeveyn'de planladığınız rutinin her adımı (ör. \"Sabah rutini · 6 adım\") çocuğunuzun oyununda küçük bir macera olarak görünür. Çocuğunuz adımı gerçek hayatta yapar, oyunda \"Yaptım\"a dokunur; siz onaylarsınız."
   ],
   [
    "Oyun çocuklar için güvenli mi?",
@@ -246,60 +243,93 @@
  "urunler_etiket": "Ekosistemin Uygulamaları",
  "alt_etiket": "Moyo Ekosistemi",
  "alt": {
-  "a": "Çocuğunuz rutinini oyunda yapar, siz evde olanı kaydedersiniz, dilerseniz uzmanınız süreci bu kayıtlarla yönlendirir.",
-  "b": "Rutini kurun, davranışları kaydedin, dilerseniz uzmanınızla paylaşın. Süreç tahminle değil, kayıtla ilerlesin.",
-  "c": "Rutin, davranış kaydı ve ilerleme takibi: çocuğunuz, siz ve dilerseniz uzmanınız için tek platform."
+  "a": "Çocuğunuz rutini yapar, oyunda işaretler; siz zor anları kaydedersiniz. Dilerseniz uzmanınız kayıtlarla yönlendirir.",
+  "b": "Rutin gerçek hayatta, takip oyunda ve uygulamada. Dilerseniz uzmanınız da kayıtlarla sürece katılır.",
+  "c": "Rutini planlayın, zor anları kaydedin, ilerlemeyi görün. Dilerseniz uzmanınız sürece katılsın."
  },
  "ince": "14 gün ücretsiz deneyin, kart bilgisi gerekmez.",
  "seo": {
-  "aciklama": "Çocuğunuzun günlük rutinini kurun, davranışlarını kaydedin, ilerlemeyi görün. Dilerseniz uzmanınız süreci bu kayıtlarla sizinle birlikte yönlendirsin.",
+  "aciklama": "Çocuğunuzun günlük rutinini planlayın, zor anları kaydedin, ilerlemeyi görün. Dilerseniz uzmanınız süreci bu kayıtlarla sizinle birlikte yönlendirsin.",
   "og_baslik": "Moyo: çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform"
  },
  "sema": {
+  "orta": [
+   "Her hafta",
+   "yeniden"
+  ],
   "uzman": [
    "Moyo Uzman",
    "önerir"
   ],
   "ebeveyn": [
    "Moyo Ebeveyn",
-   "ekler, onaylar"
+   "planlar, onaylar,",
+   "zor anı kaydeder"
   ],
   "oyun": [
    "Moyo Oyun",
-   "çocuk yapar"
+   "çocuk yapar,",
+   "oyunda işaretler"
   ],
-  "donus": "kayıt uzmana ulaşır",
-  "orta": [
-   "Her hafta",
-   "yeniden"
+  "donus": [
+   "kayıt uzmana",
+   "ulaşır"
   ],
-  "b_ebeveyn": "kaydeder",
-  "taban": "tek kayıt, tek plan",
-  "gunler": [
-   "Pzt",
-   "Sal",
-   "Çar",
-   "Per",
-   "Cum",
-   "Cmt",
-   "Paz"
+  "kart": {
+   "uzman": [
+    "Moyo Uzman",
+    [
+     "kayıtlara bakar,",
+     "önerir"
+    ]
+   ],
+   "ebeveyn": [
+    "Moyo Ebeveyn",
+    [
+     "planlar, onaylar"
+    ]
+   ],
+   "oyun": [
+    "Moyo Oyun",
+    [
+     "çocuk yapar,",
+     "işaretler"
+    ]
+   ]
+  },
+  "dort": [
+   [
+    "Uzmanınız önerir"
+   ],
+   [
+    "Siz planlar ve",
+    "onaylarsınız"
+   ],
+   [
+    "Çocuğunuz yapar,",
+    "oyunda işaretler"
+   ],
+   [
+    "Kayıt uzmanınıza",
+    "ulaşır"
+   ]
   ],
-  "gunler_kisa": [
-   "Pt",
-   "Sa",
-   "Ça",
-   "Pe",
-   "Cu",
-   "Ct",
-   "Pz"
-  ],
-  "satirlar": [
-   "Rutin",
-   "Davranış kaydı",
-   "Seans",
-   "Yeni öneri"
-  ],
-  "serit": "Her hafta kaldığı yerden"
+  "dilim": {
+   "uzman": [
+    "Moyo Uzman",
+    "kayıtlara bakar, önerir"
+   ],
+   "ebeveyn": [
+    "Moyo Ebeveyn",
+    "planlar, onaylar,",
+    "zor anı kaydeder"
+   ],
+   "oyun": [
+    "Moyo Oyun",
+    "çocuk yapar,",
+    "oyunda işaretler"
+   ]
+  }
  },
  "kaydir_ipucu": "Kaydırın",
  "altbilgi_slogan": "Çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform",
@@ -312,159 +342,63 @@
    "sec": [
     [
      "a",
-     "Oyunda yapar, siz kaydedersiniz"
+     "Yapar, işaretler; siz kaydedersiniz"
     ],
     [
      "b",
-     "Kurun, kaydedin, paylaşın"
+     "Rutin gerçek hayatta, takip oyunda"
     ],
     [
      "c",
-     "Tek platform"
-    ]
-   ]
-  },
-  {
-   "k": "sahne",
-   "ad": "1-6 sahnesinin zemini",
-   "hedef": "#hepsi",
-   "oneri": "a",
-   "sec": [
-    [
-     "a",
-     "Açık sahne"
-    ],
-    [
-     "b",
-     "Koyu sahne"
-    ],
-    [
-     "c",
-     "Mevcut (düz)"
+     "Planlayın, kaydedin, görün"
     ]
    ]
   },
   {
    "k": "dongu6",
-   "ad": "6. adım görseli",
+   "ad": "6. adım görseli (halka)",
    "hedef": "#hepsi",
    "oneri": "a",
    "sec": [
     [
      "a",
-     "Döngü çemberi"
+     "Döngü çemberi (düzeltilmiş)"
     ],
     [
      "b",
-     "Yarım halka"
+     "Yörünge"
     ],
     [
      "c",
-     "Haftalık şerit"
-    ]
-   ]
-  },
-  {
-   "k": "kapanis",
-   "ad": "Sahne altı kapanış cümlesi",
-   "hedef": "#kapanis",
-   "oneri": "a",
-   "sec": [
-    [
-     "a",
-     "Tahminle değil, gerçekte olanla"
-    ],
-    [
-     "b",
-     "Seansta konuşulan unutulmaz"
-    ],
-    [
-     "c",
-     "Tek yerde kayıtlı"
+     "Dört adımlı halka"
     ],
     [
      "d",
-     "Kayıtlar seansta hazır"
+     "Üç renkli halka"
     ]
    ]
   },
   {
-   "k": "gbas",
-   "ad": "Nasıl çalışır başlığı",
+   "k": "fiil",
+   "ad": "Nasıl çalışır: rutin fiili",
    "hedef": "#giris",
    "oneri": "a",
    "sec": [
     [
      "a",
-     "Kendiniz başlayın"
+     "planlar"
     ],
     [
      "b",
-     "Tek başınıza başlayın"
-    ]
-   ]
-  },
-  {
-   "k": "gmet",
-   "ad": "Nasıl çalışır paragrafı",
-   "hedef": "#giris",
-   "oneri": "a",
-   "sec": [
-    [
-     "a",
-     "Kurar, kaydeder, aktarırsınız"
-    ],
-    [
-     "b",
-     "Siz kurarsınız, uzman yönlendirir"
+     "gün ve saatine yerleştirir"
     ],
     [
      "c",
-     "\"Bu hafta nasıl geçti?\""
-    ]
-   ]
-  },
-  {
-   "k": "uc",
-   "ad": "1-2-3 kartlarının tasarımı",
-   "hedef": "#giris",
-   "oneri": "a",
-   "sec": [
-    [
-     "a",
-     "Renkli üç kart"
-    ],
-    [
-     "b",
-     "Beyaz ikonlu kartlar"
-    ],
-    [
-     "c",
-     "Büyük rakamlı kartlar"
+     "seçip gününü ve saatini belirler"
     ],
     [
      "d",
-     "Mevcut"
-    ]
-   ]
-  },
-  {
-   "k": "b1",
-   "ad": "1. kart başlığı",
-   "hedef": "#giris",
-   "oneri": "a",
-   "sec": [
-    [
-     "a",
-     "Kendiniz başlayın"
-    ],
-    [
-     "b",
-     "Uzman olmadan da başlayın"
-    ],
-    [
-     "c",
-     "Önce siz başlayın"
+     "atar"
     ]
    ]
   },
@@ -476,21 +410,73 @@
    "sec": [
     [
      "a",
-     "Davet, onay, neyi görür, durdurma"
+     "Davet ya da kod"
     ],
     [
      "b",
-     "Neyi görür, neyi görmez"
+     "Yalnızca davet"
+    ]
+   ]
+  },
+  {
+   "k": "b3",
+   "ad": "3. kart başlığı",
+   "hedef": "#giris",
+   "oneri": "a",
+   "sec": [
+    [
+     "a",
+     "Seans dışında da"
+    ],
+    [
+     "b",
+     "Seans vakti dışında da"
+    ]
+   ]
+  },
+  {
+   "k": "b3s",
+   "ad": "3. kart son cümlesi",
+   "hedef": "#giris",
+   "oneri": "a",
+   "sec": [
+    [
+     "a",
+     "Gününe eklemek sizin kararınız"
+    ],
+    [
+     "b",
+     "Kabul edip etmemek sizin kararınız"
     ],
     [
      "c",
-     "Tek cümle"
+     "Siz onaylamadan hiçbir şey eklenmez"
+    ]
+   ]
+  },
+  {
+   "k": "hikaye",
+   "ad": "Ürün ekranları ve anlatım",
+   "hedef": "#giris",
+   "oneri": "a",
+   "sec": [
+    [
+     "a",
+     "Kartlarda ekran, ayrı anlatım yok"
+    ],
+    [
+     "b",
+     "Yalnızca kartlar"
+    ],
+    [
+     "c",
+     "Kartlar + ayrı anlatım (bugünkü)"
     ]
    ]
   },
   {
    "k": "nk",
-   "ad": "Ürün anlatımı (tablet düzeni)",
+   "ad": "Ayrı anlatım, tablet düzeni (yalnızca c'de)",
    "hedef": "#nasil-k",
    "oneri": "a",
    "sec": [
@@ -512,11 +498,11 @@
    "sec": [
     [
      "a",
-     "Yapar, kaydeder, yönlendirir"
+     "Hatırlatır, kaydeder, yönlendirir"
     ],
     [
      "b",
-     "Üçü aynı kayıtlarla"
+     "Üçü birbirine bağlı"
     ],
     [
      "c",
@@ -524,5 +510,18 @@
     ]
    ]
   }
- ]
+ ],
+ "parca": {
+  "fiil": {
+   "a": "planlar",
+   "b": "gün ve saatine yerleştirir",
+   "c": "seçip gününü ve saatini belirler",
+   "d": "atar"
+  },
+  "b3s": {
+   "a": "önerilen rutini çocuğunuzun gününe eklemek sizin kararınız.",
+   "b": "öneriyi kabul edip etmemek sizin kararınız.",
+   "c": "siz onaylamadan çocuğunuzun gününe hiçbir şey eklenmez."
+  }
+ }
 }

@@ -84,7 +84,6 @@
 .d-nokta a { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; text-decoration: none; color: rgba(255, 255, 255, .55); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--koyu-cizgi); white-space: nowrap; }
 .d-nokta .n { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1px solid currentColor; font-size: 11px; }
 .d-nokta a[aria-current="step"] { color: var(--lacivert); background: var(--yesil); border-color: var(--yesil); }
-.d-kapanis { text-align: center; color: var(--koyu-yazi-2); font-size: clamp(16px, 1.6vw, 19px); max-width: 760px; padding: 4px 20px 56px; text-wrap: balance; }
 
 /* Yana kaydırılan kartlar: telefonda, hareket azaltmada ve betik yokken */
 .d-mobil { padding-top: clamp(48px, 7vw, 80px); text-align: center; }
