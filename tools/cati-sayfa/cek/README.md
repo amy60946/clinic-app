@@ -14,4 +14,6 @@ bash preview/build.sh && node tools/cati-sayfa/cek/mercek.js            # hepsi;
 - `moyo.js` + `moyo.json`: giriş ve uydurma aile parent-app `store/capture/prep.js` ile; adım sözdizimi dosyanın başında.
   `keep` uzmanın bekleyen rutin ve adım önerilerini korur, `noSessions` randevuları çıkarır (Uzmanım ekranı için).
 - `kucult.py`: PNG → webp (quality 86).
+- `c-baglan` (çatı sayfa 2. kart, 19 Kasım 2026): `invite` bağlanmamış bir uzman daveti ekler (kod K7M2PA), adımlar `type:` (alana yaz) ve `cb:` (onay kutusu).
+- `img/c-davranis.webp` çekim değil, `mercek-davranis.webp`'ten kırpım: x 349–756, y 174–527 (ilk cümlenin sonu, "Öncül" ile "Sonuç" sütunlarının arası, 2. satırın çizgisi).
 - Betik ekranda "macera" görürse uyarır; "Rutin ekle"deki "…oyunda çocuğunuz için bir macera olur" cümlesi beklenen bilgidir.

@@ -74,3 +74,11 @@ Seçenekler ve önerilerin gerekçesi: belge https://claude.ai/artifact/U6z9HW9Z
   `k-sitemap.xml` / `k-robots.txt` canlıda `/sitemap.xml` / `/robots.txt`.
 - **Canlı yollar:** `/`, `/ebeveyn/`, `/ebeveyn/fiyat/`, `/hakkimizda/`, `/guven/` (`disa_aktar.py` `SAYFA`, `YOL`). Site Cloudflare Access
   kilidinin arkasında olduğu için arama motorları kilit kalkana kadar okuyamaz.
+
+**İkinci bağımsız QA düzeltmeleri (19 Kasım 2026, önizlemede):** çatı sayfa 2. kart ekranı `img/c-baglan.webp` (Moyo Ebeveyn "Uzman bağla"
+onay ekranı: uzman, paylaşılacak çocuk, Uzmanla bağlan; `cek/moyo.json` `c-baglan`, `invite` seçeneği), 3. kart `img/c-davranis.webp`
+(`mercek-davranis.webp`'ten temiz sınırda kırpım, kartta bütünüyle görünür); 1. kartın cümlesi de "fiil" grubunu izler (`c-metin.json`
+`parca.fiil1`, `_grup`); 1–6 kartları tablette ve geniş ekranda büyük (`c-18.css` 8, ≥ 1025 px'te Moyo Uzman'ın masaüstü ekranı ve 6. adımın
+geniş çizimi `.d-gen`); yörüngedeki nokta `transform` ile döner (harf kırıntısı kalmaz), dar çizimlerde yazılar 390 px'te ≥ 12 px, üç ok görünür.
+Moyo Ebeveyn: sekme çubuğu tam / kısa düzen (`m/moyo.js` ölçer), 2. adımın yatay görseli, yeni `h1` grubu (a özel başlık, b çatıyla aynı;
+alt bilgideki slogan seçilen başlık, fiyat sayfasında da; `disa_aktar.py` fiyat sayfasına ebeveyn.html'nin seçimini geçirir).
