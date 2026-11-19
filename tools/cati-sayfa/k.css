@@ -172,7 +172,9 @@ html:not([data-v-kdon=b]) .kd-g3 .kd-ok { left: -10px; top: 1px; --kd-yon: -90de
   /* tablet: kart geniş, Uzman'ın geniş tablosu okunur */
   html:not([data-v-kdon=b]) .kd-uzman .kd-ekran { --kd-eh: auto; }
 }
-@media (max-width: 999px) { html:not([data-v-kdon=b]) .kd .k-kaynak-ac, html:not([data-v-kdon=b]) .kd-not { max-width: 680px; } }
+/* not ve kaynak listesi kartlarla aynı hizada (kartlar soldaki dönüş boşluğu kadar içeride) */
+@media (min-width: 720px) and (max-width: 999px) { html:not([data-v-kdon=b]) .kd .k-kaynak-ac, html:not([data-v-kdon=b]) .kd-not { max-width: 640px; position: relative; left: 20px; } }
+@media (max-width: 719px) { html:not([data-v-kdon=b]) .kd .k-kaynak-ac, html:not([data-v-kdon=b]) .kd-not { margin-left: 26px; margin-right: 0; } }
 @media (max-width: 719px) {
   html:not([data-v-kdon=b]) .kd-izgara { --gut: 26px; --ust: 58px; --alt: 36px; grid-template-rows: var(--ust) auto 76px auto 76px auto var(--alt); }
   html:not([data-v-kdon=b]) .kd-dur { padding: 18px 18px 22px; border-radius: 20px; }
@@ -296,26 +298,26 @@ html[data-v-kdon=b] .kd-merkez { grid-area: orta; justify-self: center; align-se
 .kh-neden-kart::after { content: ""; display: block; width: 96px; height: 4px; margin-top: 28px; border-radius: 2px; background: var(--yesil); }
 
 .kh-hafta { margin: 0; padding-bottom: 6px; }
-.kh-hf { display: grid; grid-template-columns: 92px repeat(8, minmax(0, 1fr)); row-gap: 10px; align-items: center; }
-.kh-cip { justify-self: start; font-size: 13px; line-height: 1.2; font-weight: 700; padding: 6px 11px; border-radius: 999px; white-space: nowrap; }
+.kh-hf { display: grid; grid-template-columns: 96px repeat(8, minmax(0, 1fr)); row-gap: 12px; align-items: center; }
+.kh-cip { justify-self: start; font-size: 14px; line-height: 1.2; font-weight: 700; padding: 6px 11px; border-radius: 999px; white-space: nowrap; }
 .kh-cip-h { color: var(--yazi-2); background: #FFFFFF; box-shadow: inset 0 0 0 1px #B9B5C9; }
 .kh-cip-k { color: #0B4A22; background: #D5F6DC; }
-.kh-hf-h { display: grid; place-items: center; height: 36px; }
-.kh-is { position: relative; display: block; width: min(32px, 72%); aspect-ratio: 1; border-radius: 9px; box-sizing: border-box; }
+.kh-hf-h { display: grid; place-items: center; height: 42px; }
+.kh-is { position: relative; display: block; width: min(38px, 76%); aspect-ratio: 1; border-radius: 9px; box-sizing: border-box; }
 .kh-is-h { border: 1.5px dashed #A29DB6; background: #FFFFFF; }
 .kh-is-k { border: 1.5px solid #3FCF5A; background: var(--yesil); }
-.kh-is-k::after { content: ""; position: absolute; left: 50%; top: 45%; width: 6px; height: 11px; margin: -6px 0 0 -3px;
-  border-right: 2.5px solid var(--lacivert); border-bottom: 2.5px solid var(--lacivert); transform: rotate(45deg); }
+.kh-is-k::after { content: ""; position: absolute; left: 50%; top: 45%; width: 7px; height: 13px; margin: -7px 0 0 -4px;
+  border-right: 3px solid var(--lacivert); border-bottom: 3px solid var(--lacivert); transform: rotate(45deg); }
 /* kalın hafta çizgisi: uçlarda görüşme noktası, ev günlerinde küçük beyaz nokta */
-.kh-hf-c { position: relative; height: 28px; }
-.kh-hf-c::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 6px; margin-top: -3px; background: var(--lacivert); }
-.kh-hf-c.kh-hf-ilk::before { left: 50%; border-radius: 3px 0 0 3px; }
-.kh-hf-c.kh-hf-son::before { right: 50%; border-radius: 0 3px 3px 0; }
+.kh-hf-c { position: relative; height: 30px; }
+.kh-hf-c::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 8px; margin-top: -4px; background: var(--lacivert); }
+.kh-hf-c.kh-hf-ilk::before { left: 50%; }
+.kh-hf-c.kh-hf-son::before { right: 50%; }
 .kh-hf-c::after { content: ""; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: #FFFFFF; }
-.kh-hf-c.kh-hf-uc::after { width: 18px; height: 18px; margin: -9px 0 0 -9px; background: var(--lacivert); box-shadow: 0 0 0 4px var(--kh-gri); }
-.kh-hf-g { text-align: center; font-size: 13px; line-height: 1.25; font-weight: 600; color: var(--yazi-2); }
+.kh-hf-c.kh-hf-uc::after { width: 22px; height: 22px; margin: -11px 0 0 -11px; background: var(--lacivert); box-shadow: 0 0 0 4px var(--kh-gri); }
+.kh-hf-g { text-align: center; font-size: 14px; line-height: 1.25; font-weight: 600; color: var(--yazi-2); }
 .kh-hf-g.kh-hf-uc { font-weight: 800; color: var(--lacivert); }
-.kh-hf-g small { display: block; font-size: 12px; font-weight: 700; color: var(--lacivert); white-space: nowrap; }
+.kh-hf-g small { display: block; font-size: 12.5px; font-weight: 700; color: var(--lacivert); white-space: nowrap; }
 .kh-hf-acik { list-style: none; margin: 22px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 24px; font-size: 15px; line-height: 1.45; color: var(--yazi-2); }
 .kh-hf-acik b { color: var(--lacivert); font-weight: 700; }
 /* bir kez yanar: kayıtlar soldan sağa */
@@ -327,8 +329,11 @@ html[data-v-kdon=b] .kd-merkez { grid-area: orta; justify-self: center; align-se
   .kh-hf { grid-template-columns: repeat(8, minmax(0, 1fr)); row-gap: 8px; }
   .kh-hf-bos { display: none; }
   .kh-cip { grid-column: 1 / -1; margin-top: 4px; }
-  .kh-hf-h { height: 32px; }
-  .kh-is { border-radius: 8px; }
+  .kh-hf-h { height: 36px; }
+  .kh-is { border-radius: 8px; width: min(32px, 80%); }
+  .kh-is-k::after { width: 6px; height: 11px; margin: -6px 0 0 -3px; border-width: 0 2.5px 2.5px 0; }
+  .kh-hf-c::before { height: 6px; margin-top: -3px; }
+  .kh-hf-c.kh-hf-uc::after { width: 18px; height: 18px; margin: -9px 0 0 -9px; }
   .kh-hf-g { font-size: 12px; }
   .kh-hf-g small { font-size: 11px; }
   .kh-hf-acik { flex-direction: column; }
