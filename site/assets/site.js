@@ -223,7 +223,7 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
     mark();
   });
 
-  /* 6. Sekmeler: "Platform Nasıl Çalışır?" ([data-nc]; önizlemede "Kimler için" a da, [data-km]). Tıklayınca, ok tuşlarıyla ve dokunmatik ekranda
+  /* 6. Sekmeler: "Platform Nasıl Çalışır?" ([data-nc]). Tıklayınca, ok tuşlarıyla ve dokunmatik ekranda
      parmakla sağa sola kaydırınca değişir; kendiliğinden ilerlemez (Atlassian'ın sekme düzeni gibi). 18 Kasım 2026: kaydırma, altı sekme
      (taşarsa şerit yana kayar, seçili sekme ortaya gelir), Önceki / Sonraki düğmeleri.
      Bir sekme data-var="grup:değer" taşıyorsa ve <html data-v-grup> başka bir değerdeyse (yalnız önizlemede olur) o sekme yok sayılır. */
@@ -382,145 +382,64 @@ window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic:
   };
   each('[data-nc]', function (box) { sekmeler(box, 'adım'); });
 
-  /* 7. "Kimler için" senaryo kartları ([data-kc], 19 Kasım 2026): telefonda (≤ 640 px) kartlar yana kayar; kaydırma tarayıcının
-     kendisinin (kart yerine oturur). Altına Önceki / Sonraki ve noktalar eklenir; CSS yalnız dar ekranda gösterir, noktalar
-     kaydırma konumunu izler. Hareket azaltmada düğmeler kaydırmayı yumuşatmadan yapar. */
-  each('[data-kc]', function (row) {
-    var kart = row.children, n = kart.length;
-    if (!n) return;
-    var pg = d.createElement('div'), nk = d.createElement('span'), o = d.createElement('button'), s = d.createElement('button');
-    pg.className = 'pager kc-pg';
-    o.type = s.type = 'button'; o.innerHTML = OK_SOL; s.innerHTML = OK_SAG;
-    o.setAttribute('aria-label', 'Önceki meslek grubu'); s.setAttribute('aria-label', 'Sonraki meslek grubu');
-    nk.className = 'pg-n'; nk.setAttribute('aria-hidden', 'true'); nk.innerHTML = new Array(n + 1).join('<i></i>');
-    pg.appendChild(o); pg.appendChild(nk); pg.appendChild(s);
-    row.parentNode.insertBefore(pg, row.nextSibling);
-    var yer = function (j) { return kart[j].offsetLeft - kart[0].offsetLeft; };
-    var hangi = function () {
-      if (row.scrollLeft > 4 && row.scrollLeft + row.clientWidth >= row.scrollWidth - 4) return n - 1;
-      var k = 0, en = Infinity;
-      for (var j = 0; j < n; j++) { var f = Math.abs(yer(j) - row.scrollLeft); if (f < en) { en = f; k = j; } }
-      return k;
-    };
-    var isaretle = function () {
-      var k = hangi();
-      Array.prototype.forEach.call(nk.children, function (x, j) { x.className = j === k ? 'on' : ''; });
-      o.disabled = k === 0; s.disabled = k === n - 1;
-    };
-    var git = function (yon) {
-      var k = Math.max(0, Math.min(n - 1, hangi() + yon));
-      if (row.scrollTo) row.scrollTo({ left: yer(k), behavior: reduce.matches ? 'auto' : 'smooth' }); else row.scrollLeft = yer(k);
-    };
-    o.addEventListener('click', function () { git(-1); });
-    s.addEventListener('click', function () { git(1); });
-    var bekle = 0;
-    row.addEventListener('scroll', function () { if (!bekle) bekle = requestAnimationFrame(function () { bekle = 0; isaretle(); }); }, { passive: true });
-    window.addEventListener('resize', isaretle);
-    isaretle();
-  });
-
-  /* ONIZ:BAS (yalnız önizleme: "Kimler için" a / c / f alternatifleri ve "Davet" adımının sırası; kabuk bir seçenek seçince yeniden kurulur) */
-  // "Kimler için" a: mesleğinizi seçin (meslek grupları sekme; bölüm 6'daki sekme düzeni)
-  each('[data-km]', function (box) { sekmeler(box, 'meslek grubu'); });
-
-  // "Platform Nasıl Çalışır?" dsira: Davet adımının sırası. a (öneri; sayfadaki sıra): 2. adım, Eğitim'den sonra · b: son adım ·
-  // c: İlerleme'den önce (4. adım). Davet sekmesi ve paneli taşınır; numaralar, noktalar, kaydırma ve ok tuşu sırası esitle ile yenilenir.
-  var DSIRA = { a: 'nc-t1', b: null, c: 'nc-t3' };   // Davet bu sekmenin önüne gelir (null: en sona)
-  var dsira = function () {
-    var td = d.getElementById('nc-td'), pd = d.getElementById('nc-pd');
-    if (!td || !pd) return;
-    var v = root.getAttribute('data-v-dsira'), ont = Object.prototype.hasOwnProperty.call(DSIRA, v) ? DSIRA[v] : DSIRA.a;
-    var t = ont ? d.getElementById(ont) : null, p = t ? d.getElementById(t.getAttribute('aria-controls')) : null;
-    td.parentNode.insertBefore(td, t);
-    pd.parentNode.insertBefore(pd, p);
-  };
-  var davetiAc = function () {
-    kutular.forEach(function (x) {
-      if (!x.box.hasAttribute('data-nc')) return;
-      var L = Array.prototype.filter.call(x.box.querySelectorAll('[role=tab]'), function (t) { return !t.hidden; });
-      x.sec(L.indexOf(d.getElementById('nc-td')), { sessiz: true });
-    });
-  };
-  dsira();
-  kutular.forEach(function (x) { x.esitle(); });
-  window.addEventListener('oniz', function (e) {
-    var k = e.detail && e.detail.k;
-    if (k === 'dsira') dsira();
-    kutular.forEach(function (x) { x.esitle(); });
-    if (k === 'dsira') davetiAc();   // seçilen sırada Davet adımı açık gelir: yeni yeri ve metni görünür
-  });
-
-  // "Kimler için" c alternatifi: iki sıra meslek çipi ters yönlere yavaşça kayar. Üstüne gelince, odakta ve dokununca durur; Duraklat düğmesi var.
+  /* 7. "Kimler için" kayan şerit ([data-ks], kullanıcı kararı 19 Kasım 2026, tur 3: üç sıra, Duraklat düğmesi yok). Sıralar ters yönlere
+     yavaşça kayar (CSS .akar). Kesintisiz döngü için her sıranın listesi şeridi dolduracak kadar çoğaltılır (kopyalar aria-hidden; ekran
+     okuyucu her mesleği bir kez okur), kayma hızı genişliğe göre ayarlanır (--ks-w, --ks-s). Üstüne gelince ve odaklanınca CSS durdurur;
+     dokununca (bırakınca 1,5 sn daha) ve ekran dışındayken burada durur. Hareket azaltmada .akar eklenmez: çipler sarılarak durur. */
   each('[data-ks]', function (box) {
-    var b = d.createElement('button'), zaman = 0;
-    b.type = 'button'; b.className = 'ks-dur';
-    var yaz = function () { var dur = box.classList.contains('dur'); b.textContent = dur ? 'Devam ettir' : 'Duraklat'; b.setAttribute('aria-pressed', String(dur)); };
-    b.addEventListener('click', function () { box.classList.toggle('dur'); yaz(); });
+    var siralar = Array.prototype.slice.call(box.querySelectorAll('.ks-sira')), HIZ = 30, sonW = -1, zaman = 0;   // HIZ: px / sn
+    var kur = function () {
+      var w0 = box.clientWidth;
+      if (!w0 || w0 === sonW && box.classList.contains('akar') === !reduce.matches) return;
+      sonW = w0;
+      siralar.forEach(function (s) { Array.prototype.forEach.call(s.querySelectorAll('ul[aria-hidden]'), function (u) { s.removeChild(u); }); });
+      box.classList.toggle('akar', !reduce.matches);
+      if (reduce.matches) return;
+      siralar.forEach(function (s) {
+        var ilk = s.querySelector('ul'), w = ilk.getBoundingClientRect().width;
+        if (!w) return;
+        for (var i = 0, n = Math.ceil(box.clientWidth / w) + 1; i < n; i++) { var k = ilk.cloneNode(true); k.setAttribute('aria-hidden', 'true'); s.appendChild(k); }
+        s.style.setProperty('--ks-w', w.toFixed(1) + 'px');
+        s.style.setProperty('--ks-s', (w / HIZ).toFixed(1) + 's');
+      });
+    };
     box.addEventListener('touchstart', function () { clearTimeout(zaman); box.classList.add('tut'); }, { passive: true });
     box.addEventListener('touchend', function () { zaman = setTimeout(function () { box.classList.remove('tut'); }, 1500); });
-    box.appendChild(b); yaz();
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { box.classList.toggle('uzak', !es[0].isIntersecting); }).observe(box);
+    }
+    var bekle = 0;
+    window.addEventListener('resize', function () { clearTimeout(bekle); bekle = setTimeout(kur, 150); });
+    if (reduce.addEventListener) reduce.addEventListener('change', function () { sonW = -1; kur(); });
+    if (d.fonts && d.fonts.ready) d.fonts.ready.then(function () { sonW = -1; kur(); });
+    kur();
   });
-  // "Kimler için" f alternatifi: mesleğinizi yazın. Birleşik kutu (ARIA combobox + listbox): yazdıkça öneri, aşağı / yukarı ok,
-  // Enter seçer, Esc kapatır (açık değilse kutuyu temizler). Türkçe harfler katlanır: "ogretmen" "Öğretmen"i, "aba" BCBA'yı bulur.
-  each('[data-kf]', function (box) {
-    var inp = box.querySelector('input'), lb = box.querySelector('[role=listbox]'), yok = box.querySelector('.kf-yok');
-    var ops = Array.prototype.slice.call(lb.querySelectorAll('[role=option]')), gs = Array.prototype.slice.call(box.querySelectorAll('.kf-g'));
-    var bos = box.querySelector('.kf-bos'), dolu = box.querySelector('.kf-dolu'), adEl = box.querySelector('.kf-ad'), grupEl = box.querySelector('.kf-grup');
-    var orn = Array.prototype.slice.call(box.querySelectorAll('.kf-orn button'));
-    var TR = { 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u', 'â': 'a', 'î': 'i', 'û': 'u' };
-    var katla = function (x) { return x.toLocaleLowerCase('tr').replace(/[çğıöşüâîû]/g, function (c) { return TR[c]; }).replace(/\s+/g, ' '); };
-    ops.forEach(function (o) { o.__k = katla(o.getAttribute('data-ad') + ' ' + o.querySelector('small').textContent + ' ' + (o.getAttribute('data-ek') || '')); });
-    var acik = [], aktif = -1;
-    var isaretle = function (j) {
-      aktif = j;
-      ops.forEach(function (o) { o.setAttribute('aria-selected', 'false'); });
-      if (j >= 0 && acik[j]) {
-        acik[j].setAttribute('aria-selected', 'true'); inp.setAttribute('aria-activedescendant', acik[j].id);
-        var a = acik[j], ust = a.offsetTop, alt = ust + a.offsetHeight;   // listede görünür tut (sayfayı kaydırmadan)
-        if (ust < lb.scrollTop) lb.scrollTop = ust - 6; else if (alt > lb.scrollTop + lb.clientHeight) lb.scrollTop = alt - lb.clientHeight + 6;
-      } else inp.removeAttribute('aria-activedescendant');
-    };
-    var ac = function (on) { lb.hidden = !on; inp.setAttribute('aria-expanded', String(on)); if (!on) isaretle(-1); };
-    var suz = function () {
-      var q = katla(inp.value.trim());
-      acik = [];
-      ops.forEach(function (o) { var on = !!q && o.__k.indexOf(q) >= 0; o.hidden = !on; if (on) acik.push(o); });
-      yok.hidden = !q || acik.length > 0;
-      if (q && !acik.length) {   // eşleşme yoksa önceki sonuç kartı "bulamadık"ın altında kalmasın (19 Kasım QA)
-        dolu.hidden = true; bos.hidden = false;
-        orn.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
-      }
-      ac(acik.length > 0);
-      if (acik.length) lb.scrollTop = 0;
-    };
-    var goster = function (o) {
-      var g = o.getAttribute('data-g'), ad = o.getAttribute('data-ad');
-      inp.value = ad; ac(false); yok.hidden = true;
-      gs.forEach(function (x) { x.hidden = x.getAttribute('data-g') !== g; if (!x.hidden) grupEl.textContent = x.getAttribute('data-grup'); });
-      adEl.textContent = ad; bos.hidden = true; dolu.hidden = false;
-      orn.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-ad') === ad)); });
-    };
-    inp.addEventListener('input', suz);
-    inp.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        if (lb.hidden) { suz(); if (lb.hidden) return; }
-        var n = acik.length, j = aktif + (e.key === 'ArrowDown' ? 1 : -1);
-        if (aktif < 0 && e.key === 'ArrowUp') j = n - 1;
-        isaretle(j >= n ? 0 : j < 0 ? n - 1 : j);
-      } else if (e.key === 'Enter') {
-        if (!lb.hidden && (aktif >= 0 || acik.length === 1)) { e.preventDefault(); goster(acik[aktif >= 0 ? aktif : 0]); }
-      } else if (e.key === 'Escape' || e.key === 'Esc') {
-        if (!lb.hidden) { e.preventDefault(); ac(false); } else if (inp.value) { inp.value = ''; yok.hidden = true; }
-      }
+
+  /* 8. Pano büyüteci ([data-pl], 19 Kasım 2026, tur 3): görünür olunca halkalar, çizgiler ve büyüteçler sırayla belirir (CSS .bekle).
+     Hareket azaltmada, eski tarayıcıda ve betik yoksa .bekle hiç eklenmez: her şey baştan yerinde durur. */
+  if ('IntersectionObserver' in window && !reduce.matches) {
+    each('[data-pl]', function (fig) {
+      fig.classList.add('bekle');
+      var io = new IntersectionObserver(function (es) {
+        if (!es[0].isIntersecting) return;
+        io.disconnect();
+        requestAnimationFrame(function () { fig.classList.remove('bekle'); });
+      }, { threshold: 0.35 });
+      io.observe(fig);
     });
-    inp.addEventListener('blur', function () { setTimeout(function () { if (d.activeElement !== inp) ac(false); }, 150); });
-    lb.addEventListener('mousedown', function (e) { e.preventDefault(); });   // tıklarken kutu odağını kaybetmesin
-    lb.addEventListener('click', function (e) { var o = e.target.closest('[role=option]'); if (o) goster(o); });
-    orn.forEach(function (b) {
-      b.setAttribute('aria-pressed', 'false');
-      b.addEventListener('click', function () { var o = ops.filter(function (x) { return x.getAttribute('data-ad') === b.getAttribute('data-ad'); })[0]; if (o) goster(o); });
-    });
+  }
+
+  /* ONIZ:BAS (yalnız önizleme: kabuk bir seçeneği değiştirince sekmelerin yüksekliği ve şerit yeniden ölçülür; "tema" a seçiliyse
+     tarayıcı çubuğunun rengi bugünkü koyu menüye döner. Canlıda açık tema: <meta name="theme-color" content="#FFFFFF">) */
+  var renk = function () {
+    var m = d.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', root.getAttribute('data-v-tema') === 'a' ? '#2D294E' : '#FFFFFF');
+  };
+  renk();
+  window.addEventListener('oniz', function () {
+    renk();
+    kutular.forEach(function (x) { x.esitle(); });
+    window.dispatchEvent(new Event('resize'));
   });
   /* ONIZ:SON */
 

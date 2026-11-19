@@ -21,17 +21,20 @@
 <meta name="twitter:title" content="Fiyatlar: Bireysel ve Klinik paketleri | Moyo Mercek">
 <meta name="twitter:description" content="Moyo Mercek paketleri: tek uzman için Bireysel, 10 uzmana kadar ekipler için Klinik. Aylık ya da yıllık. 14 gün ücretsiz, kart bilgisi gerekmez.">
 <meta name="twitter:image" content="https://mercek.moyoapp.com.tr/assets/motion/akis.webp">
-<meta name="theme-color" content="#2D294E">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="icon" href="assets/logo/favicon-mercek.svg" type="image/svg+xml">
 <link rel="alternate icon" href="assets/icon.png">
 <link rel="apple-touch-icon" href="assets/icon.png">
 <link rel="stylesheet" href="assets/site.css">
 <script>document.documentElement.classList.add('js');</script>
-<noscript><style>.nc-p[hidden], .km-p[hidden] { display: grid !important; margin-bottom: 40px; }</style></noscript>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://moyoapp.com.tr/#kurum","name":"Moyo","url":"https://moyoapp.com.tr/","logo":"https://mercek.moyoapp.com.tr/assets/icon.png"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Moyo Mercek","item":"https://mercek.moyoapp.com.tr/"},{"@type":"ListItem","position":2,"name":"Fiyatlar","item":"https://mercek.moyoapp.com.tr/fiyat"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Ödeme nereden yapılır?","acceptedAnswer":{"@type":"Answer","text":"iPhone ya da iPad'deki Moyo Mercek'ten, App Store ile. Üyelik web'de de açılır. Deneme bitince hiçbir şey silinmez."}},{"@type":"Question","name":"Deneme bitince ne olur?","acceptedAnswer":{"@type":"Answer","text":"Hiçbir şey silinmez. Devam etmek için bir paket seçersiniz; seçene kadar aile verileri görünmez."}},{"@type":"Question","name":"Bireysel çalışıyorum, klinik açmam gerekir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Kayıtta \"Bireysel uzman\"ı seçin. Ekibiniz olursa Klinik paketine geçersiniz."}},{"@type":"Question","name":"Ekip üyeleri ayrıca öder mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Tek üyelik vardır; klinik sahibi yönetir."}},{"@type":"Question","name":"Aileler ücret öder mi?","acceptedAnswer":{"@type":"Answer","text":"Aileler Moyo ile uzmanına ücretsiz bağlanır."}},{"@type":"Question","name":"Nasıl iptal ederim?","acceptedAnswer":{"@type":"Answer","text":"Apple hesabınızdaki Abonelikler bölümünden. Dönem sonuna kadar erişiminiz sürer."}}]}]}</script>
 <!-- Fiyatlar assets/site.js içindeki window.MERCEK_PRICES'tan yazılır (YER TUTUCU, ürün sahibinin kararı bekleniyor).
      Aşağıdaki sabit değerler betiksiz okuyucu içindir ve oradakilerle aynı tutulur. Özellik listeleri src/lib/billing.ts PACKAGES'tan.
      Yapılandırılmış veride (JSON-LD) fiyat teklifi yok: site.js fiyat kesinleşince (draft: false) bu sayfaya kendisi ekler. -->
+<!-- ONIZ:BAS -->
+<script type="application/json" id="oniz-gruplar">[{"k":"tema","ad":"Renk teması (üç sayfada birlikte)","hedef":"#top","oneri":"b","ortak":true,"neden":"Moyo Ekosistem sayfasıyla aynı aile: beyaz ve çok açık zeminler, lacivert yazı, yeşil vurgu. Ürünün kendi ekranları da açık renkli; ekranlar sayfaya ağır çerçeve olmadan oturur, pano büyüteçleri daha rahat okunur. a Mercek'e daha güçlü, ayırt edici bir görünüm verir ama ekosistemin geri kalanından ayrılır.","sec":[["b","Açık renk ağırlıklı"],["a","Bugünkü: koyu lacivert bölümler"]]}]</script>
+<script src="assets/oniz.js"></script>
+<!-- ONIZ:SON -->
 </head>
 <body data-offers>
 <a class="skip" href="#main">Ana içeriğe geç</a>
@@ -63,15 +66,15 @@
 </header>
 
 <main id="main">
-  <section class="ph" aria-labelledby="h-fiyat">
+  <section class="ph ph-fiyat" aria-labelledby="h-fiyat">
     <div class="wrap">
       <p class="eyebrow">Fiyatlar</p>
-      <h1 id="h-fiyat">İki paket. 14&nbsp;gün ücretsiz.</h1>
+      <h1 id="h-fiyat"><span class="yesil">14&nbsp;gün ücretsiz</span> deneyin.</h1>
       <p class="sub">Kart gerekmez. Deneme bitince hiçbir şey silinmez; devam etmek için bir paket seçersiniz.</p>
     </div>
   </section>
 
-  <section class="sec sec-soft" aria-label="Paketler"><div class="wrap">
+  <section class="sec sec-soft sec-paket" aria-label="Paketler"><div class="wrap">
       <div class="period" role="group" aria-label="Ödeme dönemi">
         <button type="button" data-period="m" aria-pressed="false">Aylık</button>
         <button type="button" data-period="y" aria-pressed="true">Yıllık <span class="save" data-gift>2 ay ücretsiz</span></button>
@@ -181,13 +184,13 @@
   <section class="sec sec-white trial" aria-labelledby="h-dene">
     <div class="wrap">
       <div class="closing">
-        <h2 id="h-dene">14 gün ücretsiz deneyin</h2>
+        <h2 id="h-dene">Denemeyi bugün başlatın</h2>
         <div class="actions">
           <a class="btn btn-cta" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Bireysel ile başlayın</a>
           <a class="btn btn-line" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Klinik ile başlayın</a>
           <a class="btn btn-quiet" data-app="login" href="https://uzman.moyoapp.com.tr/">Giriş</a>
         </div>
-        <p class="fine">14 gün ücretsiz, kart gerekmez; sonra seçtiğiniz paketin ücreti App Store üzerinden alınır ve dönem sonunda kendiliğinden yenilenir.</p>
+        <p class="fine"><span class="yesil">14 gün ücretsiz</span>, kart gerekmez; sonra seçtiğiniz paketin ücreti App Store üzerinden alınır ve dönem sonunda kendiliğinden yenilenir.</p>
       </div>
     </div>
   </section>
