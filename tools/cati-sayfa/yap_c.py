@@ -9,6 +9,8 @@
 # Kural: çocuk adımı gerçek hayatta yapar, oyunda işaretler; ebeveyn rutini planlar; uygulamalar "birbirine bağlı" (tek platform değil).
 # Tur 3 (kullanıcı yanıtları 19 Kasım 2026): alt, fiil ("planlar"), hikaye (ekranlar 1-2-3 kartlarında) ve urun tek sürüm; ayrı ürün
 # anlatımı (#nasil, telefon ve tablette #nasil-k) kalktı, hikaye.js ve kompakt.js bu sayfada yüklenmez; nk grubu da onunla gitti.
+# Tur 4 (kullanıcı kararları 19 Kasım 2026): dongu6 b (Yörünge), b2 a, b3 a, b3s a tek sürüm; sayfada önizleme grubu kalmadı.
+# c-metin.json "oniz" boşken #oniz-gruplar ve oniz.js yazılmaz; yeni grup eklenirse (sözlük metin + "oniz" kaydı) ikisi yeniden çıkar.
 import re, html as H, json, sys, runpy
 def _svg(dosya):
     s = open(dosya).read().strip()
@@ -23,15 +25,12 @@ IMG = {'ebeveyn-onay': 'img/moyo-onay.webp', 'ebeveyn-uzman': 'img/moyo-uzman.we
        'mercek-veri': 'img/mercek-rutin.webp', 'mercek-egitim': 'img/mercek-egitim.webp',
        'mercek-veri-tel': 'img/mercek-rutin-tel.webp', 'mercek-egitim-tel': 'img/mercek-egitim-tel.webp'}
 e = H.escape
-ONIZ = K['oniz']; ONERI = {g['k']: g['oneri'] for g in ONIZ}
+ONIZ = K.get('oniz', []); ONERI = {g['k']: g['oneri'] for g in ONIZ}
 SEMA = runpy.run_path('c-sema.py')['sema']; LOGO_IC = re.sub(r'^<svg[^>]*>|</svg>$', '', LOGO)
 def secenek(k, d, tag='span', attr=''):
-    # Metin alternatifi: sözlükse her değer data-var="k:değer" taşıyan kardeş öğe olur; önerilmeyenler hidden (oniz.js açar). Düz metinse tek öğe.
-    if isinstance(d, str): return f'<{tag}{attr}>{d}</{tag}>'
+    # Metin alternatifi: sözlükse her değer data-var="k:değer" taşıyan kardeş öğe olur; önerilmeyenler hidden (oniz.js açar). Düz metin olduğu gibi.
+    if isinstance(d, str): return d
     return ''.join(f'<{tag}{attr} data-var="{k}:{v}"{"" if v == ONERI[k] else " hidden"}>{t}</{tag}>' for v, t in d.items())
-def doldur(t):
-    # Cümle içindeki tek parça seçenek: "{b3s}" yer tutucusu c-metin.json "parca" sözlüğünden satır içi seçeneklerle dolar.
-    return re.sub(r'\{(\w+)\}', lambda m: secenek(m.group(1), K['parca'][m.group(1)]), t)
 
 def cumleler(t):
     # Uzun tanıtım cümleleri geniş ekranda cümle sınırında satır atlasın ("…tasarlandı. Birlikte / kullanıldığında" yerine): her cümle bir span.
@@ -46,7 +45,7 @@ def resim(key, alt, c='', dar=False):
 def dongu(beats):
     # Moyo Ekosistemi: ortadaki ekran net; yanındakiler bulanık, yana açılmış ve geride. Masaüstünde sayfa kaydıkça ilerler (eko.js),
     # altında hap biçiminde adım sayacı (geçilen adımların numarası yeşil dolar). Telefonda ve tablette parmakla yana kaydırılan kartlar + aynı sayaç.
-    # 6. adımın görseli ekran değil halka çizimidir (c-sema.py; dört seçenek, oniz "dongu6"). Kapanış cümlesi 19 Kasım'da kalktı (Moyo Ebeveyn sayfasına).
+    # 6. adımın görseli ekran değil yörünge çizimidir (c-sema.py; tur 4'te tek sürüm). Kapanış cümlesi 19 Kasım'da kalktı (Moyo Ebeveyn sayfasına).
     slots, pills, kartlar, mpills = [], [], [], []
     for i, b in enumerate(beats):
         t = tur(b['gorsel'])
@@ -77,14 +76,14 @@ def dongu(beats):
             f'<ol class="d-nokta-m sayac" aria-label="Ekosistemin adımları">{"".join(mpills)}</ol></div></section>')
 
 def uc_kart(i, s):
-    # Renkli üç kart (kullanıcı kararı 19 Kasım 2026; Atlassian örnek 1). Başlık ya da metin sözlükse grup "b<n>" seçenekleri;
-    # metindeki "{anahtar}" cümle içi seçenek (doldur). Kartın altında bir gerçek ürün ekranı (1-6 sahnesindekilerden farklı; tur 3'te tek sürüm).
+    # Renkli üç kart (kullanıcı kararı 19 Kasım 2026; Atlassian örnek 1). Başlık ya da metin sözlükse grup "b<n>" seçenekleri
+    # (tur 4'te hepsi tek sürüm). Kartın altında bir gerçek ürün ekranı (1-6 sahnesindekilerden farklı; tur 3'te tek sürüm).
     rozet = f'<span class="uc-rozet">{s["rozet"]}</span>' if s['rozet'] else ''
     g = s['gorsel']
     ekran = f'<div class="uc-gorsel uc-{g["tur"]}"><img src="{g["img"]}" alt="{e(g["alt"])}" loading="lazy" decoding="async"></div>'
     return (f'<li class="uc-k uc-{i + 1}{" istege" if s["rozet"] else ""}"><div class="uc-ust"><span class="uc-no" aria-hidden="true">{i + 1}</span>{rozet}</div>'
-            f'<h3>{secenek("b%d" % (i + 1), s["baslik"]) if isinstance(s["baslik"], dict) else s["baslik"]}</h3>'
-            f'<p>{secenek("b%d" % (i + 1), s["metin"]) if isinstance(s["metin"], dict) else doldur(s["metin"])}</p>{ekran}</li>')
+            f'<h3>{secenek("b%d" % (i + 1), s["baslik"])}</h3>'
+            f'<p>{secenek("b%d" % (i + 1), s["metin"])}</p>{ekran}</li>')
 basamak = '<ol class="uc">' + ''.join(uc_kart(i, s) for i, s in enumerate(K['basamak'])) + '</ol>'
 urunler = ''.join(f'<div class="kart urun"><img class="u-ikon" src="{u["ikon"]}" alt="" width="52" height="52"><h3><small>{u["kim"]}</small>{u["ad"]}</h3><p class="sorun2">{u["ozet"]}</p><p>{u["metin"]}</p><a href="{u["link"]}"{" target=\"_blank\" rel=\"noopener\"" if u["link"].startswith("http") else ""}>{u["link_ad"]}</a></div>' for u in K['urunler']).replace('{MERCEK}', MERCEK)
 # Menüde ve açılışta "Nasıl çalışır" #giris'e gider (1-2-3 kartları; ayrı ürün anlatımı tur 3'te kalktı).
@@ -103,9 +102,9 @@ altbilgi = (f'<footer class="altb"><div class="ic"><div class="altb-kutu">'
             + f'</div><div class="altb-alt"><span>© 2026 Moyo</span><span class="altb-not">Ekranlardaki adlar örnektir. Bu sayfa çerez, reklam pikseli ya da analiz aracı kullanmaz.</span></div></div></footer>')
 
 # Önizleme alternatifleri: <html data-v-…> varsayılanları sayfaya yazılır (betik olmadan da önerilen tasarım açılır);
-# #oniz-gruplar + oniz.js yalnız önizlemede (disa_aktar.py çıkarır).
+# #oniz-gruplar + oniz.js yalnız önizlemede (disa_aktar.py çıkarır) ve yalnız grup varken yazılır.
 VARS = ''.join(f' data-v-{g["k"]}="{g["oneri"]}"' for g in ONIZ)
-GRUPLAR = json.dumps([{k: g[k] for k in ('k', 'ad', 'hedef', 'oneri', 'sec')} for g in ONIZ], ensure_ascii=False).replace('</', '<\\/')
+GRUPLAR = '' if not ONIZ else '<script type="application/json" id="oniz-gruplar">' + json.dumps([{k: g[k] for k in ('k', 'ad', 'hedef', 'oneri', 'sec')} for g in ONIZ], ensure_ascii=False).replace('</', '<\\/') + '</script><script src="oniz.js"></script>'
 SEO = K['seo']
 assert len(SEO['aciklama']) <= 155, 'açıklama 155 karakteri geçti'
 
@@ -115,7 +114,7 @@ html = f'''<!doctype html><html lang="tr"{VARS}><head><meta charset="utf-8"><met
 <meta property="og:type" content="website"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Moyo">
 <meta property="og:title" content="{e(SEO["og_baslik"])}"><meta property="og:description" content="{e(SEO["aciklama"])}">
 <link rel="icon" href="img/favicon-moyo.svg" type="image/svg+xml"><link rel="stylesheet" href="ortak.css"><link rel="stylesheet" href="c.css"><link rel="stylesheet" href="beyaz.css"><link rel="stylesheet" href="v4.css"><link rel="stylesheet" href="c-18.css">
-<script type="application/json" id="oniz-gruplar">{GRUPLAR}</script><script src="oniz.js"></script></head><body class="sayfa-c beyaz">
+{GRUPLAR}</head><body class="sayfa-c beyaz">
 <header class="ust"><div class="ic"><a class="logo" href="#" aria-label="Moyo">{LOGO}</a><nav class="menu" aria-label="Ana menü"><a href="#giris">Nasıl çalışır</a><a class="kitle" href="ebeveyn.html">Ebeveynler için</a><a class="kitle" href="{MERCEK}" target="_blank" rel="noopener">Uzmanlar için</a></nav><div class="sag"><a class="hap cizgi k" href="#">Giriş yap</a><a class="hap dolu k" href="#">Ücretsiz deneyin</a>
 <details class="dar-menu"><summary aria-label="Menü"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="m-ac" d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="m-kapat" d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary>
 <nav aria-label="Menü"><a href="#giris">Nasıl çalışır</a><a href="ebeveyn.html">Ebeveynler için</a><a href="{MERCEK}" target="_blank" rel="noopener">Uzmanlar için</a><a class="yalniz-dar" href="#">Giriş yap</a></nav></details></div></div></header>

@@ -17,10 +17,7 @@
   },
   {
    "baslik": "Dilerseniz uzmanınızı dahil edin",
-   "metin": {
-    "a": "Uzmanınız sizi davet eder ya da size verdiği kodu girersiniz; siz onaylarsınız. Uzmanınız yalnızca paylaştığınız çocuğunuzun rutin ve davranış kayıtlarını görür. Paylaşımı dilediğiniz an durdurabilirsiniz.",
-    "b": "Çalıştığınız uzman size davet gönderir, siz onaylarsınız. Uzmanınız yalnızca paylaştığınız çocuğunuzun rutin ve davranış kayıtlarını görür. Paylaşımı dilediğiniz an durdurabilirsiniz."
-   },
+   "metin": "Uzmanınız sizi davet eder ya da size verdiği kodu girersiniz; siz onaylarsınız. Uzmanınız yalnızca paylaştığınız çocuğunuzun rutin ve davranış kayıtlarını görür. Paylaşımı dilediğiniz an durdurabilirsiniz.",
    "rozet": "İsteğe bağlı",
    "gorsel": {
     "img": "img/c-baglan.webp",
@@ -29,11 +26,8 @@
    }
   },
   {
-   "baslik": {
-    "a": "Seans dışında da birlikte ilerleyin",
-    "b": "Seans vakti dışında da birlikte ilerleyin"
-   },
-   "metin": "Uzmanınız kısa ebeveyn eğitimleri gönderir, davranış kayıtlarınıza bakar, yeni rutin önerir; {b3s}",
+   "baslik": "Seans dışında da birlikte ilerleyin",
+   "metin": "Uzmanınız kısa ebeveyn eğitimleri gönderir, davranış kayıtlarınıza bakar, yeni rutin önerir; önerilen rutini çocuğunuzun gününe eklemek sizin kararınız.",
    "rozet": "",
    "gorsel": {
     "img": "img/c-davranis.webp",
@@ -194,28 +188,6 @@
   "og_baslik": "Moyo: çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform"
  },
  "sema": {
-  "orta": [
-   "Her hafta",
-   "yeniden"
-  ],
-  "uzman": [
-   "Moyo Uzman",
-   "önerir"
-  ],
-  "ebeveyn": [
-   "Moyo Ebeveyn",
-   "planlar, onaylar,",
-   "zor anı kaydeder"
-  ],
-  "oyun": [
-   "Moyo Oyun",
-   "çocuk yapar,",
-   "oyunda işaretler"
-  ],
-  "donus": [
-   "kayıt uzmana",
-   "ulaşır"
-  ],
   "kart": {
    "uzman": [
     "Moyo Uzman",
@@ -238,126 +210,9 @@
      "işaretler"
     ]
    ]
-  },
-  "dort": [
-   [
-    "Uzmanınız önerir"
-   ],
-   [
-    "Siz planlar ve",
-    "onaylarsınız"
-   ],
-   [
-    "Çocuğunuz yapar,",
-    "oyunda işaretler"
-   ],
-   [
-    "Kayıt uzmanınıza",
-    "ulaşır"
-   ]
-  ],
-  "dilim": {
-   "uzman": [
-    "Moyo Uzman",
-    "kayıtlara bakar, önerir"
-   ],
-   "ebeveyn": [
-    "Moyo Ebeveyn",
-    "planlar, onaylar,",
-    "zor anı kaydeder"
-   ],
-   "oyun": [
-    "Moyo Oyun",
-    "çocuk yapar,",
-    "oyunda işaretler"
-   ]
   }
  },
  "kaydir_ipucu": "Kaydırın",
  "altbilgi_slogan": "Çocuğunuzun davranış, beceri ve alışkanlık gelişimini destekleyen platform",
- "oniz": [
-  {
-   "k": "dongu6",
-   "ad": "6. adım görseli (halka)",
-   "hedef": "#hepsi",
-   "oneri": "a",
-   "sec": [
-    [
-     "a",
-     "Döngü çemberi (düzeltilmiş)"
-    ],
-    [
-     "b",
-     "Yörünge"
-    ],
-    [
-     "c",
-     "Dört adımlı halka"
-    ],
-    [
-     "d",
-     "Üç renkli halka"
-    ]
-   ]
-  },
-  {
-   "k": "b2",
-   "ad": "2. kart metni",
-   "hedef": "#giris",
-   "oneri": "a",
-   "sec": [
-    [
-     "a",
-     "Davet ya da kod"
-    ],
-    [
-     "b",
-     "Yalnızca davet"
-    ]
-   ]
-  },
-  {
-   "k": "b3",
-   "ad": "3. kart başlığı",
-   "hedef": "#giris",
-   "oneri": "a",
-   "sec": [
-    [
-     "a",
-     "Seans dışında da"
-    ],
-    [
-     "b",
-     "Seans vakti dışında da"
-    ]
-   ]
-  },
-  {
-   "k": "b3s",
-   "ad": "3. kart son cümlesi",
-   "hedef": "#giris",
-   "oneri": "a",
-   "sec": [
-    [
-     "a",
-     "Gününe eklemek sizin kararınız"
-    ],
-    [
-     "b",
-     "Kabul edip etmemek sizin kararınız"
-    ],
-    [
-     "c",
-     "Siz onaylamadan hiçbir şey eklenmez"
-    ]
-   ]
-  }
- ],
- "parca": {
-  "b3s": {
-   "a": "önerilen rutini çocuğunuzun gününe eklemek sizin kararınız.",
-   "b": "öneriyi kabul edip etmemek sizin kararınız.",
-   "c": "siz onaylamadan çocuğunuzun gününe hiçbir şey eklenmez."
-  }
- }
+ "oniz": []
 }

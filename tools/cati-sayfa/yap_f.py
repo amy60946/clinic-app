@@ -8,6 +8,7 @@
 # marka yeşili yazı (8,3:1), beyaz kartta --c-ok yazı (5,3:1) ve yeşil zeminli koyu yazılı rozet. Açılış kısaldı, deneme bandı ve
 # "Moyo Ebeveyn'de" maddeleri çıktı (söyledikleri artık açılışta ve kartlarda; aynı cümle iki kez geçmesin): plan kartları fiyatlarıyla
 # 1440×900 ve 1366×768'de kaydırmadan, 390×844'te ilk kartın adı ve fiyatı ilk ekranda görünür.
+# Tur 4 (19 Kasım 2026): alt bilgideki slogan sabit ("h1" a); görünen metinde "zorlanılan" da yasak.
 # Kullanım: cd tools/cati-sayfa && python3 yap_f.py  → ebeveyn-fiyat.html
 import json, re
 import yap_m as M
@@ -27,9 +28,8 @@ tablo = ''.join(
     for g, satirlar in F['tablo'])
 sss = ''.join(f'<details><summary>{e(q)}</summary><p>{e(a)}</p></details>' for q, a in F['sss'])
 
-# Alt bilgideki slogan ana sayfanın açılış başlığıdır: "h1" grubu burada da seçilebilir (19 Kasım QA; canlıda ebeveyn.html'nin seçimi geçer)
-ONIZ = [dict(M.H1_GRUP, hedef='footer', ad='Alt bilgideki slogan (ana sayfanın açılış başlığı)')]
-html = f'''{M.bas(F["baslik"], F["aciklama"], "/ebeveyn/fiyat/", ONIZ)}
+# Alt bilgideki slogan ana sayfanın açılış başlığıdır (M.alt; tur 4'te "h1" a ile sabitlendi, bu sayfada önizleme grubu kalmadı)
+html = f'''{M.bas(F["baslik"], F["aciklama"], "/ebeveyn/fiyat/")}
 <body class="sayfa-moyo sayfa-fiyat">
 {M.ust("fiyat")}
 <main id="main">
@@ -114,7 +114,7 @@ if __name__ == '__main__':
     assert 'istediğiniz' not in html and '—' not in html, 'yasaklı ifade ya da uzun tire'
     assert html.count('Taslak fiyat') == 1 and re.search(r'<!-- ONIZ:BAS --> <span class="draft">Taslak fiyat</span><!-- ONIZ:SON -->', html), 'taslak etiketi yalnızca önizlemede'
     gorunen = re.sub(r'<[^>]+>', ' ', re.sub(r'<(script|style|svg)\b.*?</\1>', ' ', html, flags=re.S))
-    for yasak in ('kurun', 'kurarsınız', ' yalnız ', 'zor an', 'tek platform'):
+    for yasak in ('kurun', 'kurarsınız', ' yalnız ', 'zor an', 'zorlanılan', 'tek platform'):
         assert yasak not in gorunen.lower(), f'yasaklı ifade: {yasak}'
     assert html.count('<h1') == 1
     open('ebeveyn-fiyat.html', 'w').write(html); print('ok ebeveyn-fiyat.html')

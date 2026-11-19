@@ -139,13 +139,4 @@
     io.observe(sec.querySelector('.d-halka-kap')); io.observe(pencere);
     setTimeout(function () { if (sec.classList.contains('bekle')) { var r = sec.getBoundingClientRect(); if (r.top < innerHeight && r.bottom > 0) gir(); } }, 1500);   // güvenlik: görünür ama tetiklenmediyse
   } else sec.classList.add('gir', 'girdi');
-
-  // ---------- Önizleme: alternatif değişince (oniz.js) ----------
-  var hazir = false; addEventListener('load', function () { setTimeout(function () { hazir = true; }, 700); });
-  addEventListener('oniz', function (e) {
-    var k = e.detail && e.detail.k;
-    if (k === 'dongu6') { sec.style.visibility = 'hidden'; requestAnimationFrame(function () { sec.style.visibility = ''; yenidenOlc(); }); }   // eski çizimin izi kalmasın: sahne bir kare gizlenip yeniden boyanır
-    if (!hazir) return;                                   // kabuk, sayfa açılırken kayıtlı seçimleri uygular: o sırada kıpırdama
-    if (k === 'dongu6') { if (statik()) git(n - 1); else setTimeout(function () { adimaGit(n - 1); }, 650); }   // halka 6. adımda: oraya git
-  });
 })();

@@ -18,6 +18,13 @@
 # silindi); bu sayfada "zor an" yerine "zorlanılan an"; telefonun altındaki "Moyo Ebeveyn" etiketi metni taşırıyordu (m/moyo.css).
 # "Neden Moyo" başlığı ve kartları a ile sabitlendi; giriş cümlesi (nlead) ve bölümün tasarımı (ndzn: a akış bandı · b evde → uzman
 # paneli · c üst kenarı renkli kartlar) önizlemede seçilir. Tasarımlar çatı sayfanın renkli 1-2-3 kartlarına benzemez (tur 3 kuralı).
+#
+# 19 Kasım 2026, tur 4 (kullanıcının yanıtları): "h1" a ile sabitlendi (açılış başlığı ve alt bilgideki slogan; grup ve b metni silindi).
+# "Zorlanılan an" yerine "zorlandığı an" (cümlede "çocuğunuzun zorlandığı an"; kısa etikette "Zorlandığı anı kaydedin"). "Neden Moyo":
+# giriş cümlesi (nlead) rutini ve notu NEDEN tuttuğunuzu söyler, "kayıt" ses kaydı gibi okunmaz ("not edersiniz", "yazılı not"); bölümün
+# tasarımı (ndzn) her nedeni ilgili ekranın yakın çekimiyle gösterir: a üç yakın çekim · b tek telefon, kaydırdıkça bir işlevden ötekine
+# yakınlaşır (m/moyo.js; hareket azaltmada ve betiksiz üç sabit kırpım) · c liste ve yanında küçük kırpım. Kırpımlar gerçek ekranlardan
+# (img/e-nz-*.webp, 780 × 1688 = 390 × 844 nokta ×2; tools/cati-sayfa/cek düzeniyle çekildi), yalnızca CSS ile kırpılır (NZ_EKRAN).
 import json, re, html as H
 E = json.load(open('e-metin.json'))
 e = H.escape
@@ -29,36 +36,19 @@ KOK = 'https://moyoapp.com.tr'          # canlı adres (canonical ve og:url)
 ANA, FIYAT = 'ebeveyn.html', 'ebeveyn-fiyat.html'
 SITE, EKO = 'https://moyoapp.com.tr/', 'c.html'   # destek / yasal ve ekosistem; disa_aktar.py canlı yollara çevirir   # önizlemede göreli; canlıda /ebeveyn/ ve /ebeveyn/fiyat/
 HAKKIMIZDA, GUVEN = 'hakkimizda.html', 'guven.html'   # kurumsal sayfalar (başka pencere kurar); canlıda /hakkimizda/ ve /guven/
-SVG = lambda d: f'<svg viewBox="0 0 24 24" aria-hidden="true">{d}</svg>'
-I = {
-    'rutin': '<rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M8 3.2v3.4M16 3.2v3.4M4 10h16M9 15l2.1 2.1 4-4.2"/>',
-    'takip': '<path d="M4 19.5h16"/><path d="M4.5 15.5l4.6-4.6 3.6 2.9L19.5 7"/><path d="M15.4 7h4.1v4.1"/>',
-    'uzman': '<circle cx="9" cy="8.4" r="3.1"/><path d="M3.4 19.2c.6-3 2.8-4.7 5.6-4.7s5 1.7 5.6 4.7"/><circle cx="17.2" cy="9.6" r="2.3"/><path d="M16.6 14.6c2.2.2 3.6 1.6 4 4"/>',
-    'kayit': '<path d="M6.5 3.5h8l3.5 3.5v13.5h-11.5z"/><path d="M14.5 3.5v3.5h3.5"/><path d="M9.5 11.5h5.5M9.5 15h5.5M9.5 18.5h3"/>',
-}
 APPS = {'ebeveyn': ('img/ikon-moyo.svg', 'Moyo Ebeveyn'), 'oyun': ('img/ikon-oyun.png', 'Moyo Oyun'), 'mercek': ('img/ikon-mercek.svg', 'Moyo Uzman')}
 chip = lambda k: f'<span><img src="{APPS[k][0]}" alt="" width="22" height="22">{APPS[k][1]}</span>'
 CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
 
 
-def var(k, d, sarmal=lambda v, t: t):
-    """Önizleme alternatifi: aynı yerde duran <span data-var="k:değer"> kardeşleri; önerilen dışındakiler hidden."""
-    return ''.join(f'<span data-var="{k}:{v}"{"" if v == ONERI[k] else " hidden"}>{sarmal(v, t)}</span>' for v, t in d.items())
-
-
 # Önizleme alternatifleri (oniz.js sözleşmesi; yalnız önizlemede, canlıya seçilen kalır)
-# h1 (19 Kasım QA, kural 6: çatı sayfayla aynı başlık): a Moyo Ebeveyn'e özel başlık, b çatı sayfanın başlığı. Alt bilgideki slogan
-# seçilen başlıktır (kullanıcı isteği, tur 1); fiyat sayfasının alt bilgisi de aynı grubu taşır (yap_f.py, disa_aktar.py seçimi izletir).
-H1_GRUP = {'k': 'h1', 'ad': 'Açılış başlığı (alt bilgideki slogan da)', 'hedef': '.hero', 'oneri': 'a',
-           'sec': [['a', "Moyo Ebeveyn'e özel"], ['b', 'Çatı sayfayla aynı (bugünkü)']]}
-# nlead (tur 3): "Neden Moyo" başlığının altındaki giriş; kayıtların uzmana nasıl ulaştığını somut söyler (önceki "evde olan uzmanınıza
-# kayıtlı ulaşır" anlaşılmıyordu). ndzn (tur 3): bölümün tasarımı; içerik üçünde aynı (neden_kartlar).
+# nlead (tur 4): "Neden Moyo" başlığının altındaki giriş; rutini neden planladığınızı ve çocuğunuzun zorlandığı anları neden not ettiğinizi söyler.
+# ndzn (tur 4): bölümün tasarımı; üçünde içerik aynı (neden_kartlar + neden_ekran), her neden kendi ekranının yakın çekimiyle.
 ONIZ = [
-    H1_GRUP,
     {'k': 'nlead', 'ad': '"Neden Moyo" giriş cümlesi', 'hedef': '#degerler', 'oneri': 'a',
-     'sec': [['a', 'Seansta konuşulanı evde uygularsınız'], ['b', 'Kayıtlar kendiliğinden gelir'], ['c', 'Aynı kayıtlar iki ekranda']]},
-    {'k': 'ndzn', 'ad': '"Neden Moyo" tasarımı', 'hedef': '#degerler', 'oneri': 'b',
-     'sec': [['a', 'Akış bandı'], ['b', 'Evde ve uzman panelinde'], ['c', 'Üst kenarı renkli kartlar']]},
+     'sec': [['a', 'İki neden, iki cümle'], ['b', 'Soru ve yanıt'], ['c', 'Örneğe en yakın, uzmanla']]},
+    {'k': 'ndzn', 'ad': '"Neden Moyo" tasarımı', 'hedef': '#degerler', 'oneri': 'a',
+     'sec': [['a', 'Üç yakın çekim'], ['b', 'Tek telefon, kaydırdıkça yakınlaşır'], ['c', 'Liste, yanında küçük kırpım']]},
 ]
 ONERI = {g['k']: g['oneri'] for g in ONIZ}
 
@@ -124,7 +114,7 @@ def alt(sayfa):
     simdi = ' aria-current="page"' if sayfa == 'fiyat' else ''
     return f'''<footer>
   <div class="wrap">
-    <div class="about"><a class="logo" href="{a or "#top"}" aria-label="Moyo Ebeveyn ana sayfa">{LOGO}</a><p class="slogan">{var("h1", E["h1"])}</p></div>
+    <div class="about"><a class="logo" href="{a or "#top"}" aria-label="Moyo Ebeveyn ana sayfa">{LOGO}</a><p class="slogan">{e(E["h1"])}</p></div>
     <div><h2 class="fh">Ürün</h2><ul><li><a href="{a}#nasil">Nasıl çalışır</a></li><li><a href="{FIYAT}"{simdi}>Fiyat</a></li><li><a href="{a}#sss">Sık sorulanlar</a></li><li><a href="{EKO}">Moyo ekosistemi</a></li></ul></div>
     <div><h2 class="fh">Hesap</h2><ul><li><a href="{APP}#giris">Giriş yap</a></li><li><a href="{APP}#kayit">Ücretsiz deneyin</a></li><li><a href="{MERCEK}">Uzmanlar için</a></li></ul></div>
     <div><h2 class="fh">Kurumsal</h2><ul><li><a href="{HAKKIMIZDA}">Hakkımızda</a></li><li><a href="{GUVEN}">Güvenlik ve gizlilik</a></li><li><a href="{SITE}destek">Destek</a></li></ul></div>
@@ -251,32 +241,60 @@ pan = ''.join(f'''        <div class="nc-p" role="tabpanel" id="nc-p{k}" aria-la
 ''' for k, a in enumerate(ADIM))
 
 # ---------- Neden Moyo: başlık, giriş (nlead) ve üç "neden" (ndzn: üç tasarım, içerik aynı) ----------
-# Kartlar e-metin.json neden_kartlar: [simge, başlık, metin, rozet]; rozetli olan uzman kartıdır (isteğe bağlı).
-ND, YER = E['neden_kartlar'], E['neden_yer']
+# Kartlar e-metin.json neden_kartlar: [ekran, başlık, metin, rozet]; rozetli olan uzman kartıdır (isteğe bağlı). Her neden kendi ekranının
+# yakın çekimiyle (tur 4: "neden"i "nasıl" ile pekiştir): gerçek ekran (örnek veri), telefonun üst kısmı gibi çerçevelenir, işlevin çevresinde
+# yeşil halka. Ekranlar 780 × 1688 (390 × 844 nokta ×2); bölgeler nokta cinsinden (x, y, g, y), hep ekranın tam genişliği (x 0, g 390):
+# genis = a ve b (uzun; üçü aynı boyda, a'da hizalı dursun), kisa = c ve b'nin hareketsiz hâli (kısa). Davranış kaydında bölge "Sesli anlat"
+# alanından (y 590) önce biter. halka: işlevin kutusu (x, y, g, y); bölgenin içinde kalanlar çizilir.
+#   rutin: "Hazır rutin" ekranı (yeni çekim, cek/moyo.js düzeni: Rutin ekle › Güne hazır sabah): Hangi günler? (Hafta içi) ve adımların saatleri
+#   kayit: "Davranış kaydı ekle" (img/e-davranis.webp ile aynı çekimin ×2'si): Öncesinde / Ne yaşandı (halka) / Sonrasında ne oldu? ("Sesli anlat" dışarıda)
+#   uzman: Moyo Uzman telefonda, danışan › Ev rutinleri › Haftalık (img/mercek-rutin-tel.webp'in ×2'si): adımların son 7 günü
+NZ_EKRAN = {
+    'rutin': {'src': 'img/e-nz-plan.webp', 'app': 'ebeveyn', 'genis': (228, 348), 'kisa': (380, 205), 'halka': [(22, 268, 116, 32), (284, 398, 76, 102)]},
+    'kayit': {'src': 'img/e-nz-not.webp', 'app': 'ebeveyn', 'genis': (232, 348), 'kisa': (374, 205), 'halka': [(12, 382, 364, 98)]},
+    'uzman': {'src': 'img/e-nz-uzman.webp', 'app': 'mercek', 'genis': (436, 348), 'kisa': (436, 205), 'halka': [(22, 499, 352, 67)]},
+}
+ND, NE = E['neden_kartlar'], E['neden_ekran']
 gizli = lambda k, v: '' if v == ONERI[k] else ' hidden'
-bagla = lambda t: re.sub(r' (\S+)$', '\u00a0\\1', t) if t.count(' ') >= 2 else t   # son iki sözcük aynı satırda (19 Kasım QA)
+bagla = lambda t: re.sub(r' (\S+)$', ' \\1', t) if t.count(' ') >= 2 else t   # son iki sözcük aynı satırda (19 Kasım QA)
 rozet = lambda r: f'<span class="nd-rozet">{e(r)}</span>' if r else ''
-urun = lambda t: re.sub(r'Moyo (Uzman|Ebeveyn|Oyun)', 'Moyo\u00a0\\1', t)   # ürün adı satır sonunda bölünmesin
-neden_giris = ''.join(f'<p class="intro nd-giris" data-var="nlead:{v}"{gizli("nlead", v)}>{" ".join(f"<span>{e(urun(x))}</span>" for x in re.split(r"(?<=[.])\s+", t))}</p>'
+urun = lambda t: re.sub(r'Moyo (Uzman|Ebeveyn|Oyun)', 'Moyo \\1', t)   # ürün adı satır sonunda bölünmesin
+soru = lambda t: re.sub(r'^(Neden [^?]+\?)', r'<b>\1</b>', t)                  # nlead b: "Neden rutin?" kalın
+neden_giris = ''.join(f'<p class="intro nd-giris" data-var="nlead:{v}"{gizli("nlead", v)}>{" ".join(f"<span>{soru(e(urun(x)))}</span>" for x in re.split(r"(?<=[.])\s+", t))}</p>'
                       for v, t in E['neden_giris'].items())
-# a · akış bandı: tek beyaz şerit, üç durak bir çizgiyle bağlı (dar ekranda dikey); numara ve renkli kart yok
-nd_a = (f'<ol class="nd-akis" data-var="ndzn:a"{gizli("ndzn", "a")}>'
-        + ''.join(f'<li{" class=\"ops\"" if r else ""}><span class="nd-dur">{SVG(I[k])}</span>{rozet(r)}<h3>{e(bagla(t))}</h3><p>{e(p)}</p></li>' for k, t, p, r in ND)
-        + '</ol>')
-# b · evde ve uzman panelinde: solda ailenin uygulaması (iki madde), ortada onayla geçen kayıtlar, sağda uzmanın paneli. Panel başlığı
-# uygulamanın adı + yeri; "isteğe bağlı" uzman panelinin başlığında yazar (rozet yok).
-madde = lambda k, t, p: f'<li><span class="ic">{SVG(I[k])}</span><div><h3>{e(bagla(t))}</h3><p>{e(p)}</p></div></li>'
-yan = lambda cls, app, yer_, xs: (f'<div class="nd-yan {cls}"><p class="nd-yer"><img src="{APPS[app][0]}" alt="" width="36" height="36">'
-                                  f'<span><b>{APPS[app][1]}</b> {e(yer_)}</span></p><ul>{"".join(madde(k, t, p) for k, t, p, _ in xs)}</ul></div>')
-OK_SAG = '<svg class="nd-ok" viewBox="0 0 40 16" aria-hidden="true"><path d="M2 8h34M29 2.5 36 8l-7 5.5"/></svg>'
-nd_b = (f'<div class="nd-iki" data-var="ndzn:b"{gizli("ndzn", "b")}>'
-        + yan('nd-ev', 'ebeveyn', YER['ev'], [x for x in ND if not x[3]])
-        + f'<p class="nd-gec"><span class="nd-kayit">{SVG(I["kayit"])}{e(YER["gecis"])}</span>{OK_SAG}<span class="nd-gec-alt">{e(YER["gecis_alt"])}</span></p>'
-        + yan('nd-uz', 'mercek', YER['uzman'], [x for x in ND if x[3]])
-        + '</div>')
-# c · üst kenarı renkli beyaz kartlar: simge kartın rengini taşır, numara yok
-nd_c = (f'<ul class="nd" data-var="ndzn:c"{gizli("ndzn", "c")}>'
-        + ''.join(f'<li class="t{i + 1}"><span class="ic">{SVG(I[k])}</span>{rozet(r)}<h3>{e(bagla(t))}</h3><p>{e(p)}</p></li>' for i, (k, t, p, r) in enumerate(ND))
+
+
+def dilim(k, boy, ek=''):
+    """Bir ekranın bölgesi, telefonun üst kısmı gibi çerçeveli (--y, --h nokta; m/moyo.css .nz-tel kırpar)."""
+    y, h = NZ_EKRAN[k][boy]
+    alt_ = NE[k]['alt' if boy == 'genis' else 'alt_kisa']
+    halkalar = ''.join(f'<i class="nz-halka" style="left:{x / 3.9:.2f}%;top:{(hy - y) / h * 100:.2f}%;width:{g / 3.9:.2f}%;height:{yk / h * 100:.2f}%"></i>'
+                       for x, hy, g, yk in NZ_EKRAN[k]['halka'] if hy >= y and hy + yk <= y + h)
+    return (f'<div class="nz-tel{ek}" style="--y:{y};--h:{h}"><div class="nz-kasa"><div class="nz-ekran"><img src="{NZ_EKRAN[k]["src"]}" alt="{e(alt_)}" width="780" height="1688" loading="lazy">'
+            f'{halkalar}</div></div></div>')
+
+
+etk = lambda k, r: (f'<p class="nz-etk"><img src="{APPS[NZ_EKRAN[k]["app"]][0]}" alt="" width="22" height="22">'
+                    f'<span>{APPS[NZ_EKRAN[k]["app"]][1]} · {e(NE[k]["yer"])}</span>{rozet(r)}</p>')
+yazi = lambda k, t, p, r: f'{etk(k, r)}<h3>{e(bagla(t))}</h3><p class="nz-p">{e(p)}</p>'
+# a · üç yakın çekim: her nedenin üstünde kendi ekranının uzun kırpımı (≥ 1200 px üç sütun, 761–1199 px 2 + 1, telefonda alt alta)
+nd_a = (f'<ul class="nz-uc" data-var="ndzn:a"{gizli("ndzn", "a")}>'
+        + ''.join(f'<li>{dilim(k, "genis")}<div class="nz-yazi">{yazi(k, t, p, r)}</div></li>' for k, t, p, r in ND)
+        + '</ul>')
+# b · tek telefon: nedenler kaydıkça telefonun görüntüsü bir işlevden ötekine yakınlaşır (m/moyo.js "kamera"). Pencere betik açınca görünür;
+# hareket azaltmada ya da betik yoksa her nedenin yanında kendi kısa kırpımı (.nz-sabit). Katman başına iki bölge (data-g uzun, data-d kısa:
+# pencere enine genişse kısa bölge) ve alt metinleri; halkalar telefonun ekranında nokta cinsinden.
+katman = lambda k: (f'<div class="nz-katman" data-g="0,{NZ_EKRAN[k]["genis"][0]},390,{NZ_EKRAN[k]["genis"][1]}" data-d="0,{NZ_EKRAN[k]["kisa"][0]},390,{NZ_EKRAN[k]["kisa"][1]}"'
+                    f' data-alt-g="{e(NE[k]["alt"])}" data-alt-d="{e(NE[k]["alt_kisa"])}"><img src="{NZ_EKRAN[k]["src"]}" alt="" width="780" height="1688" loading="lazy">'
+                    + ''.join(f'<i class="nz-halka" style="left:{x}px;top:{y}px;width:{g}px;height:{h}px"></i>' for x, y, g, h in NZ_EKRAN[k]['halka']) + '</div>')
+nd_b = (f'<div class="nz-tek duruk" data-nz data-var="ndzn:b"{gizli("ndzn", "b")}>'
+        f'<div class="nz-pencere" role="img" aria-label="{e(NE[ND[0][0]]["alt"])}"><div class="nz-kamera"><div class="nz-govde"><div class="nz-ekran-tam">'
+        + ''.join(katman(k) for k, *_ in ND) + '</div></div></div></div>'
+        + '<ol class="nz-sebep">' + ''.join(f'<li class="nz-satir"><div class="nz-yazi">{yazi(k, t, p, r)}</div>{dilim(k, "kisa", " nz-sabit")}</li>' for k, t, p, r in ND)
+        + '</ol></div>')
+# c · liste: solda neden, sağda (telefonda altta) kendi ekranının kısa kırpımı; satırlar ince çizgiyle ayrılır
+nd_c = (f'<ul class="nz-liste" data-var="ndzn:c"{gizli("ndzn", "c")}>'
+        + ''.join(f'<li class="nz-satir"><div class="nz-yazi">{yazi(k, t, p, r)}</div>{dilim(k, "kisa")}</li>' for k, t, p, r in ND)
         + '</ul>')
 ekosis = ''.join(f'<div class="eko"><img src="{APPS[k][0]}" alt="" width="48" height="48"><h3>{APPS[k][1]}</h3><p>{e(p)}</p></div>' for k, p in E['ekosistem'])
 sss = ''.join(f'<details><summary>{q[0]}</summary><p>{q[1]}</p></details>' for q in E['sss'])
@@ -289,7 +307,7 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
     <div class="wrap wide mhero">
       <div class="mhero-yazi">
         <p class="eyebrow">Ebeveynler için</p>
-        <h1 id="h-hero">{var("h1", E["h1"])}</h1>
+        <h1 id="h-hero">{e(E["h1"])}</h1>
         <p class="sub">{e(E["alt"])}</p>
         <div class="actions"><a class="btn btn-cta" href="{APP}#kayit">Ücretsiz deneyin</a><a class="btn btn-line" href="#nasil">Nasıl çalışır?</a></div>
         <p class="fine">{E["ince"]}</p>
@@ -313,7 +331,7 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
 
   <section class="sec sec-soft" id="degerler" aria-labelledby="h-deger">
     <div class="wrap">
-      <div class="head"><p class="eyebrow">Neden Moyo</p><h2 id="h-deger">{e(E["neden_baslik"])}</h2>{neden_giris}</div>
+      <div class="head"><p class="eyebrow">Neden Moyo</p><h2 id="h-deger">{e(E["neden_baslik"]).replace("zorlandığı anlar", "zorlandığı\u00a0anlar")}</h2>{neden_giris}</div>
       {nd_a}
       {nd_b}
       {nd_c}
@@ -350,9 +368,9 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/", ONIZ)}
 {alt("ana")}'''
 
 if __name__ == '__main__':
-    assert 'istediğiniz' not in html and 'seanslar aras' not in html and '—' not in html, 'yasaklı ifade ya da uzun tire kaldı'
+    assert 'istediğiniz' not in html and 'seanslar aras' not in html and '—' not in html and 'zorlanılan' not in html.lower(), 'yasaklı ifade ya da uzun tire kaldı'
     gorunen = re.sub(r'<[^>]+>', ' ', re.sub(r'<(script|style|svg)\b.*?</\1>', ' ', html, flags=re.S))
     for yasak in ('oyunda yapar', 'oyunda yapsın', 'oyunda yapmak', 'tek platform', 'tek plan', 'tek kayıt', 'buluş', 'evde başlayın',
-                  'her şeyi', 'döngü kapanır', 'kurun', 'kurarsınız', 'kurduğunuz', 'kurulur', 'kurar,', ' yalnız ', 'zor an'):
+                  'her şeyi', 'döngü kapanır', 'kurun', 'kurarsınız', 'kurduğunuz', 'kurulur', 'kurar,', ' yalnız ', 'zor an', 'zorlanılan'):
         assert yasak not in gorunen.lower(), f'yasaklı ifade: {yasak}'
     open('ebeveyn.html', 'w').write(html); print('ok ebeveyn.html')
