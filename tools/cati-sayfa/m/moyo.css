@@ -328,11 +328,13 @@
   letter-spacing: 0; font-weight: 800; white-space: nowrap; }
 .sayfa-fiyat .plan .note { min-height: 0; }
 .sayfa-fiyat .plan .price { margin-top: 18px; align-items: baseline; }
-.sayfa-fiyat .plan .price .draft { align-self: center; }
 .plan .amount.fy-yesil { color: var(--c-ok); }
 .fy-kosul { margin-top: 8px; }
 .fy-kosul p { font-size: 14.5px; line-height: 1.45; color: var(--c-text-2); }
 .fy-kosul p + p { margin-top: 2px; }
+.fy-kosul .fy-yillik { margin-bottom: 4px; font-size: 16px; color: var(--c-text); }
+.fy-yillik b { font-weight: 800; color: var(--c-ink); }
+.fy-hediye { margin-left: 4px; font-weight: 800; color: var(--c-ok); white-space: nowrap; }
 .sayfa-fiyat .plan .btn { margin-top: 20px; }
 .sayfa-fiyat .plan ul { margin-top: 22px; }
 .fy-oyun { display: flex; align-items: center; gap: 18px; max-width: 856px; margin: 24px auto 0; padding: 22px 26px; background: var(--c-bg); border: 1px solid var(--c-line); border-radius: var(--r-md); }

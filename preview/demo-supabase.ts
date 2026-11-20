@@ -166,10 +166,10 @@ function upgrade(x: Db): Db {
   // Üyelik (ortak 20261022000000): paket kataloğu, 14 günlük deneme (20261110130000), süresi dolmuş örnek hesap
   if (!x.billing_plans.length) {
     x.billing_plans.push(
-      { id: 'solo_monthly', package: 'solo', period: 'monthly', seat_limit: 1, price_try: 749.99, apple_product_id: 'com.clinicapp.uzman.solo.monthly', iyzico_plan_ref: 'demo', sort: 1, active: true },
-      { id: 'solo_yearly', package: 'solo', period: 'yearly', seat_limit: 1, price_try: 7499.99, apple_product_id: 'com.clinicapp.uzman.solo.yearly', iyzico_plan_ref: 'demo', sort: 2, active: true },
-      { id: 'clinic_monthly', package: 'clinic', period: 'monthly', seat_limit: 10, price_try: 2999.99, apple_product_id: 'com.clinicapp.uzman.clinic.monthly', iyzico_plan_ref: 'demo', sort: 3, active: true },
-      { id: 'clinic_yearly', package: 'clinic', period: 'yearly', seat_limit: 10, price_try: 29999.99, apple_product_id: 'com.clinicapp.uzman.clinic.yearly', iyzico_plan_ref: 'demo', sort: 4, active: true },
+      { id: 'solo_monthly', package: 'solo', period: 'monthly', seat_limit: 1, price_try: 1199.99, apple_product_id: 'com.clinicapp.uzman.solo.monthly', iyzico_plan_ref: 'demo', sort: 1, active: true },
+      { id: 'solo_yearly', package: 'solo', period: 'yearly', seat_limit: 1, price_try: 11999.99, apple_product_id: 'com.clinicapp.uzman.solo.yearly', iyzico_plan_ref: 'demo', sort: 2, active: true },
+      { id: 'clinic_monthly', package: 'clinic', period: 'monthly', seat_limit: 10, price_try: 3999.99, apple_product_id: 'com.clinicapp.uzman.clinic.monthly', iyzico_plan_ref: 'demo', sort: 3, active: true },
+      { id: 'clinic_yearly', package: 'clinic', period: 'yearly', seat_limit: 10, price_try: 39999.99, apple_product_id: 'com.clinicapp.uzman.clinic.yearly', iyzico_plan_ref: 'demo', sort: 4, active: true },
     );
     x.clinics.forEach((c: Row) => {
       if (c.plan === 'trial') {
