@@ -28,9 +28,9 @@
 <link rel="stylesheet" href="assets/site.css">
 <script>document.documentElement.classList.add('js');</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://moyoapp.com.tr/#kurum","name":"Moyo","url":"https://moyoapp.com.tr/","logo":"https://mercek.moyoapp.com.tr/assets/icon.png"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Moyo Mercek","item":"https://mercek.moyoapp.com.tr/"},{"@type":"ListItem","position":2,"name":"Fiyatlar","item":"https://mercek.moyoapp.com.tr/fiyat"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Ödeme nereden yapılır?","acceptedAnswer":{"@type":"Answer","text":"iPhone ya da iPad'deki Moyo Mercek'ten, App Store ile. Üyelik web'de de açılır. Deneme bitince hiçbir şey silinmez."}},{"@type":"Question","name":"Deneme bitince ne olur?","acceptedAnswer":{"@type":"Answer","text":"Hiçbir şey silinmez. Devam etmek için bir paket seçersiniz; seçene kadar aile verileri görünmez."}},{"@type":"Question","name":"Bireysel çalışıyorum, klinik açmam gerekir mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Kayıtta \"Bireysel uzman\"ı seçin. Ekibiniz olursa Klinik paketine geçersiniz."}},{"@type":"Question","name":"Ekip üyeleri ayrıca öder mi?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Tek üyelik vardır; klinik sahibi yönetir."}},{"@type":"Question","name":"Aileler ücret öder mi?","acceptedAnswer":{"@type":"Answer","text":"Aileler Moyo ile uzmanına ücretsiz bağlanır."}},{"@type":"Question","name":"Nasıl iptal ederim?","acceptedAnswer":{"@type":"Answer","text":"Apple hesabınızdaki Abonelikler bölümünden. Dönem sonuna kadar erişiminiz sürer."}}]}]}</script>
-<!-- Fiyatlar assets/site.js içindeki window.MERCEK_PRICES'tan yazılır (YER TUTUCU, ürün sahibinin kararı bekleniyor).
+<!-- Fiyatlar assets/site.js içindeki window.MERCEK_PRICES'tan yazılır (kesin fiyatlar, 20 Kasım 2026).
      Aşağıdaki sabit değerler betiksiz okuyucu içindir ve oradakilerle aynı tutulur. Özellik listeleri src/lib/billing.ts PACKAGES'tan.
-     Yapılandırılmış veride (JSON-LD) fiyat teklifi yok: site.js fiyat kesinleşince (draft: false) bu sayfaya kendisi ekler. -->
+     Yapılandırılmış verideki fiyat teklifini (JSON-LD) site.js ekler (draft: false). -->
 </head>
 <body data-offers>
 <a class="skip" href="#main">Ana içeriğe geç</a>
@@ -81,7 +81,7 @@
           <h2 id="h-solo">Bireysel</h2>
           <p class="who">Tek uzman</p>
           <p class="note">Bir klinik hesabına da dahil olabilirsiniz; kendi aileleriniz bireysel hesabınızda kalır.</p>
-          <p class="price"><span class="amount" data-price="solo">₺11.999,99</span> <span class="unit" data-unit>/ yıl</span> <span class="draft" data-draft>Taslak fiyat</span></p>
+          <p class="price"><span class="amount" data-price="solo">₺11.999,99</span> <span class="unit" data-unit>/ yıl</span></p>
           <p class="per" data-per="solo">Aylık yaklaşık ₺1.000</p>
           <a class="btn btn-cta block" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Bireysel ile başlayın</a>
           <ul>
@@ -100,7 +100,7 @@
           <h2 id="h-clinic">Klinik</h2>
           <p class="who">10 uzmana kadar · Ekipler için</p>
           <p class="note">Ekibinizdeki uzmanlar kendi bireysel hesaplarını da kullanmaya devam edebilir.</p>
-          <p class="price"><span class="amount" data-price="clinic">₺39.999,99</span> <span class="unit" data-unit>/ yıl</span> <span class="draft" data-draft>Taslak fiyat</span></p>
+          <p class="price"><span class="amount" data-price="clinic">₺39.999,99</span> <span class="unit" data-unit>/ yıl</span></p>
           <p class="per" data-per="clinic">Aylık yaklaşık ₺3.333</p>
           <a class="btn btn-cta block" data-app="signup" href="https://uzman.moyoapp.com.tr/?kayit">Klinik ile başlayın</a>
           <ul>

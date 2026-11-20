@@ -88,6 +88,6 @@ kalmadı** (`#oniz-gruplar` / `oniz.js` yalnız gerektiğinde geri eklenir; söz
 seçimleri yok sayar). Çatı: 6. adım yörünge (`c-sema.py` yalnız bu çizim), ayrı ürün bölümü yok, ekranlar 1-2-3 kartlarının içinde.
 Moyo Ebeveyn: "Neden Moyo" üç tam ekran telefon + telefondan taşan büyütülmüş satır kartı (ince lacivert çizgi, yeşil yok; görseller
 `img/e-nz-plan|not|uzman.webp`, 780 × 1688), beş adımda "Zorlandığı anı kaydedin" (`img/e-davranis.webp`); fiyat sayfası yer tutucu
-349 TL / ay. Hakkımızda (Atlassian 'Company' kaydı örneğiyle beş bölüm): misyon + gerçek ekranlar, lacivert bantta üç kartlı döngü (çizgiler
+349 TL / ay (20 Kasım 2026'dan beri kesin fiyat: 349,99 TL / ay, altında "ya da 3.499,99 TL / yıl · 2 ay ücretsiz"; `yap_f.py` fiyatları denetler). Hakkımızda (Atlassian 'Company' kaydı örneğiyle beş bölüm): misyon + gerçek ekranlar, lacivert bantta üç kartlı döngü (çizgiler
 görününce çizilir) + yöntem uyarısı + kaynaklar, Neden varız (hafıza / kayıt hafta çizgisi), ekip ve hikâye yer tutucusu (ONIZ, canlıya
 gitmez), iletişim kartları.

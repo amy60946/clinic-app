@@ -2,9 +2,9 @@
 # Yapı Mercek sitesinin fiyat sayfasıyla aynı sırada (site/fiyat.html): açılış → plan kartları → karşılaştırma → kısa SSS →
 # deneme kapanışı. Üst menü, alt bilgi ve <head> yap_m.py'den (aynı tasarım: m/site.css + m/moyo.css + m/moyo.js).
 # Metin f-metin.json; yalnız doğrulanmış olgular (kaynaklar dosyanın "_kaynak" alanında).
-# Tur 3 (19 Kasım 2026, kullanıcı kararları): fiyat kesinleşene kadar yer tutucu Premium 349 TL / ay, gerçek fiyat gibi gösterilir; yanında
-# dönem, kendiliğinden yenileme ve App Store'dan iptal yazar; "Taslak fiyat" etiketi yalnızca önizlemede (<!-- ONIZ:BAS/SON -->,
-# disa_aktar.py canlıya taşımaz). Yıllık rakam yazılmaz ("Yıllık seçenek uygulamada"). "Ücretsiz" ve "14 gün" yeşil: koyu açılışta
+# Fiyat (kullanıcı kararı 20 Kasım 2026; ortak ekonomi.md 9): Premium 349,99 TL / ay; altında "ya da 3.499,99 TL / yıl · 2 ay ücretsiz"
+# (fy-kosul'un ilk satırı: iki kartın 7 satırlık ortak ızgarası bozulmasın), dönem, KDV, kendiliğinden yenileme ve App Store'dan iptal.
+# 19 Kasım'daki yer tutucu (349 TL) ve önizlemedeki "Taslak fiyat" etiketi kalktı. "Ücretsiz" ve "14 gün" yeşil: koyu açılışta
 # marka yeşili yazı (8,3:1), beyaz kartta --c-ok yazı (5,3:1) ve yeşil zeminli koyu yazılı rozet. Açılış kısaldı, deneme bandı ve
 # "Moyo Ebeveyn'de" maddeleri çıktı (söyledikleri artık açılışta ve kartlarda; aynı cümle iki kez geçmesin): plan kartları fiyatlarıyla
 # 1440×900 ve 1366×768'de kaydırmadan, 390×844'te ilk kartın adı ve fiyatı ilk ekranda görünür.
@@ -58,8 +58,8 @@ html = f'''{M.bas(F["baslik"], F["aciklama"], "/ebeveyn/fiyat/")}
           <h2 id="h-premium">{e(P["ad"])} <span class="fy-rozet">{e(P["rozet"])}</span></h2>
           <p class="who">{e(P["kim"])}</p>
           <p class="note">{e(P["not"])}</p>
-          <p class="price"><span class="amount">{e(P["tutar"])}</span> <span class="unit">{e(P["birim"])}</span><!-- ONIZ:BAS --> <span class="draft">{e(P["taslak"])}</span><!-- ONIZ:SON --></p>
-          <div class="fy-kosul"><p>{e(P["donem"])}</p><p>{e(P["yenileme"])}</p></div>
+          <p class="price"><span class="amount">{e(P["tutar"])}</span> <span class="unit">{e(P["birim"])}</span></p>
+          <div class="fy-kosul"><p class="fy-yillik">ya da <b>{e(P["yillik"]).replace(" ", "&nbsp;")}</b>&nbsp;{e(P["yillik_birim"]).replace(" ", "&nbsp;")} <span class="fy-hediye">{e(P["yillik_rozet"])}</span></p><p>{e(P["donem"])}</p><p>{e(P["yenileme"])}</p></div>
           <a class="btn btn-cta block" href="{M.APP}#kayit">14 gün ücretsiz deneyin</a>
           <ul>{liste(P["madde"])}</ul>
         </article>
@@ -112,7 +112,8 @@ html = html.replace('App Store', 'App&nbsp;Store')   # görünen metinde "App / 
 
 if __name__ == '__main__':
     assert 'istediğiniz' not in html and '—' not in html, 'yasaklı ifade ya da uzun tire'
-    assert html.count('Taslak fiyat') == 1 and re.search(r'<!-- ONIZ:BAS --> <span class="draft">Taslak fiyat</span><!-- ONIZ:SON -->', html), 'taslak etiketi yalnızca önizlemede'
+    assert 'Taslak fiyat' not in html and 'ONIZ:' not in html, 'fiyat kesin: taslak etiketi ve önizleme parçası yok'
+    assert '349,99' in html and '3.499,99' in html and '291,67' in html, 'fiyatlar ekonomi.md 9 ile aynı'
     gorunen = re.sub(r'<[^>]+>', ' ', re.sub(r'<(script|style|svg)\b.*?</\1>', ' ', html, flags=re.S))
     for yasak in ('kurun', 'kurarsınız', ' yalnız ', 'zor an', 'zorlanılan', 'tek platform'):
         assert yasak not in gorunen.lower(), f'yasaklı ifade: {yasak}'

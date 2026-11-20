@@ -1,5 +1,5 @@
 {
- "_kaynak": "Yalnız doğrulanmış olgular (18 Kasım 2026). Deneme 14 gün, kartsız, bitince kendiliğinden ücret yok: ortak sozlesme/durumlar.md P12, proposed/20261118200000_parent_trial_14.sql başlığı, parent-app src/screens/PaywallScreen.tsx. Ücretsiz plan sınırları: ortak migrations/20261022110000_subscriptions.sql (3 etkin adım, 1 çocuk; davranış kaydı, mesaj kapalı), 20261022130000_sun_stones_rewards.sql (ödüller), parent-app src/data/plans.ts freeFeatures. Premium aylık/yıllık, App Store, yenileme ve iptal: durumlar.md P12, PaywallScreen.tsx yasal metni. Web'de satış yok, üyelik web'de açılır: parent-app src/lib/purchases.web.ts. Davet kodu 21 gün: durumlar.md 'Aile davet et', akislar.md 19 (aile davet kodu; uzman daveti süreyi değiştirmez). FİYAT (tur 3, 19 Kasım 2026, kullanıcı kararı): kesin karara kadar yer tutucu Premium 349 TL / ay; önizlemede yanında 'Taslak fiyat' etiketi (ONIZ yorumları arasında, canlıya gitmez). Yıllık rakam yok: uygulamada yıllık ürün var (parent-app src/data/plans.ts 'yearly', PaywallScreen), bu yüzden yalnızca 'Yıllık seçenek uygulamada' yazılır.",
+ "_kaynak": "Yalnız doğrulanmış olgular (18 Kasım 2026). Deneme 14 gün, kartsız, bitince kendiliğinden ücret yok: ortak sozlesme/durumlar.md P12, proposed/20261118200000_parent_trial_14.sql başlığı, parent-app src/screens/PaywallScreen.tsx. Ücretsiz plan sınırları: ortak migrations/20261022110000_subscriptions.sql (3 etkin adım, 1 çocuk; davranış kaydı, mesaj kapalı), 20261022130000_sun_stones_rewards.sql (ödüller), parent-app src/data/plans.ts freeFeatures. Premium aylık/yıllık, App Store, yenileme ve iptal: durumlar.md P12, PaywallScreen.tsx yasal metni. Web'de satış yok, üyelik web'de açılır: parent-app src/lib/purchases.web.ts. Davet kodu 21 gün: durumlar.md 'Aile davet et', akislar.md 19 (aile davet kodu; uzman daveti süreyi değiştirmez). FİYAT (kullanıcı kararı 20 Kasım 2026; ortak sozlesme/ekonomi.md 9, KDV dahil): Premium 349,99 TL / ay, 3.499,99 TL / yıl (aylığın 10 katı, ayda 291,67 TL). Yıllıkta '2 ay ücretsiz' kullanıcının seçtiği ifade (ortak hukuk_notlari.md Q, avukata soru 30; Marketing §7.1'de aynı soru). Önceki yer tutucu 349 TL ve 'Taslak fiyat' etiketi kalktı.",
  "baslik": "Moyo Ebeveyn fiyatları",
  "aciklama": "Moyo Oyun ücretsiz. Moyo Ebeveyn 14 gün ücretsiz, kart gerekmez; sonra ücretsiz plan ya da aylık veya yıllık Premium. Planları karşılaştırın.",
  "h1": "Moyo&nbsp;Oyun <em>ücretsiz</em>. Moyo&nbsp;Ebeveyn <em>14&nbsp;gün ücretsiz</em>.",
@@ -22,7 +22,7 @@
   "ad": "Premium",
   "kim": "Bütün aile için tek abonelik",
   "not": "App Store'dan alınır, aynı hesapla web'de de açılır.",
-  "tutar": "349 TL",
+  "tutar": "349,99 TL",
   "madde": [
    "Ücretsiz plandaki bütün özellikler",
    "Çocuk ve rutin adımı sınırı yok",
@@ -34,8 +34,10 @@
   "yenileme": "Dönem sonunda kendiliğinden yenilenir; App Store'dan dilediğiniz an iptal edersiniz.",
   "rozet": "14 gün ücretsiz",
   "birim": "/ ay",
-  "taslak": "Taslak fiyat",
-  "donem": "Aylık abonelik, KDV dahil. Yıllık seçenek uygulamada."
+  "yillik": "3.499,99 TL",
+  "yillik_birim": "/ yıl",
+  "yillik_rozet": "2 ay ücretsiz",
+  "donem": "Aylık ya da yıllık abonelik, KDV dahil. Yıllıkta ayda 291,67\u00a0TL'ye gelir."
  },
  "oyun": [
   "Moyo Oyun",

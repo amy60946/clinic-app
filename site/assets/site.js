@@ -1,9 +1,9 @@
 /* Moyo Mercek tanıtım sitesi: ortak betik (index.html, fiyat.html, guvenlik.html). Dışarıya hiçbir istek göndermez. */
 
-/* FİYATLAR: TEK KAYNAK. Aşağıdaki değerler YER TUTUCUDUR; ürün sahibinin fiyat kararı bekleniyor (12 Kasım 2026).
+/* FİYATLAR: TEK KAYNAK. Kesin fiyatlar (kullanıcı kararı 20 Kasım 2026; ortak sozlesme/ekonomi.md 9, KDV dahil, yıllık = aylık × 10).
    Fiyat yalnız fiyat.html'de yazar (18 Kasım 2026: ana sayfadaki "aylık …'dan başlayan" cümlesi kalktı); hepsi buradan yazılır. HTML'deki sabit
    değerler betiksiz okuyucu içindir ve bunlarla aynı tutulur. draft true iken fiyat sayfasında "Taslak fiyat" etiketi görünür. */
-window.MERCEK_PRICES = { draft: true, solo: { m: 1199.99, y: 11999.99 }, clinic: { m: 3999.99, y: 39999.99 } };
+window.MERCEK_PRICES = { draft: false, solo: { m: 1199.99, y: 11999.99 }, clinic: { m: 3999.99, y: 39999.99 } };
 
 (function () {
   'use strict';
