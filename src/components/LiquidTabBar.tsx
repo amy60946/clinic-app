@@ -19,9 +19,10 @@ const RIM = 1;
 const INSET = 4;                         // kapsül hapın dış kenarından 5 puan içeride (1 puan çerçeve + 4)
 const NATIVE = Platform.OS !== 'web';    // web'de yerel sürücü yok; aynı animasyon JS ile oynar
 const DIM = 'rgba(255,255,255,0.7)';
-// Web: arkası bulanık cam; yerelde (ek paket olmadan) yalnız yarı saydam lacivert
+// Renk: koyu grafit cam, Moyo Ebeveyn'in alt menüsüyle aynı değerler (kullanıcı kararı 20 Kasım 2026; Moyo'da 19 Kasım, parent-app#30;
+// önceki lacivert rgba(15,27,61,…)). Web: arkası hafif bulanık; yerelde (ek paket olmadan) yalnız yarı saydam grafit + siyah %10 gölge.
 const WEB_GLASS = Platform.OS === 'web'
-  ? ({ backgroundColor: 'rgba(15,27,61,0.74)', backdropFilter: 'blur(18px) saturate(1.4)', WebkitBackdropFilter: 'blur(18px) saturate(1.4)' } as object)
+  ? ({ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', boxShadow: '0 4px 20px rgba(0,0,0,0.10)' } as object)
   : null;
 
 function useReduceMotion() {
@@ -115,12 +116,12 @@ const styles = StyleSheet.create({
   wrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
   pill: {
     height: TAB_BAR_HEIGHT, borderRadius: TAB_BAR_HEIGHT / 2, flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'rgba(15,27,61,0.86)', borderWidth: RIM, borderColor: 'rgba(255,255,255,0.14)',
-    shadowColor: '#0F1B3D', shadowOpacity: 0.26, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 10,
+    backgroundColor: 'rgba(22,24,27,0.85)', borderWidth: RIM, borderColor: 'rgba(255,255,255,0.12)',
+    shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 20, shadowOffset: { width: 0, height: 4 }, elevation: 4,
   },
   capsule: {
     position: 'absolute', left: INSET, top: INSET, bottom: INSET, borderRadius: (TAB_BAR_HEIGHT - 2 * RIM - 2 * INSET) / 2,
-    backgroundColor: 'rgba(255,255,255,0.16)',
+    backgroundColor: 'rgba(255,255,255,0.17)',
   },
   slot: { height: TAB_BAR_HEIGHT - 2 * RIM, minWidth: 44, alignItems: 'center', justifyContent: 'center', gap: 2 },
   label: { fontSize: 10.5, fontWeight: '600', color: DIM },
