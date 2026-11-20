@@ -7,12 +7,13 @@ import { colors, radius } from '../theme';
 import { Input } from '../components/ui';
 import { ClinicianMe } from '../lib/clinic';
 import { PersonalCodeCard } from './TeamCard';
-import { SURVEY, SurveyQuestion, Intent, saveSurvey } from '../lib/survey';
+import { SURVEY, SurveyQuestion, SurveyAnswers, Intent, saveSurvey } from '../lib/survey';
 import { track } from '../lib/track';
 
 // Uzman karşılama anketi (kullanıcı isteği 27 Ekim 2026; ortak sozlesme/akislar.md 15): kayıttan sonraki ilk girişte bir kez
 // meslek → zorluklar (çoklu) → işine yarayacaklar (çoklu) → buraya getiren (tek; ekip üyesine sorulmaz) → "Hazırsın".
-// Atlanamaz (kullanıcı kararı 28 Ekim 2026): "Şimdilik geç" yok, her soru yanıtlanır. Meslek kurumsal liste (gruplu, radyo).
+// Her adımda sağ üstte küçük "Geç" (kullanıcı kararı 20 Kasım 2026, ortak sozlesme/hukuk_notlari.md P.6; 28 Ekim'deki "atlanamaz"
+// kararının yerine): o adım yanıtsız geçilir; son adımdan sonra anket kaydedilir ve bir daha sorulmaz. Meslek kurumsal liste (gruplu, radyo).
 // Son ekran seçilen nedene göre ilk adımı önerir: aile daveti, ekip koduyla katılma ya da paketler.
 export type SurveyAction = 'invite' | 'plans' | 'joined' | null;
 type Step = 'profession' | 'challenges' | 'features' | 'intent';
@@ -40,18 +41,40 @@ export default function WelcomeSurvey({ me, onFinish }: { me: ClinicianMe; onFin
   const toggle = (list: string[], set: (v: string[]) => void, key: string) =>
     set(list.includes(key) ? list.filter((k) => k !== key) : [...list, key]);
 
-  const next = async () => {
-    if (!valid) return;
-    if (i < steps.length - 1) { setI(i + 1); return; }
+  // Yanıtsız adım: meslek / neden boş, çoklu seçimde hiç seçim yok. Hiçbir adım yanıtlanmadıysa sunucuya "geçti" yazılır
+  // (clinician_survey_save p_skipped; yönetim panelindeki toplamda "geçen" sayılır), yoksa verilen yanıtlar. İkisi de bir daha sorulmaz.
+  const blank = (a: SurveyAnswers, st: Step) => (st === 'profession' ? !a.profession : st === 'challenges' ? !a.challenges.length
+    : st === 'features' ? !a.features.length : !a.intent);
+  const finish = async (a: SurveyAnswers) => {
     setBusy(true);
+    const skipped = steps.filter((st) => blank(a, st)).length;
     try {
-      await saveSurvey({ profession, challenges, features, intent });
+      await saveSurvey(skipped === steps.length ? null : a);
     } catch {
       // kaydedilemese de uzman beklemez; bir sonraki girişte yeniden sorulur
     }
-    track('survey.done', { intent: intent ?? '', profession: profession ?? '' });
+    track('survey.done', { intent: a.intent ?? '', profession: a.profession ?? '', skipped });
     setBusy(false);
     setDone(true);
+  };
+
+  const next = () => {
+    if (!valid || busy) return;
+    if (i < steps.length - 1) { setI(i + 1); return; }
+    finish({ profession, challenges, features, intent });
+  };
+
+  // Geç: bu adımın (varsa yarım kalmış) seçimi boşalır, sonraki adıma geçilir; son adımda anket biter.
+  const skip = () => {
+    if (busy) return;
+    track('survey.skip', { step, n: i + 1 });
+    const a: SurveyAnswers = { profession, challenges, features, intent };
+    if (step === 'profession') { a.profession = null; setProfession(null); }
+    else if (step === 'challenges') { a.challenges = []; setChallenges([]); }
+    else if (step === 'features') { a.features = []; setFeatures([]); }
+    else { a.intent = null; setIntent(null); }
+    if (i < steps.length - 1) { setI(i + 1); return; }
+    finish(a);
   };
 
   if (done) return <Ready me={me} name={name} intent={owner ? intent : null} onFinish={onFinish} />;
@@ -62,6 +85,10 @@ export default function WelcomeSurvey({ me, onFinish }: { me: ClinicianMe; onFin
       <View style={styles.column}>
         <View style={styles.top}>
           <Text style={styles.brand}>Moyo Mercek</Text>
+          <Pressable onPress={skip} disabled={busy} accessibilityRole="button" accessibilityLabel="Bu soruyu geç"
+            style={({ pressed }) => [styles.skip, pressed && { opacity: 0.6 }]}>
+            <Text style={styles.skipText}>Geç</Text>
+          </Pressable>
         </View>
         <ScrollView contentContainerStyle={styles.scroll}>
           {i === 0 && (
@@ -163,7 +190,7 @@ function Ready({ me, name, intent, onFinish }: { me: ClinicianMe; name: string; 
   const text = intent === 'trial' ? 'En hızlı başlangıç: ilk aileni davet et. Davet e-postası senin adınla gider; ebeveyn onaylayınca çocuk panelinde görünür.'
     : intent === 'family' ? 'Çalıştığın aileyi davet et. Ebeveyn e-postadaki kodla bağlanıp onay verince çocuk panelinde görünür.'
     : intent === 'team' ? 'Aşağıdaki kişisel kodunu klinik sahibine ver. Seni ekibine eklemek istediğinde onay sana gelir; kliniğin danışanları ayrı bir ekip hesabında açılır.'
-    : intent === 'org' ? 'Klinik paketinde 10 uzmana kadar ekip kurar, aile çalışmasını tek düzende yürütürsün. 7 günlük deneme sürüyor.'
+    : intent === 'org' ? 'Klinik paketinde 10 uzmana kadar ekip kurar, aile çalışmasını tek düzende yürütürsün. 14 günlük deneme sürüyor.'
     : 'Panelin hazır. Ailelerin paylaştığı çocuklar burada görünür.';
   const primary: { label: string; onPress: () => void } | null =
     intent === 'trial' || intent === 'family' ? { label: 'İlk aileni davet et', onPress: () => onFinish('invite') }
@@ -200,8 +227,12 @@ function Ready({ me, name, intent, onFinish }: { me: ClinicianMe; name: string; 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   column: { flex: 1, width: '100%', maxWidth: 760, alignSelf: 'center' },
-  top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 12 },
+  top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, paddingTop: 4 },
   brand: { fontSize: 13, fontWeight: '700', color: colors.muted, letterSpacing: 1 },
+  // Geç: köşede, zeminsiz ve küçük yazı; dokunma alanı 44 × 44 pt (Apple HIG). Sağ kenar yazının hizasında kalsın diye iç boşluk dışa taşar.
+  skip: { minWidth: 44, minHeight: 44, paddingHorizontal: 10, marginRight: -10, alignItems: 'center', justifyContent: 'center' },
+  // ikincil: ilk adımda "İleri" pasifken (soluk) ekranın en koyu öğesi olmasın; lacivertin %72'si zeminde ~6:1 karşıtlık
+  skipText: { fontSize: 15, fontWeight: '600', color: colors.navy, opacity: 0.72 },
   scroll: { padding: 24, paddingBottom: 32 },
   hello: { fontSize: 26, fontWeight: '800', color: colors.navy },
   lead: { fontSize: 15, color: colors.text, lineHeight: 22, marginTop: 8 },
