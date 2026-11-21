@@ -50,7 +50,7 @@ import { supabase } from '../lib/supabase';
 import { CANCEL_FLOW_FLAG } from '../lib/cancelFlow';
 import { useStoreSubscription, openAppleSubscriptions } from '../lib/storeState';
 import { BillingBanner } from './membership/StoreNotices';
-import { useNudges, NUDGES_FLAG, primerDue, markNudgeOpened, clearNudges } from '../lib/nudges';
+import { useNudges, NUDGES_FLAG, serverNudgesOn, nudgeTarget, syncNudgePref, primerDue, markNudgeOpened, clearNudges } from '../lib/nudges';
 import { NudgePrimer } from './NudgeParts';
 import type { FamilyInvite } from '../lib/invites';
 import type { Training } from '../lib/training';
@@ -129,7 +129,11 @@ export default function HomeScreen() {
   const planOn = config.flag(CARE_PLAN_FLAG);
   // İptal öncesi akış ve yaşam döngüsü hatırlatmaları (uzaktan ayar; yoksa kapalı)
   const cancelFlow = config.flag(CANCEL_FLOW_FLAG);
-  const nudgesOn = config.flag(NUDGES_FLAG);
+  // Hatırlatmalar iki yoldan: cihaz içi (`lifecycle_nudges`) ya da sunucu motoru (`nudges_server_clinic` / `nudges_server`).
+  // Sunucu açıkken cihaz içi planlama yapılmaz (çift bildirim olmasın); izin açıklaması ve Ayarlar › Bildirimler ikisinde de görünür.
+  const serverNudges = serverNudgesOn(config.flags);
+  const nudgesOn = config.flag(NUDGES_FLAG) || serverNudges;
+  const localNudges = config.flag(NUDGES_FLAG) && !serverNudges;
   const [primer, setPrimer] = useState(false);          // bildirim izni açıklaması (ilk davetten sonra)
   // hatırlatma planı ana ekranın zaten yüklediği listeleri kullanır (undefined: henüz yüklenmedi)
   const [nudgeInvites, setNudgeInvites] = useState<FamilyInvite[] | null | undefined>(undefined);
@@ -153,9 +157,11 @@ export default function HomeScreen() {
   // App Store'da ödeme sorunu: yalnız sahibe, ana ekranda tek satır (üyelik ekranında başlıklı)
   const { sub: storeSub, refresh: refreshStoreSub } = useStoreSubscription(ready && ready.me.role === 'owner' ? ready.me.id : null, cancelFlow);
   // Hatırlatmalar: bayrak uzaktan ayar okununca belli olur (o âna kadar hiçbir şey planlanmaz ya da silinmez)
-  useNudges(config.status === 'ok' ? nudgesOn : null,
+  useNudges(config.status === 'ok' ? localNudges : null,
     ready ? { me: ready.me, clients: ready.clients, signedUpAt: session?.user.created_at ?? ready.me.joined_at ?? null } : null,
     nudgeInvites, nudgeTrainings);
+  // "Hatırlatmalar ve ipuçları" tercihi sunucudan (başka cihazda değişmiş olabilir; işlev yoksa sessiz)
+  useEffect(() => { if (userId && config.status === 'ok' && nudgesOn) syncNudgePref(userId); }, [userId, config.status, nudgesOn]);
 
   const refreshToday = useCallback(() => {
     const d = trDay(new Date().toISOString());
@@ -306,16 +312,17 @@ export default function HomeScreen() {
     const cur = stateRef.current;
     const target = (n.data as { clinic_id?: string } | null)?.clinic_id;
     if (target && cur.kind === 'ready' && cur.me.workspaces !== undefined && target !== cur.me.clinic_id) { ws.switchTo(target, n); return; }
-    // Yerel hatırlatma (lib/nudges.ts): davet türleri davet penceresini, eğitim türleri o danışanın Ebeveyn Eğitimi'ni, deneme üyelik ekranını açar
+    // Hatırlatma (cihaz içi lib/nudges.ts ya da sunucu motoru, ikisi de kind 'nudge', aynı data.nudge türleri): davet türleri
+    // davet penceresini, eğitim türleri o danışanın Ebeveyn Eğitimi'ni, deneme üyelik ekranını açar (nudgeCore.nudgeTarget)
     if (n.kind === 'nudge') {
-      const type = String(n.data?.nudge ?? '');
-      const ref = typeof n.data?.ref === 'string' ? n.data.ref : null;
+      const { type, code, linkId } = nudgeTarget(n.data);
       setSelected(null);
       if (type === 'trial_ending') { setPlans(true); return; }
-      if (type === 'invite_none' || type === 'invite_expiring') { setInviteOpenCode(type === 'invite_expiring' ? ref : null); setInviteOpenKey(Date.now()); return; }
+      if (type === 'invite_none' || type === 'invite_expiring') { setInviteOpenCode(code); setInviteOpenKey(Date.now()); return; }
+      if (!linkId) return;
       let st = stateRef.current;
-      let c = st.kind === 'ready' ? st.clients.find((x) => x.link_id === ref) : undefined;
-      if (!c) { st = await load(); c = st.kind === 'ready' ? st.clients.find((x) => x.link_id === ref) : undefined; }
+      let c = st.kind === 'ready' ? st.clients.find((x) => x.link_id === linkId) : undefined;
+      if (!c) { st = await load(); c = st.kind === 'ready' ? st.clients.find((x) => x.link_id === linkId) : undefined; }
       if (c) setSelected({ client: c, tab: 'training', key: Date.now() });
       return;
     }

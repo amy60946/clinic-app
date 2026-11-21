@@ -14,6 +14,7 @@ const ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   invite_claimed: 'person-add-outline', invite_expired: 'time-outline', invite_declined: 'close-circle-outline', invite_child_updated: 'create-outline',
   verification_approved: 'shield-checkmark-outline', verification_rejected: 'alert-circle-outline', verification_suspended: 'shield-outline',
   kvkk_answered: 'document-text-outline',
+  nudge: 'bulb-outline',   // hatırlatma ve ipucu (sunucu motoru; ortak akislar.md 25)
 };
 
 // Danışan ekranında birden çok çocuklu bildirim (kardeşler) yalnız bu çocuğun adıyla gösterilir

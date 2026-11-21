@@ -7,6 +7,27 @@ import { trDay, trMinutes, trToIso, weekdayOf, hhmmToMin } from './sessionCore.t
 import { addDays } from './metrics.ts';
 
 export const NUDGES_FLAG = 'lifecycle_nudges';
+// Sunucu motoru (aşama 2; ortak akislar.md 25 "Sunucu motoru", proposed/20261120230000_nudge_engine.sql): uzaktan ayarda
+// `nudges_server_clinic` tanımlıysa o, değilse `nudges_server` geçer (sunucudaki nudge_flag_on ile aynı sıra). Açıkken
+// hatırlatmaları sunucu gönderir (bildirim türü `nudge`); cihaz içi planlama yapılmaz ve planlı yerel hatırlatmalar silinir.
+export const NUDGES_SERVER_FLAG = 'nudges_server_clinic';
+export const NUDGES_SERVER_ANY = 'nudges_server';
+export function serverNudgesOn(flags: Record<string, boolean> | null | undefined): boolean {
+  if (!flags) return false;
+  return NUDGES_SERVER_FLAG in flags ? flags[NUDGES_SERVER_FLAG] === true : flags[NUDGES_SERVER_ANY] === true;
+}
+// Bildirim verisinden açılacak yer: sunucu `code` / `link_id` yazar (ref eğitim kimliği olabilir), cihaz içi yalnız `ref`
+export function nudgeTarget(data: Record<string, unknown> | null | undefined): { type: string; code: string | null; linkId: string | null } {
+  const d = data ?? {};
+  const str = (v: unknown) => (typeof v === 'string' && v ? v : null);
+  const type = String(d.nudge ?? '');
+  const ref = str(d.ref);
+  return {
+    type,
+    code: type === 'invite_expiring' ? str(d.code) ?? ref : null,
+    linkId: type === 'training_none' || type === 'training_draft' ? str(d.link_id) ?? ref : null,
+  };
+}
 export const NUDGE_PREFIX = 'nudge.';
 export const NUDGE_TITLE = 'Moyo Mercek';
 export const WORK_START = '08:30';

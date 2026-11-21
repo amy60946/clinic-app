@@ -313,6 +313,21 @@ function legalFor(uid: string | undefined, app: string): Row[] {
 
 // Sunucudaki bildirim tetikleyicilerinin (ortak 20261019130000_notifications.sql) önizleme karşılığı. ParentApp önizlemesi
 // tetikleyici çalıştırmaz; bu yüzden ClinicApp her eşitlemede uzmana gidecek bildirimleri satırlardan türetir.
+// Önizleme: sunucu motorunun "taslakta bekleyen eğitim" hatırlatması (clinic_training_draft), oturumdaki uzmana bir kez
+function demoServerNudge() {
+  const me = db.sessions[APP]?.user.id;
+  const m = me && db.clinicians.find((c: Row) => c.id === me);
+  if (!m) return;
+  const t = (db.parent_trainings ?? []).find((x: Row) => x.status === 'draft' && db.clinic_links.some((l: Row) => l.id === x.link_id && l.clinic_id === m.clinic_id));
+  if (!t || db.notifications.some((n: Row) => n.app === 'clinic' && n.kind === 'nudge' && n.user_id === me && n.data?.ref === t.id)) return;
+  const id = db.notifications.reduce((a: number, n: Row) => Math.max(a, Number(n.id) || 0), 0) + 1;
+  db.notifications.push({ id, user_id: me, app: 'clinic', kind: 'nudge', title: 'Moyo Mercek',
+    body: 'Taslakta bekleyen bir eğitimin var. Etkin yaptığında ebeveyn görmeye başlar.',
+    data: { nudge: 'training_draft', rule: 'clinic_training_draft', ref: t.id, id: `nudge.training_draft.${t.id}`, link_id: t.link_id, training_id: t.id, clinic_id: m.clinic_id },
+    family_id: null, child_id: null, created_at: now(), read_at: null });
+  save();
+}
+
 function deriveClinicNotifications(x: Db, isOld?: (createdAt: string) => boolean): boolean {
   const seeding = !!isOld;
   const before = x.notifications.length;
@@ -363,6 +378,8 @@ let db = load();
 const sync = () => {
   try { if (localStorage.getItem(KEY)) db = load(); } catch { /* yok say */ }
   if (APP === 'clinic' && deriveClinicNotifications(db)) save();
+  // sunucu motoru taklidi açıksa hatırlatma, bildirim listesi okunmadan önce yazılır (gerçekte satır sunucuda önceden durur)
+  if (APP === 'clinic') { let on = false; try { on = localStorage.getItem('demo.nudges_server') === '1'; } catch { /* yok */ } if (on) demoServerNudge(); }
 };
 const sess = () => db.sessions[APP] ?? null;
 const setSess = (s: Row | null) => { db.sessions[APP] = s; };
@@ -1049,7 +1066,24 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
   if (name === 'client_config') {
     let v: Row = { app: {}, flags: { plan_change_suggestions: true, cancel_flow: true, lifecycle_nudges: true } };
     try { v = JSON.parse(localStorage.getItem('demo.client_config') || 'null') ?? v; } catch {}
+    // Sunucu bildirim motoru (ortak proposed/20261120230000_nudge_engine.sql) önizlemede: kabuktaki "Sunucu hatırlatmalarını dene"
+    // (tarayıcı deposu demo.nudges_server = '1') bayrağı açar ve motorun gönderdiği gibi bir bildirim (kind 'nudge') yazar
+    let server = false;
+    try { server = localStorage.getItem('demo.nudges_server') === '1'; } catch { /* yok say */ }
+    if (server) { v = { ...v, flags: { ...(v.flags ?? {}), nudges_server_clinic: true } }; demoServerNudge(); }
     return { data: v, error: null };
+  }
+  // Uzman bildirim tercihi (ortak proposed/20261120230000_nudge_engine.sql): "Hatırlatmalar ve ipuçları"
+  if (name === 'clinician_notification_prefs') {
+    const r = (db.clinician_notification_prefs ?? []).find((x: Row) => x.user_id === uid);
+    return { data: { tips: r ? r.tips : true }, error: null };
+  }
+  if (name === 'clinician_notification_prefs_set') {
+    if (args.p_key !== 'tips' || typeof args.p_on !== 'boolean') return err('Geçersiz bildirim ayarı');
+    db.clinician_notification_prefs = (db.clinician_notification_prefs ?? []).filter((x: Row) => x.user_id !== uid);
+    db.clinician_notification_prefs.push({ user_id: uid, tips: args.p_on, updated_at: now() });
+    save();
+    return { data: { tips: args.p_on }, error: null };
   }
   if (name === 'track_session') {
     const row = db.user_activity.find((a: Row) => a.user_id === uid && a.app === args.p_app);

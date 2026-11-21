@@ -9,6 +9,7 @@ import { planNudges, NUDGE_PREFIX, type FiredNudge, type NudgeInput, type Planne
 import { nudgeDeviceOn, nudgePermission, requestNudgePermission, replaceNudges, type NudgePermission } from './nudgeDevice';
 import { nudgeSignal, onNudgeSignal } from './nudgeSignal';
 import { registerForPush } from './notifications';
+import { supabase } from './supabase';
 import { track } from './track';
 
 // Yaşam döngüsü hatırlatmaları: eşitleyici (uzaktan ayar bayrağı `lifecycle_nudges`; docs/arastirma/bildirim-benchmark.md 4–5).
@@ -17,7 +18,7 @@ import { track } from './track';
 // Geçmiş (ne zaman gönderildi, dokunuldu mu, amacı gerçekleşti mi) kullanıcı başına bu cihazda tutulur.
 // Yalnız bayrak açık + iPhone/iPad + bildirim izni varken çalışır; web'de hiçbir şey planlanmaz.
 // Bilinen sınır (sunucusuz): uygulama hiç açılmazsa durum değişse de planlı hatırlatma gelir (ör. aile daveti kabul etti).
-export { NUDGES_FLAG } from './nudgeCore';
+export { NUDGES_FLAG, serverNudgesOn, nudgeTarget } from './nudgeCore';
 export { nudgeDeviceOn } from './nudgeDevice';
 export type { NudgePermission } from './nudgeDevice';
 
@@ -26,6 +27,7 @@ type Stored = { scheduled: PlannedNudge[]; history: FiredNudge[]; pausedUntil: s
 const KEY = (uid: string) => `clinic.nudge.v1.${uid}`;
 const ON_KEY = (uid: string) => `clinic.nudge.on.v1.${uid}`;           // "Hatırlatmalar ve ipuçları" ('0' = kapalı; yoksa açık)
 const PRIMER_KEY = (uid: string) => `clinic.nudge.primer.v1.${uid}`;   // izin açıklaması yanıtlandı (yeniden yalnız Ayarlar'dan)
+const SYNC_KEY = (uid: string) => `clinic.nudge.sync.v1.${uid}`;      // anahtar sunucuyla en az bir kez eşitlendi
 
 async function read(uid: string): Promise<Stored> {
   const empty: Stored = { scheduled: [], history: [], pausedUntil: null };
@@ -156,9 +158,39 @@ export const markNudgeOpened = (uid: string, id: string) => queued(async () => {
 export async function nudgesEnabled(uid: string): Promise<boolean> {
   try { return (await AsyncStorage.getItem(ON_KEY(uid))) !== '0'; } catch { return true; }
 }
-export async function setNudgesEnabled(uid: string, on: boolean): Promise<void> {
+async function setLocalEnabled(uid: string, on: boolean) {
   try { if (on) await AsyncStorage.removeItem(ON_KEY(uid)); else await AsyncStorage.setItem(ON_KEY(uid), '0'); } catch { /* depolama yoksa bu oturumluk */ }
+}
+
+/* Tercih sunucuda da (sunucu motoru, ortak akislar.md 25 "Tercih"; proposed/20261120230000_nudge_engine.sql):
+   anahtar değişince clinician_notification_prefs_set('tips', açık); açılışta clinician_notification_prefs() okunur ve
+   cihazdaki değer ona uyar (başka cihazda değiştirilmiş olabilir). İşlev sunucuda yoksa ya da ağ yoksa sessiz, cihazdaki
+   değer geçerli. Sunucuyla hiç eşitlenmemiş cihazda kapalı seçilmişse sunucunun varsayılanı (açık) onu ezmez: kapalı yazılır. */
+async function serverPrefSet(uid: string, on: boolean): Promise<void> {
+  try {
+    const { error } = await supabase.rpc('clinician_notification_prefs_set', { p_key: 'tips', p_on: on });
+    if (!error) await AsyncStorage.setItem(SYNC_KEY(uid), '1');
+  } catch { /* sunucu yok ya da ağ yok: cihazdaki değer geçerli */ }
+}
+export async function syncNudgePref(uid: string): Promise<void> {
+  if (!nudgeDeviceOn) return;
+  try {
+    const { data, error } = await supabase.rpc('clinician_notification_prefs');
+    const tips = (data as { tips?: unknown } | null)?.tips;
+    if (error || typeof tips !== 'boolean') return;
+    const local = await nudgesEnabled(uid);
+    if ((await AsyncStorage.getItem(SYNC_KEY(uid))) !== '1') {
+      if (!local && tips) { await serverPrefSet(uid, false); return; }
+      await AsyncStorage.setItem(SYNC_KEY(uid), '1');
+    }
+    if (tips !== local) { await setLocalEnabled(uid, tips); nudgeSignal(); }
+  } catch { /* sessiz */ }
+}
+
+export async function setNudgesEnabled(uid: string, on: boolean): Promise<void> {
+  await setLocalEnabled(uid, on);
   nudgeSignal();
+  await serverPrefSet(uid, on);
 }
 
 /* İzin, yerinde (bildirim-benchmark M3): bayrak açıkken iOS izni girişte değil, uzman davet gönderdikten hemen sonra,

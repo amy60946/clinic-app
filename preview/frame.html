@@ -86,7 +86,7 @@
   </div>
   <div class="bar">
     <span>Uzman (klinik sahibi): <b>uzman@clinicapp.app</b> · Ekip üyesi: <b>ekip@clinicapp.app</b> · Denemesi bitmiş: <b>bitti@clinicapp.app</b> · Ebeveyn: <b>demo@parentapp.app</b> · şifre <b>12345678</b></span>
-    <span>Yeni (20 Kasım): <b>alt menü koyu grafit</b> (Moyo Ebeveyn'deki gibi; sağ üstte <b>Telefon boyu</b>) · <b>karşılama anketinde her adımda "Geç"</b> (sağ üst köşe; görmek için girişte "Kayıt ol" ile yeni bir uzman hesabı açın).</span>
+    <span>Yeni (21 Kasım): <b>Sunucu hatırlatmalarını dene</b> (aşağıda; zilde bir hatırlatma, dokununca taslak eğitim açılır) · 20 Kasım: <b>alt menü koyu grafit</b> (Moyo Ebeveyn'deki gibi; sağ üstte <b>Telefon boyu</b>) · <b>karşılama anketinde her adımda "Geç"</b> (sağ üst köşe; görmek için girişte "Kayıt ol" ile yeni bir uzman hesabı açın).</span>
     <span>18 Kasım: <b>telefonda yüzen alt menü</b> (sağ üstte <b>Telefon boyu</b>) · <b>Aboneliği yönet</b> penceresi (Ayarlar › Üyelik › Aboneliği yönet) · <b>hatırlatmalar</b> (bir aile davet edin, izin açıklaması çıkar; Ayarlar › Bildirimler).</span>
     <button id="reset" type="button">Baştan başlat</button>
   </div>
@@ -98,6 +98,7 @@
       <button type="button" data-uye="billing" aria-pressed="false">Ödeme sorunu</button>
     </span>
     <button type="button" id="hat" aria-pressed="false">Planlı hatırlatmaları göster</button>
+    <button type="button" id="sunucu" aria-pressed="false" title="Hatırlatmaları sunucu gönderir: cihazda planlanmaz, zil listesine bir hatırlatma düşer">Sunucu hatırlatmalarını dene</button>
   </div>
   <div class="hat-liste" id="hat-liste" hidden></div>
 </div>
@@ -161,6 +162,16 @@
     hat.setAttribute('aria-pressed', String(ac));
   });
 
+  // Sunucu bildirim motoru (preview/demo-supabase.ts demo.nudges_server): bayrak açılır, cihaz içi plan silinir, zile bir hatırlatma düşer
+  const sunucu = document.getElementById('sunucu');
+  const sunucuMark = () => { let on = false; try { on = localStorage.getItem('demo.nudges_server') === '1'; } catch (e) { /* yok */ } sunucu.setAttribute('aria-pressed', String(on)); };
+  sunucu.addEventListener('click', () => {
+    try { if (localStorage.getItem('demo.nudges_server') === '1') localStorage.removeItem('demo.nudges_server'); else localStorage.setItem('demo.nudges_server', '1'); } catch (e) { /* depolama kapalı */ }
+    sunucuMark();
+    document.getElementById('clinic').src = 'clinic.html?' + Date.now();
+  });
+  sunucuMark();
+
   const btn = document.getElementById('reset');
   let armed = false, timer;
   btn.addEventListener('click', () => {
@@ -175,10 +186,10 @@
     // Deneme verisinin tarayıcı deposu anahtarı (iki önizlemede aynı)
     try {
       localStorage.removeItem('pofi-onizleme-v4');
-      ['demo.membership', 'demo.nudges', 'demo.nudge_permission'].forEach((k) => localStorage.removeItem(k));
+      ['demo.membership', 'demo.nudges', 'demo.nudge_permission', 'demo.nudges_server'].forEach((k) => localStorage.removeItem(k));
       Object.keys(localStorage).filter((k) => k.startsWith('clinic.nudge.')).forEach((k) => localStorage.removeItem(k));
     } catch (e) { /* depolama kapalı */ }
-    uyeMark(); hatListe.hidden = true; hat.setAttribute('aria-pressed', 'false');
+    uyeMark(); sunucuMark(); hatListe.hidden = true; hat.setAttribute('aria-pressed', 'false');
     document.getElementById('clinic').src = 'clinic.html?' + Date.now();
     if (parent.src) parent.src = 'app.html?' + Date.now();
     armed = false; btn.textContent = 'Baştan başlat'; btn.classList.remove('confirm');

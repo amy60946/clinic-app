@@ -3,7 +3,7 @@ import { AppState } from 'react-native';
 import { supabase } from './supabase';
 import { AppNotification, notificationChildren, registerForPush, setBadge, toNotification } from './notifications';
 import { useClientConfig } from './clientConfig';
-import { NUDGES_FLAG } from './nudgeCore';
+import { NUDGES_FLAG, serverNudgesOn } from './nudgeCore';
 
 // Uygulama içi bildirim kutusu: sunucunun yazdığı satırlar (notifications, app='clinic') + Realtime ile anında yenileri
 type Ctx = {
@@ -29,8 +29,9 @@ export function NotificationsProvider({ userId, children }: { userId: string; ch
   // Cihaz bildirimi kaydı. Bugünkü davranış: girişte iOS izni istenir. `lifecycle_nudges` bayrağı açıksa izin girişte
   // istenmez (ilk davetten sonra kendi açıklamamızla: nudges.ts primerDue); daha önce verilmiş izin yine kaydedilir.
   // Bayrak uzaktan ayar okununca belli olur: o âna kadar beklenir (okunamazsa bugünkü davranış).
-  const { status, flag } = useClientConfig();
-  const deferPrompt = status === 'ok' && flag(NUDGES_FLAG);
+  // sunucu motoru açıkken de (`nudges_server_clinic` / `nudges_server`) izin ilk davetten sonra sorulur
+  const { status, flag, flags } = useClientConfig();
+  const deferPrompt = status === 'ok' && (flag(NUDGES_FLAG) || serverNudgesOn(flags));
   const settled = status !== 'loading';
   useEffect(() => { if (settled) registerForPush({ prompt: !deferPrompt }); }, [userId, settled, deferPrompt]);
 

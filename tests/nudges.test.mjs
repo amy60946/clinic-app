@@ -1,7 +1,7 @@
 // Yaşam döngüsü hatırlatmaları: hakem (src/lib/nudgeCore.ts). Çalıştırma: npm test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { planNudges, inHoldout, NUDGE_TITLE, NUDGE_TEXT, NUDGE_PREFIX } from '../src/lib/nudgeCore.ts';
+import { planNudges, inHoldout, serverNudgesOn, nudgeTarget, NUDGE_TITLE, NUDGE_TEXT, NUDGE_PREFIX } from '../src/lib/nudgeCore.ts';
 import { trToIso, trDay, trTime, weekdayOf } from '../src/lib/sessionCore.ts';
 
 const tr = (day, hhmm) => trToIso(day, hhmm);
@@ -230,4 +230,25 @@ test('anahtar kapalıysa yalnız deneme bitişi; metinlerde ad yok, başlık Moy
     assert.ok(Date.parse(n.fireAt) > Date.parse(NOW));
   }
   assertLimits(p);
+});
+
+test('sunucu motoru bayrağı: ürüne özel anahtar tanımlıysa o, değilse genel bayrak', () => {
+  assert.equal(serverNudgesOn(undefined), false);
+  assert.equal(serverNudgesOn({}), false);
+  assert.equal(serverNudgesOn({ nudges_server: true }), true);
+  assert.equal(serverNudgesOn({ nudges_server: true, nudges_server_clinic: false }), false, 'ürüne özel kapalı genel açığı ezer');
+  assert.equal(serverNudgesOn({ nudges_server: false, nudges_server_clinic: true }), true);
+  assert.equal(serverNudgesOn({ nudges_server_parent: true }), false, 'Moyo bayrağı Mercek\'i açmaz');
+});
+
+test('hatırlatma bildirimi: sunucu ve cihaz verisinden aynı yer açılır', () => {
+  // cihaz içi: ref davet kodu ya da danışan bağı
+  assert.deepEqual(nudgeTarget({ nudge: 'invite_expiring', ref: 'ABC123' }), { type: 'invite_expiring', code: 'ABC123', linkId: null });
+  assert.deepEqual(nudgeTarget({ nudge: 'training_none', ref: 'link-1' }), { type: 'training_none', code: null, linkId: 'link-1' });
+  // sunucu: ref eğitim kimliği, bağ link_id'de
+  assert.deepEqual(nudgeTarget({ nudge: 'training_draft', ref: 'egitim-9', link_id: 'link-2', training_id: 'egitim-9' }),
+    { type: 'training_draft', code: null, linkId: 'link-2' });
+  assert.deepEqual(nudgeTarget({ nudge: 'invite_expiring', ref: 'K7', code: 'K7' }), { type: 'invite_expiring', code: 'K7', linkId: null });
+  assert.deepEqual(nudgeTarget({ nudge: 'trial_ending', ref: null }), { type: 'trial_ending', code: null, linkId: null });
+  assert.deepEqual(nudgeTarget(null), { type: '', code: null, linkId: null });
 });
