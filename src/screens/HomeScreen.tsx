@@ -10,7 +10,7 @@ import { colors, radius } from '../theme';
 import { Label, Notice } from '../components/ui';
 import { useAuth } from '../lib/auth';
 import {
-  clinicianMe, listClients, listTeam, deleteAccount, ClinicNotInstalled, ClinicianMe, Client, Member,
+  clinicianMe, listClients, listTeam, deleteAccount, familyKeepsRecords, ClinicNotInstalled, ClinicianMe, Client, Member,
 } from '../lib/clinic';
 import SettingsScreen from './SettingsScreen';
 import { WorkspaceSheet, TeamRequestsCard, PERSONAL_LABEL, TEAM_LABEL } from './WorkspaceSheet';
@@ -34,6 +34,7 @@ import { VerificationState, loadVerification } from '../lib/verification';
 import Onboarding, { onboardingSeen, markOnboardingSeen } from './Onboarding';
 import HelpSheet, { HelpAction } from './HelpSheet';
 import WelcomeSurvey, { SurveyAction } from './WelcomeSurvey';
+import { deleteAccountText } from '../lib/accountDelete';
 import { surveyAnswered } from '../lib/survey';
 import { LegalDoc, legalPending } from '../lib/legal';
 import LegalSheet from './legal/LegalSheet';
@@ -392,14 +393,11 @@ export default function HomeScreen() {
     if (userId) await clearNudges(userId);   // bu cihazda planlı hatırlatma kalmasın
     signOut();
   };
-  // Metinler hukuk/50-uygulama-ici-metinler.md 5.2 (tek kişilik klinik · ekipte sahip · ekip üyesi)
-  const removeAccount = () => Alert.alert('Hesabın silinsin mi?',
-    state.kind === 'ready' && state.team.length <= 1
-      ? 'Kliniğin ve içindeki her şey silinir: danışan paylaşımları, notlar, davranış hedefleri, haftalık değerlendirmeler, rutin ve adım önerileri, takip planları, davetler ve üyelik kaydı. Ailelerin Moyo\'daki kendi verileri silinmez; yalnız seninle paylaşımları biter. Saklaman gereken kayıtları önce yazdır. App Store üyeliğin varsa Apple Ayarlar\'dan ayrıca kapat. Bu işlem geri alınamaz.'
-      : state.kind === 'ready' && state.me.role === 'owner'
-        ? 'Klinik kalır; sahiplik ekibin en eski üyesine geçer. Kliniğe ait kayıtlar klinikte kalır. Yalnız senin hesabın silinir. Bu işlem geri alınamaz.'
-        : 'Yalnız senin hesabın silinir. Kliniğe ait kayıtlar klinikte kalır. Bu işlem geri alınamaz.',
-    [{ text: 'Vazgeç', style: 'cancel' }, {
+  // Metin hukuk/50 §5.2 (lib/accountDelete.ts): sunucu "ailenin kayıtları ailede kalır" kuralını uyguluyorsa yeni metin
+  const removeAccount = async () => {
+    const kind = state.kind === 'ready' && state.team.length <= 1 ? 'solo' : state.kind === 'ready' && state.me.role === 'owner' ? 'owner' : 'member';
+    const keeps = kind === 'solo' ? await familyKeepsRecords() : false;
+    Alert.alert('Hesabın silinsin mi?', deleteAccountText(kind, keeps), [{ text: 'Vazgeç', style: 'cancel' }, {
       text: 'Kalıcı olarak sil', style: 'destructive', onPress: async () => {
         try {
           await flush().catch(() => {});
@@ -412,6 +410,7 @@ export default function HomeScreen() {
         }
       },
     }]);
+  };
   const legalOn = Array.isArray(legal);
   const accountLinks = (
     <View style={styles.accountLinks}>
