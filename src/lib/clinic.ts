@@ -544,6 +544,15 @@ export async function deleteAccount(): Promise<void> {
   check(null, error);
 }
 
+// Sunucu "ailenin kayıtları ailede kalır" kuralını uyguluyor mu (ortak 20261120200000_family_keeps_records.sql)? İşaret: göçün
+// eklediği parent_trainings.detached_at sütunu. Yoksa ya da okunamazsa false: hesap silme uyarısı önceki metinle çıkar.
+export async function familyKeepsRecords(): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('parent_trainings').select('detached_at').limit(1);
+    return !error;
+  } catch { return false; }
+}
+
 // Klinik sahibi: danışanı bir ekip üyesine açar / kapatır; sorumlu uzmanı değiştirir (ortak 20261022100000)
 export async function assignClient(linkId: string, clinicianId: string, assigned: boolean): Promise<void> {
   const { error } = await supabase.rpc('clinic_assign', { p_link_id: linkId, p_clinician_id: clinicianId, p_assigned: assigned });
