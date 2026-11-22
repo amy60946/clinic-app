@@ -20,7 +20,7 @@ async function record(name) {
   const dev = scene.device || 'desktop';
   const alt = process.env.MOTION_DEVICE && dev === 'desktop' ? process.env.MOTION_DEVICE : null;
   const id = alt ? `${name}-${alt === 'dikey' ? 'd' : alt}` : name;
-  const s = await kit.open(alt || dev, scene.data || {});
+  const s = await kit.open(alt || dev, { ...(scene.data || {}), dsf: process.env.MOTION_DSF ? Number(process.env.MOTION_DSF) : undefined });
   const h = new kit.Human(s, scene.seed || 7);
   let rec;
   try {
@@ -55,11 +55,23 @@ async function record(name) {
 
 // Hareket adımlarından biri kendi karesini kaçırdıysa (imleç takılır) sahne yeniden çekilir
 async function recordClean(id) {
+  // En az kaçan adımlı deneme saklanır (sonraki deneme daha kötü çıkarsa ona dönülür)
+  const ext = ['mp4', 'webm', 'webp'];
+  let best = null;
+  const keep = (r) => {
+    const oid = r.id;
+    for (const e of ext) { const f = path.join(kit.OUT, `${oid}.${e}`), b = path.join(kit.TMP, `best-${oid}.${e}`); fs.rmSync(b, { force: true }); if (fs.existsSync(f)) fs.copyFileSync(f, b); }
+    best = r;
+  };
   for (let i = 1; ; i++) {
     const r = await record(id);
-    if (r.missed <= r.moves * 0.02 || i >= Number(process.env.MOTION_TRIES || 4)) return r;   // %2'ye kadar tek tük kaçan adım görünmez
+    if (!best || r.missed < best.missed) keep(r);
+    if (r.missed <= r.moves * 0.02 || i >= Number(process.env.MOTION_TRIES || 4)) break;
     console.log(`  ${id}: ${r.missed} hareket adımı kaçtı, yeniden çekiliyor (${i + 1}. deneme)`);
   }
+  for (const e of ext) { const f = path.join(kit.OUT, `${best.id}.${e}`), b = path.join(kit.TMP, `best-${best.id}.${e}`); fs.rmSync(f, { force: true }); if (fs.existsSync(b)) fs.copyFileSync(b, f); }
+  console.log(`  ${id}: saklanan deneme ${best.missed}/${best.moves} kaçan adım`);
+  return best;
 }
 
 (async () => {

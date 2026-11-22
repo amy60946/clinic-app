@@ -50,7 +50,7 @@ async function open(device = 'desktop', opt = {}) {
   const z = d.zoom || 1;
   const ctx = await browser.newContext({
     viewport: z === 1 ? d.viewport : { width: d.viewport.width * z, height: d.viewport.height * z },
-    deviceScaleFactor: z === 1 ? d.deviceScaleFactor : d.deviceScaleFactor / z, isMobile: d.isMobile, hasTouch: d.hasTouch, userAgent: d.userAgent,
+    deviceScaleFactor: z === 1 ? (opt.dsf || d.deviceScaleFactor) : d.deviceScaleFactor / z,   // MOTION_DSF: ağır sayfada daha az çizim (kare kaçmasın) isMobile: d.isMobile, hasTouch: d.hasTouch, userAgent: d.userAgent,
     locale: 'tr-TR', timezoneId: 'Europe/Istanbul', colorScheme: 'light',
   });
   await ctx.addInitScript(inject.shiftDate, Date.parse(SHOT_TIME));
