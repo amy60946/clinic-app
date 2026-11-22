@@ -40,7 +40,13 @@ def cumleler(t):
 # oraya ~170 px genişlikte sığıyor, yazı ~6 px kalıyordu. Kartın mesajını anlatan parçanın kırpımı kutuyu doldurur (yazı ~11 px).
 # Kırpımlar img/c-kirp-<anahtar>.webp ← python3 ../landing-motion/kirp.py kirp.json (kutular orada). Tablet ve geniş ekran değişmez.
 KIRP = {k: f'img/c-kirp-{k}.webp' for k in ('ebeveyn-ekle', 'oyun-onay', 'ebeveyn-onay', 'mercek-veri', 'mercek-egitim')}
-def kirp(key, alt): return f'<img class="d-kirp" src="{KIRP[key]}" alt="{e(alt)}" loading="lazy" decoding="async">' if key in KIRP else ''
+# Oyun ekranı yatay: görev adı ile "Yaptım" birlikte ancak 650 × 314'lük kırpıma sığıyor; kutuya "contain" ile oturur, kalan yer kırpımın
+# kenar rengiyle (oyunun zemini) dolar, görsel kutuda yüzüyormuş gibi durmaz.
+KIRP_SIGDIR = {'oyun-onay': '#F6E8BF'}
+def kirp(key, alt):
+    if key not in KIRP: return ''
+    ek = f' sigdir" style="background-color:{KIRP_SIGDIR[key]}' if key in KIRP_SIGDIR else ''
+    return f'<img class="d-kirp{ek}" src="{KIRP[key]}" alt="{e(alt)}" loading="lazy" decoding="async">'
 
 def tur(key): return 'ebeveyn' if key.startswith('ebeveyn') else ('mercek' if key.startswith('mercek') else (key if key == 'sema' else 'oyun'))
 def cls(key, dar=False): return 'telefon' if key.startswith('ebeveyn') or (dar and key.startswith('mercek')) else ('panel' if key.startswith('mercek') else '')

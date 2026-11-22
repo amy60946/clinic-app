@@ -197,5 +197,6 @@
 @media (max-width: 699px) {
   .sayfa-c .d-kart .d-gorsel > img.d-kirp { display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; object-position: center top;
     border: 1px solid var(--cizgi); border-radius: 16px; -webkit-mask-image: none; mask-image: none; background: #FFFFFF; }
+  .sayfa-c .d-kart .d-gorsel > img.d-kirp.sigdir { object-fit: contain; object-position: center; }
   .sayfa-c .d-kart .d-gorsel > img.d-kirp ~ img { display: none; }
 }
