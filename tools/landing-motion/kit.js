@@ -26,8 +26,8 @@ const DEVICES = {
   desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2, isMobile: false, hasTouch: false, cursor: 'arrow', out: [1440, 900],
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' },
   // Telefonda gösterilecek dikey masaüstü (22 Kasım 2026, kullanıcı: "mevcut yapıyı koruyarak yazıyı büyüt"; Atlassian'ın telefondaki ürün videosu):
-  // aynı masaüstü düzeni (sol menü 900 pikselden itibaren), 4:5 çerçeve; telefonda yazı 1440 genişliğe göre ~1,6 kat büyük görünür.
-  dikey: { viewport: { width: 900, height: 1124 }, deviceScaleFactor: 2, isMobile: false, hasTouch: false, cursor: 'arrow', out: [900, 1124], from: [1440, 900],
+  // aynı masaüstü düzeni (sol menü 900 pikselden itibaren), 9:10 çerçeve (4:5'te ekranların altı boş kalıyordu); telefonda yazı 1440 genişliğe göre ~1,6 kat büyük görünür.
+  dikey: { viewport: { width: 900, height: 1000 }, deviceScaleFactor: 1.5, isMobile: false, hasTouch: false, cursor: 'arrow', out: [900, 1000], from: [1440, 900],
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' },
   // Telefon: sayfa 393×800 (×3) yerleşir, pencere 786×1600; görüntü 2 kat büyütülür (Emulation scale), kayıt 786×1600 gelir
   phone: { viewport: { width: 393, height: 800 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, cursor: 'touch', out: [786, 1600], zoom: 2,

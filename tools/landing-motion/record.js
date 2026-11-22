@@ -57,7 +57,7 @@ async function record(name) {
 async function recordClean(id) {
   for (let i = 1; ; i++) {
     const r = await record(id);
-    if (r.missed === 0 || i >= Number(process.env.MOTION_TRIES || 4)) return r;
+    if (r.missed <= r.moves * 0.02 || i >= Number(process.env.MOTION_TRIES || 4)) return r;   // %2'ye kadar tek tük kaçan adım görünmez
     console.log(`  ${id}: ${r.missed} hareket adımı kaçtı, yeniden çekiliyor (${i + 1}. deneme)`);
   }
 }

@@ -14,6 +14,8 @@ module.exports = {
     const p = s.page;
     await h.sleep(350);
     await h.click('Davranışlar ve Olaylar', { beat: 'Davranışlar ve Olaylar', after: 1200 });
+    // Dikey çerçevede (telefon sürümü) olay tablosu sol menüyle sığmıyor: uygulamanın kendi ☰ düğmesiyle menü kapanır
+    if (h.d.from) await h.click(p.getByRole('button', { name: 'Menüyü kapat', exact: true }), { beat: 'Menüyü kapat: tablo tam genişlikte', after: 900 });
     await h.click(card(p, 'Ekranı kapatırken ağlama'), { fx: 0.2, beat: 'Hedef davranışı aç: öncül, sonuç, strateji, çocuğun tepkisi', after: 1550, poster: true });
     await h.scroll(230, { ms: 800, after: 600, beat: 'Olay tablosu' });
     await h.click(card(p, 'Yatma saati direnci'), { fx: 0.2, beat: 'Süre kaydı tutulan davranış: sütunlar değişir', after: 1300 });
