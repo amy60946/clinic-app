@@ -12,6 +12,7 @@ import { buildReportHtml } from '../../lib/report';
 import { ageText, type ClientCtx } from './ClientScreen';
 import { track } from '../../lib/track';
 import { useClientConfig, CARE_PLAN_FLAG } from '../../lib/clientConfig';
+import { errorText } from '../../lib/errors';
 
 type NameMode = 'name' | 'initials' | 'label';
 
@@ -106,7 +107,7 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
       }));
       emit('report_action');
     } catch (e) {
-      Alert.alert('Rapor açılamadı', (e as Error).message);
+      Alert.alert('Rapor açılamadı', errorText(e));
     } finally {
       setBusy(false);
     }

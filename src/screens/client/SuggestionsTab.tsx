@@ -19,6 +19,7 @@ import RoutineEditor from './RoutineEditor';
 import { Routine, OwnRoutine, routinesFor, childBand, ownToRoutine, agesText, fitsAge, AGE_LABEL } from '../../lib/routines';
 import { loadPlan, domainLabel } from '../../lib/plan';
 import { Segmented } from '../../components/ui';
+import { errorText } from '../../lib/errors';
 
 const STATUS: Record<Suggestion['status'], { label: string; fg: string; bg: string; icon: keyof typeof Ionicons.glyphMap }> = {
   draft: { label: 'Taslak · Takip Planı\'ndan "Aileye gönder" ile gider', fg: colors.medium.fg, bg: colors.medium.bg, icon: 'document-text-outline' },
@@ -80,7 +81,7 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
   };
 
   const load = useCallback(() => {
-    listSuggestions(client.link_id).then((x) => { setItems(x); onCount?.(x.length); }).catch((e) => Alert.alert('Öneriler yüklenemedi', (e as Error).message));
+    listSuggestions(client.link_id).then((x) => { setItems(x); onCount?.(x.length); }).catch((e) => Alert.alert('Öneriler yüklenemedi', errorText(e)));
   }, [client.link_id]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(load, [load]);
 
@@ -107,7 +108,7 @@ export default function SuggestionsTab({ client, me, data, section, onCount }: C
     { text: 'Vazgeç', style: 'cancel' },
     {
       text: 'Geri çek', style: 'destructive',
-      onPress: () => withdrawSuggestion(s.id).then(() => { close(); load(); }).catch((e) => Alert.alert('Geri çekilemedi', (e as Error).message)),
+      onPress: () => withdrawSuggestion(s.id).then(() => { close(); load(); }).catch((e) => Alert.alert('Geri çekilemedi', errorText(e))),
     },
   ]);
 

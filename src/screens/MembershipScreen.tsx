@@ -17,6 +17,7 @@ import { CANCEL_FLOW_FLAG } from '../lib/cancelFlow';
 import { useStoreSubscription, openAppleSubscriptions } from '../lib/storeState';
 import ManageSheet from './membership/ManageSheet';
 import { CancelledCard, BillingBanner } from './membership/StoreNotices';
+import { errorText } from '../lib/errors';
 
 const APPLE_EULA = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL;
@@ -105,7 +106,7 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, onH
     if (r.reason === 'none') return Alert.alert('Bu Apple hesabında Moyo Mercek üyeliği bulunamadı.');
     if (r.reason === 'unavailable') return Alert.alert('Bu paket şu an App Store\'da satın alınamıyor.', 'Biraz sonra yeniden dene.');
     if (r.reason === 'not_connected') return Alert.alert('App Store bağlantısı bu sürümde kapalı.');
-    Alert.alert('İşlem tamamlanamadı', r.message || 'Biraz sonra yeniden dene.');
+    Alert.alert('İşlem tamamlanamadı', errorText(r.message, 'Biraz sonra yeniden dene.'));   // mağaza metni İngilizce olabilir
   };
 
   const choose = async (p: BillingPlan) => {

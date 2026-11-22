@@ -15,6 +15,7 @@ import {
 } from '../../lib/training';
 import { TypeTile, ItemContent, SheetFrame, StatusChip, GhostButton } from './parts';
 import ParentPreview from './ParentPreview';
+import { errorText } from '../../lib/errors';
 
 type Filters = { q: string; fav: boolean; types: ItemType[]; topics: string[] };
 const EMPTY: Filters = { q: '', fav: false, types: [], topics: [] };
@@ -231,7 +232,7 @@ export function AssignSheet({ me, item, clients, onClose, onDone }: {
       if (!n) Alert.alert('Zaten eğitimde', 'Bu kaynak seçtiğin eğitimde var.');
       onDone(client);
     } catch (e) {
-      Alert.alert('Kurulamadı', e instanceof TrainingNotInstalled ? 'Veritabanı güncellemesi bekleniyor.' : String((e as Error).message));
+      Alert.alert('Kurulamadı', e instanceof TrainingNotInstalled ? 'Veritabanı güncellemesi bekleniyor.' : String(errorText(e)));
     } finally { setBusy(false); }
   };
   return (

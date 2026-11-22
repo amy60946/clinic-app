@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as Linking from 'expo-linking';
-import type { Session, EmailOtpType } from '@supabase/supabase-js';
+import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { storeLogOut } from './store';
 
@@ -67,6 +67,19 @@ export function authErrorText(e: unknown): string {
   return err?.message || 'Bir şeyler ters gitti. Tekrar dene.';
 }
 
+// Web: e-posta bağlantısının kodunu ve hata parametrelerini adres çubuğundan sil (sayfa yenilenmez)
+const AUTH_PARAMS = ['code', 'type', 'token_hash', 'access_token', 'refresh_token', 'error', 'error_code', 'error_description'];
+function clearAuthParams() {
+  if (Platform.OS !== 'web' || typeof window === 'undefined' || !window.history?.replaceState) return;
+  try {
+    const u = new URL(window.location.href);
+    let changed = false;
+    for (const k of AUTH_PARAMS) if (u.searchParams.has(k)) { u.searchParams.delete(k); changed = true; }
+    if (/(^|[#&])(access_token|refresh_token|error|code)=/.test(u.hash)) { u.hash = ''; changed = true; }
+    if (changed) window.history.replaceState(window.history.state, '', u.pathname + u.search + u.hash);
+  } catch { /* adres okunamazsa dokunma */ }
+}
+
 // URL'nin hem ?sorgu hem #parça kısmındaki parametreleri oku
 function urlParams(url: string): Record<string, string> {
   const out: Record<string, string> = {};
@@ -104,23 +117,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         : 'Bağlantı geçersiz. Yeniden iste.');
       return;
     }
+    // Güvenlik denetimi 22 Kasım 2026 (Moyo ile aynı): yalnız PKCE kodu (?code=) kabul edilir; bağlantıdaki token_hash ya da
+    // access_token oturum açtırmaz (başkasının hesabına sokan bağlantı olmasın). Kod adres çubuğundan hemen silinir
+    // (geçmişe, ekran paylaşımına ve yer imine girmesin).
+    clearAuthParams();
+    if (!p.code) {
+      Alert.alert('Bağlantı açılamadı', 'Bağlantı geçersiz. Yeniden iste.');
+      return;
+    }
     try {
-      if (p.code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(p.code);
-        if (error) {
-          // Bağlantı başka cihazda/tarayıcıda açıldı: e-posta yine doğrulanmıştır
-          Alert.alert('E-posta doğrulandı', 'Bağlantıyı başka bir cihazda açtın. Şimdi e-posta ve şifrenle giriş yapabilirsin.');
-          return;
-        }
-      } else if (p.token_hash && p.type) {
-        const { error } = await supabase.auth.verifyOtp({ token_hash: p.token_hash, type: p.type as EmailOtpType });
-        if (error) throw error;
-        if (p.type !== 'recovery') {
-          // Kayıt doğrulaması oturum açtırmaz: kişi kendi şifresiyle girer
-          await supabase.auth.signOut({ scope: 'local' });
-          Alert.alert('E-posta doğrulandı', 'Şimdi e-posta ve şifrenle giriş yapabilirsin.');
-          return;
-        }
+      const { error } = await supabase.auth.exchangeCodeForSession(p.code);
+      if (error) {
+        // Kod yalnız isteğin yapıldığı tarayıcıda / cihazda çözülür (PKCE). E-postanın doğrulandığını bilemeyiz, öyle denmez.
+        Alert.alert('Bağlantı açılamadı', 'Bu bağlantı yalnız isteği yaptığın cihazda ve tarayıcıda açılır. Orada aç ya da e-posta ve şifrenle giriş yapmayı dene; olmazsa yeni bağlantı iste.');
+        return;
       }
       if (p.type === 'recovery') setRecovery(true);
     } catch (e) {
@@ -203,6 +213,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updatePassword = useCallback(async (password: string) => {
     const { error } = await supabase.auth.updateUser({ password });
     if (error) throw error;
+    // Şifre değişince öteki cihazlardaki oturumlar kapanır (güvenlik denetimi 22 Kasım 2026); bu cihaz açık kalır
+    await supabase.auth.signOut({ scope: 'others' }).catch(() => {});
     setRecovery(false);
   }, []);
 

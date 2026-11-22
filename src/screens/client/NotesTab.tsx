@@ -6,6 +6,7 @@ import { Note, listNotes, addNote, deleteNote, listGoals } from '../../lib/clini
 import { PRIVATE } from '../plan/tones';
 import type { ClientCtx } from './ClientScreen';
 import { InheritedNotes } from './History';
+import { errorText } from '../../lib/errors';
 
 // Uzman notları: yalnız klinik ekibi görür; aile görmez. Paylaşım biterse de klinikte kalır.
 export default function NotesTab({ client, me, data }: ClientCtx) {
@@ -37,7 +38,7 @@ function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(() => {
-    listNotes(client.link_id).then(setNotes).catch((e) => Alert.alert('Notlar yüklenemedi', (e as Error).message));
+    listNotes(client.link_id).then(setNotes).catch((e) => Alert.alert('Notlar yüklenemedi', errorText(e)));
   }, [client.link_id]);
   useEffect(load, [load]);
 
@@ -49,7 +50,7 @@ function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
       setBody('');
       load();
     } catch (e) {
-      Alert.alert('Not kaydedilemedi', (e as Error).message);
+      Alert.alert('Not kaydedilemedi', errorText(e));
     } finally {
       setBusy(false);
     }
@@ -57,7 +58,7 @@ function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
 
   const remove = (n: Note) => Alert.alert('Not silinsin mi?', 'Bu işlem geri alınamaz.', [
     { text: 'Vazgeç', style: 'cancel' },
-    { text: 'Sil', style: 'destructive', onPress: () => deleteNote(n.id).then(load).catch((e) => Alert.alert('Silinemedi', (e as Error).message)) },
+    { text: 'Sil', style: 'destructive', onPress: () => deleteNote(n.id).then(load).catch((e) => Alert.alert('Silinemedi', errorText(e))) },
   ]);
 
   return (

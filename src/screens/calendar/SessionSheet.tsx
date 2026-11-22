@@ -13,6 +13,7 @@ import {
 } from '../../lib/sessionCore';
 import { createSession, updateSession, loadBusy, type Conflict } from '../../lib/sessions';
 import { SheetHeader, Chips, FieldLabel, TimeInput, s } from './parts';
+import { errorText } from '../../lib/errors';
 
 // Yeni seans / seansı düzelt (ortak akislar.md 20, 1). Tekrar: her hafta / iki haftada bir; aileye göster: tarih, saat, yer ve tür
 // ParentApp'te görünür, not ve gündem görünmez. Çakışma (oda / uzman) kaydı engellemez, sonradan uyarır.
@@ -95,7 +96,7 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
         onSaved(r.ids);
       }
     } catch (e) {
-      Alert.alert('Kaydedilemedi', (e as Error).message);
+      Alert.alert('Kaydedilemedi', errorText(e));
     } finally {
       setSaving(false);
     }

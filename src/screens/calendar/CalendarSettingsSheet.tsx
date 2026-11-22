@@ -13,6 +13,7 @@ import {
 } from '../../lib/sessions';
 import { SheetHeader, Chips, FieldLabel, TimeInput, s } from './parts';
 import { DAY_SHORT } from '../../dates';
+import { errorText } from '../../lib/errors';
 
 // Takvim ayarları (ortak akislar.md 20, 6): çalışma saatlerim ve aileye açık saatler (D), odalar ve kurallar (sahip, D),
 // takvim aboneliği ve dış takvim (E).
@@ -46,15 +47,26 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
   const [srcLabel, setSrcLabel] = useState('');
   const [syncing, setSyncing] = useState(false);
 
+  // abonelik varsa göster (oluşturmadan): tablodan okunur; yoksa "Bağlantı oluştur"
+  const readFeed = () => import('../../lib/supabase').then(({ supabase }) => supabase.from('clinic_calendar_feeds').select('token, show_initials').maybeSingle())
+    .then((r) => ((r.data as Feed) ?? null)).catch(() => null);
   useEffect(() => {
     listSources().then(setSources).catch(() => setSources([]));
-    // abonelik varsa göster (oluşturmadan): tablodan okunur; yoksa "Bağlantı oluştur"
-    import('../../lib/supabase').then(({ supabase }) => supabase.from('clinic_calendar_feeds').select('token, show_initials').maybeSingle())
-      .then((r) => setFeed((r.data as Feed) ?? null)).catch(() => setFeed(null));
+    readFeed().then(setFeed);
   }, []);
+  // Yenile / baş harf: sunucu aktarımı bu arada silmiş olabilir (klinikten ayrılınca silinir; güvenlik denetimi 22 Kasım 2026).
+  // clinic_calendar_feed bu işlemlerde yoksa yeniden kurar; ekran kapalı duruma düşer, aktarım ancak "Bağlantı oluştur"la açılır.
+  const feedAct = async (action: 'rotate' | 'set', initials?: boolean) => {
+    if (!(await readFeed())) {
+      setFeed(null);
+      Alert.alert('Takvim aktarımı kapalı', 'Aktarım kapatılmış (ör. klinikten ayrıldığın için). Yeniden açmak için "Bağlantı oluştur"a dokun.');
+      return;
+    }
+    try { setFeed(await calendarFeed(action, initials)); } catch (e) { Alert.alert('Olmadı', errorText(e)); }
+  };
 
   const run = async (fn: () => Promise<unknown>, ok?: string) => {
-    try { await fn(); onChanged(); if (ok) Alert.alert(ok); } catch (e) { Alert.alert('Kaydedilemedi', (e as Error).message); }
+    try { await fn(); onChanged(); if (ok) Alert.alert(ok); } catch (e) { Alert.alert('Kaydedilemedi', errorText(e)); }
   };
   const addSlot = () => {
     if (hhmmToMin(to) <= hhmmToMin(from)) return Alert.alert('Saatleri kontrol et', 'Bitiş saati başlangıçtan sonra olmalı.');
@@ -173,13 +185,13 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
                 <View style={[s.row, { flexWrap: 'wrap' }]}>
                   <SmallButton label="Bağlantıyı kopyala" onPress={() => copy(feedUrl(feed.token))} />
                   <SmallButton label="Yenile" onPress={() => Alert.alert('Bağlantı yenilensin mi?', 'Eski bağlantı çalışmaz; takviminde yenisiyle yeniden abone ol.', [
-                    { text: 'Vazgeç', style: 'cancel' }, { text: 'Yenile', onPress: () => calendarFeed('rotate').then(setFeed).catch((e) => Alert.alert('Olmadı', e.message)) }])} />
-                  <SmallButton label="Kapat" danger onPress={() => calendarFeed('delete').then(() => setFeed(null)).catch((e) => Alert.alert('Olmadı', e.message))} />
+                    { text: 'Vazgeç', style: 'cancel' }, { text: 'Yenile', onPress: () => feedAct('rotate') }])} />
+                  <SmallButton label="Kapat" danger onPress={() => calendarFeed('delete').then(() => setFeed(null)).catch((e) => Alert.alert('Olmadı', errorText(e)))} />
                 </View>
-                <View style={s.row}><Toggle value={feed.show_initials} onChange={(v) => calendarFeed('set', v).then(setFeed).catch(() => {})} /><Text style={s.body}>Baş harfi göster (ör. "Bireysel seans · N.")</Text></View>
+                <View style={s.row}><Toggle value={feed.show_initials} onChange={(v) => feedAct('set', v)} /><Text style={s.body}>Baş harfi göster (ör. "Bireysel seans · N.")</Text></View>
               </>
             ) : (
-              <SmallButton label="Bağlantı oluştur" onPress={() => calendarFeed('get').then((f) => { setFeed(f); track('calendar.feed'); }).catch((e) => Alert.alert('Olmadı', e.message))} />
+              <SmallButton label="Bağlantı oluştur" onPress={() => calendarFeed('get').then((f) => { setFeed(f); track('calendar.feed'); }).catch((e) => Alert.alert('Olmadı', errorText(e)))} />
             )}
           </View>
 

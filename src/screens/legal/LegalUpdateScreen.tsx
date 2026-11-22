@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { colors, radius } from '../../theme';
 import { Cta, CheckRow, InlineLink, InfoText } from '../../components/ui';
 import { LegalDoc, acceptLegal, openLegal, isNotice } from '../../lib/legal';
+import { errorText } from '../../lib/errors';
 
 // Yeniden onay (akislar.md 17 adım 2): açılışta legal_pending('clinic') boş değilse panel yerine bu küçük kart.
 // Kullanıcı kararı 28 Ekim 2026: büyük sayfa yok — tek kısa satır, metin adları bağlantı (ayrıntı orada), sözleşmeler için
@@ -26,7 +27,7 @@ export default function LegalUpdateScreen({ docs, onDone, footer }: {
     try {
       onDone(await acceptLegal(docs));
     } catch (e) {
-      Alert.alert('Onay kaydedilemedi', (e as Error).message);
+      Alert.alert('Onay kaydedilemedi', errorText(e));
     } finally {
       setBusy(false);
     }

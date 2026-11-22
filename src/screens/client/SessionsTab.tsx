@@ -18,6 +18,7 @@ import SessionDetailSheet from '../calendar/SessionDetailSheet';
 import { OfferSheet } from '../calendar/SmallSheets';
 import { StatusChip, Chips, s } from '../calendar/parts';
 import type { ClientCtx, Tab } from './ClientScreen';
+import { errorText } from '../../lib/errors';
 
 // Danışan › Seanslar (ortak akislar.md 20, 5): devam, son 10 hafta, her seansın ara döneminde evden gelenler, paket, bekleme listesi.
 export default function SessionsTab({ client, me, data, today, team, clients, onOpenTab }: ClientCtx & {
@@ -48,7 +49,7 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
       setWaitNote(wl.find((w) => w.link_id === client.link_id)?.note ?? '');
       setRecords(await loadRecords(ss.filter((x) => x.status === 'done').map((x) => x.id)).catch(() => ({})));
     } catch (e) {
-      if (e instanceof SessionsNotInstalled) setMissing(true); else Alert.alert('Yüklenemedi', (e as Error).message);
+      if (e instanceof SessionsNotInstalled) setMissing(true); else Alert.alert('Yüklenemedi', errorText(e));
     }
   }, [client.link_id]);
   useEffect(() => { load(); }, [load]);
@@ -119,7 +120,7 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
                 </View>
                 <Text style={[s.small, u.over && { color: colors.danger }]}>{u.used} / {p.total} kullanıldı, {u.planned} planlı, {u.left} kaldı</Text>
               </View>
-              {!p.closed_at && <SmallButton label="Paketi kapat" onPress={() => savePackage({ ...p, closed: true }).then(load).catch((e) => Alert.alert('Olmadı', e.message))} />}
+              {!p.closed_at && <SmallButton label="Paketi kapat" onPress={() => savePackage({ ...p, closed: true }).then(load).catch((e) => Alert.alert('Olmadı', errorText(e)))} />}
             </View>
           );
         })}
@@ -130,7 +131,7 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
             <View style={s.row}>
               <SmallButton label="Kaydet" onPress={async () => {
                 try { await savePackage({ link_id: client.link_id, title: pkgTitle.trim() || `${pkgTotal} seans`, total: pkgTotal }); track('session.package', { total: pkgTotal }); setPkgForm(false); setPkgTitle(''); load(); }
-                catch (e) { Alert.alert('Kaydedilemedi', (e as Error).message); }
+                catch (e) { Alert.alert('Kaydedilemedi', errorText(e)); }
               }} />
               <SmallButton label="Vazgeç" onPress={() => setPkgForm(false)} />
             </View>
@@ -147,8 +148,8 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
         <Text style={s.small}>Daha erken ya da ek saat isteyen aile. Bir seans iptal olunca boşalan saati teklif edebilirsin; aile Moyo'da kabul eder.</Text>
         <TextInput value={waitNote} onChangeText={setWaitNote} placeholder="Uygun gün ve saatler" placeholderTextColor={colors.muted} maxLength={300} style={s.input} />
         <View style={s.row}>
-          <SmallButton label={wait ? 'Notu kaydet' : 'Bekleme listesine al'} onPress={() => saveWaitlist(client.link_id, waitNote).then(() => { track('waitlist.add'); load(); }).catch((e) => Alert.alert('Olmadı', e.message))} />
-          {wait && <SmallButton label="Listeden çıkar" onPress={() => saveWaitlist(client.link_id, '', true).then(load).catch((e) => Alert.alert('Olmadı', e.message))} />}
+          <SmallButton label={wait ? 'Notu kaydet' : 'Bekleme listesine al'} onPress={() => saveWaitlist(client.link_id, waitNote).then(() => { track('waitlist.add'); load(); }).catch((e) => Alert.alert('Olmadı', errorText(e)))} />
+          {wait && <SmallButton label="Listeden çıkar" onPress={() => saveWaitlist(client.link_id, '', true).then(load).catch((e) => Alert.alert('Olmadı', errorText(e)))} />}
         </View>
       </View>
 

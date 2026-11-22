@@ -23,6 +23,7 @@ import SessionDetailSheet from './SessionDetailSheet';
 import CalendarSettingsSheet from './CalendarSettingsSheet';
 import { OfferSheet, ExternalSheet } from './SmallSheets';
 import { StatusChip, s } from './parts';
+import { errorText } from '../../lib/errors';
 
 // Takvim (ortak akislar.md 20): gün / hafta; geniş ekranda haftalık ızgara + sağda "Bugün", dar ekranda gün gün liste.
 // Durum renkleri STATUS_META; dış takvim etkinlikleri gri kesikli; sahip için uzman süzgeci.
@@ -85,7 +86,7 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
       setRecords(await loadRecords(doneIds).catch(() => ({})));
       setError('');
     } catch (e) {
-      if (e instanceof SessionsNotInstalled) setMissing(true); else setError((e as Error).message);
+      if (e instanceof SessionsNotInstalled) setMissing(true); else setError(errorText(e));
     }
   }, [rangeFrom, rangeTo]);
   useEffect(() => { loadStatic().catch((e) => { if (e instanceof SessionsNotInstalled) setMissing(true); }); track('screen.calendar'); }, [loadStatic]);

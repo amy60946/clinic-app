@@ -24,6 +24,7 @@ import { LibraryBrowser } from './Library';
 import ParentPreview from './ParentPreview';
 import { ExplainCard, ExampleChips, TASK_EXAMPLES, TODO_EXAMPLES, TaskExample, TodoExample } from './Explain';
 import { CoachTarget, useCoachEmit } from '../../lib/coach';
+import { errorText } from '../../lib/errors';
 
 const EMPTY_DETAIL: Detail = { modules: [], tasks: [], logs: [], todos: [], data: [] };
 const ORDER: TrainingStatus[] = ['draft', 'active', 'mastered'];
@@ -43,7 +44,7 @@ export function pendingOf(t: Training, d: Detail) {
 
 async function download(name: string, header: string[], rows: string[][]) {
   if (!rows.length) return Alert.alert('İndirilecek kayıt yok.');
-  try { await saveTextFile(name, toCsv([header, ...rows])); } catch (e) { Alert.alert('Dosya oluşturulamadı', (e as Error).message); }
+  try { await saveTextFile(name, toCsv([header, ...rows])); } catch (e) { Alert.alert('Dosya oluşturulamadı', errorText(e)); }
 }
 
 export default function TrainingTab({ client, me, sample, onDetail }: ClientCtx & { sample?: boolean; onDetail?: (open: boolean) => void }) {
@@ -64,7 +65,7 @@ export default function TrainingTab({ client, me, sample, onDetail }: ClientCtx 
       const d = await loadDetail(ts.map((t) => t.id));
       setList(ts); setDetail(d); setError(null);
     } catch (e) {
-      if (e instanceof TrainingNotInstalled) setMissing(true); else setError((e as Error).message);
+      if (e instanceof TrainingNotInstalled) setMissing(true); else setError(errorText(e));
       setList([]);
     }
   }, [client.link_id]);
@@ -143,7 +144,7 @@ function CreateSheet({ parents, initial, onClose, onCreate }: { parents: Parent[
   const next = async () => {
     if (!who) return;
     setBusy(true);
-    try { await onCreate(who, goal); } catch (e) { Alert.alert('Oluşturulamadı', (e as Error).message); } finally { setBusy(false); }
+    try { await onCreate(who, goal); } catch (e) { Alert.alert('Oluşturulamadı', errorText(e)); } finally { setBusy(false); }
   };
   return (
     <SheetFrame title="Yeni eğitim oluştur" onClose={onClose}
@@ -187,7 +188,7 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
   const pend = pendingOf({ ...t, seen_at: seenAt }, detail);
   const dots: Record<TabId, boolean> = { summary: false, modules: pend.modules > 0, tasks: pend.logs > 0, todos: pend.todos > 0 };
   const remaining = mods.filter((m) => !m.completed_at).length;
-  const run = async (fn: () => Promise<unknown>) => { try { await fn(); await onChanged(); } catch (e) { Alert.alert('Kaydedilemedi', (e as Error).message); } };
+  const run = async (fn: () => Promise<unknown>) => { try { await fn(); await onChanged(); } catch (e) { Alert.alert('Kaydedilemedi', errorText(e)); } };
   const setStatus = (s: TrainingStatus) => {
     if (s === t.status) return;
     if (t.status === 'draft' && s === 'active') return setSheet('activate');
@@ -207,7 +208,7 @@ function TrainingDetail({ training: t, detail, me, onBack, onChanged }: { traini
       if (r === 'sample') { Alert.alert('Örnek ailede gönderilmez', 'Gerçek ailede ebeveyne uygulama görevleri için bildirim gider.'); return; }
       Alert.alert(r === 'sent' ? 'Hatırlatma gönderildi' : r === 'recent' ? 'Son 12 saatte hatırlatma gönderildi' : 'Hatırlatma için veritabanı güncellemesi bekleniyor',
         r === 'sent' ? `${t.parent_name} uygulama görevleri için bildirim aldı.` : '');
-    } catch (e) { Alert.alert('Gönderilemedi', (e as Error).message); }
+    } catch (e) { Alert.alert('Gönderilemedi', errorText(e)); }
   };
 
   const TABS: { id: TabId; label: string }[] = [

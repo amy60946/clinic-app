@@ -7,6 +7,7 @@ import { ageGroupLabel } from '../../lib/invites';
 import { track } from '../../lib/track';
 import type { ClientCtx } from './ClientScreen';
 import { ageText } from './ClientScreen';
+import { errorText } from '../../lib/errors';
 
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -31,7 +32,7 @@ export default function DetailsTab({ client, me, data, team, onTeamAccess, onRev
       onLabelChanged?.(label.trim());
       Alert.alert('Kaydedildi');
     } catch (e) {
-      Alert.alert('Kaydedilemedi', (e as Error).message);
+      Alert.alert('Kaydedilemedi', errorText(e));
     } finally {
       setBusy(false);
     }

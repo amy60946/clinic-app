@@ -8,6 +8,7 @@ import { track } from '../../lib/track';
 import { sessionWhen, matchClient, trDay, shortDay, trTime, type Session, type WaitItem, type ExternalEvent } from '../../lib/sessionCore';
 import { offerSlot, markExternal } from '../../lib/sessions';
 import { SheetHeader, Chips, FieldLabel, s } from './parts';
+import { errorText } from '../../lib/errors';
 
 // Boşalan saati bekleme listesindeki bir aileye teklif et (D). Aile ParentApp'te "Kabul et" derse randevu olur.
 export function OfferSheet({ slot, waitlist, clients, onClose, onDone }: {
@@ -26,7 +27,7 @@ export function OfferSheet({ slot, waitlist, clients, onClose, onDone }: {
       track('waitlist.offer', { hours });
       Alert.alert('Teklif gönderildi', 'Aile Moyo\'da kabul ederse randevu takvimine düşer; sana bildirim gelir.');
       onDone();
-    } catch (e) { Alert.alert('Gönderilemedi', (e as Error).message); } finally { setBusy(false); }
+    } catch (e) { Alert.alert('Gönderilemedi', errorText(e)); } finally { setBusy(false); }
   };
   return (
     <Modal visible={!!slot} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -70,7 +71,7 @@ export function ExternalSheet({ event, clients, onClose, onDone }: { event: Exte
     if (!event) return;
     setBusy(true);
     try { await markExternal(event.id, p); track('calendar.external', { ignore: !!p.ignore, client: !!p.link_id }); onDone(); }
-    catch (e) { Alert.alert('Olmadı', (e as Error).message); } finally { setBusy(false); }
+    catch (e) { Alert.alert('Olmadı', errorText(e)); } finally { setBusy(false); }
   };
   return (
     <Modal visible={!!event} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
