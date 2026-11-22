@@ -20,4 +20,16 @@ sed -i 's/ data-var="[^"]*"//g' "$OUT"/*.html   # önerilen (varsayılan) altern
 if grep -nE 'ONIZ:|oniz\.js|oniz-gruplar|data-var=' "$OUT"/*.html "$OUT"/assets/site.css; then
   echo "Önizleme parçası kaldı (yukarıda)." >&2; exit 1
 fi
+# Güvenlik başlıkları (güvenlik denetimi 22 Kasım 2026, koordinatör): Cloudflare Workers statik dosyalarda _headers okur.
+# Site başka sayfaya gömülemez (frame-ancestors), betik yalnız kendi dosyalarından; satır içi stil (style="--x:…") için 'unsafe-inline'.
+# Sayfaların başındaki satır içi betik (<html class="js">) özetiyle izinli; betik değişirse özet kendiliğinden yenilenir.
+HASHES="$(node -e "const fs=require('fs'),c=require('crypto');const h=new Set();for(const f of process.argv.slice(1)){for(const m of fs.readFileSync(f,'utf8').matchAll(/<script>([\s\S]*?)<\/script>/g))h.add(\"'sha256-\"+c.createHash('sha256').update(m[1]).digest('base64')+\"'\")}process.stdout.write([...h].join(' '))" "$OUT"/*.html)"
+cat > "$OUT/_headers" <<BASLIK
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' $HASHES; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+BASLIK
 echo "Hazır: $OUT"
