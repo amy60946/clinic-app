@@ -50,23 +50,28 @@ uzman eğitim oluşturur → çocuğun ev rutinlerini görür → ABC olayların
 Uzun sahnede kayıt + kodlama 10 dakikayı aşabilir: arka planda çalıştır, `MOTION_FORMAT=jpeg` ile kareler küçük. Hedef tam metin, RegExp ya da Playwright locator olur; üstte ve görünür olan seçilir.
 Çekimden sonra kareleri gözle kontrol et: `ffmpeg -i out/<sahne>.mp4 -vf fps=4/3 kare-%03d.png`.
 
-## Moyo Ebeveyn kaydı ve telefon kırpımları (22 Kasım 2026)
+## Moyo Ebeveyn kaydı ve telefon sürümleri (22 Kasım 2026)
 
 Kullanıcı kararları (Mercek denetimi, 22 Kasım 2026): 3. sekme "Moyo Ebeveyn · ebeveynin telefonunda" **gerçek Moyo Ebeveyn ekranı**
-gösterir; telefonda okunmayan masaüstü kayıtlarının yerine **telefona özel kırpım**.
+gösterir. Telefonda okunmayan masaüstü kayıtları için önce parça kırpımları denendi; kullanıcı "açık değil" dedi, yerine **aynı sahnenin
+dikey masaüstü çerçevesinde kaydı** geldi ("mevcut yapıyı koruyarak yazıyı büyüt", Atlassian'ın telefondaki ürün videosu örnek).
 
 ```bash
 (cd ../parent-app && bash preview/build.sh)               # Moyo Ebeveyn (ParentApp) önizlemesi
 node tools/landing-motion/ebeveyn.js                      # out/aile-m.* (telefon 786×1600) + out/aile.* (1440×900 zeminde)
-node tools/landing-motion/kare.js <klasör> akis kutuphane davranis rapor   # 2880×1800 durağan kareler (her adımdan sonra)
-python3 tools/landing-motion/kirp.py tools/landing-motion/kirp.json <klasör>   # site/assets/kirp/*.webp
+MOTION_DEVICE=dikey MOTION_FORMAT=jpeg node tools/landing-motion/record.js akis kutuphane davranis rapor   # out/<sahne>-d.*
 ```
 
 - `ebeveyn.js`: parent-app `store/capture/prep.js`'in uydurma ailesiyle "Bugün → eğitim → Test → Başla → yanıt → Cevabı kontrol et"
   (testi yanıtlatmak için o kayıt tarayıcı deposunda yapılmamış sayılır). Telefon 393×800, 2 kat; kit'in telefon ölçeği kullanılmaz
   (o ölçekte dokunma koordinatları sayfaya yarı değerle ulaşıyordu). Dokunma noktası yalnız dokunurken görünür. Geniş sürüm aynı kayıt,
   `ebeveyn_zemin.py`'nin açık lavanta zemininde ortada. `EBEVEYN_YALNIZ_GENIS=1` yalnız geniş sürümü yeniden üretir.
+- **Dikey çerçeve** (`kit.js` `dikey`: 900 × 1000, ×1,5; `MOTION_DEVICE=dikey`, çıktı `<sahne>-d`): aynı masaüstü düzeni (sol menü 900 pikselden
+  itibaren), telefonda (~350 px) yazı 1440'lık kayda göre ~1,6 kat büyük. Sahnelerdeki sabit dinlenme noktaları `h.fit` ile orana çevrilir;
+  olay tablosu bu genişlikte sol menüyle sığmadığı için `davranis` ve `akis` dikeyde menüyü uygulamanın ☰ düğmesiyle kapatır; `akis`'te kamera
+  üst kenara sabit, afiş haftalık rutin tablosu. Sitede ≤ 700 px'te `data-clip-m="<sahne>-d"` ile oynar (`site.css` "Telefon sürümü");
+  açılış turunun telefon saniyeleri `data-t-m`.
+- Denemeler: `record.js` en az kaçan adımlı denemeyi saklar; %2'ye kadar kaçan adım kabul. Sayfanın sonuna gelmiş kaydırma (sayfa kaymaz)
+  "kaçan adım" sayılır ama görünmez.
 - `kare.js`: sahneyi kayıttaki gibi oynatır, her tıklama / yakınlaşma / kaydırmadan sonra imleçsiz ekran görüntüsü alır (`kareler.json`).
-- `kirp.json` + `kirp.py`: hangi karenin hangi kutusu (kaynak pikselleriyle) hangi dosyaya; ≤ 700 px'te `site.css` "Telefona özel kırpım"
-  bunları gösterir, video yüklenmez. Kareler çekimlik (depoya girmez); kutular değişince yalnız `kirp.py` yeniden çalışır.
-- Sonra `out/aile*.{mp4,webm,webp}` → `site/assets/motion/`.
+- Sonra `out/aile*.{mp4,webm,webp}` ve `out/*-d.{mp4,webm,webp}` → `site/assets/motion/` (webm yalnız mp4'ten küçükse; `site.js` `WEBM`).
