@@ -54,12 +54,12 @@ def yorunge(u, T, logo, dar):
     # "moyo" yazısı biraz yukarıda, kartlara değmez; yazılar 390 px'te ≥ 12 px
     if dar: W, H, cx, cy, R = 260, 314, 130, 175, 95          # 314: uzman kartının altındaki "isteğe bağlı" yazısına yer
     else:   W, H, cx, cy, R = 640, 400, 320, 214, 140
-    P = {'ebeveyn': (cx, cy - R), 'oyun': kutup(cx, cy, R, 30 if not dar else 38), 'uzman': kutup(cx, cy, R, 150 if not dar else 142)}
+    P = {'ebeveyn': (cx, cy - R), 'oyun': kutup(cx, cy, R, 30 if not dar else 34), 'uzman': kutup(cx, cy, R, 150 if not dar else 146)}   # dar: 34° / 146° (alttaki okun iki kart arasında yeri olsun)
     s = golge(u)
     sw = 4 if dar else 5
     # halka: uzmana giden ve ondan dönen yol kesikli (isteğe bağlı), Moyo Ebeveyn → Moyo Oyun yayı düz
     s += f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="none" stroke="{LAV}" stroke-width="{sw}" stroke-dasharray="{n(sw * 2.2)} {n(sw * 1.6)}"/>'
-    b0, b1 = kutup(cx, cy, R, -90), kutup(cx, cy, R, 30 if not dar else 38)
+    b0, b1 = kutup(cx, cy, R, -90), kutup(cx, cy, R, 30 if not dar else 34)
     s += f'<path d="M{n(b0[0])} {n(b0[1])}A{R} {R} 0 0 1 {n(b1[0])} {n(b1[1])}" fill="none" stroke="{LAV}" stroke-width="{sw}"/>'
     my = cy - 13 if dar else cy                 # yazının ve açık dairenin merkezi
     s += f'<circle cx="{cx}" cy="{n(my)}" r="{n(R * (.32 if dar else .46))}" fill="#F6F5FE"/>'
@@ -70,7 +70,16 @@ def yorunge(u, T, logo, dar):
     # Kesik kaydırma 3B dönmüş sahnede her karede yeniden boyama istiyordu; Moyo Oyun kartının solunda harf kırıntıları kalıyordu.
     nx, ny = kutup(cx, cy, R, 180 if not dar else 190)
     s += (f'<g class="s6-yol" style="transform-origin:{n(cx)}px {n(cy)}px"><circle cx="{n(nx)}" cy="{n(ny)}" r="{4.5 if dar else 5.5}" fill="{YESIL_K}"/></g>')
-    for a in ((-30, 90, 210) if not dar else (-26, 90, 206)):   # üç yay, üç ok: kartların arasında, hiçbiri kartın altında kalmaz
+    alt_ok = 90
+    if dar:
+        # dar: alttaki yay (Moyo Oyun → Moyo Uzman) iki kartın arasında; uzman kartının çipi geniş olduğu için 90°'deki ok kartın altında
+        # kalıyordu (22 Kasım QA). Ok, iki kartın iç kenarlarının ortasına denk gelen açıya konur.
+        def kenar(k):
+            g = max(100, cip(0, 0, C[k][1], 12.5, 'middle')[1] + 14); x = min(max(P[k][0], g / 2 + 4), W - g / 2 - 4)
+            return x - g / 2, x + g / 2
+        orta = (kenar('uzman')[1] + kenar('oyun')[0]) / 2
+        alt_ok = math.degrees(math.acos(max(-1, min(1, (orta - cx) / R))))
+    for a in ((-30, 90, 210) if not dar else (-26, alt_ok, 206)):   # üç yay, üç ok: kartların arasında, hiçbiri kartın altında kalmaz
         s += isaret(*kutup(cx, cy, R, a), a, 8 if dar else 10, 4 if dar else 5)
     for k, (x, y) in P.items():
         if dar:   # dar: dikey kart (simge üstte, ad, çip); ad 13,5, çip 12,5 birim (tur 4: 390 px'te ≥ 12,5 px; önceden 12,46)

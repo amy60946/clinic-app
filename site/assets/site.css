@@ -764,7 +764,9 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
    data-clip-m: telefonda o kaydın telefon sürümü (3. sekme, gerçek Moyo Ebeveyn ekranı), telefon oranında. Masaüstü değişmez. */
 .clip-kirp, .clip-poster-m { display: none; }
 @media (max-width: 700px) {
-  .clip.kirpli { aspect-ratio: 4 / 5; }
+  /* görüntü alanı tam 4:5 (kırpımlar 4:5), altında 34 px rozet şeridi: kutu yüksekliği = genişlik × 1,25 + 34 (alt satır yarım kesilmesin) */
+  .clip.kirpli { aspect-ratio: auto; }
+  .clip.kirpli::before { content: ""; display: block; aspect-ratio: 4 / 5; }
   .clip.kirpli > .clip-poster, .clip.kirpli > video, .clip.kirpli > .clip-btn { display: none; }
   .clip.kirpli > .clip-kirp { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: left top; opacity: 0; transition: opacity .45s ease; }
   .clip.kirpli > .clip-kirp.on { opacity: 1; }
