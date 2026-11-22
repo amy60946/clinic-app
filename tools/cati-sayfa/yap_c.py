@@ -38,15 +38,6 @@ def cumleler(t):
 
 # Telefona özel kırpım (kullanıcı kararı 22 Kasım 2026, "Telefona özel kırp"): < 700 px'te kart görseli kutusu ~306 × 371 px; bütün ekran
 # oraya ~170 px genişlikte sığıyor, yazı ~6 px kalıyordu. Kartın mesajını anlatan parçanın kırpımı kutuyu doldurur (yazı ~11 px).
-# Kırpımlar img/c-kirp-<anahtar>.webp ← python3 ../landing-motion/kirp.py kirp.json (kutular orada). Tablet ve geniş ekran değişmez.
-KIRP = {k: f'img/c-kirp-{k}.webp' for k in ('ebeveyn-ekle', 'oyun-onay', 'ebeveyn-onay', 'mercek-veri', 'mercek-egitim')}
-# Oyun ekranı yatay: görev adı ile "Yaptım" birlikte ancak 650 × 314'lük kırpıma sığıyor; kutuya "contain" ile oturur, kalan yer kırpımın
-# kenar rengiyle (oyunun zemini) dolar, görsel kutuda yüzüyormuş gibi durmaz.
-KIRP_SIGDIR = {}   # 22 Kasım: oyun kartı artık dikey kırpım (oyun-tablet.webp), sığdırmaya gerek kalmadı; düzen ileride yatay kırpım için duruyor
-def kirp(key, alt):
-    if key not in KIRP: return ''
-    ek = f' sigdir" style="background-color:{KIRP_SIGDIR[key]}' if key in KIRP_SIGDIR else ''
-    return f'<img class="d-kirp{ek}" src="{KIRP[key]}" alt="{e(alt)}" loading="lazy" decoding="async">'
 
 def tur(key): return 'ebeveyn' if key.startswith('ebeveyn') else ('mercek' if key.startswith('mercek') else (key if key == 'sema' else 'oyun'))
 def cls(key, dar=False): return 'telefon' if key.startswith('ebeveyn') or (dar and key.startswith('mercek')) else ('panel' if key.startswith('mercek') else '')
@@ -69,7 +60,6 @@ def dongu(beats):
             dar = (dar.replace('class="d6"', 'class="d6 d-dar"', 1) + SEMA(K, LOGO_IC, 'g', 's6w').replace('class="d6"', 'class="d6 d-gen"', 1))
         elif t == 'mercek':
             dar = resim(b["gorsel"], b["alt"], 'telefon d-dar', True) + resim(b["gorsel"], b["alt"], 'panel d-gen')
-        dar = kirp(b['gorsel'], b['alt']) + dar
         slots.append(f'<div class="d-slot t-{t}" style="--i:{i}">{genis}</div>')
         ad = f'{i + 1}. {b["kim"]}: {b["baslik"]}'
         pills.append(f'<li><a href="#hepsi" aria-label="{e(ad)}"><span class="n">{i + 1}</span><span class="ad">{b["kisa"]}</span></a></li>')

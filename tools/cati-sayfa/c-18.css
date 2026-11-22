@@ -188,15 +188,3 @@
 .sayfa-c .dongu-b.js .d-kart { opacity: .62; transform: scale(.95); filter: blur(1px); }
 .sayfa-c .dongu-b.js .d-kart.on { opacity: 1; transform: none; filter: none; }
 @media (prefers-reduced-motion: reduce) { .sayfa-c .dongu-b.js .d-kart { filter: none; transform: none; } }
-
-/* ---------- 9) Telefona özel kırpım (kullanıcı kararı 22 Kasım 2026, "Telefona özel kırp") ----------
-   < 700 px'te kartın görsel kutusunu, ekranın kartı anlatan parçasının kırpımı doldurur (yap_c.py KIRP; yazı ~11 px). Kırpım bütün
-   telefon değil, parça olduğu için cihaz çerçevesi yok: ince çizgi ve 16 px köşe. Kırpım varken o karttaki öteki görseller gizlenir.
-   ≥ 700 px'te kırpım hiç yüklenmez (display: none + loading="lazy"). */
-.sayfa-c .d-kart .d-gorsel > img.d-kirp { display: none; }
-@media (max-width: 699px) {
-  .sayfa-c .d-kart .d-gorsel > img.d-kirp { display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; object-position: center top;
-    border: 1px solid var(--cizgi); border-radius: 16px; -webkit-mask-image: none; mask-image: none; background: #FFFFFF; }
-  .sayfa-c .d-kart .d-gorsel > img.d-kirp.sigdir { object-fit: contain; object-position: center; }
-  .sayfa-c .d-kart .d-gorsel > img.d-kirp ~ img { display: none; }
-}
