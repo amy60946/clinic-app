@@ -687,8 +687,10 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
   .pn-shot { --ox: 290; --oy: 90; --ow: 840; --oh: 798; }
   .pn-not { left: auto; bottom: auto; right: 10px; top: 10px; }
 }
-@media (max-width: 640px) {   /* telefonda görselde boş köşe kalmıyor: "Örnek veri" görselin altında */
-  .pn-shot { --ox: 316; --oy: 172; --ow: 798; --oh: 712; }
+@media (max-width: 640px) {   /* telefonda görselde boş köşe kalmıyor: "Örnek veri" görselin altında.
+     22 Kasım 2026 (kullanıcı kararı "Telefona özel kırp"): 798 genişlikte yazı ~5 px kalıyordu; kırpım kartların sol yarısına daraldı
+     (adlar ~14, çipler ~11 px; her kartın ilk çipi görünür, sağdaki ikinci çip, zil ve ok dışarıda). */
+  .pn-shot { --ox: 316; --oy: 172; --ow: 391; --oh: 712; }
   .pn-not { position: static; display: inline-block; margin-top: 8px; font-size: 11px; }
   .pa-k { width: 3px; margin-left: -7px; border-radius: 1.5px; }
 }
@@ -766,6 +768,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
   .clip.kirpli > .clip-poster, .clip.kirpli > video, .clip.kirpli > .clip-btn { display: none; }
   .clip.kirpli > .clip-kirp { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: left top; opacity: 0; transition: opacity .45s ease; }
   .clip.kirpli > .clip-kirp.on { opacity: 1; }
+  .clip.kirpli > .clip-kirp.solma { -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent 99%); mask-image: linear-gradient(90deg, #000 80%, transparent 99%); }   /* uzun satırlar sağda kesik */
   .clip[data-clip-m] { aspect-ratio: 393 / 800; width: min(100%, 300px); margin-inline: auto; }
   .clip[data-clip-m] > .clip-poster { display: none; }
   .clip[data-clip-m] > .clip-poster-m { display: block; width: 100%; height: 100%; object-fit: cover; }

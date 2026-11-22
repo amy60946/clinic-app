@@ -1,0 +1,8 @@
+[
+ {"kaynak": "akis-14.png", "kutu": [700, 0, 1580, 1100], "cikti": "../../site/assets/kirp/akis-1.webp", "en": 880, "not": "1 Eğitimi kurun: eğitimin adı, eklenen modüller, Etkin"},
+ {"kaynak": "akis-16.png", "kutu": [1587, 200, 2595, 1460], "cikti": "../../site/assets/kirp/akis-2.webp", "en": 880, "not": "2 Rutinleri görün (yakınlaşmış kare): günün bölümü, yapılan / plan, Sa–Pt ızgarası"},
+ {"kaynak": "akis-22.png", "kutu": [306, 491, 1236, 1653], "cikti": "../../site/assets/kirp/akis-3.webp", "en": 880, "not": "3 Davranış kayıtları (yakınlaşmış kare): stratejiler, olay tablosu"},
+ {"kaynak": "kutuphane-05.png", "kutu": [1900, 200, 2700, 1200], "cikti": "../../site/assets/kirp/kutuphane.webp", "en": 880, "not": "Kaynağın önizlemesi ve Ebeveyn eğitimi olarak ata"},
+ {"kaynak": "davranis-02.png", "kutu": [704, 0, 1584, 1100], "cikti": "../../site/assets/kirp/davranis.webp", "en": 880, "not": "Durum çipleriyle üç hedef davranış ve Diğer bildirilen olaylar (açılıştaki 3. kırpımdan farklı)"},
+ {"kaynak": "rapor-07.png", "kutu": [728, 690, 1608, 1790], "cikti": "../../site/assets/kirp/rapor.webp", "en": 880, "not": "İlerleme notu ve Notu kopyala; satırlar sağda kesildiği için sitede sağ kenar soluyor (.solma)"}
+]
