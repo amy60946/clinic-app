@@ -18,7 +18,7 @@ module.exports = {
     h.poster();
     await h.scroll(470, { ms: 900, after: 800, beat: 'Rapor: haftalık rutin kartı, adım tabloları' });
     await h.click('Kapat', { last: true, beat: 'Raporu kapat', dwell: 380, after: 700 });
-    await h.moveTo(830, 560, { ms: 700 });
+    await h.moveTo(...h.fit(830, 560), { ms: 700 });
     await h.scrollTo('Notu kopyala', 720, { ms: 850, after: 450, beat: 'İlerleme notu' });
     await h.click('Notu kopyala', { beat: 'Notu kopyala: "Kopyalandı"', dwell: 400, after: 600 });
   },

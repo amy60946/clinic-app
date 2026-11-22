@@ -25,6 +25,10 @@ const DEVICES = {
   // Sayfa 2 katı çözünürlükte çizilir; ekran kaydı 1440×900'e indirilmiş kareler verir (keskin yazı)
   desktop: { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2, isMobile: false, hasTouch: false, cursor: 'arrow', out: [1440, 900],
     userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' },
+  // Telefonda gösterilecek dikey masaüstü (22 Kasım 2026, kullanıcı: "mevcut yapıyı koruyarak yazıyı büyüt"; Atlassian'ın telefondaki ürün videosu):
+  // aynı masaüstü düzeni (sol menü 900 pikselden itibaren), 4:5 çerçeve; telefonda yazı 1440 genişliğe göre ~1,6 kat büyük görünür.
+  dikey: { viewport: { width: 900, height: 1124 }, deviceScaleFactor: 2, isMobile: false, hasTouch: false, cursor: 'arrow', out: [900, 1124], from: [1440, 900],
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36' },
   // Telefon: sayfa 393×800 (×3) yerleşir, pencere 786×1600; görüntü 2 kat büyütülür (Emulation scale), kayıt 786×1600 gelir
   phone: { viewport: { width: 393, height: 800 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, cursor: 'touch', out: [786, 1600], zoom: 2,
     userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' },
@@ -118,7 +122,9 @@ class Human {
   async tick() { const k = Math.floor((now() - this.T0) / TICK) + 1; await sleepUntil(this.T0 + k * TICK); return k; }
 
   // Kayıt dışı: imleci başlangıç yerine koy
-  async park(x, y) { this.x = x; this.y = y; await this.p.mouse.move(x, y); }
+  async park(x, y) { [x, y] = this.fit(x, y); this.x = x; this.y = y; await this.p.mouse.move(x, y); }
+  // Sahnelerdeki sabit dinlenme noktaları 1440×900'e göre yazılı; dikey çerçevede orana çevrilir
+  fit(x, y) { const f = this.d.from; return f ? [Math.round(x * this.W / f[0]), Math.round(Math.min(y, f[1]) * this.H / f[1])] : [x, y]; }
 
   async _iframes() {
     this.frames = await this.p.evaluate(() => [...document.querySelectorAll('iframe')].map((f) => { const r = f.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; }));

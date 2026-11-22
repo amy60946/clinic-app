@@ -14,9 +14,13 @@ function probe(file) {
   return { width: st.width, height: st.height, fps: st.r_frame_rate, duration: Number((j.format || {}).duration || 0) };
 }
 
-async function record(id) {
-  const scene = load(id);
-  const s = await kit.open(scene.device || 'desktop', scene.data || {});
+// MOTION_DEVICE=dikey: masaüstü sahneleri telefonda gösterilecek dikey çerçevede çekilir, çıktı adı <sahne>-d (22 Kasım 2026)
+async function record(name) {
+  const scene = load(name);
+  const dev = scene.device || 'desktop';
+  const alt = process.env.MOTION_DEVICE && dev === 'desktop' ? process.env.MOTION_DEVICE : null;
+  const id = alt ? `${name}-${alt === 'dikey' ? 'd' : alt}` : name;
+  const s = await kit.open(alt || dev, scene.data || {});
   const h = new kit.Human(s, scene.seed || 7);
   let rec;
   try {
@@ -38,7 +42,8 @@ async function record(id) {
       mp4_bytes: e.mp4_bytes, webm_bytes: e.webm_bytes, poster: e.poster, beats: h.beats };
     const mf = path.join(kit.OUT, 'manifest.json');
     const all = fs.existsSync(mf) ? JSON.parse(fs.readFileSync(mf, 'utf8')) : [];
-    const next = [...all.filter((x) => x.id !== id), entry].sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
+    const rank = (x) => ORDER.indexOf(x.replace(/-d$/, '')) + (x.endsWith('-d') ? 0.5 : 0);
+    const next = [...all.filter((x) => x.id !== id), entry].sort((a, b) => rank(a.id) - rank(b.id));
     fs.writeFileSync(mf, JSON.stringify(next, null, 1) + '\n');
     console.log(`${id}: ${entry.duration_s} sn · ${pr.width}x${pr.height} @ ${pr.fps} · mp4 ${e.mp4_bytes} (crf ${e.crf}) · webm ${e.webm_bytes || 'yok'} (crf ${e.vcrf})`
       + ` · yakalanan ${q.captured} kare (hareket sırasında ~${q.fpsWhileMoving} kare/sn) · kaçan hareket adımı ${q.missed}/${q.moves}`);

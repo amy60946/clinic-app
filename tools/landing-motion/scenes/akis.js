@@ -20,8 +20,8 @@ module.exports = {
     const cam = async (target, o = {}) => {
       const side = await p.getByText('Danışan Bilgileri', { exact: true }).filter({ visible: true }).first().boundingBox();
       const edge = side ? side.x + side.width + 28 : 280;
-      const s = Math.min(1.3, 1440 / (1440 - edge));
-      await h.zoom(target, s, { ox: 1440, oy: o.oy ?? 70, after: o.after ?? 1700 });
+      const s = Math.min(1.3, h.W / (h.W - edge));
+      await h.zoom(target, s, { ox: h.W, oy: o.oy ?? 70, after: o.after ?? 1700 });
     };
     await h.sleep(700);
     h.beat('1 · Ebeveyn eğitimi oluştur');
