@@ -7,6 +7,8 @@
 # kimlikleri ayrı olsun (sahne ve kart; gizli kopyadaki clipPath'e başvurulmasın).
 # Hareket: .s6-yol (halkada dönen tek nokta, transform), c-18.css; hareket azaltmada durur, nokta yerinde kalır.
 # Kural (tur 2): çocuk adımı gerçek hayatta yapar, oyunda işaretler; ebeveyn planlar (kurmaz).
+# 22 Kasım 2026 (kullanıcı kararı "Aileyle başlasın"): Moyo Ebeveyn üstte, saat yönünde Moyo Oyun ve Moyo Uzman; uzman isteğe bağlı:
+#   kartı ve ona giden / ondan dönen yay kesikli, kartın altında "isteğe bağlı" yazısı (sema.kart.uzman[2]).
 import math, html
 L, YESIL_K, LAV, CIZGI = '#16113A', '#0A8F3A', '#ECEBFA', '#E3E1EE'
 IKON = {'uzman': 'img/ikon-mercek.svg', 'ebeveyn': 'img/ikon-moyo.svg', 'oyun': 'img/ikon-oyun.png'}
@@ -44,20 +46,26 @@ def cip(x, y, sat, boy, hiza='start'):
     x0 = x if hiza == 'start' else x - gen / 2
     r = f'<rect x="{n(x0)}" y="{n(y)}" width="{n(gen)}" height="{n(yuk)}" rx="{n(min(yuk / 2, boy * .9))}" fill="{LAV}"/>'
     return r + ''.join(yaz(x0 + gen / 2, y + boy * .3 + (i + 1) * boy * 1.25 - boy * .22, s, boy, 600, L) for i, s in enumerate(sat)), gen, yuk
+KESIK, GRI, DASH = '#B9B5D3', '#6B6889', ' stroke-dasharray="6 4" stroke-width="1.4"'   # isteğe bağlı kart: kesikli çerçeve, gri not
 def yorunge(u, T, logo, dar):
     C = T['kart']
+    ops = lambda k: len(C[k]) > 2      # üçüncü öğe varsa ("isteğe bağlı") kart isteğe bağlıdır
     # dar (19 Kasım QA): alttaki iki kart halkanın 38° / 142° noktalarında, aralarında halkanın alt yayı ve yön oku görünür;
     # "moyo" yazısı biraz yukarıda, kartlara değmez; yazılar 390 px'te ≥ 12 px
-    if dar: W, H, cx, cy, R = 260, 296, 130, 175, 95
+    if dar: W, H, cx, cy, R = 260, 314, 130, 175, 95          # 314: uzman kartının altındaki "isteğe bağlı" yazısına yer
     else:   W, H, cx, cy, R = 640, 400, 320, 214, 140
-    P = {'uzman': (cx, cy - R), 'ebeveyn': kutup(cx, cy, R, 30 if not dar else 38), 'oyun': kutup(cx, cy, R, 150 if not dar else 142)}
+    P = {'ebeveyn': (cx, cy - R), 'oyun': kutup(cx, cy, R, 30 if not dar else 38), 'uzman': kutup(cx, cy, R, 150 if not dar else 142)}
     s = golge(u)
-    s += f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="none" stroke="{LAV}" stroke-width="{4 if dar else 5}"/>'
+    sw = 4 if dar else 5
+    # halka: uzmana giden ve ondan dönen yol kesikli (isteğe bağlı), Moyo Ebeveyn → Moyo Oyun yayı düz
+    s += f'<circle cx="{cx}" cy="{cy}" r="{R}" fill="none" stroke="{LAV}" stroke-width="{sw}" stroke-dasharray="{n(sw * 2.2)} {n(sw * 1.6)}"/>'
+    b0, b1 = kutup(cx, cy, R, -90), kutup(cx, cy, R, 30 if not dar else 38)
+    s += f'<path d="M{n(b0[0])} {n(b0[1])}A{R} {R} 0 0 1 {n(b1[0])} {n(b1[1])}" fill="none" stroke="{LAV}" stroke-width="{sw}"/>'
     my = cy - 13 if dar else cy                 # yazının ve açık dairenin merkezi
     s += f'<circle cx="{cx}" cy="{n(my)}" r="{n(R * (.32 if dar else .46))}" fill="#F6F5FE"/>'
     lw = 60 if dar else 132; lh = lw * LOGO_ORAN
     s += f'<svg x="{n(cx - lw / 2)}" y="{n(my - lh * .62)}" width="{n(lw)}" height="{n(lh)}" viewBox="-33.7 -601.7 2920.4 1113.5" color="{L}">{logo}</svg>'
-    # dolaşan nokta: tam turu 9 sn; hareket azaltmada solda (Moyo Oyun'dan Moyo Uzman'a dönüş yayında, iki kartın arasında) durur.
+    # dolaşan nokta: tam turu 9 sn; hareket azaltmada solda (Moyo Uzman'dan Moyo Ebeveyn'e dönüş yayında, iki kartın arasında) durur.
     # 19 Kasım 2026 (QA): nokta artık çizginin kesik kaydırmasıyla değil, kendi merkezinde dönen bir <g> ile yürür (c-18.css .s6-yol).
     # Kesik kaydırma 3B dönmüş sahnede her karede yeniden boyama istiyordu; Moyo Oyun kartının solunda harf kırıntıları kalıyordu.
     nx, ny = kutup(cx, cy, R, 180 if not dar else 190)
@@ -71,7 +79,8 @@ def yorunge(u, T, logo, dar):
             gen = max(100, cg + 14)
             yuk = 10 + ks + 6 + ba + 5 + cy_ + 10
             y0 = y - yuk / 2
-            s += f'<rect x="{n(x - gen / 2)}" y="{n(y0)}" width="{n(gen)}" height="{n(yuk)}" rx="16" fill="#fff" stroke="{CIZGI}" filter="url(#{u}-g)"/>'
+            s += f'<rect x="{n(x - gen / 2)}" y="{n(y0)}" width="{n(gen)}" height="{n(yuk)}" rx="16" fill="#fff" stroke="{KESIK if ops(k) else CIZGI}"{DASH if ops(k) else ""} filter="url(#{u}-g)"/>'
+            if ops(k): s += yaz(x, y0 + yuk + 14, C[k][2], 12.5, 600, GRI)
             s += karo(u, k, x, y0 + 10 + ks / 2, ks, False)
             s += yaz(x, y0 + 10 + ks + 6 + ba * .85, C[k][0], ba, 800)
             s += cip(x, y0 + 10 + ks + 6 + ba + 5, C[k][1], bc, 'middle')[0]
@@ -80,7 +89,8 @@ def yorunge(u, T, logo, dar):
             _, cg, cy_ = cip(0, 0, tek, 12.5)
             gen = 14 + ks + 12 + max(cg, len(C[k][0]) * 15 * .56) + 16; yuk = max(ks, 18 + 6 + cy_) + 24
             x0, y0 = x - gen / 2, y - yuk / 2
-            s += f'<rect x="{n(x0)}" y="{n(y0)}" width="{n(gen)}" height="{n(yuk)}" rx="18" fill="#fff" stroke="{CIZGI}" filter="url(#{u}-g)"/>'
+            s += f'<rect x="{n(x0)}" y="{n(y0)}" width="{n(gen)}" height="{n(yuk)}" rx="18" fill="#fff" stroke="{KESIK if ops(k) else CIZGI}"{DASH if ops(k) else ""} filter="url(#{u}-g)"/>'
+            if ops(k): s += yaz(x, y0 + yuk + 17, C[k][2], 12.5, 600, GRI)
             s += karo(u, k, x0 + 14 + ks / 2, y, ks, False)
             tx = x0 + 14 + ks + 12; ty = y - (18 + 6 + cy_) / 2
             s += yaz(tx, ty + 14, C[k][0], 15, 800, L, 'start') + cip(tx, ty + 18 + 6, tek, 12.5)[0]

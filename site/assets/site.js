@@ -113,7 +113,11 @@ window.MERCEK_PRICES = { draft: false, solo: { m: 1199.99, y: 11999.99 }, clinic
 
   /* 4. Ürün kayıtları: görünür olunca sessiz döngü; duraklat/oynat düğmesi (5 sn'den uzun hareket için zorunlu).
      Hareket azaltma açıksa kendiliğinden başlamaz; düğmeyle bir kez, döngüsüz oynar. Betik yoksa ya da video açılmazsa kapak görseli kalır. */
-  var WEBM = { aile: 1 }; // webm yalnız mp4ten küçükse var (hero, kutuphane, davranis, rapor yalnız mp4)
+  var WEBM = { aile: 1, 'aile-m': 1 }; // webm yalnız mp4ten küçükse var (hero, kutuphane, davranis, rapor yalnız mp4)
+  // Telefon (≤ 700 px; kullanıcı kararı 22 Kasım 2026 "Telefona özel kırp"): masaüstü kaydı orada okunmuyor (yazılar ~3 px).
+  // .kirpli kayıtlar telefonda video yüklemez, yerine ilgili parçanın okunur kırpımı (.clip-kirp; açılış turunda üç kare, 1-2-3 ile
+  // değişir: aşağıda "5"). data-clip-m taşıyan kayıt telefonda kendi telefon kaydını ve afişini (.clip-poster-m) kullanır.
+  var dar = window.matchMedia('(max-width: 700px)').matches;
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   var ICONS = '<svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1"/><rect x="9.4" y="2" width="3.6" height="12" rx="1"/></svg>' +
     '<svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .8.9 1.3 1.6.8l8.6-5.8c.6-.4.6-1.2 0-1.6L5.6 1.4C4.9.9 4 1.4 4 2.2z"/></svg>';
@@ -122,12 +126,15 @@ window.MERCEK_PRICES = { draft: false, solo: { m: 1199.99, y: 11999.99 }, clinic
   each('.clip[data-clip]', function (fig) {
     var id = fig.getAttribute('data-clip'), img = fig.querySelector('.clip-poster'), isHero = fig.hasAttribute('data-hero');
     if (!img) return;
+    if (dar && fig.classList.contains('kirpli')) return;
+    var posterSrc = img.getAttribute('src'), mId = fig.getAttribute('data-clip-m'), mImg = fig.querySelector('.clip-poster-m');
+    if (dar && mId) { id = mId; if (mImg) { posterSrc = mImg.getAttribute('src'); img = mImg; } }
     var v = d.createElement('video');
     v.muted = true; v.defaultMuted = true; v.setAttribute('muted', '');
     v.playsInline = true; v.setAttribute('playsinline', '');
     v.loop = !reduce.matches;
     v.preload = isHero ? 'metadata' : 'none';
-    v.poster = img.getAttribute('src');
+    v.poster = posterSrc;
     v.setAttribute('aria-hidden', 'true'); // anlatım kapak görselinin alt metninde
     v.setAttribute('disablepictureinpicture', '');
     var src = 'assets/motion/' + id, last;
@@ -204,6 +211,21 @@ window.MERCEK_PRICES = { draft: false, solo: { m: 1199.99, y: 11999.99 }, clinic
   each('.clip[data-tur]', function (fig) {
     var v = fig.querySelector('video'), btns = fig.parentNode.querySelectorAll('.tur [data-t]');
     if (!btns.length) return;
+    var kareler = fig.querySelectorAll('.clip-kirp');
+    if (dar && !v && kareler.length === btns.length) {
+      // Telefon: video yok; 1-2-3 her adımın kırpımını gösterir. Kendiliğinden 5 sn'de bir ilerler (hareket azaltmada ve dokununca durur).
+      var k0 = 0, zaman = null;
+      var goster = function (k) {
+        k0 = k;
+        Array.prototype.forEach.call(kareler, function (im, i) { im.classList.toggle('on', i === k); });
+        Array.prototype.forEach.call(btns, function (b, i) { if (i === k) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+      };
+      var dur = function () { if (zaman) { clearInterval(zaman); zaman = null; } };
+      Array.prototype.forEach.call(btns, function (b, i) { b.addEventListener('click', function () { dur(); goster(i); }); });
+      if (!reduce.matches) zaman = setInterval(function () { goster((k0 + 1) % kareler.length); }, 5000);
+      goster(0);
+      return;
+    }
     var mark = function () {
       var t = v ? v.currentTime : 0, cur = 0;
       Array.prototype.forEach.call(btns, function (b, k) { if (t + 0.05 >= parseFloat(b.getAttribute('data-t'))) cur = k; });

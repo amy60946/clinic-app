@@ -37,23 +37,15 @@
   }
  ],
  "dongu_etiket": "Moyo Ekosistemi",
- "dongu_baslik": "Uzmanın önerisi, yarının rutini",
+ "dongu_baslik": "Bugünün kaydı, yarının rutini",
  "dongu": [
   {
-   "kim": "Uzmanınız",
-   "kisa": "Önerir",
-   "baslik": "Eğitim gönderir, rutin önerir.",
-   "metin": "Seansta konuşulanı eve taşımak için.",
-   "gorsel": "mercek-egitim",
-   "alt": "Moyo Uzman: ebeveyn eğitimi"
-  },
-  {
    "kim": "Siz",
-   "kisa": "Öğrenirsiniz",
-   "baslik": "Eğitimi okur, rutini eklersiniz.",
-   "metin": "Kısa dersler ve rutin önerileri Moyo Ebeveyn'in Uzmanım bölümüne gelir.",
-   "gorsel": "ebeveyn-uzman",
-   "alt": "Moyo Ebeveyn: uzmandan gelenler"
+   "kisa": "Planlarsınız",
+   "baslik": "Rutini adım adım planlarsınız.",
+   "metin": "Sabah, akşam ya da ödev rutinini Moyo Ebeveyn'de kurarsınız; saatini ve adımlarını siz seçersiniz.",
+   "gorsel": "ebeveyn-ekle",
+   "alt": "Moyo Ebeveyn: rutin ekleme ekranı"
   },
   {
    "kim": "Çocuğunuz",
@@ -72,20 +64,28 @@
    "alt": "Moyo Ebeveyn: onay ekranı"
   },
   {
-   "kim": "Uzmanınız",
+   "kim": "Uzmanınız · isteğe bağlı",
    "kisa": "Görür",
    "baslik": "Evdeki haftayı görür, seansa hazırlanır.",
-   "metin": "Rutinler, kayıtlar ve eğitimdeki ilerleme tek ekranda.",
+   "metin": "Yalnızca paylaşmayı seçtiğiniz kayıtlar: rutinler, zor anlar ve eğitimdeki ilerleme tek ekranda.",
    "gorsel": "mercek-veri",
    "alt": "Moyo Uzman: evdeki kayıtlar"
+  },
+  {
+   "kim": "Uzmanınız · isteğe bağlı",
+   "kisa": "Önerir",
+   "baslik": "Eğitim gönderir, rutin önerir.",
+   "metin": "Öneri Moyo Ebeveyn'in Uzmanım bölümüne gelir; eklemek sizin kararınız.",
+   "gorsel": "mercek-egitim",
+   "alt": "Moyo Uzman: ebeveyn eğitimi"
   },
   {
    "kim": "Hepsi birlikte",
    "kisa": "Sürer",
    "baslik": "Süreç her hafta kaldığı yerden devam eder.",
-   "metin": "Uzmanınız kayıtlara bakar, öneriyi günceller; yeni adım ertesi gün oyunda.",
+   "metin": "Yeni adım ertesi gün oyunda; uzmanınız varsa öneriyi kayıtlara göre günceller.",
    "gorsel": "sema",
-   "alt": "Döngü: uzmanınız önerir; siz planlar, onaylar ve zor anları kaydedersiniz; çocuğunuz yapar ve oyunda işaretler; kayıt uzmanınıza ulaşır. Süreç her hafta yeniden başlar."
+   "alt": "Döngü: siz planlarsınız; çocuğunuz yapar ve oyunda işaretler; siz onaylar ve zor anları kaydedersiniz; dilerseniz uzmanınız kayıtlara bakar ve önerir. Süreç her hafta yeniden başlar."
   }
  ],
  "urunler_baslik": "Birbirine bağlı üç uygulama",
@@ -194,7 +194,8 @@
     [
      "kayıtlara bakar,",
      "önerir"
-    ]
+    ],
+    "isteğe bağlı"
    ],
    "ebeveyn": [
     "Moyo Ebeveyn",

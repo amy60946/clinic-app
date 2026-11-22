@@ -91,3 +91,15 @@ Moyo Ebeveyn: "Neden Moyo" üç tam ekran telefon + telefondan taşan büyütül
 349 TL / ay (20 Kasım 2026'dan beri kesin fiyat: 349,99 TL / ay, altında "ya da 3.499,99 TL / yıl · 2 ay ücretsiz"; `yap_f.py` fiyatları denetler). Hakkımızda (Atlassian 'Company' kaydı örneğiyle beş bölüm): misyon + gerçek ekranlar, lacivert bantta üç kartlı döngü (çizgiler
 görününce çizilir) + yöntem uyarısı + kaynaklar, Neden varız (hafıza / kayıt hafta çizgisi), ekip ve hikâye yer tutucusu (ONIZ, canlıya
 gitmez), iletişim kartları.
+
+## 22 Kasım 2026: döngü aileyle başlar, telefona özel kırpım, Moyo Ebeveyn tutarlılığı (kullanıcı kararları)
+
+- **Döngü "Aileyle başlasın":** 1 Siz planlarsınız (`img/moyo-ekle.webp`) → 2 Çocuğunuz yapar → 3 Siz onaylarsınız → 4–5 Uzmanınız
+  (etiketi "isteğe bağlı") görür ve önerir → 6 Sürer. `c-metin.json` `dongu`, aria metni (`dongu[5].alt`), başlık "Bugünün kaydı, yarının rutini".
+  6. adımın yörüngesi (`c-sema.py`): Moyo Ebeveyn üstte, saat yönünde Moyo Oyun ve Moyo Uzman; uzman kartı ve ona giden / ondan dönen
+  yay kesikli, kartın altında "isteğe bağlı" (`sema.kart.uzman[2]`).
+- **Telefona özel kırpım:** < 700 px'te kartın görsel kutusunu (~306 × 371) ekranın kartı anlatan parçası doldurur (`yap_c.py` `KIRP`,
+  `c-18.css` 9). Kırpımlar `img/c-kirp-*.webp` ← `python3 ../landing-motion/kirp.py kirp.json` (kutular `kirp.json`'da).
+- **Moyo Ebeveyn sayfaları:** "Giriş" → "Giriş yap" (`yap_m.py`, `yap_f.py`); SSS işareti "+" / "–" ve dar ekranda açılır menü paneli
+  (tam ekran değil; dışına dokununca ya da kaydırınca kapanır) çatı / Hakkımızda / Güven ile aynı (`m/moyo.css`, `m/moyo.js`;
+  `m/site.css` Mercek'in kopyası olduğu için dokunulmadı).

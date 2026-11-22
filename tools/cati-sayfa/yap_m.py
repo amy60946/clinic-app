@@ -90,7 +90,7 @@ def ust(sayfa):
       <nav aria-label="Ana menü"><ul>
         <li><a href="{a}#nasil">Nasıl çalışır</a></li><li><a href="{a}#degerler">Neden Moyo</a></li><li><a href="{FIYAT}"{simdi}>Fiyat</a></li><li><a href="{a}#sss">SSS</a></li><li><a href="{MERCEK}">Uzman mısınız?</a></li>
       </ul></nav>
-      <div class="acts"><a class="pill pill-line" href="{APP}#giris">Giriş</a><a class="pill pill-cta" href="{APP}#kayit">Ücretsiz deneyin</a></div>
+      <div class="acts"><a class="pill pill-line" href="{APP}#giris">Giriş yap</a><a class="pill pill-cta" href="{APP}#kayit">Ücretsiz deneyin</a></div>
     </div>
     <a class="pill pill-cta nav-cta" href="{APP}#kayit">Ücretsiz deneyin</a>
     <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menü">
@@ -336,7 +336,7 @@ html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/")}
     <div class="wrap">
       <div class="closing">
         <h2 id="h-son">{e(E["kapanis"])}</h2>
-        <div class="actions"><a class="btn btn-cta" href="{APP}#kayit">Ücretsiz deneyin</a><a class="btn btn-line" href="{APP}#giris">Giriş</a></div>
+        <div class="actions"><a class="btn btn-cta" href="{APP}#kayit">Ücretsiz deneyin</a><a class="btn btn-line" href="{APP}#giris">Giriş yap</a></div>
         <p class="fine">{e(E["kapanis_ince"])}</p>
       </div>
     </div>

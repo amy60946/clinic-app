@@ -21,7 +21,7 @@ SITE = 'https://moyoapp.com.tr/'               # yasal ve destek bağlantıları
 K = json.load(open('c-metin.json'))            # metinler ayrı dosyada
 # Moyo Ekosistemi sahnesinin tam ekran, kırpılmamış gerçek ürün ekranları (örnek veri): tools/cati-sayfa/cek ile çekilir.
 # 1-2-3 kartlarının ekranları c-metin.json "basamak" içinde (sahnedekilerden farklı).
-IMG = {'ebeveyn-onay': 'img/moyo-onay.webp', 'ebeveyn-uzman': 'img/moyo-uzman.webp', 'oyun-onay': 'img/c-oyun-onay.webp',
+IMG = {'ebeveyn-onay': 'img/moyo-onay.webp', 'ebeveyn-ekle': 'img/moyo-ekle.webp', 'ebeveyn-uzman': 'img/moyo-uzman.webp', 'oyun-onay': 'img/c-oyun-onay.webp',
        'mercek-veri': 'img/mercek-rutin.webp', 'mercek-egitim': 'img/mercek-egitim.webp',
        'mercek-veri-tel': 'img/mercek-rutin-tel.webp', 'mercek-egitim-tel': 'img/mercek-egitim-tel.webp'}
 e = H.escape
@@ -35,6 +35,12 @@ def secenek(k, d, tag='span', attr=''):
 def cumleler(t):
     # Uzun tanıtım cümleleri geniş ekranda cümle sınırında satır atlasın ("…tasarlandı. Birlikte / kullanıldığında" yerine): her cümle bir span.
     return ''.join(f'<span class="cumle">{c}</span> ' for c in re.split(r'(?<=[.!?]) (?=[A-ZÇĞİÖŞÜ"])', t)).strip()
+
+# Telefona özel kırpım (kullanıcı kararı 22 Kasım 2026, "Telefona özel kırp"): < 700 px'te kart görseli kutusu ~306 × 371 px; bütün ekran
+# oraya ~170 px genişlikte sığıyor, yazı ~6 px kalıyordu. Kartın mesajını anlatan parçanın kırpımı kutuyu doldurur (yazı ~11 px).
+# Kırpımlar img/c-kirp-<anahtar>.webp ← python3 ../landing-motion/kirp.py kirp.json (kutular orada). Tablet ve geniş ekran değişmez.
+KIRP = {k: f'img/c-kirp-{k}.webp' for k in ('ebeveyn-ekle', 'oyun-onay', 'ebeveyn-onay', 'mercek-veri', 'mercek-egitim')}
+def kirp(key, alt): return f'<img class="d-kirp" src="{KIRP[key]}" alt="{e(alt)}" loading="lazy" decoding="async">' if key in KIRP else ''
 
 def tur(key): return 'ebeveyn' if key.startswith('ebeveyn') else ('mercek' if key.startswith('mercek') else (key if key == 'sema' else 'oyun'))
 def cls(key, dar=False): return 'telefon' if key.startswith('ebeveyn') or (dar and key.startswith('mercek')) else ('panel' if key.startswith('mercek') else '')
@@ -57,6 +63,7 @@ def dongu(beats):
             dar = (dar.replace('class="d6"', 'class="d6 d-dar"', 1) + SEMA(K, LOGO_IC, 'g', 's6w').replace('class="d6"', 'class="d6 d-gen"', 1))
         elif t == 'mercek':
             dar = resim(b["gorsel"], b["alt"], 'telefon d-dar', True) + resim(b["gorsel"], b["alt"], 'panel d-gen')
+        dar = kirp(b['gorsel'], b['alt']) + dar
         slots.append(f'<div class="d-slot t-{t}" style="--i:{i}">{genis}</div>')
         ad = f'{i + 1}. {b["kim"]}: {b["baslik"]}'
         pills.append(f'<li><a href="#hepsi" aria-label="{e(ad)}"><span class="n">{i + 1}</span><span class="ad">{b["kisa"]}</span></a></li>')

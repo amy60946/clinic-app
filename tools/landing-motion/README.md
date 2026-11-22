@@ -49,3 +49,24 @@ büyür, imleç ölçeklenmez; Atlassian ana sayfasındaki ürün turu gibi, 14 
 uzman eğitim oluşturur → çocuğun ev rutinlerini görür → ABC olaylarına bakar; `beat`'ler sayfadaki 1-2-3 çipinin saniyeleri.
 Uzun sahnede kayıt + kodlama 10 dakikayı aşabilir: arka planda çalıştır, `MOTION_FORMAT=jpeg` ile kareler küçük. Hedef tam metin, RegExp ya da Playwright locator olur; üstte ve görünür olan seçilir.
 Çekimden sonra kareleri gözle kontrol et: `ffmpeg -i out/<sahne>.mp4 -vf fps=4/3 kare-%03d.png`.
+
+## Moyo Ebeveyn kaydı ve telefon kırpımları (22 Kasım 2026)
+
+Kullanıcı kararları (Mercek denetimi, 22 Kasım 2026): 3. sekme "Moyo Ebeveyn · ebeveynin telefonunda" **gerçek Moyo Ebeveyn ekranı**
+gösterir; telefonda okunmayan masaüstü kayıtlarının yerine **telefona özel kırpım**.
+
+```bash
+(cd ../parent-app && bash preview/build.sh)               # Moyo Ebeveyn (ParentApp) önizlemesi
+node tools/landing-motion/ebeveyn.js                      # out/aile-m.* (telefon 786×1600) + out/aile.* (1440×900 zeminde)
+node tools/landing-motion/kare.js <klasör> akis kutuphane davranis rapor   # 2880×1800 durağan kareler (her adımdan sonra)
+python3 tools/landing-motion/kirp.py tools/landing-motion/kirp.json <klasör>   # site/assets/kirp/*.webp
+```
+
+- `ebeveyn.js`: parent-app `store/capture/prep.js`'in uydurma ailesiyle "Bugün → eğitim → Test → Başla → yanıt → Cevabı kontrol et"
+  (testi yanıtlatmak için o kayıt tarayıcı deposunda yapılmamış sayılır). Telefon 393×800, 2 kat; kit'in telefon ölçeği kullanılmaz
+  (o ölçekte dokunma koordinatları sayfaya yarı değerle ulaşıyordu). Dokunma noktası yalnız dokunurken görünür. Geniş sürüm aynı kayıt,
+  `ebeveyn_zemin.py`'nin açık lavanta zemininde ortada. `EBEVEYN_YALNIZ_GENIS=1` yalnız geniş sürümü yeniden üretir.
+- `kare.js`: sahneyi kayıttaki gibi oynatır, her tıklama / yakınlaşma / kaydırmadan sonra imleçsiz ekran görüntüsü alır (`kareler.json`).
+- `kirp.json` + `kirp.py`: hangi karenin hangi kutusu (kaynak pikselleriyle) hangi dosyaya; ≤ 700 px'te `site.css` "Telefona özel kırpım"
+  bunları gösterir, video yüklenmez. Kareler çekimlik (depoya girmez); kutular değişince yalnız `kirp.py` yeniden çalışır.
+- Sonra `out/aile*.{mp4,webm,webp}` → `site/assets/motion/`.
