@@ -42,7 +42,7 @@ def cumleler(t):
 KIRP = {k: f'img/c-kirp-{k}.webp' for k in ('ebeveyn-ekle', 'oyun-onay', 'ebeveyn-onay', 'mercek-veri', 'mercek-egitim')}
 # Oyun ekranı yatay: görev adı ile "Yaptım" birlikte ancak 650 × 314'lük kırpıma sığıyor; kutuya "contain" ile oturur, kalan yer kırpımın
 # kenar rengiyle (oyunun zemini) dolar, görsel kutuda yüzüyormuş gibi durmaz.
-KIRP_SIGDIR = {'oyun-onay': '#F6E8BF'}
+KIRP_SIGDIR = {}   # 22 Kasım: oyun kartı artık dikey kırpım (oyun-tablet.webp), sığdırmaya gerek kalmadı; düzen ileride yatay kırpım için duruyor
 def kirp(key, alt):
     if key not in KIRP: return ''
     ek = f' sigdir" style="background-color:{KIRP_SIGDIR[key]}' if key in KIRP_SIGDIR else ''

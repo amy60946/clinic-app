@@ -781,3 +781,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
   .clip[data-clip-m] .clip-btn { bottom: 4px; width: 32px; height: 32px; }
 }
 @media (max-width: 700px) and (prefers-reduced-motion: reduce) { .clip.kirpli > .clip-kirp { transition: none; } }
+/* Moyo Oyun sekmesi (durağan görsel, 1200 × 554): telefonda görev adı ile "Yaptım" ~640 px uzak, okunur sığmıyor; yerine tablet
+   ekranındaki bugünün macerası kartı (assets/kirp/oyun.webp, çatı sayfasının 2. kartıyla aynı kırpım). */
+.shot > .shot-kirp { display: none; }
+@media (max-width: 700px) { .shot.kirpli > img:not(.shot-kirp) { display: none; } .shot.kirpli > .shot-kirp { display: block; } .shot.kirpli { padding-bottom: 34px; } .shot.kirpli figcaption { bottom: 7px; } }

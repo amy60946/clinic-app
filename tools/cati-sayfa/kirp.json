@@ -12,16 +12,16 @@
   "not": "Rutin ekle: başlık, şablon arama, hazır rutinler"
  },
  {
-  "kaynak": "img/c-oyun-onay.webp",
+  "kaynak": "img/oyun-tablet.webp",
   "kutu": [
-   160,
-   160,
-   810,
-   474
+   46,
+   46,
+   730,
+   880
   ],
   "cikti": "img/c-kirp-oyun-onay.webp",
-  "en": 600,
-  "not": "Üç görevin adı, inci ödülleri, Yaptım; yatay: kartta 'contain' ile, zemin kırpımın kenar rengi (yap_c.py KIRP_SIGDIR)"
+  "en": 684,
+  "not": "Bugünün macerası kartı (Dişlerini fırçala · Onaylandı); liste görsellerinde ad ile Yaptım dikey kutuya okunur sığmıyor"
  },
  {
   "kaynak": "img/moyo-onay.webp",
