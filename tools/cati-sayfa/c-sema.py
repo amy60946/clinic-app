@@ -77,6 +77,7 @@ def yorunge(u, T, logo, dar):
             ks, bc, ba = 28, 12.5, 13.5
             cs, cg, cy_ = cip(x, 0, C[k][1], bc, 'middle')
             gen = max(100, cg + 14)
+            x = min(max(x, gen / 2 + 4), W - gen / 2 - 4)   # kart çizim kutusunda kalsın (uzman kartının çipi geniş; 22 Kasım QA)
             yuk = 10 + ks + 6 + ba + 5 + cy_ + 10
             y0 = y - yuk / 2
             s += f'<rect x="{n(x - gen / 2)}" y="{n(y0)}" width="{n(gen)}" height="{n(yuk)}" rx="16" fill="#fff" stroke="{KESIK if ops(k) else CIZGI}"{DASH if ops(k) else ""} filter="url(#{u}-g)"/>'

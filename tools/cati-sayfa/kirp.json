@@ -2,10 +2,10 @@
  {
   "kaynak": "img/moyo-ekle.webp",
   "kutu": [
-   13,
-   4,
-   587,
-   700
+   0,
+   0,
+   600,
+   732
   ],
   "cikti": "img/c-kirp-ebeveyn-ekle.webp",
   "en": 600,
@@ -41,7 +41,7 @@
    26,
    436,
    574,
-   1100
+   1105
   ],
   "cikti": "img/c-kirp-mercek-veri.webp",
   "en": 600,
@@ -53,7 +53,7 @@
    0,
    356,
    600,
-   1070
+   1088
   ],
   "cikti": "img/c-kirp-mercek-egitim.webp",
   "en": 600,

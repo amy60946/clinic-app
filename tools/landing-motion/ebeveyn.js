@@ -114,6 +114,10 @@ if (require.main === module) (async () => {
       const seq = path.join(kit.TMP, 'aile-m', 'seq');
       q = kit.sequence(rec, h, end, seq);
       const e = kit.encode('aile-m', seq, q.poster, s.device.out, 1.6e6);
+      // Afiş: ilk dokunuştan 1,1 sn sonraki kare (eğitim sayfası, iki dokunuşun arasında: nokta görünmez). kit.encode'un afiş karesi
+      // bazen dokunma noktasını taşıyordu (22 Kasım 2026 denetimi).
+      const at = String(((h.beats[0] && h.beats[0].t) || 1.7) + 1.1);
+      ff(['-ss', at, '-i', path.join(kit.OUT, 'aile-m.mp4'), '-frames:v', '1', '-c:v', 'libwebp', '-quality', '82', path.join(kit.OUT, 'aile-m.webp')]);
       console.log(`aile-m: ${q.count} kare · mp4 ${e.mp4_bytes} · webm ${e.webm_bytes || 'yok'} · kaçan hareket adımı ${q.missed}/${q.moves} · adımlar ${JSON.stringify(h.beats)}`);
     } finally { await s.browser.close(); }
     if (q.missed === 0 || i >= 4) break;

@@ -769,8 +769,15 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
   .clip.kirpli > .clip-kirp { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: left top; opacity: 0; transition: opacity .45s ease; }
   .clip.kirpli > .clip-kirp.on { opacity: 1; }
   .clip.kirpli > .clip-kirp.solma { -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent 99%); mask-image: linear-gradient(90deg, #000 80%, transparent 99%); }   /* uzun satırlar sağda kesik */
-  .clip[data-clip-m] { aspect-ratio: 393 / 800; width: min(100%, 300px); margin-inline: auto; }
+  /* "Örnek veri" rozeti ve duraklat düğmesi görüntünün altındaki şeritte; ekranın yazısının ya da düğmesinin üstüne binmez */
+  .clip.kirpli { padding-bottom: 34px; }
+  .clip.kirpli > .clip-kirp { height: calc(100% - 34px); }
+  .clip.kirpli figcaption { bottom: 7px; }
+  .clip[data-clip-m] { aspect-ratio: auto; width: min(100%, 300px); margin-inline: auto; padding-bottom: 40px; }
   .clip[data-clip-m] > .clip-poster { display: none; }
-  .clip[data-clip-m] > .clip-poster-m { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .clip[data-clip-m] > .clip-poster-m { display: block; width: 100%; height: auto; aspect-ratio: 393 / 800; }
+  .clip[data-clip-m] > video { inset: 0 0 40px 0; width: 100%; height: calc(100% - 40px); }
+  .clip[data-clip-m] figcaption { bottom: 9px; }
+  .clip[data-clip-m] .clip-btn { bottom: 4px; width: 32px; height: 32px; }
 }
 @media (max-width: 700px) and (prefers-reduced-motion: reduce) { .clip.kirpli > .clip-kirp { transition: none; } }
