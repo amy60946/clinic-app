@@ -1,0 +1,7 @@
+[
+ {"kaynak": "img/moyo-ekle.webp", "kutu": [13, 4, 587, 700], "cikti": "img/c-kirp-ebeveyn-ekle.webp", "en": 600, "not": "Rutin ekle: başlık, şablon arama, hazır rutinler"},
+ {"kaynak": "img/c-oyun-onay.webp", "kutu": [569, 160, 828, 474], "cikti": "img/c-kirp-oyun-onay.webp", "en": 600, "not": "Yaptım / Yapamam, inci ödülleri (geçici; adlar dahil kutu bekleniyor)"},
+ {"kaynak": "img/moyo-onay.webp", "kutu": [0, 510, 600, 1248], "cikti": "img/c-kirp-ebeveyn-onay.webp", "en": 600, "not": "Bugünün adımı, motivasyon, not, Reddet / Tekrar dene / Onayla"},
+ {"kaynak": "img/mercek-rutin-tel.webp", "kutu": [26, 436, 574, 1100], "cikti": "img/c-kirp-mercek-veri.webp", "en": 600, "not": "Haftalık: üç adımın gün gün işaretleri"},
+ {"kaynak": "img/mercek-egitim-tel.webp", "kutu": [0, 356, 600, 1070], "cikti": "img/c-kirp-mercek-egitim.webp", "en": 600, "not": "ABC eğitimi: Etkin, modüller, Tamamlandı"}
+]
