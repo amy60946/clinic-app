@@ -1,7 +1,7 @@
 // Seans planlama: sunucu çağrıları. Sözleşme ortak sozlesme/veritabani.md 29 (öneri proposed/20261105100000_sessions.sql).
 // Tablolar/işlevler sunucuda yoksa SessionsNotInstalled: ekranlar "veritabanı güncellemesi bekleniyor" der, panelin geri kalanı çalışır.
 import { supabase } from './supabase';
-import type { Session, SessionRecord, Room, Availability, SessionSettings, SessionPackage, WaitItem, ExternalEvent, Busy, SessionKind, SessionMode, SessionStatus } from './sessionCore';
+import type { Session, SessionRecord, Room, Availability, SessionSettings, ExternalEvent, Busy, SessionKind, SessionMode, SessionStatus } from './sessionCore';
 import { DEFAULT_SETTINGS } from './sessionCore';
 
 export class SessionsNotInstalled extends Error {}
@@ -19,15 +19,12 @@ function check<T>(data: T, error: Err): T {
 // Sunucu hata anahtarları → kısa Türkçe (ortak durumlar.md P18)
 const ERRORS: Record<string, string> = {
   session_not_found: 'Seans bulunamadı ya da artık görünmüyor.',
-  session_not_started: 'Seans henüz başlamadı; "Yapıldı" ya da "Gelmedi" seans saatinden sonra yazılır.',
-  session_has_record: 'Kaydı olan seans silinmez. İstersen durumunu "İptal" yap.',
+  session_not_started: 'Seans henüz başlamadı; "Yapıldı" ya da "Yapılmadı" seans saatinden sonra işaretlenir.',
+  session_has_record: 'Kaydı olan seans silinmez. Seans olmadıysa durumunu "Yapılmadı" yap.',
   link_not_visible: 'Bu danışanın paylaşımı etkin değil ya da sana açık değil.',
   only_owner: 'Bunu yalnız klinik sahibi değiştirebilir.',
   only_owner_assigns: 'Başka bir uzmana seansı yalnız klinik sahibi atayabilir.',
   room_not_in_clinic: 'Oda bu kliniğe ait değil.',
-  package_link_mismatch: 'Paket bu danışana ait değil.',
-  waitlist_not_found: 'Bekleme kaydı bulunamadı.',
-  offer_in_past: 'Teklif edilen saat geçmişte olamaz.',
   calendar_url_not_allowed: 'Bu adres desteklenmiyor. Google, Apple (iCloud) ya da Outlook takviminin gizli iCal adresini yapıştır.',
   too_many_sources: 'En çok 3 dış takvim eklenebilir.',
   event_not_found: 'Etkinlik bulunamadı.',
@@ -64,7 +61,7 @@ export async function loadRecords(ids: string[]): Promise<Record<string, Session
 
 export type SessionInput = {
   link_id: string | null; clinician_id?: string | null; title?: string | null; starts_at: string; duration_min: number;
-  kind: SessionKind; mode: SessionMode; room_id?: string | null; visible_to_family: boolean; package_id?: string | null;
+  kind: SessionKind; mode: SessionMode; room_id?: string | null; visible_to_family: boolean;
   repeat?: 'none' | 'weekly' | 'biweekly'; count?: number;
 };
 export type Conflict = { starts_at: string; room: boolean; clinician: boolean };
@@ -76,8 +73,9 @@ export async function updateSession(id: string, p: Partial<SessionInput>, scope:
   const { data, error } = await supabase.rpc('clinic_session_update', { p_id: id, p, p_scope: scope });
   return check(data as { updated: number; conflicts: Conflict[] }, error);
 }
-export async function setSessionStatus(id: string, status: Exclude<SessionStatus, 'offered'>, reason?: string | null, waive = false): Promise<SessionStatus> {
-  const { data, error } = await supabase.rpc('clinic_session_set_status', { p_id: id, p_status: status, p_reason: reason ?? null, p_waive: waive });
+// Arayüz yalnız iki sonuç yazar: Yapıldı (`done`) / Yapılmadı (`no_show`) (kullanıcı kararı 23 Kasım 2026; işlevin imzası aynı)
+export async function setSessionStatus(id: string, status: 'done' | 'no_show'): Promise<SessionStatus> {
+  const { data, error } = await supabase.rpc('clinic_session_set_status', { p_id: id, p_status: status, p_reason: null, p_waive: false });
   return check(data as SessionStatus, error);
 }
 export async function deleteSession(id: string, scope: 'one' | 'following' = 'one'): Promise<number> {
@@ -136,31 +134,6 @@ export async function updateAvailability(id: string, p: Partial<Omit<Availabilit
 export async function deleteAvailability(id: string): Promise<void> {
   const { error } = await supabase.from('clinic_availability').delete().eq('id', id);
   check(null, error);
-}
-
-/* ---------- Paket, bekleme listesi ---------- */
-export async function listPackages(linkId?: string): Promise<SessionPackage[]> {
-  let q = supabase.from('clinic_session_packages').select('id, link_id, title, total, starts_on, ends_on, note, closed_at, created_at').order('created_at', { ascending: false });
-  if (linkId) q = q.eq('link_id', linkId);
-  const { data, error } = await q;
-  return check((data ?? []) as SessionPackage[], error);
-}
-export async function savePackage(p: { id?: string | null; link_id: string; title: string; total: number; starts_on?: string | null; ends_on?: string | null; note?: string | null; closed?: boolean }): Promise<string> {
-  const { data, error } = await supabase.rpc('clinic_package_save', { p_id: p.id ?? null, p_link: p.link_id, p_title: p.title, p_total: p.total,
-    p_starts: p.starts_on ?? null, p_ends: p.ends_on ?? null, p_note: p.note ?? null, p_closed: !!p.closed });
-  return check(data as string, error);
-}
-export async function listWaitlist(): Promise<WaitItem[]> {
-  const { data, error } = await supabase.from('clinic_waitlist').select('id, link_id, clinician_id, note, status, created_at').in('status', ['waiting', 'offered']).order('created_at');
-  return check((data ?? []) as WaitItem[], error);
-}
-export async function saveWaitlist(linkId: string, note: string, remove = false): Promise<void> {
-  const { error } = await supabase.rpc('clinic_waitlist_save', { p_link: linkId, p_note: note || null, p_remove: remove });
-  check(null, error);
-}
-export async function offerSlot(waitlistId: string, startsAt: string, durationMin: number, roomId: string | null, hours: number): Promise<string> {
-  const { data, error } = await supabase.rpc('clinic_waitlist_offer', { p_waitlist: waitlistId, p_starts_at: startsAt, p_duration: durationMin, p_room: roomId, p_hours: hours });
-  return check(data as string, error);
 }
 
 /* ---------- Takvim aboneliği ve dış takvim (E) ---------- */
