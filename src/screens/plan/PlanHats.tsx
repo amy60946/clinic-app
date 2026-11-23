@@ -10,7 +10,7 @@ import { todayISO } from '../../dates';
 import {
   PlanTarget, PlanGoal, PlanModule, ModuleLog, ModuleGoals, ModuleInput, PlanTemplate, GoalT, PackageT, Published, GoalStatus, ModuleStatus,
   DOMAINS, GOAL_TEMPLATES, MODULE_TEMPLATES, PACKAGES, domainLabel, measureLabel,
-  loadPlan, loadLogs, loadModuleGoals, linkModuleGoals, unlinkModuleGoal, addGoals, updateGoal, addModules, updateModule, deleteModule,
+  loadPlan, loadLogs, loadModuleGoals, linkModuleGoals, unlinkModuleGoal, addGoals, updateGoal, addModules, updateModule, ModuleHasFamilyLogs, deleteModule,
   rateGoal, applyPackage, goalFromTemplate, moduleFromTemplate, logSummary, publishPlan, publishPlanSelected, listPlanTemplates, savePlanTemplate,
   updatePlanTemplate, deletePlanTemplate, loadPublished, PlanSchemaMissing,
 } from '../../lib/plan';
@@ -39,6 +39,7 @@ import type { SamplePlan } from '../../lib/sample';
 import { FamilySees } from '../HelpSheet';
 import { CoachTarget, useCoachEmit } from '../../lib/coach';
 import { useActionMenu, confirmSpec } from '../../components/ActionMenu';
+import { errorText } from '../../lib/errors';
 
 // Takip planı — hedef hatları (kullanıcı kararları 30 Ekim ve 2 Kasım 2026, "C"; ortak akislar.md 12.1):
 // her hedef bir satır: hedef (uzman yazar ve değerlendirir) · aile programı (ebeveyn evde uygular) · rutin ve görevler
@@ -142,7 +143,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
       ]);
       setPlan(p); setSugg(s); setLogs(l); setLinks(lk); setPub(pb); setGoalNotes(gn); setError('');
     } catch (e) {
-      setError(e instanceof PlanSchemaMissing ? e.message : (e as Error).message);
+      setError(e instanceof PlanSchemaMissing ? e.message : errorText(e));
     }
   }, [client.link_id, preset]); // eslint-disable-line react-hooks/exhaustive-deps
   const loadLibrary = useCallback(() => {
@@ -214,9 +215,14 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
   };
 
   /* ---------- eylemler ---------- */
-  const fail = (what: string) => (e: unknown) => Alert.alert(what, (e as Error).message);
+  const fail = (what: string) => (e: unknown) => Alert.alert(what, errorText(e));
   const after = (planChanged = true) => { if (planChanged) setLocalDirty(true); return load(); };
   const act = (p: Promise<unknown>, what = 'Kaydedilemedi', planChanged = true) => p.then(() => after(planChanged)).catch(fail(what));
+  // Program silme: ailenin kaydı varsa sunucu reddeder, yerine Tamamlandı önerilir (güvenlik denetimi 22 Kasım 2026)
+  const removeModule = (id: string) => deleteModule(id).then(() => after(true)).catch((e) => e instanceof ModuleHasFamilyLogs
+    ? Alert.alert('Program silinemez', 'Ailenin bu programda uygulama kaydı var; kayıtlar korunur. Programı Tamamlandı yapabilirsin: aile geçmişini görmeye devam eder, yeni uygulama beklenmez.', [
+      { text: 'Vazgeç', style: 'cancel' }, { text: 'Tamamlandı yap', onPress: () => act(updateModule(id, { status: 'done' })) }])
+    : fail('Silinemedi')(e));
   const needLinks = () => {
     if (linkOK) return true;
     Alert.alert('Veritabanı güncellemesi bekleniyor', 'Programı bir davranış hedefine bağlamak için ortak 20261102100000_plan_redesign.sql uygulanmalı.');
@@ -484,7 +490,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
       Alert.alert(hold.length ? 'Seçilenler aileye gönderildi' : 'Aileye gönderildi',
         `Ebeveyn tek bildirim alır; plan ve öneriler Moyo › Uzmanım › (senin adın) bölümünde.${hold.length ? ' Beklettiklerin planda "gönderilmedi" olarak kalır.' : ''}`);
     } catch (e) {
-      Alert.alert('Gönderilemedi', (e as Error).message);
+      Alert.alert('Gönderilemedi', errorText(e));
     } finally {
       setBusy(false);
     }
@@ -546,7 +552,7 @@ export default function PlanHats({ client, me, data, today, reload, preset, open
             <IconButton name="unlink-outline" label="Bu davranış hedefinden ayır" size={16} onPress={() => act(unlinkModuleGoal(m.id, gid), 'Bağ kaldırılamadı')} />
           ) : (
             <IconButton name="trash-outline" label="Programı sil" size={16} onPress={(e) => openMenu(confirmSpec('Program silinsin mi?',
-              'Ailenin bu programdaki uygulama kayıtları da silinir.', 'Sil', () => act(deleteModule(m.id), 'Silinemedi')), e)} />
+              'Ailenin uygulama kaydı olan program silinmez; o zaman Tamamlandı yapabilirsin.', 'Sil', () => removeModule(m.id)), e)} />
           )}
         </View>
         <StatusChip label={MODULE_STATUS.find((x) => x.id === m.status)?.label ?? m.status} tone={STATUS_TONE[m.status]}
@@ -1290,7 +1296,7 @@ function TemplateSaveSheet({ goal, modules, routines, onClose, onSave }: {
   const save = async () => {
     if (!title.trim()) return Alert.alert('Şablona bir ad ver');
     setBusy(true);
-    try { await onSave(title.trim(), shared === 'team'); } catch (e) { Alert.alert('Kaydedilemedi', (e as Error).message); } finally { setBusy(false); }
+    try { await onSave(title.trim(), shared === 'team'); } catch (e) { Alert.alert('Kaydedilemedi', errorText(e)); } finally { setBusy(false); }
   };
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>

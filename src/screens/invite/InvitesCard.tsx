@@ -6,6 +6,7 @@ import { ClinicianMe, Member } from '../../lib/clinic';
 import { FamilyInvite, InviteStats, STATUS_TEXT, INVITE_HELP, listInvites, inviteStats, revokeInvite, sweepInvites, leftText, ageGroupLabel } from '../../lib/invites';
 import { useNotifications } from '../../lib/notificationsContext';
 import InviteSheet, { SheetInvite } from './InviteSheet';
+import { errorText } from '../../lib/errors';
 
 // Ana ekran: "Aileyi davet et" (e-postayla) + davetlerim (durum, e-posta durumu, yeniden gönder, iptal) + sahip için ekip istatistiği (ortak akislar.md 10).
 const TONE: Record<string, { bg: string; fg: string }> = {
@@ -73,7 +74,7 @@ export default function InvitesCard({ me, team, reloadKey, openKey, openCode, on
 
   const revoke = (i: FamilyInvite) => Alert.alert('Davet iptal edilsin mi?', 'Bağlantı ve kod çalışmaz; davete eklediğin taslak plan silinir.', [
     { text: 'Vazgeç', style: 'cancel' },
-    { text: 'İptal et', style: 'destructive', onPress: () => revokeInvite(i.code).then(load).catch((e) => Alert.alert('İptal edilemedi', (e as Error).message)) },
+    { text: 'İptal et', style: 'destructive', onPress: () => revokeInvite(i.code).then(load).catch((e) => Alert.alert('İptal edilemedi', errorText(e))) },
   ]);
 
   const shown = items ? (all ? items : items.slice(0, 4)) : [];

@@ -9,6 +9,7 @@ import { categories, templates, Template, ageGroups, AgeGroup } from '../../temp
 import { SKILL_LABEL, skillOf, normalizeCategory } from '../../skills';
 import { DAY_SHORT, fromISO, todayISO } from '../../dates';
 import type { Suggestion, SuggestionInput, RepeatKind, Category } from '../../lib/clinic';
+import { errorText } from '../../lib/errors';
 
 // Uzmanın görev önerisi: ParentApp "Görev Oluştur" (şablon seçimi) + "Görev ayrıntıları" ekranlarının birebir aynısı.
 // Ebeveyn kabul edince ParentApp görevi bu alanlarla açar (ortak/sozlesme/akislar.md 5.4).
@@ -213,7 +214,7 @@ function Details({ childName, editing, picked, custom, onBack, onClose, onSubmit
     try {
       await onSubmit(list);
     } catch (e) {
-      Alert.alert(editing ? 'Öneri güncellenemedi' : 'Öneri gönderilemedi', (e as Error).message);
+      Alert.alert(editing ? 'Öneri güncellenemedi' : 'Öneri gönderilemedi', errorText(e));
     } finally {
       setBusy(false);
     }

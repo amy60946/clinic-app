@@ -11,6 +11,7 @@ import {
   NewInvite, ChildAgeGroup, EmailStatus, CHILD_AGE_GROUPS, ageGroupLabel, createInvite, markInvite,
   leftText, sendInviteEmail, emailReasonText, INVITE_HELP,
 } from '../../lib/invites';
+import { errorText } from '../../lib/errors';
 
 // Aileyi davet et (ortak akislar.md 10): 1) ebeveynin e-postası (zorunlu), isteğe bağlı çocuğun adı + yaş grubu, kendi notun
 // → 2) "E-posta gönder": sistem senin adınla e-posta gönderir (Edge Function invite-email). Kullanıcı kararı 28 Ekim 2026:
@@ -80,8 +81,8 @@ function Body({ onClose, clinicId, clinicianName, existing, workspaceName, block
       }
       await send(r.code);
     } catch (e) {
-      const msg = (e as Error).message;
-      Alert.alert('Davet oluşturulamadı', msg.includes('invite_owner_only') ? 'Bu klinikte aile davetini klinik sahibi gönderir.' : msg);
+      const msg = (e as Error)?.message ?? '';   // kod karşılaştırması ham metinle, ekrana errorText (güvenlik denetimi 22 Kasım 2026)
+      Alert.alert('Davet oluşturulamadı', msg.includes('invite_owner_only') ? 'Bu klinikte aile davetini klinik sahibi gönderir.' : errorText(e));
     } finally {
       setBusy(false);
     }

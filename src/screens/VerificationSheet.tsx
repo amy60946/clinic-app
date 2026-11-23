@@ -10,6 +10,7 @@ import { track } from '../lib/track';
 import {
   PROFESSIONS, REASONS, MAX_PDF, VerificationState, CheckResult, loadVerification, submitDocument, checkWarnings, professionLabel,
 } from '../lib/verification';
+import { errorText } from '../lib/errors';
 
 // Belge incelemesi (ortak akislar.md 14): meslek + e-Devlet mezun belgesi (BCBA: sicil no) → ön kontrol → ekip inceler.
 // Onayda ailelere "Uzman diploma belgesini yükledi" + meslek görünür (kullanıcı kararı 14 Kasım 2026, ortak hukuk_notlari M.3; eski "Belgesi incelendi"). Belge karar sonrası silinir.
@@ -35,7 +36,7 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
     loadVerification().then((s) => {
       setState(s);
       if (s && s.enabled !== false && !s.verified_at && (!s.last || ['rejected', 'auto_rejected', 'suspended'].includes(s.last.status))) setForm(true);
-    }).catch((e) => { setState(null); Alert.alert('Yüklenemedi', (e as Error).message); });
+    }).catch((e) => { setState(null); Alert.alert('Yüklenemedi', errorText(e)); });
   }, []);
 
   const p = PROFESSIONS.find((x) => x.key === profession);
@@ -53,7 +54,7 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
       }
       setPdf(f);
     } catch (e) {
-      Alert.alert('Dosya seçilemedi', (e as Error).message);
+      Alert.alert('Dosya seçilemedi', errorText(e));
     }
   };
 
@@ -67,7 +68,7 @@ function Body({ onClose }: { onClose: (changed: boolean) => void }) {
       track('verification.submit', { profession: p.key, check: r?.status ?? 'none' });
       setState(await loadVerification());
     } catch (e) {
-      Alert.alert('Gönderilemedi', (e as Error).message);
+      Alert.alert('Gönderilemedi', errorText(e));
     } finally {
       setBusy(false);
     }

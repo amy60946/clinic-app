@@ -7,6 +7,7 @@ import { Card, Label, Input, Cta, IconButton, Notice, InlineLink } from '../../c
 import {
   KvkkKind, KvkkRequest, KVKK_KINDS, KVKK_NEEDS_DETAIL, KVKK_STATUS, kvkkNo, myKvkkRequests, createKvkkRequest, openLegal,
 } from '../../lib/legal';
+import { errorText } from '../../lib/errors';
 
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 const kindLabel = (k: string) => KVKK_KINDS.find((x) => x.kind === k)?.label ?? 'Başvuru';
@@ -34,7 +35,7 @@ export function KvkkBody({ email, onBack }: { email: string; onBack: () => void 
       setDetail('');
       load();
     } catch (e) {
-      Alert.alert('Başvuru gönderilemedi', (e as Error).message);
+      Alert.alert('Başvuru gönderilemedi', errorText(e));
     } finally {
       setBusy(false);
     }

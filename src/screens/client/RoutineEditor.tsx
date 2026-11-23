@@ -8,6 +8,7 @@ import { ClinicianMe, saveOwnRoutine, deleteOwnRoutine } from '../../lib/clinic'
 import { OwnRoutine, OwnItem, RoutineRepeat, AGE_LABEL, normalizeTime, shiftTime } from '../../lib/routines';
 import { templates, AgeGroup } from '../../templates';
 import { track } from '../../lib/track';
+import { errorText } from '../../lib/errors';
 
 const ICONS = ['sunny-outline', 'moon-outline', 'school-outline', 'home-outline', 'people-outline', 'bicycle-outline', 'book-outline',
   'leaf-outline', 'heart-outline', 'repeat-outline'] as const;
@@ -91,7 +92,7 @@ function Body({ me, editing, teamSize, onClose, onSaved }: {
       track(editing ? 'routine.own_update' : 'routine.own_create', { n: clean.length });
       onSaved();
     } catch (e) {
-      Alert.alert('Kaydedilemedi', (e as Error).message);
+      Alert.alert('Kaydedilemedi', errorText(e));
     } finally {
       setBusy(false);
     }
@@ -99,7 +100,7 @@ function Body({ me, editing, teamSize, onClose, onSaved }: {
   const remove = () => Alert.alert('Rutin silinsin mi?', 'Daha önce gönderilen öneriler etkilenmez.', [
     { text: 'Vazgeç', style: 'cancel' },
     { text: 'Sil', style: 'destructive', onPress: () => deleteOwnRoutine(editing!.id).then(() => { track('routine.own_delete'); onSaved(); })
-      .catch((e) => Alert.alert('Silinemedi', (e as Error).message)) },
+      .catch((e) => Alert.alert('Silinemedi', errorText(e))) },
   ]);
 
   return (

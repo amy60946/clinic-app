@@ -11,9 +11,10 @@ import { track } from '../../lib/track';
 import {
   PlanTarget, PlanGoal, PlanModule, ModuleLog, GoalInput, ModuleInput, Measure, GoalStatus, ModuleStatus, PackageT,
   DOMAINS, GOAL_TEMPLATES, MODULE_TEMPLATES, PACKAGES, MEASURES, TARGET_HINTS, BARRIERS,
-  loadPlan, loadLogs, addGoals, updateGoal, deleteGoal, addModules, updateModule, deleteModule, rateGoal, applyPackage,
+  loadPlan, loadLogs, addGoals, updateGoal, deleteGoal, addModules, updateModule, deleteModule, ModuleHasFamilyLogs, rateGoal, applyPackage,
   goalFromTemplate, moduleFromTemplate, domainLabel, logSummary, lastLogDay, PlanSchemaMissing,
 } from '../../lib/plan';
+import { errorText } from '../../lib/errors';
 
 // Takip planı düzenleyicisi (ortak/sozlesme/akislar.md 12): hedefler + aile programı. Bir paylaşımda (danışan › Plan)
 // ya da aile davetinde taslak olarak çalışır. Şablonlar ortak/veri/takip_sablonlari.json; uzman her alanı düzenler.
@@ -57,13 +58,18 @@ export default function PlanEditor({ target, today, onChanged, readOnly = false,
       setPlan(p);
       if (target.kind === 'link') setLogs(await loadLogs(p.modules.map((m) => m.id)));
     } catch (e) {
-      setError(e instanceof PlanSchemaMissing ? e.message : (e as Error).message);
+      setError(e instanceof PlanSchemaMissing ? e.message : errorText(e));
     }
   }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, [load]);
 
   const changed = () => { load(); onChanged?.(); };
-  const act = (p: Promise<unknown>, what = 'Kaydedilemedi') => p.then(changed).catch((e) => Alert.alert(what, (e as Error).message));
+  const act = (p: Promise<unknown>, what = 'Kaydedilemedi') => p.then(changed).catch((e) => Alert.alert(what, errorText(e)));
+  // ailenin kaydı olan modül silinemez (sunucu ipucu module_has_family_logs): Tamamlandı önerilir
+  const removeModule = (id: string) => deleteModule(id).then(changed).catch((e) => e instanceof ModuleHasFamilyLogs
+    ? Alert.alert('Modül silinemez', 'Ailenin bu modülde uygulama kaydı var; kayıtlar korunur. Modülü Tamamlandı yapabilirsin: aile geçmişini görmeye devam eder, yeni uygulama beklenmez.', [
+      { text: 'Vazgeç', style: 'cancel' }, { text: 'Tamamlandı yap', onPress: () => act(updateModule(id, { status: 'done' })) }])
+    : Alert.alert('Silinemedi', errorText(e)));
 
   if (error) return <Notice icon="construct-outline" text={error} />;
   if (!plan) return <ActivityIndicator color={colors.navy} style={{ marginTop: 24 }} />;
@@ -137,8 +143,8 @@ export default function PlanEditor({ target, today, onChanged, readOnly = false,
               <ModuleCard key={m.id} m={m} isLink={isLink} readOnly={readOnly} logs={logs}
                 onEdit={() => setModuleSheet({ open: true, editing: m })}
                 onStatus={(s) => act(updateModule(m.id, { status: s }))}
-                onDelete={() => Alert.alert('Modül silinsin mi?', 'Ailenin bu modüldeki uygulama kayıtları da silinir.', [
-                  { text: 'Vazgeç', style: 'cancel' }, { text: 'Sil', style: 'destructive', onPress: () => act(deleteModule(m.id), 'Silinemedi') }])} />
+                onDelete={() => Alert.alert('Modül silinsin mi?', 'Ailenin uygulama kaydı olan modül silinmez; o zaman Tamamlandı yapabilirsin.', [
+                  { text: 'Vazgeç', style: 'cancel' }, { text: 'Sil', style: 'destructive', onPress: () => removeModule(m.id) }])} />
             ))}
           </View>
           {!readOnly && <View style={{ marginTop: 10, alignItems: 'flex-start' }}><SmallButton label="+ Modül ekle" onPress={() => setModuleSheet({ open: true })} /></View>}
@@ -338,7 +344,7 @@ export function GoalSheet({ editing, legacy, onClose, onSave, exclude = [] }: {
   const save = async () => {
     if (!f.title.trim()) return Alert.alert('Hedef davranışı yaz.');
     setBusy(true);
-    try { await onSave(f); } catch (e) { Alert.alert('Kaydedilemedi', (e as Error).message); } finally { setBusy(false); }
+    try { await onSave(f); } catch (e) { Alert.alert('Kaydedilemedi', errorText(e)); } finally { setBusy(false); }
   };
 
   if (step === 'pick') {
@@ -435,7 +441,7 @@ export function ModuleSheet({ editing, onClose, onSave }: { editing?: PlanModule
   const save = async () => {
     if (!f.title.trim()) return Alert.alert('Modülün adını yaz.');
     setBusy(true);
-    try { await onSave({ ...f, checklist: checklist.split('\n') }); } catch (e) { Alert.alert('Kaydedilemedi', (e as Error).message); } finally { setBusy(false); }
+    try { await onSave({ ...f, checklist: checklist.split('\n') }); } catch (e) { Alert.alert('Kaydedilemedi', errorText(e)); } finally { setBusy(false); }
   };
 
   if (step === 'pick') {
@@ -489,7 +495,7 @@ export function PackageSheet({ onClose, onApply }: { onClose: () => void; onAppl
   const apply = async () => {
     if (!sel) return;
     setBusy(true);
-    try { await onApply(sel, goalKeys); } catch (e) { Alert.alert('Eklenemedi', (e as Error).message); } finally { setBusy(false); }
+    try { await onApply(sel, goalKeys); } catch (e) { Alert.alert('Eklenemedi', errorText(e)); } finally { setBusy(false); }
   };
 
   if (!sel) {

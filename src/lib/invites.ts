@@ -147,6 +147,10 @@ export function emailReasonText(r: EmailResult): string {
     case 'too_soon': return 'Aynı davete bir dakika içinde yeniden e-posta gönderilemez.';
     case 'limit_invite': return 'Bu davete en çok 3 e-posta gönderilebilir. Kodu kopyalayıp kendin ilet.';
     case 'limit_day': return 'Bugün çok fazla davet e-postası gönderdin; yarın tekrar dene ya da kodu kendin ilet.';
+    // Sunucu sınırları (ortak migrations/20261121110000_support_invite_limits.sql, functions/invite-email; 22 Kasım 2026)
+    case 'rate_recipient': return 'Bu adrese yeterince davet e-postası gitti; yarın yeniden dene ya da kodu kendin ilet.';
+    case 'rate_clinician': return 'Bugünkü davet e-postası hakkın doldu; yarın yeniden dene ya da kodu kendin ilet.';
+    case 'rate_global': return 'Şu an çok fazla davet gönderiliyor; birkaç dakika sonra yeniden dene.';
     case 'expired': return 'Davetin süresi doldu; yeni davet oluştur.';
     case 'closed': return 'Aile daveti zaten aldı ya da davet kapandı; e-posta gerekmez.';
     case 'no_email': return 'Bu davette e-posta adresi yok. Kodu kopyalayıp kendin ilet.';
