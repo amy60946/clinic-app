@@ -79,14 +79,15 @@ async function step(p, name, fn, marker) {
 }
 async function login(b, who) {
   const ctx = await b.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: +process.env.DSF || 1, isMobile: W < 700, hasTouch: true, locale: 'tr-TR', timezoneId: 'Europe/Istanbul' });
-  await ctx.addInitScript((plan) => { window.__apiLog = []; window.__plan = plan; }, !!process.env.PLAN);
+  await ctx.addInitScript(([plan, training]) => { window.__apiLog = []; window.__plan = plan; window.__training = training; }, [!!process.env.PLAN, !!process.env.TRAINING]);
   const p = await ctx.newPage(); p.errs = [];
   p.on('pageerror', (e) => p.errs.push(String(e).slice(0, 160)));
   p.on('dialog', (d) => { p.errs.push(`uyarı: ${d.message().slice(0, 160)}`); d.dismiss().catch(() => {}); });
   await p.goto(URL); await p.waitForTimeout(2500);
   await p.evaluate(() => {
     localStorage.setItem('clinicapp.cookie-notice.v1', '1');
-    if (window.__plan) localStorage.setItem('demo.client_config', JSON.stringify({ app: {}, flags: { plan_change_suggestions: true, care_plan: true } }));
+    if (window.__plan) localStorage.setItem('demo.client_config', JSON.stringify({ app: {}, flags: { plan_change_suggestions: true, care_plan: true, parent_training: !!window.__training } }));
+    else if (window.__training) localStorage.setItem('demo.client_config', JSON.stringify({ app: {}, flags: { plan_change_suggestions: true, cancel_flow: true, lifecycle_nudges: true, parent_training: true } }));
     else localStorage.removeItem('demo.client_config');
     const k = 'pofi-onizleme-v4'; const db = JSON.parse(localStorage.getItem(k)); db.sessions = {}; localStorage.setItem(k, JSON.stringify(db));
     for (const u of db.users) {
@@ -105,6 +106,7 @@ async function login(b, who) {
   let { ctx, p } = await login(b, 'uzman');
   const ONLY = process.env.ONLY === 'training';   // ONLY=training: yalnız kütüphane, ebeveyn eğitimi, davranışlar ve olaylar
   const PLAN = !!process.env.PLAN;                // PLAN=1: Takip Planı bayrağı açık (varsayılan kapalı: lansman odağı "A")
+  const TRAINING = !!process.env.TRAINING;        // TRAINING=1: ebeveyn eğitimi bayrağı açık (varsayılan kapalı, 23 Kasım 2026); ONLY=training bunu ister
   await step(p, 'home', async () => {});
   if (!ONLY) {
   await step(p, 'bell', async () => { await tap(p, p.getByRole('button', { name: /Bildirim/ })); });
@@ -136,6 +138,7 @@ async function login(b, who) {
   await step(p, 'settings', async () => { await tap(p, p.getByRole('button', { name: 'Ayarlar', exact: true }), { wait: 1500 }); });
   await closeTop(p, true);
   }
+  if (TRAINING) {
   // Kaynak kütüphanesi (ebeveyn eğitimi, 9 Kasım 2026)
   // dar düzende kütüphane alt ana menüde (17 Kasım 2026); geniş düzende ana ekrandaki satır
   await step(p, 'library', async () => { await tap(p, (await visible(p, 'Kaynak kütüphanesi').count()) ? 'Kaynak kütüphanesi' : p.locator('[role="tab"][aria-label="Kütüphane"]'), { wait: 1800 }); }, 'Ebeveyn eğitimi kaynak kütüphanesi');
@@ -143,8 +146,10 @@ async function login(b, who) {
   await step(p, 'library-assign', async () => { await tap(p, 'Ebeveyn eğitimi olarak ata', { last: true }); }, 'Danışan seç');
   await closeTop(p); await ensureClosed(p);
   await step(p, 'library-back', async () => { await tap(p, 'Ana ekran'); });
+  }
   // danışan
-  await step(p, 'client-open', async () => { await tap(p, p.getByText(/^Nazlı/).filter({ visible: true }), { wait: 2500 }); }, PLAN ? 'Dönem' : 'Ebeveyn eğitimleri');
+  await step(p, 'client-open', async () => { await tap(p, p.getByText(/^Nazlı/).filter({ visible: true }), { wait: 2500 }); }, PLAN ? 'Dönem' : TRAINING ? 'Ebeveyn eğitimleri' : 'Haftalık');
+  await step(p, 'training-menu-state', async () => { const n = await visible(p, 'Ebeveyn Eğitimi').count(); if (TRAINING ? !n : n) throw new Error(TRAINING ? 'Ebeveyn Eğitimi menüde yok' : 'Ebeveyn Eğitimi menüde duruyor'); });
   await step(p, 'plan-menu-state', async () => { const n = await visible(p, 'Takip Planı').count(); if (PLAN ? !n : n) throw new Error(PLAN ? 'Takip Planı menüde yok' : 'Takip Planı menüde duruyor'); });
   await step(p, 'menu-closed', async () => { await tap(p, p.locator('[aria-label="Menüyü kapat"]').filter({ visible: true })); if (await visible(p, 'Danışan Bilgileri').count()) throw new Error('menü kapanmadı'); });
   await step(p, 'menu-open', async () => { await tap(p, p.locator('[aria-label="Menüyü aç"]').filter({ visible: true }).first()); }, 'Danışan Bilgileri');
@@ -163,6 +168,7 @@ async function login(b, who) {
   await step(p, 'plan-library', async () => { await tap(p, p.getByText(/^Kitaplık/).filter({ visible: true })); });
   await closeTop(p);
   }
+  if (TRAINING) {
   // Ebeveyn eğitimi (danışan › Planla)
   await ensureClosed(p);
   const T = 'Ebeveyn zorlayıcı davranışları ABC ile kaydeder ve tetikleyicileri tanır';
@@ -200,6 +206,7 @@ async function login(b, who) {
   await step(p, 'training-preview-player', async () => { await tap(p, 'Başla', { last: true }); });
   await closeTop(p); await ensureClosed(p);
   await step(p, 'training-back', async () => { await tap(p, 'Tüm eğitimler'); }, 'Ebeveyn eğitimleri');
+  }
   // Davranışlar ve Olaylar (danışan › İzle)
   const B = 'Ekranı kapatırken ağlama';
   await step(p, 'behaviors', async () => { await tap(p, 'Davranışlar ve Olaylar', { wait: 2000 }); }, 'Diğer bildirilen olaylar');
@@ -237,8 +244,15 @@ async function login(b, who) {
     }
   }
   }
-  // Örnek aile + eğitim turu (lansman odağı "A"; Takip Planı kapalıyken): Ayarlar › Örnek aileyi aç
-  if (!PLAN) {
+  // Örnek aile + kısa tur (Takip Planı ve ebeveyn eğitimi kapalıyken, 23 Kasım 2026): Ev Rutinleri ile başlar
+  if (!PLAN && !TRAINING) {
+  await ensureClosed(p);
+  await step(p, 'home-again', async () => { if (!(await clickTop(p, p.locator('[aria-label="Danışanlar"]').filter({ visible: true }), 1500))) await tap(p, 'Tüm Danışanlar', { wait: 1500 }); }, 'Aileyi davet et');
+  await step(p, 'tour-intro', async () => { await tap(p, p.getByRole('button', { name: 'Ayarlar', exact: true }), { wait: 1500 }); await tap(p, 'Örnek aileyi aç', { wait: 2000 }); }, 'Deniz’le dene');
+  await step(p, 'tour-routine', async () => { await tap(p, 'Başla', { last: true }); }, 'Ailenin kaydı');
+  }
+  // Örnek aile + eğitim turu (lansman odağı "A"; Takip Planı kapalı, ebeveyn eğitimi açıkken): Ayarlar › Örnek aileyi aç
+  if (!PLAN && TRAINING) {
   await ensureClosed(p);
   await step(p, 'home-again', async () => { if (!(await clickTop(p, p.locator('[aria-label="Danışanlar"]').filter({ visible: true }), 1500))) await tap(p, 'Tüm Danışanlar', { wait: 1500 }); }, 'Aileyi davet et');
   await step(p, 'tour-intro', async () => { await tap(p, p.getByRole('button', { name: 'Ayarlar', exact: true }), { wait: 1500 }); await tap(p, 'Örnek aileyi aç', { wait: 2000 }); }, 'Deniz’le dene');

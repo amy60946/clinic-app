@@ -77,6 +77,7 @@ export function buildReportHtml(r: ReportInput): string {
   .stat b{font-size:18px;display:block} .ok{color:#2F7D4A;font-size:10px}
   .limits{margin-top:22px;padding:10px 12px;background:#F5F6F8;border-radius:8px;color:#5a6274;font-size:11px}
   @media print{body{margin:16mm} h2{break-after:avoid} tr{break-inside:avoid}}
+  @media screen and (max-width:520px){body{margin:14px} th,td{padding:4px 3px} th{font-size:9px;letter-spacing:0} .bar{width:36px} table{display:block;overflow-x:auto}}
 </style></head><body>
 <h1>Ev rutini gözlem raporu</h1>
 <div class="meta">${esc(r.childLabel)}${r.age ? ` · ${esc(r.age)}` : ''} · ${d(from)} – ${d(lastFullDay(r.today))} (${r.weeks} hafta) · ${esc(r.clinic)} · ${esc(r.clinician)} · hazırlandı ${d(r.today)}</div>
