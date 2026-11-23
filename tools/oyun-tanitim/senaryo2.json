@@ -1,0 +1,253 @@
+{
+ "gecis": 0.6,
+ "kapanis": "kapanis/kareler",
+ "sahneler": [
+  {
+   "klasor": "v2/evim",
+   "kirp": [
+    0,
+    149
+   ],
+   "bolum": "Pofi Adası",
+   "etiketler": [
+    {
+     "metin": "Pofi Adası",
+     "ust": "Okti'nin evi",
+     "bas": 0.4,
+     "son": 4.6
+    }
+   ],
+   "balonlar": [
+    {
+     "metin": "Sevgi ve güç göstergesi",
+     "kutu": [
+      170,
+      150
+     ],
+     "hedef": [
+      122,
+      98
+     ],
+     "bas": 0.7,
+     "son": 4.7
+    },
+    {
+     "metin": "Çanta",
+     "kutu": [
+      150,
+      300
+     ],
+     "hedef": [
+      106,
+      378
+     ],
+     "bas": 1.3,
+     "son": 4.7
+    },
+    {
+     "metin": "Bugünün maceraları",
+     "kutu": [
+      690,
+      122
+     ],
+     "hedef": [
+      1082,
+      70
+     ],
+     "bas": 1.9,
+     "son": 4.7
+    },
+    {
+     "metin": "Harita",
+     "kutu": [
+      1010,
+      200
+     ],
+     "hedef": [
+      1190,
+      86
+     ],
+     "bas": 2.5,
+     "son": 4.7
+    }
+   ]
+  },
+  {
+   "klasor": "v2/pano2",
+   "kirp": [
+    0,
+    107
+   ],
+   "bolum": "Görevler panosu",
+   "etiketler": [
+    {
+     "metin": "Görevler panosu",
+     "ust": "Ailenden gelen maceralar",
+     "bas": 0.4,
+     "son": 3.3
+    }
+   ]
+  },
+  {
+   "klasor": "v2/pano2",
+   "kirp": [
+    124,
+    251
+   ],
+   "dondur": [
+    [
+     150,
+     2.6
+    ]
+   ],
+   "bolum": "",
+   "maske": [
+    [
+     514,
+     10,
+     252,
+     58,
+     124,
+     246
+    ]
+   ],
+   "balonlar": [
+    {
+     "metin": "Ailenden gelen macera",
+     "kutu": [
+      150,
+      560
+     ],
+     "hedef": [
+      117,
+      372
+     ],
+     "bas": 0.6,
+     "son": 3.95
+    },
+    {
+     "metin": "Yap, sonra Yaptım'a dokun",
+     "kutu": [
+      700,
+      140
+     ],
+     "hedef": [
+      765,
+      291
+     ],
+     "bas": 1.5,
+     "son": 4.15
+    },
+    {
+     "metin": "Ailen onaylayınca inci kazanırsın",
+     "kutu": [
+      680,
+      140
+     ],
+     "hedef": [
+      737,
+      280
+     ],
+     "bas": 4.35,
+     "son": 6.6
+    }
+   ]
+  },
+  {
+   "klasor": "v2/kiskac",
+   "kirp": [
+    70,
+    224
+   ],
+   "bolum": "Kıskaç",
+   "etiket": "Kıskaç'ın dükkânı",
+   "ust": "Dokun, selam versin"
+  },
+  {
+   "klasor": "v2/odun",
+   "kirp": [
+    70,
+    190
+   ],
+   "bolum": "Odun",
+   "etiket": "Odun topla",
+   "ust": "Ormanda",
+   "balonlar": [
+    {
+     "metin": "Odun çantaya gider",
+     "kutu": [
+      160,
+      250
+     ],
+     "hedef": [
+      112,
+      372
+     ],
+     "bas": 2.5,
+     "son": 3.9
+    }
+   ]
+  },
+  {
+   "klasor": "v2/sahil",
+   "kirp": [
+    30,
+    209
+   ],
+   "bolum": "Sahil",
+   "etiket": "Sahil",
+   "ust": "Yengeçler ve iskele"
+  },
+  {
+   "klasor": "v2/tapinak",
+   "kirp": [
+    40,
+    239
+   ],
+   "bolum": "Tapınak",
+   "etiket": "Tapınak",
+   "ust": "Taş yoldan yukarı"
+  },
+  {
+   "klasor": "v2/kulube-kamp2",
+   "kirp": [
+    0,
+    260
+   ],
+   "bolum": "Oyun kulübesi",
+   "etiketler": [
+    {
+     "metin": "Oyun kulübesi",
+     "bas": 0.4,
+     "son": 3.6
+    },
+    {
+     "metin": "Kamp alanı",
+     "ust": "Ateşe odun at",
+     "bas": 4.6,
+     "son": 8.4
+    }
+   ]
+  },
+  {
+   "klasor": "v2/kosu",
+   "kirp": [
+    51,
+    119
+   ],
+   "bolum": "Gezegen Koşusu",
+   "etiket": "Gezegen Koşusu",
+   "ust": "Uzay oyunu"
+  },
+  {
+   "klasor": "v2/magara",
+   "kirp": [
+    30,
+    179
+   ],
+   "bolum": "Mağara",
+   "etiket": "Mağara",
+   "ust": "Güneş Taşı koy"
+  }
+ ]
+}

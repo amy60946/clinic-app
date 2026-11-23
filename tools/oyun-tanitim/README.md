@@ -59,3 +59,13 @@ Baloo 2 ExtraBold `<oyun>/Assets/_Pofi/Resources/Fonts/`), 0,4 sn geçişler, ka
 `tools/cati-sayfa/inline-moyo-oyun.svg` + "Okti ile Pofi Adası"), baştan siyahtan açılış ve sonda kararma, oyunun kendi müziği
 (`<oyun>/Assets/_Pofi/Resources/Audio/music_island_pcm.bytes`: 22050 Hz, mono, 16 bit, kodla bestelendi). Video iki geçişli ~2,3 Mb/sn
 (1280 × 720, 30 kare/sn, ~25 sn, ~8 MB). Betikteki oyun yolları `/workspace/amy60946/game-app`; başka yerde klonlandıysa değiştir.
+
+## İkinci sürüm (23 Kasım 2026, kullanıcının geri bildirimi)
+
+Oyunun arayüzü açık (sevgi ve güç göstergesi, çanta, maceralar, harita balonlarla), görevler panosu geniş açıdan + içeride "Ailenden" / "Yaptım" / "Ailen bakıyor" anlatımı, Kıskaç'la selamlaşma, odun, geniş sahil, tapınakta doğru yol, kapısız kulübe → kamp alanı, Gezegen Koşusu, mağara, yükleme ekranı kapanışı, oyunda olmayan tanıtım müziği. 52,9 sn.
+
+- Çekim: `cap.js` (`rec` var olan klasöre ekler, `tap x y` dokunma halkası). Komutlar ve kareler çalışma klasöründe (`v2/<sahne>/`, `v2/cmd/<sahne>.sh`), depoya girmez.
+- Kurgu: `python3 -I kurgu2.py senaryo2.json <çıktı>` (`senaryo2.json` yolları `v2/`'ye göre). Sahne başına `kirp`, `etiket`/`etiketler` (sırayla birkaç mekân etiketi), `balonlar` (metin, kutu, hedef, bas, son), `dondur` ([kare, saniye]: balon okunsun diye durur), `maske` ([x, y, g, y, ilk, son]: deneme sürümünün "Ebeveyn (deneme)" düğmesi çevresinden doldurulur), `gecis_tur`.
+- Kapanış: `kapanis/kapanis.html` (oyunun yükleme ekranı: başlık, dolan çubuk, ipuçları, bulutlar, beyaz örtü altında anahtar görsel) → `NODE_PATH=… node kapanis/cek.js <kareler> 5.6 30`.
+- Müzik: `python3 -I muzik_tanitim.py <wav> [saniye]` (118 BPM Sol majör, kodla, telifsiz; oyunun müziğinden ayrı).
+- Oyunda kalan işler (Oyun penceresi): panodaki dünya yazısı "Ev Görevleri", Kıskaç'ın selam balonunun kuyruğu Okti'yi gösteriyor, kulübe kapısı tasarımı.

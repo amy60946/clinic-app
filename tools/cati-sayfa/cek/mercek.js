@@ -13,7 +13,9 @@ const IMG = path.resolve(__dirname, '../img');
 const TMP = path.join(os.tmpdir(), 'cati-cek');
 fs.mkdirSync(TMP, { recursive: true });
 // Telefon: 390×844 nokta ×2 (çatı sayfadaki öteki telefon görselleriyle aynı oran)
-kit.DEVICES.tel = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, cursor: 'touch', out: [780, 1688],
+// CEK_H=700 CEK_EK=-m: telefon sürümü (23 Kasım 2026) → mercek-*-tel-m.webp, 820 genişlik
+const CEK_H = +(process.env.CEK_H || 844), CEK_EK = process.env.CEK_EK || '';
+kit.DEVICES.tel = { viewport: { width: 390, height: CEK_H }, deviceScaleFactor: CEK_EK ? 2.2 : 2, isMobile: true, hasTouch: true, cursor: 'touch', out: [CEK_EK ? 858 : 780, Math.round(CEK_H * (CEK_EK ? 2.2 : 2))],
   userAgent: kit.DEVICES.phone.userAgent };
 const only = process.argv.slice(2);
 const want = (n) => !only.length || only.includes(n);
@@ -37,11 +39,11 @@ async function run(device, tel) {
     if (want(tel ? 'mercek-egitim-tel' : 'mercek-egitim')) {
       await openTraining(p);
       await tab(p, 'Öğrenme modülleri').click(); await p.waitForTimeout(1200);
-      await park(p, tel); await shot(p, tel ? 'mercek-egitim-tel' : 'mercek-egitim', tel ? 600 : 1440);
+      await park(p, tel); await shot(p, tel ? 'mercek-egitim-tel' + CEK_EK : 'mercek-egitim', tel ? (CEK_EK ? 820 : 600) : 1440);
     }
     if (want(tel ? 'mercek-rutin-tel' : 'mercek-rutin')) {
       await section(p, 'Ev Rutinleri');
-      await park(p, tel); await shot(p, tel ? 'mercek-rutin-tel' : 'mercek-rutin', tel ? 600 : 1440);
+      await park(p, tel); await shot(p, tel ? 'mercek-rutin-tel' + CEK_EK : 'mercek-rutin', tel ? (CEK_EK ? 820 : 600) : 1440);
     }
     if (!tel && want('mercek-davranis')) {
       await section(p, 'Davranışlar ve Olaylar');

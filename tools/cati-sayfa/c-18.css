@@ -188,3 +188,10 @@
 .sayfa-c .dongu-b.js .d-kart { opacity: .62; transform: scale(.95); filter: blur(1px); }
 .sayfa-c .dongu-b.js .d-kart.on { opacity: 1; transform: none; filter: none; }
 @media (prefers-reduced-motion: reduce) { .sayfa-c .dongu-b.js .d-kart { filter: none; transform: none; } }
+
+/* ---------- Telefon sürümü (23 Kasım 2026, kullanıcı: Mercek'teki "iyileştirilmiş telefon görüntüsü" formatı) ----------
+   Kartlardaki telefon ekranları yüksekliğe göre değil kart genişliğine göre büyür: 179 → ~270 px (yazı ~1,5 kat). Ekranlar aynı,
+   telefon boyu 390 × 700 (img/*-m.webp, 820 px; alt menü görünür kalır). Görsel kutusu bu ekrana göre uzar; oyun ve çizim kartları ortalanır. */
+@media (max-width: 699px) {
+  .sayfa-c .d-mobil { --dg: min(520px, calc((var(--kw) - 30px) * 1.8)); }
+}
