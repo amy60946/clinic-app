@@ -1,0 +1,73 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Kapanış</title>
+<style>
+/* Moyo Oyun yükleme ekranı (oyunun web yükleyicisi tools/preview/index.html ve UI/LoadingCover dili) kare kare: render(t) ile çizilir.
+   0–3,2 sn: yükleme görselleri (Y1, Y4, Y2) art arda, "Moyo Oyun" başlığı, ipucu, güneş rengi çubuk dolar.
+   3,2–4,0 sn: bulutlar kenarlardan ortaya gelir (oyunun sis teması). 4,0–5,6 sn: bulutlar aralanır, son kare. */
+@font-face { font-family: Baloo; src: url('file:///workspace/amy60946/game-app/Assets/_Pofi/Resources/Fonts/Baloo2-ExtraBold.ttf'); }
+:root { --sky: #5CC7FA; --sun: #FFB21A; --white: #FFFFFF; --ink: #0F2B45; }
+html, body { margin: 0; width: 1280px; height: 720px; overflow: hidden; background: var(--sky); font-family: Baloo, sans-serif; }
+.art { position: absolute; inset: 0; background-size: cover; background-position: center 60%; opacity: 0; transform-origin: 50% 18%; }
+.beyaz { position: absolute; inset: 0; background: #fff; opacity: 0; }
+.shade { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(10,40,80,.50), rgba(10,40,80,0) 36%, rgba(10,40,80,0) 66%, rgba(10,40,80,.48)); }
+.box { position: absolute; left: 50%; top: 52px; transform: translateX(-50%); width: 560px; text-align: center; display: grid; gap: 14px; }
+h1 { margin: 0; font-size: 92px; line-height: 1; font-weight: 800; color: var(--white); letter-spacing: 1px; text-shadow: 0 6px 0 #E8761A, 0 14px 26px rgba(0,0,0,.38); }
+.alt { margin: 0; font-size: 30px; color: var(--white); text-shadow: 0 3px 8px rgba(0,0,0,.45); }
+.bar { height: 22px; border-radius: 999px; background: rgba(255,255,255,.6); overflow: hidden; box-shadow: 0 3px 0 rgba(0,0,0,.15) inset; margin: 4px 40px 0; }
+.bar i { display: block; height: 100%; width: 0; background: var(--sun); border-radius: 999px; }
+.tip { position: absolute; left: 50%; bottom: 34px; transform: translateX(-50%); max-width: 860px; padding: 12px 26px; border-radius: 999px; background: rgba(255,255,255,.92); color: var(--ink); font-size: 26px; white-space: nowrap; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.cloud { position: absolute; top: -12%; bottom: -12%; width: 64%; background:
+  radial-gradient(closest-side, #fff 62%, rgba(255,255,255,0)) 10% 20% / 46% 34% no-repeat, radial-gradient(closest-side, #fff 62%, rgba(255,255,255,0)) 40% 55% / 58% 40% no-repeat,
+  radial-gradient(closest-side, #fff 62%, rgba(255,255,255,0)) 15% 85% / 50% 34% no-repeat, radial-gradient(closest-side, #fff 62%, rgba(255,255,255,0)) 70% 30% / 44% 32% no-repeat,
+  radial-gradient(closest-side, #fff 70%, rgba(255,255,255,0)) 60% 75% / 60% 40% no-repeat; }
+.cloud.l { left: -14%; } .cloud.r { right: -14%; }
+.son { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; }
+.son .ic { text-align: center; display: grid; gap: 10px; }
+.son h1 { font-size: 120px; }
+.son .alt { font-size: 36px; }
+</style>
+<div class="art" id="a0" style="background-image:url('file:///workspace/amy60946/game-app/Assets/_Pofi/Resources/Art/load_beach.jpg')"></div>
+<div class="art" id="a1" style="background-image:url('file:///workspace/amy60946/game-app/Assets/_Pofi/Resources/Art/load_residents.jpg')"></div>
+<div class="art" id="a2" style="background-image:url('file:///workspace/amy60946/game-app/Assets/_Pofi/Resources/Art/load_okti.jpg')"></div>
+<div class="art" id="a3" style="background-image:url('file:///workspace/amy60946/game-app/tools/preview/keyart.jpg')"></div>
+<div class="shade"></div>
+<div class="box" id="box"><h1>Moyo Oyun</h1><p class="alt">Pofi Adası</p><div class="bar"><i id="fill"></i></div></div>
+<div class="tip" id="tip"></div>
+<div class="son" id="son"><div class="ic"><h1>Moyo Oyun</h1><p class="alt">Pofi Adası</p></div></div>
+<div class="cloud l" id="cl"></div><div class="cloud r" id="cr"></div><div class="beyaz" id="bz"></div>
+<script>
+// İpuçları oyunun yükleme ekranından (tools/preview/index.html ARTS), görsellerle aynı sırada
+const TIPS = ["Okti'ye dokun, sana bir hareket yapsın.", "Kıskaç'ın dükkânında yeni şeyler var.", "Evde yaptığın her iyilik bir Güneş Taşı olur."];
+const ease = x => x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+const cl = (v, a, b) => Math.max(a, Math.min(b, v));
+window.render = function (t) {
+  // görseller: 0–1.1 plaj, 1.1–2.2 adalılar, 2.2–3.4 Okti; aralarda 0,35 sn geçiş; hafif yakınlaşma
+  const seg = [[0, 1.1], [1.1, 2.2], [2.2, 4.0]];
+  seg.forEach(([a, b], i) => {
+    const el = document.getElementById('a' + i);
+    const inA = i === 0 ? 1 : cl((t - a) / 0.35, 0, 1), outA = i === 2 ? 1 : 1 - cl((t - b) / 0.35, 0, 1);
+    el.style.opacity = String(Math.min(inA, outA));
+    el.style.transform = `scale(${1.18 + 0.05 * cl((t - a) / 2.2, 0, 1)})`;
+  });
+  const k = t < 1.1 ? 0 : t < 2.2 ? 1 : 2;
+  const tip = document.getElementById('tip'); tip.textContent = TIPS[k];
+  tip.style.opacity = String(1 - cl((t - 2.9) / 0.35, 0, 1));
+  document.getElementById('fill').style.width = (100 * ease(cl(t / 3.1, 0, 1))).toFixed(1) + '%';
+  // bulutlar kenarların dışından gelir (3.0–3.9), ortada üst üste biner; beyaz örtü (3.7–4.15) görsel değişimini gizler; 4.15–5.0 aralanır
+  const gir = ease(cl((t - 3.0) / 0.9, 0, 1)), cik = ease(cl((t - 4.15) / 0.85, 0, 1));
+  const x = (-110 + 138 * gir) - 140 * cik;   // bulutun kendi genişliğinin yüzdesi
+  document.getElementById('cl').style.transform = `translateX(${x}%)`;
+  document.getElementById('cr').style.transform = `scaleX(-1) translateX(${x}%)`;
+  document.getElementById('cl').style.opacity = document.getElementById('cr').style.opacity = String(t > 2.95 && t < 5.1 ? 1 : 0);
+  document.getElementById('bz').style.opacity = String(Math.min(cl((t - 3.7) / 0.25, 0, 1), 1 - cl((t - 4.15) / 0.4, 0, 1)));
+  // bulutların arkasında son kare: anahtar görsel + büyük başlık
+  const s = t >= 4.0;
+  document.getElementById('a3').style.opacity = s ? '1' : '0';
+  document.getElementById('a3').style.transform = `scale(${1.08 - 0.06 * ease(cl((t - 4.0) / 1.6, 0, 1))})`;
+  document.getElementById('son').style.opacity = s ? '1' : '0';
+  document.getElementById('box').style.opacity = s ? '0' : '1';
+  document.getElementById('son').style.transform = `scale(${0.94 + 0.06 * ease(cl((t - 4.2) / 0.9, 0, 1))})`;
+};
+render(0);
+</script>

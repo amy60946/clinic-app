@@ -60,9 +60,17 @@ html = f'''{M.bas(F["baslik"], F["aciklama"], "/ebeveyn/fiyat/")}
           <p class="note">{e(P["not"])}</p>
           <p class="price"><span class="amount">{e(P["tutar"])}</span> <span class="unit">{e(P["birim"])}</span></p>
           <div class="fy-kosul"><p class="fy-yillik">ya da <b>{e(P["yillik"]).replace(" ", "&nbsp;")}</b>&nbsp;{e(P["yillik_birim"]).replace(" ", "&nbsp;")} <span class="fy-hediye">{e(P["yillik_rozet"])}</span></p><p>{e(P["donem"])}</p><p>{e(P["yenileme"])}</p></div>
+          <p class="app-al"><svg class="satin-ikon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10.5 18.5h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>{e(F["satin"]["kart"])}</p>
           <a class="btn btn-cta block" href="{M.APP}#kayit">14 gün ücretsiz deneyin</a>
           <ul>{liste(P["madde"])}</ul>
         </article>
+      </div>
+
+      <!-- 23 Kasım 2026 (kullanıcı isteği): satın almanın uygulama içinden yapıldığı açıkça görünsün (f-metin.json "satin") -->
+      <div class="satin" role="note" aria-labelledby="h-satin">
+        <div class="satin-bas"><svg class="satin-ikon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10.5 18.5h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><h2 id="h-satin">{e(F["satin"]["baslik"])}</h2></div>
+        <ol>{"".join(f'<li><b>{e(a)}</b><span>{e(b)}</span></li>' for a, b in F["satin"]["adim"])}</ol>
+        <p class="satin-not">{e(F["satin"]["not"])}</p>
       </div>
 
       <div class="fy-oyun">

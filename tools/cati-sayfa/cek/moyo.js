@@ -18,6 +18,8 @@ const TMP = path.join(os.tmpdir(), 'cati-cek');
 fs.mkdirSync(TMP, { recursive: true });
 const shots = JSON.parse(fs.readFileSync(path.join(__dirname, 'moyo.json'), 'utf8'));
 const only = process.argv.slice(2);
+// Telefon sürümü (23 Kasım 2026): CEK_H=700 CEK_EK=-m → img/<ad>-m.webp, 820 genişlik (çatı ve Ebeveyn sayfasında telefonda kart genişliğinde, 3 kat ekranda keskin)
+const CEK_H = +(process.env.CEK_H || 844), CEK_EK = process.env.CEK_EK || '', CEK_GEN = process.env.CEK_GEN || '600', CEK_DSF = CEK_EK ? 2.2 : 2;
 const KEY = 'pofi-onizleme-v14';   // parent-app preview/demo-supabase.ts KEY (store/capture/prep.js ile aynı)
 const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-family:BlinkMacSystemFont;src:local('${['Inter', 'Inter Medium', 'Inter SemiBold', 'Inter Bold', 'Inter ExtraBold', 'Inter Black'][i]}');font-weight:${w}}`).join('\n');
 
@@ -25,7 +27,7 @@ const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-famil
   const b = await chromium.launch();
   for (const s of shots) {
     if (only.length && !only.includes(s.name)) continue;
-    const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'tr-TR', timezoneId: 'Europe/Istanbul', colorScheme: 'light' });
+    const ctx = await b.newContext({ viewport: { width: 390, height: CEK_H }, deviceScaleFactor: CEK_DSF, locale: 'tr-TR', timezoneId: 'Europe/Istanbul', colorScheme: 'light' });
     const p = await ctx.newPage();
     p.on('pageerror', (e) => console.log('HATA', s.name, String(e.message).slice(0, 160)));
     await p.addInitScript((css) => { document.addEventListener('DOMContentLoaded', () => { const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st); }); }, FONT);
@@ -48,15 +50,16 @@ const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-famil
       }, KEY);
       await p.reload(); await p.waitForTimeout(2500);
     }
-    if (s.keep || s.noSessions) {
+    if (s.keep || s.noSessions || s.sade) {
       // Uzmanım ekranı: uzmanın bekleyen rutin ve adım önerileri görünsün (değişiklik önerisi hariç); randevular bu çekimde yok
-      await p.evaluate(({ K, keep, noSessions }) => {
+      await p.evaluate(({ K, keep, noSessions, sade }) => {
         const db = JSON.parse(localStorage.getItem(K));
         if (keep) JSON.parse(localStorage.getItem('__cek_pending') || '[]').filter((x) => x.kind !== 'change')
           .forEach((x) => { if (!db.clinic_task_suggestions.some((y) => y.id === x.id)) db.clinic_task_suggestions.push(x); });
         if (noSessions) db.clinic_sessions = [];
+        if (sade) db.parent_training_todos = [];   // sade: Bugün yapılacaklar'da yalnız eğitimin iki uygulama görevi
         localStorage.setItem(K, JSON.stringify(db));
-      }, { K: KEY, keep: !!s.keep, noSessions: !!s.noSessions });
+      }, { K: KEY, keep: !!s.keep, noSessions: !!s.noSessions, sade: !!s.sade });
       await p.reload(); await p.waitForTimeout(2500);
     }
     for (const raw of s.steps || []) {
@@ -77,15 +80,48 @@ const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-famil
       await p.waitForTimeout(900);
       try { await p.getByText(lb, { exact: true }).first().click({ timeout: 1200 }); } catch { try { await p.getByLabel(lb, { exact: true }).first().click({ timeout: 1200 }); } catch { /* yoksa geç */ } }
     }
+    // hideBlock "Başlık|İçerik": başlığı tam eşleşen yazıdan yukarı çıkıp içeriği de kapsayan ilk bloğu gizler (ör. boş Randevular bölümü)
+    for (const spec of s.hideBlock || []) await p.evaluate(([h, ic]) => {
+      // yalnız görünen ekrandaki eşleşme (gezinme önceki ekranları da DOM'da tutar)
+      const el = Array.from(document.querySelectorAll('div, span')).find((e) => e.childElementCount === 0 && e.textContent.trim() === h && e.getClientRects().length && e.getBoundingClientRect().width > 0);
+      let a = el; while (a && !a.textContent.includes(ic)) a = a.parentElement;
+      // yalnız küçük bir blok gizlenir (başlık + içerik); daha büyüğüne çıktıysa bir şey yapma
+      const ok = a && a !== document.body && a.textContent.length < h.length + ic.length + 120;
+      if (ok) {
+        // satırın kendisi (ok simgesi, çizgi): yazısı aynı kalan en üst ataya kadar çık; hemen önündeki yazısız ince çizgiyi de gizle
+        const harf = (x) => x.textContent.replace(/[^\p{L}\p{N}]/gu, '');   // ok simgesi yazı tipiyle çizildiği için yalnız harf ve rakam karşılaştırılır
+        const t = harf(a);
+        while (a.parentElement && a.parentElement !== document.body && harf(a.parentElement) === t) a = a.parentElement;
+        a.style.display = 'none';
+        const once = a.previousElementSibling;
+        if (once && !once.textContent.trim() && once.getBoundingClientRect().height <= 2) once.style.display = 'none';
+      }
+      return `${h}: ${el ? 'bulundu' : 'yok'}, blok ${a ? a.textContent.length : 0} harf, ${ok ? 'gizlendi' : 'atlandı'}`;
+    }, spec.split('|')).then((r) => { if (process.env.CEK_DEBUG) console.log('GİZLE', r); });
     for (const sel of s.hide || []) await p.evaluate((q) => document.querySelectorAll(q).forEach((e) => { e.style.display = 'none'; }), sel);
+    // telefon sürümü: yüzen alt menünün üst kenarı bir başlığı ortadan kesmesin diye çekimden önce biraz kaydır (moyo.json "mScroll")
+    if (CEK_EK && s.mScroll) { await p.mouse.move(195, 400); await p.mouse.wheel(0, s.mScroll); await p.waitForTimeout(900); }
     await p.waitForTimeout(800);
+    if (CEK_EK && process.env.CEK_DEBUG) {
+      // alt menünün (alttan 22–82 nokta) üst ve alt kenarını kesen yazılar
+      const kes = await p.evaluate((H) => {
+        const out = []; const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        for (let n = w.nextNode(); n; n = w.nextNode()) {
+          const t = n.textContent.trim(); if (!t) continue;
+          const r = document.createRange(); r.selectNodeContents(n); const b = r.getBoundingClientRect();
+          for (const y of [H - 82, H - 22, H]) if (b.top < y && b.bottom > y && b.width > 0) out.push(`${Math.round(b.top)}–${Math.round(b.bottom)} @${y} ${t.slice(0, 40)}`);
+        }
+        return out;
+      }, CEK_H);
+      console.log('KESİLEN', s.name, kes.join(' | ') || 'yok');
+    }
     const text = (await p.evaluate(() => document.body.innerText)).replace(/\n{2,}/g, '\n');
     if (process.env.CEK_DEBUG) console.log(`--- ${s.name}\n${text.slice(0, +process.env.CEK_DEBUG > 1 ? +process.env.CEK_DEBUG : 900)}\n---`);
     if (/macera/i.test(text)) console.log('UYARI', s.name, 'ekranda "macera" geçiyor:', (text.match(/.{0,40}macera.{0,30}/i) || [''])[0].replace(/\n/g, ' '));
     if (!s.skip) {
-      const png = path.join(TMP, s.name + '.png');
+      const png = path.join(TMP, s.name + CEK_EK + '.png');
       await p.screenshot({ path: png });
-      console.log(execFileSync('python3', [path.join(__dirname, 'kucult.py'), png, path.join(IMG, s.name + '.webp'), '600'], { encoding: 'utf8' }).trim());
+      console.log(execFileSync('python3', [path.join(__dirname, 'kucult.py'), png, path.join(IMG, s.name + CEK_EK + '.webp'), CEK_GEN], { encoding: 'utf8' }).trim());
     }
     await ctx.close();
   }
