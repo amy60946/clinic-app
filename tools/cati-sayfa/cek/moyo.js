@@ -50,15 +50,16 @@ const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-famil
       }, KEY);
       await p.reload(); await p.waitForTimeout(2500);
     }
-    if (s.keep || s.noSessions) {
+    if (s.keep || s.noSessions || s.sade) {
       // Uzmanım ekranı: uzmanın bekleyen rutin ve adım önerileri görünsün (değişiklik önerisi hariç); randevular bu çekimde yok
-      await p.evaluate(({ K, keep, noSessions }) => {
+      await p.evaluate(({ K, keep, noSessions, sade }) => {
         const db = JSON.parse(localStorage.getItem(K));
         if (keep) JSON.parse(localStorage.getItem('__cek_pending') || '[]').filter((x) => x.kind !== 'change')
           .forEach((x) => { if (!db.clinic_task_suggestions.some((y) => y.id === x.id)) db.clinic_task_suggestions.push(x); });
         if (noSessions) db.clinic_sessions = [];
+        if (sade) db.parent_training_todos = [];   // sade: Bugün yapılacaklar'da yalnız eğitimin iki uygulama görevi
         localStorage.setItem(K, JSON.stringify(db));
-      }, { K: KEY, keep: !!s.keep, noSessions: !!s.noSessions });
+      }, { K: KEY, keep: !!s.keep, noSessions: !!s.noSessions, sade: !!s.sade });
       await p.reload(); await p.waitForTimeout(2500);
     }
     for (const raw of s.steps || []) {
@@ -79,6 +80,24 @@ const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-famil
       await p.waitForTimeout(900);
       try { await p.getByText(lb, { exact: true }).first().click({ timeout: 1200 }); } catch { try { await p.getByLabel(lb, { exact: true }).first().click({ timeout: 1200 }); } catch { /* yoksa geç */ } }
     }
+    // hideBlock "Başlık|İçerik": başlığı tam eşleşen yazıdan yukarı çıkıp içeriği de kapsayan ilk bloğu gizler (ör. boş Randevular bölümü)
+    for (const spec of s.hideBlock || []) await p.evaluate(([h, ic]) => {
+      // yalnız görünen ekrandaki eşleşme (gezinme önceki ekranları da DOM'da tutar)
+      const el = Array.from(document.querySelectorAll('div, span')).find((e) => e.childElementCount === 0 && e.textContent.trim() === h && e.getClientRects().length && e.getBoundingClientRect().width > 0);
+      let a = el; while (a && !a.textContent.includes(ic)) a = a.parentElement;
+      // yalnız küçük bir blok gizlenir (başlık + içerik); daha büyüğüne çıktıysa bir şey yapma
+      const ok = a && a !== document.body && a.textContent.length < h.length + ic.length + 120;
+      if (ok) {
+        // satırın kendisi (ok simgesi, çizgi): yazısı aynı kalan en üst ataya kadar çık; hemen önündeki yazısız ince çizgiyi de gizle
+        const harf = (x) => x.textContent.replace(/[^\p{L}\p{N}]/gu, '');   // ok simgesi yazı tipiyle çizildiği için yalnız harf ve rakam karşılaştırılır
+        const t = harf(a);
+        while (a.parentElement && a.parentElement !== document.body && harf(a.parentElement) === t) a = a.parentElement;
+        a.style.display = 'none';
+        const once = a.previousElementSibling;
+        if (once && !once.textContent.trim() && once.getBoundingClientRect().height <= 2) once.style.display = 'none';
+      }
+      return `${h}: ${el ? 'bulundu' : 'yok'}, blok ${a ? a.textContent.length : 0} harf, ${ok ? 'gizlendi' : 'atlandı'}`;
+    }, spec.split('|')).then((r) => { if (process.env.CEK_DEBUG) console.log('GİZLE', r); });
     for (const sel of s.hide || []) await p.evaluate((q) => document.querySelectorAll(q).forEach((e) => { e.style.display = 'none'; }), sel);
     // telefon sürümü: yüzen alt menünün üst kenarı bir başlığı ortadan kesmesin diye çekimden önce biraz kaydır (moyo.json "mScroll")
     if (CEK_EK && s.mScroll) { await p.mouse.move(195, 400); await p.mouse.wheel(0, s.mScroll); await p.waitForTimeout(900); }

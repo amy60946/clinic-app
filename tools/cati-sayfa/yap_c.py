@@ -22,6 +22,7 @@ K = json.load(open('c-metin.json'))            # metinler ayrı dosyada
 # Moyo Ekosistemi sahnesinin tam ekran, kırpılmamış gerçek ürün ekranları (örnek veri): tools/cati-sayfa/cek ile çekilir.
 # 1-2-3 kartlarının ekranları c-metin.json "basamak" içinde (sahnedekilerden farklı).
 IMG = {'ebeveyn-onay': 'img/moyo-onay.webp', 'ebeveyn-ekle': 'img/moyo-ekle.webp', 'ebeveyn-uzman': 'img/moyo-uzman.webp', 'oyun-onay': 'img/c-oyun-onay.webp',
+       'ebeveyn-egitim': 'img/moyo-uzman-sade.webp', 'ebeveyn-egitim-m': 'img/moyo-uzman-sade-m.webp',
        'mercek-veri': 'img/mercek-rutin.webp', 'mercek-egitim': 'img/mercek-egitim.webp',
        'mercek-veri-tel': 'img/mercek-rutin-tel.webp', 'mercek-egitim-tel': 'img/mercek-egitim-tel.webp',
        # Telefon sürümü (23 Kasım 2026, kullanıcı: Mercek'teki gibi "aynı formatla optimize et"): aynı ekranlar 390 × 700 telefon boyunda,
