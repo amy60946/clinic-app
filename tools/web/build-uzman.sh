@@ -14,4 +14,17 @@ if [[ "$EXPO_PUBLIC_SUPABASE_KEY" == *.*.* ]] && node -e "const p=JSON.parse(Buf
 fi
 rm -rf "$OUT"
 (cd "$ROOT" && CI=1 npx expo export --clear --platform web --output-dir "$OUT" >/dev/null)
+# Güvenlik başlıkları (güvenlik denetimi 22 Kasım 2026, koordinatör; oturum tarayıcı deposunda olduğu için önce bu Worker):
+# Cloudflare Workers statik dosyalarda _headers okur. Uygulama başka sayfaya gömülemez (frame-ancestors, tıklama tuzağı);
+# betik yalnız kendi paketinden; bağlantı yalnız Supabase'e (REST, Realtime wss, Edge Function, Storage). React Native Web stilleri
+# satır içi yazdığı için style-src 'unsafe-inline'. Rapor önizlemesi betiksiz srcdoc iframe, PDF blob: adresi.
+SB="${EXPO_PUBLIC_SUPABASE_URL%/}"; SBW="wss://${SB#https://}"
+cat > "$OUT/_headers" <<BASLIK
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: $SB; media-src 'self' blob: $SB; font-src 'self' data:; connect-src 'self' $SB $SBW; frame-src 'self' blob: data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+BASLIK
 echo "Hazır: $OUT"

@@ -19,6 +19,7 @@ import {
   INCIDENT_HEADER, BehaviorsNotInstalled,
 } from '../../lib/behaviors';
 import IncidentPreview, { PreviewBehavior } from './IncidentPreview';
+import { errorText } from '../../lib/errors';
 
 const FOOT = { height: 48, marginTop: 0, paddingHorizontal: 18 };
 const HEAD_BTN = { height: 44, marginTop: 0, paddingHorizontal: 16 };
@@ -37,7 +38,7 @@ export default function BehaviorsTab({ client, today, sample }: ClientCtx & { sa
       const [bs, is] = await Promise.all([loadBehaviors(client.link_id), loadIncidents(client.link_id)]);
       setList(bs); setIncidents(is); setError(null);
     } catch (e) {
-      if (e instanceof BehaviorsNotInstalled) setMissing(true); else setError((e as Error).message);
+      if (e instanceof BehaviorsNotInstalled) setMissing(true); else setError(errorText(e));
       setList([]);
     }
   }, [client.link_id]);
@@ -53,14 +54,14 @@ export default function BehaviorsTab({ client, today, sample }: ClientCtx & { sa
   if (!list) return <ActivityIndicator color={colors.navy} style={{ marginTop: 30 }} />;
 
   const toggle = (id: string) => setOpen((o) => { const n = new Set(o); n.has(id) ? n.delete(id) : n.add(id); return n; });
-  const run = async (fn: () => Promise<unknown>) => { try { await fn(); await reload(); } catch (e) { Alert.alert('Kaydedilemedi', (e as Error).message); } };
+  const run = async (fn: () => Promise<unknown>) => { try { await fn(); await reload(); } catch (e) { Alert.alert('Kaydedilemedi', errorText(e)); } };
   const exportCsv = async () => {
     const rows = incidentRows(incidents, list);
     if (!rows.length) return Alert.alert('Dışa aktarılacak olay yok.');
     try {
       const r = await saveTextFile(incidentsCsvName(client.child_name, today), toCsv([INCIDENT_HEADER, ...rows]));
       if (r === 'saved') track('export.behaviors', { rows: rows.length });
-    } catch (e) { Alert.alert('Dosya oluşturulamadı', (e as Error).message); }
+    } catch (e) { Alert.alert('Dosya oluşturulamadı', errorText(e)); }
   };
   const gear = (b: TargetBehavior) => (e: any) => openMenu({ items: [
     { label: 'Düzenle', icon: 'create-outline', onPress: () => setSheet({ edit: b }) },

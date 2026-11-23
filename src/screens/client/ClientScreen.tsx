@@ -26,6 +26,7 @@ import BehaviorsTab from '../behaviors/BehaviorsTab';
 import { fromISO } from '../../dates';
 import { SectionHint } from '../SampleTour';
 import { useLayout, LayoutToggle } from '../../lib/layout';
+import { errorText } from '../../lib/errors';
 
 // 'suggestions' eski bağlantılar ve bildirimler için: Ev rutinleri'nde öneri penceresi (Gönderilenler) açılır.
 // "Davranış Kayıtları" bölümü (eski 'abc' sekmesi) 10 Kasım 2026'da menüden kalktı (kullanıcı kararı: güncel özellik Davranışlar ve Olaylar);
@@ -141,7 +142,7 @@ export default function ClientScreen({
       setData(await loadClientData(client.child_id, windowStarts(today, MAX_WEEKS + 1)[0]));
       setError(null);
     } catch (e) {
-      setError((e as Error).message);
+      setError(errorText(e));
     }
   }, [client.child_id, today, sample]);
 
@@ -167,7 +168,7 @@ export default function ClientScreen({
       { text: 'Vazgeç', style: 'cancel' },
       {
         text: 'Sonlandır', style: 'destructive',
-        onPress: () => revokeLink(client.link_id).then(onRevoked).catch((e) => Alert.alert('Sonlandırılamadı', (e as Error).message)),
+        onPress: () => revokeLink(client.link_id).then(onRevoked).catch((e) => Alert.alert('Sonlandırılamadı', errorText(e))),
       },
     ]);
   };

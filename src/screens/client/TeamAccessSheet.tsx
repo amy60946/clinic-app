@@ -5,6 +5,7 @@ import { colors, radius } from '../../theme';
 import { IconButton } from '../../components/ui';
 import { Client, ClinicianMe, Member, assignClient, setResponsible } from '../../lib/clinic';
 import { track } from '../../lib/track';
+import { errorText } from '../../lib/errors';
 
 // Klinik sahibi: bu danışanı hangi ekip üyelerinin göreceğini seçer, sorumlu uzmanı değiştirir.
 // Ekip üyesi yalnız kendi davet ettiği ve kendisine atanan danışanları görür (ortak 20261022100000).
@@ -27,7 +28,7 @@ export default function TeamAccessSheet({ visible, onClose, client, me, team, on
       track('client.assign', { on });
       onChanged();
     } catch (e) {
-      Alert.alert('Kaydedilemedi', (e as Error).message);
+      Alert.alert('Kaydedilemedi', errorText(e));
     } finally {
       setBusy(null);
     }
@@ -43,7 +44,7 @@ export default function TeamAccessSheet({ visible, onClose, client, me, team, on
           track('client.responsible');
           onChanged();
         } catch (e) {
-          Alert.alert('Kaydedilemedi', (e as Error).message);
+          Alert.alert('Kaydedilemedi', errorText(e));
         } finally {
           setBusy(null);
         }

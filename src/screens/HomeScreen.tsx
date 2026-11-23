@@ -55,6 +55,7 @@ import { useNudges, NUDGES_FLAG, serverNudgesOn, nudgeTarget, syncNudgePref, pri
 import { NudgePrimer } from './NudgeParts';
 import type { FamilyInvite } from '../lib/invites';
 import type { Training } from '../lib/training';
+import { errorText } from '../lib/errors';
 
 type State =
   | { kind: 'loading' }
@@ -181,7 +182,7 @@ export default function HomeScreen() {
         next = { kind: 'ready', me, clients, team };
       }
     } catch (e) {
-      next = e instanceof ClinicNotInstalled ? { kind: 'not_installed' } : { kind: 'error', message: (e as Error).message };
+      next = e instanceof ClinicNotInstalled ? { kind: 'not_installed' } : { kind: 'error', message: errorText(e) };
     }
     setState(next);
     stateRef.current = next;
@@ -406,7 +407,7 @@ export default function HomeScreen() {
           await deleteAccount();
           await supabase.auth.signOut({ scope: 'local' });
         } catch (e) {
-          Alert.alert('Hesap silinemedi', (e as Error).message);
+          Alert.alert('Hesap silinemedi', errorText(e));
         }
       },
     }]);

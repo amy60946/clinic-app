@@ -17,6 +17,7 @@ import PublishSheet from '../plan/PublishSheet';
 import { useClientConfig, CARE_PLAN_FLAG } from '../../lib/clientConfig';
 import type { Tab } from '../client/ClientScreen';
 import { SheetHeader, StatusChip, Chips, FieldLabel, Private, s } from './parts';
+import { errorText } from '../../lib/errors';
 
 // Seans ayrıntısı (ortak akislar.md 20, 2–4): Hazırlık = son yapılan seanstan bu yana evde olanlar + kendiliğinden gündem (C);
 // Kayıt = durum, katılanlar, gözlem / çalışılan / sonraki adım (yalnız klinik), aileye ev ödevi (Takip Planı'nın "Aileye gönder"i),
@@ -81,7 +82,7 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
         loadHomework(client, d.tasks, today).then(setHw).catch(() => setHw(null));
       }
     } catch (e) {
-      setLoadErr((e as Error).message);
+      setLoadErr(errorText(e));
     }
   }, [client, session.id, session.starts_at, today]);
   useEffect(() => { load(); }, [load]);
@@ -107,7 +108,7 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
             { text: 'Şimdi değil', style: 'cancel' }, { text: 'Teklif et', onPress: () => onOffer(session) },
           ]);
         }
-      } catch (e) { Alert.alert('Değiştirilemedi', (e as Error).message); }
+      } catch (e) { Alert.alert('Değiştirilemedi', errorText(e)); }
     };
     if (next === 'cancelled' && wouldBeLate(session.starts_at, new Date(), settings.cancel_hours)) {
       Alert.alert('Geç iptal', `Seansa ${settings.cancel_hours} saatten az kaldı; kural gereği "Geç iptal" yazılır${settings.count_late_cancel ? ' ve paketten düşer' : ''}.`, [
@@ -130,12 +131,12 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
       setDirty(false);
       onChanged();
       Alert.alert('Kaydedildi', 'Seans kaydı yalnız klinikte görünür.');
-    } catch (e) { Alert.alert('Kaydedilemedi', (e as Error).message); } finally { setSaving(false); }
+    } catch (e) { Alert.alert('Kaydedilemedi', errorText(e)); } finally { setSaving(false); }
   };
   const remove = () => {
     const run = async (scope: 'one' | 'following') => {
       try { await deleteSession(session.id, scope); track('session.delete', { scope }); onChanged(); onClose(); }
-      catch (e) { Alert.alert('Silinemedi', (e as Error).message); }
+      catch (e) { Alert.alert('Silinemedi', errorText(e)); }
     };
     Alert.alert('Seansı sil', session.visible_to_family && Date.parse(session.starts_at) > Date.now() ? 'Aileye "randevu iptal edildi" bildirimi gider.' : 'Seans takvimden kalkar.',
       session.series_id ? [{ text: 'Vazgeç', style: 'cancel' }, { text: 'Yalnız bu', style: 'destructive', onPress: () => run('one') }, { text: 'Bu ve sonrakiler', style: 'destructive', onPress: () => run('following') }]
