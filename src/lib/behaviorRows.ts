@@ -40,6 +40,17 @@ export type BehaviorFocus = { kind: 'abc' | 'incident'; id: string };
 // Kaydın yeri: açılacak kart (hedef davranış kimliği ya da OTHER), arşivde mi, vurgulanacak satır
 export type FocusPlace = { card: string; archived: boolean; row: string };
 
+// Bildirimden odak: abc_event → data.abc_id (toplu bildirimde data.items[] çocuk başına), behavior_incident → data.incident_id
+export function focusFromNotification(n: { kind: string; data: Record<string, any> }, childId: string): BehaviorFocus | null {
+  if (n.kind === 'abc_event') {
+    const item = Array.isArray(n.data?.items) ? n.data.items.find((i: any) => i?.child_id === childId) : null;
+    const id = item?.abc_id ?? n.data?.abc_id;
+    return typeof id === 'string' ? { kind: 'abc', id } : null;
+  }
+  if (n.kind === 'behavior_incident' && typeof n.data?.incident_id === 'string') return { kind: 'incident', id: n.data.incident_id };
+  return null;
+}
+
 export function locateFocus(f: BehaviorFocus, behaviors: Pick<TargetBehavior, 'id' | 'archived'>[], incidents: Incident[], abc: AbcEvent[]): FocusPlace | null {
   if (f.kind === 'abc') return abc.some((e) => e.id === f.id) ? { card: OTHER, archived: false, row: abcKey(f.id) } : null;
   const i = incidents.find((x) => x.id === f.id);

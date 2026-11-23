@@ -23,6 +23,7 @@ import DetailsTab from './DetailsTab';
 import SessionsTab from './SessionsTab';
 import TrainingTab from '../training/TrainingTab';
 import BehaviorsTab from '../behaviors/BehaviorsTab';
+import { focusFromNotification, type BehaviorFocus } from '../../lib/behaviorRows';
 import { fromISO } from '../../dates';
 import { SectionHint } from '../SampleTour';
 import { useLayout, LayoutToggle } from '../../lib/layout';
@@ -78,7 +79,7 @@ export type ClientCtx = {
 };
 
 export default function ClientScreen({
-  client, me, team = [], clients = [], initialTab = 'summary', sample, focusTab, onBack, onRevoked, onOpenNotification, onTeamChanged, onSwitch, footer, overlay,
+  client, me, team = [], clients = [], initialTab = 'summary', initialFocus = null, sample, focusTab, onBack, onRevoked, onOpenNotification, onTeamChanged, onSwitch, footer, overlay,
 }: {
   client: Client; me: ClinicianMe; team?: Member[]; initialTab?: Tab; onBack: () => void; onRevoked: () => void;
   onOpenNotification: (n: AppNotification) => void;
@@ -89,8 +90,18 @@ export default function ClientScreen({
   footer?: React.ReactNode;
   overlay?: React.ReactNode;                       // örnek ailede yaptırarak öğreten tur: perde + kart, her şeyin üstünde
   focusTab?: Tab;                                  // tur adımı değişince o bölüm açılır
+  initialFocus?: BehaviorFocus | null;             // bildirimden: Davranışlar ve Olaylar'da o kayıt açılır
 }) {
   const [tab, setTab] = useState<Section>(initialTab === 'suggestions' ? 'routine' : initialTab);
+  const [behFocus, setBehFocus] = useState<BehaviorFocus | null>(initialFocus);
+  const scrollRef = useRef<ScrollView>(null);
+  const contentRef = useRef<View>(null);
+  // iOS'ta odaklanan kayda kaydır (web'de BehaviorsTab kendisi kaydırır)
+  const scrollToNode = useCallback((node: View) => {
+    const host = contentRef.current;
+    if (!host) return;
+    node.measureLayout(host as any, (_x, y) => scrollRef.current?.scrollTo({ y: Math.max(0, y - 80), animated: true }), () => {});
+  }, []);
   const [routineView, setRoutineView] = useState<RoutineView>(initialTab === 'suggestions' ? 'suggest' : 'week');
   const [bell, setBell] = useState(false);
   const [access, setAccess] = useState(false);
@@ -179,7 +190,7 @@ export default function ClientScreen({
   // Çocuk satırı görünmüyorsa rıza geri alınmıştır (RLS)
   const revoked = data && !data.child;
   const shown: Client = { ...client, label };
-  const go = (s: Section) => { setTab(s); if (s === 'routine') setRoutineView('week'); };
+  const go = (s: Section) => { setTab(s); setBehFocus(null); if (s === 'routine') setRoutineView('week'); };
   const ctx: ClientCtx | null = data && data.child ? {
     client: shown, me, data, today, weeks: Number(weeks), reload: load,
   } : null;
@@ -254,7 +265,7 @@ export default function ClientScreen({
             {tab === 'summary' && <SummaryTab {...ctx} />}
             {tab === 'routine' && <HomeRoutines {...ctx} view={routineView} onView={setRoutineView} />}
             {tab === 'training' && <TrainingTab {...ctx} sample={!!sample} onDetail={setTrainingOpen} />}
-            {tab === 'behaviors' && <BehaviorsTab {...ctx} sample={!!sample} />}
+            {tab === 'behaviors' && <BehaviorsTab {...ctx} sample={!!sample} focus={behFocus} onScrollTo={scrollToNode} />}
             {tab === 'goals' && <PlanTab {...ctx} />}
             {tab === 'sessions' && (sample
               ? <Notice icon="calendar-outline" text={'Seanslar gerçek danışanlarda görünür: Takvim\'den ya da burada "+ Seans" ile planlanır.'} />
@@ -305,13 +316,14 @@ export default function ClientScreen({
           </View>
         )}
         <ScrollView
+          ref={scrollRef}
           style={{ flex: 1 }}
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
           refreshControl={sample ? undefined : <RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={colors.navy} />}
         >
-          <View style={[styles.column, sidebar && tab === 'goals' && { maxWidth: 1320 }, !!footer && { paddingBottom: 170 }]}>{body}</View>
+          <View ref={contentRef} collapsable={false} style={[styles.column, sidebar && tab === 'goals' && { maxWidth: 1320 }, !!footer && { paddingBottom: 170 }]}>{body}</View>
         </ScrollView>
       </View>
       {/* tanıtım turu içeriğin üstünde, altta durur; içerik altına boşluk bırakılır */}
@@ -331,6 +343,7 @@ export default function ClientScreen({
             // Bu danışanın bildirimi: ilgili bölüme geç; başka danışan ya da ekip: ana ekran yönlendirir
             if (notificationChildren(n).includes(client.child_id) && n.kind !== 'clinic_revoked') {
               const t = notificationTab(n.kind);
+              setBehFocus(focusFromNotification(n, client.child_id));
               setTab(sectionOf(t));
               if (t === 'suggestions') setRoutineView('suggest');
             } else onOpenNotification(n);

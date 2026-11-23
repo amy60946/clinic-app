@@ -42,6 +42,7 @@ import LegalUpdateScreen from './legal/LegalUpdateScreen';
 import { billingStatus, hasAccess, daysLeft, packageName, packageOfProduct } from '../lib/billing';
 import ClientScreen, { Tab } from './client/ClientScreen';
 import NotificationsSheet, { notificationTab } from './NotificationsSheet';
+import { focusFromNotification, type BehaviorFocus } from '../lib/behaviorRows';
 import Bell from '../components/Bell';
 import ClientBoard from './ClientBoard';
 import { useNotifications } from '../lib/notificationsContext';
@@ -99,7 +100,7 @@ export default function HomeScreen() {
   const [state, setState] = useState<State>({ kind: 'loading' });
   const stateRef = useRef(state);
   const [refreshing, setRefreshing] = useState(false);
-  const [selected, setSelected] = useState<{ client: Client; tab: Tab; key: number } | null>(null);
+  const [selected, setSelected] = useState<{ client: Client; tab: Tab; key: number; focus?: BehaviorFocus | null } | null>(null);
   const [attention, setAttention] = useState<Record<string, Attention> | null>(null);
   const [bell, setBell] = useState(false);
   const [plans, setPlans] = useState(false);
@@ -360,7 +361,7 @@ export default function HomeScreen() {
         : 'Bu çocuğun paylaşımı artık etkin değil.');
       return;
     }
-    setSelected({ client: c, tab: notificationTab(n.kind), key: Date.now() });
+    setSelected({ client: c, tab: notificationTab(n.kind), key: Date.now(), focus: focusFromNotification(n, c.child_id) });
   }, [load, ws, refreshToday]);
 
   // Telefon bildirimine dokunma (uygulama kapalıyken de)
@@ -535,7 +536,7 @@ export default function HomeScreen() {
     return (
       <ClientScreen
         key={selected.key}
-        client={selected.client} me={state.me} team={state.team} initialTab={selected.tab}
+        client={selected.client} me={state.me} team={state.team} initialTab={selected.tab} initialFocus={selected.focus ?? null}
         clients={state.clients}
         onSwitch={(c, tab) => setSelected({ client: c, tab, key: Date.now() })}
         onTeamChanged={async () => {
