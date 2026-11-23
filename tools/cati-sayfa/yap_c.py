@@ -23,7 +23,11 @@ K = json.load(open('c-metin.json'))            # metinler ayrı dosyada
 # 1-2-3 kartlarının ekranları c-metin.json "basamak" içinde (sahnedekilerden farklı).
 IMG = {'ebeveyn-onay': 'img/moyo-onay.webp', 'ebeveyn-ekle': 'img/moyo-ekle.webp', 'ebeveyn-uzman': 'img/moyo-uzman.webp', 'oyun-onay': 'img/c-oyun-onay.webp',
        'mercek-veri': 'img/mercek-rutin.webp', 'mercek-egitim': 'img/mercek-egitim.webp',
-       'mercek-veri-tel': 'img/mercek-rutin-tel.webp', 'mercek-egitim-tel': 'img/mercek-egitim-tel.webp'}
+       'mercek-veri-tel': 'img/mercek-rutin-tel.webp', 'mercek-egitim-tel': 'img/mercek-egitim-tel.webp',
+       # Telefon sürümü (23 Kasım 2026, kullanıcı: Mercek'teki gibi "aynı formatla optimize et"): aynı ekranlar 390 × 700 telefon boyunda,
+       # 820 px (cek/moyo.js ve cek/mercek.js CEK_H=700 CEK_EK=-m); kartta kart genişliğinde (c-18.css "Telefon sürümü")
+       'ebeveyn-ekle-m': 'img/moyo-ekle-m.webp', 'ebeveyn-onay-m': 'img/moyo-onay-m.webp',
+       'mercek-veri-tel-m': 'img/mercek-rutin-tel-m.webp', 'mercek-egitim-tel-m': 'img/mercek-egitim-tel-m.webp'}
 e = H.escape
 ONIZ = K.get('oniz', []); ONERI = {g['k']: g['oneri'] for g in ONIZ}
 SEMA = runpy.run_path('c-sema.py')['sema']; LOGO_IC = re.sub(r'^<svg[^>]*>|</svg>$', '', LOGO)
@@ -43,6 +47,7 @@ def tur(key): return 'ebeveyn' if key.startswith('ebeveyn') else ('mercek' if ke
 def cls(key, dar=False): return 'telefon' if key.startswith('ebeveyn') or (dar and key.startswith('mercek')) else ('panel' if key.startswith('mercek') else '')
 def resim(key, alt, c='', dar=False):
     if dar and key.startswith('mercek'): key += '-tel'          # telefonda Moyo Uzman'ın telefon ekranı (masaüstü penceresi okunmaz)
+    if dar and key + '-m' in IMG: key += '-m'                    # telefon ve tablet kartında kısa boylu, keskin telefon ekranı
     return f'<img class="{c}" src="{IMG[key]}" alt="{e(alt)}" loading="lazy" decoding="async">'
 
 def dongu(beats):

@@ -31,7 +31,7 @@
 # kırpılmaz; her neden kendi panelinde, üstte küçük büyük harfli etiket, başlık ve tek cümle, altta telefonda uygulamanın bütün ekranı (panelin
 # alt kenarı yalnızca telefonun altını keser) ve ekranın vurgulanan şeridi aynı yerde ~1,18 kat büyük, telefonun iki kenarından taşan kart
 # olarak (kullanıcının iki örnek görselindeki vurgu biçimi; NZ). Kart aynı görselden kırpılır (CSS), ekrana girince bir kez yerine oturur.
-import json, re, html as H
+import os, json, re, html as H
 E = json.load(open('e-metin.json'))
 e = H.escape
 LOGO = open('inline-moyo-ebeveyn.svg').read().strip()   # kilit: "moyo" yazısı + ince "Ebeveyn" (tools/logo/gen.py; yazı 18 Kasım 2026 seçenek 6)
@@ -222,7 +222,10 @@ tabs = ''.join(f'<button type="button" role="tab" id="nc-t{k}" aria-controls="nc
 def gorsel(g, ek=''):
     kind, src, alt_ = g
     if kind in ('tel', 'kirp'):
-        return f'<figure class="tel{" kirp" if kind == "kirp" else ""}"{ek}><img src="{src}" alt="{e(alt_)}" width="600" height="1298" loading="lazy"><figcaption>Örnek veri</figcaption></figure>'
+        # telefon sürümü (23 Kasım 2026): ≤ 699 px'te aynı ekranın 390 × 700 boylu, 820 px'lik kopyası (img/<ad>-m.webp varsa), kart genişliğinde
+        mob = src.replace('.webp', '-m.webp')
+        kaynak = f'<source media="(max-width: 699px)" srcset="{mob}" width="820" height="1472">' if os.path.exists(mob) else ''
+        return f'<figure class="tel{" kirp" if kind == "kirp" else ""}"{ek}><picture>{kaynak}<img src="{src}" alt="{e(alt_)}" width="600" height="1298" loading="lazy"></picture><figcaption>Örnek veri</figcaption></figure>'
     return f'<figure class="shot"{ek}><img src="{src}" alt="{e(alt_)}" width="1200" height="554" loading="lazy"><figcaption>Örnek veri</figcaption></figure>'
 
 

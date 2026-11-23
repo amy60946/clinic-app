@@ -18,6 +18,8 @@ const TMP = path.join(os.tmpdir(), 'cati-cek');
 fs.mkdirSync(TMP, { recursive: true });
 const shots = JSON.parse(fs.readFileSync(path.join(__dirname, 'moyo.json'), 'utf8'));
 const only = process.argv.slice(2);
+// Telefon sürümü (23 Kasım 2026): CEK_H=700 CEK_EK=-m → img/<ad>-m.webp, 820 genişlik (çatı ve Ebeveyn sayfasında telefonda kart genişliğinde, 3 kat ekranda keskin)
+const CEK_H = +(process.env.CEK_H || 844), CEK_EK = process.env.CEK_EK || '', CEK_GEN = process.env.CEK_GEN || '600', CEK_DSF = CEK_EK ? 2.2 : 2;
 const KEY = 'pofi-onizleme-v14';   // parent-app preview/demo-supabase.ts KEY (store/capture/prep.js ile aynı)
 const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-family:BlinkMacSystemFont;src:local('${['Inter', 'Inter Medium', 'Inter SemiBold', 'Inter Bold', 'Inter ExtraBold', 'Inter Black'][i]}');font-weight:${w}}`).join('\n');
 
@@ -25,7 +27,7 @@ const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-famil
   const b = await chromium.launch();
   for (const s of shots) {
     if (only.length && !only.includes(s.name)) continue;
-    const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, locale: 'tr-TR', timezoneId: 'Europe/Istanbul', colorScheme: 'light' });
+    const ctx = await b.newContext({ viewport: { width: 390, height: CEK_H }, deviceScaleFactor: CEK_DSF, locale: 'tr-TR', timezoneId: 'Europe/Istanbul', colorScheme: 'light' });
     const p = await ctx.newPage();
     p.on('pageerror', (e) => console.log('HATA', s.name, String(e.message).slice(0, 160)));
     await p.addInitScript((css) => { document.addEventListener('DOMContentLoaded', () => { const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st); }); }, FONT);
@@ -83,9 +85,9 @@ const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-famil
     if (process.env.CEK_DEBUG) console.log(`--- ${s.name}\n${text.slice(0, +process.env.CEK_DEBUG > 1 ? +process.env.CEK_DEBUG : 900)}\n---`);
     if (/macera/i.test(text)) console.log('UYARI', s.name, 'ekranda "macera" geçiyor:', (text.match(/.{0,40}macera.{0,30}/i) || [''])[0].replace(/\n/g, ' '));
     if (!s.skip) {
-      const png = path.join(TMP, s.name + '.png');
+      const png = path.join(TMP, s.name + CEK_EK + '.png');
       await p.screenshot({ path: png });
-      console.log(execFileSync('python3', [path.join(__dirname, 'kucult.py'), png, path.join(IMG, s.name + '.webp'), '600'], { encoding: 'utf8' }).trim());
+      console.log(execFileSync('python3', [path.join(__dirname, 'kucult.py'), png, path.join(IMG, s.name + CEK_EK + '.webp'), CEK_GEN], { encoding: 'utf8' }).trim());
     }
     await ctx.close();
   }
