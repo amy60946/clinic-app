@@ -13,6 +13,7 @@ export type Session = {
   family_response: 'ok' | 'unavailable' | null; family_note: string | null; family_responded_at: string | null;
   package_id: string | null; waitlist_id: string | null; offer_expires_at: string | null; external_uid: string | null;
   created_at: string; updated_at: string;
+  fee?: number | string | null;   // TL, uzmanın elle yazdığı ücret (akislar 27.1); eski sunucuda yok
 };
 export type AgendaItem = { text: string; done: boolean; source?: string };
 export type HomeworkItem = { kind: 'suggestion' | 'module' | 'goal'; id: string; title: string };
@@ -206,3 +207,30 @@ const DOW = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 export const shortDay = (day: string) => { const [, m, d] = day.split('-').map(Number); return `${d} ${MON[m - 1]} ${DOW[weekdayOf(day) - 1]}`; };
 export const longDay = (day: string) => { const [y, m, d] = day.split('-').map(Number); return `${d} ${['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'][m - 1]} ${y}, ${WEEKDAY_LONG[weekdayOf(day) - 1]}`; };
 export const sessionWhen = (s: Pick<Session, 'starts_at' | 'duration_min'>) => `${shortDay(trDay(s.starts_at))} · ${timeRange(s)}`;
+
+// Seans ücreti (akislar 27.1): "450", "450,50", "1.200" → sunucuya noktalı metin ("450.50"); boş → null; geçersiz → undefined
+export function parseFee(text: string): string | null | undefined {
+  const t = text.trim().replace(/\s|TL|₺/gi, '');
+  if (!t) return null;
+  // binlik nokta + ondalık virgül (1.200,50) ya da yalnız virgül / nokta ondalık
+  let n = t;
+  if (/^\d{1,3}(\.\d{3})+(,\d{1,2})?$/.test(n)) n = n.replace(/\./g, '').replace(',', '.');
+  else n = n.replace(',', '.');
+  if (!/^\d+(\.\d{1,2})?$/.test(n)) return undefined;
+  const v = Number(n);
+  if (!(v >= 0) || v > 1_000_000) return undefined;
+  return v.toFixed(2);
+}
+// Görünüm: 450 → "450 TL", 450.5 → "450,50 TL", 1200 → "1.200 TL"
+export function feeText(fee: number | string | null | undefined): string | null {
+  if (fee == null || fee === '') return null;
+  const v = Number(fee);
+  if (!Number.isFinite(v)) return null;
+  const whole = Number.isInteger(v);
+  return `${v.toLocaleString('tr-TR', { minimumFractionDigits: whole ? 0 : 2, maximumFractionDigits: 2 })} TL`;
+}
+// Ücretin düzenleme kutusundaki ilk hâli: 450.5 → "450,50", 450 → "450"
+export const feeInput = (fee: number | string | null | undefined) => {
+  const t = feeText(fee);
+  return t ? t.replace(/\sTL$/, '').replace(/\./g, '') : '';
+};

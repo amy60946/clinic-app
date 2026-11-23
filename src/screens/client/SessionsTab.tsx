@@ -6,8 +6,7 @@ import type { Client, Member } from '../../lib/clinic';
 import { observations, addDays } from '../../lib/metrics';
 import {
   DEFAULT_SETTINGS, KIND_LABEL, STATUS_META, RESPONSE_LABEL, attendance, weeklyCells, hasNote, isOfferLeftover, shortDay, trDay, timeRange,
-  type Session, type SessionRecord, type Room, type Availability, type SessionSettings,
-} from '../../lib/sessionCore';
+  type Session, type SessionRecord, type Room, type Availability, type SessionSettings, feeText } from '../../lib/sessionCore';
 import { SessionsNotInstalled, loadLinkSessions, loadRecords, loadSettings, listRooms, listAvailability } from '../../lib/sessions';
 import SessionSheet, { type SessionPreset } from '../calendar/SessionSheet';
 import SessionDetailSheet from '../calendar/SessionDetailSheet';
@@ -105,7 +104,7 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
               <Text style={s.small}>{timeRange(x)}</Text>
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={s.body} numberOfLines={1}>{KIND_LABEL[x.kind]}</Text>
+              <Text style={s.body} numberOfLines={1}>{KIND_LABEL[x.kind]}{feeText(x.fee) ? ` · ${feeText(x.fee)}` : ''}</Text>
               <Text style={s.small}>
                 {[x.status === 'done' && (hasNote(records[x.id]) ? 'Not yazıldı' : 'Not yok'), x.family_response && RESPONSE_LABEL[x.family_response],
                   rate !== null && `arada evde: rutin\u00a0%${rate}`, abc !== null && `${abc}\u00a0davranış kaydı`].filter(Boolean).join(', ')}

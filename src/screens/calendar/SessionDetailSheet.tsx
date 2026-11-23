@@ -9,8 +9,7 @@ import { DECLINE_LABELS, observations, addDays } from '../../lib/metrics';
 import { track } from '../../lib/track';
 import {
   KIND_LABEL, MODE_LABEL, RESPONSE_LABEL, STATUS_META, prepSummary, sessionWhen, trDay, canMarkDone, isClosed, hasNote, outcomeOf,
-  type Session, type SessionRecord, type Room, type AgendaItem, type HomeworkItem, type Prep,
-} from '../../lib/sessionCore';
+  type Session, type SessionRecord, type Room, type AgendaItem, type HomeworkItem, type Prep, feeText } from '../../lib/sessionCore';
 import { loadLinkSessions, loadRecords, saveRecord, setSessionStatus, deleteSession } from '../../lib/sessions';
 import { loadHomework, sendHomework, type Homework } from '../../lib/homework';
 import PublishSheet from '../plan/PublishSheet';
@@ -135,7 +134,7 @@ function Body({ session, client, me, team, rooms, onClose, onChanged, onEdit, on
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.column}>
-        <SheetHeader title={clientName} sub={`${sessionWhen(session)} · ${KIND_LABEL[session.kind]} · ${session.mode === 'in_person' ? (room ? `${room.name}${room.location ? ` · ${room.location}` : ''}` : MODE_LABEL.in_person) : MODE_LABEL[session.mode]}${who && who.id !== me.id ? ` · ${who.name}` : ''}`}
+        <SheetHeader title={clientName} sub={`${sessionWhen(session)} · ${KIND_LABEL[session.kind]} · ${session.mode === 'in_person' ? (room ? `${room.name}${room.location ? ` · ${room.location}` : ''}` : MODE_LABEL.in_person) : MODE_LABEL[session.mode]}${who && who.id !== me.id ? ` · ${who.name}` : ''}${feeText(session.fee) ? ` · ${feeText(session.fee)}` : ''}`}
           onClose={() => { if (dirty) Alert.alert('Kaydedilmedi', 'Kayıttaki değişiklikler kaybolsun mu?', [{ text: 'Vazgeç', style: 'cancel' }, { text: 'Kapat', style: 'destructive', onPress: onClose }]); else onClose(); }}
           right={<View style={{ alignSelf: 'center' }}><StatusChip status={status} /></View>} />
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48, gap: 12 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>

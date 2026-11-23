@@ -8,10 +8,11 @@ import DateField from '../../components/DateField';
 import type { Client, ClinicianMe, Member } from '../../lib/clinic';
 import { track } from '../../lib/track';
 import {
+  parseFee, feeInput,
   KIND_LABEL, MODE_LABEL, trDay, trTime, trToIso, freeStarts, seriesDates, shortDay,
   type Session, type SessionKind, type SessionMode, type Room, type Availability, type SessionSettings, type Busy,
 } from '../../lib/sessionCore';
-import { createSession, updateSession, loadBusy, type Conflict } from '../../lib/sessions';
+import { createSession, updateSession, loadBusy, feeSupported, type Conflict } from '../../lib/sessions';
 import { SheetHeader, Chips, FieldLabel, TimeInput, s } from './parts';
 import { errorText } from '../../lib/errors';
 
@@ -47,6 +48,10 @@ function Body({ me, team, clients, rooms, availability, settings, editing, prese
   const [repeat, setRepeat] = useState<'none' | 'weekly' | 'biweekly'>('none');
   const [count, setCount] = useState(8);
   const [visible, setVisible] = useState(editing ? editing.visible_to_family : true);
+  // Seans ücreti (akislar 27.1): elle yazılır, boş = ücret yok; aile yalnız kendisine gösterilen randevuda görür
+  const fee0 = feeInput(editing?.fee);
+  const [fee, setFee] = useState(fee0);
+  const feeVal = parseFee(fee);
   const [picking, setPicking] = useState(!editing && !preset?.link_id && clients.length > 1);
   const [q, setQ] = useState('');
   const [busy, setBusy] = useState<Busy[] | null>(null);
@@ -65,7 +70,7 @@ function Body({ me, team, clients, rooms, availability, settings, editing, prese
   // bugün için geçmiş saatler önerilmez
   const free = useMemo(() => (busy ? freeStarts(day, availability, busy, clinician ?? me.id, dur, room).filter((t) => Date.parse(trToIso(day, t)) > Date.now()) : []),
     [busy, day, availability, clinician, dur, room, me.id]);
-  const valid = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) && (!!linkId || title.trim().length > 0);
+  const valid = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) && (!!linkId || title.trim().length > 0) && feeVal !== undefined;
   const startsAt = valid ? trToIso(day, time.padStart(5, '0')) : null;
   const dates = startsAt ? seriesDates(startsAt, editing ? 'none' : repeat, count) : [];
   const shown = clients.filter((c) => !q || c.child_name.toLocaleLowerCase('tr-TR').includes(q.toLocaleLowerCase('tr-TR')) || c.label.toLocaleLowerCase('tr-TR').includes(q.toLocaleLowerCase('tr-TR')));
@@ -80,7 +85,9 @@ function Body({ me, team, clients, rooms, availability, settings, editing, prese
     setSaving(true);
     try {
       const input = { link_id: linkId, title: linkId ? null : title.trim(), clinician_id: clinician, starts_at: startsAt, duration_min: dur, kind, mode,
-                      room_id: mode === 'in_person' ? room : null, visible_to_family: !!linkId && visible };
+                      room_id: mode === 'in_person' ? room : null, visible_to_family: !!linkId && visible,
+                      // düzeltmede ücret yalnız değiştiyse gider (serideki öteki seansların ücreti istemeden ezilmesin)
+                      ...(feeSupported() && (!editing || fee.trim() !== fee0) ? { fee: linkId ? feeVal ?? null : null } : {}) };
       if (editing) {
         const { link_id: _l, ...patch } = input;   // danışan sonradan değişmez
         const r = await updateSession(editing.id, patch, scope);
@@ -203,6 +210,17 @@ function Body({ me, team, clients, rooms, availability, settings, editing, prese
               </View>
               <Toggle value={visible} onChange={setVisible} />
             </View>
+          )}
+
+          {!!linkId && feeSupported() && (
+            <>
+              <FieldLabel hint="İsteğe bağlı; boş bırakılırsa ücret yok">Ücret (TL)</FieldLabel>
+              <TextInput value={fee} onChangeText={setFee} placeholder="Ör. 450" placeholderTextColor={colors.muted} keyboardType="decimal-pad"
+                maxLength={12} style={s.input} accessibilityLabel="Seans ücreti (TL)" />
+              {feeVal === undefined
+                ? <Text style={[s.small, { color: colors.danger, marginTop: 6 }]}>Yalnız rakam yaz (ör. 450 ya da 450,50); en çok 1.000.000 TL.</Text>
+                : <Text style={[s.small, { marginTop: 6 }]}>{visible ? 'Aile de Moyo\'da görür.' : 'Aile bu seansı görmediği için ücreti de görmez.'}{editing?.series_id && fee.trim() !== fee0 ? ' Kaydederken hangi seanslara uygulanacağını seçersin.' : ''}</Text>}
+            </>
           )}
 
           <Cta label={editing ? 'Kaydet' : dates.length > 1 ? `${dates.length} seansı kaydet` : 'Kaydet'} onPress={ask} busy={saving} disabled={!valid}

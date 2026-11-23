@@ -111,3 +111,21 @@ test('dış takvim başlığından danışan önerisi (tek eşleşme)', () => {
   assert.equal(matchClient('Ege - kontrol', clients), null);      // iki Ege: belirsiz
   assert.equal(matchClient('Diş hekimi', clients), null);
 });
+
+// Seans ücreti (ortak akislar 27.1, 23 Kasım 2026)
+test('ücret: Türkçe yazımı sunucu biçimine çevirir, geçersizi reddeder', async () => {
+  const { parseFee, feeText, feeInput } = await import('../src/lib/sessionCore.ts');
+  assert.equal(parseFee(''), null);
+  assert.equal(parseFee('450'), '450.00');
+  assert.equal(parseFee('450,5'), '450.50');
+  assert.equal(parseFee('1.200'), '1200.00');
+  assert.equal(parseFee('1.200,75 TL'), '1200.75');
+  assert.equal(parseFee('-5'), undefined);
+  assert.equal(parseFee('12,345'), undefined);
+  assert.equal(parseFee('1000001'), undefined);
+  assert.equal(feeText(450), '450 TL');
+  assert.equal(feeText('450.50'), '450,50 TL');
+  assert.equal(feeText(1200), '1.200 TL');
+  assert.equal(feeText(null), null);
+  assert.equal(feeInput(1200.5), '1200,50');
+});

@@ -28,27 +28,34 @@ const ERRORS: Record<string, string> = {
   calendar_url_not_allowed: 'Bu adres desteklenmiyor. Google, Apple (iCloud) ya da Outlook takviminin gizli iCal adresini yapıştır.',
   too_many_sources: 'En çok 3 dış takvim eklenebilir.',
   event_not_found: 'Etkinlik bulunamadı.',
+  fee_invalid: 'Ücret geçersiz. Yalnız rakam yaz (ör. 450 ya da 450,50); en çok 1.000.000 TL.',
 };
 export const errorText = (m: string) => {
   const k = Object.keys(ERRORS).find((x) => m.includes(x));
   return k ? ERRORS[k] : m;
 };
 
-const COLS = 'id, clinic_id, clinician_id, link_id, title, series_id, starts_at, duration_min, kind, mode, room_id, status, cancel_reason, visible_to_family, booked_by, family_response, family_note, family_responded_at, package_id, waitlist_id, offer_expires_at, external_uid, created_at, updated_at';
+const BASE_COLS = 'id, clinic_id, clinician_id, link_id, title, series_id, starts_at, duration_min, kind, mode, room_id, status, cancel_reason, visible_to_family, booked_by, family_response, family_note, family_responded_at, package_id, waitlist_id, offer_expires_at, external_uid, created_at, updated_at';
+// Seans ücreti (ortak migrations/20261123100000_mercek_updates.sql, akislar 27.1): sütun yoksa (eski sunucu, 42703) onsuz okunur
+let feeCol = true;
+const cols = () => (feeCol ? `${BASE_COLS}, fee` : BASE_COLS);
+async function sel<T>(run: (c: string) => PromiseLike<{ data: unknown; error: { code?: string; message: string } | null }>): Promise<T> {
+  let r = await run(cols());
+  if (r.error?.code === '42703' && feeCol) { feeCol = false; r = await run(cols()); }
+  return check(r.data as T, r.error);
+}
 
 /* ---------- Seanslar ---------- */
 export async function loadSessions(fromIso: string, toIso: string): Promise<Session[]> {
-  const { data, error } = await supabase.from('clinic_sessions').select(COLS).gte('starts_at', fromIso).lt('starts_at', toIso).order('starts_at').limit(1500);
-  return check((data ?? []) as unknown as Session[], error);
+  return (await sel<Session[] | null>((c) => supabase.from('clinic_sessions').select(c).gte('starts_at', fromIso).lt('starts_at', toIso).order('starts_at').limit(1500))) ?? [];
 }
 export async function loadSession(id: string): Promise<Session | null> {
-  const { data, error } = await supabase.from('clinic_sessions').select(COLS).eq('id', id).maybeSingle();
-  return check((data ?? null) as unknown as Session | null, error);
+  return (await sel<Session | null>((c) => supabase.from('clinic_sessions').select(c).eq('id', id).maybeSingle())) ?? null;
 }
 export async function loadLinkSessions(linkId: string): Promise<Session[]> {
-  const { data, error } = await supabase.from('clinic_sessions').select(COLS).eq('link_id', linkId).order('starts_at', { ascending: false }).limit(400);
-  return check((data ?? []) as unknown as Session[], error);
+  return (await sel<Session[] | null>((c) => supabase.from('clinic_sessions').select(c).eq('link_id', linkId).order('starts_at', { ascending: false }).limit(400))) ?? [];
 }
+export const feeSupported = () => feeCol;
 export async function loadRecords(ids: string[]): Promise<Record<string, SessionRecord>> {
   if (!ids.length) return {};
   const out: Record<string, SessionRecord> = {};
