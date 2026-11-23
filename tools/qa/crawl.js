@@ -223,7 +223,7 @@ async function login(b, who) {
   await step(p, 'behavior-preview-thanks', async () => { await tap(p, 'Hiçbiri', { last: true }); await tap(p, p.getByRole('radio', { name: /^4:/ }).filter({ visible: true })); await tap(p, 'Gönder', { last: true }); }, 'teşekkürler');
   await closeTop(p); await ensureClosed(p);
   if (!ONLY) {
-  const MARK = { sessions: 'Bekleme listesi', summary: 'Dönem', routines: 'Haftalık', notes: 'Not', report: 'Raporu aç', details: 'Paylaşımı sonlandır' };
+  const MARK = { sessions: 'Seans yapıldı', summary: 'Dönem', routines: 'Haftalık', notes: 'Not', report: 'Raporu aç', details: 'Paylaşımı sonlandır' };
   for (const [tab, name] of [['Seanslar', 'sessions'], ['Özet', 'summary'], ['Ev Rutinleri', 'routines'], ['Notlar', 'notes'], ['Rapor', 'report'], ['Danışan Bilgileri', 'details']]) {
     await ensureClosed(p);
     await step(p, name, async () => { await tap(p, tab, { wait: 2000 }); }, MARK[name]);

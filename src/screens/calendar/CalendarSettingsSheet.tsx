@@ -148,13 +148,6 @@ function Body({ me, rooms, availability, settings, onClose, onChanged }: Paramet
 
           <View style={s.card}>
             <Text style={s.label}>Kurallar{owner ? '' : ' (klinik sahibi değiştirir)'}</Text>
-            <FieldLabel hint={'Bu süreden kısa kala iptal edilen seans "Geç iptal" yazılır. Uzman bunu kaldırabilir.'}>Geç iptal süresi</FieldLabel>
-            <Disabled on={!owner}><Chips options={[0, 12, 24, 48].map((h) => ({ id: h, label: h ? `${h} saat` : 'Yok' }))} value={st.cancel_hours} onChange={(h) => saveSt({ cancel_hours: h })} /></Disabled>
-            <FieldLabel>Paketten düşen</FieldLabel>
-            <Disabled on={!owner}>
-              <View style={s.row}><Toggle value={st.count_no_show} onChange={(v) => saveSt({ count_no_show: v })} /><Text style={s.body}>Gelmedi</Text></View>
-              <View style={[s.row, { marginTop: 6 }]}><Toggle value={st.count_late_cancel} onChange={(v) => saveSt({ count_late_cancel: v })} /><Text style={s.body}>Geç iptal</Text></View>
-            </Disabled>
             <FieldLabel hint="Moyo, aileye görünür her seans için cihazda bildirim kurar">Aileye hatırlatma</FieldLabel>
             <Disabled on={!owner}>
               <Chips multi options={REMINDERS} value={st.reminders}
