@@ -1,10 +1,55 @@
 // Davranışlar ve Olaylar: saf yardımcılar (sunucu çağrısı yok; testi tests/behaviors.test.mjs).
 // "Diğer bildirilen olaylar" iki kaynağı tarih sırasıyla birleştirir (kullanıcı kararı 23 Kasım 2026):
 // hedef davranışa bağlı olmayan olaylar (behavior_incidents) ve ebeveynin Moyo'daki "Davranış kaydı" (abc_events).
-import type { TargetBehavior, Incident } from './behaviors';
+// Kayıt türü çoklu seçim (kullanıcı kararı 23 Kasım 2026; ortak akislar.md 27.3, veritabani.md 40.3): tür listesi, tablo sütunları, olay formu.
+import type { TargetBehavior, Incident, LogType } from './behaviors';
 import type { AbcEvent, DayPart } from './metrics';
 import { dayPart } from './metrics.ts';
 
+// ---------------------------------------------------------------- kayıt türleri
+// Sabit sıra sıklık · ABC · süre (sunucu da bu sıraya dizer, tekrarı düşürür; log_type = ilk tür)
+export const LOG_TYPE_ORDER: readonly LogType[] = ['frequency', 'abc', 'duration'];
+type Types = readonly (string | null | undefined)[] | null | undefined;
+// Tekil, sabit sırada; bilinmeyen değer düşer
+export const normLogTypes = (list: Types): LogType[] => { const have = new Set(list ?? []); return LOG_TYPE_ORDER.filter((t) => have.has(t)); };
+
+// Hedef davranışın türleri: log_types; sunucuda sütun yoksa (eski sunucu) ya da boşsa eski tek log_type
+export function behaviorTypes(b: { log_type?: string | null; log_types?: Types }): LogType[] {
+  const list = normLogTypes(b.log_types);
+  if (list.length) return list;
+  const one = normLogTypes([b.log_type]);
+  return one.length ? one : ['frequency'];
+}
+// Olayın kendi türleri (bildirim anının kopyası): log_types, yoksa eski log_type, o da yoksa davranışın türleri
+export function incidentTypes(i: { log_type?: string | null; log_types?: Types }, fallback: LogType[]): LogType[] {
+  const list = normLogTypes(i.log_types);
+  if (list.length) return list;
+  const one = normLogTypes([i.log_type]);
+  return one.length ? one : fallback;
+}
+// Olay tablosunun türleri: davranışın seçili bütün türleri + olayların kendi türleri (tür sonradan değişse de eski olay kendi alanlarıyla görünür)
+export function typesShown(b: { log_type?: string | null; log_types?: Types }, incidents: { log_type?: string | null; log_types?: Types }[]): LogType[] {
+  const own = behaviorTypes(b);
+  return normLogTypes([...own, ...incidents.flatMap((i) => incidentTypes(i, own))]);
+}
+// Türlere göre ayrıntı sütunları: sıklık → Sayı, ABC → Öncül + Sonuç, süre → Süre
+export type DetailCol = 'count' | 'antecedent' | 'consequence' | 'duration';
+const DETAIL: Record<LogType, DetailCol[]> = { frequency: ['count'], abc: ['antecedent', 'consequence'], duration: ['duration'] };
+export const detailCols = (types: Types): DetailCol[] => normLogTypes(types).flatMap((t) => DETAIL[t]);
+
+// Formdaki çoklu seçim: dokunulan tür eklenir ya da çıkar; en az biri seçili kalır
+export function toggleLogType(list: Types, t: LogType): LogType[] {
+  const cur = normLogTypes(list);
+  const next = cur.includes(t) ? cur.filter((x) => x !== t) : normLogTypes([...cur, t]);
+  return next.length ? next : cur;
+}
+
+// Olay formunun 2. adımı (sunucudaki family_incident_report): seçili her türün alanı zorunlu; eksik olan türler
+export type IncidentFields = { count: string; minutes: string; before: string; after: string };
+export const missingFields = (types: Types, f: IncidentFields): LogType[] => normLogTypes(types).filter((t) =>
+  t === 'frequency' ? !(Number(f.count) >= 1) : t === 'abc' ? !(f.before.trim() && f.after.trim()) : f.minutes === '');
+
+// ---------------------------------------------------------------- tarih
 const MONTHS = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
 const pad = (n: number) => String(n).padStart(2, '0');
 // "9 Kas" ve "17:00" (yerel saat)

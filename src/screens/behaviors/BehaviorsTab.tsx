@@ -1,5 +1,6 @@
 // Danışan › Davranışlar ve Olaylar (rakipteki "Target behaviors & reported incidents"e sadık; kullanıcı isteği 9 Kasım 2026).
-// Her hedef davranış açılır kart: ad, başlangıç, ayar (Düzenle · Arşivle); açılınca kayıt türüne göre olay tablosu.
+// Her hedef davranış açılır kart: ad, başlangıç, ayar (Düzenle · Arşivle); açılınca kayıt türlerine göre olay tablosu
+// (davranışın seçili bütün türleri + olayların kendi türleri). Kayıt türü çoklu seçim bayrak arkasında (behavior_log_types, 23 Kasım 2026).
 // Altta "Diğer bildirilen olaylar": hedefe bağlı olmayan olaylar ve ebeveynin Moyo'daki "Davranış kaydı" (abc_events), yeniden eskiye;
 // en altta açılıp kapanan "Arşivlenenler" (olaylarıyla; "Geri al"). Durum alanı ve "Dışa aktar" kalktı (kullanıcı kararı 23 Kasım 2026).
 // Olayları ebeveyn ParentApp'ten bildirir; uzman yalnız okur. focus: bildirimden gelen kayıt açılır, vurgulanır ve ekrana kaydırılır.
@@ -17,12 +18,13 @@ import { loadAbcEvents, listGoals } from '../../lib/clinic';
 import { loadParents } from '../../lib/training';
 import type { AbcEvent } from '../../lib/metrics';
 import {
-  TargetBehavior, Incident, LogType, BehaviorDraft, LOG_TYPES, MAX_STRATEGIES, responseLabel, typesShown,
+  TargetBehavior, Incident, LogType, BehaviorDraft, LOG_TYPES, MAX_STRATEGIES, responseLabel, typesShown, detailCols, toggleLogType,
   dayLabel, timeLabel, loadBehaviors, loadIncidents, saveBehavior, archiveBehavior, restoreBehavior, cleanStrategies, BehaviorsNotInstalled,
 } from '../../lib/behaviors';
 import { OTHER, OtherRow, BehaviorFocus, otherRows, locateFocus, abcWhen, incidentKey } from '../../lib/behaviorRows';
 import IncidentPreview, { PreviewBehavior } from './IncidentPreview';
 import { errorText } from '../../lib/errors';
+import { useClientConfig, BEHAVIOR_LOG_TYPES_FLAG } from '../../lib/clientConfig';
 
 export type { BehaviorFocus } from '../../lib/behaviorRows';
 
@@ -51,6 +53,8 @@ export default function BehaviorsTab({ client, data, sample, focus, onScrollTo }
   const [lost, setLost] = useState(false);                    // bildirimdeki kayıt bulunamadı
   const [sheet, setSheet] = useState<null | { edit: TargetBehavior | null } | 'preview'>(null);
   const [menu, openMenu] = useActionMenu();
+  // Kayıt türü çoklu seçim: Moyo güncellenene dek kapalı (eski Moyo çok türlü davranışa olay gönderemez; ortak akislar.md 27.3)
+  const multiType = useClientConfig().flag(BEHAVIOR_LOG_TYPES_FLAG);
   const abcFallback = useRef(data.abc);
   abcFallback.current = data.abc;
 
@@ -130,7 +134,7 @@ export default function BehaviorsTab({ client, data, sample, focus, onScrollTo }
       () => run(() => archiveBehavior(b.id)), 'archive-outline')) },
   ] }, e);
   const add = () => setSheet({ edit: null });
-  const previewOf = (bs: TargetBehavior[]): PreviewBehavior[] => bs.map((b) => ({ id: b.id, title: b.title, strategies: b.strategies, log_type: b.log_type, parent_logging: b.parent_logging }));
+  const previewOf = (bs: TargetBehavior[]): PreviewBehavior[] => bs.map((b) => ({ id: b.id, title: b.title, strategies: b.strategies, log_types: b.log_types, parent_logging: b.parent_logging }));
   const card = (b: TargetBehavior) => (
     <BehaviorCard key={b.id} behavior={b} incidents={incidents.filter((i) => i.behavior_id === b.id)} open={open.has(b.id)}
       onToggle={() => toggle(b.id)} onGear={b.archived ? undefined : gear(b)} hl={hl} rowRef={rowRef}
@@ -203,7 +207,7 @@ export default function BehaviorsTab({ client, data, sample, focus, onScrollTo }
       {sheet === 'preview' && <IncidentPreview behaviors={previewOf(shown)} childName={client.child_name} onClose={() => setSheet(null)} />}
       {sheet && typeof sheet === 'object' && (
         <BehaviorSheet behavior={sheet.edit} others={previewOf(shown.filter((x) => x.id !== sheet.edit?.id))} childName={client.child_name}
-          onClose={() => setSheet(null)}
+          multi={multiType} onClose={() => setSheet(null)}
           onSave={(d) => run(() => saveBehavior({ ...d, id: sheet.edit?.id, clinic_id: client.clinic_id, link_id: client.link_id }))} />
       )}
     </View>
@@ -274,13 +278,8 @@ const C = {
     ? <Text style={styles.td}>{responseLabel(i.response)} <Text style={styles.tdSmall}>· {i.response}/5</Text></Text> : muted('—')) },
 } satisfies Record<string, Col<Incident>>;
 
-function colsFor(types: LogType[]): Col<Incident>[] {
-  const mid: Col<Incident>[] = [];
-  if (types.includes('frequency')) mid.push(C.count);
-  if (types.includes('abc')) mid.push(C.antecedent, C.consequence);
-  if (types.includes('duration')) mid.push(C.duration);
-  return [C.date, C.reporter, ...mid, C.strategy, C.response];
-}
+// Sıklık → Sayı, ABC → Öncül + Sonuç, Süre → Süre (detailCols); olayın sormadığı türün hücresi boş (—)
+const colsFor = (types: LogType[]): Col<Incident>[] => [C.date, C.reporter, ...detailCols(types).map((k) => C[k]), C.strategy, C.response];
 
 // "Diğer bildirilen olaylar": olay ve davranış kaydı aynı tabloda. Davranış kaydında saat yerine gün bölümü; davranış hücresinde
 // "Davranış kaydı" etiketi, bağlı davranış hedefi (Takip Planı), ebeveynin şiddet değerlendirmesi ve ses; sıklık / süre / strateji / tepki yok.
@@ -345,24 +344,27 @@ function Table<R>({ cols, rows, rowKey, hl, rowRef, empty }: {
 }
 
 // ---------------------------------------------------------------- ekleme / düzenleme
-// Durum alanı yok (kullanıcı kararı 23 Kasım 2026): yeni kayıtta sunucunun varsayılanı, düzenlemede eski değer kalır
-function BehaviorSheet({ behavior, others, childName, onClose, onSave }: {
-  behavior: TargetBehavior | null; others: PreviewBehavior[]; childName: string; onClose: () => void; onSave: (d: BehaviorDraft) => void;
+// Durum alanı yok (kullanıcı kararı 23 Kasım 2026): yeni kayıtta sunucunun varsayılanı, düzenlemede eski değer kalır.
+// Kayıt türü: bayrak açıkken çoklu seçim (en az biri); kapalıyken tek seçim, yine log_types: [tür] yazılır. Bayrak kapalıyken de
+// zaten birden çok türü olan davranışta çoklu seçim görünür (düzenleme türleri sessizce düşürmesin).
+function BehaviorSheet({ behavior, others, childName, multi: multiFlag, onClose, onSave }: {
+  behavior: TargetBehavior | null; others: PreviewBehavior[]; childName: string; multi: boolean; onClose: () => void; onSave: (d: BehaviorDraft) => void;
 }) {
   const [title, setTitle] = useState(behavior?.title ?? '');
   const [desc, setDesc] = useState(behavior?.description ?? '');
   const [strategies, setStrategies] = useState<string[]>(behavior?.strategies.length ? behavior.strategies : ['', '']);
   const [logging, setLogging] = useState(behavior?.parent_logging ?? true);
-  const [logType, setLogType] = useState<LogType>(behavior?.log_type ?? 'frequency');
+  const [types, setTypes] = useState<LogType[]>(behavior?.log_types.length ? behavior.log_types : ['frequency']);
+  const multi = multiFlag || (behavior?.log_types.length ?? 0) > 1;
   const [tried, setTried] = useState(false);
   const [preview, setPreview] = useState(false);
   const missingTitle = !title.trim();
   const save = () => {
     if (missingTitle) { setTried(true); return; }
-    onSave({ title, description: desc, strategies: cleanStrategies(strategies), parent_logging: logging, log_type: logType });
+    onSave({ title, description: desc, strategies: cleanStrategies(strategies), parent_logging: logging, log_types: multi ? types : types.slice(0, 1) });
     onClose();
   };
-  const draft: PreviewBehavior = { id: behavior?.id ?? '__draft__', title: title.trim() || 'Yeni hedef davranış', strategies: cleanStrategies(strategies), log_type: logType, parent_logging: logging };
+  const draft: PreviewBehavior = { id: behavior?.id ?? '__draft__', title: title.trim() || 'Yeni hedef davranış', strategies: cleanStrategies(strategies), log_types: multi ? types : types.slice(0, 1), parent_logging: logging };
   return (
     <SheetFrame title={behavior ? 'Hedef davranışı düzenle' : 'Yeni hedef davranış'} onClose={onClose}
       footer={<><GhostButton label="Vazgeç" onPress={onClose} /><Cta label="Kaydet" onPress={save} disabled={missingTitle} style={FOOT} /></>}>
@@ -406,13 +408,16 @@ function BehaviorSheet({ behavior, others, childName, onClose, onSave }: {
 
       {logging && (
         <>
-          <Text style={styles.label}>Kayıt türünü seç</Text>
+          <Text style={styles.label}>{multi ? 'Kayıt türlerini seç' : 'Kayıt türünü seç'}</Text>
+          {multi && <Text style={styles.small}>Birden çok seçebilirsin; ebeveyn her olayda seçtiklerinin hepsini girer. En az biri seçili kalır.</Text>}
           {LOG_TYPES.map((t) => {
-            const on = t.key === logType;
+            const on = multi ? types.includes(t.key) : t.key === types[0];
+            const icon = multi ? (on ? 'checkbox' : 'square-outline') : on ? 'radio-button-on' : 'radio-button-off';
             return (
-              <Pressable key={t.key} onPress={() => setLogType(t.key)} style={[styles.opt, on && styles.optOn]} accessibilityRole="radio" accessibilityState={{ selected: on }}>
+              <Pressable key={t.key} onPress={() => setTypes((x) => (multi ? toggleLogType(x, t.key) : [t.key]))} style={[styles.opt, on && styles.optOn]}
+                accessibilityRole={multi ? 'checkbox' : 'radio'} accessibilityState={multi ? { checked: on } : { selected: on }}>
                 <View style={{ flex: 1, minWidth: 0, gap: 2 }}><Text style={styles.optTitle}>{t.label}</Text><Text style={styles.small}>{t.hint}</Text></View>
-                <Ionicons name={on ? 'radio-button-on' : 'radio-button-off'} size={22} color={on ? colors.navy : colors.faint} />
+                <Ionicons name={icon} size={22} color={on ? colors.navy : colors.faint} />
               </Pressable>
             );
           })}
