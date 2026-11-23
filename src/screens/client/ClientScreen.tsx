@@ -92,7 +92,10 @@ export default function ClientScreen({
   focusTab?: Tab;                                  // tur adımı değişince o bölüm açılır
   initialFocus?: BehaviorFocus | null;             // bildirimden: Davranışlar ve Olaylar'da o kayıt açılır
 }) {
-  const [tab, setTab] = useState<Section>(initialTab === 'suggestions' ? 'routine' : initialTab);
+  const config = useClientConfig();
+  const trainingOn = config.flag(PARENT_TRAINING_FLAG);
+  // eğitim kapalıyken eğitim sekmesiyle gelen (bildirim, eski bağlantı) Ev Rutinleri'nde açılır; TrainingTab hiç çizilmez
+  const [tab, setTab] = useState<Section>(initialTab === 'suggestions' || (initialTab === 'training' && !trainingOn) ? 'routine' : initialTab);
   const [behFocus, setBehFocus] = useState<BehaviorFocus | null>(initialFocus);
   const scrollRef = useRef<ScrollView>(null);
   const contentRef = useRef<View>(null);
@@ -108,9 +111,7 @@ export default function ClientScreen({
   const [switcher, setSwitcher] = useState(false);
   const [label, setLabel] = useState(client.label);
   const { desktop } = useLayout();
-  const config = useClientConfig();
   const planOn = config.flag(CARE_PLAN_FLAG);
-  const trainingOn = config.flag(PARENT_TRAINING_FLAG);
   const sections = useMemo(() => SECTIONS.filter((x) => (x.id !== 'goals' || planOn) && (x.id !== 'training' || trainingOn)), [planOn, trainingOn]);
   // Bölüm menüsü hep açık gelir; hamburger düğmesiyle kapatılıp açılır (kullanıcı kararı 11 Kasım 2026)
   const [menuOpen, setMenuOpen] = useState(true);
@@ -264,7 +265,7 @@ export default function ClientScreen({
             {!sample && !(tab === 'training' && trainingOpen) && <SectionHint userId={me.id} section={tab} />}
             {tab === 'summary' && <SummaryTab {...ctx} />}
             {tab === 'routine' && <HomeRoutines {...ctx} view={routineView} onView={setRoutineView} />}
-            {tab === 'training' && <TrainingTab {...ctx} sample={!!sample} onDetail={setTrainingOpen} />}
+            {tab === 'training' && trainingOn && <TrainingTab {...ctx} sample={!!sample} onDetail={setTrainingOpen} />}
             {tab === 'behaviors' && <BehaviorsTab {...ctx} sample={!!sample} focus={behFocus} onScrollTo={scrollToNode} />}
             {tab === 'goals' && <PlanTab {...ctx} />}
             {tab === 'sessions' && (sample

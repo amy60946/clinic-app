@@ -164,7 +164,7 @@ export default function HomeScreen() {
   const { sub: storeSub, refresh: refreshStoreSub } = useStoreSubscription(ready && ready.me.role === 'owner' ? ready.me.id : null, cancelFlow);
   // Hatırlatmalar: bayrak uzaktan ayar okununca belli olur (o âna kadar hiçbir şey planlanmaz ya da silinmez)
   useNudges(config.status === 'ok' ? localNudges : null,
-    ready ? { me: ready.me, clients: ready.clients, signedUpAt: session?.user.created_at ?? ready.me.joined_at ?? null } : null,
+    ready ? { me: ready.me, clients: ready.clients, signedUpAt: session?.user.created_at ?? ready.me.joined_at ?? null, noTraining: !trainingOn } : null,
     nudgeInvites, trainingOn ? nudgeTrainings : null);
   // "Hatırlatmalar ve ipuçları" tercihi sunucudan (başka cihazda değişmiş olabilir; işlev yoksa sessiz)
   useEffect(() => { if (userId && config.status === 'ok' && nudgesOn) syncNudgePref(userId); }, [userId, config.status, nudgesOn]);
@@ -402,7 +402,7 @@ export default function HomeScreen() {
   const removeAccount = async () => {
     const kind = state.kind === 'ready' && state.team.length <= 1 ? 'solo' : state.kind === 'ready' && state.me.role === 'owner' ? 'owner' : 'member';
     const keeps = kind === 'solo' ? await familyKeepsRecords() : false;
-    Alert.alert('Hesabın silinsin mi?', deleteAccountText(kind, keeps), [{ text: 'Vazgeç', style: 'cancel' }, {
+    Alert.alert('Hesabın silinsin mi?', deleteAccountText(kind, keeps, trainingOn), [{ text: 'Vazgeç', style: 'cancel' }, {
       text: 'Kalıcı olarak sil', style: 'destructive', onPress: async () => {
         try {
           await flush().catch(() => {});

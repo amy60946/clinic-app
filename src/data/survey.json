@@ -254,11 +254,6 @@
     "key": "report_export",
     "label": "Raporu PDF olarak almak",
     "icon": "document-text-outline"
-   },
-   {
-    "key": "parent_materials",
-    "label": "Aileye okuma, video ve çalışma kâğıdı göndermek",
-    "icon": "library-outline"
    }
   ]
  },

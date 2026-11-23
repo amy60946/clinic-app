@@ -69,7 +69,8 @@ function achieved(h: FiredNudge, invites: FamilyInvite[], trainings: Training[],
   return false;
 }
 
-export type NudgeBase = { me: ClinicianMe; signedUpAt: string | null; clients: Client[] };
+// noTraining: ebeveyn eğitimi bayrağı kapalı (`parent_training`, 23 Kasım 2026) → eğitim okunmaz, eğitim hatırlatması planlanmaz
+export type NudgeBase = { me: ClinicianMe; signedUpAt: string | null; clients: Client[]; noTraining?: boolean };
 // invites / trainings: ana ekranın belleğindeki güncel liste (verilirse sunucuya gidilmez); undefined → burada okunur; null → okunamadı
 export type NudgeContext = NudgeBase & { invites?: FamilyInvite[] | null; trainings?: Training[] | null };
 
@@ -109,7 +110,7 @@ async function reconcile(ctx: NudgeContext): Promise<void> {
   if ((await nudgePermission()) !== 'granted') return;
   const [invites, trainings] = await Promise.all([
     ctx.invites !== undefined ? ctx.invites : listInvites(90).catch(() => null),
-    ctx.trainings !== undefined ? ctx.trainings : loadTrainingsFor(ctx.clients.map((c) => c.link_id)).catch(() => null),
+    ctx.noTraining ? null : ctx.trainings !== undefined ? ctx.trainings : loadTrainingsFor(ctx.clients.map((c) => c.link_id)).catch(() => null),
   ]);
   const nowMs = Date.now();
   const st = await read(uid);
@@ -233,7 +234,7 @@ export function useNudges(on: boolean | null, base: NudgeBase | null, invites?: 
     if (!nudgeDeviceOn || !uid || on === null) return;
     if (!on) { clearNudges(uid); return; }
     kick(false);
-  }, [on, uid, base?.clients, me?.clinic_id, me?.status, me?.plan, me?.trial_ends_at, me?.access, invites, trainings, kick]);
+  }, [on, uid, base?.clients, base?.noTraining, me?.clinic_id, me?.status, me?.plan, me?.trial_ends_at, me?.access, invites, trainings, kick]);
   useEffect(() => {
     if (!nudgeDeviceOn || !on || !uid) return;
     const sub = AppState.addEventListener('change', (s) => { if (s === 'active') kick(true); });

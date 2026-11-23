@@ -11,7 +11,7 @@ test('tek kişilik klinik: sunucu yeni kuralı uygulamıyorsa önceki metin', ()
 });
 
 test('tek kişilik klinik: sunucu yeni kuralı uyguluyorsa ailede kalanlar ve erişimin bittiği yazar', () => {
-  const t = deleteAccountText('solo', true);
+  const t = deleteAccountText('solo', true, true);
   assert.match(t, /Ailelere gönderdiğin eğitimler/);
   assert.match(t, /ailenin hedef davranışlara bildirdiği olaylar da \(davranışın adıyla\) ailede kalır/);
   assert.match(t, /sen ve kliniğin bunlara artık erişemezsiniz/);
@@ -28,4 +28,12 @@ test('ekipte sahip ve ekip üyesi: klinik kalır, metin sunucu kuralından bağ�
     assert.equal(deleteAccountText('owner', keeps), deleteAccountText('owner', !keeps));
     assert.equal(deleteAccountText('member', keeps), deleteAccountText('member', !keeps));
   }
+});
+
+test('tek kişilik klinik: ebeveyn eğitimi kapalıyken eğitim sözü yok (hukuk/50 §5.2, 23 Kasım 2026)', () => {
+  const t = deleteAccountText('solo', true);
+  assert.doesNotMatch(t, /eğitim/i);
+  assert.match(t, /ailenin hedef davranışlara bildirdiği olaylar \(davranışın adıyla\) ailede kalır/i);
+  assert.match(t, /sonraki uzmana aktarımı da sona erer/);
+  assert.match(t, /Bu işlem geri alınamaz\.$/);
 });
