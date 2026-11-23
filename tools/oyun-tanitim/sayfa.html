@@ -1,0 +1,158 @@
+<title>Moyo Oyun Tanıtımı</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Düzen: üstte tanıtım videosu (bölüm çipleriyle), altında yatay telefon çerçevesinde çalışan karşılama ekranları ve altı ekranın şeridi.
+   Sayfa kabuğu serin deniz tonunda ve sade; oyunun kendi arayüz dili (krem kapsül, kahve yazı, yeşil kurdele, Baloo 2) yalnız ekranların içinde. */
+:root {
+  --bg: #EEF3F4; --yuzey: #FFFFFF; --fg: #10242B; --soluk: #4F646B; --cizgi: #D6E1E3; --vurgu: #0E7C86; --vurgu-zemin: #DDF0F1;
+  --krem-ust: #FFF7E0; --krem-alt: #F2D79A; --kahve: #6B3F0E; --kahve-acik: #9A6A2E; --yesil-ust: #7EDD6A; --yesil-alt: #2A9E44; --yesil-yazi: #0F4A1E;
+  --baslik: "Baloo 2", "Trebuchet MS", ui-rounded, system-ui, sans-serif; --govde: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0B1A1F; --yuzey: #12262C; --fg: #E4EEF0; --soluk: #9DB2B8; --cizgi: #24404A; --vurgu: #4CC3CC; --vurgu-zemin: #133A40; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0B1A1F; --yuzey: #12262C; --fg: #E4EEF0; --soluk: #9DB2B8; --cizgi: #24404A; --vurgu: #4CC3CC; --vurgu-zemin: #133A40; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.6 var(--govde); margin: 0; }
+.sar { max-width: 1040px; margin: 0 auto; padding-block: 36px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 48px; }
+h1, h2, h3 { font-family: var(--baslik); font-weight: 800; line-height: 1.1; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(32px, 6vw, 48px); }
+h2 { font-size: clamp(24px, 4vw, 30px); }
+h3 { font-size: 18px; }
+.ust p { color: var(--soluk); max-width: 66ch; margin: 12px 0 0; }
+.ust .etiket { display: inline-block; font: 600 12px/1 var(--govde); letter-spacing: .08em; text-transform: uppercase; color: var(--vurgu); margin-bottom: 10px; }
+section { display: grid; gap: 18px; }
+section > p { margin: 0; color: var(--soluk); max-width: 66ch; }
+/* video */
+.video { background: #000; border-radius: 16px; overflow: hidden; aspect-ratio: 16 / 9; max-width: 100%; }
+.video video { width: 100%; height: 100%; display: block; }
+.bolumler { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.bolumler button { font: 600 13px/1 var(--govde); color: var(--fg); background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: 999px; padding: 9px 14px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; }
+.bolumler button span { color: var(--soluk); font-variant-numeric: tabular-nums; font-weight: 500; }
+.bolumler button[aria-current="true"] { background: var(--vurgu-zemin); border-color: var(--vurgu); color: var(--vurgu); }
+.bolumler button:focus-visible, .ob-btn:focus-visible, .ob-atla:focus-visible, .serit button:focus-visible { outline: 3px solid var(--vurgu); outline-offset: 2px; }
+/* karşılama ekranı: yatay telefon (2532 × 1170); içindeki ölçüler kabın genişliğine göre (cqw) */
+.tel { max-width: 100%; aspect-ratio: 2532 / 1170; border-radius: clamp(14px, 3.2vw, 34px); overflow: hidden; position: relative; container-type: inline-size; background: #1d3b2a; box-shadow: 0 0 0 clamp(5px, 1vw, 10px) #15171b, 0 18px 40px rgba(10, 30, 35, .25); margin: 10px; }
+.ob { position: absolute; inset: 0; opacity: 0; transition: opacity .45s ease; pointer-events: none; }
+.ob.on { opacity: 1; pointer-events: auto; }
+.ob img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ob::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0) 52%, rgba(20, 12, 2, .28) 100%); pointer-events: none; }
+/* kart solda (Okti ortada, kartın sağında kalır); Okti'nin solda durduğu ekranda sağda (.sag) */
+.ob-kart { position: absolute; z-index: 2; left: 4.5cqw; bottom: 4.2cqw; width: 39cqw; padding: 2cqw 2.4cqw 2cqw; border-radius: 2.6cqw; background: linear-gradient(180deg, var(--krem-ust), var(--krem-alt)); border: .28cqw solid #FFFFFF; box-shadow: 0 .6cqw 1.6cqw rgba(60, 30, 0, .3); color: var(--kahve); }
+.ob-kart h3 { font-size: 3cqw; line-height: 1.05; color: var(--kahve); }
+.ob-kart p { margin: .7cqw 0 0; font: 600 1.7cqw/1.3 var(--baslik); color: var(--kahve-acik); }
+.ob.sag .ob-kart { left: auto; right: 4.5cqw; }
+.ob-alt { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; margin-top: 1.5cqw; }
+.ob-nokta { display: flex; gap: .7cqw; }
+.ob-nokta i { width: 1cqw; height: 1cqw; border-radius: 50%; background: rgba(107, 63, 14, .25); }
+.ob-nokta i.on { width: 2.8cqw; border-radius: 1cqw; background: var(--kahve); }
+.ob-btn { font: 800 2.3cqw/1 var(--baslik); color: #FFFFFF; text-shadow: 0 .15cqw 0 var(--yesil-yazi); background: linear-gradient(180deg, var(--yesil-ust), var(--yesil-alt)); border: .3cqw solid #FFFFFF; border-radius: 99px; padding: 1.3cqw 3.6cqw 1.1cqw; cursor: pointer; box-shadow: 0 .45cqw 0 #1E7A33, 0 .8cqw 1.4cqw rgba(0, 0, 0, .22); white-space: nowrap; }
+.ob-btn:active { transform: translateY(.3cqw); box-shadow: 0 .2cqw 0 #1E7A33; }
+.ob-atla { position: absolute; z-index: 3; right: 5cqw; top: 3.4cqw; font: 800 1.7cqw/1 var(--baslik); color: var(--kahve); background: rgba(255, 247, 224, .92); border: .22cqw solid #FFFFFF; border-radius: 99px; padding: 1cqw 2.2cqw .8cqw; cursor: pointer; }
+.ob-yer { position: absolute; z-index: 2; left: 5cqw; top: 3.4cqw; font: 800 1.6cqw/1 var(--baslik); color: #FFFFFF; background: rgba(16, 36, 43, .55); border-radius: 99px; padding: .9cqw 1.8cqw .7cqw; letter-spacing: .02em; }
+.ob-bitti { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; background: rgba(16, 36, 43, .72); color: #FFFFFF; font: 800 3cqw/1.2 var(--baslik); text-align: center; opacity: 0; pointer-events: none; transition: opacity .3s; }
+.ob-bitti.on { opacity: 1; pointer-events: auto; }
+.ob-bitti button { margin-top: 2cqw; font: 600 1.6cqw/1 var(--govde); color: var(--fg); background: #FFFFFF; border: 0; border-radius: 99px; padding: 1.2cqw 2.4cqw; cursor: pointer; }
+.cerceve { display: grid; justify-items: center; }
+/* şerit: altı ekranın küçükleri */
+.serit { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.serit button { all: unset; cursor: pointer; display: grid; gap: 8px; width: 100%; }
+.serit img { width: 100%; aspect-ratio: 2532 / 1170; object-fit: cover; border-radius: 10px; border: 2px solid transparent; display: block; }
+.serit button[aria-current="true"] img { border-color: var(--vurgu); }
+.serit b { font: 800 15px/1.2 var(--baslik); }
+.serit small { display: block; color: var(--soluk); font-size: 13px; line-height: 1.4; }
+.notlar { background: var(--yuzey); border: 1px solid var(--cizgi); border-radius: 16px; padding: 18px 20px; display: grid; gap: 10px; }
+.notlar ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.notlar li { max-width: 74ch; }
+.kaynak { font-size: 13px; color: var(--soluk); margin: 0; }
+@media (max-width: 720px) { .serit { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tel { margin: 6px; } }
+@media (prefers-reduced-motion: reduce) { .ob { transition: none; } }
+</style>
+<div class="sar">
+  <header class="ust">
+    <span class="etiket">Moyo Oyun · taslak</span>
+    <h1>Moyo Oyun Tanıtımı</h1>
+    <p>Tanıtım videosu ve ilk açılışta görünecek karşılama ekranları. Bütün görüntüler oyunun kendisinden çekildi (TestFlight 40 ile aynı derleme). Arayüz gizlendi, kilitli yerlerin sisi kapatıldı. Mekânlar: harita, sahil, tapınak, Oyun Kulübesi ve Gezegen Koşusu, Kamp Alanı, mağara.</p>
+  </header>
+
+  <section aria-labelledby="h-video">
+    <h2 id="h-video">Tanıtım videosu</h2>
+    <div class="video"><video id="vid" src="video/tanitim.mp4" poster="video/tanitim.webp" width="1280" height="720" controls muted playsinline preload="metadata" aria-label="Moyo Oyun tanıtım videosu: Pofi Adası'nın mekânları"></video></div>
+    <ol class="bolumler" id="bolumler"></ol>
+    <p>Yatay, 1280 × 720, 30 kare/sn, 25 saniye. Müzik oyunun kendi müziği (kodla bestelendi, telifsiz); sesi açmak için videonun ses düğmesine dokunun.</p>
+  </section>
+
+  <section aria-labelledby="h-ob">
+    <h2 id="h-ob">Karşılama ekranları</h2>
+    <p>Yatay telefonda altı ekran. "İleri" ile sırayla geçilir, "Atla" doğrudan oyuna götürür. Krem kart, kahve yazı ve yeşil düğme oyunun kendi pencerelerinden; yazı tipi oyundaki Baloo 2. Metinlerin çoğu oyunda zaten geçen cümleler.</p>
+    <div class="cerceve"><div class="tel" id="tel" role="region" aria-roledescription="karşılama ekranları" aria-label="Karşılama ekranları önizlemesi"></div></div>
+    <ul class="serit" id="serit"></ul>
+  </section>
+
+  <section aria-labelledby="h-not" class="notlar">
+    <h3 id="h-not">Notlar</h3>
+    <ul>
+      <li><b>Sizin örnek videonuzdan farkı:</b> sizin kaydınızda arayüz her an açık, mağara ve kulübe sisli, tapınak görünmüyor. Bu çekimler oyunun ayıklama komutlarıyla aynı derlemeden alındı: arayüz gizli, sis kapalı, kamera biraz geride.</li>
+      <li><b>Kamera:</b> Okti'nin arkasından, oyundaki kamerayla. Bazı kayalar kamerayla Okti'nin arasına girince yarı saydam görünüyor; bu, oyunun kendi davranışı.</li>
+      <li><b>Sesli okuma:</b> oyunda her okunacak metnin sesi de olur. Karşılama metinleri onaylanınca sesleri Marketing penceresinde üretilir.</li>
+      <li><b>Oyuna eklemek:</b> ekranları oyunun içine Oyun penceresi kurar (Moyo Oyun deposu). Bu sayfa tasarım ve görüntü önerisi; oyun kodu değişmedi.</li>
+      <li><b>Pazarlama kullanımı:</b> video mağazada ya da sitede kullanılacaksa metinleri Marketing §7.1 kontrolünden geçer. Videoda çocuğa doğrudan çağrı yok; yalnız mekân adları var.</li>
+    </ul>
+  </section>
+  <p class="kaynak">Kaynak: Moyo Oyun WebGL derlemesi (game-app 1d02656, 20 Kasım 2026), ayıklama komutları showall, hud, tp, walk, cam, minigame runner. Çekim 22 Kasım 2026; her kare sanal saatle tek tek alındı.</p>
+</div>
+<script>
+(function () {
+  var EKRANLAR = [
+    { id: 'harita', yer: 'Pofi Adası', baslik: "Pofi Adası'na hoş geldin!", metin: "Okti'yle adayı gez. Her köşede yeni bir şey var." },
+    { id: 'sahil', yer: 'Sahil', baslik: 'Kumsalda keşfe çık', metin: 'Dalgaların yanında yürü, hindistan cevizlerini bul.' },
+    { id: 'tapinak', yer: 'Tapınak', baslik: 'Tapınağa tırman', metin: 'Basamakları çık, terastan adayı seyret.' },
+    { id: 'kosu', yer: 'Oyun Kulübesi', baslik: 'Gezegen Koşusu', metin: 'Kuyrukluyıldızın peşinden koş, kristalleri topla!', sag: true },
+    { id: 'kamp', yer: 'Kamp Alanı', baslik: 'Kamp ateşine odun at', metin: 'Topladığın odunlarla ateşi canlandır.' },
+    { id: 'magara', yer: 'Mağara', baslik: 'Sisli yerleri Güneş Taşı açar', metin: 'Ailen maceranı onaylayınca Güneş Taşı gelir. Sorumluluklarını tamamlayınca inci de kazanırsın.' }
+  ];
+  var BOLUM = [["Pofi Adası", 0.0], ["Sahil", 3.4], ["Tapınak", 6.2], ["Oyun Kulübesi", 9.2], ["Gezegen Koşusu", 12.2], ["Kamp Alanı", 16.4], ["Mağara", 19.1], ["Kapanış", 22.4]];
+  var tel = document.getElementById('tel'), serit = document.getElementById('serit'), cur = 0, n = EKRANLAR.length;
+  EKRANLAR.forEach(function (e, i) {
+    var d = document.createElement('div'); d.className = 'ob' + (e.sag ? ' sag' : '') + (i === 0 ? ' on' : ''); d.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
+    var nokta = ''; for (var k = 0; k < n; k++) nokta += '<i' + (k === i ? ' class="on"' : '') + '></i>';
+    d.innerHTML = '<img src="ob/' + e.id + '.webp" alt="" loading="' + (i < 2 ? 'eager' : 'lazy') + '">' +
+      '<span class="ob-yer">' + e.yer + '</span>' +
+      '<button type="button" class="ob-atla">Atla</button>' +
+      '<div class="ob-kart"><h3>' + e.baslik + '</h3><p>' + e.metin + '</p><div class="ob-alt"><div class="ob-nokta" aria-label="' + (i + 1) + ' / ' + n + '">' + nokta + '</div>' +
+      '<button type="button" class="ob-btn">' + (i === n - 1 ? 'Başla' : 'İleri') + '</button></div></div>';
+    tel.appendChild(d);
+    var li = document.createElement('li');
+    li.innerHTML = '<button type="button"' + (i === 0 ? ' aria-current="true"' : '') + '><img src="ob/' + e.id + '.webp" alt="" loading="lazy"><span><b>' + (i + 1) + ' · ' + e.yer + '</b><small>' + e.baslik + '</small></span></button>';
+    serit.appendChild(li);
+  });
+  var bitti = document.createElement('div'); bitti.className = 'ob-bitti';
+  bitti.innerHTML = '<div>Burada oyun açılır<br><button type="button">Baştan izle</button></div>'; tel.appendChild(bitti);
+  var obs = tel.querySelectorAll('.ob'), kucuk = serit.querySelectorAll('button');
+  function git(i) {
+    cur = i; bitti.classList.remove('on');
+    Array.prototype.forEach.call(obs, function (o, k) { o.classList.toggle('on', k === i); o.setAttribute('aria-hidden', k === i ? 'false' : 'true'); });
+    Array.prototype.forEach.call(kucuk, function (b, k) { if (k === i) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+  }
+  function son() { bitti.classList.add('on'); }
+  Array.prototype.forEach.call(obs, function (o, i) {
+    o.querySelector('.ob-btn').addEventListener('click', function () { if (i < n - 1) git(i + 1); else son(); });
+    o.querySelector('.ob-atla').addEventListener('click', son);
+  });
+  bitti.querySelector('button').addEventListener('click', function () { git(0); });
+  Array.prototype.forEach.call(kucuk, function (b, i) { b.addEventListener('click', function () { git(i); tel.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }); });
+  // video bölümleri
+  var vid = document.getElementById('vid'), ol = document.getElementById('bolumler');
+  function sure(t) { var s = Math.floor(t); return '0:' + (s < 10 ? '0' : '') + s; }
+  BOLUM.forEach(function (bl, i) {
+    var li = document.createElement('li'); li.innerHTML = '<button type="button">' + bl[0] + ' <span>' + sure(bl[1]) + '</span></button>';
+    li.querySelector('button').addEventListener('click', function () { try { vid.currentTime = bl[1] + 0.05; } catch (e) { /* yok say */ } var p = vid.play(); if (p && p.catch) p.catch(function () {}); });
+    ol.appendChild(li);
+  });
+  var btns = ol.querySelectorAll('button');
+  function isaret() {
+    var t = vid.currentTime, c = 0; BOLUM.forEach(function (bl, i) { if (t + 0.05 >= bl[1]) c = i; });
+    Array.prototype.forEach.call(btns, function (b, i) { if (i === c) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+  }
+  vid.addEventListener('timeupdate', isaret); isaret();
+})();
+</script>

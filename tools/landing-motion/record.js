@@ -14,9 +14,13 @@ function probe(file) {
   return { width: st.width, height: st.height, fps: st.r_frame_rate, duration: Number((j.format || {}).duration || 0) };
 }
 
-async function record(id) {
-  const scene = load(id);
-  const s = await kit.open(scene.device || 'desktop', scene.data || {});
+// MOTION_DEVICE=dikey: masaüstü sahneleri telefonda gösterilecek dikey çerçevede çekilir, çıktı adı <sahne>-d (22 Kasım 2026)
+async function record(name) {
+  const scene = load(name);
+  const dev = scene.device || 'desktop';
+  const alt = process.env.MOTION_DEVICE && dev === 'desktop' ? process.env.MOTION_DEVICE : null;
+  const id = alt ? `${name}-${alt === 'dikey' ? 'd' : alt}` : name;
+  const s = await kit.open(alt || dev, { ...(scene.data || {}), dsf: process.env.MOTION_DSF ? Number(process.env.MOTION_DSF) : undefined });
   const h = new kit.Human(s, scene.seed || 7);
   let rec;
   try {
@@ -38,7 +42,8 @@ async function record(id) {
       mp4_bytes: e.mp4_bytes, webm_bytes: e.webm_bytes, poster: e.poster, beats: h.beats };
     const mf = path.join(kit.OUT, 'manifest.json');
     const all = fs.existsSync(mf) ? JSON.parse(fs.readFileSync(mf, 'utf8')) : [];
-    const next = [...all.filter((x) => x.id !== id), entry].sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
+    const rank = (x) => ORDER.indexOf(x.replace(/-d$/, '')) + (x.endsWith('-d') ? 0.5 : 0);
+    const next = [...all.filter((x) => x.id !== id), entry].sort((a, b) => rank(a.id) - rank(b.id));
     fs.writeFileSync(mf, JSON.stringify(next, null, 1) + '\n');
     console.log(`${id}: ${entry.duration_s} sn · ${pr.width}x${pr.height} @ ${pr.fps} · mp4 ${e.mp4_bytes} (crf ${e.crf}) · webm ${e.webm_bytes || 'yok'} (crf ${e.vcrf})`
       + ` · yakalanan ${q.captured} kare (hareket sırasında ~${q.fpsWhileMoving} kare/sn) · kaçan hareket adımı ${q.missed}/${q.moves}`);
@@ -50,11 +55,23 @@ async function record(id) {
 
 // Hareket adımlarından biri kendi karesini kaçırdıysa (imleç takılır) sahne yeniden çekilir
 async function recordClean(id) {
+  // En az kaçan adımlı deneme saklanır (sonraki deneme daha kötü çıkarsa ona dönülür)
+  const ext = ['mp4', 'webm', 'webp'];
+  let best = null;
+  const keep = (r) => {
+    const oid = r.id;
+    for (const e of ext) { const f = path.join(kit.OUT, `${oid}.${e}`), b = path.join(kit.TMP, `best-${oid}.${e}`); fs.rmSync(b, { force: true }); if (fs.existsSync(f)) fs.copyFileSync(f, b); }
+    best = r;
+  };
   for (let i = 1; ; i++) {
     const r = await record(id);
-    if (r.missed === 0 || i >= Number(process.env.MOTION_TRIES || 4)) return r;
+    if (!best || r.missed < best.missed) keep(r);
+    if (r.missed <= r.moves * 0.02 || i >= Number(process.env.MOTION_TRIES || 4)) break;
     console.log(`  ${id}: ${r.missed} hareket adımı kaçtı, yeniden çekiliyor (${i + 1}. deneme)`);
   }
+  for (const e of ext) { const f = path.join(kit.OUT, `${best.id}.${e}`), b = path.join(kit.TMP, `best-${best.id}.${e}`); fs.rmSync(f, { force: true }); if (fs.existsSync(b)) fs.copyFileSync(b, f); }
+  console.log(`  ${id}: saklanan deneme ${best.missed}/${best.moves} kaçan adım`);
+  return best;
 }
 
 (async () => {

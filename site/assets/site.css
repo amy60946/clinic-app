@@ -755,3 +755,24 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
   .kur-adim li::before { left: 17px; right: auto; top: 40px; bottom: -18px; width: 2px; height: auto; }
   .kur-karo { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ---------- Telefon sürümü (22 Kasım 2026, kullanıcı: "yeni kırpımlar açık değil; mevcut görselleri yapıyı koruyarak optimize et,
+   yazıyı büyüt"; örnek Atlassian'ın telefondaki ürün videosu) ----------
+   ≤ 700 px'te data-clip-m taşıyan kayıt kendi telefon sürümünü ve afişini (.clip-poster-m) kullanır: aynı sahne, aynı ekran düzeni
+   (sol menü, başlık, içerik), 900 × 1000 dikey masaüstü çerçevesinde (assets/motion/<ad>-d; yazı 1440 genişliğe göre ~1,6 kat büyük);
+   3. sekmede gerçek Moyo Ebeveyn telefon kaydı (aile-m, telefon oranında). "Örnek veri" rozeti ve duraklat düğmesi görüntünün altındaki
+   34 px şeritte, ekranın yazısına binmez. Masaüstü değişmez. */
+.clip-poster-m { display: none; }
+@media (max-width: 700px) {
+  .clip[data-clip-m] { aspect-ratio: auto; padding-bottom: 34px; }
+  .clip[data-clip-m] > .clip-poster { display: none; }
+  .clip[data-clip-m] > .clip-poster-m { display: block; width: 100%; height: auto; aspect-ratio: 9 / 10; }
+  .clip[data-clip-m] > video { inset: 0 0 34px 0; width: 100%; height: calc(100% - 34px); }
+  .clip[data-clip-m] figcaption { bottom: 7px; }
+  .clip[data-clip-m] .clip-btn { bottom: 2px; width: 30px; height: 30px; }
+  .clip[data-clip-m="aile-m"] { width: min(100%, 300px); margin-inline: auto; padding-bottom: 40px; }
+  .clip[data-clip-m="aile-m"] > .clip-poster-m { aspect-ratio: 393 / 800; }
+  .clip[data-clip-m="aile-m"] > video { inset: 0 0 40px 0; height: calc(100% - 40px); }
+  .clip[data-clip-m="aile-m"] figcaption { bottom: 9px; }
+  .clip[data-clip-m="aile-m"] .clip-btn { bottom: 4px; width: 32px; height: 32px; }
+}

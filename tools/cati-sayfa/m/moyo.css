@@ -353,3 +353,19 @@
 }
 /* Karşılaştırma tablosu, telefonda (≤ 640 px; tablo blok düzende): başlık ve altındaki not sütun genişliğinde (önceden ~180 px'e daralıp kötü bölünüyordu) */
 @media (max-width: 640px) { .sayfa-fiyat .cmp caption { display: block; width: 100%; } }
+
+/* 22 Kasım 2026 (kullanıcı kararı, tutarlılık): SSS işareti ve dar ekran menüsü çatı / Hakkımızda / Güven sayfalarıyla aynı.
+   SSS: sağda "+", açıkken "–" (c.css .sss). Menü: tam ekran yerine üst çubuğun altında açılan panel (v4.css .dar-menu);
+   sayfa kaymaya devam eder, panel dışına dokununca ya da kaydırınca kapanır (m/moyo.js). m/site.css Mercek'in kopyası, dokunulmaz. */
+.faq summary::after { content: "+"; width: auto; height: auto; margin-right: 0; border: 0; transform: none; font-size: 24px; font-weight: 400; line-height: 1; color: var(--c-cta, #0FD354); }
+.faq details[open] summary::after { content: "–"; transform: none; }
+@media (max-width: 1079px) {
+  html.menu-open, html.menu-open body { overflow: visible; }
+  html.menu-open .menu { bottom: auto; max-height: calc(100svh - var(--h-nav) - env(safe-area-inset-top, 0px)); gap: 12px;
+    padding: 8px var(--gutter-r) 16px var(--gutter-l); border-bottom: 1px solid var(--c-line-dark); box-shadow: 0 22px 44px -22px rgba(0, 0, 0, .55); }
+  html.menu-open .menu nav li { border-bottom: 0; }
+  html.menu-open .menu nav a { min-height: 48px; padding: 0 8px; font-size: 17px; font-weight: 700; border-radius: 10px; }
+  html.menu-open .menu nav a:hover { background: rgba(255, 255, 255, .07); }
+  html.menu-open .menu .acts { gap: 10px; }
+  html.menu-open .menu .pill { height: 48px; font-size: 16px; }
+}
