@@ -31,6 +31,7 @@
 # kırpılmaz; her neden kendi panelinde, üstte küçük büyük harfli etiket, başlık ve tek cümle, altta telefonda uygulamanın bütün ekranı (panelin
 # alt kenarı yalnızca telefonun altını keser) ve ekranın vurgulanan şeridi aynı yerde ~1,18 kat büyük, telefonun iki kenarından taşan kart
 # olarak (kullanıcının iki örnek görselindeki vurgu biçimi; NZ). Kart aynı görselden kırpılır (CSS), ekrana girince bir kez yerine oturur.
+from PIL import Image
 import os, json, re, html as H
 E = json.load(open('e-metin.json'))
 e = H.escape
@@ -142,14 +143,16 @@ SAHNE = {
           'y1': 'M440 229C432 150 430 72 384 54Q260 6 146 72C124 92 120 150 122 191',
           'y2': 'M370 182C372 260 336 330 334 380Q338 432 400 426C450 422 520 410 548 389',
           's1': 'M410 60Q285 0 152 86', 's2': 'M300 376Q318 436 410 420'},
-    'd': {'boy': (350, 494),
-          'oyun': (0, 34, 350, 161.6), 'tel': (95, 120, 160, 334.5), 'tel_pay': 5,
-          'etk-oyun': (0, 34), 'etk-tel': (175, 454.5),
-          'h-rutin': (105, 281.5, 140, 33), 'h-satir': (22, 75, 219, 33), 'h-yaptim': (194, 77, 44, 18), 'h-onay': (182, 412, 63, 27.5),
-          'tik': (215.8, 86.1), 'n2': (56.5, 266.5), 'n4': (300, 320.5),
-          'y1': 'M112 298C80 300 52 290 48 250C44 200 50 140 62 92',
-          'y2': 'M216 86C260 120 300 160 302 230C304 330 300 400 262 424C248 432 232 430 214 425',
-          's1': 'M90 304Q40 280 56 202', 's2': 'M298 202Q320 330 262 420'},
+    # dar (23 Kasım 2026): oyun telefonda iPad oranında 4:3 çekim (img/c-oyun-*-m.webp, 1200×900; ilk satır 51–1149 × 195–462,
+    # "Yaptım" 831–1118 × 235–333), telefon ilk satırın altından başlar; sahne 494 → 559 boy.
+    'd': {'boy': (350, 559),
+          'oyun': (0, 34, 350, 262.5), 'tel': (95, 185, 160, 334.5), 'tel_pay': 5,
+          'etk-oyun': (0, 34), 'etk-tel': (175, 519.5),
+          'h-rutin': (105, 346.5, 140, 33), 'h-satir': (13, 88, 324, 82), 'h-yaptim': (240, 100, 88, 32), 'h-onay': (182, 477, 63, 27.5),
+          'tik': (284, 116.5), 'n2': (50, 336), 'n4': (328, 392),
+          'y1': 'M112 363C80 365 50 352 46 305C42 250 50 180 62 130',
+          'y2': 'M284 117C318 150 330 200 330 270C330 370 322 455 286 484C270 494 238 494 214 490',
+          's1': 'M90 369Q40 345 56 303', 's2': 'M318 303Q338 400 266 486'},
 }
 
 
@@ -187,7 +190,9 @@ def etiketler():
 
 
 A = E['anim']
-OYUN = lambda src, ek='': f'<img{ek} src="{src}" alt="" width="1200" height="554">'
+# dar sahnede (≤ 520 px) oyun ekranının 4:3 çekimi (img/<ad>-m.webp)
+OYUN = lambda src, ek='': (f'<picture{ek}><source media="(max-width: 520px)" srcset="{src.replace(".webp", "-m.webp")}" width="1200" height="900">'
+                           f'<img src="{src}" alt="" width="1200" height="554"{" loading=\"lazy\"" if "ust" in ek else ""}></picture>')
 TEL = lambda src, ek='': f'<img{ek} src="{src}" alt="" width="600" height="1298">'
 DUR = ('<svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1"/><rect x="9.4" y="2" width="3.6" height="12" rx="1"/></svg>'
        '<svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6c0 .8.9 1.3 1.6.8l8.6-5.8c.6-.4.6-1.2 0-1.6L5.6 1.4C4.9.9 4 1.4 4 2.2z"/></svg>')
@@ -204,7 +209,7 @@ anim = f'''<figure class="ma duruk" data-ma>
             <div class="ma-sahne" style="{SAHNE_STIL}" role="img" aria-label="{e(A["anlatim"])}">
               {yollar()}
               {etiketler()}
-              <div class="ma-oyun"{yer("oyun")}>{OYUN("img/c-oyun-liste.webp")}{OYUN("img/c-oyun-odul.webp", ' class="ust" loading="lazy"')}</div>
+              <div class="ma-oyun"{yer("oyun")}>{OYUN("img/c-oyun-liste.webp")}{OYUN("img/c-oyun-odul.webp", ' class="ust"')}</div>
               <div class="ma-tel"{yer("tel")}><div class="ma-ekran">{TEL("img/e-rutinler.webp")}{TEL("img/e-onay.webp", ' class="ust" loading="lazy"')}</div></div>
               {halka("h-rutin", 1)}{halka("h-satir", 2)}{halka("h-yaptim", 3)}{halka("h-onay", 4)}
               <i class="ma-tik"{yer("tik")}>{TIK}</i>
@@ -225,10 +230,12 @@ def gorsel(g, ek=''):
         # telefon sürümü (23 Kasım 2026): ≤ 699 px'te aynı ekranın 390 × 700 boylu, 820 px'lik kopyası (img/<ad>-m.webp varsa), kart genişliğinde
         mob = src.replace('.webp', '-m.webp')
         kaynak = f'<source media="(max-width: 699px)" srcset="{mob}" width="820" height="1472">' if os.path.exists(mob) else ''
-        return f'<figure class="tel{" kirp" if kind == "kirp" else ""}"{ek}><picture>{kaynak}<img src="{src}" alt="{e(alt_)}" width="600" height="1298" loading="lazy"></picture><figcaption>Örnek veri</figcaption></figure>'
+        # "m": telefon boyu kopyası var (genişliğe göre büyür); yoksa eski yüksekliğe göre boyut (kutudan taşmasın)
+        return f'<figure class="tel{" kirp" if kind == "kirp" else ""}{" m" if kaynak else ""}"{ek}><picture>{kaynak}<img src="{src}" alt="{e(alt_)}" width="600" height="1298" loading="lazy"></picture><figcaption>Örnek veri</figcaption></figure>'
     # oyun ekranı telefonda iPad oranında (4:3) çekim (img/<ad>-m.webp varsa): yatay telefon ekranı 350 px'te okunmuyordu
     mob = src.replace('.webp', '-m.webp')
-    kaynak = f'<source media="(max-width: 699px)" srcset="{mob}" width="1200" height="900">' if os.path.exists(mob) else ''
+    kaynak = (f'<source media="(max-width: 699px)" srcset="{mob}" width="{Image.open(mob).width}" height="{Image.open(mob).height}">'
+              if os.path.exists(mob) else '')
     return f'<figure class="shot"{ek}><picture>{kaynak}<img src="{src}" alt="{e(alt_)}" width="1200" height="554" loading="lazy"></picture><figcaption>Örnek veri</figcaption></figure>'
 
 

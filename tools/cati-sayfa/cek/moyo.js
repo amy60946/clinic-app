@@ -80,7 +80,22 @@ const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-famil
       try { await p.getByText(lb, { exact: true }).first().click({ timeout: 1200 }); } catch { try { await p.getByLabel(lb, { exact: true }).first().click({ timeout: 1200 }); } catch { /* yoksa geç */ } }
     }
     for (const sel of s.hide || []) await p.evaluate((q) => document.querySelectorAll(q).forEach((e) => { e.style.display = 'none'; }), sel);
+    // telefon sürümü: yüzen alt menünün üst kenarı bir başlığı ortadan kesmesin diye çekimden önce biraz kaydır (moyo.json "mScroll")
+    if (CEK_EK && s.mScroll) { await p.mouse.move(195, 400); await p.mouse.wheel(0, s.mScroll); await p.waitForTimeout(900); }
     await p.waitForTimeout(800);
+    if (CEK_EK && process.env.CEK_DEBUG) {
+      // alt menünün (alttan 22–82 nokta) üst ve alt kenarını kesen yazılar
+      const kes = await p.evaluate((H) => {
+        const out = []; const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        for (let n = w.nextNode(); n; n = w.nextNode()) {
+          const t = n.textContent.trim(); if (!t) continue;
+          const r = document.createRange(); r.selectNodeContents(n); const b = r.getBoundingClientRect();
+          for (const y of [H - 82, H - 22, H]) if (b.top < y && b.bottom > y && b.width > 0) out.push(`${Math.round(b.top)}–${Math.round(b.bottom)} @${y} ${t.slice(0, 40)}`);
+        }
+        return out;
+      }, CEK_H);
+      console.log('KESİLEN', s.name, kes.join(' | ') || 'yok');
+    }
     const text = (await p.evaluate(() => document.body.innerText)).replace(/\n{2,}/g, '\n');
     if (process.env.CEK_DEBUG) console.log(`--- ${s.name}\n${text.slice(0, +process.env.CEK_DEBUG > 1 ? +process.env.CEK_DEBUG : 900)}\n---`);
     if (/macera/i.test(text)) console.log('UYARI', s.name, 'ekranda "macera" geçiyor:', (text.match(/.{0,40}macera.{0,30}/i) || [''])[0].replace(/\n/g, ' '));

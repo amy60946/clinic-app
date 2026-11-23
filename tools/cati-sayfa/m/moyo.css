@@ -70,6 +70,7 @@
 
 .ma-oyun { border-radius: 14px; overflow: hidden; box-shadow: 0 26px 60px rgba(0, 0, 0, .38); background: #8EC5E6; }
 .ma-oyun img, .ma-ekran img { display: block; width: 100%; height: auto; }
+.ma-oyun picture { display: block; }
 .ma-tel { z-index: 2; padding: var(--gp); background: #0B0920; border-radius: 13.5% / 6.6%; box-shadow: 0 30px 70px rgba(0, 0, 0, .42), 0 0 0 1px rgba(255, 255, 255, .08); }
 .ma-ekran { position: relative; overflow: hidden; border-radius: 11% / 5.1%; background: #fff; }
 .ma .ust { position: absolute; inset: 0; opacity: 0; transition: opacity .35s ease; }
@@ -396,7 +397,7 @@
 @media (max-width: 699px) {
   .sayfa-moyo .nc-media { --nc-h: 560px; }
   .sayfa-moyo .nc-media figure.tel picture { display: block; }
-  .sayfa-moyo .nc-media figure.tel img { height: auto; width: min(270px, 70vw); max-width: none; }
+  .sayfa-moyo .nc-media figure.tel.m img { height: auto; width: min(270px, 70vw); max-width: none; }
 }
 /* oyun ekranı telefonda 4:3 çekim (<picture>, img/c-oyun-*-m.webp) */
 .sayfa-moyo .nc-media figure.shot picture { display: block; }

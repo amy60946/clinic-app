@@ -28,8 +28,9 @@ IMG = {'ebeveyn-onay': 'img/moyo-onay.webp', 'ebeveyn-ekle': 'img/moyo-ekle.webp
        # 820 px (cek/moyo.js ve cek/mercek.js CEK_H=700 CEK_EK=-m); kartta kart genişliğinde (c-18.css "Telefon sürümü")
        'ebeveyn-ekle-m': 'img/moyo-ekle-m.webp', 'ebeveyn-onay-m': 'img/moyo-onay-m.webp',
        'mercek-veri-tel-m': 'img/mercek-rutin-tel-m.webp', 'mercek-egitim-tel-m': 'img/mercek-egitim-tel-m.webp',
-       # oyun kartı telefonda iPad oranında (4:3) çekim: aynı an, ekranın üst ve alt şeridi kesilmeden ~1,6 kat büyük yazı
-       'oyun-onay-m': 'img/c-oyun-onay-m.webp'}
+       # oyun kartı telefonda iPad çekimi (yazı ~1,6 kat büyük): kartın başlığındaki an, iki adımda da "Yaptım" düğmesi
+       'oyun-onay-m': 'img/c-oyun-yaptim-m.webp'}
+ALT_M = {'oyun-onay-m': 'Moyo Oyun: bugünün adımları, her birinde "Yaptım" düğmesi'}   # telefon görselinin anlatımı başkaysa
 e = H.escape
 ONIZ = K.get('oniz', []); ONERI = {g['k']: g['oneri'] for g in ONIZ}
 SEMA = runpy.run_path('c-sema.py')['sema']; LOGO_IC = re.sub(r'^<svg[^>]*>|</svg>$', '', LOGO)
@@ -50,7 +51,7 @@ def cls(key, dar=False): return 'telefon' if key.startswith('ebeveyn') or (dar a
 def resim(key, alt, c='', dar=False):
     if dar and key.startswith('mercek'): key += '-tel'          # telefonda Moyo Uzman'ın telefon ekranı (masaüstü penceresi okunmaz)
     if dar and key + '-m' in IMG and os.path.exists(IMG[key + '-m']): key += '-m'                    # telefon ve tablet kartında kısa boylu, keskin telefon ekranı
-    return f'<img class="{c}" src="{IMG[key]}" alt="{e(alt)}" loading="lazy" decoding="async">'
+    return f'<img class="{c}" src="{IMG[key]}" alt="{e(ALT_M.get(key, alt))}" loading="lazy" decoding="async">'
 
 def dongu(beats):
     # Moyo Ekosistemi: ortadaki ekran net; yanındakiler bulanık, yana açılmış ve geride. Masaüstünde sayfa kaydıkça ilerler (eko.js),
