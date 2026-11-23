@@ -398,3 +398,6 @@
   .sayfa-moyo .nc-media figure.tel picture { display: block; }
   .sayfa-moyo .nc-media figure.tel img { height: auto; width: min(270px, 70vw); max-width: none; }
 }
+/* oyun ekranı telefonda 4:3 çekim (<picture>, img/c-oyun-*-m.webp) */
+.sayfa-moyo .nc-media figure.shot picture { display: block; }
+.sayfa-moyo .nc-media figure.shot img { width: 100%; height: auto; }

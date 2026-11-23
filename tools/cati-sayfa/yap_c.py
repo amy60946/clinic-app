@@ -11,7 +11,7 @@
 # anlatımı (#nasil, telefon ve tablette #nasil-k) kalktı, hikaye.js ve kompakt.js bu sayfada yüklenmez; nk grubu da onunla gitti.
 # Tur 4 (kullanıcı kararları 19 Kasım 2026): dongu6 b (Yörünge), b2 a, b3 a, b3s a tek sürüm; sayfada önizleme grubu kalmadı.
 # c-metin.json "oniz" boşken #oniz-gruplar ve oniz.js yazılmaz; yeni grup eklenirse (sözlük metin + "oniz" kaydı) ikisi yeniden çıkar.
-import re, html as H, json, sys, runpy
+import os, re, html as H, json, sys, runpy
 def _svg(dosya):
     s = open(dosya).read().strip()
     return re.sub(r' role="img" aria-label="[^"]*"', ' aria-hidden="true" focusable="false"', s).replace(' xmlns="http://www.w3.org/2000/svg"', '')
@@ -27,7 +27,9 @@ IMG = {'ebeveyn-onay': 'img/moyo-onay.webp', 'ebeveyn-ekle': 'img/moyo-ekle.webp
        # Telefon sürümü (23 Kasım 2026, kullanıcı: Mercek'teki gibi "aynı formatla optimize et"): aynı ekranlar 390 × 700 telefon boyunda,
        # 820 px (cek/moyo.js ve cek/mercek.js CEK_H=700 CEK_EK=-m); kartta kart genişliğinde (c-18.css "Telefon sürümü")
        'ebeveyn-ekle-m': 'img/moyo-ekle-m.webp', 'ebeveyn-onay-m': 'img/moyo-onay-m.webp',
-       'mercek-veri-tel-m': 'img/mercek-rutin-tel-m.webp', 'mercek-egitim-tel-m': 'img/mercek-egitim-tel-m.webp'}
+       'mercek-veri-tel-m': 'img/mercek-rutin-tel-m.webp', 'mercek-egitim-tel-m': 'img/mercek-egitim-tel-m.webp',
+       # oyun kartı telefonda iPad oranında (4:3) çekim: aynı an, ekranın üst ve alt şeridi kesilmeden ~1,6 kat büyük yazı
+       'oyun-onay-m': 'img/c-oyun-onay-m.webp'}
 e = H.escape
 ONIZ = K.get('oniz', []); ONERI = {g['k']: g['oneri'] for g in ONIZ}
 SEMA = runpy.run_path('c-sema.py')['sema']; LOGO_IC = re.sub(r'^<svg[^>]*>|</svg>$', '', LOGO)
@@ -47,7 +49,7 @@ def tur(key): return 'ebeveyn' if key.startswith('ebeveyn') else ('mercek' if ke
 def cls(key, dar=False): return 'telefon' if key.startswith('ebeveyn') or (dar and key.startswith('mercek')) else ('panel' if key.startswith('mercek') else '')
 def resim(key, alt, c='', dar=False):
     if dar and key.startswith('mercek'): key += '-tel'          # telefonda Moyo Uzman'ın telefon ekranı (masaüstü penceresi okunmaz)
-    if dar and key + '-m' in IMG: key += '-m'                    # telefon ve tablet kartında kısa boylu, keskin telefon ekranı
+    if dar and key + '-m' in IMG and os.path.exists(IMG[key + '-m']): key += '-m'                    # telefon ve tablet kartında kısa boylu, keskin telefon ekranı
     return f'<img class="{c}" src="{IMG[key]}" alt="{e(alt)}" loading="lazy" decoding="async">'
 
 def dongu(beats):

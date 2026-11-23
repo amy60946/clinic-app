@@ -226,7 +226,10 @@ def gorsel(g, ek=''):
         mob = src.replace('.webp', '-m.webp')
         kaynak = f'<source media="(max-width: 699px)" srcset="{mob}" width="820" height="1472">' if os.path.exists(mob) else ''
         return f'<figure class="tel{" kirp" if kind == "kirp" else ""}"{ek}><picture>{kaynak}<img src="{src}" alt="{e(alt_)}" width="600" height="1298" loading="lazy"></picture><figcaption>Örnek veri</figcaption></figure>'
-    return f'<figure class="shot"{ek}><img src="{src}" alt="{e(alt_)}" width="1200" height="554" loading="lazy"><figcaption>Örnek veri</figcaption></figure>'
+    # oyun ekranı telefonda iPad oranında (4:3) çekim (img/<ad>-m.webp varsa): yatay telefon ekranı 350 px'te okunmuyordu
+    mob = src.replace('.webp', '-m.webp')
+    kaynak = f'<source media="(max-width: 699px)" srcset="{mob}" width="1200" height="900">' if os.path.exists(mob) else ''
+    return f'<figure class="shot"{ek}><picture>{kaynak}<img src="{src}" alt="{e(alt_)}" width="1200" height="554" loading="lazy"></picture><figcaption>Örnek veri</figcaption></figure>'
 
 
 # 2. adımın oyun ekranı c-oyun-onay: açılış anlatımı c-oyun-liste'yi gösterir, aynı ekran sayfada iki kez görünmez.
