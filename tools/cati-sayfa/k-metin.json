@@ -59,12 +59,12 @@
           "kim": "Ebeveyn",
           "uygulama": "Moyo Ebeveyn",
           "ikon": "img/ikon-moyo.svg",
-          "ne": "Rutini planlar, adımı onaylar, zor anı kaydeder; kısa eğitimleri okur.",
+          "ne": "Rutini planlar, adımı onaylar, zor anı kaydeder.",
           "ekran": {
             "img": "img/k-ebeveyn.webp",
-            "alt": "Moyo Ebeveyn: zorlayıcı davranışları ABC ile kaydetmeyi anlatan kısa eğitim ve tamamlanan modüller"
+            "alt": "Moyo Ebeveyn: çocuğun zorlandığı anı kaydetme ekranı"
           },
-          "ars": "Davranışsal ebeveyn eğitimi programları çocuklardaki davranış sorunlarını azaltmada ve ebeveynlik becerilerini güçlendirmede etkili bulunmuş [[Furlong2012]]; internet üzerinden sunulan programlarda da olumlu etkiler bildirilmiş [[Thongseiratch2020]]."
+          "ars": "Olanı o anda kaydetmek, sonradan hatırlamanın yanılgılarını azaltmak için geliştirilmiş bir yöntem [[Shiffman2008]]."
         },
         {
           "k": "uzman",
@@ -72,13 +72,13 @@
           "uygulama": "Moyo Uzman",
           "ikon": "img/ikon-mercek.svg",
           "istege": true,
-          "ne": "Paylaşılan kayıtları okur, eğitim gönderir, rutin önerir.",
+          "ne": "Paylaşılan kayıtları okur, rutin önerir, rapor gönderir.",
           "ekran": {
             "img": "img/k-uzman.webp",
             "alt": "Moyo Uzman: ebeveynin bildirdiği olaylar tablosu; öncesi, sonrası, uygulanan strateji ve çocuğun tepkisi",
             "dar": "img/k-uzman-dar.webp"
           },
-          "ars": "Terapi araştırmalarında görüşme dışındaki uygulamaya uyum daha iyi sonuçlarla ilişkili bulunmuş [[Mausbach2010]]; olanı o anda kaydetmek, sonradan hatırlamanın yanılgılarını azaltmak için geliştirilmiş bir yöntem [[Shiffman2008]]."
+          "ars": "Terapi araştırmalarında görüşme dışındaki uygulamaya uyum daha iyi sonuçlarla ilişkili bulunmuş [[Mausbach2010]]."
         }
       ],
       "gecisler": [
@@ -155,7 +155,7 @@
         {
           "ikon": "kisi",
           "ad": "Uzman mısınız?",
-          "metin": "Ebeveynin onayıyla paylaşılan kayıtlar, ebeveyn eğitimi ve ilerleme notu için panel.",
+          "metin": "Ebeveynin onayıyla paylaşılan kayıtlar, seanslar ve rapor için panel.",
           "link": "{MERCEK}",
           "link_ad": "Uzman sitesi"
         },
@@ -229,7 +229,7 @@
       "gorur": [
         "Rutinler ve tamamlanma durumu",
         "Davranış kayıtlarınız",
-        "Gönderdiği eğitim ve önerilerdeki ilerleme"
+        "Gönderdiği öneriler ve raporlar"
       ],
       "gormez_baslik": "Görmez",
       "gormez": [
