@@ -68,3 +68,73 @@ export function seedBehaviors(x: Row) {
     duration_min: 10, count: 2, strategy: '', response: 2 });
   x.behaviorsSeeded = true;
 }
+
+// Ebeveynin davranış kayıtları (abc_events) Davranışlar ve Olaylar'da (23 Kasım 2026): örnek ailenin kayıtlarına gün bölümü,
+// "Tablet süresi bitti" kayıtlarına davranış hedefi (g-gecis) ve sesli, hedefe bağlı (g-sabah) yeni bir sabah kaydı.
+// Bundan sonra ParentApp önizlemesinden bildirilen olaylar uzmana behavior_incident bildirimi düşürür (behaviorNotifications).
+export function seedParentRecords(x: Row) {
+  if (x.parentRecordsSeeded) return;
+  x.behaviorNotifSince = new Date().toISOString();
+  x.parentRecordsSeeded = true;
+  const link = x.clinic_links.find((l: Row) => l.id === 'demo-link');
+  if (!link) return;
+  const hasGoal = (id: string) => x.clinic_goals.some((g: Row) => g.id === id && g.link_id === link.id);
+  x.abc_events.filter((e: Row) => e.child_id === link.child_id).forEach((e: Row) => {
+    if (!e.day_part) e.day_part = 'evening';
+    if (e.goal_id === undefined) e.goal_id = e.antecedent === 'Tablet süresi bitti' && hasGoal('g-gecis') ? 'g-gecis' : null;
+  });
+  const parent = x.profiles.filter((p: Row) => p.family_id === link.family_id)
+    .sort((a: Row, b: Row) => String(a.created_at).localeCompare(String(b.created_at)))[0];
+  const path = `${link.family_id}/demo-davranis-kaydi.wav`;
+  x.blobs = x.blobs ?? {};
+  x.blobs[path] = toneWav(4);
+  const occurred = at(1, 8, 0);
+  x.abc_events.push({ id: uid(), family_id: link.family_id, child_id: link.child_id, occurred_at: occurred, day_part: 'morning',
+    antecedent: 'Kahvaltı hazırdı, giyinmesi istendi', behavior: 'Giyinmeyi reddetti, odasına kapandı',
+    consequence: 'Sabah çizelgesi gösterildi, 10 dakikada giyindi', intensity: 3, goal_id: hasGoal('g-sabah') ? 'g-sabah' : null,
+    audio_path: path, duration_ms: 4000, group_id: null, created_by: parent?.id ?? null, created_at: occurred });
+  // Arşivlenenler: olaylarıyla arşivlenmiş bir hedef davranış ("Geri al" denensin)
+  const B4 = uid();
+  x.clinic_target_behaviors.push({ id: B4, clinic_id: link.clinic_id, link_id: link.id, title: 'Yemekte masadan kalkma',
+    description: 'Akşam yemeğinde yemek bitmeden masadan kalkma. Kaç kez olduğunu kaydedin.', strategies: ['Yemek öncesi kısa hatırlatma'],
+    status: 'baselining', parent_logging: true, log_type: 'frequency', archived: true, created_by: 'demo-clinician',
+    started_at: ago(30 * 1440), created_at: ago(30 * 1440), updated_at: ago(12 * 1440) });
+  [[26, 4], [20, 2], [14, 1]].forEach(([d, count]) => x.behavior_incidents.push({ id: uid(), link_id: link.id, family_id: link.family_id,
+    child_id: link.child_id, behavior_id: B4, log_type: 'frequency', other_behavior: '', occurred_at: at(d, 19, 30), count, duration_min: null,
+    antecedent: '', consequence: '', strategy: 'Yemek öncesi kısa hatırlatma', response: 3, reporter_id: parent?.id ?? 'demo-parent',
+    reporter_name: String(parent?.name ?? '').trim() || parent?.nickname || 'Ebeveyn', created_at: at(d, 19, 30) }));
+}
+
+// Sunucudaki behavior_incidents_notify: yeni olay → paylaşımın uzmanlarına, data { incident_id, behavior_id, link_id, child_id }.
+// Örnek verinin eski olayları bildirim üretmez (behaviorNotifSince'ten önce eklenmiş).
+export function behaviorNotifications(x: Row, has: (kind: string, test: (d: Row) => boolean) => boolean,
+  push: (user: string, kind: string, title: string, body: string, data: Row, childId: string | null, createdAt: string) => void,
+  recipients: (l: Row) => string[]) {
+  if (!x.behaviorNotifSince) return;
+  (x.behavior_incidents ?? []).forEach((i: Row) => {
+    if (String(i.created_at) < x.behaviorNotifSince || has('behavior_incident', (d) => d.incident_id === i.id)) return;
+    const l = x.clinic_links.find((k: Row) => k.id === i.link_id && k.status === 'active');
+    if (!l) return;
+    const name = x.clinic_target_behaviors.find((b: Row) => b.id === i.behavior_id)?.title || i.other_behavior || 'Davranış olayı';
+    recipients(l).forEach((u) => push(u, 'behavior_incident', `Yeni davranış olayı: ${name}`.slice(0, 120),
+      `${i.reporter_name || 'Ebeveyn'} yeni bir davranış olayı bildirdi.`,
+      { incident_id: i.id, behavior_id: i.behavior_id, link_id: l.id, child_id: l.child_id }, l.child_id, i.created_at));
+  });
+}
+
+// Önizlemedeki sesli kayıt: kısa, yumuşak iki tonlu ses (8 kHz, 8 bit, tek kanal WAV), veri adresi olarak
+function toneWav(seconds: number): string {
+  const rate = 8000, n = rate * seconds, bytes = new Uint8Array(44 + n);
+  const v = new DataView(bytes.buffer);
+  const str = (o: number, s: string) => { for (let i = 0; i < s.length; i++) bytes[o + i] = s.charCodeAt(i); };
+  str(0, 'RIFF'); v.setUint32(4, 36 + n, true); str(8, 'WAVE'); str(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true); v.setUint32(28, rate, true);
+  v.setUint16(32, 1, true); v.setUint16(34, 8, true); str(36, 'data'); v.setUint32(40, n, true);
+  for (let i = 0; i < n; i++) {
+    const t = i / rate, f = Math.floor(t * 2) % 2 ? 330 : 262, env = Math.min(1, (t % 0.5) * 20, (0.5 - (t % 0.5)) * 20);
+    bytes[44 + i] = 128 + Math.round(18 * env * Math.sin(2 * Math.PI * f * t));
+  }
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return `data:audio/wav;base64,${btoa(bin)}`;
+}

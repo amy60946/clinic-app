@@ -46,6 +46,7 @@ export type AbcEvent = {
   duration_ms?: number | null;
   // ebeveynin seçtiği uzman hedefi (ortak 20261103120000_abc_goal, uygulandı 3 Kasım 2026); seçmezse boş
   goal_id?: string | null;
+  created_by?: string | null;   // kaydı giren ebeveyn (Davranışlar ve Olaylar'da "Bildiren")
 };
 
 // Bir hedefe bağlı davranış kaydı sayısı, son n takvim haftası (pazartesiden; bugün dahil), eskiden yeniye
