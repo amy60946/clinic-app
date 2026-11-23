@@ -13,7 +13,7 @@ export default function NotesTab({ client, me, data }: ClientCtx) {
   if (data.sample) {
     return (
       <View>
-        <Text style={[styles.small, { marginTop: 8 }]}>Notlarını aile görmez. Örnek ailede not eklenmez.</Text>
+        <Text style={[styles.small, { marginTop: 8 }]}>Örnek ailede not eklenmez.</Text>
         <View style={{ gap: 8, marginTop: 12 }}>
           {(data.sampleNotes ?? []).map((n) => (
             <Card key={n.id} style={{ gap: 6 }}>
@@ -67,7 +67,6 @@ function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
       <Card style={{ gap: 10 }}>
         <Input value={body} onChangeText={setBody} placeholder="Seans notu, gözlem, müdahale değişikliği (ör. ödül değişti)…" multiline maxLength={4000} />
         <Cta label="Notu kaydet" onPress={save} busy={busy} />
-        <Text style={styles.small}>Notlarını aile görmez; yalnız kliniğindeki uzmanlar okur. Ebeveyn izin verirse notların, adın gizlenerek çocuğun sonraki uzmanına okunur olarak açılabilir. Nota kimlik bilgisi yazma.</Text>
       </Card>
       <Label>{`Notlar (${notes?.length ?? 0})`}</Label>
       {!notes ? <ActivityIndicator color={colors.navy} /> : notes.length === 0 ? <Empty text="Henüz not yok." /> : (

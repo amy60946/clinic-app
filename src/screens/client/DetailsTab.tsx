@@ -60,7 +60,6 @@ export default function DetailsTab({ client, me, data, team, onTeamAccess, onRev
       <Label>Ebeveyn ve bakım verenler</Label>
       <Card style={{ gap: 6 }}>
         <Text style={styles.body}>{client.parents || 'Ad paylaşılmadı'}</Text>
-        <Text style={styles.small}>İletişim bilgileri (e-posta, telefon) ailede kalır, uzmana açılmaz. Aileye Moyo üzerinden ulaşırsın: önerilerin ve atadığın eğitim orada görünür.</Text>
       </Card>
 
       <Label>Paylaşım</Label>

@@ -5,7 +5,7 @@ import { View, Text, Alert, Platform, StyleSheet } from 'react-native';
 import * as Print from 'expo-print';
 import * as Clipboard from 'expo-clipboard';
 import { colors, radius } from '../../theme';
-import { Card, Label, Cta, Segmented, SmallButton } from '../../components/ui';
+import { Card, Label, Cta, SmallButton } from '../../components/ui';
 import { progressNote } from '../../lib/progressNote';
 import { Goal, listGoals } from '../../lib/clinic';
 import { buildReportHtml } from '../../lib/report';
@@ -13,12 +13,6 @@ import { ageText, type ClientCtx } from './ClientScreen';
 import { track } from '../../lib/track';
 import { useClientConfig, CARE_PLAN_FLAG } from '../../lib/clientConfig';
 import { errorText } from '../../lib/errors';
-
-type NameMode = 'name' | 'initials' | 'label';
-
-function initials(name: string) {
-  return name.split(/\s+/).filter(Boolean).map((w) => `${w[0].toLocaleUpperCase('tr-TR')}.`).join(' ');
-}
 
 // Web'de rapor sayfanın üstünde bir pencerede açılır; "Yazdır / PDF" tarayıcının yazdırma penceresini getirir
 // ("PDF olarak kaydet" oradan). iPad'de sistem yazdırma/paylaşma (expo-print).
@@ -64,7 +58,6 @@ async function printHtml(html: string) {
 
 export default function ReportTab({ client, me, data, today, weeks }: ClientCtx) {
   const planOn = useClientConfig().flag(CARE_PLAN_FLAG);   // Takip Planı kapalıyken rapor tarifinde GAS geçmez
-  const [mode, setMode] = useState<NameMode>('initials');
   const [goals, setGoals] = useState<Goal[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -75,8 +68,8 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
     listGoals(client.link_id).then(setGoals).catch(() => setGoals([]));
   }, [client.link_id, data]);
 
-  const name = data.child?.name ?? client.child_name;
-  const childLabel = mode === 'name' ? name : mode === 'initials' ? initials(name) : client.label || initials(name);
+  // Raporda çocuğun ebeveynin Moyo'da girdiği adı (kullanıcı kararı 23 Kasım 2026; baş harf / etiket seçimi kalktı)
+  const childLabel = data.child?.name ?? client.child_name;
   const note = useMemo(() => progressNote({
     childLabel, tasks: data.tasks, completions: data.completions, abc: data.abc, goals, today, weeks,
   }), [childLabel, data, goals, today, weeks]);
@@ -120,23 +113,11 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
         <Text style={styles.body}>
           Rapor şunları içerir: haftalık rutin kartı, yürütücü işlev gözlem özeti (başlatma, tutarlılık, "Yapamam"), adım ve beceri alanı tabloları{planOn ? ', GAS davranış hedefi puanları' : ''} ve davranış kaydı özeti. Uzman notları rapora girmez.
         </Text>
-        <Text style={styles.small}>Raporda çocuk nasıl görünsün?</Text>
-        <Segmented<NameMode>
-          options={[{ id: 'initials', label: 'Baş harfler' }, { id: 'label', label: 'Etiket' }, { id: 'name', label: 'Tam ad' }]}
-          value={mode} onChange={setMode}
-        />
-        <Text style={styles.small}>Görünecek: {childLabel || '—'}</Text>
         <CoachTarget id="report.open"><Cta label={Platform.OS === 'web' ? 'Raporu aç' : 'Raporu yazdır / paylaş'} onPress={open} busy={busy} /></CoachTarget>
-        <Text style={styles.small}>
-          Rapor kişisel sağlık verisi içerir. Yalnız tedavi amacıyla, güvenli kanaldan ve ebeveynin bilgisiyle paylaş.
-        </Text>
       </Card>
 
       <Label>{`İlerleme notu (${weeks} hafta)`}</Label>
       <Card style={{ gap: 10 }}>
-        <Text style={styles.small}>
-          Dönemin kayıtlarından kuralla derlenir (yapay zekâ yok, veri cihazdan çıkmaz). Kopyala, kendi kayıt sistemine yapıştır, "Uzman yorumu"nu sen yaz. Çocuk yukarıda seçtiğin biçimde görünür.
-        </Text>
         <View style={styles.note}>
           <Text selectable style={styles.noteText}>{note}</Text>
         </View>
@@ -150,7 +131,6 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
 
 const styles = StyleSheet.create({
   body: { fontSize: 14, color: colors.text, lineHeight: 20 },
-  small: { fontSize: 12, color: colors.muted, lineHeight: 17 },
   note: { backgroundColor: '#F7F8FA', borderRadius: radius.sm, padding: 14, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.line },
   noteText: { fontSize: 13, color: colors.text, lineHeight: 20 },
 });

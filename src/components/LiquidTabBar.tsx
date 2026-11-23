@@ -56,15 +56,17 @@ function useKeyboardOpen() {
   return open;
 }
 
-export default function LiquidTabBar({ active, onSelect }: { active: TabId; onSelect: (to: TabId) => void }) {
+// hide: gösterilmeyen sekmeler (ör. ebeveyn eğitimi bayrağı kapalıyken Kütüphane, 23 Kasım 2026)
+export default function LiquidTabBar({ active, onSelect, hide = [] }: { active: TabId; onSelect: (to: TabId) => void; hide?: TabId[] }) {
+  const tabs = TABS.filter((t) => !hide.includes(t.id));
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const reduce = useReduceMotion();
   const keyboard = useKeyboardOpen();
   const { shrunk, expand } = useTabBarShrunk();
-  const index = Math.max(0, TABS.findIndex((t) => t.id === active));
+  const index = Math.max(0, tabs.findIndex((t) => t.id === active));
   const barW = Math.round(Math.min(width * 0.88, 420));
-  const slotW = (barW - 2 * RIM) / TABS.length;
+  const slotW = (barW - 2 * RIM) / tabs.length;
 
   const shrink = useRef(new Animated.Value(1)).current;     // kaydırma: 1 ↔ 0,84
   const press = useRef(new Animated.Value(1)).current;      // dokunma: 1 ↔ 1,045
@@ -93,9 +95,9 @@ export default function LiquidTabBar({ active, onSelect }: { active: TabId; onSe
       <Animated.View testID="liquid-tab-bar" accessibilityRole="tablist" style={[styles.pill, WEB_GLASS, { width: barW, transform: [{ scale }] }]}>
         <Animated.View pointerEvents="none" style={[styles.capsule, {
           width: slotW - 2 * INSET,
-          transform: [{ translateX: slide.interpolate({ inputRange: [0, TABS.length - 1], outputRange: [0, slotW * (TABS.length - 1)] }) }],
+          transform: [{ translateX: slide.interpolate({ inputRange: [0, tabs.length - 1], outputRange: [0, slotW * (tabs.length - 1)] }) }],
         }]} />
-        {TABS.map((t) => {
+        {tabs.map((t) => {
           const on = t.id === active;
           return (
             <Pressable key={t.id} accessibilityRole="tab" accessibilityState={{ selected: on }} aria-selected={on} accessibilityLabel={t.label}

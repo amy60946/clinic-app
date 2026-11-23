@@ -10,7 +10,7 @@ import NotificationsSheet, { notificationTab } from '../NotificationsSheet';
 import { useNotifications } from '../../lib/notificationsContext';
 import { AppNotification, notificationChildren } from '../../lib/notifications';
 import { track } from '../../lib/track';
-import { useClientConfig, CARE_PLAN_FLAG } from '../../lib/clientConfig';
+import { useClientConfig, CARE_PLAN_FLAG, PARENT_TRAINING_FLAG } from '../../lib/clientConfig';
 import { Client, ClientData, ClinicianMe, Member, loadClientData, revokeLink } from '../../lib/clinic';
 import TeamAccessSheet from './TeamAccessSheet';
 import { isoDate, windowStarts } from '../../lib/metrics';
@@ -34,23 +34,24 @@ import { errorText } from '../../lib/errors';
 export type Tab = 'training' | 'behaviors' | 'summary' | 'routine' | 'goals' | 'sessions' | 'notes' | 'suggestions' | 'report' | 'details';
 type Section = Exclude<Tab, 'suggestions'>;
 
-// Bölümler: geniş ekranda (web, iPad'de "Web görünümü") gruplu sol menü — Planla · Takip · Kayıt (kullanıcı kararı 30 Ekim 2026);
-// telefonda ve "iPad görünümü"nde gri zeminli seçici (4 + 3)
-// Lansman odağı (kullanıcı kararı 11 Kasım 2026, "A"): tek plan ekranı Ebeveyn Eğitimi. Takip Planı uzaktan ayar bayrağı
-// `care_plan` (clientConfig.tsx CARE_PLAN_FLAG) açık değilse menüde yok (verisi durur); danışan Ebeveyn Eğitimi'nde açılır.
+// Bölümler: geniş ekranda (web, iPad'de "Web görünümü") gruplu sol menü — Planla · Takip (kullanıcı kararı 30 Ekim 2026;
+// 23 Kasım 2026: "Kayıt" grubu Planla'ya katıldı, Ev Rutinleri Takip'te Özet'in üstünde); telefonda ve "iPad görünümü"nde gri zeminli seçici
+// Lansman odağı (kullanıcı kararı 11 Kasım 2026, "A"): Takip Planı uzaktan ayar bayrağı `care_plan` (clientConfig.tsx CARE_PLAN_FLAG)
+// açık değilse menüde yok (verisi durur). Ebeveyn Eğitimi de bayrak arkasında (`parent_training`, PARENT_TRAINING_FLAG, 23 Kasım 2026);
+// kapalıyken danışan Ev Rutinleri'nde açılır.
 const MENU_KEY = 'clinic.menu.v1';   // bölüm menüsü açık mı (hamburger); cihazda hatırlanır
-type Group = 'plan' | 'watch' | 'record';
-const GROUPS: { id: Group; label: string }[] = [{ id: 'plan', label: 'Planla' }, { id: 'watch', label: 'Takip' }, { id: 'record', label: 'Kayıt' }];
+type Group = 'plan' | 'watch';
+const GROUPS: { id: Group; label: string }[] = [{ id: 'plan', label: 'Planla' }, { id: 'watch', label: 'Takip' }];
 const SECTIONS: { id: Section; label: string; icon: keyof typeof Ionicons.glyphMap; group: Group }[] = [
   { id: 'training', label: 'Ebeveyn Eğitimi', icon: 'school-outline', group: 'plan' },
   { id: 'goals', label: 'Takip Planı', icon: 'flag-outline', group: 'plan' },
   { id: 'sessions', label: 'Seanslar', icon: 'calendar-outline', group: 'plan' },
+  { id: 'notes', label: 'Notlar', icon: 'create-outline', group: 'plan' },
+  { id: 'report', label: 'Rapor', icon: 'print-outline', group: 'plan' },
+  { id: 'details', label: 'Danışan Bilgileri', icon: 'person-circle-outline', group: 'plan' },
   { id: 'behaviors', label: 'Davranışlar ve Olaylar', icon: 'locate-outline', group: 'watch' },
-  { id: 'summary', label: 'Özet', icon: 'grid-outline', group: 'watch' },
   { id: 'routine', label: 'Ev Rutinleri', icon: 'repeat-outline', group: 'watch' },
-  { id: 'notes', label: 'Notlar', icon: 'create-outline', group: 'record' },
-  { id: 'report', label: 'Rapor', icon: 'print-outline', group: 'record' },
-  { id: 'details', label: 'Danışan Bilgileri', icon: 'person-circle-outline', group: 'record' },
+  { id: 'summary', label: 'Özet', icon: 'grid-outline', group: 'watch' },
 ];
 
 export const MAX_WEEKS = 8;
@@ -96,8 +97,10 @@ export default function ClientScreen({
   const [switcher, setSwitcher] = useState(false);
   const [label, setLabel] = useState(client.label);
   const { desktop } = useLayout();
-  const planOn = useClientConfig().flag(CARE_PLAN_FLAG);
-  const sections = useMemo(() => SECTIONS.filter((x) => x.id !== 'goals' || planOn), [planOn]);
+  const config = useClientConfig();
+  const planOn = config.flag(CARE_PLAN_FLAG);
+  const trainingOn = config.flag(PARENT_TRAINING_FLAG);
+  const sections = useMemo(() => SECTIONS.filter((x) => (x.id !== 'goals' || planOn) && (x.id !== 'training' || trainingOn)), [planOn, trainingOn]);
   // Bölüm menüsü hep açık gelir; hamburger düğmesiyle kapatılıp açılır (kullanıcı kararı 11 Kasım 2026)
   const [menuOpen, setMenuOpen] = useState(true);
   const [trainingOpen, setTrainingOpen] = useState(false);   // eğitim sayfası açıkken bölüm ipucu gizlenir (kendi anlatım kartı var)
@@ -181,7 +184,10 @@ export default function ClientScreen({
     client: shown, me, data, today, weeks: Number(weeks), reload: load,
   } : null;
   useEffect(() => { if (focusTab) go(sectionOf(focusTab)); }, [focusTab]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (!planOn && tab === 'goals') setTab('training'); }, [planOn, tab]);
+  useEffect(() => {
+    if (!planOn && tab === 'goals') setTab(trainingOn ? 'training' : 'routine');
+    else if (!trainingOn && tab === 'training') go('routine');
+  }, [planOn, trainingOn, tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const header = (
     <View style={styles.header}>

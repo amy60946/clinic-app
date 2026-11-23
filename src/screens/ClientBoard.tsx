@@ -20,6 +20,8 @@ const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { da
 
 // Takip Planı kapalıyken (lansman odağı "A") "Senin sıran" açıklaması
 const MINE_TRAINING_INFO = 'Ebeveynin bitirdiği ve senin henüz açmadığın yanıtlar, ebeveynin göremediği taslak eğitimler ya da henüz eğitimi olmayan danışanlar.';
+// Takip Planı ve ebeveyn eğitimi kapalıyken (23 Kasım 2026)
+const MINE_BASIC_INFO = 'Senden bir adım bekleyen danışanlar.';
 const SECTIONS: { id: Section; title: string; info: string }[] = [
   { id: 'mine', title: 'Senin sıran', info: 'Aileye gönderilmemiş değişikliğin, değerlendirme zamanı gelen davranış hedefinin ya da takip planı henüz olmayan danışanlar.' },
   { id: 'family', title: 'Ebeveynden yeni', info: 'Son 7 günde ebeveynin girdiği davranış kayıtları ve öneri kararları. "Gördüm" dersen ya da danışanı açarsan, yeni bir şey gelene kadar bu bölümden çıkar (bu cihazda).' },
@@ -27,10 +29,11 @@ const SECTIONS: { id: Section; title: string; info: string }[] = [
   { id: 'rest', title: 'Diğer danışanlar', info: 'Şu an bir şey beklemeyen danışanlar.' },
 ];
 
-export default function ClientBoard({ clients, unread, me, team, onOpen, onAttention, plan = true, onTraining, onTrainings }: {
+export default function ClientBoard({ clients, unread, me, team, onOpen, onAttention, plan = true, training: trainingOn = true, onTraining, onTrainings }: {
   clients: Client[]; unread: Record<string, number>; me: ClinicianMe; team: Member[]; onOpen: (c: Client) => void;
   onAttention?: (a: Record<string, Attention> | null) => void;      // ana ekrandaki Başlarken kartı aynı özeti kullanır
   plan?: boolean;                                                   // Takip Planı açık mı (uzaktan ayar care_plan); kapalıyken nedenler eğitimden
+  training?: boolean;                                               // ebeveyn eğitimi açık mı (parent_training); kapalıyken eğitim okunmaz, nedeni yok
   onTraining?: (s: { any: boolean; active: boolean }) => void;      // Başlarken: ilk eğitim / Etkin eğitim var mı
   onTrainings?: (ts: Training[] | null) => void;                    // yüklenen eğitim listesi (hatırlatma planı yeniden okumasın); null: okunamadı
 }) {
@@ -44,7 +47,7 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
   // Takip Planı kapalıyken danışan başına eğitim özeti (sunucuda eğitim tabloları yoksa neden eklenmez)
   const [training, setTraining] = useState<Record<string, TrainingStat> | null>(null);
   useEffect(() => {
-    if (plan) { setTraining(null); return; }
+    if (plan || !trainingOn) { setTraining(null); return; }
     let live = true;
     (async () => {
       try {
@@ -63,7 +66,7 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
       } catch { if (live) setTraining(null); }
     })();
     return () => { live = false; };
-  }, [clients, plan]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [clients, plan, trainingOn]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     AsyncStorage.getItem(SEEN_KEY(me.id)).then((v) => { if (v) setSeen(JSON.parse(v)); }).catch(() => {});
   }, [me.id]);
@@ -80,7 +83,7 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
   const query = q.trim().toLocaleLowerCase('tr');
   const searched = query ? scoped.filter((c) => `${c.child_name} ${c.parents} ${c.label}`.toLocaleLowerCase('tr').includes(query)) : scoped;
   const board = useMemo(() => (att && !query ? buildBoard(searched, att, seen, new Date(), { plan, training }) : null), [att, query, searched, seen, plan, training]);
-  const sections = board ? SECTIONS.filter((s) => board[s.id].length > 0).map((s) => (s.id === 'mine' && !plan ? { ...s, info: MINE_TRAINING_INFO } : s)) : [];
+  const sections = board ? SECTIONS.filter((s) => board[s.id].length > 0).map((s) => (s.id === 'mine' && !plan ? { ...s, info: trainingOn ? MINE_TRAINING_INFO : MINE_BASIC_INFO } : s)) : [];
   const onlyRest = sections.length === 1 && sections[0].id === 'rest';
 
   const row = (r: BoardRow<Client> | { client: Client; reasons: []; fresh: false }, i: number) => {
