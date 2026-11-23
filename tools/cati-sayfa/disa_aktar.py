@@ -127,7 +127,7 @@ def baglantilar(s):
     for a in VARLIK:
         s = s.replace(f'"{a}"', f'"/c/{a}"')
     s = s.replace(FAV_ONIZLEME, FAV)
-    s = s.replace('"m/', '"/c/m/').replace('src="img/', 'src="/c/img/').replace('href="img/', 'href="/c/img/').replace("url(img/", "url(/c/img/")
+    s = s.replace('"m/', '"/c/m/').replace('src="img/', 'src="/c/img/').replace('srcset="img/', 'srcset="/c/img/').replace('href="img/', 'href="/c/img/').replace("url(img/", "url(/c/img/")
     return s
 
 
