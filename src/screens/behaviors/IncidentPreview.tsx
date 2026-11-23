@@ -1,14 +1,16 @@
 // "Ebeveyn deneyimini önizle" (Davranışlar ve olaylar): ebeveynin aile uygulamasında olay bildirirken göreceği ekranlar
-// (rakipteki aile uygulamasına sadık). Ben › Görevlerin › "Çocuğunun davranış olayını bildir" → 1 hangi davranış → 2 kayıt türüne
-// göre ayrıntı → 3 strateji ve çocuğun tepkisi → teşekkür. Yerel; kaydedilmez. Gerçek ekranlar ParentApp penceresinin işi.
+// (rakipteki aile uygulamasına sadık). Ben › Görevlerin › "Çocuğunun davranış olayını bildir" → 1 hangi davranış → 2 ayrıntı: olay tarihi
+// ve davranışın seçili bütün kayıt türleri aynı ekranda (sıklık "Kaç kez oldu?", ABC "önce / sonra ne oldu?", süre "Ne kadar sürdü?";
+// ortak akislar.md 27.3) → 3 strateji ve çocuğun tepkisi → teşekkür. Yerel; kaydedilmez. Gerçek ekranlar ParentApp penceresinin işi.
 import React, { useMemo, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal, StyleSheet, TextInput, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
-import { LogType, RESPONSES } from '../../lib/behaviors';
+import { LogType, RESPONSES, missingFields } from '../../lib/behaviors';
+import { normLogTypes } from '../../lib/behaviorRows';
 
-export type PreviewBehavior = { id: string; title: string; strategies: string[]; log_type: LogType; parent_logging: boolean };
+export type PreviewBehavior = { id: string; title: string; strategies: string[]; log_types: LogType[]; parent_logging: boolean };
 type Step = 'home' | 'pick' | 'details' | 'strategy' | 'thanks';
 const NONE = '__none__';
 
@@ -28,11 +30,10 @@ export default function IncidentPreview({ behaviors, childName, onClose }: { beh
   const num = (v: string) => v.replace(/[^0-9]/g, '').slice(0, 4);
   const reset = () => { setPick(null); setF({ name: '', count: '', minutes: '', before: '', after: '', tried: '' }); setStrategy(null); setResponse(null); };
 
-  // Sunucudaki kurallar (family_incident_report): sıklıkta sayı, ABC'de öncül + sonuç, sürede dakika, diğer olayda davranışın adı
-  const detailsOk = other ? !!f.name.trim()
-    : b?.log_type === 'frequency' ? Number(f.count) >= 1
-    : b?.log_type === 'abc' ? !!f.before.trim() && !!f.after.trim()
-    : b?.log_type === 'duration' ? f.minutes !== '' : false;
+  // Sunucudaki kurallar (family_incident_report): seçili her türün alanı (sıklıkta sayı, ABC'de öncül + sonuç, sürede dakika),
+  // diğer olayda davranışın adı
+  const types = b ? normLogTypes(b.log_types) : [];
+  const detailsOk = other ? !!f.name.trim() : !!b && types.length > 0 && missingFields(types, f).length === 0;
   const strategyOk = (other || strategy !== null) && response !== null;
 
   const body = (() => {
@@ -89,9 +90,12 @@ export default function IncidentPreview({ behaviors, childName, onClose }: { beh
               <Field label="Ne oldu?" value={f.name} onChange={(v) => set('name')(v.slice(0, 120))} placeholder="Davranışın adı" />
               {date}{before}{after}{minutes}{count}
             </>
-          ) : b?.log_type === 'frequency' ? <>{date}{count}</>
-            : b?.log_type === 'abc' ? <>{date}{before}{after}</>
-            : <>{date}{minutes}</>}
+          ) : (
+            <>
+              {date}
+              {types.map((t) => <React.Fragment key={t}>{t === 'frequency' ? count : t === 'abc' ? <>{before}{after}</> : minutes}</React.Fragment>)}
+            </>
+          )}
         </>
       );
       footer = <Footer back="Geri" onBack={() => setStep('pick')} next="İleri" nextDisabled={!detailsOk} onNext={() => setStep('strategy')} />;

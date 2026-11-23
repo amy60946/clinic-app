@@ -7,7 +7,7 @@ export const BEHAVIOR_TABLES = ['clinic_target_behaviors', 'behavior_incidents']
 export const BEHAVIOR_DEFAULTS: Record<string, Row> = {
   clinic_target_behaviors: { description: '', strategies: [], status: 'baselining', parent_logging: true, log_type: 'frequency', archived: false,
     created_by: 'demo-clinician', updated_at: null },
-  behavior_incidents: { behavior_id: null, log_type: null, other_behavior: '', count: null, duration_min: null, antecedent: '', consequence: '',
+  behavior_incidents: { behavior_id: null, log_type: null, log_types: null, other_behavior: '', count: null, duration_min: null, antecedent: '', consequence: '',
     strategy: '', response: null, reporter_name: '' },
 };
 
@@ -27,9 +27,45 @@ export function behaviorVisible(table: string, r: Row, m: Row | null, db: Row, l
   return link.status === 'active' && linkVisible(m, link);
 }
 
-// Örnek aile (Nazlı): üç hedef davranış (ABC · sıklık · süre) ve olayları, iki "diğer" olay
+// Kayıt türü çoklu seçim (ortak 20261123100000): sunucudaki tetikleyicilerin karşılığı. Uygulama yalnız log_types yazar;
+// log_types yoksa (eski kayıt, ParentApp önizlemesinin eski olayı) [log_type], varsa sabit sıra ve tekil, log_type = ilk tür.
+const ORDER = ['frequency', 'abc', 'duration'];
+const norm = (list: unknown) => ORDER.filter((t) => Array.isArray(list) && list.includes(t));
+function syncLogTypes(x: Row) {
+  (x.clinic_target_behaviors ?? []).forEach((b: Row) => {
+    const list = norm(b.log_types);
+    b.log_types = list.length ? list : [b.log_type ?? 'frequency'];
+    b.log_type = b.log_types[0];
+  });
+  (x.behavior_incidents ?? []).forEach((i: Row) => {
+    const list = norm(i.log_types);
+    i.log_types = list.length ? list : i.log_type ? [i.log_type] : null;
+    if (i.log_types) i.log_type = i.log_types[0];
+  });
+}
+
+// "Ekranı kapatırken ağlama" iki türlü (ABC + Süre): son iki olay sürüyle bildirildi, öncekiler yalnız ABC'yle (tür sonradan eklendi;
+// eski olaylar kendi alanlarıyla görünür). Daha önce kurulmuş önizleme verisine de bir kez uygulanır.
+function seedTwoTypes(x: Row) {
+  if (x.logTypesSeeded) return;
+  x.logTypesSeeded = true;
+  const b = (x.clinic_target_behaviors ?? []).find((r: Row) => r.link_id === 'demo-link' && r.title === 'Ekranı kapatırken ağlama');
+  if (!b) return;
+  b.log_types = ['abc', 'duration'];
+  b.log_type = 'abc';
+  b.description = 'Tablet ya da televizyon kapanınca ağlama ve bağırma. Olduğu her seferi öncesi, sonrası ve ne kadar sürdüğüyle kaydetmenizi istiyorum.';
+  (x.behavior_incidents ?? []).filter((i: Row) => i.behavior_id === b.id)
+    .sort((p: Row, q: Row) => String(q.occurred_at).localeCompare(String(p.occurred_at)))
+    .forEach((i: Row, k: number) => {
+      if (k < 2) { i.log_types = ['abc', 'duration']; i.duration_min = k === 0 ? 4 : 9; } else i.log_types = ['abc'];
+      i.log_type = 'abc';
+    });
+}
+
+// Örnek aile (Nazlı): üç hedef davranış (ABC + süre · sıklık · süre) ve olayları, iki "diğer" olay
 export function seedBehaviors(x: Row) {
-  if (x.behaviorsSeeded) return;
+  syncLogTypes(x);
+  if (x.behaviorsSeeded) { seedTwoTypes(x); return; }
   const link = x.clinic_links.find((l: Row) => l.id === 'demo-link');
   if (!link) return;
   const parent = x.profiles.filter((p: Row) => p.family_id === link.family_id)
@@ -67,6 +103,8 @@ export function seedBehaviors(x: Row) {
   inc(null, null, at(2, 8, 20), { other_behavior: 'Okula giderken ayakkabı giymeyi reddetme', antecedent: 'Servis gelmek üzereydi', consequence: 'Babası yardım etti',
     duration_min: 10, count: 2, strategy: '', response: 2 });
   x.behaviorsSeeded = true;
+  seedTwoTypes(x);
+  syncLogTypes(x);
 }
 
 // Ebeveynin davranış kayıtları (abc_events) Davranışlar ve Olaylar'da (23 Kasım 2026): örnek ailenin kayıtlarına gün bölümü,
@@ -97,10 +135,10 @@ export function seedParentRecords(x: Row) {
   const B4 = uid();
   x.clinic_target_behaviors.push({ id: B4, clinic_id: link.clinic_id, link_id: link.id, title: 'Yemekte masadan kalkma',
     description: 'Akşam yemeğinde yemek bitmeden masadan kalkma. Kaç kez olduğunu kaydedin.', strategies: ['Yemek öncesi kısa hatırlatma'],
-    status: 'baselining', parent_logging: true, log_type: 'frequency', archived: true, created_by: 'demo-clinician',
+    status: 'baselining', parent_logging: true, log_type: 'frequency', log_types: ['frequency'], archived: true, created_by: 'demo-clinician',
     started_at: ago(30 * 1440), created_at: ago(30 * 1440), updated_at: ago(12 * 1440) });
   [[26, 4], [20, 2], [14, 1]].forEach(([d, count]) => x.behavior_incidents.push({ id: uid(), link_id: link.id, family_id: link.family_id,
-    child_id: link.child_id, behavior_id: B4, log_type: 'frequency', other_behavior: '', occurred_at: at(d, 19, 30), count, duration_min: null,
+    child_id: link.child_id, behavior_id: B4, log_type: 'frequency', log_types: ['frequency'], other_behavior: '', occurred_at: at(d, 19, 30), count, duration_min: null,
     antecedent: '', consequence: '', strategy: 'Yemek öncesi kısa hatırlatma', response: 3, reporter_id: parent?.id ?? 'demo-parent',
     reporter_name: String(parent?.name ?? '').trim() || parent?.nickname || 'Ebeveyn', created_at: at(d, 19, 30) }));
 }
