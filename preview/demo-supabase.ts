@@ -10,7 +10,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SESSION_TABLES, seedSessions, sessionVisible, sessionRpc } from './demo-sessions';
 import { TRAINING_TABLES, TRAINING_DEFAULTS, seedTraining, trainingVisible, trainingRpc } from './demo-training';
-import { BEHAVIOR_TABLES, BEHAVIOR_DEFAULTS, seedBehaviors, behaviorVisible } from './demo-behaviors';
+import { BEHAVIOR_TABLES, BEHAVIOR_DEFAULTS, seedBehaviors, seedParentRecords, behaviorNotifications, behaviorVisible } from './demo-behaviors';
 import { getWorkspace } from './workspace';
 
 type Row = Record<string, any>;
@@ -253,6 +253,8 @@ function upgrade(x: Db): Db {
   seedTraining(x);
   // Davranışlar ve olaylar (ortak proposed/20261110110000): örnek ailede üç hedef davranış ve olayları
   seedBehaviors(x);
+  // Ebeveynin davranış kayıtları bu bölümde (23 Kasım 2026): gün bölümü, hedef bağı, sesli kayıt, arşivlenmiş hedef davranış
+  seedParentRecords(x);
   // Motive etmek (ortak 20261027130000): örnek ailenin onaylı görevlerine ebeveyn gözlemi (eskiler zor, yeniler kolay; bazıları yanıtsız)
   if (!x.motivationSeeded) {
     x.completions.filter((c: Row) => c.child_id === 'c-nazli' && c.status === 'approved' && c.motivation == null).forEach((c: Row, i: number) => {
@@ -365,6 +367,7 @@ function deriveClinicNotifications(x: Db, isOld?: (createdAt: string) => boolean
         seeding && e.occurred_at < (e.created_at ?? now()) ? e.occurred_at : e.created_at ?? now()));
     });
   });
+  behaviorNotifications(x, has, push, recipients);
   x.clinic_task_suggestions.forEach((s: Row) => {
     if (!['accepted', 'declined'].includes(s.status) || has('suggestion_decided', (d) => d.suggestion_id === s.id)) return;
     push(s.created_by, 'suggestion_decided', `${s.status === 'accepted' ? 'Öneri kabul edildi: ' : 'Öneri şimdilik eklenmedi: '}${s.title}`,

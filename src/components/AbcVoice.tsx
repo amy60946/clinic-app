@@ -12,7 +12,8 @@ const mmss = (ms: number) => {
 };
 
 // Ebeveynin davranış kaydına eklediği ses (ParentApp › Davranış kaydı). Bağlantı imzalı ve 1 saat geçerli.
-export default function AbcVoice({ path, durationMs }: { path: string; durationMs?: number | null }) {
+// compact: tablo hücresinde (Davranışlar ve Olaylar) düğme + süre, ilerleme çubuğu yok
+export default function AbcVoice({ path, durationMs, compact }: { path: string; durationMs?: number | null; compact?: boolean }) {
   const [uri, setUri] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
@@ -33,7 +34,7 @@ export default function AbcVoice({ path, durationMs }: { path: string; durationM
   }, [status.didJustFinish, player]);
 
   if (error) {
-    return <Text style={styles.err}>Ses kaydı açılamadı (paylaşım bitmiş ya da kayıt silinmiş olabilir).</Text>;
+    return <Text style={styles.err}>{compact ? 'Ses kaydı açılamadı.' : 'Ses kaydı açılamadı (paylaşım bitmiş ya da kayıt silinmiş olabilir).'}</Text>;
   }
 
   const total = status.duration > 0 ? status.duration * 1000 : durationMs ?? 0;
@@ -47,10 +48,21 @@ export default function AbcVoice({ path, durationMs }: { path: string; durationM
     track('abc.play');
   };
 
+  const label = status.playing ? 'Ses kaydını duraklat' : 'Ses kaydını dinle';
+  if (compact) {
+    return (
+      <Pressable onPress={toggle} hitSlop={6} disabled={!uri} style={styles.compact} accessibilityRole="button" accessibilityLabel={label}>
+        <View style={styles.btnSmall}>
+          {uri ? <Ionicons name={status.playing ? 'pause' : 'play'} size={14} color="#fff" /> : <ActivityIndicator color="#fff" size="small" />}
+        </View>
+        <Text style={styles.time}>Ses · {mmss(status.playing || pos > 0 ? pos : total)}</Text>
+      </Pressable>
+    );
+  }
   return (
     <View style={styles.wrap}>
       <Pressable onPress={toggle} hitSlop={8} disabled={!uri} style={styles.btn}
-        accessibilityLabel={status.playing ? 'Ses kaydını duraklat' : 'Ses kaydını dinle'}>
+        accessibilityLabel={label}>
         {uri ? <Ionicons name={status.playing ? 'pause' : 'play'} size={18} color="#fff" /> : <ActivityIndicator color="#fff" size="small" />}
       </Pressable>
       <View style={{ flex: 1, gap: 4 }}>
@@ -72,4 +84,6 @@ const styles = StyleSheet.create({
   fill: { height: 4, borderRadius: 2, backgroundColor: colors.navy },
   time: { fontSize: 12, color: colors.navy, fontVariant: ['tabular-nums'] },
   err: { fontSize: 12, color: colors.muted, marginTop: 4 },
+  compact: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', backgroundColor: colors.today, borderRadius: radius.pill, paddingVertical: 3, paddingLeft: 3, paddingRight: 10 },
+  btnSmall: { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center' },
 });

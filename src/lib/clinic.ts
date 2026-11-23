@@ -157,14 +157,23 @@ async function loadCompletions(childId: string, from: string) {
   return r.error?.code === '42703' || r.error?.code === 'PGRST204' ? q(COMP_COLS) : r;
 }
 
+// Ebeveynin davranış kayıtları (abc_events; Moyo › Davranış kaydı ekle), yeniden eskiye. Yalnız okuma: RLS "abc: bağlı klinik okur".
+const abcQuery = (childId: string) => supabase.from('abc_events')
+  .select('*')   // ses, gün bölümü ve grup alanları eski şemada yoksa da çalışsın
+  .eq('child_id', childId).order('occurred_at', { ascending: false }).limit(500);
+
+// Davranışlar ve Olaylar bölümü açılınca taze okur (bildirimden gelen kayıt danışan verisinden yeni olabilir)
+export async function loadAbcEvents(childId: string): Promise<AbcEvent[]> {
+  const { data, error } = await abcQuery(childId);
+  return check((data ?? []) as AbcEvent[], error);
+}
+
 export async function loadClientData(childId: string, from: string): Promise<ClientData> {
   const [child, assigned, comps, abc, sugg] = await Promise.all([
     supabase.from('children').select('id, name, gender, birthday, age_band').eq('id', childId).maybeSingle(),
     supabase.from('task_assignments').select(`tasks(${TASK_COLS})`).eq('child_id', childId),
     loadCompletions(childId, from),
-    supabase.from('abc_events')
-      .select('*')   // ses, gün bölümü ve grup alanları eski şemada yoksa da çalışsın
-      .eq('child_id', childId).order('occurred_at', { ascending: false }).limit(500),
+    abcQuery(childId),
     supabase.from('clinic_task_suggestions').select('task_id').eq('child_id', childId).not('task_id', 'is', null),
   ]);
   const rows = check(assigned.data ?? [], assigned.error) as unknown as { tasks: Task | null }[];
