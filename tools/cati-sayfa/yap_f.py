@@ -100,7 +100,7 @@ html = f'''{M.bas(F["baslik"], F["aciklama"], "/ebeveyn/fiyat/")}
     <div class="wrap">
       <div class="closing">
         <h2 id="h-dene">{e(F["kapanis"])}</h2>
-        <div class="actions"><a class="btn btn-cta" href="{M.APP}#kayit">Ücretsiz deneyin</a><a class="btn btn-line" href="{M.APP}#giris">Giriş</a></div>
+        <div class="actions"><a class="btn btn-cta" href="{M.APP}#kayit">Ücretsiz deneyin</a><a class="btn btn-line" href="{M.APP}#giris">Giriş yap</a></div>
         <p class="fine">{e(F["kapanis_ince"])}</p>
       </div>
     </div>

@@ -237,3 +237,14 @@
     izle(reduce, function () { if (reduce.matches) each(nzp, function (f) { f.classList.remove('bekle'); gozcu.disconnect(); }); });
   }
 })();
+
+// 22 Kasım 2026: dar ekran menüsü açılır panel (m/moyo.css); çatı sayfadaki gibi panel dışına dokununca ya da sayfa kayınca kapanır.
+(function () {
+  var btn = document.querySelector('.menu-btn'), head = document.getElementById('top'), root = document.documentElement;
+  if (!btn || !head) return;
+  var acik = function () { return root.classList.contains('menu-open'); };
+  document.addEventListener('click', function (e) { if (acik() && !head.contains(e.target)) btn.click(); });
+  var y0 = 0;
+  btn.addEventListener('click', function () { y0 = scrollY; });
+  addEventListener('scroll', function () { if (acik() && Math.abs(scrollY - y0) > 40) btn.click(); }, { passive: true });
+})();
