@@ -18,6 +18,10 @@ export type ClientConfig = {
 // Takip Planı bayrağı (lansman odağı "A", kullanıcı kararı 11 Kasım 2026): açık değilse ClinicApp'te Takip Planı menüde yok,
 // tek plan ekranı Ebeveyn Eğitimi'dir (ortak sozlesme/admin.md bayrak listesi). Verisi durur; bayrak açılınca geri gelir.
 export const CARE_PLAN_FLAG = 'care_plan';
+// Ebeveyn eğitimi bayrağı (kullanıcı kararı 23 Kasım 2026): açık değilse Ebeveyn Eğitimi bölümü, Kaynak kütüphanesi (alt menü dahil),
+// Başlarken'deki eğitim maddeleri, eğitim turu, "Senin sıran"daki eğitim nedenleri ve seans kaydındaki "Ebeveyn Eğitimi'ni aç" görünmez;
+// danışan sayfası Ev rutinleri ile açılır. Verisi durur; sunucu da bu bayrakla eğitim hatırlatmalarını susturur (ortak admin.md).
+export const PARENT_TRAINING_FLAG = 'parent_training';
 
 const EMPTY: ClientConfig = { minVersion: null, maintenance: false, banner: null, flags: {} };
 
