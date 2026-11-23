@@ -37,7 +37,7 @@
   "yillik": "3.499,99 TL",
   "yillik_birim": "/ yıl",
   "yillik_rozet": "2 ay ücretsiz",
-  "donem": "Aylık ya da yıllık abonelik, KDV dahil. Yıllıkta ayda 291,67\u00a0TL'ye gelir."
+  "donem": "Aylık ya da yıllık abonelik, KDV dahil. Yıllıkta ayda 291,67 TL'ye gelir."
  },
  "oyun": [
   "Moyo Oyun",
@@ -134,5 +134,25 @@
   ]
  ],
  "kapanis": "14 gün ücretsiz deneyin",
- "kapanis_ince": "Deneme için kart gerekmez, süre bitince ücret alınmaz. Premium'u seçerseniz ödeme App Store üzerinden alınır ve abonelik dönem sonunda yenilenir."
+ "kapanis_ince": "Deneme için kart gerekmez, süre bitince ücret alınmaz. Premium'u seçerseniz ödeme App Store üzerinden alınır ve abonelik dönem sonunda yenilenir.",
+ "satin": {
+  "_not": "23 Kasım 2026, kullanıcı isteği: satın alma uygulamanın içinden; yol ParentApp'te Aile › Hesap › Üyelik (PaywallScreen).",
+  "kart": "Uygulamanın içinden satın alınır",
+  "baslik": "Satın alma uygulamanın içinden yapılır",
+  "adim": [
+   [
+    "iPhone ya da iPad'de Moyo Ebeveyn'i açın",
+    "App Store'dan indirin, hesabınızla giriş yapın."
+   ],
+   [
+    "Aile › Hesap › Üyelik'e girin",
+    "Moyo Premium'da aylık ya da yıllık dönemi seçin."
+   ],
+   [
+    "Ödemeyi App Store ile yapın",
+    "İptal için Apple hesabınız ya da uygulamadaki \"Aboneliği yönet\"."
+   ]
+  ],
+  "not": "Bu siteden satın alma yapılmaz. Aldığınız üyelik aynı hesapla web'deki Moyo Ebeveyn'de de geçerlidir."
+ }
 }

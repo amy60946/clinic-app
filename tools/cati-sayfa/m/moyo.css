@@ -369,3 +369,23 @@
   html.menu-open .menu .acts { gap: 10px; }
   html.menu-open .menu .pill { height: 48px; font-size: 16px; }
 }
+
+/* ---------- Moyo ekosistemi geçişleri ve uygulama içi satın alma (23 Kasım 2026, kullanıcı isteği; Mercek site.css'teki kuralların eşi) ---------- */
+.menu nav a { white-space: nowrap; }
+.menu nav li.eko-ilk { padding-left: 28px; border-left: 1px solid var(--c-line); }
+@media (min-width: 1080px) and (max-width: 1379px) { .menu nav { margin-left: 20px; } .menu nav ul { gap: 16px; } .menu nav li.eko-ilk { padding-left: 16px; } .menu nav a { font-size: 15px; } .menu .acts { gap: 8px; } .menu .acts .pill { padding-inline: 14px; } }
+@media (min-width: 1080px) and (max-width: 1239px) { .menu nav a { font-size: 14px; } .menu nav ul { gap: 13px; } .menu nav li.eko-ilk { padding-left: 13px; } }
+@media (max-width: 1079px) { html.menu-open .menu nav li.eko-ilk { padding-left: 0; border-left: 0; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--c-line); } }
+.app-al { display: flex; align-items: center; gap: 6px; margin: 2px 0 14px; font-size: 14px; font-weight: 600; color: var(--c-text-2); }
+.app-al .satin-ikon { width: 16px; height: 16px; flex: none; }
+.satin { margin: 28px auto 0; max-width: 960px; padding: 22px 24px; border: 1px solid var(--c-line); border-radius: 18px; background: #FFFFFF; }
+.satin-bas { display: flex; align-items: center; gap: 10px; }
+.satin-bas .satin-ikon { width: 26px; height: 26px; flex: none; color: var(--c-text); }
+.satin h2 { margin: 0; font-size: 20px; line-height: 1.25; }
+.satin ol { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; counter-reset: s; }
+.satin li { counter-increment: s; display: grid; gap: 4px; padding-left: 38px; position: relative; min-width: 0; }
+.satin li::before { content: counter(s); position: absolute; left: 0; top: -1px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 700; color: #fff; background: var(--c-text); }
+.satin li b { font-size: 16px; }
+.satin li span { font-size: 14px; color: var(--c-text-2); }
+.satin-not { margin: 14px 0 0; font-size: 14px; color: var(--c-text-2); }
+@media (max-width: 760px) { .satin { padding: 18px 16px; } .satin ol { grid-template-columns: minmax(0, 1fr); } }

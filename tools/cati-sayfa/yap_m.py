@@ -88,7 +88,7 @@ def ust(sayfa):
     <a class="logo" href="{a or "#top"}" aria-label="Moyo Ebeveyn ana sayfa">{LOGO}</a>
     <div class="menu" id="menu">
       <nav aria-label="Ana menü"><ul>
-        <li><a href="{a}#nasil">Nasıl çalışır</a></li><li><a href="{a}#degerler">Neden Moyo</a></li><li><a href="{FIYAT}"{simdi}>Fiyat</a></li><li><a href="{a}#sss">SSS</a></li><li><a href="{MERCEK}">Uzman mısınız?</a></li>
+        <li><a href="{a}#nasil">Nasıl çalışır</a></li><li><a href="{a}#degerler">Neden Moyo</a></li><li><a href="{FIYAT}"{simdi}>Fiyat</a></li><li><a href="{a}#sss">SSS</a></li><li class="eko-ilk"><a class="eko-git" href="c.html">Moyo Ekosistemi</a></li><li><a class="eko-git" href="{MERCEK}">Uzmanlar için</a></li>
       </ul></nav>
       <div class="acts"><a class="pill pill-line" href="{APP}#giris">Giriş yap</a><a class="pill pill-cta" href="{APP}#kayit">Ücretsiz deneyin</a></div>
     </div>
@@ -276,7 +276,7 @@ def nz_panel(k, t, p, r):
 
 
 neden = '<ul class="nzp-uc">' + ''.join(nz_panel(*x) for x in ND) + '</ul>'
-ekosis = ''.join(f'<div class="eko"><img src="{APPS[k][0]}" alt="" width="48" height="48"><h3>{APPS[k][1]}</h3><p>{e(p)}</p></div>' for k, p in E['ekosistem'])
+ekosis = ''.join(f'<div class="eko-git"><img src="{APPS[k][0]}" alt="" width="48" height="48"><h3>{APPS[k][1]}</h3><p>{e(p)}</p></div>' for k, p in E['ekosistem'])
 sss = ''.join(f'<details><summary>{q[0]}</summary><p>{q[1]}</p></details>' for q in E['sss'])
 
 html = f'''{bas(E["baslik"], E["aciklama"], "/ebeveyn/")}
