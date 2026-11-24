@@ -78,3 +78,13 @@ MOTION_DEVICE=dikey MOTION_FORMAT=jpeg node tools/landing-motion/record.js akis 
   "kaçan adım" sayılır ama görünmez.
 - `kare.js`: sahneyi kayıttaki gibi oynatır, her tıklama / yakınlaşma / kaydırmadan sonra imleçsiz ekran görüntüsü alır (`kareler.json`).
 - Sonra `out/aile*.{mp4,webm,webp}` ve `out/*-d.{mp4,webm,webp}` → `site/assets/motion/` (webm yalnız mp4'ten küçükse; `site.js` `WEBM`).
+
+## 24 Kasım 2026: eğitimsiz kayıtlar
+
+- `akis`, `rutin`, `seans`, `rapor`, `davranis` (masaüstü ve `-d`) ve `ebeveyn.js` (`aile`, `aile-m`) yeni önizlemelerden kaydedildi, `MOTION_WEBM=0`
+  (yalnız `aile.webm`, mp4'ten küçük olduğu için; `site.js` `WEBM`). Makinede başka bir çekim işi çalışırken kaydedildi: kaçan hareket adımı
+  %8–20 (imleç yer yer bir kare takılır); boş makinede `node record.js <sahne>` ile yeniden çekilebilir.
+- Açılış turu saniyeleri (`index.html` `data-t` / `data-t-m`) saklanan denemenin ekran değişimlerinden ölçüldü: masaüstü 0 · 10,1 · 22,5;
+  dikey 0 · 11 · 26,6. `record.js` artık saklanan denemenin manifest satırını yazar.
+- `davranis.webp` afişi kaydın 8,4. saniyesinden (açılmış olay tablosu): yük altında `poster` anı tablo açılmadan düştü.
+- `ebeveyn.js`: "İlk onayın tamam!" kutlaması kayıtta gösterilmez (`first-approval-seen`); o pencerede eski oyun adı ve "coin" yazıyor (Moyo uygulaması, ayrı iş).

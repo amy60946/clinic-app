@@ -113,7 +113,7 @@ window.MERCEK_PRICES = { draft: false, solo: { m: 1199.99, y: 11999.99 }, clinic
 
   /* 4. Ürün kayıtları: görünür olunca sessiz döngü; duraklat/oynat düğmesi (5 sn'den uzun hareket için zorunlu).
      Hareket azaltma açıksa kendiliğinden başlamaz; düğmeyle bir kez, döngüsüz oynar. Betik yoksa ya da video açılmazsa kapak görseli kalır. */
-  var WEBM = { aile: 1, 'aile-m': 1, 'akis-d': 1, 'kutuphane-d': 1, 'rapor-d': 1 }; // webm yalnız mp4ten küçükse var (öbürleri yalnız mp4)
+  var WEBM = { aile: 1 }; // webm yalnız mp4'ten küçükse var (öbürleri yalnız mp4; 24 Kasım 2026 kayıtları MOTION_WEBM=0)
   // Telefon (≤ 700 px; 22 Kasım 2026, kullanıcı: "mevcut görselleri yapıyı koruyarak optimize et"): data-clip-m taşıyan kayıt telefonda
   // kendi telefon sürümünü ve afişini (.clip-poster-m) kullanır (aynı sahne dikey masaüstü çerçevesinde, ya da gerçek telefon kaydı).
   var dar = window.matchMedia('(max-width: 700px)').matches;

@@ -48,6 +48,7 @@ async function open() {
     db.clinic_sessions = (db.clinic_sessions || []).filter((x) => x.id === 'demo-ses-3').map((x) => ({ ...x, fee: 1200 }));
     localStorage.setItem(K, JSON.stringify(db));
     localStorage.setItem('push-ask', `2:${Date.now()}`);   // "Haber verelim mi?" ön sorusu kayıtta çıkmasın
+    localStorage.setItem('first-approval-seen', '1');      // "İlk onayın tamam!" kutlaması kayıtta çıkmasın (eski oyun adı ve "coin" yazıyor)
   }, KEY);
   await page.reload();
   await page.waitForTimeout(2500);

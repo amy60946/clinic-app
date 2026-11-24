@@ -646,8 +646,8 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
 /* ---------- Pano: renkli başlıklar (19 Kasım 2026, tur 4; tur 6'da kullanıcı seçimiyle kalıcı, eski önizleme grubu "pvurgu" a) ----------
    24 Kasım 2026: "Senin sıran" bölümü Takip Planı ve ebeveyn eğitimi kapalıyken oluşmuyor; mavi (n1) uzman süzgecinin çiplerinde bant,
    yeşil (n2) Ebeveynden yeni, sarı (n3) Sessiz kalanlar. Görsel ve konumlar tools/mercek-onizleme/cek.js.
-   Kullanıcı isteği: büyüteçler olmadı; panodaki üç bölüm (Senin sıran, Ebeveynden yeni, Sessiz kalanlar) renkli bir göstergeyle kolay
-   görünsün, abartısız. Alt başlıktaki üç ifade (.pi) ile panodaki üç bölüm aynı renkte; bölüm başlığında fosforlu kalem bandı (.pa-h),
+   Kullanıcı isteği (19 Kasım): büyüteçler olmadı; panonun bölümleri renkli bir göstergeyle kolay görünsün, abartısız (o gün üç bölüm:
+   Senin sıran, Ebeveynden yeni, Sessiz kalanlar; bugün iki bölüm + süzgeç). Alt başlıktaki üç ifade (.pi) ile panodaki işaretler aynı renkte; bölüm başlığında fosforlu kalem bandı (.pa-h),
    kartların solunda yalnızca ince renkli dikey çizgi (.pa-k; tur 6, kullanıcı: kartların çevresinde çerçeve ve içinde renk olmasın).
    Alt başlık lejanttır; ayrıca açıklama yazısı yok, panonun üstüne yazı binmez.
    Görsel assets/pano-2x.webp (2880 × 1800, pano kaydıyla aynı veri). İşaretler (.pn-o) görselin 1440 × 900 düzleminde --x / --y / --w / --h
@@ -685,7 +685,7 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
   .pn:not(.bekle) .pa-h.n2 { transition-delay: .45s; } .pn:not(.bekle) .pa-k.n2 { transition-delay: .7s; }
   .pn:not(.bekle) .pa-h.n3 { transition-delay: .9s; } .pn:not(.bekle) .pa-k.n3 { transition-delay: 1.15s; }
 }
-@media (max-width: 999px) {   /* tablette ve telefonda pano kırpılır: süzgeç çiplerinden son karta (telefonda yalnız üç bölüm) */
+@media (max-width: 999px) {   /* tablette ve telefonda pano kırpılır: süzgeç çiplerinden son karta (telefonda süzgeç ve iki bölüm) */
   .pn-shot { --ox: 290; --oy: 88; --ow: 840; --oh: 798; }
   .pn-not { left: auto; bottom: auto; right: 10px; top: 10px; }
 }

@@ -40,7 +40,8 @@ async function kirp(p, name, x, y, w = 640, h = 250) {
         (c || document.scrollingElement).scrollTop += el.getBoundingClientRect().top - 22;
       });
       // Panonun üstündeki kısa açıklama "Senin sıran" başlığını da anlatıyor; Takip Planı ve ebeveyn eğitimi kapalıyken o bölüm hiç
-      // oluşmadığı için (attention.ts) görselde gizlenir (24 Kasım 2026; uygulamadaki metin ayrı iş, Mercek penceresi)
+      // oluşmadığı için (attention.ts) görselde gizlenir (24 Kasım 2026). Uygulamadaki metin 3edf312'de iki başlığa göre düzeltildi;
+      // o değişiklik önizlemeye girince bu gizleme kaldırılıp pano yeniden çekilebilir.
       await p.evaluate(() => {
         const el = [...document.querySelectorAll('div')].find((e) => e.textContent.trim().startsWith('Danışanların üç başlık altında') && e.getBoundingClientRect().height < 80 && e.getBoundingClientRect().width > 0);
         if (el) el.style.display = 'none';

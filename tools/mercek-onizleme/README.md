@@ -29,4 +29,4 @@ Başka pencereden yayınlarken önce `read`, sonra `url`.
   Nasıl Çalışır?" 7 sekme (Davet · Ev rutinleri `rutin` · Aile uygulaması `aile` · Davranış kayıtları `davranis` · Seans `seans` · Rapor `rapor` ·
   Oyun). Durağan görseller `cek.js` ile: `neden-oneri|kayit|seans.webp` ("Neden Moyo Mercek" kartları) ve `pano-2x.webp` (işaret konumlarını
   da yazar). Panoda "Senin sıran" bölümü oluşmadığı için mavi işaret uzman süzgecinde; panonun üstündeki açıklama (hâlâ "Senin sıran"ı anlatıyor)
-  görselde gizli. Eski `kutuphane`, `hero`, `pano` kayıtları ve `neden-egitim|olcut.webp` silindi.
+  görselde gizli (uygulama metni 3edf312'de düzeltildi; birleşince gizleme kalkabilir). Eski `kutuphane`, `hero`, `pano` kayıtları ve `neden-egitim|olcut.webp` silindi.
