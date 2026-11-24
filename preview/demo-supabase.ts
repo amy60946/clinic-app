@@ -661,6 +661,22 @@ function newFamilyFor(userId: string, name: string) {
   db.profiles.push({ id: userId, family_id: fid, nickname: 'Ben', name, avatar: 'erkek', created_at: now() });
 }
 
+// Şifre güvenliği ve hesap silmede şifre (ortak akislar.md 28) önizleme karşılığı. Varsayılan davranış değişmez; denemek için
+// tarayıcı deposuna yazılır:
+//   demo.password_rules = '1'  → Supabase'in şifre kuralı taklidi: kayıtta ve yeni şifrede zayıf şifre `weak_password` (nedenleriyle)
+//                                reddedilir; girişte hesabın şifresi kurala uymuyorsa yanıt `weakPassword` taşır (öneri penceresi)
+//   demo.delete_recent_login = '1' → `delete_account()` bir kez `recent_login_required` ipucuyla reddeder (şifre yeniden sorulur)
+const demoFlag = (k: string) => { try { return localStorage.getItem(k) === '1'; } catch { return false; } };
+const LEAKED = ['password1', 'qwerty123', 'abc12345'];
+function weakReasons(password: string): string[] {
+  const r: string[] = [];
+  if (password.length < 8) r.push('length');
+  if (!/\p{L}/u.test(password) || !/\d/.test(password)) r.push('characters');
+  if (LEAKED.includes(password.toLowerCase())) r.push('pwned');
+  return r;
+}
+const weakFail = (reasons: string[]) => ({ data: { session: null, user: null }, error: { message: 'Password is known to be weak and easy to guess', code: 'weak_password', reasons } });
+
 const auth = {
   async getSession() { sync(); return { data: { session: sess() }, error: null }; },
   onAuthStateChange(cb: Listener) {
@@ -673,11 +689,13 @@ const auth = {
     if (!u) return fail('Invalid login credentials', 'invalid_credentials');
     setSess({ user: { id: u.id, email: u.email, user_metadata: u.meta ?? {} }, access_token: 'demo' });
     save(); emit('SIGNED_IN');
-    return { data: { session: sess() }, error: null };
+    const weak = demoFlag('demo.password_rules') ? weakReasons(password) : [];
+    return { data: { session: sess(), ...(weak.length ? { weakPassword: { reasons: weak, message: 'Password is weak' } } : {}) }, error: null };
   },
   async signUp({ email, password, options }: { email: string; password: string; options?: { data?: Row } }) {
     sync();
     if (db.users.some((x) => x.email.toLowerCase() === email.toLowerCase())) return fail('User already registered', 'user_already_exists');
+    if (demoFlag('demo.password_rules') && weakReasons(password).length) return weakFail(weakReasons(password));
     const id = uuid();
     const meta = options?.data ?? {};
     // Sunucudaki handle_new_user ile aynı: uzman hesabı aile açmaz, klinik açar ya da ekibe katılır
@@ -717,6 +735,7 @@ const auth = {
   async signOut() { sync(); setSess(null); save(); emit('SIGNED_OUT'); return { error: null }; },
   async updateUser({ password }: { password?: string }) {
     const u = db.users.find((x) => x.id === sess()?.user.id);
+    if (password && demoFlag('demo.password_rules') && weakReasons(password).length) return { data: {}, error: weakFail(weakReasons(password)).error };
     if (u && password) u.password = password;
     save();
     return { data: {}, error: null };
@@ -980,6 +999,11 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
     return { data: inv.family_id, error: null };
   }
   if (name === 'delete_account') {
+    // sunucunun "son 10 dakikada şifreyle giriş" şartı (bayrak delete_recent_login) taklidi: bir kez reddeder
+    if (demoFlag('demo.delete_recent_login')) {
+      try { localStorage.removeItem('demo.delete_recent_login'); } catch { /* yok say */ }
+      return { data: null, error: { message: 'Hesabı silmek için şifreni yeniden girmelisin', code: '42501', hint: 'recent_login_required' } as Err };
+    }
     const cm = myClinician();
     if (cm) {
       const others = db.clinicians.filter((x: Row) => x.clinic_id === cm.clinic_id && x.id !== uid)

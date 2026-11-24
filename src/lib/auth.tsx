@@ -4,6 +4,7 @@ import * as Linking from 'expo-linking';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { storeLogOut } from './store';
+import { authErrorText, hasWeakPassword, WEAK_PASSWORD_PROMPT, WEAK_PASSWORD_NOW, WEAK_PASSWORD_LATER } from './authErrors';
 
 // E-postadaki bağlantılar uygulamayı bu adresle açar:
 // web'de sitenin adresi, derlenmiş uygulamada clinicapp://auth
@@ -28,6 +29,9 @@ type Auth = {
   session: Session | null;
   loading: boolean;
   recovery: boolean; // şifre yenileme bağlantısıyla gelindi: yeni şifre ekranı gösterilir
+  // Girişte "şifren güvenli değil" önerisinden gelindi (ortak akislar.md 28): aynı yeni şifre ekranı, vazgeçilince panele dönülür
+  passwordChange: boolean;
+  cancelPasswordChange: () => void;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (p: ClinicianSignUp) => Promise<{ needsConfirmation: boolean }>;
   resendConfirmation: (email: string) => Promise<void>;
@@ -42,30 +46,8 @@ type Auth = {
 
 const Ctx = createContext<Auth | null>(null);
 
-// Supabase hata kodlarını sade Türkçe mesajlara çevir
-export function authErrorText(e: unknown): string {
-  const err = e as { code?: string; message?: string; status?: number };
-  switch (err?.code) {
-    case 'invalid_credentials': return 'E-posta ya da şifre hatalı.';
-    case 'email_not_confirmed': return 'E-posta adresin henüz doğrulanmadı. Gelen kutunu kontrol et.';
-    case 'user_already_exists':
-    case 'email_exists': return 'Bu e-posta kullanımda. Başka bir e-posta yaz ya da giriş yap.';
-    case 'weak_password': return 'Şifre çok zayıf. En az 8 karakter, harf ve rakam kullan.';
-    case 'same_password': return 'Yeni şifre eskisinden farklı olmalı.';
-    case 'email_address_invalid':
-    case 'validation_failed': return 'Geçerli bir e-posta adresi yaz.';
-    case 'over_email_send_rate_limit':
-    case 'over_request_rate_limit': return 'Çok fazla deneme yapıldı. Biraz sonra tekrar dene.';
-    case 'otp_expired': return 'Bağlantının süresi dolmuş. Yeniden iste.';
-  }
-  if (err?.status === 429) return 'Çok fazla deneme yapıldı. Biraz sonra tekrar dene.';
-  if (err?.message?.toLowerCase().includes('network')) return 'İnternet bağlantını kontrol et.';
-  // Kayıt tetikleyicisinin Türkçe hataları (ekip kodu, koltuk) Supabase'ten genel bir mesajla döner
-  if (err?.message?.toLowerCase().includes('database error saving new user')) {
-    return 'Kayıt tamamlanamadı. Ekip kodu yazdıysan doğru yazdığından, 15 dakikalık süresinin dolmadığından ve kliniğin uzman koltuğunun dolu olmadığından emin ol; gerekirse klinik sahibinden yeni kod iste.';
-  }
-  return err?.message || 'Bir şeyler ters gitti. Tekrar dene.';
-}
+// Hata metinleri saf dosyada (testi tests/authErrors.test.mjs); eski içe aktarmalar bozulmasın diye buradan da verilir
+export { authErrorText };
 
 // Web: e-posta bağlantısının kodunu ve hata parametrelerini adres çubuğundan sil (sayfa yenilenmez)
 const AUTH_PARAMS = ['code', 'type', 'token_hash', 'access_token', 'refresh_token', 'error', 'error_code', 'error_description'];
@@ -99,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [recovery, setRecovery] = useState(false);
+  const [passwordChange, setPasswordChange] = useState(false);
   const [noAccount, setNoAccount] = useState(false);
   // Girişte hesap türü denetlenirken oturum ekrana yansımaz (panel bir an açılıp kapanmasın)
   const verifying = useRef(false);
@@ -147,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (verifying.current) return;
       setSession(s);
       if (event === 'PASSWORD_RECOVERY') setRecovery(true);
-      if (event === 'SIGNED_OUT') { setRecovery(false); storeLogOut(); }   // App Store (RevenueCat) kimliği de bırakılır
+      if (event === 'SIGNED_OUT') { setRecovery(false); setPasswordChange(false); storeLogOut(); }   // App Store (RevenueCat) kimliği de bırakılır
     });
     Linking.getInitialURL().then(handleUrl);
     const sub = Linking.addEventListener('url', ({ url }) => handleUrl(url));
@@ -159,6 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = useCallback(async (email: string, password: string) => {
     verifying.current = true;
+    setPasswordChange(false);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (error) throw error;
@@ -169,6 +153,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw Object.assign(new Error('Uzman hesabı yok'), { code: 'no_clinician_account' });
       }
       setSession(data.session);
+      // Eski hesap, şifresi artık kurala uymuyor (ortak akislar.md 28, satır 3): giriş sürer; öneri giriş başına bir kez
+      // (yalnız şifreyle girişte; açık oturumla uygulama açılınca sorulmaz)
+      if (hasWeakPassword(data)) {
+        Alert.alert(WEAK_PASSWORD_PROMPT, undefined, [
+          { text: WEAK_PASSWORD_LATER, style: 'cancel' },
+          { text: WEAK_PASSWORD_NOW, onPress: () => setPasswordChange(true) },
+        ]);
+      }
     } finally {
       verifying.current = false;
     }
@@ -216,10 +208,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Şifre değişince öteki cihazlardaki oturumlar kapanır (güvenlik denetimi 22 Kasım 2026); bu cihaz açık kalır
     await supabase.auth.signOut({ scope: 'others' }).catch(() => {});
     setRecovery(false);
+    setPasswordChange(false);
   }, []);
 
   const signOut = useCallback(async () => {
     setRecovery(false);
+    setPasswordChange(false);
     const { error } = await supabase.auth.signOut();
     // Ağ yoksa bile yerel oturumu kapat
     if (error) await supabase.auth.signOut({ scope: 'local' });
@@ -230,11 +224,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut({ scope: 'local' });
   }, []);
   const clearNoAccount = useCallback(() => setNoAccount(false), []);
+  const cancelPasswordChange = useCallback(() => setPasswordChange(false), []);
 
   return (
     <Ctx.Provider value={{
       session, loading, recovery, signIn, signUp, resendConfirmation, sendPasswordReset, updatePassword, signOut,
-      noAccount, rejectAccount, clearNoAccount,
+      noAccount, rejectAccount, clearNoAccount, passwordChange, cancelPasswordChange,
     }}>
       {children}
     </Ctx.Provider>

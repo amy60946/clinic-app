@@ -94,7 +94,7 @@ export default function WelcomeSurvey({ me, onFinish }: { me: ClinicianMe; onFin
           {i === 0 && (
             <View style={{ marginBottom: 18 }}>
               <Text style={styles.hello}>{name ? `Hoş geldin, ${name}` : 'Hoş geldin'}</Text>
-              <Text style={styles.lead}>{steps.length} kısa soruyla Moyo Mercek'i sana göre hazırlayalım. Cevapların ailelere görünmez.</Text>
+              <Text style={styles.lead}>{steps.length} kısa soru soracağız. Moyo Mercek'i yanıtlarına göre hazırlarız. Aileler yanıtlarını görmez.</Text>
             </View>
           )}
           <View style={styles.progressRow} accessibilityLabel={`Soru ${i + 1} / ${steps.length}`}>
@@ -187,11 +187,11 @@ function ProfessionList({ q, value, onChange, wide }: { q: SurveyQuestion; value
 
 // Son ekran: seçilen nedene göre ilk adım
 function Ready({ me, name, intent, onFinish }: { me: ClinicianMe; name: string; intent: Intent | null; onFinish: (a: SurveyAction) => void }) {
-  const text = intent === 'trial' ? 'En hızlı başlangıç: ilk aileni davet et. Davet e-postası senin adınla gider; ebeveyn onaylayınca çocuk panelinde görünür.'
-    : intent === 'family' ? 'Çalıştığın aileyi davet et. Ebeveyn e-postadaki kodla bağlanıp onay verince çocuk panelinde görünür.'
-    : intent === 'team' ? 'Aşağıdaki kişisel kodunu klinik sahibine ver. Seni ekibine eklemek istediğinde onay sana gelir; kliniğin danışanları ayrı bir ekip hesabında açılır.'
-    : intent === 'org' ? 'Klinik paketinde 10 uzmana kadar ekip kurar, aile çalışmasını tek düzende yürütürsün. 14 günlük deneme sürüyor.'
-    : 'Panelin hazır. Ailelerin paylaştığı çocuklar burada görünür.';
+  const text = intent === 'trial' ? 'Başlamak için ilk aileni davet et. Davet e-postası senin adınla gider. Ebeveyn onaylayınca çocuk panelinde görünür.'
+    : intent === 'family' ? 'Çalıştığın aileyi davet et. Ebeveyn e-postadaki kodla bağlanır ve onay verir. Sonra çocuk panelinde görünür.'
+    : intent === 'team' ? 'Aşağıdaki kişisel kodunu klinik sahibine ver. Klinik sahibi seni ekibe ekler, onay isteği sana gelir. Kliniğin danışanları ayrı bir ekip hesabında açılır.'
+    : intent === 'org' ? 'Klinik paketiyle 10 uzmana kadar ekip kurarsın. Aile takibini tek yerden yürütürsün. 14 günlük ücretsiz denemen sürüyor.'
+    : 'Panelin hazır. Ailelerin seninle paylaştığı çocukları burada görürsün.';
   const primary: { label: string; onPress: () => void } | null =
     intent === 'trial' || intent === 'family' ? { label: 'İlk aileni davet et', onPress: () => onFinish('invite') }
     : intent === 'org' && me.role === 'owner' ? { label: 'Paketleri gör', onPress: () => onFinish('plans') }

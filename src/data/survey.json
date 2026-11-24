@@ -1,8 +1,8 @@
 {
- "version": 1,
+ "version": 2,
  "profession": {
   "title": "Mesleğin ne?",
-  "hint": "Unvanına en yakın olanı seç. Sana uygun şablonları ve örnekleri öne çıkaralım.",
+  "hint": "Sana en yakın olanı seç. Örnekleri mesleğine göre gösteririz.",
   "groups": [
    {
     "key": "mental",
@@ -191,94 +191,94 @@
   ]
  },
  "challenges": {
-  "title": "Ailelerle çalışırken en çok neyde zorlanıyorsun?",
-  "hint": "Birden çok seçebilirsin.",
+  "title": "Ailelerle çalışırken en çok ne zorluyor?",
+  "hint": "Birden fazla seçebilirsin.",
   "options": [
    {
     "key": "home_followthrough",
-    "label": "Ailenin evde düzenli uygulaması",
+    "label": "Aileler evde düzenli uygulamıyor",
     "icon": "home-outline"
    },
    {
     "key": "home_data",
-    "label": "Evden güvenilir gözlem bilgisi almak",
+    "label": "Evde ne olduğunu tam öğrenemiyorum",
     "icon": "clipboard-outline"
    },
    {
     "key": "unpaid_time",
-    "label": "Seans dışında aileye ayırdığım ücretsiz zaman",
+    "label": "Seans dışında ailelere çok zaman ayırıyorum",
     "icon": "time-outline"
    },
    {
     "key": "no_system",
-    "label": "Aile çalışması için düzenli bir sistemim olmaması",
+    "label": "Aile takibini düzenli tutacak bir sistemim yok",
     "icon": "folder-open-outline"
    },
    {
     "key": "between_sessions",
-    "label": "Seanslar arasında aileyle iletişim",
+    "label": "Seanslar arasında aileyle iletişim kopuyor",
     "icon": "chatbubbles-outline"
    },
    {
     "key": "progress_report",
-    "label": "İlerlemeyi ölçmek ve aileye göstermek",
+    "label": "İlerlemeyi ölçmek ve aileye göstermek zor",
     "icon": "trending-up-outline"
    }
   ]
  },
  "features": {
-  "title": "Hangileri işine en çok yarar?",
-  "hint": "Birden çok seçebilirsin.",
+  "title": "Hangi özellikler işine yarar?",
+  "hint": "Birden fazla seçebilirsin.",
   "options": [
    {
     "key": "plan_templates",
-    "label": "Hazır hedef ve aile programı şablonları",
+    "label": "Aileye hazır rutin önermek",
     "icon": "albums-outline"
    },
    {
     "key": "parent_logging",
-    "label": "Ebeveynin telefondan kısa gözlem kaydı",
+    "label": "Ebeveynin telefondan davranış kaydı girmesi",
     "icon": "phone-portrait-outline"
    },
    {
     "key": "reward_routines",
-    "label": "Çocuğa ödüllü rutin ve görev sistemi",
+    "label": "Çocuğun rutinlerini oyunla ve ödülle takip etmesi",
     "icon": "star-outline"
    },
    {
     "key": "progress_report",
-    "label": "Hedeflere göre ilerleme raporu",
+    "label": "Evdeki kayıtlardan ilerleme raporu almak",
     "icon": "bar-chart-outline"
    },
    {
     "key": "report_export",
-    "label": "Raporu PDF olarak almak",
+    "label": "Raporu PDF olarak indirmek",
     "icon": "document-text-outline"
    }
   ]
  },
  "intent": {
-  "title": "Seni ClinicApp'e ne getirdi?",
-  "hint": "En önemli nedenini seç; ilk adımı buna göre önereceğiz.",
+  "title": "Moyo Mercek'i neden denemek istiyorsun?",
+  "hint": "En önemli nedeni seç. İlk adımı buna göre öneririz.",
   "options": [
    {
     "key": "trial",
-    "label": "Birkaç ailede ücretsiz denemek",
+    "label": "Birkaç aileyle ücretsiz denemek istiyorum",
     "icon": "flask-outline"
    },
    {
     "key": "family",
-    "label": "Çalıştığım bir aileyi bağlamak",
+    "label": "Çalıştığım bir aileyi eklemek istiyorum",
     "icon": "link-outline"
    },
    {
     "key": "team",
-    "label": "Kliniğimin ekibine katılmak",
+    "label": "Çalıştığım kliniğin ekibine katılacağım",
     "icon": "people-outline"
    },
    {
     "key": "org",
-    "label": "Kliniğimde aile çalışmasını tek düzene almak",
+    "label": "Kliniğimde aile takibini tek yerden yürütmek istiyorum",
     "icon": "business-outline"
    }
   ]

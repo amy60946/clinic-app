@@ -550,6 +550,9 @@ export async function updateClinicName(clinicId: string, name: string): Promise<
 // ekip varsa klinik kalır, sahiplik en eski üyeye geçer.
 export async function deleteAccount(): Promise<void> {
   const { error } = await supabase.rpc('delete_account');
+  // Sunucu yeni giriş isterse (ortak akislar.md 28; ipucu `recent_login_required`) ipucu korunur: uygulama şifreyi yeniden sorar
+  const hint = (error as { hint?: string | null } | null)?.hint;
+  if (error && hint) throw Object.assign(new Error(error.message), { hint });
   check(null, error);
 }
 

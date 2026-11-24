@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme';
 import { Input, Cta, LinkText, Notice, CheckRow, InlineLink } from '../components/ui';
 import { useAuth, authErrorText } from '../lib/auth';
+import { WEAK_PASSWORD_RULE } from '../lib/authErrors';
 import { signupVersions, openLegal } from '../lib/legal';
 
 const MIN_PASSWORD = 8;
@@ -103,7 +104,8 @@ export function LoginScreen({ go, initialEmail = '' }: { go: Go; initialEmail?: 
   );
 }
 
-/* ---------- Kayıt: bireysel uzman ya da klinik hesabı açar; kodla mevcut bir kliniğin ekibine katılır ---------- */
+/* ---------- Kayıt: bireysel uzman (varsayılan, uzmanların çoğu) ya da klinik hesabı ----------
+   Klinik seçeneği formun altında küçük bir bağlantı (kullanıcı isteği 24 Kasım 2026); seçim kayıt meta verisinde `practice`. */
 
 type Practice = 'solo' | 'clinic';
 
@@ -135,7 +137,7 @@ export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { g
     if (join && ![6, 8].includes(teamCode.trim().length)) return Alert.alert('Ekip kodu 8 karakterdir.');
     if (!join && practice === 'clinic' && !clinicName.trim()) return Alert.alert('Kliniğinin adını yaz.');
     if (!isEmail(email)) return Alert.alert('Geçerli bir e-posta adresi yaz.');
-    if (password.length < MIN_PASSWORD) return Alert.alert(`Şifre en az ${MIN_PASSWORD} karakter olmalı.`);
+    if (password.length < MIN_PASSWORD) return Alert.alert(WEAK_PASSWORD_RULE);
     setBusy(true);
     try {
       const { needsConfirmation } = await signUp({
@@ -166,36 +168,22 @@ export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { g
     );
   }
 
+  const clinic = !join && practice === 'clinic';
   return (
     <Layout
-      title="Uzman kaydı"
-      subtitle="Kendi adına çalışan uzman da klinik de hesap açabilir. Aileler, çocuklarının verisini yalnız kendi verdikleri onayla ve istedikleri sürece seninle paylaşır."
+      title={clinic ? 'Klinik kaydı' : 'Uzman kaydı'}
+      subtitle={clinic ? 'Kliniğinin sahibiysen bu hesabı aç. Ekibini sonra Ayarlar\'dan kurarsın.' : undefined}
       onBack={() => go('login')}
     >
       {noAccount && <Notice icon="person-add-outline" text="Bu e-postayla bir uzman hesabı bulunamadı. Aşağıdan yeni hesabını aç." />}
-      {initialJoin && <Notice icon="people-outline" text="Kliniğin ekibine katılmak için önce kendi hesabını aç (Bireysel uzman). Sonra Ayarlar › Kişisel kodun'u klinik sahibine ver; seni eklediğinde onay sana gelir." />}
-      {!join && (
-        <View style={styles.practiceRow}>
-          {([
-            { id: 'solo', icon: 'person-outline', t: 'Bireysel uzman', d: 'Kendi adıma ya da kliniklerde çalışıyorum' },
-            { id: 'clinic', icon: 'business-outline', t: 'Klinik', d: 'Kliniğimin sahibiyim, ekibimi kuracağım' },
-          ] as const).map((o) => (
-            <Pressable key={o.id} onPress={() => setPractice(o.id)} accessibilityRole="radio" accessibilityState={{ selected: practice === o.id }}
-              style={[styles.practice, practice === o.id && styles.practiceOn]}>
-              <Ionicons name={o.icon} size={20} color={colors.navy} />
-              <Text style={styles.teamTitle}>{o.t}</Text>
-              <Text style={styles.small}>{o.d}</Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
+      {initialJoin && <Notice icon="people-outline" text="Kliniğin ekibine katılmak için önce kendi hesabını aç. Sonra Ayarlar › Kişisel kodun'u klinik sahibine ver; seni eklediğinde onay sana gelir." />}
       {join && (
         <Input value={teamCode} onChangeText={(t) => setTeamCode(t.toUpperCase())} placeholder="Kod (klinik sahibinden, 8 karakter)"
           autoCapitalize="characters" autoCorrect={false} maxLength={8} />
       )}
       <Input value={name} onChangeText={setName} placeholder="Adın soyadın" autoComplete="name" textContentType="name" />
       <Input value={title} onChangeText={setTitle} placeholder="Unvanın (ör. Klinik Psikolog)" />
-      {!join && practice === 'clinic' && <Input value={clinicName} onChangeText={setClinicName} placeholder="Kliniğinin adı" />}
+      {clinic && <Input value={clinicName} onChangeText={setClinicName} placeholder="Kliniğinin adı" />}
       <Input value={email} onChangeText={setEmail} placeholder="E-posta" keyboardType="email-address"
         autoCapitalize="none" autoComplete="email" textContentType="emailAddress" />
       <Input value={password} onChangeText={setPassword} placeholder={`Şifre (en az ${MIN_PASSWORD} karakter)`} secure
@@ -218,6 +206,11 @@ export function SignUpScreen({ go, initialJoin = false, noAccount = false }: { g
       )}
       <Cta label="Kayıt ol" onPress={submit} busy={busy} disabled={!!legal && !agree} />
       <LinkText onPress={() => go('login')}>Zaten hesabın var mı? Giriş yap</LinkText>
+      {!join && (
+        <Pressable onPress={() => setPractice(clinic ? 'solo' : 'clinic')} accessibilityRole="button" hitSlop={6} style={styles.switch}>
+          <Text style={styles.switchText}>{clinic ? 'Bireysel hesap açacağım' : 'Klinik hesabı açmak istiyorum'}</Text>
+        </Pressable>
+      )}
     </Layout>
   );
 }
@@ -261,13 +254,15 @@ export function ForgotPasswordScreen({ go, initialEmail = '' }: { go: Go; initia
 /* ---------- Yeni şifre (e-postadaki bağlantıdan gelinir) ---------- */
 
 export function NewPasswordScreen() {
-  const { updatePassword, signOut, session } = useAuth();
+  const { updatePassword, signOut, session, recovery, cancelPasswordChange } = useAuth();
+  // Girişteki "şifren güvenli değil" önerisinden gelindi: geri düğmesi vazgeçer, oturum açık kalır (bağlantıdan gelişte çıkış yapar)
+  const voluntary = !recovery;
   const [password, setPassword] = useState('');
   const [again, setAgain] = useState('');
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
-    if (password.length < MIN_PASSWORD) return Alert.alert(`Şifre en az ${MIN_PASSWORD} karakter olmalı.`);
+    if (password.length < MIN_PASSWORD) return Alert.alert(WEAK_PASSWORD_RULE);
     if (password !== again) return Alert.alert('Şifreler aynı değil.');
     setBusy(true);
     try {
@@ -282,7 +277,8 @@ export function NewPasswordScreen() {
 
   return (
     <Layout title="Yeni şifre belirle"
-      subtitle={`${session?.user.email ?? 'Hesabın'} için yeni bir şifre seç. Bu e-posta senin değilse geri dön.`} onBack={signOut}>
+      subtitle={`${session?.user.email ?? 'Hesabın'} için yeni bir şifre seç.${voluntary ? '' : ' Bu e-posta senin değilse geri dön.'}`}
+      onBack={voluntary ? cancelPasswordChange : signOut}>
       <Input value={password} onChangeText={setPassword} placeholder={`Yeni şifre (en az ${MIN_PASSWORD} karakter)`} secure
         autoComplete="new-password" textContentType="newPassword" />
       <Input value={again} onChangeText={setAgain} placeholder="Yeni şifre (tekrar)" secure
@@ -306,7 +302,7 @@ const styles = StyleSheet.create({
   segActive: { backgroundColor: '#fff' },
   teamBox: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#fff', borderRadius: 14, padding: 14, marginTop: 8 },
   teamTitle: { fontSize: 14, fontWeight: '700', color: colors.navy },
-  practiceRow: { flexDirection: 'row', gap: 10 },
-  practice: { flex: 1, gap: 4, padding: 14, borderRadius: 14, backgroundColor: '#fff', borderWidth: 1.5, borderColor: 'transparent' },
-  practiceOn: { borderColor: colors.navy },
+  // Klinik / bireysel geçişi: bilerek küçük ve soluk (uzmanların çoğu bireysel); dokunma alanı iç boşlukla büyür
+  switch: { alignSelf: 'center', paddingVertical: 10, paddingHorizontal: 8 },
+  switchText: { fontSize: 12, color: colors.muted, textDecorationLine: 'underline' },
 });

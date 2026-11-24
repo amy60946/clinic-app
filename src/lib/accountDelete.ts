@@ -26,3 +26,43 @@ export function deleteAccountText(kind: DeleteCase, familyKeeps: boolean, traini
     + ' Kayıtların, ailenin izniyle sonraki uzmana aktarımı da sona erer.'
     + ' Mevzuatın sana yüklediği kayıt saklama yükümlülüğü sende; saklaman gereken kayıtları silmeden önce indir ya da yazdır.' + END;
 }
+
+// ---------- Son adım: şifre (ortak sozlesme/akislar.md 28, satır 4) ----------
+// Uyarı onaylandıktan sonra şifre sorulur. Uygulama aynı e-postayla `signInWithPassword` çağırır: şifre yanlışsa silme hiç
+// çağrılmaz; doğruysa hemen `delete_account()`. Sunucu "son 10 dakikada şifreyle giriş" şartını ararsa (bayrak
+// `delete_recent_login`; hata ipucu `recent_login_required`) şifre penceresi yeniden açılır.
+export const DELETE_PASSWORD_TITLE = 'Hesabını silmek için şifreni gir';
+export const WRONG_PASSWORD = 'Şifre yanlış';
+export const REENTER_PASSWORD = 'Güvenlik için şifreni yeniden gir.';
+export const RECENT_LOGIN_HINT = 'recent_login_required';
+
+export function isRecentLoginRequired(e: unknown): boolean {
+  return (e as { hint?: unknown } | null | undefined)?.hint === RECENT_LOGIN_HINT;
+}
+
+export type DeleteOutcome =
+  | { kind: 'deleted' }
+  | { kind: 'empty' }                           // şifre yazılmadı: hiçbir şey çağrılmaz
+  | { kind: 'wrong_password' }                  // silme çağrılmadı
+  | { kind: 'reauth' }                          // sunucu yeni giriş istedi: şifre yeniden sorulur
+  | { kind: 'signin_error'; error: unknown }    // ağ, deneme sınırı…: silme çağrılmadı
+  | { kind: 'delete_error'; error: unknown };
+
+// signIn: şifre doğruysa null, değilse Auth hatası döner (ya da atar). remove: `delete_account()` (hata atar).
+// wrong: hatanın "şifre yanlış" olup olmadığı (lib/authErrors.ts isWrongPassword).
+export async function deleteWithPassword(password: string, deps: {
+  signIn: (password: string) => Promise<unknown>;
+  remove: () => Promise<void>;
+  wrong: (e: unknown) => boolean;
+}): Promise<DeleteOutcome> {
+  if (!password) return { kind: 'empty' };
+  let error: unknown;
+  try { error = await deps.signIn(password); } catch (e) { error = e; }
+  if (error) return deps.wrong(error) ? { kind: 'wrong_password' } : { kind: 'signin_error', error };
+  try {
+    await deps.remove();
+  } catch (e) {
+    return isRecentLoginRequired(e) ? { kind: 'reauth' } : { kind: 'delete_error', error: e };
+  }
+  return { kind: 'deleted' };
+}

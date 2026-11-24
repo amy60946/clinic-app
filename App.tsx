@@ -44,9 +44,10 @@ function AuthFlow() {
 }
 
 function Root() {
-  const { session, loading, recovery, signOut } = useAuth();
+  const { session, loading, recovery, passwordChange, signOut } = useAuth();
   if (loading) return <Loading />;
-  if (recovery && session) return <NewPasswordScreen />;
+  // Yeni şifre ekranı: e-postadaki bağlantıdan (recovery) ya da girişteki "şifren güvenli değil" önerisinden (passwordChange)
+  if ((recovery || passwordChange) && session) return <NewPasswordScreen />;
   if (!session) return <AuthFlow />;
   return (
     <ClientConfigProvider key={session.user.id}>

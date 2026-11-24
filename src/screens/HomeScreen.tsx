@@ -35,6 +35,7 @@ import Onboarding, { onboardingSeen, markOnboardingSeen } from './Onboarding';
 import HelpSheet, { HelpAction } from './HelpSheet';
 import WelcomeSurvey, { SurveyAction } from './WelcomeSurvey';
 import { deleteAccountText } from '../lib/accountDelete';
+import DeleteAccountDialog from './DeleteAccountDialog';
 import { surveyAnswered } from '../lib/survey';
 import { LegalDoc, legalPending } from '../lib/legal';
 import LegalSheet from './legal/LegalSheet';
@@ -96,6 +97,7 @@ export default function HomeScreen() {
   const { signOut, rejectAccount, session } = useAuth();
   const ws = useWorkspace();
   const [wsOpen, setWsOpen] = useState(false);          // çalışma alanı seçici (ortak akislar.md 21)
+  const [deleteAsk, setDeleteAsk] = useState(false);    // hesap silmede son adım: şifre penceresi (ortak akislar.md 28)
   const [reqKey, setReqKey] = useState(0);              // ekibe katılma istekleri yenilensin
   const [state, setState] = useState<State>({ kind: 'loading' });
   const stateRef = useRef(state);
@@ -402,19 +404,18 @@ export default function HomeScreen() {
   const removeAccount = async () => {
     const kind = state.kind === 'ready' && state.team.length <= 1 ? 'solo' : state.kind === 'ready' && state.me.role === 'owner' ? 'owner' : 'member';
     const keeps = kind === 'solo' ? await familyKeepsRecords() : false;
+    // Son adım şifre (ortak akislar.md 28): uyarı onaylanınca şifre penceresi; silme ancak şifre doğruysa (iOS'ta uyarı kapanınca açılır)
     Alert.alert('Hesabın silinsin mi?', deleteAccountText(kind, keeps, trainingOn), [{ text: 'Vazgeç', style: 'cancel' }, {
-      text: 'Kalıcı olarak sil', style: 'destructive', onPress: async () => {
-        try {
-          await flush().catch(() => {});
-          await unregisterPush().catch(() => {});
-          if (userId) await clearNudges(userId);
-          await deleteAccount();
-          await supabase.auth.signOut({ scope: 'local' });
-        } catch (e) {
-          Alert.alert('Hesap silinemedi', errorText(e));
-        }
-      },
+      text: 'Kalıcı olarak sil', style: 'destructive', onPress: () => { setTimeout(() => setDeleteAsk(true), Platform.OS === 'ios' ? 350 : 0); },
     }]);
+  };
+  // Şifre doğrulandıktan sonra (DeleteAccountDialog): hata atarsa pencere metni gösterir
+  const eraseAccount = async () => {
+    await flush().catch(() => {});
+    await unregisterPush().catch(() => {});
+    if (userId) await clearNudges(userId);
+    await deleteAccount();
+    await supabase.auth.signOut({ scope: 'local' });
   };
   const legalOn = Array.isArray(legal);
   const accountLinks = (
@@ -697,6 +698,7 @@ export default function HomeScreen() {
       <View style={styles.root}>
         {screen}
         {barOn && tab !== null && <LiquidTabBar active={tab} onSelect={selectTab} hide={trainingOn ? [] : ['library']} />}
+        <DeleteAccountDialog visible={deleteAsk} email={session?.user.email ?? ''} onClose={() => setDeleteAsk(false)} onDelete={eraseAccount} />
       </View>
     </TabBarProvider>
   );
