@@ -15,5 +15,14 @@ bash preview/build.sh && node tools/cati-sayfa/cek/mercek.js            # hepsi;
   `keep` uzmanın bekleyen rutin ve adım önerilerini korur, `noSessions` randevuları çıkarır (Uzmanım ekranı için).
 - `kucult.py`: PNG → webp (quality 86).
 - `c-baglan` (çatı sayfa 2. kart, 19 Kasım 2026): `invite` bağlanmamış bir uzman daveti ekler (kod K7M2PA), adımlar `type:` (alana yaz) ve `cb:` (onay kutusu).
-- `img/c-davranis.webp` çekim değil, `mercek-davranis.webp`'ten kırpım: x 349–756, y 174–527 (ilk cümlenin sonu, "Öncül" ile "Sonuç" sütunlarının arası, 2. satırın çizgisi).
+- `img/c-davranis.webp` çekim değil, `mercek-davranis.webp`'ten kırpım: x 341–748, y 168–521 (ilk cümlenin sonu, "Öncül" ile "Sonuç" sütunlarının arası, 2. satırın çizgisi; 24 Kasım 2026, Süre sütunlu yeni tablo).
+  Hakkımızda `img/k-uzman.webp` (x 366–1306, y 372–645: olay tablosu) ve `img/k-uzman-dar.webp` (x 562–918: yalnız Öncül ve Sonuç) da aynı görselden; `img/k-ebeveyn.webp` = `e-davranis.webp`'in üst 730 pikseli.
 - Betik ekranda "macera" görürse uyarır; "Rutin ekle"deki "…oyunda çocuğunuz için bir macera olur" cümlesi beklenen bilgidir.
+
+## 24 Kasım 2026: ebeveyn eğitimi kapalı (ortak `akislar.md` 27.4)
+
+- Eğitim ekranları çıktı (`moyo-uzman-sade`, `moyo-egitim`, `mercek-egitim*`, `c-mercek-egitim`). Mercek çekimlerinde danışan Ev Rutinleri'yle açılır, menü Planla / Takip.
+- `moyo-uzman-oneri` (çatı 5. kart ve Moyo Ebeveyn 5. adım): Uzmanım'da tek randevu (seans ücretiyle) ve uzmanın rutin önerisi. `moyo.json`:
+  `"keep": "rutin"` yalnız rutin paketini geri koyar ("coin" yazan tek adım kartı görünmez), `"sessions": {"keep": ["demo-ses-3"], "fee": 1200}`,
+  `hideBlock` "Bugün yapılacaklar" ve "Randevu al" satırını gizler. Telefon sürümü `CEK_H=700 CEK_EK=-m CEK_GEN=820`.
+- `mercek.js e-nz-uzman`: Moyo Ebeveyn sayfasının "Neden Moyo" uzman paneli (780 × 1688); çıktıda "Yatağını topla" satırının yeri yazılır, `yap_m.py` `NZ['uzman']['cikma']`.

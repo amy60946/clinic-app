@@ -76,8 +76,8 @@
    "kisa": "Önerir",
    "baslik": "Rutin önerir, rapor gönderir.",
    "metin": "Öneri Moyo Ebeveyn'in Uzmanım bölümüne, rapor Gelişim'e gelir; rutini eklemek sizin kararınız.",
-   "gorsel": "ebeveyn-egitim",
-   "alt": "Moyo Ebeveyn, Uzmanım: uzmanın gönderdiği eğitimden bugün yapılacak iki görev"
+   "gorsel": "ebeveyn-oneri",
+   "alt": "Moyo Ebeveyn, Uzmanım: uzmanın randevusu ve rutin önerisi"
   },
   {
    "kim": "Hepsi birlikte",

@@ -1,5 +1,5 @@
 // Sayfanın içinde çalışır (page.evaluate). ../store-shots/editdb.js'in uydurma verisinin üstüne, yalnız çekim için:
-// bir kez gösterilen ipuçları kapalı, pano üç bölümü de gösterir (Defne ve Ege'ye etkin eğitim), bildirimler okunmuş.
+// bir kez gösterilen ipuçları kapalı, pano dolu (iki aile daha), takvimde dolu bir hafta ve seans ücreti, bildirimler okunmuş.
 // Hepsi tarayıcının deposunda (pofi-onizleme-v4); kaynak koda ve gerçek veriye dokunmaz.
 const KEY = 'pofi-onizleme-v4';
 
@@ -52,24 +52,29 @@ function extra(opt) {
     abc('lm-a3', 'lm-fam-poyraz', 'c-poyraz', 12, 20, 30, 'evening', 'Ekran süresi bitti', 'Kısa bir itirazdan sonra kapattı', 'Kapattığı için teşekkür edildi', 1);
   }
 
-  const training = (id, link, parent, by, title, days, mods) => {
-    if (db.parent_trainings.some((t) => t.id === id) || !db.clinic_links.some((l) => l.id === link)) return;
-    db.parent_trainings.push({ id, clinic_id: K, link_id: link, parent_name: parent, created_by: by, title, status: 'active', criterion: null,
-      created_at: ago(days * 1440), started_at: ago(days * 1440 - 60), updated_at: ago(2 * 1440), seen_at: ago(60) });
-    mods.forEach(([key, doneDays], i) => db.parent_training_modules.push({ id: `${id}-m${i}`, training_id: id, item_key: key, position: i, archived: false,
-      completed_at: doneDays === null ? null : ago(doneDays * 1440), correct: null, total: null, answers: null, created_at: ago(days * 1440),
-      reviewed_at: doneDays === null ? null : ago(doneDays * 1440 - 300) }));
+  // Ebeveyn eğitimi kapalı (kullanıcı kararı 23 Kasım 2026, bayrak parent_training): çekim verisine eğitim eklenmez.
+  // Seanslar (24 Kasım 2026, eğitimsiz tanıtım): takvimde dolu bir hafta ve seans ücreti (akislar 27.1). Uydurma veri.
+  const at2 = (dayOff, hhmm) => { const d = new Date(); d.setDate(d.getDate() + dayOff); const [h, m] = hhmm.split(':').map(Number); d.setHours(h, m, 0, 0); return d.toISOString(); };
+  const dow = new Date().getDay() || 7;   // 1 = pazartesi
+  const wk = (wd) => wd - dow;            // bu haftanın günü
+  const ses = (id, link, day, hhmm, o = {}) => {
+    const wd = day;
+    if (!db.clinic_links.some((l) => l.id === link) || (db.clinic_sessions || []).some((x) => x.id === id)) return;
+    db.clinic_sessions.push({ id, clinic_id: K, clinician_id: o.by || D, link_id: link, title: null, series_id: null, starts_at: at2(wd, hhmm), duration_min: o.min || 45, kind: o.kind || 'individual',
+      mode: o.mode || 'in_person', room_id: o.room || 'room-1', status: 'planned', status_at: null, status_by: null, cancel_reason: null, visible_to_family: true, booked_by: 'clinic',
+      family_response: o.ok ? 'ok' : null, family_note: null, family_responded_at: o.ok ? ago(600) : null, package_id: null, waitlist_id: null, offer_expires_at: null,
+      external_uid: null, fee: o.fee ?? 1200, created_by: D, created_at: ago(9000), updated_at: ago(9000) });
   };
-  training('lm-tr-defne', 'shot-link-defne', 'Selin', M2, 'Ebeveyn yatma rutinini her akşam aynı sırayla uygular', 10,
-    [['yatma_pekistirme_r', 8], ['gunluk_cizelge_r', null]]);
-  training('lm-tr-ege', 'shot-link-ege', 'Zeynep', D, 'Ebeveyn ödev öncesinde iki geçiş uyarısı verir', 20,
-    [['gecis_uyari_r', 16], ['gecis_uyari_q', null]]);
-  training('lm-tr-duru', 'lm-link-duru', 'Esra', D, 'Ebeveyn sofraya geçişte iki seçenek sunar', 25,
-    [['pekistirme_r', 20], ['sozel_ovgu_r', 12]]);
-  training('lm-tr-poyraz', 'lm-link-poyraz', 'Emre', M2, 'Ebeveyn ekran süresini görünür zamanlayıcıyla bitirir', 40,
-    [['gecis_uyari_r', 30], ['ivme_r', null]]);
+  if (db.clinic_sessions) {
+    db.clinic_sessions.forEach((x) => { if (x.link_id === 'demo-link' && x.fee == null) x.fee = 1200; });
+    ses('lm-ses-ege', 'shot-link-ege', wk(1), '14:00', { room: 'room-2', ok: true });
+    ses('lm-ses-defne', 'shot-link-defne', wk(2), '11:00', { by: M2, min: 50, room: 'room-2' });
+    ses('lm-ses-duru', 'lm-link-duru', wk(2), '16:30', { kind: 'parent', mode: 'online', room: null, fee: 1500 });
+    ses('lm-ses-kerem', 'shot-link-kerem', wk(4), '10:30', { min: 60, kind: 'intake', fee: 1500, ok: true });
+    ses('lm-ses-poyraz', 'lm-link-poyraz', wk(5), '13:00', { by: M2, room: 'room-2' });
+  }
   localStorage.setItem(KEY, JSON.stringify(db));
-  return { trainings: db.parent_trainings.length, clients: db.clinic_links.length };
+  return { sessions: (db.clinic_sessions || []).length, clients: db.clinic_links.length };
 }
 
 // Açılışta türetilen bildirimler: en yeni davranış kaydı dışında hepsi okunmuş (zil sakin görünür)

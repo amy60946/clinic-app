@@ -22,13 +22,13 @@ K = json.load(open('c-metin.json'))            # metinler ayrı dosyada
 # Moyo Ekosistemi sahnesinin tam ekran, kırpılmamış gerçek ürün ekranları (örnek veri): tools/cati-sayfa/cek ile çekilir.
 # 1-2-3 kartlarının ekranları c-metin.json "basamak" içinde (sahnedekilerden farklı).
 IMG = {'ebeveyn-onay': 'img/moyo-onay.webp', 'ebeveyn-ekle': 'img/moyo-ekle.webp', 'ebeveyn-uzman': 'img/moyo-uzman.webp', 'oyun-onay': 'img/c-oyun-onay.webp',
-       'ebeveyn-egitim': 'img/moyo-uzman-sade.webp', 'ebeveyn-egitim-m': 'img/moyo-uzman-sade-m.webp',
-       'mercek-veri': 'img/mercek-rutin.webp', 'mercek-egitim': 'img/mercek-egitim.webp',
-       'mercek-veri-tel': 'img/mercek-rutin-tel.webp', 'mercek-egitim-tel': 'img/mercek-egitim-tel.webp',
+       # 5. adım (24 Kasım 2026, ebeveyn eğitimi kapalı): Moyo Ebeveyn › Uzmanım, uzmanın randevusu (seans ücretiyle) ve rutin önerisi
+       'ebeveyn-oneri': 'img/moyo-uzman-oneri.webp', 'ebeveyn-oneri-m': 'img/moyo-uzman-oneri-m.webp',
+       'mercek-veri': 'img/mercek-rutin.webp', 'mercek-veri-tel': 'img/mercek-rutin-tel.webp',
        # Telefon sürümü (23 Kasım 2026, kullanıcı: Mercek'teki gibi "aynı formatla optimize et"): aynı ekranlar 390 × 700 telefon boyunda,
        # 820 px (cek/moyo.js ve cek/mercek.js CEK_H=700 CEK_EK=-m); kartta kart genişliğinde (c-18.css "Telefon sürümü")
        'ebeveyn-ekle-m': 'img/moyo-ekle-m.webp', 'ebeveyn-onay-m': 'img/moyo-onay-m.webp',
-       'mercek-veri-tel-m': 'img/mercek-rutin-tel-m.webp', 'mercek-egitim-tel-m': 'img/mercek-egitim-tel-m.webp',
+       'mercek-veri-tel-m': 'img/mercek-rutin-tel-m.webp',
        # oyun kartı telefonda iPad çekimi (yazı ~1,6 kat büyük): kartın başlığındaki an, iki adımda da "Yaptım" düğmesi
        'oyun-onay-m': 'img/c-oyun-yaptim-m.webp'}
 ALT_M = {'oyun-onay-m': 'Moyo Oyun: bugünün adımları, her birinde "Yaptım" düğmesi'}   # telefon görselinin anlatımı başkaysa

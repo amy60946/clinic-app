@@ -55,22 +55,6 @@
   ]
  },
  {
-  "name": "moyo-uzman-sade",
-  "mScroll": 0,
-  "clinic": true,
-  "noSessions": true,
-  "sade": true,
-  "steps": [
-   "Uzmanım",
-   "?Kapat"
-  ],
-  "hideBlock": [
-   "Randevular|Randevu al",
-   "Uzmanının belirlediği davranışlar|Çocuğunun davranış olayını bildir",
-   "Davranış kaydı ekle|Ne oldu, öncesinde ve sonrasında"
-  ]
- },
- {
   "name": "moyo-oneri",
   "clinic": true,
   "keep": true,
@@ -94,20 +78,23 @@
   ]
  },
  {
-  "name": "moyo-egitim",
-  "clinic": true,
-  "steps": [
-   "~Ebeveyn zorlayıcı davranışları ABC"
-  ]
- },
- {
   "name": "moyo-uzman-oneri",
   "mScroll": 0,
   "clinic": true,
-  "keep": true,
+  "keep": "rutin",
+  "sessions": {
+   "keep": [
+    "demo-ses-3"
+   ],
+   "fee": 1200
+  },
   "steps": [
    "Uzmanım",
    "?Kapat"
+  ],
+  "hideBlock": [
+   "Bugün yapılacaklar|Davranış kaydı ekle",
+   "Randevu al|Randevu al"
   ]
  }
 ]

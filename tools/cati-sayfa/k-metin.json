@@ -35,7 +35,7 @@
       }
     ],
     "dongu": {
-      "_not": "Açılışın altındaki döngü (tur 4; tur 5'te lacivert banda alındı, tur 6'da bu düzen kalıcı oldu): üç durak (Çocuk, Ebeveyn, Uzman) gerçek ürün ekranlarıyla; her durakta ne olduğu ve dayandığı araştırma (kaynak işaretli). Ekranlar img/k-*.webp (c-oyun-liste, moyo-egitim, mercek-davranis kırpımları; dar kartta Uzman için yalnız Öncül ve Sonuç sütunları: k-uzman-dar). gecisler: Çocuk → Ebeveyn, Ebeveyn → Uzman, Uzman → Çocuk. Kural: çocuk adımı gerçek hayatta yapar, oyunda işaretler; araştırma cümleleri genel bilgidir, ürünün etkisi gibi sunulmaz (hukuk/45 §1.4), altındaki not bunu söyler.",
+      "_not": "Açılışın altındaki döngü (tur 4; tur 5'te lacivert banda alındı, tur 6'da bu düzen kalıcı oldu): üç durak (Çocuk, Ebeveyn, Uzman) gerçek ürün ekranlarıyla; her durakta ne olduğu ve dayandığı araştırma (kaynak işaretli). Ekranlar img/k-*.webp (c-oyun-liste, e-davranis, mercek-davranis kırpımları; dar kartta Uzman için yalnız Öncül ve Sonuç sütunları: k-uzman-dar). gecisler: Çocuk → Ebeveyn, Ebeveyn → Uzman, Uzman → Çocuk. Kural: çocuk adımı gerçek hayatta yapar, oyunda işaretler; araştırma cümleleri genel bilgidir, ürünün etkisi gibi sunulmaz (hukuk/45 §1.4), altındaki not bunu söyler.",
       "etiket": "Üç uygulama",
       "baslik": "Adımdan kayda, kayıttan öneriye",
       "alt": "Her uygulamanın yaptığı iş, araştırmalarda incelenmiş bir yönteme dayanır.",
@@ -303,16 +303,6 @@
       "kunye": "Leijten, P., Gardner, F., Melendez-Torres, G. J., van Aar, J., Hutchings, J., Schulz, S., Knerr, W., & Overbeek, G. (2019). Meta-analyses: Key parenting program components for disruptive child behavior. *Journal of the American Academy of Child & Adolescent Psychiatry, 58*(2), 180–190.",
       "doi": "10.1016/j.jaac.2018.07.900",
       "pmid": "30738545"
-    },
-    "Furlong2012": {
-      "kunye": "Furlong, M., McGilloway, S., Bywater, T., Hutchings, J., Smith, S. M., & Donnelly, M. (2012). Behavioural and cognitive-behavioural group-based parenting programmes for early-onset conduct problems in children aged 3 to 12 years. *Cochrane Database of Systematic Reviews,* (2), CD008225.",
-      "doi": "10.1002/14651858.CD008225.pub2",
-      "pmid": "22336837"
-    },
-    "Thongseiratch2020": {
-      "kunye": "Thongseiratch, T., Leijten, P., & Melendez-Torres, G. J. (2020). Online parent programs for children's behavioral problems: A meta-analytic review. *European Child & Adolescent Psychiatry, 29*(11), 1555–1568.",
-      "doi": "10.1007/s00787-020-01472-0",
-      "pmid": "31925545"
     },
     "Mausbach2010": {
       "kunye": "Mausbach, B. T., Moore, R., Roesch, S., Cardenas, V., & Patterson, T. L. (2010). The relationship between homework compliance and therapy outcomes: An updated meta-analysis. *Cognitive Therapy and Research, 34*(5), 429–438.",
