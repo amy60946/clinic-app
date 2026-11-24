@@ -37,3 +37,55 @@ test('tek kişilik klinik: ebeveyn eğitimi kapalıyken eğitim sözü yok (huku
   assert.match(t, /sonraki uzmana aktarımı da sona erer/);
   assert.match(t, /Bu işlem geri alınamaz\.$/);
 });
+
+// ---------- Son adım: şifre (ortak akislar.md 28, satır 4) ----------
+import { deleteWithPassword, isRecentLoginRequired, RECENT_LOGIN_HINT } from '../src/lib/accountDelete.ts';
+import { isWrongPassword } from '../src/lib/authErrors.ts';
+
+const deps = (signInError, removeError) => {
+  const calls = [];
+  return {
+    calls,
+    signIn: async (pw) => { calls.push(`signIn:${pw}`); return signInError ?? null; },
+    remove: async () => { calls.push('remove'); if (removeError) throw removeError; },
+    wrong: isWrongPassword,
+  };
+};
+
+test('şifre yanlış: "wrong_password", silme hiç çağrılmaz', async () => {
+  const d = deps({ code: 'invalid_credentials', message: 'Invalid login credentials' });
+  assert.deepEqual(await deleteWithPassword('yanlis', d), { kind: 'wrong_password' });
+  assert.deepEqual(d.calls, ['signIn:yanlis']);
+});
+
+test('şifre doğru: hemen silinir', async () => {
+  const d = deps(null);
+  assert.deepEqual(await deleteWithPassword('12345678', d), { kind: 'deleted' });
+  assert.deepEqual(d.calls, ['signIn:12345678', 'remove']);
+});
+
+test('boş şifre: giriş de silme de çağrılmaz', async () => {
+  const d = deps(null);
+  assert.deepEqual(await deleteWithPassword('', d), { kind: 'empty' });
+  assert.deepEqual(d.calls, []);
+});
+
+test('giriş başka nedenle olmadı (ağ, deneme sınırı): silme çağrılmaz, hata döner', async () => {
+  const err = { status: 429, message: 'Too many requests' };
+  const d = deps(err);
+  assert.deepEqual(await deleteWithPassword('12345678', d), { kind: 'signin_error', error: err });
+  assert.deepEqual(d.calls, ['signIn:12345678']);
+  const thrown = new TypeError('Failed to fetch');
+  const r = await deleteWithPassword('12345678', { ...deps(null), signIn: async () => { throw thrown; } });
+  assert.deepEqual(r, { kind: 'signin_error', error: thrown });
+});
+
+test('sunucu yeni giriş isterse (recent_login_required) şifre yeniden sorulur; öteki hata "delete_error"', async () => {
+  const hint = Object.assign(new Error('Hesabı silmek için şifreni yeniden girmelisin'), { hint: RECENT_LOGIN_HINT });
+  assert.deepEqual(await deleteWithPassword('12345678', deps(null, hint)), { kind: 'reauth' });
+  const other = new Error('Bir şey oldu');
+  assert.deepEqual(await deleteWithPassword('12345678', deps(null, other)), { kind: 'delete_error', error: other });
+  assert.equal(isRecentLoginRequired({ hint: 'recent_login_required' }), true);
+  assert.equal(isRecentLoginRequired(new Error('recent_login_required')), false);
+  assert.equal(isRecentLoginRequired(null), false);
+});
