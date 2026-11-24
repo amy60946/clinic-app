@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Pressable, Modal, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, Pressable, Modal, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../theme';
-import { Input } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { authErrorText, isWrongPassword } from '../lib/authErrors';
 import { errorText } from '../lib/errors';
@@ -18,9 +18,11 @@ export default function DeleteAccountDialog({ visible, email, onClose, onDelete 
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ text: string; error: boolean } | null>(null);
   const [round, setRound] = useState(0);   // şifre alanı baştan kurulur (boş, gizli, odakta)
+  const [hidden, setHidden] = useState(true);
+  const [focused, setFocused] = useState(false);
   useEffect(() => { if (visible) { setPassword(''); setNote(null); setBusy(false); } }, [visible]);
 
-  const again = (text: string, error = true) => { setPassword(''); setNote({ text, error }); setRound((r) => r + 1); };
+  const again = (text: string, error = true) => { setPassword(''); setHidden(true); setNote({ text, error }); setRound((r) => r + 1); };
   const submit = async () => {
     if (busy || !password) return;
     if (!email) return setNote({ text: 'Hesabının e-postası okunamadı. Çıkış yap, yeniden giriş yap ve tekrar dene.', error: true });
@@ -46,9 +48,17 @@ export default function DeleteAccountDialog({ visible, email, onClose, onDelete 
         <View style={styles.card} accessibilityRole="alert">
           <Text style={styles.title}>{DELETE_PASSWORD_TITLE}</Text>
           {!!email && <Text style={styles.email} numberOfLines={1}>{email}</Text>}
-          <Input key={round} value={password} onChangeText={(t) => { setPassword(t); if (note?.error) setNote(null); }}
-            placeholder="Şifre" secure autoFocus editable={!busy} autoCapitalize="none" autoCorrect={false}
-            autoComplete="current-password" textContentType="password" onSubmitEditing={submit} returnKeyType="done" />
+          {/* beyaz kartın üstünde alan çerçeveli (ortak Input beyaz zeminde görünmez); odakta çerçeve lacivert */}
+          <View style={[styles.field, focused && { borderColor: colors.navy }, note?.error && { borderColor: colors.danger }]}>
+            <TextInput key={round} value={password} onChangeText={(t) => { setPassword(t); if (note?.error) setNote(null); }}
+              placeholder="Şifre" placeholderTextColor={colors.muted} secureTextEntry={hidden} autoFocus editable={!busy}
+              autoCapitalize="none" autoCorrect={false} autoComplete="current-password" textContentType="password"
+              onSubmitEditing={submit} returnKeyType="done" onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+              accessibilityLabel="Şifre" style={[styles.input, WEB_NO_OUTLINE]} />
+            <Pressable onPress={() => setHidden((h) => !h)} hitSlop={10} accessibilityLabel={hidden ? 'Şifreyi göster' : 'Şifreyi gizle'}>
+              <Ionicons name={hidden ? 'eye-outline' : 'eye-off-outline'} size={18} color={colors.muted} />
+            </Pressable>
+          </View>
           {!!note && <Text style={[styles.note, note.error && { color: colors.danger }]} accessibilityLiveRegion="polite">{note.text}</Text>}
           <View style={styles.row}>
             <Pressable onPress={close} disabled={busy} accessibilityRole="button"
@@ -66,11 +76,16 @@ export default function DeleteAccountDialog({ visible, email, onClose, onDelete 
   );
 }
 
+// Web: tarayıcının odak çizgisi yerine alanın kendi çerçevesi
+const WEB_NO_OUTLINE = Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : null;
+
 const styles = StyleSheet.create({
   scrim: { flex: 1, backgroundColor: 'rgba(10,14,28,0.5)', alignItems: 'center', justifyContent: 'center', padding: 20 },
   card: { width: '100%', maxWidth: 400, backgroundColor: '#fff', borderRadius: 16, padding: 20, gap: 12 },
   title: { fontSize: 18, fontWeight: '700', color: colors.navy, lineHeight: 24 },
   email: { fontSize: 13, color: colors.muted, marginTop: -6 },
+  field: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderColor: colors.line, borderRadius: 14, backgroundColor: '#FAFBFC', paddingHorizontal: 14 },
+  input: { flex: 1, paddingVertical: 13, fontSize: 15, color: colors.navy },
   note: { fontSize: 13, lineHeight: 18, color: colors.text },
   row: { flexDirection: 'row', gap: 10, marginTop: 4 },
   btn: { flex: 1, height: 48, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 },
