@@ -514,6 +514,9 @@ footer .legal { grid-column: 1 / -1; border-top: 1px solid var(--c-line-2); padd
 .tur .kisa { display: none; }
 /* Telefonda kısa ad, tek satır: Eğitim · Rutinler · Kayıtlar (14 Kasım incelemesi: uzun adlar çipin içinde 3 satıra bölünüyordu) */
 @media (max-width: 560px) { .tur .uzun { display: none; } .tur .kisa { display: inline; } .tur button { white-space: nowrap; font-size: 13.5px; } }
+/* 24 Kasım 2026: açılış turu dört adım; telefonda dört çip tek satıra sığsın (numara ve iç boşluk küçük) */
+@media (max-width: 560px) { .tur { gap: 2px; } .tur button { padding: 6px 4px; gap: 4px; } .tur b { width: 22px; height: 22px; font-size: 12px; } }
+@media (max-width: 900px) { .tur .uzun { display: none; } .tur .kisa { display: inline; } }   /* 561–900 px'te uzun adlar taşıyordu (dört çip) */
 
 /* ==================================================================================================================
    18 Kasım 2026 turu (ürün sahibinin geri bildirimi): sıkı açılış, parmakla kaydırılan sekmeler, "Davet" adımı, Gizlilik ve güvenlik

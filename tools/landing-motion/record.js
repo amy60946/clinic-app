@@ -14,6 +14,17 @@ function probe(file) {
   return { width: st.width, height: st.height, fps: st.r_frame_rate, duration: Number((j.format || {}).duration || 0) };
 }
 
+// İmleç görüntüsü: sayfadaki SVG okun aynısı, şeffaf zeminde, kayıt ölçeğinde (MOTION_IMLEC=sonra; imlec.py kullanır)
+async function imlecGorseli(s, dir) {
+  fs.mkdirSync(dir, { recursive: true });
+  const pg = await s.ctx.newPage();
+  await pg.setContent('<html><body style="margin:0;background:transparent"><div id="k" style="position:absolute;left:0;top:0;width:40px;height:40px;padding:0">'
+    + '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" style="position:absolute;left:8px;top:8px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.38))">'
+    + '<path d="M5.5 3.2v16.2l4.2-3.9 2.7 6.2 2.7-1.2-2.7-6.1h5.7z" fill="#111" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg></div></body></html>');
+  await pg.locator('#k').screenshot({ path: path.join(dir, 'imlec.png'), omitBackground: true });
+  await pg.close();
+}
+
 // MOTION_DEVICE=dikey: masaüstü sahneleri telefonda gösterilecek dikey çerçevede çekilir, çıktı adı <sahne>-d (22 Kasım 2026)
 async function record(name) {
   const scene = load(name);
@@ -26,17 +37,31 @@ async function record(name) {
   try {
     await scene.prepare(h, s);
     await kit.sleep(700);
+    if (kit.POST_CURSOR) {
+      // imleç görüntüsü (sayfadaki okla aynı SVG) bir kez çizilir, kayıtta sayfadaki imleç gizlenir
+      await imlecGorseli(s, path.join(kit.TMP, id));
+      await s.page.addStyleTag({ content: '#__lm-cursor{visibility:hidden!important}.__lm-ring{display:none!important}' });
+    }
     rec = new kit.Recorder(s.cdp, path.join(kit.TMP, id, 'cap'), s.device.out);
     await rec.start();
     await kit.sleep(300);
     h.T0 = kit.now();
+    h.startTrail();
     await scene.run(h, s);
     const end = kit.now();
     await rec.stop();
     if (s.page.errors.length) console.log(`  sayfa hataları: ${JSON.stringify(s.page.errors.slice(0, 3))}`);
     const seqDir = path.join(kit.TMP, id, 'seq');
     const q = kit.sequence(rec, h, end, seqDir);
-    const e = kit.encode(id, seqDir, q.poster, s.device.out, scene.maxBytes || 1.8e6);
+    let encDir = seqDir;
+    if (kit.POST_CURSOR) {
+      encDir = path.join(kit.TMP, id, 'seq-imlec');
+      const r = spawnSync('python3', [path.join(__dirname, 'imlec.py'), seqDir, encDir, path.join(kit.TMP, id, 'imlec.json'), path.join(kit.TMP, id, 'imlec.png'),
+        String((process.env.MOTION_DSF ? Number(process.env.MOTION_DSF) : s.device.deviceScaleFactor) * s.device.viewport.width / s.device.out[0]),
+        String(s.device.out[0] / s.device.viewport.width)], { encoding: 'utf8' });
+      if (r.status !== 0) throw new Error('imlec.py: ' + r.stderr.slice(-400));
+    }
+    const e = kit.encode(id, encDir, q.poster, s.device.out, scene.maxBytes || 1.8e6);
     const pr = probe(path.join(kit.OUT, `${id}.mp4`));
     const entry = { id, title_tr: scene.title_tr, duration_s: Math.round(pr.duration * 100) / 100, width: pr.width, height: pr.height,
       mp4_bytes: e.mp4_bytes, webm_bytes: e.webm_bytes, poster: e.poster, beats: h.beats };

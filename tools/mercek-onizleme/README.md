@@ -30,3 +30,6 @@ Başka pencereden yayınlarken önce `read`, sonra `url`.
   Oyun). Durağan görseller `cek.js` ile: `neden-oneri|kayit|seans.webp` ("Neden Moyo Mercek" kartları) ve `pano-2x.webp` (işaret konumlarını
   da yazar). Panoda "Senin sıran" bölümü oluşmadığı için mavi işaret uzman süzgecinde; panonun üstündeki açıklama (hâlâ "Senin sıran"ı anlatıyor)
   görselde gizli (uygulama metni 3edf312'de düzeltildi; birleşince gizleme kalkabilir). Eski `kutuphane`, `hero`, `pano` kayıtları ve `neden-egitim|olcut.webp` silindi.
+- **24 Kasım 2026, ikinci tur (kullanıcı geri bildirimi):** açılış turu dört adım (… → 3 hedef davranış ekle → 4 raporu aileye gönder),
+  kamera yakınlaşması ve sayfa kaydırması yok (ekran baştan sona bütün); çipler telefonda ve 900 px'e kadar kısa adla (`site.css` `.tur`).
+  Kayıtların imleci kayıttan sonra çizilir (`tools/landing-motion` `MOTION_IMLEC=sonra`).

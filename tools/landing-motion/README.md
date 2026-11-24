@@ -88,3 +88,16 @@ MOTION_DEVICE=dikey MOTION_FORMAT=jpeg node tools/landing-motion/record.js akis 
   dikey 0 · 11 · 26,6. `record.js` artık saklanan denemenin manifest satırını yazar.
 - `davranis.webp` afişi kaydın 8,4. saniyesinden (açılmış olay tablosu): yük altında `poster` anı tablo açılmadan düştü.
 - `ebeveyn.js`: "İlk onayın tamam!" kutlaması kayıtta gösterilmez (`first-approval-seen`); o pencerede eski oyun adı ve "coin" yazıyor (Moyo uygulaması, ayrı iş).
+
+## 24 Kasım 2026 (ikinci tur): açılış turu dört adım, imleç kayıttan sonra çizilir
+
+- Kullanıcı: "ekran yukarıdan kesik geliyor, bütün ekran görünmüyor". Kırpılma `akis`'in kamera yakınlaşmasından (`zoom`, sağ üst köşeye
+  sabit, ölçek 1,3: üst kenar ve sol menü kadraj dışına çıkıyordu) ve olay tablosuna sayfa kaydırmasından geliyordu; `.clip` kutusu (16:10,
+  `object-fit: cover`) ve telefon sürümü (9:10) kaydın oranıyla aynı, kırpmıyor. `akis` artık yakınlaştırmaz ve kaydırmaz; dört adım:
+  ev rutinleri → davranış kayıtları → "+ Hedef davranış ekle" (ad, strateji, "Ebeveyn davranış kaydı" açık, Kaydet) → raporu aileye gönder.
+  Sitedeki çipler 0 · 8,6 · 20,9 · 40,4 (telefonda 0 · 8,5 · 22,6 · 40,9).
+- **`MOTION_IMLEC=sonra`**: kayıtta sayfadaki imleç gizlenir; `kit.js` her video karesinin imleç yerini ve basma anını planlanan zamanla
+  `imlec.json`'a yazar, `imlec.py` kareleri imleç (sayfadaki SVG okun kendisi, `record.js` `imlecGorseli`) ve basma halkasıyla yeniden yazar.
+  Makinede başka yük varken de imleç akıcı kayar (önceki kayıtlarda hareket adımlarının %8–20'si kaçıyordu). Bu kipte "kaçan hareket adımı"
+  sayısı anlamını yitirir (imleç kare üretmez), `MOTION_TRIES=1` yeter. 24 Kasım kayıtları (`akis`, `rutin`, `davranis`, `seans`, `rapor`, `-d`)
+  bu kiple.
