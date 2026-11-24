@@ -24,6 +24,8 @@ const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL;
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 const SOURCE: Record<string, string> = { app_store: 'App Store', revenuecat: 'App Store', manual: 'klinik anlaşması' };
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+// Web'de satış yok (kullanıcı kararı 22 Ekim 2026): fiyatların üstündeki bilgi
+const WEB_BUY_NOTE = 'Satın alma iPhone ya da iPad\'deki Moyo Mercek uygulamasından yapılır. Üyelik hesabına bağlıdır; web\'de de geçerli olur.';
 
 // Satın almadan sonra üyeliği sunucu yazar (RevenueCat → billing-webhook, birkaç saniye): açılana dek kısa aralıkla bakılır
 async function waitForServer(planOk: (me: ClinicianMe) => boolean): Promise<boolean> {
@@ -200,6 +202,13 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, onH
           ) : (
             <>
               <View style={{ marginTop: 20 }} onLayout={(e) => { packagesY.current = e.nativeEvent.layout.y; }}>
+                {/* web'de satış yok: nereden alınacağı fiyatların hemen üstünde (kullanıcı isteği 24 Kasım 2026; önce sayfanın en altındaydı) */}
+                {!ios && (
+                  <View style={styles.buyNote}>
+                    <Ionicons name="phone-portrait-outline" size={20} color={colors.navy} />
+                    <Text style={styles.buyNoteText}>{WEB_BUY_NOTE}</Text>
+                  </View>
+                )}
                 <Segmented options={[{ id: 'monthly', label: 'Aylık' }, { id: 'yearly', label: gift ? `Yıllık · ${gift} ay hediye` : 'Yıllık' }]}
                   value={period} onChange={setPeriod} />
               </View>
@@ -243,11 +252,11 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, onH
                 </View>
               )}
 
-              <Text style={styles.legal}>
-                {ios
-                  ? 'Ödeme, onayladığında Apple hesabından alınır. Abonelik, dönem bitmeden en az 24 saat önce kapatılmazsa aynı süre ve ücretle otomatik yenilenir; yenileme ücreti dönem bitmeden önceki 24 saat içinde alınır. Ayarlar › Apple Hesabı › Abonelikler\'den yönetebilir ya da kapatabilirsin.'
-                  : 'Üyeliği iPhone ya da iPad\'deki Moyo Mercek\'ten alabilirsin. Üyelik hesabına bağlıdır; web\'de de açılır.'}
-              </Text>
+              {ios && (
+                <Text style={styles.legal}>
+                  Ödeme, onayladığında Apple hesabından alınır. Abonelik, dönem bitmeden en az 24 saat önce kapatılmazsa aynı süre ve ücretle otomatik yenilenir; yenileme ücreti dönem bitmeden önceki 24 saat içinde alınır. Ayarlar › Apple Hesabı › Abonelikler'den yönetebilir ya da kapatabilirsin.
+                </Text>
+              )}
             </>
           )}
           <View style={styles.links}>
@@ -382,5 +391,7 @@ const styles = StyleSheet.create({
   link: { fontSize: 13, fontWeight: '600', color: colors.navy },
   smallLink: { fontSize: 12, color: colors.muted, textDecorationLine: 'underline' },
   notice: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#FFF3D6', borderRadius: radius.md, padding: 12, marginTop: 12 },
+  buyNote: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#fff', borderRadius: radius.md, padding: 14, marginBottom: 12 },
+  buyNoteText: { flex: 1, fontSize: 13, color: colors.navy, lineHeight: 19 },
   legal: { fontSize: 11, color: colors.muted, lineHeight: 16, marginTop: 20 },
 });

@@ -1,28 +1,32 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors, radius } from '../theme';
 import { Label, Notice } from '../components/ui';
 import Bell from '../components/Bell';
 import { Client, ClinicianMe, Member, loadAttention } from '../lib/clinic';
-import { Attention, BoardRow, Section, TrainingStat, buildBoard, mineOn } from '../lib/attention';
+import { Attention, BoardRow, Section, TrainingStat, buildBoard } from '../lib/attention';
+import { loadSeen, markSeen as storeSeen, peekSeen } from '../lib/boardSeen';
+import { useNotifications } from '../lib/notificationsContext';
+import { notificationChildren } from '../lib/notifications';
 import { loadTrainingsFor, loadDetail, type Training } from '../lib/training';
 import { track } from '../lib/track';
 
 // Tüm danışanlar (kullanıcı kararı 2 Kasım 2026: dikkat panosu "liste + neden"; ortak clinic_attention_summary, veritabani.md 23).
 // Danışan başına tek satır; bölümler Senin sıran · Ebeveynden yeni · Sessiz kalanlar · Diğer danışanlar. Neden çipleri yalnız olgu
 // söyler, hepsi aynı nötr renkte: puan, renkli risk ve "en kötüden iyiye" sıralama yok; bölüm içinde sıra ailenin son kaydına göre.
-// "Gördüm" (ya da danışanı açmak) Ebeveynden yeni'yi o danışan için yeni bir şey gelene kadar kapatır (bu cihazda).
+// "Gördüm" (ya da danışanın sayfasına girmek) Ebeveynden yeni'yi o danışan için yeni bir şey gelene kadar kapatır (bu cihazda;
+// lib/boardSeen.ts) ve o danışanın okunmamış bildirimlerini okunmuş sayar: satırdaki zil işareti de söner.
+// Zil (24 Kasım 2026): yeni bir şeyi olan satırda dolu zil + sarı sayı (okunmamış bildirim) ya da sarı nokta (bildirimi okunmuş
+// ama Ebeveynden yeni'de); öteki satırlarda soluk çizgi zil. Renk tek başına değil: sayı ve erişilebilirlik etiketi var.
 // Sahip için uzman süzgeci (uzmanlar karşılaştırılmaz, sayı gösterilmez). Sunucuda işlev yoksa düz liste (eski davranış).
-const SEEN_KEY = (id: string) => `clinic.attention.seen.v1.${id}`;
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
 // Takip Planı kapalıyken (lansman odağı "A") "Senin sıran" açıklaması
 const MINE_TRAINING_INFO = 'Ebeveynin bitirdiği ve senin henüz açmadığın yanıtlar, ebeveynin göremediği taslak eğitimler ya da henüz eğitimi olmayan danışanlar.';
 const SECTIONS: { id: Section; title: string; info: string }[] = [
   { id: 'mine', title: 'Senin sıran', info: 'Aileye gönderilmemiş değişikliğin, değerlendirme zamanı gelen davranış hedefinin ya da takip planı henüz olmayan danışanlar.' },
-  { id: 'family', title: 'Ebeveynden yeni', info: 'Son 7 günde ebeveynin girdiği davranış kayıtları ve öneri kararları. "Gördüm" dersen ya da danışanı açarsan, yeni bir şey gelene kadar bu bölümden çıkar (bu cihazda).' },
+  { id: 'family', title: 'Ebeveynden yeni', info: 'Son 7 günde ebeveynin girdiği davranış kaydını ve diğer iletileri listeler. Danışanın sayfasına girdiğinde normal listeye döner.' },
   { id: 'quiet', title: 'Sessiz kalanlar', info: 'Ebeveynin 7 gündür hiç kaydı yok: adım onayı, davranış kaydı, program uygulaması, öneri kararı.' },
   { id: 'rest', title: 'Diğer danışanlar', info: 'Şu an bir şey beklemeyen danışanlar.' },
 ];
@@ -37,7 +41,8 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
 }) {
   const [q, setQ] = useState('');
   const [att, setAtt] = useState<Record<string, Attention> | null>(null);
-  const [seen, setSeen] = useState<Record<string, string>>({});
+  const [seen, setSeen] = useState<Record<string, string>>(() => peekSeen(me.id));
+  const { items: notes, markRead } = useNotifications();
   const [who, setWho] = useState<string>('all');
   useEffect(() => {
     loadAttention().then((a) => { setAtt(a); onAttention?.(a); }).catch(() => { setAtt(null); onAttention?.(null); });
@@ -66,28 +71,33 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
     return () => { live = false; };
   }, [clients, plan, trainingOn]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    AsyncStorage.getItem(SEEN_KEY(me.id)).then((v) => { if (v) setSeen(JSON.parse(v)); }).catch(() => {});
+    let live = true;
+    loadSeen(me.id).then((v) => { if (live) setSeen(v); });
+    return () => { live = false; };
   }, [me.id]);
-  const markSeen = (linkId: string) => {
-    const next = { ...seen, [linkId]: new Date().toISOString() };
-    setSeen(next);
-    AsyncStorage.setItem(SEEN_KEY(me.id), JSON.stringify(next)).catch(() => {});
+  // "Gördüm": satır bölümden çıkar, zili söner. Danışanı açınca aynısını danışan sayfası yapar (her yoldan açılışta).
+  const markSeen = (c: Client) => {
+    storeSeen(me.id, c.link_id).then(setSeen);
+    const ids = notes.filter((n) => !n.readAt && notificationChildren(n).includes(c.child_id)).map((n) => n.id);
+    if (ids.length) markRead(ids);
   };
-  const open = (c: Client) => { if (att) markSeen(c.link_id); onOpen(c); };
 
   const ownerFilter = me.role === 'owner' && team.length > 1;
   const mineOf = (c: Client, id: string) => c.clinician_id === id || (c.assigned ?? []).includes(id);
   const scoped = ownerFilter && who !== 'all' ? clients.filter((c) => mineOf(c, who)) : clients;
   const query = q.trim().toLocaleLowerCase('tr');
   const searched = query ? scoped.filter((c) => `${c.child_name} ${c.parents} ${c.label}`.toLocaleLowerCase('tr').includes(query)) : scoped;
-  const board = useMemo(() => (att && !query ? buildBoard(searched, att, seen, new Date(), { plan, training }) : null), [att, query, searched, seen, plan, training]);
+  const built = useMemo(() => (att ? buildBoard(searched, att, seen, new Date(), { plan, training }) : null), [att, searched, seen, plan, training]);
+  const board = query ? null : built;
+  // arama listesinde de (bölümsüz düz liste) ebeveynden yenisi olan satırın zili işaretli
+  const freshIds = useMemo(() => new Set(built ? Object.values(built).flat().filter((r) => r.fresh).map((r) => r.client.link_id) : []), [built]);
   const sections = board ? SECTIONS.filter((s) => board[s.id].length > 0).map((s) => (s.id === 'mine' && !plan ? { ...s, info: MINE_TRAINING_INFO } : s)) : [];
   const onlyRest = sections.length === 1 && sections[0].id === 'rest';
 
-  const row = (r: BoardRow<Client> | { client: Client; reasons: []; fresh: false }, i: number) => {
+  const row = (r: BoardRow<Client> | { client: Client; reasons: []; fresh: boolean }, i: number) => {
     const c = r.client;
     return (
-      <Pressable key={c.link_id} onPress={() => open(c)} accessibilityRole="button"
+      <Pressable key={c.link_id} onPress={() => onOpen(c)} accessibilityRole="button"
         style={({ pressed }) => [styles.row, i > 0 && styles.rowLine, pressed && { backgroundColor: '#F7F8FA' }]}>
         <View style={styles.initial}>
           <Text style={{ fontSize: 16, fontWeight: '700', color: colors.navy }}>{(c.child_name || '?').slice(0, 1).toLocaleUpperCase('tr-TR')}</Text>
@@ -97,12 +107,7 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
             <Text style={styles.clientName}>{c.child_name || 'Adsız'}</Text>
             {!!c.label && <Text style={styles.tag} numberOfLines={1}>{c.label}</Text>}
           </View>
-          {!!c.parents && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-              <Ionicons name="person-outline" size={13} color={colors.muted} />
-              <Text style={styles.parents} numberOfLines={1}>Ebeveyn: {c.parents}</Text>
-            </View>
-          )}
+          {!!c.parents && <Text style={styles.parents} numberOfLines={1}>Ebeveyn: {c.parents}</Text>}
           {r.reasons.length > 0 && (
             <View style={styles.reasons}>
               {r.reasons.map((x) => (
@@ -112,7 +117,7 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
                 </View>
               ))}
               {r.fresh && (
-                <Pressable onPress={() => { markSeen(c.link_id); track('board.seen'); }} hitSlop={8} accessibilityRole="button"
+                <Pressable onPress={() => { markSeen(c); track('board.seen'); }} hitSlop={8} accessibilityRole="button"
                   accessibilityLabel={`${c.child_name}: gördüm`}>
                   <Text style={styles.seen}>Gördüm</Text>
                 </Pressable>
@@ -125,7 +130,7 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
             {me.role === 'member' && c.clinician_id !== me.id && (c.assigned ?? []).includes(me.id) ? ' · Sana atandı' : ''}
           </Text>
         </View>
-        <Bell count={unread[c.child_id] ?? 0} small />
+        <Bell count={unread[c.child_id] ?? 0} small dot={r.fresh} />
         <Ionicons name="chevron-forward" size={18} color={colors.faint} />
       </Pressable>
     );
@@ -161,24 +166,16 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
             <View style={styles.list}><Text style={[styles.small, { padding: 16 }]}>{query ? 'Sonuç bulunamadı.' : 'Bu uzmana bağlı danışan yok.'}</Text></View>
           ) : board && !onlyRest ? (
             <>
-            {/* bölümlerin ne olduğu her zaman görünür (kullanıcı isteği 5 Kasım 2026); ayrıntı başlıklardaki (i).
-                Takip Planı ve ebeveyn eğitimi kapalıyken "Senin sıran" hiç oluşmaz: cümle iki başlığı anlatır (24 Kasım 2026) */}
-            <Text style={styles.intro}>
-              {mineOn({ plan, training: trainingOn })
-                ? <>{'Danışanların üç başlık altında: '}<Text style={styles.introB}>Senin sıran</Text>{' senden bir adım bekleyenler, '}</>
-                : 'Danışanların iki başlık altında: '}
-              <Text style={styles.introB}>Ebeveynden yeni</Text>{' son 7 günde ebeveynin girdiği kayıtlar, '}
-              <Text style={styles.introB}>Sessiz kalanlar</Text>{' 7 gündür kaydı olmayanlar. Bekleyen bir şeyi olmayanlar en altta.'}
-            </Text>
-            {sections.map((s) => (
-              <View key={s.id} style={{ gap: 6, marginTop: 10 }}>
+            {/* bölümlerin açıklaması başlıklardaki (i)'de (kullanıcı isteği 24 Kasım 2026: listenin üstündeki açıklama kalktı) */}
+            {sections.map((s, i) => (
+              <View key={s.id} style={{ gap: 6, marginTop: i ? 10 : 6 }}>
                 <SectionHead title={s.title} count={board[s.id].length} info={s.info} />
                 <View style={styles.list}>{board[s.id].map(row)}</View>
               </View>
             ))}
             </>
           ) : (
-            <View style={styles.list}>{(board ? board.rest : searched.map((c) => ({ client: c, reasons: [] as [], fresh: false as const }))).map(row)}</View>
+            <View style={styles.list}>{(board ? board.rest : searched.map((c) => ({ client: c, reasons: [] as [], fresh: freshIds.has(c.link_id) }))).map(row)}</View>
           )}
         </>
       )}
@@ -190,10 +187,10 @@ function SectionHead({ title, count, info }: { title: string; count: number; inf
   const [open, setOpen] = useState(false);
   return (
     <View style={{ gap: 4 }}>
-      <Pressable onPress={() => setOpen((v) => !v)} hitSlop={8} accessibilityRole="button" accessibilityLabel={`${title}: açıklama`}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 5, alignSelf: 'flex-start' }}>
+      <Pressable onPress={() => setOpen((v) => !v)} hitSlop={10} accessibilityRole="button" accessibilityLabel={`${title}: açıklama`}
+        accessibilityState={{ expanded: open }} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}>
         <Text style={styles.secTitle}>{title} · {count}</Text>
-        <Ionicons name={open ? 'information-circle' : 'information-circle-outline'} size={14} color={colors.muted} />
+        <Ionicons name={open ? 'information-circle' : 'information-circle-outline'} size={17} color={colors.navy} />
       </Pressable>
       {open && <Text style={styles.info}>{info}</Text>}
     </View>
@@ -207,15 +204,13 @@ const styles = StyleSheet.create({
   initial: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.today, alignItems: 'center', justifyContent: 'center' },
   clientName: { fontSize: 15, fontWeight: '600', color: colors.text },
   tag: { fontSize: 11, fontWeight: '600', color: colors.navy, backgroundColor: colors.today, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden', maxWidth: 180 },
-  parents: { fontSize: 13, color: colors.text, flexShrink: 1 },
+  parents: { fontSize: 13, color: colors.text },
   small: { fontSize: 12, color: colors.muted },
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: radius.md, paddingHorizontal: 14, height: 44, marginBottom: 8 },
   reasons: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center', marginTop: 2 },
   reason: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#F1F3F7', borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 3, flexShrink: 1, maxWidth: '100%' },
   reasonText: { fontSize: 11.5, fontWeight: '600', color: colors.navy, flexShrink: 1 },
   seen: { fontSize: 12, fontWeight: '700', color: colors.navy, textDecorationLine: 'underline' },
-  intro: { fontSize: 12.5, color: colors.muted, lineHeight: 18, marginTop: 4, marginBottom: 6 },
-  introB: { fontWeight: '700', color: colors.navy },
   secTitle: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase', color: '#6B7387' },
   info: { fontSize: 12, color: colors.text, lineHeight: 17, backgroundColor: '#F3F5FA', borderRadius: radius.sm, padding: 10 },
   filter: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 4 },

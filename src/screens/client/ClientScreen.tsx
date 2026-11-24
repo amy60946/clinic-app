@@ -8,6 +8,7 @@ import { Notice, Segmented, IconButton } from '../../components/ui';
 import Bell from '../../components/Bell';
 import NotificationsSheet, { notificationTab } from '../NotificationsSheet';
 import { useNotifications } from '../../lib/notificationsContext';
+import { markSeen } from '../../lib/boardSeen';
 import { AppNotification, notificationChildren } from '../../lib/notifications';
 import { track } from '../../lib/track';
 import { useClientConfig, CARE_PLAN_FLAG, PARENT_TRAINING_FLAG } from '../../lib/clientConfig';
@@ -130,21 +131,34 @@ export default function ClientScreen({
   const current: Tab = tab === 'routine' && routineView === 'suggest' ? 'suggestions' : tab;
   const sectionOf = (t: Tab): Section => (t === 'suggestions' ? 'routine' : t);
   const { items, unreadByChild, markRead } = useNotifications();
-  // Açılan bölümün bu çocuğa ait okunmamış bildirimleri okunmuş sayılır (ör. Davranışlar ve Olaylar açılınca olay ve davranış kaydı bildirimleri).
-  // Öneri kararları Ev rutinleri'nde (öneri penceresi) ve Takip planı'nda görünür.
+  // Danışanın sayfasına girilince (hangi yoldan olursa olsun) bu çocuğun okunmamış bildirimleri okunmuş sayılır ve panoda
+  // "Ebeveynden yeni" görüldü işareti yazılır: dönüşte satırdaki zil sönmüş, satır normal listededir (kullanıcı isteği 24 Kasım 2026).
+  // Önce yalnız açılan bölümün bildirimleri okunuyordu; danışan Ev Rutinleri'nde açıldığı için davranış kaydı bildirimi
+  // okunmamış kalıyor, satırdaki zil Davranışlar ve Olaylar açılana dek yanıyordu.
+  // Hangi bölümde yeni bir şey olduğu bu açılış için saklanır (`fresh`: bildirim → bölüm): bölüm noktaları buradan, bölüm
+  // açılınca noktası kalkar. Öneri kararları Ev rutinleri'nde (öneri penceresi) ve Takip planı'nda görünür.
+  const [fresh, setFresh] = useState<Record<string, Tab>>({});
+  useEffect(() => { if (!sample) markSeen(me.id, client.link_id); }, [me.id, client.link_id, sample]);
   useEffect(() => {
     if (sample) return;
     const seen = (t: Tab) => t === current || (t === 'suggestions' && (current === 'routine' || current === 'goals'));
-    const ids = items.filter((n) => !n.readAt && seen(notificationTab(n.kind)) && notificationChildren(n).includes(client.child_id)).map((n) => n.id);
-    if (ids.length) markRead(ids);
+    const mine = items.filter((n) => !n.readAt && notificationChildren(n).includes(client.child_id));
+    if (mine.length) markRead(mine.map((n) => n.id));
+    setFresh((f) => {
+      const next: Record<string, Tab> = {};
+      Object.entries(f).forEach(([id, t]) => { if (!seen(t)) next[id] = t; });
+      mine.forEach((n) => { const t = notificationTab(n.kind); if (!seen(t)) next[String(n.id)] = t; });
+      const same = Object.keys(next).length === Object.keys(f).length && Object.keys(next).every((id) => id in f);
+      return same ? f : next;
+    });
   }, [current, items, client.child_id, markRead, sample]);
   useEffect(() => { track('screen.client', { tab: current, ...(sample ? { sample: true } : {}) }); }, [current, sample]);
-  // Bölümde okunmamış bildirim işareti
+  // Bölümde yeni bildirim işareti (bu açılışta henüz bakılmamış bölümler)
   const dots = useMemo(() => {
     const out: Partial<Record<Section, boolean>> = {};
-    if (!sample) items.forEach((n) => { if (!n.readAt && notificationChildren(n).includes(client.child_id)) out[sectionOf(notificationTab(n.kind))] = true; });
+    Object.values(fresh).forEach((t) => { out[sectionOf(t)] = true; });
     return out;
-  }, [items, client.child_id, sample]);
+  }, [fresh]);
   const [weeks, setWeeks] = useState<'4' | '8'>('4');
   const [data, setData] = useState<ClientData | null>(sample ?? null);
   const [error, setError] = useState<string | null>(null);

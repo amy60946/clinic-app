@@ -1,7 +1,7 @@
 // Dikkat panosu (src/lib/attention.ts). Çalıştırma: npm test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { reasonsFor, sectionOf, buildBoard, relDay, trainingReasons, mineOn } from '../src/lib/attention.ts';
+import { reasonsFor, sectionOf, buildBoard, relDay, trainingReasons } from '../src/lib/attention.ts';
 
 const now = new Date('2026-11-02T12:00:00Z');
 const ago = (d, h = 0) => new Date(now.getTime() - d * 86400000 - h * 3600000).toISOString();
@@ -89,17 +89,12 @@ test('Takip Planı açık (varsayılan): eski davranış değişmez', () => {
   assert.deepEqual(keys(board.mine[0].reasons), ['unsent']);
 });
 
-// 24 Kasım 2026: Takip Planı ve ebeveyn eğitimi kapalıyken (23 Kasım kararı, varsayılan) "Senin sıran" oluşmaz;
-// pano giriş cümlesi mineOn'a bakar ("üç başlık" yerine "iki başlık")
-test('ikisi de kapalı: Senin sıran oluşmaz, giriş iki başlık', () => {
+// 24 Kasım 2026: Takip Planı ve ebeveyn eğitimi kapalıyken (23 Kasım kararı, varsayılan) "Senin sıran" oluşmaz
+test('ikisi de kapalı: Senin sıran oluşmaz', () => {
   const clients = ['taslak', 'yok', 'yeni'].map((id) => ({ link_id: id, consent_at: ago(30) }));
   const a = { taslak: att({ link_id: 'taslak', drafts: 2, review_due: 1 }), yok: att({ link_id: 'yok', goals_active: 0, plan_published_at: null }),
     yeni: att({ link_id: 'yeni', abc_7d: 1, abc_last_at: ago(1) }) };
   const board = buildBoard(clients, a, {}, now, { plan: false, training: null });
   assert.equal(board.mine.length, 0);
   assert.equal(board.family.map((r) => r.client.link_id).join(), 'yeni');
-  assert.equal(mineOn({ plan: false, training: false }), false);
-  assert.equal(mineOn({ plan: true, training: false }), true, 'Takip Planı açık');
-  assert.equal(mineOn({ plan: false, training: true }), true, 'ebeveyn eğitimi açık');
-  assert.equal(mineOn({}), true, 'varsayılanlar ClientBoard ile aynı (ikisi de açık)');
 });
