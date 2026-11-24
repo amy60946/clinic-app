@@ -4,7 +4,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const kit = require('./kit');
 
-const ORDER = ['akis', 'hero', 'kutuphane', 'aile', 'davranis', 'rapor', 'pano', 'hero-m', 'davranis-m', 'rapor-m'];
+const ORDER = ['akis', 'rutin', 'davranis', 'seans', 'rapor', 'pano'];
 const load = (id) => require(path.join(__dirname, 'scenes', `${id}.js`));
 
 function probe(file) {
@@ -70,7 +70,13 @@ async function recordClean(id) {
     console.log(`  ${id}: ${r.missed} hareket adımı kaçtı, yeniden çekiliyor (${i + 1}. deneme)`);
   }
   for (const e of ext) { const f = path.join(kit.OUT, `${best.id}.${e}`), b = path.join(kit.TMP, `best-${best.id}.${e}`); fs.rmSync(f, { force: true }); if (fs.existsSync(b)) fs.copyFileSync(b, f); }
-  console.log(`  ${id}: saklanan deneme ${best.missed}/${best.moves} kaçan adım`);
+  // manifest'te saklanan denemenin satırı kalsın (her deneme kendi satırını yazıyordu; adımların saniyeleri denemeden denemeye değişir)
+  const mf = path.join(kit.OUT, 'manifest.json');
+  const keys = ['id', 'title_tr', 'duration_s', 'width', 'height', 'mp4_bytes', 'webm_bytes', 'poster', 'beats'];
+  const row = Object.fromEntries(keys.map((k) => [k, best[k]]));
+  const all = fs.existsSync(mf) ? JSON.parse(fs.readFileSync(mf, 'utf8')) : [];
+  fs.writeFileSync(mf, JSON.stringify(all.map((x) => (x.id === best.id ? row : x)), null, 1) + '\n');
+  console.log(`  ${id}: saklanan deneme ${best.missed}/${best.moves} kaçan adım · adımlar ${JSON.stringify(best.beats.map((b) => b.t))}`);
   return best;
 }
 

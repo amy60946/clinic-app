@@ -24,3 +24,9 @@ Başka pencereden yayınlarken önce `read`, sonra `url`.
 - Açılıştaki ürün turu `site/assets/motion/akis.mp4` ← `tools/landing-motion` `node record.js akis` (`scenes/akis.js`; kamera
   yakınlaşması `kit.js` `zoom` / `unzoom`). Kaydın altındaki 1-2-3 çiplerinin `data-t` saniyeleri `out/manifest.json`'daki `beats`'ten.
   Boyutu yalnız CSS'te (`site.css` "Açılış" bölümü, `--hm-w`): ilk ekranda kaydın yaklaşık %45'i görünür.
+- **24 Kasım 2026 (ebeveyn eğitimi bütün platformlarda kapalı, ortak `akislar.md` 27.4):** konum "Ev Programı ve İlerleme Takibi Platformu",
+  açılış "Seanslar arasında evde olanı görün."; açılış turu `akis` 1 ev rutinleri → 2 davranış kayıtları → 3 raporu aileye gönder; "Platform
+  Nasıl Çalışır?" 7 sekme (Davet · Ev rutinleri `rutin` · Aile uygulaması `aile` · Davranış kayıtları `davranis` · Seans `seans` · Rapor `rapor` ·
+  Oyun). Durağan görseller `cek.js` ile: `neden-oneri|kayit|seans.webp` ("Neden Moyo Mercek" kartları) ve `pano-2x.webp` (işaret konumlarını
+  da yazar). Panoda "Senin sıran" bölümü oluşmadığı için mavi işaret uzman süzgecinde; panonun üstündeki açıklama (hâlâ "Senin sıran"ı anlatıyor)
+  görselde gizli. Eski `kutuphane`, `hero`, `pano` kayıtları ve `neden-egitim|olcut.webp` silindi.

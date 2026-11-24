@@ -338,6 +338,8 @@ function encode(id, seqDir, posterFrame, dim, maxBytes) {
     if (size(mp4) <= maxBytes) break;
   }
   let vcrf = 34;
+  // MOTION_WEBM=0: webm üretilmez (VP9 uzun sürer; site webm'i yalnız mp4'ten küçükse kullanır, site.js WEBM)
+  if (process.env.MOTION_WEBM === '0') { fs.rmSync(webm, { force: true }); vcrf = 99; }
   for (; vcrf <= 40; vcrf++) {
     ff([...input, '-vf', vf, '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', String(vcrf), '-row-mt', '1', '-deadline', 'good', '-cpu-used', '1', '-tune-content', 'screen', '-g', '300', '-r', String(FPS), ...tags, '-an', webm]);
     if (size(webm) <= maxBytes) break;
