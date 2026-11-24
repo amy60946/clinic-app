@@ -1,13 +1,14 @@
 // Çatı sayfa için gerçek Moyo Mercek ekranları (uydurma veri; tam pencere, kırpma yok).
 // Önce: clinic-app'te `bash preview/build.sh`. Kullanım: node tools/cati-sayfa/cek/mercek.js [yalnız-ad …]
-// Çıktı: tools/cati-sayfa/img/mercek-{pano,egitim,rutin,davranis}.webp (1440×900) ve mercek-{rutin,egitim}-tel.webp (600×1298).
+// Çıktı: tools/cati-sayfa/img/mercek-{pano,rutin,davranis}.webp (1440×900), mercek-rutin-tel.webp (600×1298) ve e-nz-uzman.webp (780×1688).
+// Ebeveyn eğitimi kapalı (24 Kasım 2026): eğitim ekranı çekilmez; danışan Ev Rutinleri'yle açılır, menü Planla / Takip.
 // Oturum, uydurma veri ve bir kez görünen ipuçlarının kapatılması tools/landing-motion/kit.js ile aynı (kit.open).
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { execFileSync } = require('child_process');
 const kit = require('../../landing-motion/kit');
-const { vis, tab, card, openClient, openTraining } = require('../../landing-motion/scenes/_common');
+const { vis, card, openClient } = require('../../landing-motion/scenes/_common');
 
 const IMG = path.resolve(__dirname, '../img');
 const TMP = path.join(os.tmpdir(), 'cati-cek');
@@ -35,15 +36,19 @@ async function run(device, tel) {
   const p = s.page;
   try {
     if (!tel && want('mercek-pano')) { await park(p, tel); await shot(p, 'mercek-pano', 1440); }
-    await openClient(p);                                   // Nazlı; danışan Ebeveyn Eğitimi'yle açılır
-    if (want(tel ? 'mercek-egitim-tel' : 'mercek-egitim')) {
-      await openTraining(p);
-      await tab(p, 'Öğrenme modülleri').click(); await p.waitForTimeout(1200);
-      await park(p, tel); await shot(p, tel ? 'mercek-egitim-tel' + CEK_EK : 'mercek-egitim', tel ? (CEK_EK ? 820 : 600) : 1440);
-    }
+    await openClient(p);                                   // Nazlı; danışan Ev Rutinleri'yle açılır
     if (want(tel ? 'mercek-rutin-tel' : 'mercek-rutin')) {
-      await section(p, 'Ev Rutinleri');
       await park(p, tel); await shot(p, tel ? 'mercek-rutin-tel' + CEK_EK : 'mercek-rutin', tel ? (CEK_EK ? 820 : 600) : 1440);
+    }
+    // Moyo Ebeveyn sayfası "Neden Moyo" uzman paneli: aynı telefon ekranı 780 × 1688 (yap_m.py NZ "uzman"; çıkma şeridi "Yatağını topla" satırı)
+    if (tel && !CEK_EK && want('e-nz-uzman')) {
+      await shot(p, 'e-nz-uzman', 780);
+      const r = await p.evaluate(() => {
+        const t = [...document.querySelectorAll('div')].find((e) => e.childElementCount === 0 && e.textContent.trim() === 'Yatağını topla' && e.getBoundingClientRect().width > 0);
+        let a = t; while (a.parentElement && a.parentElement.getBoundingClientRect().height < 120) a = a.parentElement;
+        const b = a.getBoundingClientRect(); return [Math.round(b.top), Math.round(b.height)];
+      });
+      console.log('e-nz-uzman "Yatağını topla" satırı (nokta: y, yükseklik):', JSON.stringify(r));
     }
     if (!tel && want('mercek-davranis')) {
       await section(p, 'Davranışlar ve Olaylar');
@@ -56,5 +61,5 @@ async function run(device, tel) {
 
 (async () => {
   if (!only.length || only.some((n) => !n.endsWith('-tel'))) await run('desktop', false);
-  if (!only.length || only.some((n) => n.endsWith('-tel'))) await run('tel', true);
+  if (!only.length || only.some((n) => n.endsWith('-tel') || n === 'e-nz-uzman')) await run('tel', true);
 })().catch((e) => { console.error(e); process.exit(1); });

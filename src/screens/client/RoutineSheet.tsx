@@ -12,6 +12,7 @@ import {
 } from '../../lib/routines';
 import type { AgeGroup } from '../../templates';
 import { repeatSummary } from './SuggestionEditor';
+import { errorText } from '../../lib/errors';
 
 const DAY_SHORT = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
 export type RoutineGoal = { id: string; title: string; meta?: string };   // meta: alan · bağlı program/rutin sayısı
@@ -65,7 +66,7 @@ function Body({ routine, childName, band, taken, goals, onClose, onSubmit, initi
     try {
       await onSubmit(list);
     } catch (e) {
-      Alert.alert('Rutin önerilemedi', (e as Error).message);
+      Alert.alert('Rutin önerilemedi', errorText(e));
     } finally {
       setBusy(false);
     }

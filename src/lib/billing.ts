@@ -26,6 +26,8 @@ const DEFAULT_PLANS: BillingPlan[] = [
   { id: 'clinic_yearly', package: 'clinic', period: 'yearly', seat_limit: 10, price_try: null, apple_product_id: 'com.clinicapp.uzman.clinic.yearly', iyzico_plan_ref: null },
 ];
 
+// Ebeveyn eğitimi bayrağı kapalıyken (`parent_training`, 23 Kasım 2026) eğitim satırı listede yok (packageFeatures)
+export const TRAINING_FEATURE = 'Ebeveyn eğitimi: öğrenme modülleri, uygulama görevleri, hızlı yapılacaklar';
 // Paket içerikleri (üyelik ekranında sade liste); yalnız ClinicApp'te gerçekten olanlar yazılır.
 export const PACKAGES: Record<PackageId, { title: string; who: string; features: string[] }> = {
   solo: {
@@ -35,7 +37,7 @@ export const PACKAGES: Record<PackageId, { title: string; who: string; features:
       'Sınırsız danışan; aileler Moyo ile ücretsiz bağlanır',
       'Evdeki rutin verisi: adımlar, tamamlama, "Yapamam" nedenleri',
       'Hedef davranışlar ve ebeveynin bildirdiği olaylar',
-      'Ebeveyn eğitimi: öğrenme modülleri, uygulama görevleri, hızlı yapılacaklar',
+      TRAINING_FEATURE,
       'Aileye rutin önerisi; karar ebeveynde',
       'Yazdırılabilir gözlem raporu (PDF)',
       'Yalnız sana görünen klinik notları (aile görmez)',
@@ -55,6 +57,8 @@ export const PACKAGES: Record<PackageId, { title: string; who: string; features:
     ],
   },
 };
+
+export const packageFeatures = (id: PackageId, training: boolean) => PACKAGES[id].features.filter((f) => training || f !== TRAINING_FEATURE);
 
 // Yıllıkta kaç ay hediye: fiyatlardan hesaplanır (fiyat değişince metin de değişir; bilinmiyorsa 0)
 export function yearlyGift(monthly: number | null | undefined, yearly: number | null | undefined): number {

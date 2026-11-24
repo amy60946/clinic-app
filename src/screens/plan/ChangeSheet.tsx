@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, radius } from '../../theme';
 import { IconButton, SmallButton } from '../../components/ui';
 import { shiftTime, normalizeTime } from '../../lib/routines';
+import { errorText } from '../../lib/errors';
 
 // Takip planında rutini ya da tek görevi düzenlemek (kullanıcı kararı 2 Kasım 2026; ortak akislar.md 12.1 adım 6–7).
 // mode:
@@ -75,7 +76,7 @@ function Body({ target, onClose, onSubmit, onWithdraw }: {
     try {
       await onSubmit(changed.map((r) => ({ id: r.item.id, reminder: r.time.trim() ? normalizeTime(r.time) : null, remove: r.remove })));
     } catch (e) {
-      Alert.alert('Kaydedilemedi', (e as Error).message);
+      Alert.alert('Kaydedilemedi', errorText(e));
     } finally {
       setBusy(false);
     }

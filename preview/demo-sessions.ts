@@ -153,7 +153,7 @@ export function sessionRpc(name: string, a: Row, c: Ctx): Res | undefined {
         conf = conf.concat(conflicts(db, me!.clinic_id, clin, p.room_id ?? null, start, p.duration_min ?? 45));
         const s = base({ clinic_id: me!.clinic_id, clinician_id: clin, link_id: p.link_id ?? null, title: p.link_id ? null : p.title ?? null, series_id: series, starts_at: start,
           duration_min: p.duration_min ?? 45, kind: p.kind ?? 'individual', mode: p.mode ?? 'in_person', room_id: p.room_id ?? null,
-          visible_to_family: !!p.visible_to_family && !!p.link_id, package_id: p.package_id ?? null, created_by: me!.id });
+          visible_to_family: !!p.visible_to_family && !!p.link_id, package_id: p.package_id ?? null, fee: p.fee == null || p.fee === '' ? null : Number(p.fee), created_by: me!.id });
         db.clinic_sessions.push(s); ids.push(s.id);
       }
       const first = db.clinic_sessions.find((s: Row) => s.id === ids[0]);
@@ -173,6 +173,7 @@ export function sessionRpc(name: string, a: Row, c: Ctx): Res | undefined {
         Object.assign(x, { starts_at: start, duration_min: p.duration_min ?? x.duration_min, kind: p.kind ?? x.kind, mode: p.mode ?? x.mode,
           room_id: 'room_id' in p ? p.room_id : x.room_id, clinician_id: p.clinician_id ?? x.clinician_id, title: 'title' in p ? p.title : x.title,
           visible_to_family: 'visible_to_family' in p ? !!p.visible_to_family && !!x.link_id : x.visible_to_family, package_id: 'package_id' in p ? p.package_id : x.package_id,
+          fee: 'fee' in p ? (p.fee == null || p.fee === '' ? null : Number(p.fee)) : x.fee ?? null,
           family_response: delta ? null : x.family_response, family_note: delta ? null : x.family_note, updated_at: nowIso() });
         conf = conf.concat(conflicts(db, x.clinic_id, x.clinician_id, x.room_id, x.starts_at, x.duration_min, x.id));
       }

@@ -8,22 +8,22 @@ import { loadClientData, type Client, type ClientData, type ClinicianMe, type Me
 import { DECLINE_LABELS, observations, addDays } from '../../lib/metrics';
 import { track } from '../../lib/track';
 import {
-  KIND_LABEL, MODE_LABEL, RESPONSE_LABEL, STATUS_META, prepSummary, sessionWhen, trDay, wouldBeLate, canMarkDone, isClosed, hasNote,
-  type Session, type SessionRecord, type Room, type SessionSettings, type AgendaItem, type HomeworkItem, type Prep,
-} from '../../lib/sessionCore';
+  KIND_LABEL, MODE_LABEL, RESPONSE_LABEL, STATUS_META, prepSummary, sessionWhen, trDay, canMarkDone, isClosed, hasNote, outcomeOf,
+  type Session, type SessionRecord, type Room, type AgendaItem, type HomeworkItem, type Prep, feeText } from '../../lib/sessionCore';
 import { loadLinkSessions, loadRecords, saveRecord, setSessionStatus, deleteSession } from '../../lib/sessions';
 import { loadHomework, sendHomework, type Homework } from '../../lib/homework';
 import PublishSheet from '../plan/PublishSheet';
-import { useClientConfig, CARE_PLAN_FLAG } from '../../lib/clientConfig';
+import { useClientConfig, CARE_PLAN_FLAG, PARENT_TRAINING_FLAG } from '../../lib/clientConfig';
 import type { Tab } from '../client/ClientScreen';
 import { SheetHeader, StatusChip, Chips, FieldLabel, Private, s } from './parts';
+import { errorText } from '../../lib/errors';
 
 // Seans ayrıntısı (ortak akislar.md 20, 2–4): Hazırlık = son yapılan seanstan bu yana evde olanlar + kendiliğinden gündem (C);
-// Kayıt = durum, katılanlar, gözlem / çalışılan / sonraki adım (yalnız klinik), aileye ev ödevi (Takip Planı'nın "Aileye gönder"i),
-// sonraki seans. Danışansız blokta yalnız durum ve düzeltme.
+// Kayıt = durum (yalnız Yapıldı / Yapılmadı, kullanıcı kararı 23 Kasım 2026), katılanlar, gözlem / çalışılan / sonraki adım (yalnız klinik),
+// aileye ev ödevi (Takip Planı'nın "Aileye gönder"i). Danışansız blokta yalnız durum ve düzeltme.
 export default function SessionDetailSheet(p: {
-  session: Session | null; client: Client | null; me: ClinicianMe; team: Member[]; rooms: Room[]; settings: SessionSettings;
-  onClose: () => void; onChanged: () => void; onEdit: (s: Session) => void; onNext: (s: Session) => void; onOffer: (s: Session) => void;
+  session: Session | null; client: Client | null; me: ClinicianMe; team: Member[]; rooms: Room[];
+  onClose: () => void; onChanged: () => void; onEdit: (s: Session) => void;
   onOpenClient: (c: Client, tab: Tab) => void;
 }) {
   return (
@@ -35,7 +35,7 @@ export default function SessionDetailSheet(p: {
 
 const ATTENDEES = ['Çocuk', 'Anne', 'Baba', 'Bakım veren', 'Kardeş'];
 
-function Body({ session, client, me, team, rooms, settings, onClose, onChanged, onEdit, onNext, onOffer, onOpenClient }:
+function Body({ session, client, me, team, rooms, onClose, onChanged, onEdit, onOpenClient }:
   Parameters<typeof SessionDetailSheet>[0] & { session: Session }) {
   const [view, setView] = useState<'prep' | 'record'>(session.status === 'planned' && Date.parse(session.starts_at) > Date.now() ? 'prep' : 'record');
   const [data, setData] = useState<ClientData | null>(null);
@@ -51,7 +51,9 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
   const [nextStep, setNextStep] = useState('');
   const [agenda, setAgenda] = useState<AgendaItem[]>([]);
   const [homework, setHomework] = useState<HomeworkItem[]>([]);
-  const planOn = useClientConfig().flag(CARE_PLAN_FLAG);   // Takip Planı kapalıyken ev çalışması Ebeveyn Eğitimi'nde
+  const config = useClientConfig();
+  const planOn = config.flag(CARE_PLAN_FLAG);   // Takip Planı kapalıyken ev çalışması Ebeveyn Eğitimi'nde
+  const trainingOn = config.flag(PARENT_TRAINING_FLAG);   // kapalıyken "Ebeveyn Eğitimi'ni aç" yok
   const [own, setOwn] = useState('');
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -81,7 +83,7 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
         loadHomework(client, d.tasks, today).then(setHw).catch(() => setHw(null));
       }
     } catch (e) {
-      setLoadErr((e as Error).message);
+      setLoadErr(errorText(e));
     }
   }, [client, session.id, session.starts_at, today]);
   useEffect(() => { load(); }, [load]);
@@ -95,31 +97,17 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
   // kayıtta gündem yoksa özetin gündemiyle başlar
   useEffect(() => { if (prep && !record && !agenda.length) setAgenda(prep.agenda); }, [prep]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const change = async (next: Exclude<typeof status, 'offered'>) => {
-    const apply = async (waive: boolean) => {
-      try {
-        const v = await setSessionStatus(session.id, next, null, waive);
-        setStatus(v);
-        track('session.status', { status: v, waive });
-        onChanged();
-        if ((v === 'cancelled' || v === 'late_cancel' || v === 'postponed') && client && Date.parse(session.starts_at) > Date.now()) {
-          Alert.alert('Saat boşaldı', 'Bekleme listesindeki bir aileye bu saati teklif edebilirsin.', [
-            { text: 'Şimdi değil', style: 'cancel' }, { text: 'Teklif et', onPress: () => onOffer(session) },
-          ]);
-        }
-      } catch (e) { Alert.alert('Değiştirilemedi', (e as Error).message); }
-    };
-    if (next === 'cancelled' && wouldBeLate(session.starts_at, new Date(), settings.cancel_hours)) {
-      Alert.alert('Geç iptal', `Seansa ${settings.cancel_hours} saatten az kaldı; kural gereği "Geç iptal" yazılır${settings.count_late_cancel ? ' ve paketten düşer' : ''}.`, [
-        { text: 'Vazgeç', style: 'cancel' }, { text: 'Geç iptal sayma', onPress: () => apply(true) }, { text: 'Geç iptal', onPress: () => apply(false) },
-      ]);
+  const change = async (next: 'done' | 'no_show') => {
+    if (!canMarkDone(session.starts_at, new Date())) {
+      Alert.alert('Seans henüz başlamadı', '"Yapıldı" ya da "Yapılmadı" seans saatinden sonra işaretlenir.');
       return;
     }
-    if ((next === 'done' || next === 'no_show') && !canMarkDone(session.starts_at, new Date())) {
-      Alert.alert('Seans henüz başlamadı', '"Yapıldı" ve "Gelmedi" seans saatinden sonra yazılır.');
-      return;
-    }
-    apply(false);
+    try {
+      const v = await setSessionStatus(session.id, next);
+      setStatus(v);
+      track('session.status', { status: v });
+      onChanged();
+    } catch (e) { Alert.alert('Değiştirilemedi', errorText(e)); }
   };
 
   const save = async () => {
@@ -130,24 +118,23 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
       setDirty(false);
       onChanged();
       Alert.alert('Kaydedildi', 'Seans kaydı yalnız klinikte görünür.');
-    } catch (e) { Alert.alert('Kaydedilemedi', (e as Error).message); } finally { setSaving(false); }
+    } catch (e) { Alert.alert('Kaydedilemedi', errorText(e)); } finally { setSaving(false); }
   };
   const remove = () => {
     const run = async (scope: 'one' | 'following') => {
       try { await deleteSession(session.id, scope); track('session.delete', { scope }); onChanged(); onClose(); }
-      catch (e) { Alert.alert('Silinemedi', (e as Error).message); }
+      catch (e) { Alert.alert('Silinemedi', errorText(e)); }
     };
     Alert.alert('Seansı sil', session.visible_to_family && Date.parse(session.starts_at) > Date.now() ? 'Aileye "randevu iptal edildi" bildirimi gider.' : 'Seans takvimden kalkar.',
       session.series_id ? [{ text: 'Vazgeç', style: 'cancel' }, { text: 'Yalnız bu', style: 'destructive', onPress: () => run('one') }, { text: 'Bu ve sonrakiler', style: 'destructive', onPress: () => run('following') }]
         : [{ text: 'Vazgeç', style: 'cancel' }, { text: 'Sil', style: 'destructive', onPress: () => run('one') }]);
   };
   const touch = <T,>(set: (v: T) => void) => (v: T) => { set(v); setDirty(true); };
-  const future = Date.parse(session.starts_at) > Date.now();
 
   return (
     <SafeAreaView style={s.safe} edges={['top', 'bottom']}>
       <View style={s.column}>
-        <SheetHeader title={clientName} sub={`${sessionWhen(session)} · ${KIND_LABEL[session.kind]} · ${session.mode === 'in_person' ? (room ? `${room.name}${room.location ? ` · ${room.location}` : ''}` : MODE_LABEL.in_person) : MODE_LABEL[session.mode]}${who && who.id !== me.id ? ` · ${who.name}` : ''}`}
+        <SheetHeader title={clientName} sub={`${sessionWhen(session)} · ${KIND_LABEL[session.kind]} · ${session.mode === 'in_person' ? (room ? `${room.name}${room.location ? ` · ${room.location}` : ''}` : MODE_LABEL.in_person) : MODE_LABEL[session.mode]}${who && who.id !== me.id ? ` · ${who.name}` : ''}${feeText(session.fee) ? ` · ${feeText(session.fee)}` : ''}`}
           onClose={() => { if (dirty) Alert.alert('Kaydedilmedi', 'Kayıttaki değişiklikler kaybolsun mu?', [{ text: 'Vazgeç', style: 'cancel' }, { text: 'Kapat', style: 'destructive', onPress: onClose }]); else onClose(); }}
           right={<View style={{ alignSelf: 'center' }}><StatusChip status={status} /></View>} />
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48, gap: 12 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
@@ -202,10 +189,9 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
           {(view === 'record' || !client) && (
             <>
               <FieldLabel>Durum</FieldLabel>
-              <Chips options={[{ id: 'planned', label: 'Planlandı' }, { id: 'done', label: 'Yapıldı' }, { id: 'no_show', label: 'Gelmedi' },
-                               { id: 'cancelled', label: 'İptal' }, { id: 'late_cancel', label: 'Geç iptal' }, { id: 'postponed', label: 'Ertelendi' }]}
-                value={status} onChange={(v) => { if (v !== status) change(v as Exclude<typeof status, 'offered'>); }} />
-              {status === 'late_cancel' && <Text style={[s.small, { color: STATUS_META.late_cancel.fg }]}>Geç iptal olarak kayıtlı{settings.count_late_cancel ? '; paketten düşer' : ''}.</Text>}
+              <Chips<'done' | 'no_show' | ''> options={[{ id: 'done', label: STATUS_META.done.label }, { id: 'no_show', label: STATUS_META.no_show.label }]}
+                value={outcomeOf(status) ?? ''} onChange={(v) => { if (v && v !== outcomeOf(status)) change(v); }} />
+              {!outcomeOf(status) && !canMarkDone(session.starts_at, now) && <Text style={s.small}>Seans saatinden sonra işaretlenir.</Text>}
               {client && (
                 <>
                   <FieldLabel>Katılanlar</FieldLabel>
@@ -217,14 +203,18 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
                   <Note label="Sonraki adım" value={nextStep} onChange={touch(setNextStep)} placeholder="Bir sonraki seansta ya da evde" />
                   <AgendaBox agenda={agenda} setAgenda={touch(setAgenda)} own={own} setOwn={setOwn} />
 
-                  {!planOn && (
+                  {!planOn && (trainingOn || homework.length > 0) && (
                     <View style={s.card}>
                       <Text style={s.label}>Ebeveynin ev çalışması</Text>
                       {homework.map((h) => (
                         <View key={`${h.kind}:${h.id}`} style={s.row}><Ionicons name="paper-plane-outline" size={14} color={colors.ok} /><Text style={s.body}>{h.title}</Text></View>
                       ))}
-                      <Text style={s.small}>Uygulama görevleri ve yapılacaklar Ebeveyn Eğitimi'nde eklenir; eğitim "Etkin" olunca ebeveyn görür.</Text>
-                      <Pressable onPress={() => onOpenClient(client, 'training')}><Text style={s.link}>Ebeveyn Eğitimi'ni aç</Text></Pressable>
+                      {trainingOn && (
+                        <>
+                          <Text style={s.small}>Uygulama görevleri ve yapılacaklar Ebeveyn Eğitimi'nde eklenir; eğitim "Etkin" olunca ebeveyn görür.</Text>
+                          <Pressable onPress={() => onOpenClient(client, 'training')}><Text style={s.link}>Ebeveyn Eğitimi'ni aç</Text></Pressable>
+                        </>
+                      )}
                     </View>
                   )}
                   {planOn && <View style={s.card}>
@@ -251,9 +241,7 @@ function Body({ session, client, me, team, rooms, settings, onClose, onChanged, 
           )}
 
           <View style={[s.row, { flexWrap: 'wrap', marginTop: 8 }]}>
-            {client && <SmallButton label="Sonraki seansı planla" onPress={() => onNext(session)} />}
-            {(status === 'planned' || status === 'offered') && <SmallButton label="Düzelt" onPress={() => onEdit(session)} />}
-            {isClosed(status) && future && client && <SmallButton label="Bekleme listesine teklif et" onPress={() => onOffer(session)} />}
+            {status === 'planned' && <SmallButton label="Düzelt" onPress={() => onEdit(session)} />}
             {client && <SmallButton label="Danışanı aç" onPress={() => onOpenClient(client, 'summary')} />}
             {!record && <SmallButton label="Sil" danger onPress={remove} />}
           </View>

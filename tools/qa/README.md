@@ -14,7 +14,7 @@ W=393 node tools/qa/crawl.js               # iPhone 15/16 (375: SE/mini, 820: iP
 Dört deneme hesabıyla (uzman@, ekip@, ada@, bitti@) ana ekran, pencereler, Kaynak kütüphanesi, danışanın bütün
 bölümleri (Ebeveyn Eğitimi ve Davranışlar ve Olaylar dahil, iki "Ebeveyn deneyimini önizle" akışı uçtan uca), takvim ve
 ayarlar gezilir. Varsayılan geçiş Takip Planı kapalıyken (uzaktan ayar `care_plan` yok; lansman düzeni: menü aç/kapat, örnekli anlatım
-kartları, örnek aile eğitim turu); Takip Planı açıkken eski düzeni gezmek için `PLAN=1`. Yalnız kütüphane + eğitim + davranış adımları için `ONLY=training` (masaüstü: `W=1440 H=900`). Her adımda `yoga-emu.js` iOS'u taklit eder:
+kartları, örnek aile eğitim turu); Takip Planı açıkken eski düzeni gezmek için `PLAN=1`, ebeveyn eğitimi açıkken (kütüphane, eğitim, eğitim turu) `TRAINING=1` (23 Kasım 2026: ikisi de varsayılan kapalı). Yalnız kütüphane + eğitim + davranış adımları için `TRAINING=1 ONLY=training` (masaüstü: `W=1440 H=900`). Her adımda `yoga-emu.js` iOS'u taklit eder:
 - çok satırlı flex kapsayıcıda satırlar gerilmez (Yoga `alignContent: flex-start`),
 - `flex: 1` (temel 0) öğe, satır yönündeki kapsayıcının içerik genişliğine katkı vermez,
 - metin (Text) kendiliğinden daralmaz (Yoga `flexShrink: 0`),

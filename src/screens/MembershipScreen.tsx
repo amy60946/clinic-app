@@ -6,17 +6,18 @@ import { colors, radius } from '../theme';
 import { Card, Label, Cta, Segmented } from '../components/ui';
 import { clinicianMe, type ClinicianMe } from '../lib/clinic';
 import {
-  BillingPlan, PackageId, Period, PACKAGES, commonTerms, yearlyGift, listPlans, tl, billingStatus, hasAccess, daysLeft, packageName, packageOfProduct, periodOfProduct,
+  BillingPlan, PackageId, Period, PACKAGES, packageFeatures, commonTerms, yearlyGift, listPlans, tl, billingStatus, hasAccess, daysLeft, packageName, packageOfProduct, periodOfProduct,
 } from '../lib/billing';
 import * as store from '../lib/store';
 import type { StorePrices, StoreResult } from '../lib/storeTypes';
 import { track } from '../lib/track';
 import { useLegalOn, openLegal } from '../lib/legal';
-import { useClientConfig } from '../lib/clientConfig';
+import { useClientConfig, PARENT_TRAINING_FLAG } from '../lib/clientConfig';
 import { CANCEL_FLOW_FLAG } from '../lib/cancelFlow';
 import { useStoreSubscription, openAppleSubscriptions } from '../lib/storeState';
 import ManageSheet from './membership/ManageSheet';
 import { CancelledCard, BillingBanner } from './membership/StoreNotices';
+import { errorText } from '../lib/errors';
 
 const APPLE_EULA = 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL;
@@ -105,7 +106,7 @@ export default function MembershipScreen({ me, blocking, onClose, onChanged, onH
     if (r.reason === 'none') return Alert.alert('Bu Apple hesabında Moyo Mercek üyeliği bulunamadı.');
     if (r.reason === 'unavailable') return Alert.alert('Bu paket şu an App Store\'da satın alınamıyor.', 'Biraz sonra yeniden dene.');
     if (r.reason === 'not_connected') return Alert.alert('App Store bağlantısı bu sürümde kapalı.');
-    Alert.alert('İşlem tamamlanamadı', r.message || 'Biraz sonra yeniden dene.');
+    Alert.alert('İşlem tamamlanamadı', errorText(r.message, 'Biraz sonra yeniden dene.'));   // mağaza metni İngilizce olabilir
   };
 
   const choose = async (p: BillingPlan) => {
@@ -326,6 +327,7 @@ function PlanCard({ plan, price, perMonth, current, loading, canBuy, busy, disab
   busy: boolean; disabled: boolean; onChoose: () => void; highlight?: boolean;
 }) {
   const meta = PACKAGES[plan.package];
+  const trainingOn = useClientConfig().flag(PARENT_TRAINING_FLAG);
   return (
     <View style={[styles.plan, highlight && styles.planHi]}>
       <Text style={styles.planTitle}>{meta.title}</Text>
@@ -337,7 +339,7 @@ function PlanCard({ plan, price, perMonth, current, loading, canBuy, busy, disab
       )}
       {price && perMonth && <Text style={styles.small}>aylık yaklaşık {perMonth}</Text>}
       <View style={{ gap: 8, marginTop: 12, flex: 1 }}>
-        {meta.features.map((f) => <Check key={f} text={f} />)}
+        {packageFeatures(plan.package, trainingOn).map((f) => <Check key={f} text={f} />)}
       </View>
       {current ? (
         <View style={styles.currentPill}><Text style={styles.currentText}>Mevcut paketin</Text></View>

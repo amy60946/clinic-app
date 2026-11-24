@@ -43,8 +43,9 @@ const ALL_STEPS: Step[] = [
   { title: 'Takip et ve raporla', line: 'Takip bölümü; dönem sonunda "Rapor".', screen: 'watch' },
 ];
 
-export default function Onboarding({ visible, plan = true, onClose }: { visible: boolean; plan?: boolean; onClose: (completed: boolean) => void }) {
-  const STEPS = plan ? ALL_STEPS : ALL_STEPS.map((x) => (x.screen === 'plan' ? TRAINING_STEP : x));
+// training: ebeveyn eğitimi açık mı (parent_training, 23 Kasım 2026); ikisi de kapalıyken üçüncü ekran yok
+export default function Onboarding({ visible, plan = true, training = true, onClose }: { visible: boolean; plan?: boolean; training?: boolean; onClose: (completed: boolean) => void }) {
+  const STEPS = plan ? ALL_STEPS : training ? ALL_STEPS.map((x) => (x.screen === 'plan' ? TRAINING_STEP : x)) : ALL_STEPS.filter((x) => x.screen !== 'plan');
   const { width } = useWindowDimensions();
   const [index, setIndex] = useState(0);
   const scroller = useRef<ScrollView>(null);
@@ -79,7 +80,7 @@ export default function Onboarding({ visible, plan = true, onClose }: { visible:
                 {s.screen === 'board' && <BoardMock />}
                 {s.screen === 'plan' && <PlanMock wide={wide} />}
                 {s.screen === 'training' && <TrainingMock wide={wide} />}
-                {s.screen === 'watch' && <MenuMock plan={plan} />}
+                {s.screen === 'watch' && <MenuMock plan={plan} training={training} />}
               </View>
             </SafeAreaView>
           ))}
@@ -272,7 +273,7 @@ function TrainingMock({ wide }: { wide: boolean }) {
   );
 }
 
-function MenuMock({ plan }: { plan: boolean }) {
+function MenuMock({ plan, training }: { plan: boolean; training: boolean }) {
   const group = (head: string, items: string[], lit?: string[]) => (
     <View style={[styles.block, { padding: 12, gap: 6 }, lit && { backgroundColor: '#fff' }, lit && styles.ring]}>
       <Text style={[styles.sec, { marginTop: 0 }, lit && { color: '#6B7286' }]}>{head}</Text>
@@ -281,24 +282,24 @@ function MenuMock({ plan }: { plan: boolean }) {
       ))}
     </View>
   );
+  const planla = [...(training ? ['Ebeveyn Eğitimi'] : []), ...(plan ? ['Takip Planı'] : []), 'Seanslar', 'Notlar'];
   return (
     <View style={{ gap: 8 }}>
       <Header title="Nazlı" sub="8 yaş · Sorumlu: sen" back />
-      {group('Planla', plan ? ['Ebeveyn Eğitimi', 'Takip Planı', 'Seanslar'] : ['Ebeveyn Eğitimi', 'Seanslar'])}
-      <View>
-        {group('Takip', ['Davranışlar ve Olaylar', 'Özet', 'Ev Rutinleri'], ['Davranışlar ve Olaylar', 'Ev Rutinleri'])}
-        <Badge n={1} />
-      </View>
       <View>
         <View style={[styles.block, { padding: 12, gap: 6 }]}>
-          <Text style={[styles.sec, { marginTop: 0 }]}>Kayıt</Text>
-          <Text style={{ fontSize: 15, fontWeight: '600', color: INK }}>Notlar</Text>
+          <Text style={[styles.sec, { marginTop: 0 }]}>Planla</Text>
+          {planla.map((x) => <Text key={x} style={{ fontSize: 15, fontWeight: '600', color: INK }}>{x}</Text>)}
           <View style={[styles.ring, { backgroundColor: '#fff', borderRadius: 10, paddingVertical: 6, paddingHorizontal: 8, alignSelf: 'flex-start' }]}>
             <Text style={{ fontSize: 15, fontWeight: '800', color: colors.navy }}>Rapor · PDF ve ilerleme notu</Text>
           </View>
           <Text style={{ fontSize: 15, fontWeight: '600', color: INK }}>Danışan Bilgileri</Text>
         </View>
         <Badge n={2} side="right" />
+      </View>
+      <View>
+        {group('Takip', ['Davranışlar ve Olaylar', 'Ev Rutinleri', 'Özet'], ['Davranışlar ve Olaylar', 'Ev Rutinleri'])}
+        <Badge n={1} />
       </View>
     </View>
   );

@@ -13,14 +13,14 @@ import { track } from '../lib/track';
 
 export type HelpAction = 'invite' | 'routine' | 'plan' | 'report' | 'team' | 'home';
 // plan: yalnız Takip Planı açıkken (uzaktan ayar `care_plan`); noPlan: yalnız kapalıyken (lansman odağı "A", 11 Kasım 2026)
-type Item = { key: string; q: string; a?: string[]; card?: boolean; show?: HelpAction; showLabel?: string; ownerOnly?: boolean; plan?: boolean; noPlan?: boolean };
+type Item = { key: string; q: string; a?: string[]; card?: boolean; show?: HelpAction; showLabel?: string; ownerOnly?: boolean; plan?: boolean; noPlan?: boolean; training?: boolean };
 
 // Kısa yanıt (kullanıcı isteği 3 Kasım 2026): bir iki cümle, dokunulacak tuş tırnak içinde
 const ITEMS: Item[] = [
   { key: 'invite', q: 'Aileyi nasıl davet ederim?', show: 'invite', showLabel: 'Davet et', a: ['"Aileyi davet et" › ebeveynin e-postası › "E-posta gönder". Davet 3 gün geçerli; ebeveyn onaylayınca çocuk ana ekranda.'] },
   { key: 'sees', q: 'Aile neyi görür?', card: true },
-  { key: 'training', noPlan: true, q: 'Ebeveyne eğitim nasıl atarım?', show: 'plan', showLabel: 'Ebeveyn Eğitimi', a: ['Danışan › Ebeveyn Eğitimi › "+ Eğitim ekle". Modül, uygulama görevi ve yapılacak ekle. Eğitim Taslak açılır; "Etkin" yapınca ebeveyn görür.'] },
-  { key: 'tasks', noPlan: true, q: 'Uygulama görevi ile hızlı yapılacak farkı ne?', show: 'plan', showLabel: 'Ebeveyn Eğitimi', a: ['Uygulama görevi tekrarlanır; ebeveyn her uyguladığında kayıt girer (ör. "Geçişten önce iki uyarı ver"). Hızlı yapılacak bir kez yapılır ve işaretlenir (ör. "Zamanlayıcı hazırla").'] },
+  { key: 'training', noPlan: true, training: true, q: 'Ebeveyne eğitim nasıl atarım?', show: 'plan', showLabel: 'Ebeveyn Eğitimi', a: ['Danışan › Ebeveyn Eğitimi › "+ Eğitim ekle". Modül, uygulama görevi ve yapılacak ekle. Eğitim Taslak açılır; "Etkin" yapınca ebeveyn görür.'] },
+  { key: 'tasks', noPlan: true, training: true, q: 'Uygulama görevi ile hızlı yapılacak farkı ne?', show: 'plan', showLabel: 'Ebeveyn Eğitimi', a: ['Uygulama görevi tekrarlanır; ebeveyn her uyguladığında kayıt girer (ör. "Geçişten önce iki uyarı ver"). Hızlı yapılacak bir kez yapılır ve işaretlenir (ör. "Zamanlayıcı hazırla").'] },
   { key: 'routine', plan: true, q: 'Rutin ya da adım nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Takip Planı\'ndan eklersen taslak olur. Eklemek ebeveynin kararı.'] },
   { key: 'routine2', noPlan: true, q: 'Rutin ya da adım nasıl öneririm?', show: 'routine', showLabel: 'Ev Rutinleri', a: ['Ev Rutinleri › "+ Aileye öner". Eklemek ebeveynin kararı.'] },
   { key: 'publish', plan: true, q: '"Aileye gönder" ne yapar?', show: 'plan', showLabel: 'Takip Planı', a: ['Taslakları (bej) aileye yollar. Önce özet açılır; işaretliler tek bildirimle gider.'] },
@@ -31,13 +31,13 @@ const ITEMS: Item[] = [
   { key: 'workspace', q: 'Birden çok klinikte çalışıyorum, nasıl ayırırım?', a: ['Sol üstte "Moyo Mercek" yanındaki küçük hesap düğmesine dokun: "Bireysel hesap" ve ekip hesapları (her klinik için bir tane) ayrıdır. Ekip hesabı, klinik seni ekibine eklediğinde ve kabul ettiğinde açılır. Danışanlar, davetler ve seanslar seçili hesaba aittir.'] },
 ];
 
-export default function HelpSheet({ visible, owner, plan = true, focus, onClose, onIntro, onSample, onAction }: {
-  visible: boolean; owner: boolean; plan?: boolean; focus?: string | null; onClose: () => void; onIntro: () => void; onSample: () => void; onAction: (a: HelpAction) => void;
+export default function HelpSheet({ visible, owner, plan = true, training = true, focus, onClose, onIntro, onSample, onAction }: {
+  visible: boolean; owner: boolean; plan?: boolean; training?: boolean; focus?: string | null; onClose: () => void; onIntro: () => void; onSample: () => void; onAction: (a: HelpAction) => void;
 }) {
   const [open, setOpen] = useState<string | null>(null);
   // focus: açılırken açık gelecek soru (ör. iptal öncesi pencereden "İpuçlarına bak" → 'invite')
   useEffect(() => { if (visible && focus) setOpen(focus); }, [visible, focus]);
-  const items = ITEMS.filter((x) => (!x.ownerOnly || owner) && (plan ? !x.noPlan : !x.plan));
+  const items = ITEMS.filter((x) => (!x.ownerOnly || owner) && (plan ? !x.noPlan : !x.plan) && (training || !x.training));
   const toggle = (k: string) => {
     setOpen((o) => (o === k ? null : k));
     if (open !== k) track('help.open', { q: k });
@@ -72,7 +72,7 @@ export default function HelpSheet({ visible, owner, plan = true, focus, onClose,
                     </Pressable>
                     {on && (
                       <View style={styles.answer}>
-                        {x.card ? <FamilySees plan={plan} /> : x.a?.map((t) => <Text key={t} style={styles.aText}>{t}</Text>)}
+                        {x.card ? <FamilySees plan={plan} training={training} /> : x.a?.map((t) => <Text key={t} style={styles.aText}>{t}</Text>)}
                         {x.show && (
                           <Pressable onPress={() => { track('help.show', { q: x.key }); onAction(x.show!); }} style={styles.show} accessibilityRole="button">
                             <Text style={styles.showText}>{x.showLabel ?? 'Göster'}</Text>
@@ -113,12 +113,18 @@ const SEES_TRAINING: typeof SEES = [
   { title: 'Yalnız sen ve yetkili ekibin', tone: 'private', icon: 'eye-off-outline', items: ['Notlar', 'Taslak eğitimler', 'Ustalık ölçütü verisi', 'Klinik etiketi'] },
   SEES[2],
 ];
-export function FamilySees({ compact, plan = true }: { compact?: boolean; plan?: boolean }) {
+// Takip Planı ve ebeveyn eğitimi kapalıyken (23 Kasım 2026)
+const SEES_BASIC: typeof SEES = [
+  { title: 'Aile görür', tone: 'family', icon: 'people-outline', items: ['Hedef davranışlar ve stratejiler', 'Rutin ve adım önerileri', 'Randevular'] },
+  { title: 'Yalnız sen ve yetkili ekibin', tone: 'private', icon: 'eye-off-outline', items: ['Notlar', 'Klinik etiketi'] },
+  SEES[2],
+];
+export function FamilySees({ compact, plan = true, training = true }: { compact?: boolean; plan?: boolean; training?: boolean }) {
   return (
     <View style={{ gap: 8 }}>
       {!compact && plan && <Text style={styles.aText}>Bej = aileye gitmez.</Text>}
       <View style={styles.sees}>
-        {(plan ? SEES : SEES_TRAINING).map((c) => (
+        {(plan ? SEES : training ? SEES_TRAINING : SEES_BASIC).map((c) => (
           <View key={c.title} style={[styles.seeCol, c.tone === 'family' ? styles.seeFamily : c.tone === 'private' ? styles.seePrivate : styles.seeNone]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Ionicons name={c.icon} size={14} color={c.tone === 'private' ? '#7A5A1E' : colors.navy} />

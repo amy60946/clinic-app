@@ -6,13 +6,14 @@ import { Note, listNotes, addNote, deleteNote, listGoals } from '../../lib/clini
 import { PRIVATE } from '../plan/tones';
 import type { ClientCtx } from './ClientScreen';
 import { InheritedNotes } from './History';
+import { errorText } from '../../lib/errors';
 
 // Uzman notları: yalnız klinik ekibi görür; aile görmez. Paylaşım biterse de klinikte kalır.
 export default function NotesTab({ client, me, data }: ClientCtx) {
   if (data.sample) {
     return (
       <View>
-        <Text style={[styles.small, { marginTop: 8 }]}>Notlarını aile görmez. Örnek ailede not eklenmez.</Text>
+        <Text style={[styles.small, { marginTop: 8 }]}>Örnek ailede not eklenmez.</Text>
         <View style={{ gap: 8, marginTop: 12 }}>
           {(data.sampleNotes ?? []).map((n) => (
             <Card key={n.id} style={{ gap: 6 }}>
@@ -37,7 +38,7 @@ function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(() => {
-    listNotes(client.link_id).then(setNotes).catch((e) => Alert.alert('Notlar yüklenemedi', (e as Error).message));
+    listNotes(client.link_id).then(setNotes).catch((e) => Alert.alert('Notlar yüklenemedi', errorText(e)));
   }, [client.link_id]);
   useEffect(load, [load]);
 
@@ -49,7 +50,7 @@ function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
       setBody('');
       load();
     } catch (e) {
-      Alert.alert('Not kaydedilemedi', (e as Error).message);
+      Alert.alert('Not kaydedilemedi', errorText(e));
     } finally {
       setBusy(false);
     }
@@ -57,7 +58,7 @@ function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
 
   const remove = (n: Note) => Alert.alert('Not silinsin mi?', 'Bu işlem geri alınamaz.', [
     { text: 'Vazgeç', style: 'cancel' },
-    { text: 'Sil', style: 'destructive', onPress: () => deleteNote(n.id).then(load).catch((e) => Alert.alert('Silinemedi', (e as Error).message)) },
+    { text: 'Sil', style: 'destructive', onPress: () => deleteNote(n.id).then(load).catch((e) => Alert.alert('Silinemedi', errorText(e))) },
   ]);
 
   return (
@@ -66,7 +67,6 @@ function LiveNotes({ client, me }: Pick<ClientCtx, 'client' | 'me'>) {
       <Card style={{ gap: 10 }}>
         <Input value={body} onChangeText={setBody} placeholder="Seans notu, gözlem, müdahale değişikliği (ör. ödül değişti)…" multiline maxLength={4000} />
         <Cta label="Notu kaydet" onPress={save} busy={busy} />
-        <Text style={styles.small}>Notlarını aile görmez; yalnız kliniğindeki uzmanlar okur. Ebeveyn izin verirse notların, adın gizlenerek çocuğun sonraki uzmanına okunur olarak açılabilir. Nota kimlik bilgisi yazma.</Text>
       </Card>
       <Label>{`Notlar (${notes?.length ?? 0})`}</Label>
       {!notes ? <ActivityIndicator color={colors.navy} /> : notes.length === 0 ? <Empty text="Henüz not yok." /> : (

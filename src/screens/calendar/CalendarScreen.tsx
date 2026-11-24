@@ -11,21 +11,23 @@ import { track } from '../../lib/track';
 import { useTabBarScroll } from '../../lib/tabBar';
 import {
   STATUS_META, KIND_LABEL, DEFAULT_SETTINGS, layoutDay, noteDue, trDay, trMinutes, trToIso, mondayOfDay, shortDay, longDay, timeRange,
-  minToHhmm, isClosed,
-  type Session, type SessionRecord, type Room, type Availability, type SessionSettings, type SessionPackage, type WaitItem, type ExternalEvent,
+  minToHhmm, isMissed, isOfferLeftover,
+  type Session, type SessionRecord, type Room, type Availability, type SessionSettings, type ExternalEvent,
 } from '../../lib/sessionCore';
 import {
-  SessionsNotInstalled, loadSessions, loadSession, loadRecords, loadSettings, listRooms, listAvailability, listWaitlist, listPackages, loadExternal, loadBusyElsewhere,
+  SessionsNotInstalled, loadSessions, loadSession, loadRecords, loadSettings, listRooms, listAvailability, loadExternal, loadBusyElsewhere,
 } from '../../lib/sessions';
 import type { Tab } from '../client/ClientScreen';
 import SessionSheet, { type SessionPreset } from './SessionSheet';
 import SessionDetailSheet from './SessionDetailSheet';
 import CalendarSettingsSheet from './CalendarSettingsSheet';
-import { OfferSheet, ExternalSheet } from './SmallSheets';
+import { ExternalSheet } from './SmallSheets';
 import { StatusChip, s } from './parts';
+import { errorText } from '../../lib/errors';
 
 // Takvim (ortak akislar.md 20): gün / hafta; geniş ekranda haftalık ızgara + sağda "Bugün", dar ekranda gün gün liste.
-// Durum renkleri STATUS_META; dış takvim etkinlikleri gri kesikli; sahip için uzman süzgeci.
+// Durum renkleri STATUS_META (Planlandı / Yapıldı / Yapılmadı; kullanıcı kararı 23 Kasım 2026: bekleme listesi, teklif ve paket yok);
+// dış takvim etkinlikleri gri kesikli; sahip için uzman süzgeci.
 export default function CalendarScreen({ me, team, clients, initialSessionId, onBack, onOpenClient }: {
   me: ClinicianMe; team: Member[]; clients: Client[]; initialSessionId?: string | null;
   onBack: () => void; onOpenClient: (c: Client, tab: Tab) => void;
@@ -43,15 +45,12 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
   const [rooms, setRooms] = useState<Room[]>([]);
   const [avail, setAvail] = useState<Availability[]>([]);
   const [settings, setSettings] = useState<SessionSettings>(DEFAULT_SETTINGS);
-  const [packages, setPackages] = useState<SessionPackage[]>([]);
-  const [waitlist, setWaitlist] = useState<WaitItem[]>([]);
   const [missing, setMissing] = useState(false);
   const [error, setError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [detail, setDetail] = useState<Session | null>(null);
   const [form, setForm] = useState<{ editing?: Session | null; preset?: SessionPreset | null } | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [offer, setOffer] = useState<Session | null>(null);
   const [ext, setExtRaw] = useState<ExternalEvent | null>(null);
   const setExt = (e: ExternalEvent | null) => {
     if (e?.source_id === 'workspace') return Alert.alert(e.summary ?? 'Başka hesap', 'Bu saatte başka hesabında seansın var. Ayrıntısı için o hesaba geç.');
@@ -67,8 +66,8 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
   const rangeFrom = trToIso(weekDays[0], '00:00'), rangeTo = trToIso(addDays(weekDays[weekDays.length - 1], 1), '00:00');
 
   const loadStatic = useCallback(async () => {
-    const [st, r, a, w, p] = await Promise.all([loadSettings(), listRooms(), listAvailability(), listWaitlist(), listPackages()]);
-    setSettings(st); setRooms(r); setAvail(a); setWaitlist(w); setPackages(p);
+    const [st, r, a] = await Promise.all([loadSettings(), listRooms(), listAvailability()]);
+    setSettings(st); setRooms(r); setAvail(a);
   }, []);
   const load = useCallback(async () => {
     try {
@@ -80,12 +79,12 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
       // başka çalışma alanlarındaki kendi seansların gri blok (alanın adıyla; ayrıntı o alanda)
       const mine: ExternalEvent[] = other.filter((b) => b.clinic).map((b, i) => ({ id: `ws-${i}-${b.starts_at}`, source_id: 'workspace', uid: '',
         starts_at: b.starts_at, ends_at: b.ends_at, summary: b.clinic, session_id: null, ignored: false }));
-      setSessions(ss); setExternal([...ex.filter((e) => !e.session_id && !e.ignored), ...mine]);
+      setSessions(ss.filter((x) => !isOfferLeftover(x))); setExternal([...ex.filter((e) => !e.session_id && !e.ignored), ...mine]);
       const doneIds = ss.filter((x) => x.status === 'done').map((x) => x.id);
       setRecords(await loadRecords(doneIds).catch(() => ({})));
       setError('');
     } catch (e) {
-      if (e instanceof SessionsNotInstalled) setMissing(true); else setError((e as Error).message);
+      if (e instanceof SessionsNotInstalled) setMissing(true); else setError(errorText(e));
     }
   }, [rangeFrom, rangeTo]);
   useEffect(() => { loadStatic().catch((e) => { if (e instanceof SessionsNotInstalled) setMissing(true); }); track('screen.calendar'); }, [loadStatic]);
@@ -93,7 +92,7 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
   // bildirimden: seansı aç (gerekirse o güne git)
   useEffect(() => {
     if (!initialSessionId) return;
-    loadSession(initialSessionId).then((x) => { if (x) { setAnchor(trDay(x.starts_at)); setDetail(x); } }).catch(() => {});
+    loadSession(initialSessionId).then((x) => { if (x) { setAnchor(trDay(x.starts_at)); if (!isOfferLeftover(x)) setDetail(x); } }).catch(() => {});
   }, [initialSessionId]);
 
   const refresh = async () => { setRefreshing(true); await Promise.all([load(), loadStatic().catch(() => {})]); setRefreshing(false); };
@@ -108,10 +107,9 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
   const todayList = shown.filter((x) => trDay(x.starts_at) === today).sort((a, b) => a.starts_at.localeCompare(b.starts_at));
   const weekStats = useMemo(() => {
     const wk = shown.filter((x) => !!x.link_id && trDay(x.starts_at) >= mondayOfDay(today) && trDay(x.starts_at) < addDays(mondayOfDay(today), 7));
-    return { planned: wk.filter((x) => !isClosed(x.status) && x.status !== 'offered').length, done: wk.filter((x) => x.status === 'done').length,
-             noShow: wk.filter((x) => x.status === 'no_show').length, cancelled: wk.filter((x) => isClosed(x.status)).length };
+    return { total: wk.filter((x) => x.status !== 'postponed').length, done: wk.filter((x) => x.status === 'done').length,
+             missed: wk.filter((x) => isMissed(x.status)).length };
   }, [shown, today]);
-  const waiting = waitlist.filter((w) => w.status === 'waiting');
 
   const step = (n: number) => setAnchor(addDays(anchor, n * (view === 'week' ? 7 : 1)));
   const label = view === 'week' ? `${shortDay(weekDays[0])} – ${shortDay(weekDays[6])}` : longDay(anchor);
@@ -149,7 +147,7 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
       <View style={s.card}>
         <Text style={s.label}>Bu hafta</Text>
         <View style={[s.row, { flexWrap: 'wrap', gap: 8 }]}>
-          <Mini n={weekStats.planned} t="seans" /><Mini n={weekStats.done} t="yapıldı" /><Mini n={weekStats.noShow} t="gelmedi" /><Mini n={weekStats.cancelled} t="iptal/erteleme" />
+          <Mini n={weekStats.total} t="seans" /><Mini n={weekStats.done} t="yapıldı" /><Mini n={weekStats.missed} t="yapılmadı" />
         </View>
       </View>
       {due.length > 0 && (
@@ -160,13 +158,6 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
               <Text style={s.body}>{nameOf(x)} <Text style={s.small}>· {shortDay(trDay(x.starts_at))}</Text></Text>
             </Pressable>
           ))}
-        </View>
-      )}
-      {waiting.length > 0 && (
-        <View style={s.card}>
-          <Text style={s.label}>Bekleme listesi · {waiting.length}</Text>
-          {waiting.slice(0, 5).map((w) => <Text key={w.id} style={s.small}>{clientOf(w.link_id)?.child_name ?? 'Danışan'}{w.note ? ` · ${w.note}` : ''}</Text>)}
-          <Text style={s.small}>İptal edilen bir seansta "Bekleme listesine teklif et".</Text>
         </View>
       )}
     </View>
@@ -221,33 +212,29 @@ export default function CalendarScreen({ me, team, clients, initialSessionId, on
         </ScrollView>
       </View>
 
-      <SessionSheet open={!!form} me={me} team={team} clients={clients} rooms={rooms} availability={avail} settings={settings} packages={packages}
+      <SessionSheet open={!!form} me={me} team={team} clients={clients} rooms={rooms} availability={avail} settings={settings}
         editing={form?.editing} preset={form?.preset} onClose={() => setForm(null)} onSaved={() => { setForm(null); changed(); }} />
-      <SessionDetailSheet session={detail} client={detail ? clientOf(detail.link_id) : null} me={me} team={team} rooms={rooms} settings={settings}
+      <SessionDetailSheet session={detail} client={detail ? clientOf(detail.link_id) : null} me={me} team={team} rooms={rooms}
         onClose={() => setDetail(null)} onChanged={changed}
         onEdit={(x) => { setDetail(null); setTimeout(() => setForm({ editing: x }), 250); }}
-        onNext={(x) => { setDetail(null); setTimeout(() => setForm({ preset: { link_id: x.link_id, kind: x.kind, duration_min: x.duration_min, starts_at: new Date(Date.parse(x.starts_at) + 7 * 864e5).toISOString() } }), 250); }}
-        onOffer={(x) => { setDetail(null); setTimeout(() => setOffer(x), 250); }}
         onOpenClient={openClient} />
       <CalendarSettingsSheet open={settingsOpen} me={me} team={team} rooms={rooms} availability={avail} settings={settings}
         onClose={() => setSettingsOpen(false)} onChanged={changed} />
-      <OfferSheet slot={offer} waitlist={waitlist} clients={clients} onClose={() => setOffer(null)} onDone={() => { setOffer(null); changed(); }} />
       <ExternalSheet event={ext?.source_id === 'workspace' ? null : ext} clients={clients} onClose={() => setExt(null)} onDone={() => { setExt(null); changed(); }} />
     </SafeAreaView>
   );
 }
 
 const Mini = ({ n, t }: { n: number; t: string }) => (
-  <View style={{ minWidth: 112, flex: 1 }}><Text style={{ fontSize: 20, fontWeight: '700', color: colors.navy }}>{n}</Text><Text style={s.small}>{t}</Text></View>
+  <View style={{ minWidth: 76, flex: 1 }}><Text style={{ fontSize: 20, fontWeight: '700', color: colors.navy }}>{n}</Text><Text style={s.small}>{t}</Text></View>
 );
 
 function Legend({ grid }: { grid: boolean }) {
-  const items: [string, string, string][] = [['planned', 'Planlandı', ''], ['done', 'Yapıldı', ''], ['no_show', 'Gelmedi', ''], ['late_cancel', 'Geç iptal', ''], ['cancelled', 'İptal / ertelendi', '']];
   return (
     <View style={[s.row, { flexWrap: 'wrap', gap: 12, marginTop: 10 }]}>
-      {items.map(([k, t]) => {
-        const m = STATUS_META[k as keyof typeof STATUS_META];
-        return <View key={k} style={[s.row, { gap: 5 }]}><View style={{ width: 13, height: 13, borderRadius: 4, backgroundColor: m.bg, borderWidth: 1, borderColor: m.line }} /><Text style={s.small}>{t}</Text></View>;
+      {(['planned', 'done', 'no_show'] as const).map((k) => {
+        const m = STATUS_META[k];
+        return <View key={k} style={[s.row, { gap: 5 }]}><View style={{ width: 13, height: 13, borderRadius: 4, backgroundColor: m.bg, borderWidth: 1, borderColor: m.line }} /><Text style={s.small}>{m.label}</Text></View>;
       })}
       <View style={[s.row, { gap: 5 }]}><View style={{ width: 13, height: 13, borderRadius: 4, borderWidth: 1, borderColor: colors.faint, borderStyle: 'dashed' }} /><Text style={s.small}>Dış takvim</Text></View>
       <View style={[s.row, { gap: 5 }]}><Ionicons name="eye-outline" size={13} color={colors.muted} /><Text style={s.small}>Ailede görünür</Text></View>
@@ -323,14 +310,14 @@ function Grid({ days, today, sessions, external, hours: work = [], nameOf, onOpe
 
 function Block({ x, name, onPress, style }: { x: Session; name: string; onPress: () => void; style: object }) {
   const m = STATUS_META[x.status];
-  const planned = x.status === 'planned' || x.status === 'offered';
+  const planned = x.status === 'planned';
   return (
     <View style={[style, { padding: 2 }]}>
       <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={`${name}, ${timeRange(x)}, ${m.label}`}
         style={{ flex: 1, borderRadius: 8, backgroundColor: m.bg, borderWidth: planned ? 1.5 : 0, borderColor: m.line, paddingHorizontal: 6, paddingVertical: 4, overflow: 'hidden' }}>
         <View style={[s.row, { gap: 4 }]}>
-          <Text style={{ flex: 1, fontSize: 12.5, fontWeight: '700', color: x.status === 'cancelled' || x.status === 'postponed' ? colors.muted : colors.navy,
-            textDecorationLine: isClosed(x.status) ? 'line-through' : 'none' }} numberOfLines={1}>{name}</Text>
+          <Text style={{ flex: 1, fontSize: 12.5, fontWeight: '700', color: x.status === 'postponed' ? colors.muted : colors.navy,
+            textDecorationLine: x.status === 'postponed' ? 'line-through' : 'none' }} numberOfLines={1}>{name}</Text>
           {x.visible_to_family && <Ionicons name="eye-outline" size={11} color={colors.muted} />}
           {x.family_response === 'unavailable' && <Ionicons name="alert-circle" size={12} color="#9A6B00" />}
         </View>
@@ -348,7 +335,7 @@ function WeekStrip({ week, today, sessions, onPick }: { week: string[]; today: s
   return (
     <View style={{ flexDirection: 'row', gap: 4, marginBottom: 4 }} accessibilityRole="tablist">
       {week.map((d, i) => {
-        const n = sessions.filter((x) => trDay(x.starts_at) === d && !isClosed(x.status)).length;
+        const n = sessions.filter((x) => trDay(x.starts_at) === d && x.status !== 'postponed').length;
         const on = d === today;
         return (
           <Pressable key={d} onPress={() => onPick(d)} accessibilityRole="button" accessibilityLabel={`${shortDay(d)}: ${n} seans. Günü aç`}
@@ -391,7 +378,7 @@ function Agenda({ days, today, sessions, external, nameOf, onOpen, onExt, onNew,
               <Pressable key={x.id} onPress={() => onOpen(x)} style={[s.card, s.row, { borderLeftWidth: 4, borderLeftColor: STATUS_META[x.status].line, paddingVertical: 10 }]}>
                 <Text style={{ width: 54, fontWeight: '700', color: colors.navy, fontVariant: ['tabular-nums'] }}>{timeRange(x).slice(0, 5)}</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={[s.body, { fontWeight: '600' }, isClosed(x.status) && { textDecorationLine: 'line-through', color: colors.muted }]} numberOfLines={1}>{nameOf(x)}</Text>
+                  <Text style={[s.body, { fontWeight: '600' }, x.status === 'postponed' && { textDecorationLine: 'line-through', color: colors.muted }]} numberOfLines={1}>{nameOf(x)}</Text>
                   <Text style={s.small} numberOfLines={1}>{timeRange(x)} · {KIND_LABEL[x.kind]}{x.family_response === 'unavailable' ? ' · aile: uygun değil' : ''}</Text>
                 </View>
                 {x.visible_to_family && <Ionicons name="eye-outline" size={14} color={colors.muted} />}

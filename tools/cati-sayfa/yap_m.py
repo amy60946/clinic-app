@@ -260,7 +260,7 @@ pan = ''.join(f'''        <div class="nc-p" role="tabpanel" id="nc-p{k}" aria-la
 NZ = {
     'rutin': {'src': 'img/e-nz-plan.webp', 'app': 'ebeveyn', 'cikma': (376, 142)},
     'kayit': {'src': 'img/e-nz-not.webp', 'app': 'ebeveyn', 'cikma': (384, 95)},
-    'uzman': {'src': 'img/e-nz-uzman.webp', 'app': 'mercek', 'cikma': (491, 80)},
+    'uzman': {'src': 'img/e-nz-uzman.webp', 'app': 'mercek', 'cikma': (492, 80)},
 }
 TEL_G, TEL_Y, KENAR, CIKMA = 418, 872, 14, 1.18
 ND, NE = E['neden_kartlar'], E['neden_ekran']

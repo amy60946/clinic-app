@@ -9,6 +9,7 @@ import {
   setInvitePolicy, REQUEST_ERROR, RequestResult,
 } from '../lib/clinic';
 import { track } from '../lib/track';
+import { errorText } from '../lib/errors';
 
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 const daysTo = (iso: string) => Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 864e5));
@@ -31,7 +32,7 @@ export function PersonalCodeCard({ compact }: { compact?: boolean }) {
     { text: 'Vazgeç', style: 'cancel' },
     { text: 'Yenile', onPress: async () => {
       setBusy(true);
-      try { setCode(await personalCode(true)); track('team.code_rotate'); } catch (e) { Alert.alert('Yenilenemedi', (e as Error).message); } finally { setBusy(false); }
+      try { setCode(await personalCode(true)); track('team.code_rotate'); } catch (e) { Alert.alert('Yenilenemedi', errorText(e)); } finally { setBusy(false); }
     } },
   ]);
   return (
@@ -83,7 +84,7 @@ export default function TeamCard({ me, team: initial, onChanged, onUpgrade, onLe
       track('team.request', { result: r.status ?? r.error ?? 'unknown' });
       if (r.status) { setCode(''); reload(); }
     } catch (e) {
-      Alert.alert('İstek gönderilemedi', (e as Error).message);
+      Alert.alert('İstek gönderilemedi', errorText(e));
     } finally {
       setBusy(null);
     }
@@ -91,26 +92,26 @@ export default function TeamCard({ me, team: initial, onChanged, onUpgrade, onLe
   const cancel = (id: string) => Alert.alert('İstek geri çekilsin mi?', '', [
     { text: 'Vazgeç', style: 'cancel' },
     { text: 'Geri çek', style: 'destructive', onPress: async () => {
-      try { await cancelTeamRequest(id); track('team.request_cancel'); reload(); } catch (e) { Alert.alert('Geri çekilemedi', (e as Error).message); }
+      try { await cancelTeamRequest(id); track('team.request_cancel'); reload(); } catch (e) { Alert.alert('Geri çekilemedi', errorText(e)); }
     } },
   ]);
   const remove = (m: Member) => Alert.alert(`${m.name || 'Uzman'} ekipten çıkarılsın mı?`,
     'Kliniğin danışanlarını artık görmez. Sorumlu olduğu danışanlar ve kayıtlar klinikte kalır; bekleyen davetleri iptal olur.', [
       { text: 'Vazgeç', style: 'cancel' },
       { text: 'Ekipten çıkar', style: 'destructive', onPress: async () => {
-        try { await removeMember(m.id); track('team.remove'); reload(); onChanged(); } catch (e) { Alert.alert('Çıkarılamadı', (e as Error).message); }
+        try { await removeMember(m.id); track('team.remove'); reload(); onChanged(); } catch (e) { Alert.alert('Çıkarılamadı', errorText(e)); }
       } },
     ]);
   const leave = () => Alert.alert(`${me.clinic} ekibinden ayrılmak istiyor musun?`,
     'Bu kliniğin danışanlarını artık görmezsin. Kliniğin kayıtları klinikte kalır. Bireysel hesabına dokunulmaz.', [
       { text: 'Vazgeç', style: 'cancel' },
       { text: 'Ayrıl', style: 'destructive', onPress: async () => {
-        try { await leaveClinic(); track('team.leave'); onLeft(); } catch (e) { Alert.alert('Ayrılınamadı', (e as Error).message); }
+        try { await leaveClinic(); track('team.leave'); onLeft(); } catch (e) { Alert.alert('Ayrılınamadı', errorText(e)); }
       } },
     ]);
   const togglePolicy = async (on: boolean) => {
     setBusy('policy');
-    try { await setInvitePolicy(on); track('team.invite_policy', { on }); reload(); onChanged(); } catch (e) { Alert.alert('Kaydedilemedi', (e as Error).message); } finally { setBusy(null); }
+    try { await setInvitePolicy(on); track('team.invite_policy', { on }); reload(); onChanged(); } catch (e) { Alert.alert('Kaydedilemedi', errorText(e)); } finally { setBusy(null); }
   };
 
   return (

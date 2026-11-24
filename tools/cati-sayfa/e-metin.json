@@ -85,15 +85,15 @@
    "sekme": "Uzmanınızla",
    "ust": "İsteğe bağlı · Moyo Uzman",
    "baslik": "Dilerseniz uzmanınızı bağlayın",
-   "metin": "Uzmanınız Moyo Uzman'dan davet gönderir ya da size verdiği kodu girersiniz; paylaşım onayınızla başlar. Paylaştığınız çocuğun yalnızca rutin ve davranış kayıtlarını görür, size kısa ebeveyn eğitimleri ve rutin önerileri gönderir. Eklemek sizin kararınız; paylaşımı dilediğiniz an durdurabilirsiniz.",
+   "metin": "Uzmanınız Moyo Uzman'dan davet gönderir ya da size verdiği kodu girersiniz; paylaşım onayınızla başlar. Paylaştığınız çocuğun yalnızca rutin ve davranış kayıtlarını görür, size rutin önerileri ve rapor gönderir. Eklemek sizin kararınız; paylaşımı dilediğiniz an durdurabilirsiniz.",
    "uygulama": [
     "ebeveyn",
     "mercek"
    ],
    "gorsel": [
     "tel",
-    "img/moyo-uzman-sade.webp",
-    "Moyo Ebeveyn, Uzmanım: uzmanın gönderdiği eğitimden bugün yapılacak iki görev"
+    "img/moyo-uzman-oneri.webp",
+    "Moyo Ebeveyn, Uzmanım: uzmanın randevusu ve rutin önerisi"
    ]
   }
  ],

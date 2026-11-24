@@ -10,6 +10,7 @@ import type { PlanGoal, GoalStatus } from '../../lib/plan';
 import { goalWeek, lastRating, shiftDay } from '../../lib/planCore';
 import { GAS_LABELS } from './PlanEditor';
 import { PRIVATE } from './tones';
+import { errorText } from '../../lib/errors';
 
 // "Değerlendir" (kullanıcı kararı 2 Kasım 2026, "A1"): GAS her hafta girilmez; uzman gözden geçirme anında bu pencereyi açar.
 // Hedefe ulaşma düzeyi (GAS −2…+2) bu haftaya yazılır; "Bundan sonra" hedefin durumunu da seçtirir (Sürdür / Ulaşıldı / Ara ver).
@@ -54,7 +55,7 @@ function Body({ goal, week, today, initialStatus, onClose, onSave }: {
       const noteChanged = note.trim() !== (goal.ratings.find((r) => r.week === week)?.note ?? '');
       await onSave(rating === current && !noteChanged ? (current ?? null) : rating, status, rating !== null ? note : '');
     } catch (e) {
-      Alert.alert('Kaydedilemedi', (e as Error).message);
+      Alert.alert('Kaydedilemedi', errorText(e));
     } finally {
       setBusy(false);
     }

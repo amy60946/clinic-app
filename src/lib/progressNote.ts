@@ -31,14 +31,16 @@ const PART: Record<DayPart, string> = { sabah: 'sabah', 'öğle': 'öğle', 'ak�
 // Alt satır: dışa aktarılan bütün belgelerle aynı (metrics.ts EXPORT_FOOTER, kullanıcı kararı 14 Kasım 2026)
 export const NOTE_FOOTER = EXPORT_FOOTER;
 
-export function progressNote(r: NoteInput): string {
+// family: aileye gönderilen raporun "İlerleme notu" bölümü (ortak akislar.md 27.2): başlık satırı (çocuğun adı raporda ayrıca
+// yazılı), GAS hedef puanları (yalnız uzmanda) ve "Uzman yorumu" / alt satır yok (raporun kendi alt satırı var).
+export function progressNote(r: NoteInput, opts: { family?: boolean } = {}): string {
   const from = windowStarts(r.today, r.weeks)[0];
   const to = lastFullDay(r.today);
   const prevFrom = addDays(from, -7 * r.weeks);
   const prevTo = addDays(from, -1);
   const lines: string[] = [];
 
-  lines.push(`İlerleme notu: ${r.childLabel}`);
+  if (!opts.family) lines.push(`İlerleme notu: ${r.childLabel}`);
   lines.push(`Dönem: ${day(from)} – ${day(to, true)} (${r.weeks} hafta). Kaynak: ebeveynin Moyo kayıtları.`);
 
   // Ev rutini
@@ -89,7 +91,7 @@ export function progressNote(r: NoteInput): string {
   }
 
   // Hedefler (GAS): dönemdeki ilk ve son değerlendirme
-  const goals = r.goals.filter((g) => !g.archived);
+  const goals = opts.family ? [] : r.goals.filter((g) => !g.archived);
   if (goals.length) {
     lines.push('', 'Davranış hedefleri (GAS, −2 … +2)');
     goals.forEach((g) => {
@@ -100,6 +102,7 @@ export function progressNote(r: NoteInput): string {
     });
   }
 
+  if (opts.family) return lines.join('\n');
   lines.push('', 'Uzman yorumu:', '', '', NOTE_FOOTER);
   return lines.join('\n');
 }

@@ -8,11 +8,13 @@ import DateField from '../../components/DateField';
 import type { Client, ClinicianMe, Member } from '../../lib/clinic';
 import { track } from '../../lib/track';
 import {
+  parseFee, feeInput,
   KIND_LABEL, MODE_LABEL, trDay, trTime, trToIso, freeStarts, seriesDates, shortDay,
-  type Session, type SessionKind, type SessionMode, type Room, type Availability, type SessionSettings, type SessionPackage, type Busy,
+  type Session, type SessionKind, type SessionMode, type Room, type Availability, type SessionSettings, type Busy,
 } from '../../lib/sessionCore';
-import { createSession, updateSession, loadBusy, type Conflict } from '../../lib/sessions';
+import { createSession, updateSession, loadBusy, feeSupported, type Conflict } from '../../lib/sessions';
 import { SheetHeader, Chips, FieldLabel, TimeInput, s } from './parts';
+import { errorText } from '../../lib/errors';
 
 // Yeni seans / seansı düzelt (ortak akislar.md 20, 1). Tekrar: her hafta / iki haftada bir; aileye göster: tarih, saat, yer ve tür
 // ParentApp'te görünür, not ve gündem görünmez. Çakışma (oda / uzman) kaydı engellemez, sonradan uyarır.
@@ -23,7 +25,7 @@ const COUNTS = [4, 8, 12, 16];
 
 export default function SessionSheet(p: {
   open: boolean; me: ClinicianMe; team: Member[]; clients: Client[]; rooms: Room[]; availability: Availability[]; settings: SessionSettings;
-  packages: SessionPackage[]; editing?: Session | null; preset?: SessionPreset | null; onClose: () => void; onSaved: (ids: string[]) => void;
+  editing?: Session | null; preset?: SessionPreset | null; onClose: () => void; onSaved: (ids: string[]) => void;
 }) {
   return (
     <Modal visible={p.open} animationType="slide" presentationStyle="pageSheet" onRequestClose={p.onClose}>
@@ -32,7 +34,7 @@ export default function SessionSheet(p: {
   );
 }
 
-function Body({ me, team, clients, rooms, availability, settings, packages, editing, preset, onClose, onSaved }: Parameters<typeof SessionSheet>[0]) {
+function Body({ me, team, clients, rooms, availability, settings, editing, preset, onClose, onSaved }: Parameters<typeof SessionSheet>[0]) {
   const start0 = editing?.starts_at ?? preset?.starts_at ?? nextHour();
   const [linkId, setLinkId] = useState<string | null>(editing ? editing.link_id : preset?.link_id ?? clients[0]?.link_id ?? null);
   const [title, setTitle] = useState(editing?.title ?? '');
@@ -46,7 +48,10 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
   const [repeat, setRepeat] = useState<'none' | 'weekly' | 'biweekly'>('none');
   const [count, setCount] = useState(8);
   const [visible, setVisible] = useState(editing ? editing.visible_to_family : true);
-  const [pkg, setPkg] = useState<string | null>(editing?.package_id ?? null);
+  // Seans ücreti (akislar 27.1): elle yazılır, boş = ücret yok; aile yalnız kendisine gösterilen randevuda görür
+  const fee0 = feeInput(editing?.fee);
+  const [fee, setFee] = useState(fee0);
+  const feeVal = parseFee(fee);
   const [picking, setPicking] = useState(!editing && !preset?.link_id && clients.length > 1);
   const [q, setQ] = useState('');
   const [busy, setBusy] = useState<Busy[] | null>(null);
@@ -54,7 +59,6 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
   const owner = me.role === 'owner';
   const client = clients.find((c) => c.link_id === linkId) ?? null;
   const activeRooms = rooms.filter((r) => r.active || r.id === room);
-  const myPackages = packages.filter((x) => x.link_id === linkId && !x.closed_at);
 
   useEffect(() => {
     let alive = true;
@@ -66,7 +70,7 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
   // bugün için geçmiş saatler önerilmez
   const free = useMemo(() => (busy ? freeStarts(day, availability, busy, clinician ?? me.id, dur, room).filter((t) => Date.parse(trToIso(day, t)) > Date.now()) : []),
     [busy, day, availability, clinician, dur, room, me.id]);
-  const valid = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) && (!!linkId || title.trim().length > 0);
+  const valid = /^([01]\d|2[0-3]):[0-5]\d$/.test(time) && (!!linkId || title.trim().length > 0) && feeVal !== undefined;
   const startsAt = valid ? trToIso(day, time.padStart(5, '0')) : null;
   const dates = startsAt ? seriesDates(startsAt, editing ? 'none' : repeat, count) : [];
   const shown = clients.filter((c) => !q || c.child_name.toLocaleLowerCase('tr-TR').includes(q.toLocaleLowerCase('tr-TR')) || c.label.toLocaleLowerCase('tr-TR').includes(q.toLocaleLowerCase('tr-TR')));
@@ -81,7 +85,9 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
     setSaving(true);
     try {
       const input = { link_id: linkId, title: linkId ? null : title.trim(), clinician_id: clinician, starts_at: startsAt, duration_min: dur, kind, mode,
-                      room_id: mode === 'in_person' ? room : null, visible_to_family: !!linkId && visible, package_id: linkId ? pkg : null };
+                      room_id: mode === 'in_person' ? room : null, visible_to_family: !!linkId && visible,
+                      // düzeltmede ücret yalnız değiştiyse gider (serideki öteki seansların ücreti istemeden ezilmesin)
+                      ...(feeSupported() && (!editing || fee.trim() !== fee0) ? { fee: linkId ? feeVal ?? null : null } : {}) };
       if (editing) {
         const { link_id: _l, ...patch } = input;   // danışan sonradan değişmez
         const r = await updateSession(editing.id, patch, scope);
@@ -95,7 +101,7 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
         onSaved(r.ids);
       }
     } catch (e) {
-      Alert.alert('Kaydedilemedi', (e as Error).message);
+      Alert.alert('Kaydedilemedi', errorText(e));
     } finally {
       setSaving(false);
     }
@@ -197,21 +203,23 @@ function Body({ me, team, clients, rooms, availability, settings, packages, edit
           )}
 
           {!!linkId && (
-            <>
-              <View style={[s.card, s.row, { marginTop: 14 }]}>
-                <View style={{ flex: 1 }}>
-                  <Text style={s.label}>Aile uygulamasında göster</Text>
-                  <Text style={s.small}>Tarih, saat, yer ve tür Moyo › Uzmanım'da görünür; ebeveyn hatırlatma alır. Not ve gündem görünmez.</Text>
-                </View>
-                <Toggle value={visible} onChange={setVisible} />
+            <View style={[s.card, s.row, { marginTop: 14 }]}>
+              <View style={{ flex: 1 }}>
+                <Text style={s.label}>Aile uygulamasında göster</Text>
+                <Text style={s.small}>Tarih, saat, yer ve tür Moyo › Uzmanım'da görünür; ebeveyn hatırlatma alır. Not ve gündem görünmez.</Text>
               </View>
-              {myPackages.length > 0 && (
-                <>
-                  <FieldLabel hint="Paketten düşer: yapılan seans; ayara göre gelmedi ve geç iptal de.">Paket</FieldLabel>
-                  <Chips options={[{ id: '', label: 'Paketsiz' }, ...myPackages.map((x) => ({ id: x.id, label: x.title }))]}
-                    value={pkg ?? ''} onChange={(v) => setPkg(v || null)} />
-                </>
-              )}
+              <Toggle value={visible} onChange={setVisible} />
+            </View>
+          )}
+
+          {!!linkId && feeSupported() && (
+            <>
+              <FieldLabel hint="İsteğe bağlı; boş bırakılırsa ücret yok">Ücret (TL)</FieldLabel>
+              <TextInput value={fee} onChangeText={setFee} placeholder="Ör. 450" placeholderTextColor={colors.muted} keyboardType="decimal-pad"
+                maxLength={12} style={s.input} accessibilityLabel="Seans ücreti (TL)" />
+              {feeVal === undefined
+                ? <Text style={[s.small, { color: colors.danger, marginTop: 6 }]}>Yalnız rakam yaz (ör. 450 ya da 450,50); en çok 1.000.000 TL.</Text>
+                : <Text style={[s.small, { marginTop: 6 }]}>{visible ? 'Aile de Moyo\'da görür.' : 'Aile bu seansı görmediği için ücreti de görmez.'}{editing?.series_id && fee.trim() !== fee0 ? ' Kaydederken hangi seanslara uygulanacağını seçersin.' : ''}</Text>}
             </>
           )}
 

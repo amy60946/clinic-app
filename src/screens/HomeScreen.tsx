@@ -20,8 +20,8 @@ import LibraryScreen from './training/Library';
 import { loadSessions } from '../lib/sessions';
 import { trDay, trToIso, timeRange, isClosed, type Session } from '../lib/sessionCore';
 import { CoachProvider, CoachOverlay } from '../lib/coach';
-import { StartCard, SampleRow, TOUR, TRAINING_TOUR, StartFlags, StartProgress, startFlags, startDone, startTotal, markSampleSeen, hideStart, hideSample } from './SampleTour';
-import { useClientConfig, CARE_PLAN_FLAG } from '../lib/clientConfig';
+import { StartCard, SampleRow, TOUR, TRAINING_TOUR, BASIC_TOUR, StartFlags, StartMode, StartProgress, startFlags, startDone, startTotal, markSampleSeen, hideStart, hideSample } from './SampleTour';
+import { useClientConfig, CARE_PLAN_FLAG, PARENT_TRAINING_FLAG } from '../lib/clientConfig';
 import { resetSampleTraining } from '../lib/trainingSample';
 import type { Attention } from '../lib/attention';
 import { sampleClient } from '../lib/sample';
@@ -42,6 +42,7 @@ import LegalUpdateScreen from './legal/LegalUpdateScreen';
 import { billingStatus, hasAccess, daysLeft, packageName, packageOfProduct } from '../lib/billing';
 import ClientScreen, { Tab } from './client/ClientScreen';
 import NotificationsSheet, { notificationTab } from './NotificationsSheet';
+import { focusFromNotification, type BehaviorFocus } from '../lib/behaviorRows';
 import Bell from '../components/Bell';
 import ClientBoard from './ClientBoard';
 import { useNotifications } from '../lib/notificationsContext';
@@ -55,6 +56,7 @@ import { useNudges, NUDGES_FLAG, serverNudgesOn, nudgeTarget, syncNudgePref, pri
 import { NudgePrimer } from './NudgeParts';
 import type { FamilyInvite } from '../lib/invites';
 import type { Training } from '../lib/training';
+import { errorText } from '../lib/errors';
 
 type State =
   | { kind: 'loading' }
@@ -98,7 +100,7 @@ export default function HomeScreen() {
   const [state, setState] = useState<State>({ kind: 'loading' });
   const stateRef = useRef(state);
   const [refreshing, setRefreshing] = useState(false);
-  const [selected, setSelected] = useState<{ client: Client; tab: Tab; key: number } | null>(null);
+  const [selected, setSelected] = useState<{ client: Client; tab: Tab; key: number; focus?: BehaviorFocus | null } | null>(null);
   const [attention, setAttention] = useState<Record<string, Attention> | null>(null);
   const [bell, setBell] = useState(false);
   const [plans, setPlans] = useState(false);
@@ -128,6 +130,9 @@ export default function HomeScreen() {
   // Lansman odağı "A" (11 Kasım 2026): Takip Planı uzaktan ayar bayrağı açık değilse tur, Başlarken ve danışanın açılış bölümü ebeveyn eğitimine göre
   const config = useClientConfig();
   const planOn = config.flag(CARE_PLAN_FLAG);
+  // Ebeveyn eğitimi bayrağı (23 Kasım 2026): kapalıyken kütüphane, eğitim maddeleri ve eğitim turu yok; danışan Ev Rutinleri'nde açılır
+  const trainingOn = config.flag(PARENT_TRAINING_FLAG);
+  const startMode: StartMode = planOn ? 'plan' : trainingOn ? 'training' : 'basic';
   // İptal öncesi akış ve yaşam döngüsü hatırlatmaları (uzaktan ayar; yoksa kapalı)
   const cancelFlow = config.flag(CANCEL_FLOW_FLAG);
   // Hatırlatmalar iki yoldan: cihaz içi (`lifecycle_nudges`) ya da sunucu motoru (`nudges_server_clinic` / `nudges_server`).
@@ -139,8 +144,8 @@ export default function HomeScreen() {
   // hatırlatma planı ana ekranın zaten yüklediği listeleri kullanır (undefined: henüz yüklenmedi)
   const [nudgeInvites, setNudgeInvites] = useState<FamilyInvite[] | null | undefined>(undefined);
   const [nudgeTrainings, setNudgeTrainings] = useState<Training[] | null | undefined>(undefined);
-  const tour = planOn ? TOUR : TRAINING_TOUR;
-  const homeTab: Tab = planOn ? 'summary' : 'training';
+  const tour = planOn ? TOUR : trainingOn ? TRAINING_TOUR : BASIC_TOUR;
+  const homeTab: Tab = planOn ? 'summary' : trainingOn ? 'training' : 'routine';
   const [trainStat, setTrainStat] = useState<{ any: boolean; active: boolean }>({ any: false, active: false });
   const [start, setStart] = useState<StartFlags | null>(null);
   const [inviteCount, setInviteCount] = useState(0);
@@ -159,8 +164,8 @@ export default function HomeScreen() {
   const { sub: storeSub, refresh: refreshStoreSub } = useStoreSubscription(ready && ready.me.role === 'owner' ? ready.me.id : null, cancelFlow);
   // Hatırlatmalar: bayrak uzaktan ayar okununca belli olur (o âna kadar hiçbir şey planlanmaz ya da silinmez)
   useNudges(config.status === 'ok' ? localNudges : null,
-    ready ? { me: ready.me, clients: ready.clients, signedUpAt: session?.user.created_at ?? ready.me.joined_at ?? null } : null,
-    nudgeInvites, nudgeTrainings);
+    ready ? { me: ready.me, clients: ready.clients, signedUpAt: session?.user.created_at ?? ready.me.joined_at ?? null, noTraining: !trainingOn } : null,
+    nudgeInvites, trainingOn ? nudgeTrainings : null);
   // "Hatırlatmalar ve ipuçları" tercihi sunucudan (başka cihazda değişmiş olabilir; işlev yoksa sessiz)
   useEffect(() => { if (userId && config.status === 'ok' && nudgesOn) syncNudgePref(userId); }, [userId, config.status, nudgesOn]);
 
@@ -181,7 +186,7 @@ export default function HomeScreen() {
         next = { kind: 'ready', me, clients, team };
       }
     } catch (e) {
-      next = e instanceof ClinicNotInstalled ? { kind: 'not_installed' } : { kind: 'error', message: (e as Error).message };
+      next = e instanceof ClinicNotInstalled ? { kind: 'not_installed' } : { kind: 'error', message: errorText(e) };
     }
     setState(next);
     stateRef.current = next;
@@ -242,7 +247,7 @@ export default function HomeScreen() {
     const c = pick ?? clientList[0];
     if (!c) return;
     track('start.step', { step });
-    setSelected({ client: c, tab: step === 'report' ? 'report' : planOn ? 'goals' : 'training', key: Date.now() });
+    setSelected({ client: c, tab: step === 'report' ? 'report' : planOn ? 'goals' : trainingOn ? 'training' : 'routine', key: Date.now() });
   };
   // "Nasıl kullanılır?" › Göster: gerçek danışan varsa ilkinde, yoksa örnek ailede açar (iOS'ta pencere kapanınca)
   const afterSheet = (f: () => void) => { setHelp(false); setHelpFocus(null); if (Platform.OS === 'ios') setTimeout(f, 450); else f(); };
@@ -250,7 +255,7 @@ export default function HomeScreen() {
     if (a === 'home') return;
     if (a === 'invite') return inviteFirst();
     if (a === 'team') return setSettings(true);
-    const tab: Tab = a === 'routine' ? 'routine' : a === 'plan' ? (planOn ? 'goals' : 'training') : 'report';
+    const tab: Tab = a === 'routine' ? 'routine' : a === 'plan' ? (planOn ? 'goals' : trainingOn ? 'training' : 'routine') : 'report';
     const c = clientList[0];
     if (c) setSelected({ client: c, tab, key: Date.now() });
     else openSample(tab);
@@ -356,7 +361,7 @@ export default function HomeScreen() {
         : 'Bu çocuğun paylaşımı artık etkin değil.');
       return;
     }
-    setSelected({ client: c, tab: notificationTab(n.kind), key: Date.now() });
+    setSelected({ client: c, tab: notificationTab(n.kind), key: Date.now(), focus: focusFromNotification(n, c.child_id) });
   }, [load, ws, refreshToday]);
 
   // Telefon bildirimine dokunma (uygulama kapalıyken de)
@@ -397,7 +402,7 @@ export default function HomeScreen() {
   const removeAccount = async () => {
     const kind = state.kind === 'ready' && state.team.length <= 1 ? 'solo' : state.kind === 'ready' && state.me.role === 'owner' ? 'owner' : 'member';
     const keeps = kind === 'solo' ? await familyKeepsRecords() : false;
-    Alert.alert('Hesabın silinsin mi?', deleteAccountText(kind, keeps), [{ text: 'Vazgeç', style: 'cancel' }, {
+    Alert.alert('Hesabın silinsin mi?', deleteAccountText(kind, keeps, trainingOn), [{ text: 'Vazgeç', style: 'cancel' }, {
       text: 'Kalıcı olarak sil', style: 'destructive', onPress: async () => {
         try {
           await flush().catch(() => {});
@@ -406,7 +411,7 @@ export default function HomeScreen() {
           await deleteAccount();
           await supabase.auth.signOut({ scope: 'local' });
         } catch (e) {
-          Alert.alert('Hesap silinemedi', (e as Error).message);
+          Alert.alert('Hesap silinemedi', errorText(e));
         }
       },
     }]);
@@ -488,7 +493,7 @@ export default function HomeScreen() {
     );
   }
 
-  if (library && state.kind === 'ready') {
+  if (library && trainingOn && state.kind === 'ready') {
     tab = 'library';
     return (
       <LibraryScreen me={state.me} clients={state.clients} onBack={() => setLibrary(false)}
@@ -531,7 +536,7 @@ export default function HomeScreen() {
     return (
       <ClientScreen
         key={selected.key}
-        client={selected.client} me={state.me} team={state.team} initialTab={selected.tab}
+        client={selected.client} me={state.me} team={state.team} initialTab={selected.tab} initialFocus={selected.focus ?? null}
         clients={state.clients}
         onSwitch={(c, tab) => setSelected({ client: c, tab, key: Date.now() })}
         onTeamChanged={async () => {
@@ -620,16 +625,16 @@ export default function HomeScreen() {
                   onFix={async () => { track('membership.billing_fix'); await openAppleSubscriptions(state.me.id); refreshStoreSub(true); load(); }} />
               )}
               {!!verification?.enabled && <VerificationRow v={verification} onOpen={() => setVerify(true)} />}
-              {start && !start.hidden && startDone(progressOf(start), planOn) < startTotal(planOn) && (
-                <StartCard progress={progressOf(start)} plan={planOn} onSample={() => openSample()} onInvite={inviteFirst}
+              {start && !start.hidden && startDone(progressOf(start), startMode) < startTotal(startMode) && (
+                <StartCard progress={progressOf(start)} mode={startMode} onSample={() => openSample()} onInvite={inviteFirst}
                   onPlan={() => openFirst('plan')} onPublish={() => openFirst('publish')} onReport={() => openFirst('report')}
-                  onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide', { done: startDone(progressOf(start), planOn) }); }} />
+                  onHide={() => { if (meId) hideStart(meId); setStart((s) => (s ? { ...s, hidden: true } : s)); track('start.hide', { done: startDone(progressOf(start), startMode) }); }} />
               )}
               <CalendarRow sessions={todaySessions} clients={state.clients} onOpen={() => setCalendar({})} />
               {/* dar düzende kütüphane alt menüde; satır yalnız geniş (sol menülü) düzende */}
-              {desktop && <LibraryRow onOpen={() => setLibrary(true)} />}
+              {desktop && trainingOn && <LibraryRow onOpen={() => setLibrary(true)} />}
               <ClientBoard clients={state.clients} unread={unreadByChild} me={state.me} team={state.team} onAttention={setAttention}
-                plan={planOn} onTraining={setTrainStat} onTrainings={setNudgeTrainings}
+                plan={planOn} training={trainingOn} onTraining={setTrainStat} onTrainings={setNudgeTrainings}
                 onOpen={(c) => setSelected({ client: c, tab: homeTab, key: Date.now() })} />
               {/* örnek aile listenin altında kendi satırında: ilk açılıştan sonra 30 gün ya da × ile kaldırılana dek */}
               {(state.clients.length === 0 || !!start?.sampleRow) && (
@@ -665,9 +670,9 @@ export default function HomeScreen() {
       </TabBarScrollView>
       <NotificationsSheet visible={bell} onClose={() => setBell(false)} onOpen={openTarget} />
       <VerificationSheet visible={verify} onClose={() => { setVerify(false); loadVerify(); }} />
-      <Onboarding visible={guide} plan={planOn} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
+      <Onboarding visible={guide} plan={planOn} training={trainingOn} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
       {state.kind === 'ready' && (
-        <HelpSheet visible={help} owner={state.me.role === 'owner'} plan={planOn} focus={helpFocus} onClose={() => { setHelp(false); setHelpFocus(null); }}
+        <HelpSheet visible={help} owner={state.me.role === 'owner'} plan={planOn} training={trainingOn} focus={helpFocus} onClose={() => { setHelp(false); setHelpFocus(null); }}
           onIntro={() => afterSheet(() => setGuide(true))} onSample={() => afterSheet(() => openSample())} onAction={onHelpAction} />
       )}
       {legalSheets}
@@ -691,7 +696,7 @@ export default function HomeScreen() {
     <TabBarProvider visible={barOn}>
       <View style={styles.root}>
         {screen}
-        {barOn && tab !== null && <LiquidTabBar active={tab} onSelect={selectTab} />}
+        {barOn && tab !== null && <LiquidTabBar active={tab} onSelect={selectTab} hide={trainingOn ? [] : ['library']} />}
       </View>
     </TabBarProvider>
   );

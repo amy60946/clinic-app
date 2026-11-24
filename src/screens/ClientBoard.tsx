@@ -6,7 +6,7 @@ import { colors, radius } from '../theme';
 import { Label, Notice } from '../components/ui';
 import Bell from '../components/Bell';
 import { Client, ClinicianMe, Member, loadAttention } from '../lib/clinic';
-import { Attention, BoardRow, Section, TrainingStat, buildBoard } from '../lib/attention';
+import { Attention, BoardRow, Section, TrainingStat, buildBoard, mineOn } from '../lib/attention';
 import { loadTrainingsFor, loadDetail, type Training } from '../lib/training';
 import { track } from '../lib/track';
 
@@ -27,10 +27,11 @@ const SECTIONS: { id: Section; title: string; info: string }[] = [
   { id: 'rest', title: 'Diğer danışanlar', info: 'Şu an bir şey beklemeyen danışanlar.' },
 ];
 
-export default function ClientBoard({ clients, unread, me, team, onOpen, onAttention, plan = true, onTraining, onTrainings }: {
+export default function ClientBoard({ clients, unread, me, team, onOpen, onAttention, plan = true, training: trainingOn = true, onTraining, onTrainings }: {
   clients: Client[]; unread: Record<string, number>; me: ClinicianMe; team: Member[]; onOpen: (c: Client) => void;
   onAttention?: (a: Record<string, Attention> | null) => void;      // ana ekrandaki Başlarken kartı aynı özeti kullanır
   plan?: boolean;                                                   // Takip Planı açık mı (uzaktan ayar care_plan); kapalıyken nedenler eğitimden
+  training?: boolean;                                               // ebeveyn eğitimi açık mı (parent_training); kapalıyken eğitim okunmaz, nedeni yok
   onTraining?: (s: { any: boolean; active: boolean }) => void;      // Başlarken: ilk eğitim / Etkin eğitim var mı
   onTrainings?: (ts: Training[] | null) => void;                    // yüklenen eğitim listesi (hatırlatma planı yeniden okumasın); null: okunamadı
 }) {
@@ -44,7 +45,7 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
   // Takip Planı kapalıyken danışan başına eğitim özeti (sunucuda eğitim tabloları yoksa neden eklenmez)
   const [training, setTraining] = useState<Record<string, TrainingStat> | null>(null);
   useEffect(() => {
-    if (plan) { setTraining(null); return; }
+    if (plan || !trainingOn) { setTraining(null); return; }
     let live = true;
     (async () => {
       try {
@@ -63,7 +64,7 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
       } catch { if (live) setTraining(null); }
     })();
     return () => { live = false; };
-  }, [clients, plan]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [clients, plan, trainingOn]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     AsyncStorage.getItem(SEEN_KEY(me.id)).then((v) => { if (v) setSeen(JSON.parse(v)); }).catch(() => {});
   }, [me.id]);
@@ -160,9 +161,12 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
             <View style={styles.list}><Text style={[styles.small, { padding: 16 }]}>{query ? 'Sonuç bulunamadı.' : 'Bu uzmana bağlı danışan yok.'}</Text></View>
           ) : board && !onlyRest ? (
             <>
-            {/* bölümlerin ne olduğu her zaman görünür (kullanıcı isteği 5 Kasım 2026); ayrıntı başlıklardaki (i) */}
+            {/* bölümlerin ne olduğu her zaman görünür (kullanıcı isteği 5 Kasım 2026); ayrıntı başlıklardaki (i).
+                Takip Planı ve ebeveyn eğitimi kapalıyken "Senin sıran" hiç oluşmaz: cümle iki başlığı anlatır (24 Kasım 2026) */}
             <Text style={styles.intro}>
-              {'Danışanların üç başlık altında: '}<Text style={styles.introB}>Senin sıran</Text>{' senden bir adım bekleyenler, '}
+              {mineOn({ plan, training: trainingOn })
+                ? <>{'Danışanların üç başlık altında: '}<Text style={styles.introB}>Senin sıran</Text>{' senden bir adım bekleyenler, '}</>
+                : 'Danışanların iki başlık altında: '}
               <Text style={styles.introB}>Ebeveynden yeni</Text>{' son 7 günde ebeveynin girdiği kayıtlar, '}
               <Text style={styles.introB}>Sessiz kalanlar</Text>{' 7 gündür kaydı olmayanlar. Bekleyen bir şeyi olmayanlar en altta.'}
             </Text>

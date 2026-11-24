@@ -3,7 +3,8 @@
 // Deneme verisi ve giriş parent-app `store/capture/prep.js` ile (mağaza görselleriyle aynı uydurma aile); adım sözdizimi `store/capture/capture.js` ile aynı:
 //   "Yazı" tam eşleşme · "~Yazı" içeren · "@Etiket" aria-label · "xy:x,y" nokta · "scroll:n" · "wait:ms" · başta "?" = varsa dokun
 //   "type:Yer tutucu=metin" alana harf harf yazar · "cb:Ad" adı tam eşleşen onay kutusuna dokunur (önceki ekranlardaki gizli kopyalar atlanır)
-// moyo.json: clinic = uzman bağlı kalsın · keep = uzmanın bekleyen önerileri kalsın · noSessions = randevular görünmesin
+// moyo.json: clinic = uzman bağlı kalsın · keep = uzmanın bekleyen önerileri kalsın ("rutin": yalnız rutin paketleri, tek adım önerisi yok)
+//   noSessions = randevular görünmesin · sessions = {keep: [kimlik…], fee: TL} yalnız bu randevular kalır, ücretleri yazılır (24 Kasım 2026)
 //   invite = bağlanmamış bir uzman daveti eklenir (kod K7M2PA, örnek uzman; "Uzman bağla" onay ekranı için, 19 Kasım 2026)
 const path = require('path');
 const fs = require('fs');
@@ -50,16 +51,17 @@ const FONT = [400, 500, 600, 700, 800, 900].map((w, i) => `@font-face{font-famil
       }, KEY);
       await p.reload(); await p.waitForTimeout(2500);
     }
-    if (s.keep || s.noSessions || s.sade) {
+    if (s.keep || s.noSessions || s.sade || s.sessions) {
       // Uzmanım ekranı: uzmanın bekleyen rutin ve adım önerileri görünsün (değişiklik önerisi hariç); randevular bu çekimde yok
-      await p.evaluate(({ K, keep, noSessions, sade }) => {
+      await p.evaluate(({ K, keep, noSessions, sade, sessions }) => {
         const db = JSON.parse(localStorage.getItem(K));
-        if (keep) JSON.parse(localStorage.getItem('__cek_pending') || '[]').filter((x) => x.kind !== 'change')
+        if (keep) JSON.parse(localStorage.getItem('__cek_pending') || '[]').filter((x) => x.kind !== 'change' && (keep !== 'rutin' || x.routine_group))
           .forEach((x) => { if (!db.clinic_task_suggestions.some((y) => y.id === x.id)) db.clinic_task_suggestions.push(x); });
         if (noSessions) db.clinic_sessions = [];
+        if (sessions) db.clinic_sessions = db.clinic_sessions.filter((x) => (sessions.keep || []).includes(x.id)).map((x) => ({ ...x, fee: sessions.fee ?? x.fee }));
         if (sade) db.parent_training_todos = [];   // sade: Bugün yapılacaklar'da yalnız eğitimin iki uygulama görevi
         localStorage.setItem(K, JSON.stringify(db));
-      }, { K: KEY, keep: !!s.keep, noSessions: !!s.noSessions, sade: !!s.sade });
+      }, { K: KEY, keep: s.keep || false, noSessions: !!s.noSessions, sade: !!s.sade, sessions: s.sessions || null });
       await p.reload(); await p.waitForTimeout(2500);
     }
     for (const raw of s.steps || []) {

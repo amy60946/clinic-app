@@ -12,6 +12,7 @@ import { track } from '../lib/track';
 import { useTabBarScroll } from '../lib/tabBar';
 import TeamCard, { PersonalCodeCard } from './TeamCard';
 import { NudgeSettings } from './NudgeParts';
+import { errorText } from '../lib/errors';
 
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -48,7 +49,7 @@ export default function SettingsScreen({
       track('workspace.create', { kind: 'clinic' });
       switchTo(id);   // ana ekran yeni hesapla baştan açılır
     } catch (e) {
-      Alert.alert('Kurulamadı', (e as Error).message);
+      Alert.alert('Kurulamadı', errorText(e));
       setBusy(null);
     }
   };
@@ -65,7 +66,7 @@ export default function SettingsScreen({
         onChanged();
         Alert.alert('Kaydedildi');
       } catch (e) {
-        Alert.alert('Kaydedilemedi', (e as Error).message);
+        Alert.alert('Kaydedilemedi', errorText(e));
       } finally {
         setBusy(null);
       }
@@ -86,7 +87,7 @@ export default function SettingsScreen({
       onChanged();
       Alert.alert('Kaydedildi');
     } catch (e) {
-      Alert.alert('Kaydedilemedi', (e as Error).message);
+      Alert.alert('Kaydedilemedi', errorText(e));
     } finally {
       setBusy(null);
     }

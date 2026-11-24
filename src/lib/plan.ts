@@ -140,9 +140,15 @@ export async function updateModule(id: string, m: Partial<ModuleInput>): Promise
   const { error } = await supabase.from('care_modules').update(cleanModule(m)).eq('id', id);
   if (error) throw new Error(error.message);
 }
+// Ailenin uygulama kaydı olan program silinemez (sunucu: ortak migrations/20261121100000_security_audit_fixes.sql, ipucu
+// module_has_family_logs; kayıtlar ailede kalsın). Ekran bu hatada programı "Tamamlandı" yapmayı önerir.
+export class ModuleHasFamilyLogs extends Error {}
 export async function deleteModule(id: string): Promise<void> {
   const { error } = await supabase.from('care_modules').delete().eq('id', id);
-  if (error) throw new Error(error.message);
+  if (error) {
+    if (error.hint === 'module_has_family_logs' || error.message.includes('module_has_family_logs')) throw new ModuleHasFamilyLogs(error.message);
+    throw new Error(error.message);
+  }
 }
 // note: değerlendirmenin kısa gerekçesi (≤ 300, yalnız klinik; "N3", 3 Kasım 2026)
 export async function rateGoal(clinicId: string, goalId: string, week: string, rating: number, note = ''): Promise<void> {

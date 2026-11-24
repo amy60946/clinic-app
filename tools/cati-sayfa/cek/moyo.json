@@ -1,13 +1,100 @@
 [
- {"name": "moyo-bugun"},
- {"name": "moyo-rutinler", "steps": ["Rutinler", "?Kapat", "?@İpucunu kapat"]},
- {"name": "moyo-ekle", "steps": ["Rutin ekle"]},
- {"name": "moyo-onay", "steps": ["~1 adım onayını bekliyor", "@Yatağını topla, Nazlı: incele", "?Şimdi değil", "?@Yatağını topla, Nazlı: incele"]},
- {"name": "moyo-gelisim", "mScroll": 48, "steps": ["Gelişim", "?Kapat"]},
- {"name": "moyo-odul", "steps": ["Ödül", "?Atla"], "hide": ["[aria-label^=\"Harçlık ekle\"]"]},
- {"name": "moyo-uzman", "mScroll": 56, "clinic": true, "keep": true, "noSessions": true, "steps": ["Uzmanım", "?Kapat"]},
-{"name": "moyo-uzman-sade", "mScroll": 0, "clinic": true, "noSessions": true, "sade": true, "steps": ["Uzmanım", "?Kapat"], "hideBlock": ["Randevular|Randevu al", "Uzmanının belirlediği davranışlar|Çocuğunun davranış olayını bildir", "Davranış kaydı ekle|Ne oldu, öncesinde ve sonrasında"]},
- {"name": "moyo-oneri", "clinic": true, "keep": true, "noSessions": true, "steps": ["Uzmanım", "?Kapat", "scroll:520"]},
- {"name": "c-baglan", "invite": true, "steps": ["Uzmanım", "~Uzman bağla", "type:KOD=K7M2PA", "wait:1500", "cb:Nazlı", "~Bu uzmanı tanıyorum"]},
- {"name": "moyo-egitim", "clinic": true, "steps": ["~Ebeveyn zorlayıcı davranışları ABC"]}
+ {
+  "name": "moyo-bugun"
+ },
+ {
+  "name": "moyo-rutinler",
+  "steps": [
+   "Rutinler",
+   "?Kapat",
+   "?@İpucunu kapat"
+  ]
+ },
+ {
+  "name": "moyo-ekle",
+  "steps": [
+   "Rutin ekle"
+  ]
+ },
+ {
+  "name": "moyo-onay",
+  "steps": [
+   "~1 adım onayını bekliyor",
+   "@Yatağını topla, Nazlı: incele",
+   "?Şimdi değil",
+   "?@Yatağını topla, Nazlı: incele"
+  ]
+ },
+ {
+  "name": "moyo-gelisim",
+  "mScroll": 48,
+  "steps": [
+   "Gelişim",
+   "?Kapat"
+  ]
+ },
+ {
+  "name": "moyo-odul",
+  "steps": [
+   "Ödül",
+   "?Atla"
+  ],
+  "hide": [
+   "[aria-label^=\"Harçlık ekle\"]"
+  ]
+ },
+ {
+  "name": "moyo-uzman",
+  "mScroll": 56,
+  "clinic": true,
+  "keep": true,
+  "noSessions": true,
+  "steps": [
+   "Uzmanım",
+   "?Kapat"
+  ]
+ },
+ {
+  "name": "moyo-oneri",
+  "clinic": true,
+  "keep": true,
+  "noSessions": true,
+  "steps": [
+   "Uzmanım",
+   "?Kapat",
+   "scroll:520"
+  ]
+ },
+ {
+  "name": "c-baglan",
+  "invite": true,
+  "steps": [
+   "Uzmanım",
+   "~Uzman bağla",
+   "type:KOD=K7M2PA",
+   "wait:1500",
+   "cb:Nazlı",
+   "~Bu uzmanı tanıyorum"
+  ]
+ },
+ {
+  "name": "moyo-uzman-oneri",
+  "mScroll": 0,
+  "clinic": true,
+  "keep": "rutin",
+  "sessions": {
+   "keep": [
+    "demo-ses-3"
+   ],
+   "fee": 1200
+  },
+  "steps": [
+   "Uzmanım",
+   "?Kapat"
+  ],
+  "hideBlock": [
+   "Bugün yapılacaklar|Davranış kaydı ekle",
+   "Randevu al|Randevu al"
+  ]
+ }
 ]

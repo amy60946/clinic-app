@@ -27,7 +27,7 @@
   },
   {
    "baslik": "Seans dışında da birlikte ilerleyin",
-   "metin": "Uzmanınız kısa ebeveyn eğitimleri gönderir, davranış kayıtlarınıza bakar, yeni rutin önerir; önerilen rutini çocuğunuzun gününe eklemek sizin kararınız.",
+   "metin": "Uzmanınız davranış kayıtlarınıza bakar, yeni rutin önerir, raporunu size gönderir; önerilen rutini çocuğunuzun gününe eklemek sizin kararınız.",
    "rozet": "",
    "gorsel": {
     "img": "img/c-davranis.webp",
@@ -67,17 +67,17 @@
    "kim": "Uzmanınız · isteğe bağlı",
    "kisa": "Görür",
    "baslik": "Evdeki haftayı görür, seansa hazırlanır.",
-   "metin": "Yalnızca paylaşmayı seçtiğiniz kayıtlar: rutinler, zor anlar ve eğitimdeki ilerleme tek ekranda.",
+   "metin": "Yalnızca paylaşmayı seçtiğiniz kayıtlar: rutinler ve zor anlar tek ekranda.",
    "gorsel": "mercek-veri",
    "alt": "Moyo Uzman: evdeki kayıtlar"
   },
   {
    "kim": "Uzmanınız · isteğe bağlı",
    "kisa": "Önerir",
-   "baslik": "Eğitim gönderir, rutin önerir.",
-   "metin": "Öneri Moyo Ebeveyn'in Uzmanım bölümüne gelir; eklemek sizin kararınız.",
-   "gorsel": "ebeveyn-egitim",
-   "alt": "Moyo Ebeveyn, Uzmanım: uzmanın gönderdiği eğitimden bugün yapılacak iki görev"
+   "baslik": "Rutin önerir, rapor gönderir.",
+   "metin": "Öneri Moyo Ebeveyn'in Uzmanım bölümüne, rapor Gelişim'e gelir; rutini eklemek sizin kararınız.",
+   "gorsel": "ebeveyn-oneri",
+   "alt": "Moyo Ebeveyn, Uzmanım: uzmanın randevusu ve rutin önerisi"
   },
   {
    "kim": "Hepsi birlikte",
@@ -114,7 +114,7 @@
    "kim": "Uzman için · isteğe bağlı",
    "ad": "Moyo Uzman",
    "ozet": "Evde olanları uzmanınızın önüne düzenli getirir.",
-   "metin": "Yalnızca onay verdiğiniz kayıtları uzmanınıza açar. Uzmanınız buradan ebeveyn eğitimi gönderir, rapor ve ilerleme notunu kayıtlardan hazırlar.",
+   "metin": "Yalnızca onay verdiğiniz kayıtları uzmanınıza açar. Uzmanınız buradan rutin önerir, raporu kayıtlardan hazırlayıp size gönderir.",
    "link": "{MERCEK}",
    "link_ad": "Uzman sayfası →"
   }

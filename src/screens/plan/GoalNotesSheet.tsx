@@ -8,6 +8,7 @@ import type { PlanGoal } from '../../lib/plan';
 import type { Note } from '../../lib/clinic';
 import { dayMonth } from './EvaluateSheet';
 import { PRIVATE } from './tones';
+import { errorText } from '../../lib/errors';
 
 // Hedefin notları (kullanıcı kararı "N3", 3 Kasım 2026; sade): üstte yaz + Kaydet, altında tek zaman çizelgesi —
 // hedef notları (clinic_notes.goal_id) ve değerlendirme notları (goal_ratings.note). Aile görmez. Silme danışan › Notlar'da.
@@ -37,7 +38,7 @@ function Body({ goal, notes, canWrite, onClose, onAdd }: { goal: PlanGoal; notes
   const save = async () => {
     if (!body.trim()) return;
     setBusy(true);
-    try { await onAdd(body.trim()); setBody(''); } catch (e) { Alert.alert('Kaydedilemedi', (e as Error).message); } finally { setBusy(false); }
+    try { await onAdd(body.trim()); setBody(''); } catch (e) { Alert.alert('Kaydedilemedi', errorText(e)); } finally { setBusy(false); }
   };
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>

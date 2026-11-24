@@ -41,7 +41,7 @@ export const INVITE_HELP = [
   'Hangi çocuğu paylaşacağına ebeveyn karar verir; paylaşımı istediği an durdurabilir.',
   'Çocuğun adını ve yaş grubunu yazarsan yalnız daveti kabul eden ebeveyn görür; kontrol edip onaylar, düzeltirse sana bildirim gelir. E-postada görünmez, davet bitince silinir.',
   'Davet 3 gün geçerli. Davetlerim\'den e-postayı yeniden gönderebilir ya da daveti iptal edebilirsin. E-posta gönderilemezse yedek kod görünür.',
-  'Eğitimi ve ev çalışmasını aile bağlanınca danışanın sayfasında kurarsın.',
+  'Rutin önerilerini ve hedef davranışları aile bağlanınca danışanın sayfasında kurarsın.',
 ];
 
 export const STATUS_TEXT: Record<InviteStatus, string> = {
@@ -147,6 +147,10 @@ export function emailReasonText(r: EmailResult): string {
     case 'too_soon': return 'Aynı davete bir dakika içinde yeniden e-posta gönderilemez.';
     case 'limit_invite': return 'Bu davete en çok 3 e-posta gönderilebilir. Kodu kopyalayıp kendin ilet.';
     case 'limit_day': return 'Bugün çok fazla davet e-postası gönderdin; yarın tekrar dene ya da kodu kendin ilet.';
+    // Sunucu sınırları (ortak migrations/20261121110000_support_invite_limits.sql, functions/invite-email; 22 Kasım 2026)
+    case 'rate_recipient': return 'Bu adrese yeterince davet e-postası gitti; yarın yeniden dene ya da kodu kendin ilet.';
+    case 'rate_clinician': return 'Bugünkü davet e-postası hakkın doldu; yarın yeniden dene ya da kodu kendin ilet.';
+    case 'rate_global': return 'Şu an çok fazla davet gönderiliyor; birkaç dakika sonra yeniden dene.';
     case 'expired': return 'Davetin süresi doldu; yeni davet oluştur.';
     case 'closed': return 'Aile daveti zaten aldı ya da davet kapandı; e-posta gerekmez.';
     case 'no_email': return 'Bu davette e-posta adresi yok. Kodu kopyalayıp kendin ilet.';

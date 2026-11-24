@@ -103,3 +103,11 @@ gitmez), iletişim kartları.
 - **Moyo Ebeveyn sayfaları:** "Giriş" → "Giriş yap" (`yap_m.py`, `yap_f.py`); SSS işareti "+" / "–" ve dar ekranda açılır menü paneli
   (tam ekran değil; dışına dokununca ya da kaydırınca kapanır) çatı / Hakkımızda / Güven ile aynı (`m/moyo.css`, `m/moyo.js`;
   `m/site.css` Mercek'in kopyası olduğu için dokunulmadı).
+
+## 24 Kasım 2026: eğitimsiz görseller (ortak `akislar.md` 27.4, kullanıcı kararı 23 Kasım 2026)
+
+Metinler 26c208f'de eğitimsiz yazıldı; görseller bu turda: çatı 5. kart ve Moyo Ebeveyn 5. adım `img/moyo-uzman-oneri(-m).webp` (IMG anahtarı
+`ebeveyn-oneri`: Uzmanım, randevu + seans ücreti + rutin önerisi), çatı "mercek-veri" kartı `img/mercek-rutin*.webp` (menü Planla / Takip),
+`img/c-davranis.webp`, Hakkımızda `img/k-ebeveyn.webp` (davranış kaydı ekranı) ve `img/k-uzman(-dar).webp`, Moyo Ebeveyn "Neden Moyo"
+`img/e-nz-uzman.webp`, `img/moyo-gelisim(-m).webp` (Gelişim'de "Ben" yok). Hakkımızda'da artık anılmayan iki kaynak (Furlong2012,
+Thongseiratch2020) `k-metin.json`'dan çıktı (`yap_k.py` anılmayan kaynağı reddeder). Ayrıntı `cek/README.md` sonu. Canlıya alma kullanıcı onayıyla.

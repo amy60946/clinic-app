@@ -1,7 +1,7 @@
 // Seans planlama yardımcıları (src/lib/sessionCore.ts). Çalıştırma: npm test
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { trDay, trTime, trToIso, layoutDay, wouldBeLate, noteDue, packageUsage, attendance, weeklyCells, prepSummary,
+import { trDay, trTime, trToIso, layoutDay, canMarkDone, noteDue, attendance, weeklyCells, prepSummary, STATUS_META, outcomeOf, isOfferLeftover,
          freeStarts, seriesDates, matchClient, weekdayOf, mondayOfDay, sessionWhen } from '../src/lib/sessionCore.ts';
 
 const S = (p = {}) => ({ id: 's', clinic_id: 'k', clinician_id: 'd1', link_id: 'L', title: null, series_id: null, starts_at: '2026-11-11T12:00:00.000Z',
@@ -29,31 +29,50 @@ test('gün düzeni: çakışanlar yan yana, ayrık olan tek sütun', () => {
   assert.equal(by.c.top, 240);
 });
 
-test('geç iptal ve not bekleyenler', () => {
+test('işaretleme seans saatinden sonra; not bekleyenler', () => {
   const now = new Date('2026-11-11T08:00:00Z');
-  assert.equal(wouldBeLate('2026-11-11T12:00:00Z', now, 24), true);
-  assert.equal(wouldBeLate('2026-11-13T12:00:00Z', now, 24), false);
+  assert.equal(canMarkDone('2026-11-11T12:00:00Z', now), false);
+  assert.equal(canMarkDone('2026-11-11T08:20:00Z', now), true);   // en çok 30 dk önce
+  assert.equal(canMarkDone('2026-11-10T12:00:00Z', now), true);
   const done = [S({ id: 'd1', status: 'done', starts_at: '2026-11-09T12:00:00Z' }), S({ id: 'd2', status: 'done', starts_at: '2026-11-10T12:00:00Z' }),
                 S({ id: 'old', status: 'done', starts_at: '2026-10-01T12:00:00Z' }), S({ id: 'blk', status: 'done', link_id: null, starts_at: '2026-11-10T09:00:00Z' })];
   const recs = { d1: { session_id: 'd1', attendees: [], observation: 'x', worked: null, next_step: null, agenda: [], homework: [], author_id: null, updated_at: '' } };
   assert.deepEqual(noteDue(done, recs, now).map((s) => s.id), ['d2']);
 });
 
-test('paket kullanımı ayara göre, devam sayıları', () => {
+test('iki sayaç: yapıldı ve yapılmadı (eski geç iptal ve iptal yapılmadı, ertelenen ve teklif kalıntısı sayılmaz)', () => {
   const now = new Date('2026-11-20T00:00:00Z');
-  const pkg = { id: 'p', link_id: 'L', title: '10 seans', total: 3, starts_on: null, ends_on: null, note: null, closed_at: null, created_at: '' };
-  const ss = [S({ id: '1', status: 'done', package_id: 'p' }), S({ id: '2', status: 'no_show', package_id: 'p' }), S({ id: '3', status: 'late_cancel', package_id: 'p' }),
-              S({ id: '4', status: 'cancelled', package_id: 'p' }), S({ id: '5', status: 'planned', package_id: 'p', starts_at: '2026-11-25T12:00:00Z' })];
-  assert.deepEqual(packageUsage(pkg, ss, { count_late_cancel: true, count_no_show: true }, now), { used: 3, planned: 1, left: 0, over: false });
-  assert.equal(packageUsage(pkg, ss, { count_late_cancel: false, count_no_show: false }, now).used, 1);
+  const ss = [S({ id: '1', status: 'done' }), S({ id: '2', status: 'done', starts_at: '2026-11-04T12:00:00Z' }), S({ id: '3', status: 'no_show' }),
+              S({ id: '4', status: 'late_cancel' }), S({ id: '5', status: 'cancelled' }), S({ id: '6', status: 'postponed' }),
+              S({ id: '7', status: 'planned' }),                                                    // geçmişte işaretlenmemiş: sayılmaz
+              S({ id: '8', status: 'cancelled', waitlist_id: 'w' }), S({ id: '9', status: 'offered', starts_at: '2026-11-21T12:00:00Z' }),
+              S({ id: '10', status: 'cancelled', starts_at: '2026-11-27T12:00:00Z' }),            // gelecekte: sayılmaz
+              S({ id: '11', status: 'planned', starts_at: '2026-11-25T12:00:00Z' }), S({ id: '12', status: 'planned', starts_at: '2026-11-22T12:00:00Z' })];
   const a = attendance(ss, now);
-  assert.deepEqual([a.done, a.noShow, a.late, a.cancelled, a.next?.id], [1, 1, 1, 1, '5']);
+  assert.deepEqual([a.done, a.missed, a.next?.id], [2, 3, '12']);
+  assert.deepEqual(Object.keys(a).sort(), ['done', 'missed', 'next']);
 });
 
-test('haftalık hücreler: haftada en belirgin durum', () => {
+test('durum etiketleri ve seçim: yalnız Yapıldı / Yapılmadı, gelecekteki seans Planlandı', () => {
+  assert.equal(STATUS_META.done.label, 'Yapıldı');
+  for (const st of ['no_show', 'late_cancel', 'cancelled']) assert.equal(STATUS_META[st].label, 'Yapılmadı');
+  assert.equal(STATUS_META.planned.label, 'Planlandı');
+  assert.ok(!Object.values(STATUS_META).some((m) => /Gelmedi|Geç iptal|İptal/.test(m.label)));
+  assert.deepEqual(['done', 'no_show', 'late_cancel', 'cancelled', 'postponed', 'planned', 'offered'].map(outcomeOf),
+    ['done', 'no_show', 'no_show', 'no_show', null, null, null]);
+  assert.equal(isOfferLeftover(S({ status: 'offered' })), true);
+  assert.equal(isOfferLeftover(S({ status: 'cancelled', waitlist_id: 'w' })), true);
+  assert.equal(isOfferLeftover(S({ status: 'planned', waitlist_id: 'w' })), false);   // aile kabul etti: görünür
+  assert.equal(isOfferLeftover(S({ status: 'cancelled' })), false);
+});
+
+test('haftalık hücreler: yapıldı > yapılmadı > planlandı; ertelenen ve teklif kalıntısı yok sayılır', () => {
   const cells = weeklyCells([S({ status: 'cancelled', starts_at: '2026-11-03T12:00:00Z' }), S({ status: 'done', starts_at: '2026-11-04T12:00:00Z' }),
-                             S({ status: 'no_show', starts_at: '2026-11-11T12:00:00Z' })], '2026-11-12', 3);
-  assert.deepEqual(cells.map((c) => [c.start, c.status]), [['2026-10-26', null], ['2026-11-02', 'done'], ['2026-11-09', 'no_show']]);
+                             S({ status: 'late_cancel', starts_at: '2026-11-11T12:00:00Z' }), S({ status: 'planned', starts_at: '2026-11-12T12:00:00Z' }),
+                             S({ status: 'postponed', starts_at: '2026-10-27T12:00:00Z' }), S({ status: 'offered', starts_at: '2026-10-28T12:00:00Z' }),
+                             S({ status: 'planned', starts_at: '2026-11-19T12:00:00Z' })], '2026-11-19', 4);
+  assert.deepEqual(cells.map((c) => [c.start, c.status, c.count]),
+    [['2026-10-26', null, 0], ['2026-11-02', 'done', 2], ['2026-11-09', 'no_show', 2], ['2026-11-16', 'planned', 1]]);
 });
 
 test('seans öncesi özet: son yapılan seanstan bu yana, gündem', () => {
@@ -91,4 +110,22 @@ test('dış takvim başlığından danışan önerisi (tek eşleşme)', () => {
   assert.equal(matchClient('NAZLI seans 15:00', clients)?.link_id, 'L1');
   assert.equal(matchClient('Ege - kontrol', clients), null);      // iki Ege: belirsiz
   assert.equal(matchClient('Diş hekimi', clients), null);
+});
+
+// Seans ücreti (ortak akislar 27.1, 23 Kasım 2026)
+test('ücret: Türkçe yazımı sunucu biçimine çevirir, geçersizi reddeder', async () => {
+  const { parseFee, feeText, feeInput } = await import('../src/lib/sessionCore.ts');
+  assert.equal(parseFee(''), null);
+  assert.equal(parseFee('450'), '450.00');
+  assert.equal(parseFee('450,5'), '450.50');
+  assert.equal(parseFee('1.200'), '1200.00');
+  assert.equal(parseFee('1.200,75 TL'), '1200.75');
+  assert.equal(parseFee('-5'), undefined);
+  assert.equal(parseFee('12,345'), undefined);
+  assert.equal(parseFee('1000001'), undefined);
+  assert.equal(feeText(450), '450 TL');
+  assert.equal(feeText('450.50'), '450,50 TL');
+  assert.equal(feeText(1200), '1.200 TL');
+  assert.equal(feeText(null), null);
+  assert.equal(feeInput(1200.5), '1200,50');
 });

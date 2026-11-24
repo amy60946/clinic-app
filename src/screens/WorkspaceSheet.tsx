@@ -13,6 +13,7 @@ import {
 import { useWorkspace } from '../lib/workspace';
 import { useNotifications } from '../lib/notificationsContext';
 import { track } from '../lib/track';
+import { errorText } from '../lib/errors';
 
 export const PERSONAL_LABEL = 'Bireysel hesap';
 export const TEAM_LABEL = 'Ekip hesabı';
@@ -37,7 +38,7 @@ export function WorkspaceSheet({ visible, me, onClose }: { visible: boolean; me:
       track('workspace.create', { kind: 'personal' });
       onClose();
       switchTo(id);
-    } catch (e) { Alert.alert('Açılamadı', (e as Error).message); } finally { setBusy(false); }
+    } catch (e) { Alert.alert('Açılamadı', errorText(e)); } finally { setBusy(false); }
   };
   const personal = list?.filter((w) => w.personal) ?? [];
   const teams = list?.filter((w) => !w.personal) ?? [];
@@ -114,7 +115,7 @@ export function TeamRequestsCard({ me, reloadKey, onAccepted }: { me: ClinicianM
       const seen = items.filter((n) => n.kind === 'team_request' && !n.readAt && n.data?.request_id === r.id).map((n) => n.id);
       if (seen.length) markRead(seen);
       if (accept && out.status === 'accepted') onAccepted(r);
-    } catch (e) { Alert.alert('Yanıtlanamadı', (e as Error).message); } finally { setBusy(null); }
+    } catch (e) { Alert.alert('Yanıtlanamadı', errorText(e)); } finally { setBusy(null); }
   };
   return (
     <View style={{ gap: 8, marginTop: 12 }}>

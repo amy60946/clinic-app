@@ -5,6 +5,7 @@ import { colors, radius } from '../theme';
 import { saveTextFile } from '../lib/saveFile';
 import { toCsv } from '../lib/csv';
 import { track } from '../lib/track';
+import { errorText } from '../lib/errors';
 
 // Tabloyu CSV olarak indir (web) ya da paylaş (iOS). Dosya cihazda oluşur, sunucuya gitmez.
 export default function ExportButton({ name, header, rows, event }: {
@@ -17,7 +18,7 @@ export default function ExportButton({ name, header, rows, event }: {
       const r = await saveTextFile(name, toCsv([header, ...body]));
       if (r === 'saved') track(event, { rows: body.length });
     } catch (e) {
-      Alert.alert('Dosya oluşturulamadı', (e as Error).message);
+      Alert.alert('Dosya oluşturulamadı', errorText(e));
     }
   };
   return (

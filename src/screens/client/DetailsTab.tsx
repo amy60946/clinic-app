@@ -7,6 +7,7 @@ import { ageGroupLabel } from '../../lib/invites';
 import { track } from '../../lib/track';
 import type { ClientCtx } from './ClientScreen';
 import { ageText } from './ClientScreen';
+import { errorText } from '../../lib/errors';
 
 const dateText = (iso: string) => new Date(iso).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -31,7 +32,7 @@ export default function DetailsTab({ client, me, data, team, onTeamAccess, onRev
       onLabelChanged?.(label.trim());
       Alert.alert('Kaydedildi');
     } catch (e) {
-      Alert.alert('Kaydedilemedi', (e as Error).message);
+      Alert.alert('Kaydedilemedi', errorText(e));
     } finally {
       setBusy(false);
     }
@@ -59,7 +60,6 @@ export default function DetailsTab({ client, me, data, team, onTeamAccess, onRev
       <Label>Ebeveyn ve bakım verenler</Label>
       <Card style={{ gap: 6 }}>
         <Text style={styles.body}>{client.parents || 'Ad paylaşılmadı'}</Text>
-        <Text style={styles.small}>İletişim bilgileri (e-posta, telefon) ailede kalır, uzmana açılmaz. Aileye Moyo üzerinden ulaşırsın: önerilerin ve atadığın eğitim orada görünür.</Text>
       </Card>
 
       <Label>Paylaşım</Label>

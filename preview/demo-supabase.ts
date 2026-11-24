@@ -10,7 +10,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { SESSION_TABLES, seedSessions, sessionVisible, sessionRpc } from './demo-sessions';
 import { TRAINING_TABLES, TRAINING_DEFAULTS, seedTraining, trainingVisible, trainingRpc } from './demo-training';
-import { BEHAVIOR_TABLES, BEHAVIOR_DEFAULTS, seedBehaviors, behaviorVisible } from './demo-behaviors';
+import { BEHAVIOR_TABLES, BEHAVIOR_DEFAULTS, seedBehaviors, seedParentRecords, behaviorNotifications, behaviorVisible } from './demo-behaviors';
 import { getWorkspace } from './workspace';
 
 type Row = Record<string, any>;
@@ -253,6 +253,8 @@ function upgrade(x: Db): Db {
   seedTraining(x);
   // Davranışlar ve olaylar (ortak proposed/20261110110000): örnek ailede üç hedef davranış ve olayları
   seedBehaviors(x);
+  // Ebeveynin davranış kayıtları bu bölümde (23 Kasım 2026): gün bölümü, hedef bağı, sesli kayıt, arşivlenmiş hedef davranış
+  seedParentRecords(x);
   // Motive etmek (ortak 20261027130000): örnek ailenin onaylı görevlerine ebeveyn gözlemi (eskiler zor, yeniler kolay; bazıları yanıtsız)
   if (!x.motivationSeeded) {
     x.completions.filter((c: Row) => c.child_id === 'c-nazli' && c.status === 'approved' && c.motivation == null).forEach((c: Row, i: number) => {
@@ -365,6 +367,7 @@ function deriveClinicNotifications(x: Db, isOld?: (createdAt: string) => boolean
         seeding && e.occurred_at < (e.created_at ?? now()) ? e.occurred_at : e.created_at ?? now()));
     });
   });
+  behaviorNotifications(x, has, push, recipients);
   x.clinic_task_suggestions.forEach((s: Row) => {
     if (!['accepted', 'declined'].includes(s.status) || has('suggestion_decided', (d) => d.suggestion_id === s.id)) return;
     push(s.created_by, 'suggestion_decided', `${s.status === 'accepted' ? 'Öneri kabul edildi: ' : 'Öneri şimdilik eklenmedi: '}${s.title}`,
@@ -1413,6 +1416,43 @@ async function rpc(name: string, args: Row = {}): Promise<{ data: any; error: Er
         assigned: db.clinic_link_access.filter((a: Row) => a.link_id === l.id).map((a: Row) => a.clinician_id) };
     }).sort((a: Row, b: Row) => String(b.consent_at).localeCompare(String(a.consent_at)));
     return { data: rows, error: null };
+  }
+  // Raporu aileye gönder (ortak veritabani.md 40.2): içerik saklanır; önizlemede ebeveyn bildirimi ve Moyo'nun rapor sayfası yok
+  if (name === 'clinic_report_share' || name === 'clinic_reports_sent') {
+    const m = myClinician();
+    const fail = (message: string, hint: string, code = '22023') => ({ data: null, error: { message, code, hint } as Err });
+    if (!m || !clinicianAccess(m)) return fail('Üyelik etkin değil', 'no_access', 'P0402');
+    const l = db.clinic_links.find((x: Row) => x.id === args.p_link);
+    if (!l || !linkVisible(m, l)) return fail('Bu aileyle paylaşım açık değil', 'link_not_visible', '42501');
+    db.clinic_shared_reports ??= [];
+    if (name === 'clinic_reports_sent') {
+      return {
+        data: db.clinic_shared_reports.filter((r: Row) => r.link_id === l.id)
+          .sort((a: Row, b: Row) => String(b.created_at).localeCompare(String(a.created_at)))
+          .map((r: Row) => ({ id: r.id, title: r.title, period_start: r.period_start, period_end: r.period_end, clinician_name: r.clinician_name,
+            mine: r.sent_by === m.id, created_at: r.created_at,
+            seen_at: l.status === 'active' || (r.seen_at && l.revoked_at && r.seen_at <= l.revoked_at) ? r.seen_at ?? null : null })),
+        error: null,
+      };
+    }
+    if (l.status !== 'active') return fail('Bu aileyle paylaşım açık değil', 'link_not_visible', '42501');
+    const title = String(args.p_title ?? '').trim();
+    if (!title || title.length > 120) return fail('Rapor başlığı 1–120 karakter olmalı', 'title_invalid');
+    const ps = args.p_period_start ?? null, pe = args.p_period_end ?? null;
+    if ((ps === null) !== (pe === null) || (ps && ps > pe)) return fail('Rapor dönemi geçersiz', 'period_invalid');
+    const c = args.p_content;
+    if (!c || c.v !== 1 || !Array.isArray(c.sections) || c.sections.length < 1 || c.sections.length > 40) return fail('Rapor içeriği geçersiz', 'content_invalid');
+    if (new TextEncoder().encode(JSON.stringify(c)).length > 262144) return fail('Rapor çok büyük (en çok 256 KB)', 'content_too_large');
+    const since = Date.now() - 864e5;
+    if (db.clinic_shared_reports.filter((r: Row) => r.link_id === l.id && Date.parse(r.created_at) > since).length >= 20) {
+      return fail('Bu aileye son 24 saatte 20 rapor gönderdin; biraz sonra yeniden dene', 'too_many_reports', 'P0001');
+    }
+    const row = { id: uuid(), link_id: l.id, clinic_id: l.clinic_id, family_id: l.family_id, child_id: l.child_id, sent_by: m.id,
+      clinician_name: [m.name, m.title].filter(Boolean).join(', ').slice(0, 120), title, period_start: ps, period_end: pe, content: c,
+      created_at: now(), seen_at: null };
+    db.clinic_shared_reports.push(row);
+    save();
+    return { data: row.id, error: null };
   }
   if (name === 'clinic_assign' || name === 'clinic_set_responsible') {
     const m = myClinician();
