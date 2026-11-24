@@ -31,8 +31,7 @@ import { ConfigBanner } from './ConfigGate';
 import InvitesCard from './invite/InvitesCard';
 import VerificationSheet from './VerificationSheet';
 import { VerificationState, loadVerification } from '../lib/verification';
-import Onboarding, { onboardingSeen, markOnboardingSeen } from './Onboarding';
-import HelpSheet, { HelpAction } from './HelpSheet';
+import HelpTour, { onboardingSeen, markOnboardingSeen } from './Onboarding';
 import WelcomeSurvey, { SurveyAction } from './WelcomeSurvey';
 import { deleteAccountText } from '../lib/accountDelete';
 import { surveyAnswered } from '../lib/survey';
@@ -104,9 +103,7 @@ export default function HomeScreen() {
   const [attention, setAttention] = useState<Record<string, Attention> | null>(null);
   const [bell, setBell] = useState(false);
   const [plans, setPlans] = useState(false);
-  const [guide, setGuide] = useState(false);
-  const [help, setHelp] = useState(false);          // "Nasıl kullanılır?" (kısa tanıtım + kısa yanıtlar)
-  const [helpFocus, setHelpFocus] = useState<string | null>(null);   // açılırken açık gelecek soru
+  const [help, setHelp] = useState(false);          // "Nasıl kullanılır?": adım adım görsel tur (Onboarding.tsx; 24 Kasım 2026)
   const [invitesKey, setInvitesKey] = useState(0);
   const [verify, setVerify] = useState(false);
   const [verification, setVerification] = useState<VerificationState | null>(null);
@@ -249,17 +246,8 @@ export default function HomeScreen() {
     track('start.step', { step });
     setSelected({ client: c, tab: step === 'report' ? 'report' : planOn ? 'goals' : trainingOn ? 'training' : 'routine', key: Date.now() });
   };
-  // "Nasıl kullanılır?" › Göster: gerçek danışan varsa ilkinde, yoksa örnek ailede açar (iOS'ta pencere kapanınca)
-  const afterSheet = (f: () => void) => { setHelp(false); setHelpFocus(null); if (Platform.OS === 'ios') setTimeout(f, 450); else f(); };
-  const onHelpAction = (a: HelpAction) => afterSheet(() => {
-    if (a === 'home') return;
-    if (a === 'invite') return inviteFirst();
-    if (a === 'team') return setSettings(true);
-    const tab: Tab = a === 'routine' ? 'routine' : a === 'plan' ? (planOn ? 'goals' : trainingOn ? 'training' : 'routine') : 'report';
-    const c = clientList[0];
-    if (c) setSelected({ client: c, tab, key: Date.now() });
-    else openSample(tab);
-  });
+  // "Nasıl kullanılır?" turunun sonu › "Örnek aileyle dene": tur kapanır, örnek aile turu açılır (iOS'ta pencere kapanınca)
+  const afterTour = (f: () => void) => { setHelp(false); if (Platform.OS === 'ios') setTimeout(f, 450); else f(); };
   const inviteFirst = () => {
     setSampleOpen(false);
     setTourStep(null);
@@ -288,7 +276,7 @@ export default function HomeScreen() {
     if (!meId || survey !== 'hidden' || skipGuide.current) return;
     onboardingSeen(meId).then((seen) => {
       if (seen) return;
-      // İlk giriş (kullanıcı isteği 3 Kasım 2026): bilgilendirme örnek aile üzerinde, yaptırarak (tur); 4 ekranlık tanıtım "Nasıl kullanılır?"da
+      // İlk giriş (kullanıcı isteği 3 Kasım 2026): bilgilendirme örnek aile üzerinde, yaptırarak (tur); ekran ekran tanıtım "Nasıl kullanılır?" turunda
       markOnboardingSeen(meId);
       if (noClients) openSample();
     });
@@ -465,7 +453,7 @@ export default function HomeScreen() {
     return (
       <>
         <MembershipScreen me={state.me} onClose={() => { setPlans(false); load(); }} onChanged={load} footer={accountLinks}
-          onHelp={() => { setPlans(false); load(); setHelpFocus('invite'); setHelp(true); }} />
+          onHelp={() => { setPlans(false); load(); setHelp(true); }} />
         {legalSheets}
       </>
     );
@@ -657,9 +645,6 @@ export default function HomeScreen() {
                   <Ionicons name="chevron-forward" size={18} color={colors.faint} />
                 </Pressable>
               )}
-              <Text style={styles.footnote}>
-                Ebeveyn paylaşımı istediği an durdurabilir; o an erişim biter.
-              </Text>
               <View style={styles.accountLinks}>
                 <Pressable onPress={() => setHelp(true)} hitSlop={8} accessibilityRole="button"><Text style={styles.link}>Nasıl kullanılır?</Text></Pressable>
                 <Pressable onPress={() => setSettings(true)} hitSlop={8}><Text style={styles.link}>Ayarlar</Text></Pressable>
@@ -670,10 +655,8 @@ export default function HomeScreen() {
       </TabBarScrollView>
       <NotificationsSheet visible={bell} onClose={() => setBell(false)} onOpen={openTarget} />
       <VerificationSheet visible={verify} onClose={() => { setVerify(false); loadVerify(); }} />
-      <Onboarding visible={guide} plan={planOn} training={trainingOn} onClose={() => { setGuide(false); if (meId) markOnboardingSeen(meId); }} />
       {state.kind === 'ready' && (
-        <HelpSheet visible={help} owner={state.me.role === 'owner'} plan={planOn} training={trainingOn} focus={helpFocus} onClose={() => { setHelp(false); setHelpFocus(null); }}
-          onIntro={() => afterSheet(() => setGuide(true))} onSample={() => afterSheet(() => openSample())} onAction={onHelpAction} />
+        <HelpTour visible={help} plan={planOn} training={trainingOn} onClose={() => setHelp(false)} onSample={() => afterTour(() => openSample())} />
       )}
       {legalSheets}
       {wsSheet}
@@ -816,7 +799,6 @@ const styles = StyleSheet.create({
   tag: { fontSize: 11, fontWeight: '600', color: colors.navy, backgroundColor: colors.today, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999, overflow: 'hidden', maxWidth: 180 },
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', borderRadius: radius.md, paddingHorizontal: 14, height: 44, marginBottom: 8 },
   clientName: { fontSize: 15, fontWeight: '600', color: colors.text },
-  footnote: { fontSize: 11, color: colors.muted, marginTop: 24, lineHeight: 16 },
   accountLinks: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 24, rowGap: 12, marginTop: 20 },
   member: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.today, borderRadius: radius.md, padding: 14, marginTop: 8 },
   memberTitle: { fontSize: 14, fontWeight: '700', color: colors.navy },
