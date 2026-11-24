@@ -162,7 +162,7 @@ export function prepSummary(target: Pick<Session, 'starts_at' | 'link_id' | 'id'
   const agenda: AgendaItem[] = [];
   if (cur.declined > 0) agenda.push({ text: `"Yapamam" ${cur.declined} kez${extra.declineTop ? ` · en sık: ${extra.declineTop}` : ''}`, done: false, source: 'Ev rutinleri' });
   if (cur.rate !== null && before.rate !== null && cur.rate < before.rate - 10) agenda.push({ text: `Rutin oranı düştü: %${before.rate} → %${cur.rate}`, done: false, source: 'Ev rutinleri' });
-  if (abc.length) agenda.push({ text: `${abc.length} davranış kaydı · en son: ${abc[0].antecedent}`, done: false, source: 'Davranış kayıtları' });
+  if (abc.length) agenda.push({ text: `${abc.length} davranış kaydı · en son: ${abc[0].antecedent}`, done: false, source: 'Davranışlar ve Olaylar' });
   for (const g of extra.reviewDue.slice(0, 2)) agenda.push({ text: `Değerlendirme zamanı: ${g.title}`, done: false, source: 'Takip Planı' });
   for (const p of extra.pending.slice(0, 2)) agenda.push({ text: `Bekleyen öneri: ${p.title}`, done: false, source: 'Ebeveyn kararı bekliyor' });
   return { since, sinceSession: !!prev, days, rate: cur.rate, prevRate: before.rate, planned: cur.planned, approved: cur.approved,

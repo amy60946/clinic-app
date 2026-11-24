@@ -43,14 +43,14 @@ export function seedSessions(x: Row) {
   const series = uid();
   const pastStatus = ['done', 'done', 'no_show', 'done', 'postponed', 'done'];
   const notes = ['İlk hedefler aileyle birlikte belirlendi; sabah rutini çizelgesi verildi.', 'Sabah rutininde düzen başladı; ekran geçişinde itiraz sürüyor.', '',
-                 'Zamanlayıcı önerildi; ebeveyn uygulamaya istekli.', '', 'Sabah rutini daha kolay; akşam hazırlığı görevi denenecek.'];
+                 'Zamanlayıcı önerildi; ebeveyn uygulamaya istekli.', '', 'Sabah rutini daha kolay; akşam hazırlığı rutini denenecek.'];
   for (let i = 6; i >= 1; i--) {
     const s = base({ link_id: 'demo-link', series_id: series, starts_at: at(addD(wed, -7 * i), '15:00'), visible_to_family: true, room_id: 'room-1',
       status: pastStatus[6 - i], package_id: 'pkg-nazli', status_at: nowIso(), kind: i === 4 ? 'family' : 'individual',
       cancel_reason: pastStatus[6 - i] === 'postponed' ? 'Aile tatilde' : null });
     x.clinic_sessions.push(s);
     if (s.status === 'done') x.clinic_session_records.push({ session_id: s.id, clinic_id: 'demo-clinic', attendees: ['Çocuk', 'Anne'], observation: notes[6 - i],
-      worked: 'Resimli çizelge ve geçiş provası.', next_step: i === 1 ? 'Akşam hazırlığı görevi; 2 hafta sonra değerlendir.' : null, agenda: [], homework: [], author_id: 'demo-clinician', updated_at: nowIso() });
+      worked: 'Resimli çizelge ve geçiş provası.', next_step: i === 1 ? 'Akşam hazırlığı rutini; 2 hafta sonra değerlendir.' : null, agenda: [], homework: [], author_id: 'demo-clinician', updated_at: nowIso() });
   }
   for (let i = 0; i < 4; i++) x.clinic_sessions.push(base({ link_id: 'demo-link', series_id: series, starts_at: at(addD(wed, 7 * i), '15:00'), visible_to_family: true, room_id: 'room-1', package_id: 'pkg-nazli',
     family_response: i === 0 ? 'ok' : null, family_responded_at: i === 0 ? nowIso() : null }));
