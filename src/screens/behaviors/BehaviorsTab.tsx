@@ -415,7 +415,8 @@ function BehaviorSheet({ behavior, others, childName, multi: multiFlag, onClose,
             const icon = multi ? (on ? 'checkbox' : 'square-outline') : on ? 'radio-button-on' : 'radio-button-off';
             return (
               <Pressable key={t.key} onPress={() => setTypes((x) => (multi ? toggleLogType(x, t.key) : [t.key]))} style={[styles.opt, on && styles.optOn]}
-                accessibilityRole={multi ? 'checkbox' : 'radio'} accessibilityState={multi ? { checked: on } : { selected: on }}>
+                accessibilityRole={multi ? 'checkbox' : 'radio'} accessibilityState={multi ? { checked: on } : { selected: on }}
+                aria-checked={on}>
                 <View style={{ flex: 1, minWidth: 0, gap: 2 }}><Text style={styles.optTitle}>{t.label}</Text><Text style={styles.small}>{t.hint}</Text></View>
                 <Ionicons name={icon} size={22} color={on ? colors.navy : colors.faint} />
               </Pressable>

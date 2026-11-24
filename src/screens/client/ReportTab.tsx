@@ -185,7 +185,7 @@ export default function ReportTab({ client, me, data, today, weeks }: ClientCtx)
       <Label>{`Ev rutini gözlem raporu (${weeks} hafta)`}</Label>
       <Card style={{ gap: 12 }}>
         <Text style={styles.body}>
-          Rapor şunları içerir: haftalık rutin kartı, yürütücü işlev gözlem özeti (başlatma, tutarlılık, "Yapamam"), adım ve beceri alanı tabloları{planOn ? ', GAS davranış hedefi puanları' : ''} ve davranış kaydı özeti. Uzman notları rapora girmez.
+          Rapor şunları içerir: haftalık rutin kartı, yürütücü işlev gözlem özeti (başlatma, tutarlılık, "Yapamam"), adım ve beceri alanı tabloları{planOn || hasGas ? ', GAS davranış hedefi puanları' : ''} ve davranış kaydı özeti. Uzman notları rapora girmez.
         </Text>
         <CoachTarget id="report.open"><Cta label={Platform.OS === 'web' ? 'Raporu aç' : 'Raporu yazdır / paylaş'} onPress={open} busy={busy} /></CoachTarget>
       </Card>

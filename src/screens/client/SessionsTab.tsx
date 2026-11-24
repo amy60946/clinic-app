@@ -104,7 +104,10 @@ export default function SessionsTab({ client, me, data, today, team, clients, on
               <Text style={s.small}>{timeRange(x)}</Text>
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={s.body} numberOfLines={1}>{KIND_LABEL[x.kind]}{feeText(x.fee) ? ` · ${feeText(x.fee)}` : ''}</Text>
+              <View style={{ flexDirection: 'row', gap: 8, alignItems: 'baseline' }}>
+                <Text style={[s.body, { flexShrink: 1 }]} numberOfLines={1}>{KIND_LABEL[x.kind]}</Text>
+                {!!feeText(x.fee) && <Text style={[s.body, { flexShrink: 0 }]}>{feeText(x.fee)}</Text>}
+              </View>
               <Text style={s.small}>
                 {[x.status === 'done' && (hasNote(records[x.id]) ? 'Not yazıldı' : 'Not yok'), x.family_response && RESPONSE_LABEL[x.family_response],
                   rate !== null && `arada evde: rutin\u00a0%${rate}`, abc !== null && `${abc}\u00a0davranış kaydı`].filter(Boolean).join(', ')}
