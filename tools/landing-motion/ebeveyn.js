@@ -1,9 +1,11 @@
 // Mercek sitesi "Platform Nasıl Çalışır?" 3. sekme (Moyo Ebeveyn · ebeveynin telefonunda): gerçek Moyo Ebeveyn (ParentApp) ekranından
 // telefon kaydı. Kullanıcı kararı 22 Kasım 2026 ("Gerçek Moyo Ebeveyn ekranı"; önceki klip Mercek'teki "Ebeveyn deneyimi önizlemesi"ydi).
+// 24 Kasım 2026 (ebeveyn eğitimi bütün platformlarda kapalı): ebeveyn uzmanın rutin önerisini Uzmanım'da ekler ("Hepsini ekle"), sonra
+// Bugün'den çocuğun "Yaptım" dediği adımı inceler ve onaylar. Uzmanım'da tek randevu, seans ücretiyle (akislar 27.1).
 // Önce: parent-app'te `bash preview/build.sh`. Kullanım: node tools/landing-motion/ebeveyn.js
 // Çıktı: out/aile-m.{mp4,webm,webp} (telefon, 786×1600) + out/aile.{mp4,webm,webp} (geniş: aynı kayıt 1440×900 zeminin ortasında).
-// Veri: parent-app store/capture/prep.js'in uydurma ailesi (çatı sayfa görselleriyle aynı); testi yanıtlatmak için "ABC modelini anlamak: Test"
-// kaydı yapılmamış sayılır (yalnız tarayıcı deposunda).
+// Veri: parent-app store/capture/prep.js'in uydurma ailesi (çatı sayfa görselleriyle aynı); prep.js'in sildiği bekleyen rutin önerisi
+// (Güne hazır sabah, 3 adım) geri konur, tek adım önerisi konmaz; bildirim izni ön sorusu gösterilmiş sayılır (yalnız tarayıcı deposunda).
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
@@ -29,12 +31,24 @@ async function open() {
   const page = await ctx.newPage();
   page.errors = [];
   page.on('pageerror', (e) => page.errors.push(String(e).slice(0, 200)));
+  // prep.js bekleyen önerileri siler: silinmeden önceki hâli saklanır (cek/moyo.js "keep" ile aynı yol)
+  await page.addInitScript((K) => {
+    const set = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (k, v) {
+      if (k === K && !this.getItem('__cek_pending')) { try { const pend = (JSON.parse(v).clinic_task_suggestions || []).filter((x) => x.status === 'pending'); if (pend.length) set.call(this, '__cek_pending', JSON.stringify(pend)); } catch (e) { /* geç */ } }
+      return set.call(this, k, v);
+    };
+  }, KEY);
   await prep(page, { clinic: true });
   const cdp = await ctx.newCDPSession(page);
   await page.evaluate((K) => {
     const db = JSON.parse(localStorage.getItem(K));
-    (db.parent_training_modules || []).forEach((m) => { if (m.item_key === 'abc_q') Object.assign(m, { completed_at: null, correct: null, total: null, answers: null, reviewed_at: null }); });
+    JSON.parse(localStorage.getItem('__cek_pending') || '[]').filter((x) => x.kind !== 'change' && x.routine_group)
+      .forEach((x) => { if (!db.clinic_task_suggestions.some((y) => y.id === x.id)) db.clinic_task_suggestions.push(x); });
+    db.clinic_sessions = (db.clinic_sessions || []).filter((x) => x.id === 'demo-ses-3').map((x) => ({ ...x, fee: 1200 }));
     localStorage.setItem(K, JSON.stringify(db));
+    localStorage.setItem('push-ask', `2:${Date.now()}`);   // "Haber verelim mi?" ön sorusu kayıtta çıkmasın
+    localStorage.setItem('first-approval-seen', '1');      // "İlk onayın tamam!" kutlaması kayıtta çıkmasın (eski oyun adı ve "coin" yazıyor)
   }, KEY);
   await page.reload();
   await page.waitForTimeout(2500);
@@ -57,13 +71,17 @@ const dokun = (h, p) => async (target, o = {}) => {
 };
 const run = async (h, p) => {
   h.click = dokun(h, p);
+  const vis = (t) => p.getByText(t, { exact: true }).filter({ visible: true });
   await nokta(p, false);
-  await h.sleep(500);
-  await h.click(p.getByText(/^Ebeveyn zorlayıcı davranışları ABC/).filter({ visible: true }), { beat: 'Derslere devam et', dwell: 420, after: 1500, poster: true });
-  await h.click('ABC modelini anlamak: Test', { last: true, beat: 'Testi aç', dwell: 400, after: 1100 });
-  await h.click('Başla', { last: true, beat: 'Teste başla', dwell: 380, after: 1150 });
-  await h.click('Davranıştan hemen önce olan durumu ya da olayı', { fx: 0.4, beat: 'Yanıtı seç', dwell: 420, after: 900 });
-  await h.click('Cevabı kontrol et', { last: true, beat: 'Cevabı kontrol et: Doğru', dwell: 380, after: 1700 });
+  await h.sleep(600);
+  await h.click(vis('Uzmanından 3 adım önerisi').first(), { beat: 'Uzmanım: randevu ve rutin önerisi', dwell: 420, after: 1700 });
+  await h.scroll(330, { ms: 900, after: 900 });
+  await h.click(vis('Hepsini ekle').first(), { beat: 'Rutini ekle', dwell: 420, after: 1500 });
+  await h.click(vis('Tamam').last(), { dwell: 380, after: 900 });
+  await h.click(vis('Bugün').last(), { beat: 'Bugün', dwell: 380, after: 1200 });
+  await h.click(p.getByText('1 adım onayını bekliyor').filter({ visible: true }).first(), { beat: 'Onay bekleyen adım', dwell: 400, after: 1200 });
+  await h.click(p.getByLabel('Yatağını topla, Nazlı: incele').filter({ visible: true }).first(), { beat: 'Adımı incele', dwell: 400, after: 1300 });
+  await h.click(p.getByText('Onayla', { exact: true }).filter({ visible: true }).last(), { beat: 'Onayla', dwell: 420, after: 1800 });
 };
 
 function ff(args) {
@@ -92,6 +110,9 @@ function wide() {
 
 module.exports = { open };
 if (require.main === module) (async () => {
+  // En az kaçan adımlı deneme saklanır (record.js gibi; 24 Kasım 2026: yük altında sonraki deneme daha kötü çıkabiliyordu)
+  const ext = ['mp4', 'webm', 'webp'], at = (e, b) => path.join(b ? kit.TMP : kit.OUT, `${b ? 'best-' : ''}aile-m.${e}`);
+  let best = null;
   for (let i = 1; !process.env.EBEVEYN_YALNIZ_GENIS; i++) {
     const s = await open();
     const h = new kit.Human(s, 31);
@@ -114,14 +135,19 @@ if (require.main === module) (async () => {
       const seq = path.join(kit.TMP, 'aile-m', 'seq');
       q = kit.sequence(rec, h, end, seq);
       const e = kit.encode('aile-m', seq, q.poster, s.device.out, 1.6e6);
-      // Afiş: ilk dokunuştan 1,1 sn sonraki kare (eğitim sayfası, iki dokunuşun arasında: nokta görünmez). kit.encode'un afiş karesi
+      // Afiş: ilk dokunuştan 1,1 sn sonraki kare (Uzmanım: randevu ve rutin önerisi; nokta görünmez). kit.encode'un afiş karesi
       // bazen dokunma noktasını taşıyordu (22 Kasım 2026 denetimi).
       const at = String(((h.beats[0] && h.beats[0].t) || 1.7) + 1.1);
       ff(['-ss', at, '-i', path.join(kit.OUT, 'aile-m.mp4'), '-frames:v', '1', '-c:v', 'libwebp', '-quality', '82', path.join(kit.OUT, 'aile-m.webp')]);
       console.log(`aile-m: ${q.count} kare · mp4 ${e.mp4_bytes} · webm ${e.webm_bytes || 'yok'} · kaçan hareket adımı ${q.missed}/${q.moves} · adımlar ${JSON.stringify(h.beats)}`);
     } finally { await s.browser.close(); }
-    if (q.missed === 0 || i >= 4) break;
+    if (!best || q.missed < best) { best = q.missed; for (const e of ext) { fs.rmSync(at(e, 1), { force: true }); if (fs.existsSync(at(e))) fs.copyFileSync(at(e), at(e, 1)); } }
+    if (q.missed <= q.moves * 0.02 || i >= Number(process.env.MOTION_TRIES || 4)) break;
     console.log(`  ${q.missed} hareket adımı kaçtı, yeniden çekiliyor`);
+  }
+  if (best !== null) {
+    for (const e of ext) { fs.rmSync(at(e), { force: true }); if (fs.existsSync(at(e, 1))) fs.copyFileSync(at(e, 1), at(e)); }
+    console.log(`  aile-m: saklanan deneme ${best} kaçan adım`);
   }
   wide();
   console.log('aile: geniş sürüm hazır');

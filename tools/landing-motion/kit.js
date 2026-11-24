@@ -19,6 +19,7 @@ const TICK = 1000 / FPS;
 const HOLD_S = 1.2;
 const FORMAT = process.env.MOTION_FORMAT === 'jpeg' ? 'jpeg' : 'png';   // ekran kaydı kare biçimi (png: kayıpsız)
 const EXT = FORMAT === 'png' ? 'png' : 'jpg';
+const POST_CURSOR = process.env.MOTION_IMLEC === 'sonra';            // imleç kayıttan sonra çizilir (imlec.py)
 const ID = 'demo-clinician';
 
 const DEVICES = {
@@ -112,7 +113,7 @@ class Human {
     this.p = s.page; this.cdp = s.cdp; this.d = s.device; this.touch = s.device.cursor === 'touch';
     this.W = s.device.viewport.width; this.H = s.device.viewport.height;
     this.x = this.W * 0.7; this.y = this.H * 0.5; this.rand = rng(seed);
-    this.T0 = now(); this.beats = []; this.motion = []; this.posterAt = null; this.frames = [];
+    this.T0 = now(); this.beats = []; this.motion = []; this.posterAt = null; this.frames = []; this.trail = [];
   }
   between(a, b) { return a + (b - a) * this.rand(); }
   sleep(ms) { return sleep(ms); }
@@ -153,6 +154,7 @@ class Human {
       const [x, y] = at(i / n);
       const [px, py] = at((i - 1) / n);
       await this._at(x, y);
+      this.trail.push({ t: k * TICK, x, y });                        // imleç sonradan çizilirse (MOTION_IMLEC=sonra) planlanan yer
       if (Math.hypot(x - px, y - py) >= 1) this.motion.push(k);     // 1 pikselden küçük adım kare üretmeyebilir
     }
     this.x = tx; this.y = ty;
@@ -188,7 +190,10 @@ class Human {
     await sleep(o.after ?? this.between(500, 800));
   }
 
+  // Kayıt başlarken: imlecin ilk yeri (sonradan çizilen imleç için)
+  startTrail() { this.trail = [{ t: 0, x: this.x, y: this.y }]; }
   async press() {
+    this.trail.push({ t: now() - this.T0, x: this.x, y: this.y, press: true });
     if (this.touch) {
       await this.cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: this.x, y: this.y }] });
       await sleep(95);
@@ -311,6 +316,19 @@ function sequence(rec, h, end, dir) {
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
   seq.forEach((i, k) => fs.symlinkSync(fr[i].file, path.join(dir, `${String(k).padStart(5, '0')}.${EXT}`)));
+  // MOTION_IMLEC=sonra: kayıtta imleç gizli; her video karesinin imleç yeri ve basma anı (planlanan zamanla) imlec.json'a,
+  // imlec.py kareleri imleçle yeniden yazar. Kare kaçsa da imleç akıcı kayar (makinede başka yük varken; 24 Kasım 2026).
+  if (POST_CURSOR) {
+    const tr = h.trail.filter((e) => !e.press), pr = h.trail.filter((e) => e.press).map((e) => e.t);
+    let m = 0;
+    const plan = seq.map((_, k) => {
+      const t = (k + 1) * TICK + 8;
+      while (m + 1 < tr.length && tr[m + 1].t <= t) m++;
+      const last = pr.filter((x) => x <= t).pop();
+      return [Math.round(tr[m].x * 10) / 10, Math.round(tr[m].y * 10) / 10, last === undefined ? -1 : Math.round(t - last)];
+    });
+    fs.writeFileSync(path.join(dir, '..', 'imlec.json'), JSON.stringify(plan));
+  }
   let poster = fr[seq[seq.length - 1]].file;
   if (h.posterAt) { const k = clamp(Math.round((h.posterAt - h.T0) / TICK), 0, seq.length - 1); poster = fr[seq[k]].file; }
   const gaps = fr.slice(1).map((f, i) => f.ts - fr[i].ts).filter((g) => g < 60);
@@ -338,6 +356,8 @@ function encode(id, seqDir, posterFrame, dim, maxBytes) {
     if (size(mp4) <= maxBytes) break;
   }
   let vcrf = 34;
+  // MOTION_WEBM=0: webm üretilmez (VP9 uzun sürer; site webm'i yalnız mp4'ten küçükse kullanır, site.js WEBM)
+  if (process.env.MOTION_WEBM === '0') { fs.rmSync(webm, { force: true }); vcrf = 99; }
   for (; vcrf <= 40; vcrf++) {
     ff([...input, '-vf', vf, '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', String(vcrf), '-row-mt', '1', '-deadline', 'good', '-cpu-used', '1', '-tune-content', 'screen', '-g', '300', '-r', String(FPS), ...tags, '-an', webm]);
     if (size(webm) <= maxBytes) break;
@@ -348,4 +368,4 @@ function encode(id, seqDir, posterFrame, dim, maxBytes) {
   return { mp4_bytes: size(mp4), webm_bytes: webmBytes, crf, vcrf, poster: `${id}.webp` };
 }
 
-module.exports = { open, Recorder, Human, sequence, encode, sleep, now, SHOT_TIME, URL, TMP, OUT, FPS, TICK, HOLD_S, DEVICES, ID };
+module.exports = { open, Recorder, Human, sequence, encode, sleep, now, SHOT_TIME, URL, TMP, OUT, FPS, TICK, HOLD_S, DEVICES, ID, POST_CURSOR, EXT };

@@ -50,9 +50,14 @@ def cumleler(t):
 def tur(key): return 'ebeveyn' if key.startswith('ebeveyn') else ('mercek' if key.startswith('mercek') else (key if key == 'sema' else 'oyun'))
 def cls(key, dar=False): return 'telefon' if key.startswith('ebeveyn') or (dar and key.startswith('mercek')) else ('panel' if key.startswith('mercek') else '')
 def resim(key, alt, c='', dar=False):
-    if dar and key.startswith('mercek'): key += '-tel'          # telefonda Moyo Uzman'ın telefon ekranı (masaüstü penceresi okunmaz)
-    if dar and key + '-m' in IMG and os.path.exists(IMG[key + '-m']): key += '-m'                    # telefon ve tablet kartında kısa boylu, keskin telefon ekranı
-    return f'<img class="{c}" src="{IMG[key]}" alt="{e(ALT_M.get(key, alt))}" loading="lazy" decoding="async">'
+    if dar and key.startswith('mercek'): key += '-tel'          # kartta Moyo Uzman'ın telefon ekranı (masaüstü penceresi dar kartta okunmaz)
+    img = lambda k, ek='': f'<img class="{(c + ek).strip()}" src="{IMG[k]}" alt="{e(ALT_M.get(k, alt))}" loading="lazy" decoding="async">'
+    # Telefon sürümü (img/*-m.webp, 390 × 700 boylu) YALNIZ telefonda (≤ 699 px); tablette ve geniş ekranda özgün görsel (kullanıcı 24 Kasım 2026:
+    # "telefon için optimize edilen görseller yalnız telefonda"). İki <img>, CSS (c-18.css "Telefon sürümü") birini gizler; gizli olan tembel
+    # yüklendiği için indirilmez. <picture> kullanılmadı: kart kuralları ".d-gorsel > img" seçicisine bağlı.
+    if dar and key + '-m' in IMG and os.path.exists(IMG[key + '-m']):
+        return img(key, ' m-gen') + img(key + '-m', ' m-tel')
+    return img(key)
 
 def dongu(beats):
     # Moyo Ekosistemi: ortadaki ekran net; yanındakiler bulanık, yana açılmış ve geride. Masaüstünde sayfa kaydıkça ilerler (eko.js),

@@ -1,9 +1,10 @@
-// Rapor: yazdırılabilir gözlem raporu açılır, biraz kaydırılır, kapanır; ilerleme notu kopyalanır ("Kopyalandı").
+// Rapor (24 Kasım 2026'da "Aileye gönder"le yeniden kuruldu; akislar 27.2): dönemin gözlem raporu açılır, kaydırılır, rapor penceresindeki
+// "Aileye gönder" ve onay; rapor ailenin Moyo Ebeveyn'ine gider, "Gönderilen raporlar"da görünür.
 const { openClient } = require('./_common');
 
 module.exports = {
   id: 'rapor',
-  title_tr: 'Rapor ve ilerleme notu',
+  title_tr: 'Rapor: gözlem raporu ve aileye gönderme',
   device: 'desktop',
   seed: 53,
   async prepare(h, s) {
@@ -12,17 +13,15 @@ module.exports = {
   },
   async run(h, s) {
     const p = s.page;
+    const vis = (t) => p.getByText(t, { exact: true }).filter({ visible: true });
     await h.sleep(350);
-    await h.click('Rapor', { beat: 'Rapor', dwell: 380, after: 1100 });
-    await h.click('Raporu aç', { beat: 'Ev rutini gözlem raporunu aç', dwell: 400, after: 1250 });
+    await h.click(vis('Rapor').first(), { beat: 'Rapor', dwell: 380, after: 1100 });
+    await h.click(vis('Raporu aç').first(), { beat: 'Ev rutini gözlem raporunu aç', dwell: 400, after: 1250 });
     h.poster();
     await h.scroll(470, { ms: 900, after: 800, beat: 'Rapor: haftalık rutin kartı, adım tabloları' });
-    await h.click('Kapat', { last: true, beat: 'Raporu kapat', dwell: 380, after: 700 });
-    await h.moveTo(...h.fit(830, 560), { ms: 700 });
-    // dikeyde düğme zaten görünüyorsa kaydırılmaz (danışan başlığı yarım kalmasın)
-    const nb = h.d.from ? await p.getByText('Notu kopyala', { exact: true }).first().boundingBox() : null;
-    if (!nb || nb.y + nb.height > h.H - 60) await h.scrollTo('Notu kopyala', h.d.from ? h.H - 160 : 720, { ms: 850, after: 450, beat: 'İlerleme notu' });
-    else h.beat('İlerleme notu');
-    await h.click('Notu kopyala', { beat: 'Notu kopyala: "Kopyalandı"', dwell: 400, after: 600 });
+    await h.click(vis('Aileye gönder'), { last: true, beat: 'Aileye gönder', dwell: 400, after: 1200 });
+    await h.click(vis('Gönder'), { last: true, beat: 'Onay: rapor ailenin Moyo uygulamasına gider', dwell: 400, after: 1700 });
+    const sent = vis('Gönderilen raporlar').first();
+    if (await sent.count()) await h.scrollTo(sent, h.d.from ? 420 : 380, { ms: 800, after: 1500, beat: 'Gönderilen raporlar' });
   },
 };
