@@ -69,3 +69,23 @@ Oyunun arayüzü açık (sevgi ve güç göstergesi, çanta, maceralar, harita b
 - Kapanış: `kapanis/kapanis.html` (oyunun yükleme ekranı: başlık, dolan çubuk, ipuçları, bulutlar, beyaz örtü altında anahtar görsel) → `NODE_PATH=… node kapanis/cek.js <kareler> 5.6 30`.
 - Müzik: `python3 -I muzik_tanitim.py <wav> [saniye]` (118 BPM Sol majör, kodla, telifsiz; oyunun müziğinden ayrı).
 - Oyunda kalan işler (Oyun penceresi): panodaki dünya yazısı "Ev Görevleri", Kıskaç'ın selam balonunun kuyruğu Okti'yi gösteriyor, kulübe kapısı tasarımı.
+
+## Üçüncü sürüm ve App Store önizlemeleri (24 Kasım 2026, kullanıcının mağaza geri bildirimi)
+
+`v3/`: `kurgu_v3.py` (kurgu), `muzik_v3.py` (tek parça müzik; girişte davul sıçraması yok, son akor seçilen ana denk gelir), `maske.py`
+(deneme sürümündeki "Ebeveyn (deneme)" düğmesi çevresinden doldurulur), `denetim.py` (düğme, siyah kare, "güç" ve ses düzeyi denetimi),
+senaryolar `onizleme-iphone.json` (1920 × 886), `onizleme-ipad.json` (1600 × 1200), `tanitim-v3.json` (1280 × 720). Senaryolardaki
+`<calisma>` çekim karelerinin durduğu çalışma klasörüdür (depoda yok).
+
+```bash
+python3 -I tools/oyun-tanitim/v3/kurgu_v3.py <senaryo>.json <çıktı>.mp4      # YALNIZ_SES=1 yalnız sesi yeniler
+```
+
+- Önizlemeler ~24 sn, yalnız oyun görüntüsü, arayüz kırpılmaz: ada → görevler panosu (Ailenden · Yaptım · Ailen bakıyor) → sahil → tapınak →
+  Gezegen Koşusu → mağara (Taşı koy, sis açılır). Pano açılışındaki kareler atlanır (düğme küçükken maskelenemiyor); mağara ara sahnesi
+  ~1,5 sn'ye kısaltıldı (oyun burada kendi sinema bantlarına geçip arayüzü gizliyor).
+- Tanıtım videosu 49,4 sn: gösterge "Sevgi ve sağlık göstergesi", hiçbir yerde "güç" yok, kapanış 3,8 sn, yeni iPhone çekimleri 16:9'a
+  kırpılmadan (üstte ve altta siyah bant) yerleşir.
+- Mağaza kareleri 2622 × 1206, yedi an: pano (Ailenden) · Yaptım'dan önce · Ailen bakıyor + Taş geldi! · odun · Kıskaç · Gezegen Koşusu · mağara.
+- Oyunda kalan işler (Oyun penceresi): 4:3 ekranda panodaki Güneş Taşı sayacı "Maceralar" başlığının sonunu örtüyor; koşuda müzik düğmesi
+  ilerleme çubuğunun üstünde; deneme düğmesi gizlenemiyor; Kıskaç'ın selam balonu her oturumda çıkmıyor.

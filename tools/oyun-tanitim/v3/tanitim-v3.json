@@ -1,0 +1,361 @@
+{
+ "boyut": [
+  1280,
+  720
+ ],
+ "bant": {
+  "y": 64,
+  "h": 591
+ },
+ "gecis": 0.6,
+ "etiket_olcek": 0.6666666666666666,
+ "hedef_mb": 14.2,
+ "ses": "192k",
+ "level": "4.0",
+ "giris_karar": 0.3,
+ "son": {
+  "soluk": 0.5
+ },
+ "muzik": {
+  "giris": 2,
+  "son_vurus": {
+   "sahne": -1,
+   "t": 2.1
+  },
+  "ac": 0.4,
+  "kapa": 1.2
+ },
+ "sahneler": [
+  {
+   "klasor": "<calisma>/oyun-cap/v3/iphone/evim",
+   "kirp": [
+    43,
+    149
+   ],
+   "dondur": [
+    [
+     149,
+     2.4
+    ]
+   ],
+   "yerlesim": "bant",
+   "bolum": "Pofi Adası",
+   "etiketler": [
+    {
+     "metin": "Pofi Adası",
+     "alt": 20,
+     "bas": 0.4,
+     "son": 5.6,
+     "ust": "Okti'nin evi"
+    }
+   ],
+   "balonlar": [
+    {
+     "metin": "Sevgi ve sağlık göstergesi",
+     "kutu": [
+      40,
+      246
+     ],
+     "hedef": [
+      62,
+      170
+     ],
+     "bas": 2.1,
+     "son": 5.6
+    },
+    {
+     "metin": "Çanta",
+     "kutu": [
+      150,
+      337
+     ],
+     "hedef": [
+      92,
+      364
+     ],
+     "bas": 2.6,
+     "son": 5.6
+    },
+    {
+     "metin": "Bugünün maceraları",
+     "kutu": [
+      760,
+      190
+     ],
+     "hedef": [
+      1110,
+      124
+     ],
+     "bas": 3.1,
+     "son": 5.6
+    },
+    {
+     "metin": "Harita",
+     "kutu": [
+      1062,
+      262
+     ],
+     "hedef": [
+      1222,
+      168
+     ],
+     "bas": 3.6,
+     "son": 5.6
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/iphone/pano2",
+   "kirp": [
+    10,
+    99
+   ],
+   "yerlesim": "bant",
+   "bolum": "Görevler panosu",
+   "etiketler": [
+    {
+     "metin": "Görevler panosu",
+     "alt": 20,
+     "bas": 0.4,
+     "son": 2.65,
+     "ust": "Ailenden gelen maceralar"
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/iphone/pano2",
+   "kirp": [
+    109,
+    209
+   ],
+   "maske": true,
+   "gecis": 0.16666666666666666,
+   "dondur": [
+    [
+     149,
+     2.4
+    ],
+    [
+     209,
+     1.2
+    ]
+   ],
+   "yerlesim": "bant",
+   "bolum": "",
+   "balonlar": [
+    {
+     "metin": "Ailenden gelen macera",
+     "kutu": [
+      175,
+      449
+     ],
+     "hedef": [
+      132,
+      378
+     ],
+     "bas": 0.4,
+     "son": 3.7
+    },
+    {
+     "metin": "Yap, sonra Yaptım'a dokun",
+     "kutu": [
+      540,
+      66
+     ],
+     "hedef": [
+      790,
+      304
+     ],
+     "bas": 1.0,
+     "son": 3.7
+    },
+    {
+     "metin": "Ailen onaylayınca Güneş Taşı kazanırsın",
+     "kutu": [
+      300,
+      66
+     ],
+     "hedef": [
+      766,
+      293
+     ],
+     "bas": 4.1,
+     "son": 6.5
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v2/kiskac",
+   "kirp": [
+    55,
+    224
+   ],
+   "yerlesim": "bant-kirp",
+   "alt_karart": [
+    491,
+    553
+   ],
+   "bolum": "Kıskaç",
+   "etiketler": [
+    {
+     "metin": "Kıskaç'ın dükkânı",
+     "alt": 20,
+     "bas": 0.45,
+     "son": 5.3,
+     "ust": "Dokun, selam versin"
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v2/odun",
+   "kirp": [
+    70,
+    190
+   ],
+   "yerlesim": "bant-kirp",
+   "alt_karart": [
+    491,
+    553
+   ],
+   "bolum": "Odun",
+   "etiketler": [
+    {
+     "metin": "Odun topla",
+     "alt": 20,
+     "bas": 0.45,
+     "son": 3.6,
+     "ust": "Ormanda"
+    }
+   ],
+   "balonlar": [
+    {
+     "metin": "Odun çantaya gider",
+     "kutu": [
+      160,
+      314
+     ],
+     "hedef": [
+      112,
+      436
+     ],
+     "bas": 2.5,
+     "son": 3.9
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/iphone/sahil",
+   "kirp": [
+    0,
+    120
+   ],
+   "yerlesim": "bant",
+   "bolum": "Sahil",
+   "etiketler": [
+    {
+     "metin": "Sahil",
+     "alt": 20,
+     "bas": 0.45,
+     "son": 3.6,
+     "ust": "Yengeçler ve deniz"
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/iphone/tapinak",
+   "kirp": [
+    0,
+    167
+   ],
+   "yerlesim": "bant",
+   "bolum": "Tapınak",
+   "etiketler": [
+    {
+     "metin": "Tapınak",
+     "alt": 20,
+     "bas": 0.45,
+     "son": 5.2,
+     "ust": "Taş yoldan yukarı"
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v2/kulube-kamp2",
+   "kirp": [
+    0,
+    260
+   ],
+   "yerlesim": "bant-kirp",
+   "alt_karart": [
+    491,
+    553
+   ],
+   "bolum": "Oyun kulübesi",
+   "etiketler": [
+    {
+     "metin": "Oyun kulübesi",
+     "alt": 20,
+     "bas": 0.4,
+     "son": 3.6
+    },
+    {
+     "metin": "Kamp alanı",
+     "alt": 20,
+     "bas": 4.6,
+     "son": 8.3,
+     "ust": "Ateşe odun at"
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/iphone/kosu",
+   "kirp": [
+    0,
+    104
+   ],
+   "yerlesim": "bant",
+   "bolum": "Gezegen Koşusu",
+   "etiketler": [
+    {
+     "metin": "Gezegen Koşusu",
+     "alt": 20,
+     "bas": 0.45,
+     "son": 3.1,
+     "ust": "Uzay oyunu"
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/iphone/magara",
+   "kirp": [
+    20,
+    91
+   ],
+   "yerlesim": "bant",
+   "bolum": "Mağara",
+   "etiketler": [
+    {
+     "metin": "Mağara",
+     "alt": 20,
+     "bas": 0.45,
+     "son": 2.0,
+     "ust": "Güneş Taşı koy"
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/iphone/magara",
+   "kirp": [
+    180,
+    224
+   ],
+   "gecis": 0.2,
+   "yerlesim": "bant",
+   "bolum": ""
+  },
+  {
+   "klasor": "<calisma>/v3edit/kapanis/kareler3",
+   "bolum": "Kapanış"
+  }
+ ]
+}

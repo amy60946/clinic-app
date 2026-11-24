@@ -1,0 +1,147 @@
+{
+ "boyut": [
+  1600,
+  1200
+ ],
+ "gecis": 0.35,
+ "etiket_olcek": 0.62,
+ "hedef_mb": 14.2,
+ "ses": "256k",
+ "level": "4.0",
+ "son": {
+  "tut": 0.4,
+  "soluk": 0.9
+ },
+ "muzik": {
+  "giris": 1,
+  "son_vurus": {
+   "sahne": -1,
+   "t": 0.4
+  },
+  "ac": 0.25,
+  "kapa": 0.9
+ },
+ "sahneler": [
+  {
+   "klasor": "<calisma>/oyun-cap/v3/ipad/evim",
+   "kirp": [
+    43,
+    149
+   ],
+   "bolum": "Ada (Okti'nin evi)",
+   "etiketler": [
+    {
+     "metin": "Pofi Adası",
+     "yer": "orta",
+     "alt": 44,
+     "bas": 0.3,
+     "son": 2.6
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/ipad/pano",
+   "kirp": [
+    25,
+    99
+   ],
+   "bolum": "Görevler panosu (yürüyüş)",
+   "etiketler": [
+    {
+     "metin": "Görevler panosu",
+     "yer": "orta",
+     "alt": 44,
+     "bas": 0.3,
+     "son": 2.2
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/ipad/pano",
+   "kirp": [
+    109,
+    209
+   ],
+   "maske": true,
+   "gecis": 0.16666666666666666,
+   "bolum": "Görevler panosu (açık)"
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/ipad/sahil",
+   "kirp": [
+    0,
+    120
+   ],
+   "bolum": "Sahil",
+   "etiketler": [
+    {
+     "metin": "Sahil",
+     "yer": "orta",
+     "alt": 44,
+     "bas": 0.35,
+     "son": 2.4
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/ipad/tapinak",
+   "kirp": [
+    0,
+    165
+   ],
+   "bolum": "Tapınak",
+   "etiketler": [
+    {
+     "metin": "Tapınak",
+     "yer": "orta",
+     "alt": 44,
+     "bas": 0.35,
+     "son": 2.6
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/ipad/kosu",
+   "kirp": [
+    0,
+    104
+   ],
+   "bolum": "Gezegen Koşusu",
+   "etiketler": [
+    {
+     "metin": "Gezegen Koşusu",
+     "yer": "orta",
+     "alt": 44,
+     "bas": 0.35,
+     "son": 2.6
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/ipad/magara",
+   "kirp": [
+    25,
+    91
+   ],
+   "bolum": "Mağara (Taşı koy)",
+   "etiketler": [
+    {
+     "metin": "Mağara",
+     "yer": "orta",
+     "alt": 44,
+     "bas": 0.3,
+     "son": 1.85
+    }
+   ]
+  },
+  {
+   "klasor": "<calisma>/oyun-cap/v3/ipad/magara",
+   "kirp": [
+    188,
+    224
+   ],
+   "gecis": 0.2,
+   "bolum": "Mağara (sis açılıyor)"
+  }
+ ]
+}
