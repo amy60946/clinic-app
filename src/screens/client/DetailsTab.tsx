@@ -72,7 +72,7 @@ export default function DetailsTab({ client, me, data, team, onTeamAccess, onRev
         <>
           <Label>Klinisyenler</Label>
           <Card style={{ gap: 8 }}>
-            {!!responsible && <Row k="Sorumlu" v={responsible} />}
+            {!!responsible && <Row k="Uzman" v={responsible} />}
             {others.length > 0 && <Row k="Erişen" v={others.join(', ')} />}
             {!!onTeamAccess && (
               <View style={{ alignItems: 'flex-start' }}>

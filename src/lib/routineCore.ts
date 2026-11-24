@@ -83,11 +83,17 @@ function schedule(d: RoutineDraft, t: RoutineTask): { recurring: boolean; repeat
   return { recurring: true, repeat_kind: 'weekly', repeat_days: t.days?.length ? t.days : WEEKDAYS };
 }
 
+// Not alanındaki rutin adı: "Okul dönüşü rutini". Ad zaten "rutini" ile bitiyorsa (24 Kasım 2026: "Sabah rutini") yinelenmez.
+export const routineNoteName = (title: string) => {
+  const t = title.trim();
+  return t.toLocaleLowerCase('tr-TR').endsWith('rutini') ? t : `${t} rutini`;
+};
+
 // Seçili görevlerden öneri satırları: aynı paket kimliği, sıra, rutin adı; isteğe bağlı hedef. Not alanında rutin adı
 // (paket alanlarını okumayan eski ParentApp sürümü de hangi rutinden geldiğini görür).
 export function routineSuggestions(r: Routine, d: RoutineDraft, startDate: string, note: string,
   opts: { group: string; goalId?: string | null }): SuggestionInput[] {
-  const n = [`${r.title} rutini`, note.trim()].filter(Boolean).join(' · ');
+  const n = [routineNoteName(r.title), note.trim()].filter(Boolean).join(' · ');
   const picked = d.tasks.filter((t) => t.on);
   return picked.map((t, i) => {
     const routine: RoutineRef = { group: opts.group, title: r.title, icon: r.icon, position: i, key: r.source === 'own' ? `own:${r.id}` : r.key };

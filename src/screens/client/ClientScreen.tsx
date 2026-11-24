@@ -123,7 +123,7 @@ export default function ClientScreen({
   const nameOf = (id: string) => team.find((m) => m.id === id)?.name || 'Adsız';
   const others = (client.assigned ?? []).filter((id) => id !== client.clinician_id).map(nameOf);
   const teamLine = !sample && team.length > 1 && client.clinician_id !== undefined
-    ? [client.clinician_id ? `Sorumlu: ${client.clinician_id === me.id ? 'sen' : client.clinician_name || nameOf(client.clinician_id)}` : '',
+    ? [client.clinician_id ? `Uzman: ${client.clinician_id === me.id ? 'sen' : client.clinician_name || nameOf(client.clinician_id)}` : '',
        owner && others.length ? `Erişen: ${others.join(', ')}` : ''].filter(Boolean).join(' · ')
     : '';
   // Bildirim sekmesi: öneri kararları Ev rutinleri'ndeki öneri penceresinde

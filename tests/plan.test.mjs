@@ -10,7 +10,7 @@ const sug = (p) => ({
   note: '', status: p.status ?? 'draft', created_at: '2026-11-01T10:00:00Z', updated_at: null, decided_at: p.decided_at ?? null,
   task_title: null, task_id: p.task_id ?? null, kind: p.kind ?? 'new', target_task_id: p.target ?? null, change_remove: !!p.remove,
   goal_id: p.goal ?? null,
-  routine: p.group ? { group: p.group, title: 'Güne hazır sabah', icon: 'sunny-outline', position: p.pos ?? 0, key: 'morning_a' } : null,
+  routine: p.group ? { group: p.group, title: 'Sabah rutini', icon: 'sunny-outline', position: p.pos ?? 0, key: 'morning_a' } : null,
 });
 const task = (id, end = null) => ({ id, title: id, emoji: '⭐', skill: '', start_date: '2026-10-01', end_date: end, recurring: true,
   repeat_kind: 'daily', repeat_days: [], reminder: '07:00', requires_review: true });

@@ -54,7 +54,7 @@ test('saat: yazım düzeltme ve kaydırma gün içinde kalır', () => {
 });
 
 const routine = {
-  id: 'morning', key: 'morning', source: 'catalog', title: 'Güne hazır sabah', subtitle: '', icon: 'sunny-outline', tint: '', repeat: 'weekdays', ages: ['A', 'B'],
+  id: 'morning', key: 'morning', source: 'catalog', title: 'Sabah rutini', subtitle: '', icon: 'sunny-outline', tint: '', repeat: 'weekdays', ages: ['A', 'B'],
   tasks: [
     { id: 'a', title: 'Yatağını topla', emoji: '🛏️', skill: 'focus', category: 'focus', template_key: 'a', difficulty: 'easy', coins: 5, time: '07:05' },
     { id: 'b', title: 'Dişlerini fırçala', emoji: '🪥', skill: 'strength', category: 'health', template_key: 'b', difficulty: 'medium', coins: 10, time: '07:15' },
@@ -70,10 +70,12 @@ test('paket: seçilenler aynı grupta, sırayla; çocukta olan baştan seçili d
   let list = routineSuggestions(routine, d, '2026-10-29', 'Görsel çizelge', { group, goalId: 'g1' });
   assert.equal(list.length, 2);
   assert.deepEqual(list.map((s) => s.routine.position), [0, 1]);
-  assert.ok(list.every((s) => s.routine.group === group && s.routine.title === 'Güne hazır sabah' && s.goal_id === 'g1'));
+  assert.ok(list.every((s) => s.routine.group === group && s.routine.title === 'Sabah rutini' && s.goal_id === 'g1'));
   assert.deepEqual(list[0].repeat_days, [1, 2, 3, 4, 5]);
   assert.equal(list[1].reminder, '07:30');
-  assert.equal(list[0].note, 'Güne hazır sabah rutini · Görsel çizelge');
+  // not alanında rutin adı: "rutini" ile biten ad yinelenmez ("Sabah rutini rutini" olmaz), ötekilere eklenir
+  assert.equal(list[0].note, 'Sabah rutini · Görsel çizelge');
+  assert.equal(routineSuggestions({ ...routine, title: 'Sakin bir akşam' }, d, '2026-10-29', '', { group })[0].note, 'Sakin bir akşam rutini');
   list = routineSuggestions(routine, { ...d, repeat: 'days', days: [6, 1] }, '2026-10-29', '', { group });
   assert.deepEqual(list[0].repeat_days, [1, 6]);
   assert.equal(list[0].goal_id, null);

@@ -178,8 +178,8 @@ function samplePlan(today: string, start: string, r: () => number, ts: Task[]): 
     kind: 'new', target_task_id: null, change_remove: false, routine: null, goal_id: null, ...o,
   });
   const task = (id: string) => ts.find((t) => t.id === id)!;
-  const morning = { group: 's-r1', title: 'Güne hazır sabah', icon: 'sunny-outline', key: 'morning' };
-  const evening = { group: 's-r2', title: 'Sakin akşam', icon: 'moon-outline', key: 'evening' };
+  const morning = { group: 's-r1', title: 'Sabah rutini', icon: 'sunny-outline', key: 'morning' };
+  const evening = { group: 's-r2', title: 'Sakin bir akşam', icon: 'moon-outline', key: 'evening' };
   const draftTask = (title: string, emoji: string, skill: string, reminder: string): SuggestionInput => ({
     ...fromTask(task('s-toys')), title, emoji, skill, reminder, start_date: today, recurring: true, repeat_kind: 'daily', repeat_days: [],
   });
