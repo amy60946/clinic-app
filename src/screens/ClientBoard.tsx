@@ -100,7 +100,7 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
           {!!c.parents && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
               <Ionicons name="person-outline" size={13} color={colors.muted} />
-              <Text style={styles.parents} numberOfLines={1}>{c.parents}</Text>
+              <Text style={styles.parents} numberOfLines={1}>Ebeveyn: {c.parents}</Text>
             </View>
           )}
           {r.reasons.length > 0 && (
@@ -121,7 +121,7 @@ export default function ClientBoard({ clients, unread, me, team, onOpen, onAtten
           )}
           <Text style={styles.small}>
             {!r.reasons.length || !att ? `Ebeveyn onayı: ${dateText(c.consent_at)}` : ''}
-            {me.role === 'owner' && team.length > 1 && c.clinician_id && c.clinician_id !== me.id ? `${!r.reasons.length || !att ? ' · ' : ''}Sorumlu: ${c.clinician_name || 'ekip üyesi'}` : ''}
+            {me.role === 'owner' && team.length > 1 && c.clinician_id && c.clinician_id !== me.id ? `${!r.reasons.length || !att ? ' · ' : ''}Uzman: ${c.clinician_name || 'ekip üyesi'}` : ''}
             {me.role === 'member' && c.clinician_id !== me.id && (c.assigned ?? []).includes(me.id) ? ' · Sana atandı' : ''}
           </Text>
         </View>
