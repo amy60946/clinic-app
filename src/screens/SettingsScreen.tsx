@@ -185,7 +185,7 @@ export default function SettingsScreen({
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={styles.rowTitle}>{c.child_name || 'Adsız'}{c.label ? ` · ${c.label}` : ''}</Text>
                   <Text style={styles.small}>
-                    {[c.parents && `Ebeveyn: ${c.parents}`, `Eklendi ${dateText(c.consent_at)}`, team.length > 1 && responsible(c) && `Sorumlu: ${responsible(c)}`]
+                    {[c.parents && `Ebeveyn: ${c.parents}`, `Eklendi ${dateText(c.consent_at)}`, team.length > 1 && responsible(c) && `Uzman: ${responsible(c)}`]
                       .filter(Boolean).join(' · ')}
                   </Text>
                 </View>

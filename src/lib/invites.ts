@@ -32,16 +32,17 @@ export type InviteStats = {
 };
 export type Channel = 'whatsapp' | 'email' | 'sms' | 'copy' | 'other';
 
-// "i" açıklaması (ana ekran kartı ve davet penceresi)
+// "i" açıklaması (ana ekran kartı ve davet penceresi). Kısa, gündelik dil; her bilgi bir kez (kullanıcı isteği 24 Kasım 2026).
 export const INVITE_HELP = [
-  'Davet e-postası senin adınla ebeveynin e-postasına gider; yanıtlarsa yanıtı sana gelir.',
+  'Davet e-postası senin adınla ebeveyne gider. Ebeveyn yanıt yazarsa yanıt sana gelir.',
   HAS_BASE
-    ? 'Ebeveyn e-postadaki bağlantıdan Moyo\'yu yükleyip kayıt olur; sen kendiliğinden tanımlı gelirsin.'
-    : 'Ebeveyn Moyo\'yu açınca davet kodu sorulduğunda e-postadaki 6 karakterlik kodu yazar; sen kendiliğinden tanımlı gelirsin.',
-  'Hangi çocuğu paylaşacağına ebeveyn karar verir; paylaşımı istediği an durdurabilir.',
-  'Çocuğun adını ve yaş grubunu yazarsan yalnız daveti kabul eden ebeveyn görür; kontrol edip onaylar, düzeltirse sana bildirim gelir. E-postada görünmez, davet bitince silinir.',
-  'Davet 3 gün geçerli. Davetlerim\'den e-postayı yeniden gönderebilir ya da daveti iptal edebilirsin. E-posta gönderilemezse yedek kod görünür.',
-  'Rutin önerilerini ve hedef davranışları aile bağlanınca danışanın sayfasında kurarsın.',
+    ? 'Ebeveyn e-postadaki bağlantıyla Moyo\'yu yükler ve kayıt olur.'
+    : 'Ebeveyn Moyo\'yu yükler ve e-postadaki 6 karakterlik kodu yazar.',
+  'Ebeveyn daveti onaylar ve paylaşacağı çocuğu seçer. Paylaşımı istediği zaman durdurabilir.',
+  'Çocuğun adını ve yaş grubunu yalnız daveti kabul eden ebeveyn görür.',
+  'Davet 3 gün geçerlidir. Bu sürede e-postayı yeniden gönderebilir ya da daveti iptal edebilirsin.',
+  'E-posta gönderilemezse yedek davet kodu görünür. Bu kodu ebeveyne kendin iletirsin.',
+  'Aile bağlanınca rutin önerilerini ve hedef davranışları danışanın sayfasında hazırlarsın.',
 ];
 
 export const STATUS_TEXT: Record<InviteStatus, string> = {

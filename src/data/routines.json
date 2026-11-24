@@ -7,7 +7,7 @@
    "ages": [
     "K"
    ],
-   "title": "Güne hazır sabah",
+   "title": "Sabah rutini",
    "subtitle": "Okul ve kreş sabahları",
    "icon": "sunny-outline",
    "tint": "#FFF1D6",
@@ -46,7 +46,7 @@
     "A",
     "B"
    ],
-   "title": "Güne hazır sabah",
+   "title": "Sabah rutini",
    "subtitle": "Okul sabahları",
    "icon": "sunny-outline",
    "tint": "#FFF1D6",
@@ -84,7 +84,7 @@
    "ages": [
     "C"
    ],
-   "title": "Güne hazır sabah",
+   "title": "Sabah rutini",
    "subtitle": "Okul sabahları, kendi başına",
    "icon": "sunny-outline",
    "tint": "#FFF1D6",
@@ -225,7 +225,7 @@
    "ages": [
     "K"
    ],
-   "title": "Sakin akşam",
+   "title": "Sakin bir akşam",
    "subtitle": "Uyku öncesi",
    "icon": "moon-outline",
    "tint": "#ECE8FF",
@@ -264,7 +264,7 @@
     "A",
     "B"
    ],
-   "title": "Sakin akşam",
+   "title": "Sakin bir akşam",
    "subtitle": "Uyku öncesi",
    "icon": "moon-outline",
    "tint": "#ECE8FF",
@@ -302,7 +302,7 @@
    "ages": [
     "C"
    ],
-   "title": "Sakin akşam",
+   "title": "Sakin bir akşam",
    "subtitle": "Uyku öncesi, ekransız son yarım saat",
    "icon": "moon-outline",
    "tint": "#ECE8FF",
