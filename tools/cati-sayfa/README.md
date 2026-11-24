@@ -111,3 +111,9 @@ Metinler 26c208f'de eğitimsiz yazıldı; görseller bu turda: çatı 5. kart ve
 `img/c-davranis.webp`, Hakkımızda `img/k-ebeveyn.webp` (davranış kaydı ekranı) ve `img/k-uzman(-dar).webp`, Moyo Ebeveyn "Neden Moyo"
 `img/e-nz-uzman.webp`, `img/moyo-gelisim(-m).webp` (Gelişim'de "Ben" yok). Hakkımızda'da artık anılmayan iki kaynak (Furlong2012,
 Thongseiratch2020) `k-metin.json`'dan çıktı (`yap_k.py` anılmayan kaynağı reddeder). Ayrıntı `cek/README.md` sonu. Canlıya alma kullanıcı onayıyla.
+
+**Telefon görselleri yalnız telefonda (24 Kasım 2026, kullanıcı: "büyük ekrandaki görseller okunuyordu, değiştirmeyelim"):** çatı sayfanın
+1–6 kartlarında `img/*-m.webp` (390 × 700 boylu telefon çekimi) tablette (700–1024 px) ve hareket azaltmalı geniş ekranda da yükleniyordu.
+`yap_c.py` `resim()` artık iki `<img>` yazar (`.m-gen` özgün, `.m-tel` telefon sürümü), `c-18.css` yalnız ≤ 699 px'te `.m-tel`'i gösterir;
+gizli olan tembel yüklendiği için indirilmez. Tablet kartında Moyo Uzman için 23 Kasım öncesindeki gibi `mercek-rutin-tel.webp`.
+Moyo Ebeveyn sayfası (`<picture><source media="(max-width: 699px)">`, `m/moyo.css` `.tel.m` yalnız ≤ 699 px) ve Hakkımızda zaten doğruydu.

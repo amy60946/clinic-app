@@ -195,3 +195,10 @@
 @media (max-width: 699px) {
   .sayfa-c .d-mobil { --dg: min(520px, calc((var(--kw) - 30px) * 1.8)); }
 }
+/* 24 Kasım 2026 (kullanıcı: telefon görselleri yalnız telefonda): kartta iki görsel, .m-tel (img/*-m.webp) yalnız ≤ 699 px'te, .m-gen (özgün)
+   daha genişte. Telefon kutusu ölçüsü (--dg) yalnız telefonda -m oranına göre; tablette ve geniş ekranda eski yükseklik kuralı. */
+.sayfa-c .d-gorsel > img.m-tel { display: none; }
+@media (max-width: 699px) {
+  .sayfa-c .d-gorsel > img.m-gen { display: none; }
+  .sayfa-c .d-gorsel > img.m-tel { display: block; }
+}
