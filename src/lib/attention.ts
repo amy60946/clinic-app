@@ -13,6 +13,9 @@ export type Reason = { key: 'unsent' | 'review' | 'noplan' | 'abc' | 'decided' |
 export type TrainingStat = { total: number; drafts: number; review: number };
 export type BoardOptions = { plan?: boolean; training?: Record<string, TrainingStat> | null };
 const PLAN_KEYS = ['unsent', 'review', 'noplan'];
+// "Senin sıran" yalnız plan nedenleriyle (Takip Planı açık, `care_plan`) ya da eğitim nedenleriyle (ebeveyn eğitimi açık,
+// `parent_training`; ortak akislar 27.4) dolabilir. İkisi de kapalıyken pano iki başlıktır; panonun giriş cümlesi buna bakar.
+export const mineOn = (flags: { plan?: boolean; training?: boolean }) => flags.plan !== false || flags.training !== false;
 const MINE_KEYS = [...PLAN_KEYS, 'tr_review', 'tr_draft', 'tr_none'];
 export function trainingReasons(s: TrainingStat | undefined): Reason[] {
   if (!s) return [];
