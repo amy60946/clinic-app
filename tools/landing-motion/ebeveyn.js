@@ -5,7 +5,7 @@
 // Önce: parent-app'te `bash preview/build.sh`. Kullanım: node tools/landing-motion/ebeveyn.js
 // Çıktı: out/aile-m.{mp4,webm,webp} (telefon, 786×1600) + out/aile.{mp4,webm,webp} (geniş: aynı kayıt 1440×900 zeminin ortasında).
 // Veri: parent-app store/capture/prep.js'in uydurma ailesi (çatı sayfa görselleriyle aynı); prep.js'in sildiği bekleyen rutin önerisi
-// (Güne hazır sabah, 3 adım) geri konur, tek adım önerisi konmaz; bildirim izni ön sorusu gösterilmiş sayılır (yalnız tarayıcı deposunda).
+// (Sabah rutini, 3 adım) geri konur, tek adım önerisi konmaz; bildirim izni ön sorusu gösterilmiş sayılır (yalnız tarayıcı deposunda).
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');

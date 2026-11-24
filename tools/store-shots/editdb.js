@@ -104,8 +104,8 @@ module.exports = function editDb() {
     ['k-kahvalti', 'Kahvaltını yap', '🥣', 'strength', 'gs_health_031', '07:30', 'health', 1],
     ['k-canta', 'Çantanı hazırla', '🎒', 'focus', 'gs_focus_043', '07:45', 'focus', 2]].forEach(([tid, title, emoji, skill, tk, rem, cat, pos]) => {
     db.clinic_task_suggestions.push({ ...sugBase, id: id('s'), title, emoji, skill, difficulty: tid === 'k-kahvalti' ? 'medium' : 'easy', coins: tid === 'k-kahvalti' ? 10 : 5,
-      note: 'Güne hazır sabah rutini', category: cat, template_key: tk, start_date: day(-22), repeat_kind: 'weekly', repeat_days: [1, 2, 3, 4, 5], reminder: rem,
-      created_at: ago(23 * 1440), decided_at: ago(22 * 1440), task_id: tid, routine_group: grp, routine_title: 'Güne hazır sabah', routine_icon: 'sunny-outline',
+      note: 'Sabah rutini', category: cat, template_key: tk, start_date: day(-22), repeat_kind: 'weekly', repeat_days: [1, 2, 3, 4, 5], reminder: rem,
+      created_at: ago(23 * 1440), decided_at: ago(22 * 1440), task_id: tid, routine_group: grp, routine_title: 'Sabah rutini', routine_icon: 'sunny-outline',
       routine_position: pos, routine_key: 'morning', goal_id: 'g-sabah' });
   });
   db.clinic_task_suggestions.push({ ...sugBase, id: id('s'), title: 'Ekranı kapat', emoji: '📵', skill: 'focus', difficulty: 'hard', coins: 20,

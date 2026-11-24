@@ -406,7 +406,7 @@ export default function HomeScreen() {
     const keeps = kind === 'solo' ? await familyKeepsRecords() : false;
     // Son adım şifre (ortak akislar.md 28): uyarı onaylanınca şifre penceresi; silme ancak şifre doğruysa (iOS'ta uyarı kapanınca açılır)
     Alert.alert('Hesabın silinsin mi?', deleteAccountText(kind, keeps, trainingOn), [{ text: 'Vazgeç', style: 'cancel' }, {
-      text: 'Kalıcı olarak sil', style: 'destructive', onPress: () => { setTimeout(() => setDeleteAsk(true), Platform.OS === 'ios' ? 350 : 0); },
+      text: 'Devam et', style: 'destructive', onPress: () => { setTimeout(() => setDeleteAsk(true), Platform.OS === 'ios' ? 350 : 0); },
     }]);
   };
   // Şifre doğrulandıktan sonra (DeleteAccountDialog): hata atarsa pencere metni gösterir

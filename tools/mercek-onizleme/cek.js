@@ -76,7 +76,7 @@ async function kirp(p, name, x, y, w = 640, h = 250) {
     }
     if (want('neden-oneri')) {
       await p.getByText(/Aileye öner$/).filter({ visible: true }).first().click(); await p.waitForTimeout(1500);
-      const c = await box(vis(p, 'Güne hazır sabah'));
+      const c = await box(vis(p, 'Sabah rutini'));
       await kirp(p, 'neden-oneri', c.x - 34, c.y - 76);             // iki sıra rutin kartı tam, üçüncü sütun taşar
       await p.locator('[aria-label="Kapat"]').filter({ visible: true }).last().click(); await p.waitForTimeout(900);
     }
